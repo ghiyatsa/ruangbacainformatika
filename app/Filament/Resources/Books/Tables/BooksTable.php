@@ -45,7 +45,10 @@ class BooksTable
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
-                    ->description(fn ($record): string => $record->isbn ?? '-')
+                    ->description(fn ($record): string => collect([
+                        $record->isbn ? "ISBN: {$record->isbn}" : null,
+                        $record->issn ? "ISSN: {$record->issn}" : null,
+                    ])->filter()->join(' | ') ?: '-')
                     ->wrap(),
 
                 TextColumn::make('categories.name')
@@ -54,12 +57,14 @@ class BooksTable
                     ->color('success')
                     ->limitList(2)
                     ->listWithLineBreaks()
-                    ->size('sm'),
+                    ->size('sm')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('publisher.name')
                     ->label('Penerbit')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('published_year')
                     ->label('Tahun')
@@ -88,6 +93,10 @@ class BooksTable
                     ->label('Unggulan')
                     ->boolean(),
 
+                IconColumn::make('is_borrowable')
+                    ->label('Boleh Dipinjam')
+                    ->boolean(),
+
                 TextColumn::make('view_count')
                     ->label('Views')
                     ->numeric()
@@ -111,6 +120,11 @@ class BooksTable
                     ->placeholder('Semua buku')
                     ->trueLabel('Hanya sorotan')
                     ->falseLabel('Bukan sorotan'),
+                TernaryFilter::make('is_borrowable')
+                    ->label('Status Peminjaman')
+                    ->placeholder('Semua buku')
+                    ->trueLabel('Boleh dipinjam')
+                    ->falseLabel('Tidak boleh dipinjam'),
                 Filter::make('out_of_stock')
                     ->label('Stok habis')
                     ->query(fn (Builder $query): Builder => $query->whereDoesntHave(
@@ -171,6 +185,22 @@ class BooksTable
                         ->color('gray')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each(fn (Book $record) => $record->update(['is_featured' => false])))
+                        ->deselectRecordsAfterCompletion(),
+
+                    BulkAction::make('mark_non_borrowable')
+                        ->label('Tandai Tidak Boleh Dipinjam')
+                        ->icon(Heroicon::OutlinedNoSymbol)
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(fn (Collection $records) => $records->each(fn (Book $record) => $record->update(['is_borrowable' => false])))
+                        ->deselectRecordsAfterCompletion(),
+
+                    BulkAction::make('mark_borrowable')
+                        ->label('Tandai Boleh Dipinjam')
+                        ->icon(Heroicon::OutlinedCheckCircle)
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(fn (Collection $records) => $records->each(fn (Book $record) => $record->update(['is_borrowable' => true])))
                         ->deselectRecordsAfterCompletion(),
 
                     LibraryResourceActionFactory::deleteBulkAction(

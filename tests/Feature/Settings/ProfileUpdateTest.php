@@ -7,8 +7,7 @@ use Spatie\Permission\Models\Role;
 test('profile page is displayed', function () {
     $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user)
+    $response = $this->actingAs($user)
         ->get(route('profile.edit'));
 
     $response->assertOk();
@@ -23,16 +22,16 @@ test('google users with incomplete profile are redirected to onboarding page', f
 
     $this->actingAs($user)
         ->get(route('register.whatsapp'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('auth/register-whatsapp'),
+        ->assertInertia(
+            fn (AssertableInertia $page) => $page
+                ->component('auth/register-whatsapp'),
         );
 });
 
 test('profile information can be updated', function () {
     $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user)
+    $response = $this->actingAs($user)
         ->patch(route('profile.update'), [
             'name' => 'Test User',
             'email' => 'changed@example.com',
@@ -53,8 +52,7 @@ test('profile information can be updated', function () {
 test('email verification status is unchanged when the email address is unchanged', function () {
     $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user)
+    $response = $this->actingAs($user)
         ->patch(route('profile.update'), [
             'name' => 'Test User',
             'whatsapp' => '08123456789',
@@ -72,8 +70,7 @@ test('users cannot update their email address from profile settings', function (
         'email' => '230170001@mhs.unimal.ac.id',
     ]);
 
-    $response = $this
-        ->actingAs($user)
+    $response = $this->actingAs($user)
         ->patch(route('profile.update'), [
             'name' => 'Test User',
             'email' => 'outside@example.com',
@@ -91,8 +88,7 @@ test('users cannot update their email address from profile settings', function (
 test('non-administrative users cannot delete their account', function () {
     $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user)
+    $response = $this->actingAs($user)
         ->delete(route('profile.destroy'), [
             'password' => 'password',
         ]);
@@ -109,8 +105,7 @@ test('administrative users can delete their account', function () {
     $user = User::factory()->create();
     $user->assignRole('staff');
 
-    $response = $this
-        ->actingAs($user)
+    $response = $this->actingAs($user)
         ->delete(route('profile.destroy'), [
             'password' => 'password',
         ]);
@@ -126,8 +121,7 @@ test('administrative users can delete their account', function () {
 test('correct password must be provided to delete account', function () {
     $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user)
+    $response = $this->actingAs($user)
         ->from(route('profile.edit'))
         ->delete(route('profile.destroy'), [
             'password' => 'wrong-password',

@@ -26,7 +26,9 @@ class CatalogService
             'featuredCount' => Book::query()->published()->featured()->count(),
             'availableItemsCount' => BookItem::query()
                 ->available()
-                ->whereHas('book', fn (Builder $query): Builder => $query->published())
+                ->whereHas('book', fn (Builder $query): Builder => $query
+                    ->published()
+                    ->where('is_borrowable', true))
                 ->count(),
         ];
     }
@@ -39,10 +41,10 @@ class CatalogService
     public function getCategoriesWithCounts(): Collection
     {
         return Category::query()
+            ->select(['id', 'name', 'slug'])
             ->withCount([
                 'books as books_count' => fn (Builder $query): Builder => $query->published(),
             ])
-            ->select(['id', 'name', 'slug'])
             ->orderBy('name')
             ->get()
             ->map(fn (Category $category) => [

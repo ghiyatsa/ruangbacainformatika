@@ -15,6 +15,7 @@ export type CatalogBook = {
     itemsCount: number;
     availableItemsCount: number;
     isFeatured: boolean;
+    isBorrowable: boolean;
     isAvailable: boolean;
 };
 

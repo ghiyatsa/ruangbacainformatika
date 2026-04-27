@@ -20,11 +20,13 @@ class BookFactory extends Factory
             'title' => ucwords($title),
             'slug' => Str::slug($title),
             'isbn' => fake()->unique()->numerify('978########'),
+            'issn' => fake()->optional()->numerify('####-####'),
             'description' => fake()->paragraph(),
             'published_year' => fake()->year(),
             'pages' => fake()->numberBetween(100, 800),
             'language' => 'Indonesia',
             'is_featured' => false,
+            'is_borrowable' => true,
             'is_published' => true,
             'view_count' => 0,
             'publisher_id' => Publisher::factory(),
@@ -44,5 +46,10 @@ class BookFactory extends Factory
     public function featured(): static
     {
         return $this->state(['is_featured' => true, 'is_published' => true]);
+    }
+
+    public function nonBorrowable(): static
+    {
+        return $this->state(['is_borrowable' => false]);
     }
 }

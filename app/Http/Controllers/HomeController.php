@@ -23,7 +23,9 @@ class HomeController extends Controller
             ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
             ->withCount([
                 'items',
-                'items as available_items_count' => fn ($query) => $query->available(),
+                'items as available_items_count' => fn ($query) => $query
+                    ->available()
+                    ->whereHas('book', fn ($bookQuery) => $bookQuery->where('is_borrowable', true)),
             ])
             ->orderByDesc('is_featured')
             ->orderByDesc('published_year')
@@ -56,7 +58,9 @@ class HomeController extends Controller
             ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
             ->withCount([
                 'items',
-                'items as available_items_count' => fn ($query) => $query->available(),
+                'items as available_items_count' => fn ($query) => $query
+                    ->available()
+                    ->whereHas('book', fn ($bookQuery) => $bookQuery->where('is_borrowable', true)),
             ])
             ->first();
 

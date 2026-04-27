@@ -56,6 +56,12 @@ class BookForm
                             ->maxLength(20)
                             ->placeholder('978-xxx-xxx-xxx'),
 
+                        TextInput::make('issn')
+                            ->label('ISSN')
+                            ->unique('books', 'issn', ignoreRecord: true)
+                            ->maxLength(20)
+                            ->placeholder('1234-5678'),
+
                         TextInput::make('ddc_code')
                             ->label('DDC Code (Dewey Decimal)')
                             ->maxLength(20)
@@ -186,14 +192,17 @@ class BookForm
                             ->label('Buku Unggulan')
                             ->default(false),
 
+                        Toggle::make('is_borrowable')
+                            ->label('Boleh Dipinjam')
+                            ->default(true),
+
                         TextInput::make('view_count')
                             ->label('Jumlah Viewer')
                             ->numeric()
                             ->default(0)
                             ->disabled()
                             ->dehydrated(false),
-                    ])
-                    ->columns(3),
+                    ]),
             ]);
     }
 }

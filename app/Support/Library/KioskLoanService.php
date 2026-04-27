@@ -2,6 +2,7 @@
 
 namespace App\Support\Library;
 
+use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\KioskDevice;
 use App\Models\Loan;
@@ -44,6 +45,14 @@ class KioskLoanService
             ]);
         }
 
+        $book = Book::query()->where('isbn', $isbn)->first();
+
+        if ($book && ! $book->canBeBorrowed()) {
+            throw ValidationException::withMessages([
+                'isbn' => "Buku dengan ISBN {$isbn} ditandai tidak boleh dipinjam.",
+            ]);
+        }
+
         return DB::transaction(function () use ($kioskDevice, $member, $isbn): Loan {
             $borrowedAt = now();
 
@@ -58,7 +67,9 @@ class KioskLoanService
             $bookItem = BookItem::query()
                 ->with('book')
                 ->available()
-                ->whereHas('book', fn ($query) => $query->where('isbn', $isbn))
+                ->whereHas('book', fn ($query) => $query
+                    ->where('isbn', $isbn)
+                    ->where('is_borrowable', true))
                 ->lockForUpdate()
                 ->first();
 

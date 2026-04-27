@@ -48,8 +48,16 @@ const applyTheme = (appearance: Appearance): void => {
 
     const isDark = isDarkMode(appearance);
 
+    document.documentElement.classList.add('disable-transitions');
+
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+
+    void window.getComputedStyle(document.documentElement).opacity;
+
+    requestAnimationFrame(() => {
+        document.documentElement.classList.remove('disable-transitions');
+    });
 };
 
 const subscribe = (callback: () => void) => {

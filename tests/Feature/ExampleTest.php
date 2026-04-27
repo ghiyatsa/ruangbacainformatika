@@ -50,3 +50,22 @@ test('home page does not expose search filtering', function () {
         ->where('filters.search', ''),
     );
 });
+
+test('home page excludes non-borrowable books from available counts', function () {
+    $book = Book::factory()
+        ->published()
+        ->featured()
+        ->nonBorrowable()
+        ->create(['title' => 'Ensiklopedia Arsip']);
+
+    BookItem::factory()->available()->create(['book_id' => $book->id]);
+
+    $this->get(route('home'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('welcome')
+            ->where('stats.availableItemsCount', 0)
+            ->where('featuredBook.title', 'Ensiklopedia Arsip')
+            ->where('featuredBook.availableItemsCount', 0)
+            ->where('featuredBook.isAvailable', false),
+        );
+});

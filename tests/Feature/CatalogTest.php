@@ -88,3 +88,21 @@ test('catalog stats include books count and available items count', function () 
             ->where('stats.availableItemsCount', 1),
         );
 });
+
+test('catalog availability excludes books marked as not borrowable', function () {
+    $book = Book::factory()
+        ->published()
+        ->nonBorrowable()
+        ->create(['title' => 'Reference Only']);
+
+    BookItem::factory()->available()->create(['book_id' => $book->id]);
+
+    $this->get(route('catalog'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('catalog')
+            ->where('stats.availableItemsCount', 0)
+            ->where('books.data.0.title', 'Reference Only')
+            ->where('books.data.0.availableItemsCount', 0)
+            ->where('books.data.0.isAvailable', false),
+        );
+});

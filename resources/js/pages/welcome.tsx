@@ -9,7 +9,6 @@ import type { WelcomeProps } from '@/components/welcome/types';
 
 export default function Welcome({
     canRegister = true,
-    filters,
     stats,
     featuredBook,
     books,

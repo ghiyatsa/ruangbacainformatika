@@ -36,6 +36,7 @@ class Book extends Model
         'title',
         'slug',
         'isbn',
+        'issn',
         'ddc_code',
         'description',
         'cover_image',
@@ -44,6 +45,7 @@ class Book extends Model
         'pages',
         'language',
         'is_featured',
+        'is_borrowable',
         'is_published',
         'view_count',
         'publisher_id',
@@ -51,6 +53,7 @@ class Book extends Model
 
     protected $casts = [
         'is_featured' => 'boolean',
+        'is_borrowable' => 'boolean',
         'is_published' => 'boolean',
         'published_year' => 'integer',
         'pages' => 'integer',
@@ -93,13 +96,27 @@ class Book extends Model
             return $query;
         }
 
-        return $query->where(fn (Builder $q) => $q
-            ->where('title', 'like', "%{$search}%")
-            ->orWhere('isbn', 'like', "%{$search}%")
-            ->orWhere('description', 'like', "%{$search}%")
-            ->orWhereHas('publisher', fn (Builder $p): Builder => $p->where('name', 'like', "%{$search}%"))
-            ->orWhereHas('authors', fn (Builder $a): Builder => $a->where('name', 'like', "%{$search}%"))
-            ->orWhereHas('categories', fn (Builder $c): Builder => $c->where('name', 'like', "%{$search}%")));
+        $terms = collect(explode(' ', $search))->filter()->values();
+
+        return $query->where(function (Builder $q) use ($terms) {
+            foreach ($terms as $term) {
+                $q->where(function (Builder $inner) use ($term) {
+                    $inner->where('title', 'like', "%{$term}%")
+                        ->orWhere('isbn', 'like', "%{$term}%")
+                        ->orWhere('issn', 'like', "%{$term}%")
+                        ->orWhere('ddc_code', 'like', "%{$term}%")
+                        ->orWhere('description', 'like', "%{$term}%")
+                        ->orWhereHas('publisher', fn (Builder $p) => $p->where('name', 'like', "%{$term}%"))
+                        ->orWhereHas('authors', fn (Builder $a) => $a->where('name', 'like', "%{$term}%"))
+                        ->orWhereHas('categories', fn (Builder $c) => $c->where('name', 'like', "%{$term}%"));
+                });
+            }
+        });
+    }
+
+    public function canBeBorrowed(): bool
+    {
+        return $this->is_borrowable;
     }
 
     public function scopeForCategory(Builder $query, string $categorySlug): Builder

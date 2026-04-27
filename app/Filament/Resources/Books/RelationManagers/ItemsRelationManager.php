@@ -60,11 +60,6 @@ class ItemsRelationManager extends RelationManager
                 DatePicker::make('acquired_date')
                     ->label('Tanggal Pengadaan')
                     ->default(now()),
-                TextInput::make('price')
-                    ->label('Harga Buku (Rp)')
-                    ->numeric()
-                    ->prefix('Rp')
-                    ->helperText('Berguna untuk denda jika buku dihilangkan peminjam.'),
             ]);
     }
 

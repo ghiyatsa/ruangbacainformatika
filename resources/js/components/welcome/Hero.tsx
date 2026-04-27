@@ -1,38 +1,41 @@
+import { Link } from '@inertiajs/react';
 import { Search } from 'lucide-react';
-import Antigravity from '@/components/Antigravity';
+import { lazy, Suspense } from 'react';
+import CatalogController from '@/actions/App/Http/Controllers/CatalogController';
 import CountUp from '@/components/CountUp';
 import ShinyText from '@/components/ShinyText';
 import StarBorder from '@/components/StarBorder';
-import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
-import { Input } from '../ui/input';
 import type { WelcomeProps } from './types';
 
 interface HeroProps {
     stats: WelcomeProps['stats'];
 }
 
+const Antigravity = lazy(() => import('@/components/Antigravity'));
+
 export default function Hero({ stats }: HeroProps) {
     return (
         <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-32">
             <div className="pointer-events-none absolute inset-0 -z-10 h-full w-full">
-                <Antigravity
-                    count={300}
-                    magnetRadius={10}
-                    ringRadius={7}
-                    waveSpeed={0.4}
-                    waveAmplitude={1}
-                    particleSize={1}
-                    lerpSpeed={0.05}
-                    color="#2900cd"
-                    autoAnimate
-                    particleVariance={1}
-                    rotationSpeed={0}
-                    depthFactor={1}
-                    pulseSpeed={3}
-                    particleShape="capsule"
-                    fieldStrength={10}
-                />
+                <Suspense fallback={null}>
+                    <Antigravity
+                        count={300}
+                        magnetRadius={10}
+                        ringRadius={7}
+                        waveSpeed={0.4}
+                        waveAmplitude={1}
+                        particleSize={1}
+                        lerpSpeed={0.05}
+                        color="#2900cd"
+                        autoAnimate
+                        particleVariance={1}
+                        rotationSpeed={0}
+                        depthFactor={1}
+                        pulseSpeed={3}
+                        particleShape="capsule"
+                        fieldStrength={10}
+                    />
+                </Suspense>
             </div>
 
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -76,38 +79,24 @@ export default function Hero({ stats }: HeroProps) {
                     </p>
 
                     <div className="w-full max-w-xl">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <StarBorder
-                                    as="div"
-                                    color="var(--color-primary)"
-                                    contentClassName="backdrop-blur-sm bg-muted/50"
-                                >
-                                    <Button
-                                        variant="outline"
-                                        className="relative h-12 w-max cursor-pointer justify-start rounded-2xl px-4 text-base"
-                                    >
-                                        <Search className="mr-2 h-5 w-5" />
-                                        <span className="font-normal text-muted-foreground">
-                                            Cari judul buku, penulis, atau
-                                            subjek...
-                                        </span>
-                                    </Button>
-                                </StarBorder>
-                            </DialogTrigger>
-                            <DialogContent
-                                className="sm:max-w-2xl"
-                                showCloseButton={false}
+                        <Link
+                            href={CatalogController.url()}
+                            className="block transition-transform"
+                        >
+                            <StarBorder
+                                as="div"
+                                color="var(--color-primary)"
+                                contentClassName="backdrop-blur-sm bg-muted/50 px-4 py-3 rounded-2xl"
+                                className="rounded-2xl"
                             >
-                                <div className="mt-4 flex items-center gap-2">
-                                    <Input
-                                        placeholder="Ketik judul buku, penulis, atau subjek..."
-                                        className="h-12 flex-1"
-                                        autoFocus
-                                    />
+                                <div className="flex items-center gap-3 text-muted-foreground">
+                                    <Search className="size-5" />
+                                    <span className="text-base font-normal">
+                                        Cari judul buku, penulis, atau subjek...
+                                    </span>
                                 </div>
-                            </DialogContent>
-                        </Dialog>
+                            </StarBorder>
+                        </Link>
                     </div>
 
                     <div className="w-full max-w-2xl">

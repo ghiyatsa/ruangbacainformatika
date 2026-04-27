@@ -15,7 +15,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import type { CatalogBook, WelcomeProps } from './types';
 
 interface CatalogSectionProps {
@@ -28,6 +27,7 @@ function availabilityLabel(book: CatalogBook): string {
     if (book.isAvailable) {
         return `${book.availableItemsCount} tersedia`;
     }
+
     return 'Tidak tersedia';
 }
 

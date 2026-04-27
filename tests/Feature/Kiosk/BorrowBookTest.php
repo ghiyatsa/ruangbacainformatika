@@ -48,3 +48,45 @@ test('members must fill whatsapp before borrowing books', function () {
     expect(fn () => $service->borrow($kioskDevice, $member->nim(), '9786020000001'))
         ->toThrow(ValidationException::class, 'Nomor WhatsApp wajib diisi pada profil sebelum meminjam buku.');
 });
+
+test('books marked as not borrowable cannot be borrowed', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Test',
+        'slug' => 'penerbit-test',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Referensi',
+        'slug' => 'buku-referensi',
+        'isbn' => '9786020000002',
+        'issn' => '1234-5678',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => false,
+    ]);
+
+    BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-002',
+        'status' => 'available',
+    ]);
+
+    $kioskDevice = KioskDevice::query()->create([
+        'name' => 'Kiosk 1',
+        'kiosk_identifier' => 'kiosk-1',
+        'registration_code' => 'ABC123456789',
+        'status' => KioskDevice::STATUS_APPROVED,
+    ]);
+
+    $service = app(KioskLoanService::class);
+
+    expect(fn () => $service->borrow($kioskDevice, $member->nim(), '9786020000002'))
+        ->toThrow(ValidationException::class, 'Buku dengan ISBN 9786020000002 ditandai tidak boleh dipinjam.');
+});
