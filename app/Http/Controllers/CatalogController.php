@@ -49,7 +49,7 @@ class CatalogController extends Controller
                 ['searchResultsCount' => $books->total()]
             ),
             'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
-            'books' => BookResource::collection($books),
+            'books' => Inertia::defer(fn () => BookResource::collection($books)),
         ]);
     }
 }

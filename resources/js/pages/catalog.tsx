@@ -1,21 +1,19 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Deferred, Head, Link, router } from '@inertiajs/react';
 import {
-    BookOpen,
     ChevronLeft,
     ChevronRight,
-    GraduationCap,
-    LayoutGrid,
-    LayoutList,
     Library,
     SlidersHorizontal,
 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import BookController from '@/actions/App/Http/Controllers/BookController';
 import CatalogController from '@/actions/App/Http/Controllers/CatalogController';
 import BookCard from '@/components/catalog/BookCard';
+import BookCardSkeleton from '@/components/catalog/BookCardSkeleton';
+import BookListItem from '@/components/catalog/BookListItem';
+import BookListItemSkeleton from '@/components/catalog/BookListItemSkeleton';
+import CatalogHeader from '@/components/catalog/CatalogHeader';
 import FilterSidebar from '@/components/catalog/FilterSidebar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,9 +24,8 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import Footer from '@/components/welcome/Footer';
-import Navigation from '@/components/welcome/Navigation';
-import type { CatalogBook, PaginatedBooks } from '@/components/welcome/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { PaginatedBooks } from '@/components/welcome/types';
 
 interface CatalogProps {
     canRegister?: boolean;
@@ -51,7 +48,6 @@ interface CatalogProps {
 }
 
 export default function Catalog({
-    canRegister = true,
     filters,
     stats,
     categories,
@@ -105,7 +101,7 @@ export default function Catalog({
     const hasActiveFilters = filters.search !== '' || filters.category !== '';
 
     return (
-        <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/10 selection:text-primary">
+        <>
             <Head title="Katalog Buku — Ruang Baca" />
 
             <div
@@ -117,59 +113,17 @@ export default function Catalog({
                 }}
             />
 
-            <div className="relative z-10 flex min-h-screen flex-col">
-                <Navigation canRegister={canRegister} />
-
+            <div className="relative z-10 flex flex-col">
                 <main className="flex-1 py-10">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                            <div>
-                                <Badge
-                                    variant="secondary"
-                                    className="mb-3 w-fit"
-                                >
-                                    <GraduationCap className="mr-1.5 size-3.5" />
-                                    Koleksi Akademik
-                                </Badge>
-                                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                                    Katalog Buku
-                                </h1>
-                                <p className="mt-1.5 text-sm text-muted-foreground">
-                                    {stats.booksCount} judul &middot;{' '}
-                                    {stats.availableItemsCount} eksemplar
-                                    tersedia
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-1 self-start rounded-lg border bg-muted/50 p-1">
-                                <Button
-                                    variant={
-                                        viewMode === 'grid'
-                                            ? 'secondary'
-                                            : 'ghost'
-                                    }
-                                    size="icon"
-                                    className="size-8"
-                                    onClick={() => setViewMode('grid')}
-                                >
-                                    <LayoutGrid className="size-4" />
-                                    <span className="sr-only">Grid view</span>
-                                </Button>
-                                <Button
-                                    variant={
-                                        viewMode === 'list'
-                                            ? 'secondary'
-                                            : 'ghost'
-                                    }
-                                    size="icon"
-                                    className="size-8"
-                                    onClick={() => setViewMode('list')}
-                                >
-                                    <LayoutList className="size-4" />
-                                    <span className="sr-only">List view</span>
-                                </Button>
-                            </div>
-                        </div>
+                        <CatalogHeader
+                            title="Katalog Buku"
+                            badgeText="Koleksi Akademik"
+                            description={`${stats.booksCount} judul · ${stats.availableItemsCount} eksemplar tersedia`}
+                            viewMode={viewMode}
+                            onViewModeChange={setViewMode}
+                            className="mb-8"
+                        />
 
                         <div className="flex gap-8 lg:items-start">
                             <FilterSidebar
@@ -261,237 +215,208 @@ export default function Catalog({
                                     </Sheet>
                                 </div>
 
-                                <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-                                    {hasActiveFilters ? (
-                                        <>
-                                            <span className="font-semibold text-foreground">
-                                                {stats.searchResultsCount}
-                                            </span>
-                                            <span>hasil ditemukan</span>
-                                            {filters.search && (
-                                                <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-foreground">
-                                                    "{filters.search}"
-                                                </span>
-                                            )}
-                                            {filters.category && (
-                                                <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
-                                                    {
-                                                        categories.find(
-                                                            (category) =>
-                                                                category.slug ===
-                                                                filters.category,
-                                                        )?.name
-                                                    }
-                                                </span>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <span>
-                                            Menampilkan{' '}
-                                            <span className="font-semibold text-foreground">
-                                                {books.from}–{books.to}
-                                            </span>{' '}
-                                            dari{' '}
-                                            <span className="font-semibold text-foreground">
-                                                {books.total}
-                                            </span>{' '}
-                                            buku
-                                        </span>
-                                    )}
-                                </div>
-
-                                {books.data.length > 0 ? (
-                                    <>
-                                        {viewMode === 'list' ? (
-                                            <div className="overflow-hidden rounded-xl border bg-card">
-                                                <div className="flex flex-col divide-y divide-border">
-                                                    {books.data.map((book) => (
-                                                        <BookListItem
-                                                            key={book.id}
-                                                            book={book}
+                                <Deferred
+                                    data="books"
+                                    fallback={
+                                        <div className="space-y-4">
+                                            <div className="flex h-5 w-48 items-center">
+                                                <Skeleton className="h-4 w-full" />
+                                            </div>
+                                            {viewMode === 'list' ? (
+                                                <div className="overflow-hidden rounded-xl border bg-card">
+                                                    <div className="flex flex-col divide-y divide-border">
+                                                        {Array.from({
+                                                            length: 5,
+                                                        }).map((_, i) => (
+                                                            <BookListItemSkeleton
+                                                                key={i}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                                                    {Array.from({
+                                                        length: 8,
+                                                    }).map((_, i) => (
+                                                        <BookCardSkeleton
+                                                            key={i}
                                                         />
                                                     ))}
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                                                {books.data.map((book) => (
-                                                    <BookCard
-                                                        key={book.id}
-                                                        book={book}
-                                                    />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-20 text-center">
-                                        <div className="mb-3 rounded-full bg-muted p-4">
-                                            <Library className="size-8 text-muted-foreground" />
+                                            )}
                                         </div>
-                                        <h2 className="text-base font-bold">
-                                            Buku tidak ditemukan
-                                        </h2>
-                                        <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                                            Coba kata kunci lain atau hapus
-                                            filter aktif.
-                                        </p>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="mt-5"
-                                            onClick={clearAllFilters}
-                                        >
-                                            Reset Filter
-                                        </Button>
-                                    </div>
-                                )}
-
-                                {books.total > 0 && (
-                                    <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t pt-6 sm:flex-row">
-                                        <p className="text-sm text-muted-foreground">
-                                            <span className="font-semibold text-foreground">
-                                                {books.from}–{books.to}
-                                            </span>{' '}
-                                            dari{' '}
-                                            <span className="font-semibold text-foreground">
-                                                {books.total}
-                                            </span>{' '}
-                                            buku
-                                        </p>
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                asChild={!!books.prev_page_url}
-                                                disabled={!books.prev_page_url}
-                                                variant="outline"
-                                                size="sm"
-                                                className="gap-1"
-                                            >
-                                                {books.prev_page_url ? (
-                                                    <Link
-                                                        href={
-                                                            books.prev_page_url
-                                                        }
-                                                        preserveScroll
-                                                    >
-                                                        <ChevronLeft className="size-3.5" />
-                                                        Sebelumnya
-                                                    </Link>
-                                                ) : (
-                                                    <span className="flex items-center gap-1">
-                                                        <ChevronLeft className="size-3.5" />
-                                                        Sebelumnya
-                                                    </span>
-                                                )}
-                                            </Button>
-                                            <span className="px-1 text-xs text-muted-foreground">
-                                                {books.current_page} /{' '}
-                                                {books.last_page}
-                                            </span>
-                                            <Button
-                                                asChild={!!books.next_page_url}
-                                                disabled={!books.next_page_url}
-                                                variant="outline"
-                                                size="sm"
-                                                className="gap-1"
-                                            >
-                                                {books.next_page_url ? (
-                                                    <Link
-                                                        href={
-                                                            books.next_page_url
-                                                        }
-                                                        preserveScroll
-                                                    >
-                                                        Berikutnya
-                                                        <ChevronRight className="size-3.5" />
-                                                    </Link>
-                                                ) : (
-                                                    <span className="flex items-center gap-1">
-                                                        Berikutnya
-                                                        <ChevronRight className="size-3.5" />
-                                                    </span>
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
+                                    }
+                                >
+                                    <CatalogResults
+                                        books={books}
+                                        hasActiveFilters={hasActiveFilters}
+                                        stats={stats}
+                                        filters={filters}
+                                        categories={categories}
+                                        viewMode={viewMode}
+                                    />
+                                </Deferred>
                             </div>
                         </div>
                     </div>
                 </main>
-
-                <Footer />
             </div>
-        </div>
+        </>
     );
 }
 
-function BookListItem({ book }: { book: CatalogBook }) {
+function CatalogResults({
+    books,
+    hasActiveFilters,
+    stats,
+    filters,
+    categories,
+    viewMode,
+}: {
+    books: PaginatedBooks;
+    hasActiveFilters: boolean;
+    stats: CatalogProps['stats'];
+    filters: CatalogProps['filters'];
+    categories: CatalogProps['categories'];
+    viewMode: 'grid' | 'list';
+}) {
+    // This component only renders when books is available
     return (
-        <Link
-            href={BookController.show(book.slug)}
-            className="group flex items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/40 focus:bg-muted/40 focus:outline-none"
-        >
-            <div className="h-16 w-11 shrink-0 overflow-hidden rounded-md border bg-muted shadow-sm">
-                <img
-                    src={book.coverImageUrl}
-                    alt={book.title}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
+        <>
+            <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+                {hasActiveFilters ? (
+                    <>
+                        <span className="font-semibold text-foreground">
+                            {stats.searchResultsCount}
+                        </span>
+                        <span>hasil ditemukan</span>
+                        {filters.search && (
+                            <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-foreground">
+                                "{filters.search}"
+                            </span>
+                        )}
+                        {filters.category && (
+                            <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                                {
+                                    categories.find(
+                                        (category) =>
+                                            category.slug === filters.category,
+                                    )?.name
+                                }
+                            </span>
+                        )}
+                    </>
+                ) : (
+                    <span>
+                        Menampilkan{' '}
+                        <span className="font-semibold text-foreground">
+                            {books.from}–{books.to}
+                        </span>{' '}
+                        dari{' '}
+                        <span className="font-semibold text-foreground">
+                            {books.total}
+                        </span>{' '}
+                        buku
+                    </span>
+                )}
             </div>
 
-            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <div className="flex flex-wrap items-center gap-1.5">
-                    {book.categories.slice(0, 1).map((category) => (
-                        <span
-                            key={category}
-                            className="rounded border px-1.5 py-px text-[10px] font-medium text-muted-foreground"
-                        >
-                            {category}
-                        </span>
-                    ))}
-                    {book.isFeatured && (
-                        <span className="rounded bg-primary/10 px-1.5 py-px text-[10px] font-semibold text-primary">
-                            ✦ Unggulan
-                        </span>
+            {books.data.length > 0 ? (
+                <>
+                    {viewMode === 'list' ? (
+                        <div className="overflow-hidden rounded-xl border bg-card">
+                            <div className="flex flex-col divide-y divide-border">
+                                {books.data.map((book) => (
+                                    <BookListItem key={book.id} book={book} />
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                            {books.data.map((book) => (
+                                <BookCard key={book.id} book={book} />
+                            ))}
+                        </div>
                     )}
+                </>
+            ) : (
+                <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-20 text-center">
+                    <div className="mb-3 rounded-full bg-muted p-4">
+                        <Library className="size-8 text-muted-foreground" />
+                    </div>
+                    <h2 className="text-base font-bold">
+                        Buku tidak ditemukan
+                    </h2>
+                    <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                        Coba kata kunci lain atau hapus filter aktif.
+                    </p>
                 </div>
-                <p className="line-clamp-1 text-sm leading-snug font-semibold transition-colors group-hover:text-primary">
-                    {book.title}
-                </p>
-                <p className="line-clamp-1 text-xs text-muted-foreground">
-                    {book.authors.join(', ') || 'Penulis anonim'}
-                    {book.publishedYear && (
-                        <span className="ml-2 text-[11px]">
-                            · {book.publishedYear}
+            )}
+
+            {books.total > 0 && (
+                <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t pt-6 sm:flex-row">
+                    <p className="text-sm text-muted-foreground">
+                        <span className="font-semibold text-foreground">
+                            {books.from}–{books.to}
+                        </span>{' '}
+                        dari{' '}
+                        <span className="font-semibold text-foreground">
+                            {books.total}
+                        </span>{' '}
+                        buku
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            asChild={!!books.prev_page_url}
+                            disabled={!books.prev_page_url}
+                            variant="outline"
+                            size="sm"
+                            className="gap-1"
+                        >
+                            {books.prev_page_url ? (
+                                <Link
+                                    href={books.prev_page_url}
+                                    preserveScroll
+                                >
+                                    <ChevronLeft className="size-3.5" />
+                                    Sebelumnya
+                                </Link>
+                            ) : (
+                                <span className="flex items-center gap-1">
+                                    <ChevronLeft className="size-3.5" />
+                                    Sebelumnya
+                                </span>
+                            )}
+                        </Button>
+                        <span className="px-1 text-xs text-muted-foreground">
+                            {books.current_page} / {books.last_page}
                         </span>
-                    )}
-                </p>
-            </div>
-
-            <div className="shrink-0">
-                <Badge
-                    variant={
-                        !book.isAvailable
-                            ? 'outline'
-                            : book.isBorrowable
-                              ? 'default'
-                              : 'secondary'
-                    }
-                    className="text-[10px]"
-                >
-                    {!book.isAvailable
-                        ? 'Kosong'
-                        : !book.isBorrowable
-                          ? 'Referensi'
-                          : `${book.availableItemsCount} tersedia`}
-                </Badge>
-            </div>
-
-            <div className="hidden shrink-0 items-center gap-1 text-[11px] text-muted-foreground sm:flex">
-                <BookOpen className="size-3" />
-                <span>{book.pages ? `${book.pages} hal` : '—'}</span>
-            </div>
-        </Link>
+                        <Button
+                            asChild={!!books.next_page_url}
+                            disabled={!books.next_page_url}
+                            variant="outline"
+                            size="sm"
+                            className="gap-1"
+                        >
+                            {books.next_page_url ? (
+                                <Link
+                                    href={books.next_page_url}
+                                    preserveScroll
+                                >
+                                    Berikutnya
+                                    <ChevronRight className="size-3.5" />
+                                </Link>
+                            ) : (
+                                <span className="flex items-center gap-1">
+                                    Berikutnya
+                                    <ChevronRight className="size-3.5" />
+                                </span>
+                            )}
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }

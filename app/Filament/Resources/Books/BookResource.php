@@ -21,7 +21,7 @@ class BookResource extends Resource
 {
     protected static ?string $model = Book::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Perpustakaan';
+    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Buku';
 
     protected static ?string $navigationLabel = 'Buku';
 

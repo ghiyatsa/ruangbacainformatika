@@ -42,17 +42,17 @@ class HomeController extends Controller
                 ['searchResultsCount' => $books->total()]
             ),
             'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
-            'featuredBook' => $this->featuredBook(),
-            'books' => BookResource::collection($books),
+            'featuredBooks' => Inertia::defer(fn () => $this->featuredBooks()),
+            'books' => Inertia::defer(fn () => BookResource::collection($books)),
         ]);
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return array<int, array<string, mixed>>
      */
-    protected function featuredBook(): ?array
+    protected function featuredBooks(): array
     {
-        $book = Book::query()
+        $books = Book::query()
             ->published()
             ->featured()
             ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
@@ -62,12 +62,9 @@ class HomeController extends Controller
                     ->available()
                     ->whereHas('book', fn ($bookQuery) => $bookQuery->where('is_borrowable', true)),
             ])
-            ->first();
+            ->limit(5)
+            ->get();
 
-        if ($book === null) {
-            return null;
-        }
-
-        return (new BookResource($book))->toArray(request());
+        return BookResource::collection($books)->resolve();
     }
 }

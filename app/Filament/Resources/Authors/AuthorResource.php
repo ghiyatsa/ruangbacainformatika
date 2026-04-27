@@ -19,7 +19,7 @@ class AuthorResource extends Resource
 {
     protected static ?string $model = Author::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Perpustakaan';
+    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Buku';
 
     protected static ?string $navigationLabel = 'Penulis';
 

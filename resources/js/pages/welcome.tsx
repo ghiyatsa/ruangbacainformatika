@@ -1,16 +1,15 @@
 import { Head } from '@inertiajs/react';
 
+import { AppHeader } from '@/components/app-header';
 import CatalogSection from '@/components/welcome/CatalogSection';
 import DomainHighlights from '@/components/welcome/DomainHighlights';
 import Footer from '@/components/welcome/Footer';
 import Hero from '@/components/welcome/Hero';
-import Navigation from '@/components/welcome/Navigation';
 import type { WelcomeProps } from '@/components/welcome/types';
 
 export default function Welcome({
-    canRegister = true,
     stats,
-    featuredBook,
+    featuredBooks,
     books,
     categories,
 }: WelcomeProps) {
@@ -29,7 +28,7 @@ export default function Welcome({
             />
 
             <div className="relative z-10 flex min-h-screen flex-col">
-                <Navigation canRegister={canRegister} />
+                <AppHeader />
 
                 <main className="flex-1">
                     <Hero stats={stats} />
@@ -38,7 +37,7 @@ export default function Welcome({
 
                     <CatalogSection
                         stats={stats}
-                        featuredBook={featuredBook}
+                        featuredBooks={featuredBooks}
                         books={books}
                     />
                 </main>

@@ -19,7 +19,7 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Perpustakaan';
+    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Buku';
 
     protected static ?string $navigationLabel = 'Kategori';
 

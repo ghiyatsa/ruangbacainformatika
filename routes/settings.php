@@ -12,13 +12,13 @@ Route::middleware(['auth', 'profile.completed'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'profile.completed'])->group(function () {
-    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
     Route::get('settings/security', [SecurityController::class, 'edit'])->name('security.edit');
 
     Route::put('settings/password', [SecurityController::class, 'update'])
         ->middleware('throttle:6,1')
         ->name('user-password.update');
+
+    Route::delete('settings/sessions', [SecurityController::class, 'destroy'])->name('sessions.destroy');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
 });

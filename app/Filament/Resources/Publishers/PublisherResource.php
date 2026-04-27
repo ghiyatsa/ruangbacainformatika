@@ -19,7 +19,7 @@ class PublisherResource extends Resource
 {
     protected static ?string $model = Publisher::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Perpustakaan';
+    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Buku';
 
     protected static ?string $navigationLabel = 'Penerbit';
 
