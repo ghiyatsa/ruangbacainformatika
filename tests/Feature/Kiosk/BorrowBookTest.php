@@ -1,0 +1,50 @@
+<?php
+
+use App\Models\Book;
+use App\Models\BookItem;
+use App\Models\KioskDevice;
+use App\Models\Publisher;
+use App\Models\User;
+use App\Support\Library\KioskLoanService;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
+
+test('members must fill whatsapp before borrowing books', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => null,
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Test',
+        'slug' => 'penerbit-test',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Test',
+        'slug' => 'buku-test',
+        'isbn' => '9786020000001',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+    ]);
+
+    BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-001',
+        'status' => 'available',
+    ]);
+
+    $kioskDevice = KioskDevice::query()->create([
+        'name' => 'Kiosk 1',
+        'kiosk_identifier' => 'kiosk-1',
+        'registration_code' => 'ABC123456789',
+        'status' => KioskDevice::STATUS_APPROVED,
+    ]);
+
+    $service = app(KioskLoanService::class);
+
+    expect(fn () => $service->borrow($kioskDevice, $member->nim(), '9786020000001'))
+        ->toThrow(ValidationException::class, 'Nomor WhatsApp wajib diisi pada profil sebelum meminjam buku.');
+});

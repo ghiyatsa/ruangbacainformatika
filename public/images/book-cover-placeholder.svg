@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" role="img" aria-labelledby="title desc">
+  <title id="title">Book cover placeholder</title>
+  <desc id="desc">Placeholder image for books without a cover.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f4efe6"/>
+      <stop offset="100%" stop-color="#d7c6a5"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" rx="24" fill="url(#bg)"/>
+  <rect x="28" y="24" width="22" height="352" rx="11" fill="#72583a" opacity="0.85"/>
+  <rect x="64" y="64" width="172" height="232" rx="18" fill="#fffaf1" opacity="0.9"/>
+  <path d="M102 146h96m-96 34h84m-84 34h66" stroke="#8f724a" stroke-linecap="round" stroke-width="12"/>
+  <path d="M150 264c27-19 50-18 68-8v60c-19-9-41-11-68 4-27-15-49-13-68-4v-60c18-10 41-11 68 8Z" fill="#72583a"/>
+  <text x="64" y="344" fill="#5b462d" font-family="Georgia, serif" font-size="28" font-weight="700">No Cover</text>
+</svg>
