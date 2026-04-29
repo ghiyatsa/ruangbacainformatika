@@ -4,6 +4,7 @@
     "shadcn": {
       "source": "shadcn/ui",
       "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
       "computedHash": "03365c7543539f6e6689a754e65b3d8ea023ba9d6ea12a9b5550462bf060af8c"
     }
   }

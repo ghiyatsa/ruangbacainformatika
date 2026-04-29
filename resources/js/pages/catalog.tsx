@@ -7,13 +7,13 @@ import {
 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import CatalogController from '@/actions/App/Http/Controllers/CatalogController';
 import BookCard from '@/components/catalog/BookCard';
 import BookCardSkeleton from '@/components/catalog/BookCardSkeleton';
 import BookListItem from '@/components/catalog/BookListItem';
 import BookListItemSkeleton from '@/components/catalog/BookListItemSkeleton';
 import CatalogHeader from '@/components/catalog/CatalogHeader';
 import FilterSidebar from '@/components/catalog/FilterSidebar';
+import { AppHeader } from '@/components/layouts/AppHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -25,7 +25,9 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
+import Footer from '@/components/welcome/Footer';
 import type { PaginatedBooks } from '@/components/welcome/types';
+import booksRoute from '@/routes/books';
 
 interface CatalogProps {
     canRegister?: boolean;
@@ -61,7 +63,7 @@ export default function Catalog({
     const applyFilters = useCallback(
         (params: { search?: string; category?: string }) => {
             router.get(
-                CatalogController.url(),
+                booksRoute.index.url(),
                 {
                     search: params.search ?? filters.search,
                     category: params.category ?? filters.category,
@@ -92,7 +94,7 @@ export default function Catalog({
     function clearAllFilters(): void {
         setSearchValue('');
         router.get(
-            CatalogController.url(),
+            booksRoute.index.url(),
             {},
             { preserveScroll: true, replace: true },
         );
@@ -114,6 +116,8 @@ export default function Catalog({
             />
 
             <div className="relative z-10 flex flex-col">
+                <AppHeader />
+
                 <main className="flex-1 py-10">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
                         <CatalogHeader
@@ -261,6 +265,8 @@ export default function Catalog({
                         </div>
                     </div>
                 </main>
+
+                <Footer />
             </div>
         </>
     );
@@ -375,10 +381,7 @@ function CatalogResults({
                             className="gap-1"
                         >
                             {books.prev_page_url ? (
-                                <Link
-                                    href={books.prev_page_url}
-                                    preserveScroll
-                                >
+                                <Link href={books.prev_page_url} preserveScroll>
                                     <ChevronLeft className="size-3.5" />
                                     Sebelumnya
                                 </Link>
@@ -400,10 +403,7 @@ function CatalogResults({
                             className="gap-1"
                         >
                             {books.next_page_url ? (
-                                <Link
-                                    href={books.next_page_url}
-                                    preserveScroll
-                                >
+                                <Link href={books.next_page_url} preserveScroll>
                                     Berikutnya
                                     <ChevronRight className="size-3.5" />
                                 </Link>

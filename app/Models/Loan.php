@@ -20,7 +20,6 @@ class Loan extends Model
 
     protected $fillable = [
         'user_id',
-        'kiosk_device_id',
         'status',
         'borrowed_at',
         'due_at',
@@ -47,11 +46,6 @@ class Loan extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function kioskDevice(): BelongsTo
-    {
-        return $this->belongsTo(KioskDevice::class);
     }
 
     public function items(): HasMany

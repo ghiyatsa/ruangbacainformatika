@@ -2,9 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Resources\KioskDevices\Pages\EditKioskDevice;
 use App\Filament\Resources\Loans\Pages\ViewLoan;
-use App\Models\KioskDevice;
 use App\Models\Loan;
 use Filament\Actions\Action;
 use Filament\Support\Enums\IconPosition;
@@ -40,10 +38,7 @@ class OperationsAttentionTable extends TableWidget
                 TextColumn::make('type')
                     ->label('Kategori')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Loan' => 'danger',
-                        default => 'warning',
-                    }),
+                    ->color('danger'),
                 TextColumn::make('title')
                     ->label('Item')
                     ->searchable()
@@ -57,11 +52,7 @@ class OperationsAttentionTable extends TableWidget
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Melewati jatuh tempo' => 'danger',
-                        'Menunggu approval' => 'warning',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => $state === 'Melewati jatuh tempo' ? 'danger' : 'gray'),
                 TextColumn::make('updated_at')
                     ->label('Terakhir Update')
                     ->since(),
@@ -84,7 +75,7 @@ class OperationsAttentionTable extends TableWidget
                     ->url(fn (array $record): string => $record['url']),
             ])
             ->emptyStateHeading('Belum ada item yang perlu tindakan')
-            ->emptyStateDescription('Dashboard ini akan menampilkan peminjaman lama dan kiosk yang bermasalah.');
+            ->emptyStateDescription('Dashboard ini akan menampilkan peminjaman lama yang perlu ditangani.');
     }
 
     protected function getTableDescription(): ?string
@@ -124,44 +115,7 @@ class OperationsAttentionTable extends TableWidget
                 ];
             });
 
-        $pendingKiosks = KioskDevice::query()
-            ->where('status', KioskDevice::STATUS_PENDING)
-            ->latest('created_at')
-            ->limit(3)
-            ->get()
-            ->map(fn (KioskDevice $device): array => [
-                'type' => 'Kiosk',
-                'title' => $device->name ?: 'Perangkat tanpa nama',
-                'detail' => "Kiosk ID: {$device->kiosk_identifier}",
-                'status' => 'Menunggu approval',
-                'updated_at' => $device->last_seen_at ?? $device->created_at,
-                'priority' => 200,
-                'priority_label' => 'Tinggi',
-                'url' => EditKioskDevice::getUrl(['record' => $device], panel: 'admin'),
-            ]);
-
-        $offlineKiosks = KioskDevice::query()
-            ->where('status', KioskDevice::STATUS_APPROVED)
-            ->where(fn ($query) => $query
-                ->whereNull('last_seen_at')
-                ->orWhere('last_seen_at', '<', now()->subHour()))
-            ->orderByDesc('last_seen_at')
-            ->limit(3)
-            ->get()
-            ->map(fn (KioskDevice $device): array => [
-                'type' => 'Kiosk',
-                'title' => $device->name ?: 'Perangkat tanpa nama',
-                'detail' => "Kiosk ID: {$device->kiosk_identifier}",
-                'status' => 'Offline > 1 jam',
-                'updated_at' => $device->last_seen_at ?? $device->updated_at,
-                'priority' => 100,
-                'priority_label' => 'Sedang',
-                'url' => EditKioskDevice::getUrl(['record' => $device], panel: 'admin'),
-            ]);
-
         return $overdueLoans
-            ->concat($pendingKiosks)
-            ->concat($offlineKiosks)
             ->sortByDesc('priority')
             ->values();
     }

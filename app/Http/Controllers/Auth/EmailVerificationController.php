@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\Auth\RegisterResponse;
 use App\Support\Auth\AuthenticationRedirector;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +22,10 @@ class EmailVerificationController extends Controller
     public function notice(Request $request): Response|RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
+            if ($request->session()->pull(RegisterResponse::KIOSK_RETURN_AFTER_VERIFICATION_KEY, false)) {
+                return redirect()->route('kiosk.index');
+            }
+
             return $this->authenticationRedirector->redirectResponse($request);
         }
 
@@ -51,6 +56,12 @@ class EmailVerificationController extends Controller
         }
 
         $request->fulfill();
+
+        if ($request->session()->pull(RegisterResponse::KIOSK_RETURN_AFTER_VERIFICATION_KEY, false)) {
+            return redirect()
+                ->route('kiosk.index')
+                ->with('success', 'Email berhasil diverifikasi. Silakan lanjut menggunakan kiosk.');
+        }
 
         return $this->authenticationRedirector
             ->redirectResponse($request)

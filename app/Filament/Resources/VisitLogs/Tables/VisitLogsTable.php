@@ -21,7 +21,7 @@ class VisitLogsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->searchPlaceholder('Cari nama, identitas, instansi, atau kiosk')
+            ->searchPlaceholder('Cari nama, identitas, atau instansi')
             ->emptyStateHeading('Belum ada data kunjungan')
             ->emptyStateDescription('Data kunjungan dari kiosk akan tercatat otomatis di sini.')
             ->defaultPaginationPageOption(25)
@@ -51,9 +51,6 @@ class VisitLogsTable
                     ->label('Tujuan')
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => VisitLog::purposeOptions()[$state] ?? $state),
-                TextColumn::make('kioskDevice.name')
-                    ->label('Kiosk')
-                    ->toggleable(),
                 TextColumn::make('phone')
                     ->label('WhatsApp')
                     ->copyable()

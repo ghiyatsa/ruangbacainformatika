@@ -2,7 +2,6 @@
 
 use App\Models\Book;
 use App\Models\BookItem;
-use App\Models\KioskDevice;
 use App\Models\Publisher;
 use App\Models\User;
 use App\Support\Library\KioskLoanService;
@@ -36,16 +35,9 @@ test('members must fill whatsapp before borrowing books', function () {
         'status' => 'available',
     ]);
 
-    $kioskDevice = KioskDevice::query()->create([
-        'name' => 'Kiosk 1',
-        'kiosk_identifier' => 'kiosk-1',
-        'registration_code' => 'ABC123456789',
-        'status' => KioskDevice::STATUS_APPROVED,
-    ]);
-
     $service = app(KioskLoanService::class);
 
-    expect(fn () => $service->borrow($kioskDevice, $member->nim(), '9786020000001'))
+    expect(fn () => $service->borrow($member->nim(), '9786020000001'))
         ->toThrow(ValidationException::class, 'Nomor WhatsApp wajib diisi pada profil sebelum meminjam buku.');
 });
 
@@ -78,15 +70,8 @@ test('books marked as not borrowable cannot be borrowed', function () {
         'status' => 'available',
     ]);
 
-    $kioskDevice = KioskDevice::query()->create([
-        'name' => 'Kiosk 1',
-        'kiosk_identifier' => 'kiosk-1',
-        'registration_code' => 'ABC123456789',
-        'status' => KioskDevice::STATUS_APPROVED,
-    ]);
-
     $service = app(KioskLoanService::class);
 
-    expect(fn () => $service->borrow($kioskDevice, $member->nim(), '9786020000002'))
+    expect(fn () => $service->borrow($member->nim(), '9786020000002'))
         ->toThrow(ValidationException::class, 'Buku dengan ISBN 9786020000002 ditandai tidak boleh dipinjam.');
 });

@@ -10,6 +10,8 @@ class KioskPinManager
 {
     public const SESSION_PIN_HASH_KEY = 'kiosk.pin_hash';
 
+    public const SESSION_VERSION_KEY = 'kiosk.session_version';
+
     public function __construct(
         protected SettingRepository $settingRepository,
     ) {}
@@ -22,10 +24,12 @@ class KioskPinManager
     public function isVerified(Request $request): bool
     {
         $sessionPinHash = $request->session()->get(self::SESSION_PIN_HASH_KEY);
+        $sessionVersion = (int) $request->session()->get(self::SESSION_VERSION_KEY, 0);
         $currentPinHash = $this->currentPinHash();
 
         return filled($sessionPinHash)
             && filled($currentPinHash)
+            && $sessionVersion === $this->currentSessionVersion()
             && hash_equals($currentPinHash, (string) $sessionPinHash);
     }
 
@@ -43,13 +47,17 @@ class KioskPinManager
 
         $request->session()->regenerate();
         $request->session()->put(self::SESSION_PIN_HASH_KEY, $currentPinHash);
+        $request->session()->put(self::SESSION_VERSION_KEY, $this->currentSessionVersion());
 
         return true;
     }
 
     public function forget(Request $request): void
     {
-        $request->session()->forget(self::SESSION_PIN_HASH_KEY);
+        $request->session()->forget([
+            self::SESSION_PIN_HASH_KEY,
+            self::SESSION_VERSION_KEY,
+        ]);
     }
 
     public function currentPinHash(): ?string
@@ -57,5 +65,19 @@ class KioskPinManager
         $pinHash = $this->settingRepository->get('kiosk', 'pin_hash');
 
         return filled($pinHash) ? (string) $pinHash : null;
+    }
+
+    public function currentSessionVersion(): int
+    {
+        return max((int) $this->settingRepository->get('kiosk', 'session_version', 1), 1);
+    }
+
+    public function rotateSessions(): int
+    {
+        $nextVersion = $this->currentSessionVersion() + 1;
+
+        $this->settingRepository->put('kiosk', 'session_version', $nextVersion);
+
+        return $nextVersion;
     }
 }

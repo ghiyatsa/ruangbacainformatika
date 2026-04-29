@@ -2,7 +2,6 @@ import { Deferred, Link } from '@inertiajs/react';
 import { ArrowRight, BookOpen, Sparkles } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import CatalogController from '@/actions/App/Http/Controllers/CatalogController';
 import BookCard from '@/components/catalog/BookCard';
 import BookCardSkeleton from '@/components/catalog/BookCardSkeleton';
 import BookListItem from '@/components/catalog/BookListItem';
@@ -17,6 +16,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import booksRoute from '@/routes/books';
 import type { CatalogBook, WelcomeProps } from './types';
 
 interface CatalogSectionProps {
@@ -26,11 +26,15 @@ interface CatalogSectionProps {
 }
 
 function availabilityLabel(book: CatalogBook): string {
-    if (book.isAvailable) {
-        return `${book.availableItemsCount} tersedia`;
+    if (!book.isAvailable) {
+        return 'Kosong';
     }
 
-    return 'Tidak tersedia';
+    if (!book.isBorrowable) {
+        return 'Referensi';
+    }
+
+    return 'Tersedia';
 }
 
 export default function CatalogSection({
@@ -170,7 +174,7 @@ export default function CatalogSection({
                                     className="w-full"
                                     asChild
                                 >
-                                    <Link href={CatalogController.url()}>
+                                    <Link href={booksRoute.index.url()}>
                                         Jelajahi Semua Koleksi
                                         <ArrowRight className="ml-2 size-4" />
                                     </Link>
@@ -253,7 +257,7 @@ export default function CatalogSection({
                                 size="lg"
                                 className="gap-2 rounded-xl"
                             >
-                                <Link href={CatalogController.url()}>
+                                <Link href={booksRoute.index.url()}>
                                     <BookOpen className="size-4" />
                                     Lihat Semua Buku
                                     <ArrowRight className="size-4" />

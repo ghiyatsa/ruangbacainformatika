@@ -112,10 +112,6 @@ class LoansTable
                         Loan::STATUS_RETURNED => 'success',
                         default => 'gray',
                     }),
-                TextColumn::make('kioskDevice.name')
-                    ->label('Kiosk')
-                    ->placeholder('Mode development / tidak tercatat')
-                    ->toggleable(),
                 TextColumn::make('returned_at')
                     ->label('Selesai Pada')
                     ->dateTime('d M Y H:i')
@@ -156,9 +152,6 @@ class LoansTable
                         now()->startOfWeek(),
                         now()->endOfWeek(),
                     ])),
-                Filter::make('without_kiosk')
-                    ->label('Tanpa Kiosk')
-                    ->query(fn (Builder $query): Builder => $query->whereNull('kiosk_device_id')),
                 Filter::make('overdue_7_days')
                     ->label('Melewati Jatuh Tempo')
                     ->query(fn (Builder $query): Builder => $query

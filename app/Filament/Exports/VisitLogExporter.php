@@ -18,9 +18,6 @@ class VisitLogExporter extends Exporter
         return [
             ExportColumn::make('id')
                 ->label('ID'),
-            ExportColumn::make('kioskDevice.name')
-                ->label('Perangkat Kiosk')
-                ->formatStateUsing(fn (?string $state): string => static::sanitizeForSpreadsheet($state)),
             ExportColumn::make('name')
                 ->label('Nama Pengunjung')
                 ->formatStateUsing(fn (?string $state): string => static::sanitizeForSpreadsheet($state)),

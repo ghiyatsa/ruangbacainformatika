@@ -7,6 +7,7 @@ use App\Support\Kiosk\KioskPinManager;
 use App\Support\Settings\SettingRepository;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -48,7 +49,7 @@ class KioskSettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Akses Kios')
-                    ->description('PIN ini wajib dimasukkan perangkat sebelum dapat mengajukan akses kiosk.')
+                    ->description('PIN ini wajib dimasukkan sebelum pengunjung dapat menggunakan kiosk.')
                     ->schema([
                         TextInput::make('pin')
                             ->label('PIN Kiosk')
@@ -59,6 +60,23 @@ class KioskSettings extends Page
                             ->minLength(4)
                             ->maxLength(8),
                     ]),
+                Section::make('Sesi Kiosk')
+                    ->description('Kelola sesi PIN aktif tanpa mengubah PIN kiosk.')
+                    ->schema([
+                        Placeholder::make('session_version')
+                            ->label('Versi sesi aktif')
+                            ->content(fn (): string => (string) $this->kioskPinManager()->currentSessionVersion()),
+                        Actions::make([
+                            Action::make('rotateSessions')
+                                ->label('Reset Semua Sesi')
+                                ->color('warning')
+                                ->requiresConfirmation()
+                                ->modalHeading('Reset semua sesi kiosk?')
+                                ->modalDescription('Semua browser kiosk yang sudah memasukkan PIN akan diminta memasukkan PIN ulang.')
+                                ->action('rotateSessions'),
+                        ]),
+                    ])
+                    ->columns(2),
                 Section::make('Tampilan Kiosk')
                     ->description('Atur teks dan perilaku dasar yang tampil pada monitor kiosk.')
                     ->schema([
@@ -69,21 +87,6 @@ class KioskSettings extends Page
                         TextInput::make('subtitle')
                             ->label('Subjudul')
                             ->maxLength(255),
-                        TextInput::make('waiting_message')
-                            ->label('Pesan Menunggu')
-                            ->maxLength(255),
-                        TextInput::make('waiting_refresh_seconds')
-                            ->label('Refresh Approval (detik)')
-                            ->numeric()
-                            ->required()
-                            ->minValue(5)
-                            ->maxValue(120),
-                        TextInput::make('success_redirect_seconds')
-                            ->label('Kembali ke Landing (detik)')
-                            ->numeric()
-                            ->required()
-                            ->minValue(3)
-                            ->maxValue(30),
                     ])
                     ->columns(2),
             ])
@@ -110,9 +113,6 @@ class KioskSettings extends Page
         $this->settingRepository()->putMany('kiosk', [
             'title' => $data['title'] ?? null,
             'subtitle' => $data['subtitle'] ?? null,
-            'waiting_message' => $data['waiting_message'] ?? null,
-            'waiting_refresh_seconds' => $data['waiting_refresh_seconds'] ?? 20,
-            'success_redirect_seconds' => $data['success_redirect_seconds'] ?? 6,
         ]);
 
         Notification::make()
@@ -132,10 +132,20 @@ class KioskSettings extends Page
             'pin' => '',
             'title' => 'Pendataan Pengunjung Perpustakaan',
             'subtitle' => 'Silakan masukkan PIN untuk mengaktifkan perangkat kiosk.',
-            'waiting_message' => 'Perangkat ini sedang menunggu persetujuan super admin.',
-            'waiting_refresh_seconds' => '20',
-            'success_redirect_seconds' => '6',
         ];
+    }
+
+    public function rotateSessions(): void
+    {
+        $this->kioskPinManager()->rotateSessions();
+
+        Notification::make()
+            ->success()
+            ->title('Semua sesi kiosk telah direset')
+            ->body('Browser kiosk aktif akan diminta memasukkan PIN ulang.')
+            ->send();
+
+        $this->form->fill($this->settingRepository()->sectionValues('kiosk', $this->defaultValues()));
     }
 
     protected function settingRepository(): SettingRepository

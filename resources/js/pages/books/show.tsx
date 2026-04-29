@@ -7,11 +7,11 @@ import {
     FileText,
     Hash,
 } from 'lucide-react';
-import CatalogController from '@/actions/App/Http/Controllers/CatalogController';
+import { AppHeader } from '@/components/layouts/AppHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Footer from '@/components/welcome/Footer';
-import Navigation from '@/components/welcome/Navigation';
+import books from '@/routes/books';
 
 interface BookDetailsProps {
     book: {
@@ -39,10 +39,7 @@ interface BookDetailsProps {
     canRegister?: boolean;
 }
 
-export default function BookShow({
-    book: { data: book },
-    canRegister = true,
-}: BookDetailsProps) {
+export default function BookShow({ book: { data: book } }: BookDetailsProps) {
     return (
         <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/10 selection:text-primary">
             <Head title={`${book.title} — Ruang Baca`} />
@@ -57,7 +54,7 @@ export default function BookShow({
             />
 
             <div className="relative z-10 flex min-h-screen flex-col">
-                <Navigation canRegister={canRegister} />
+                <AppHeader />
 
                 <main className="flex-1 py-10">
                     <div className="mx-auto max-w-5xl px-6 lg:px-8">
@@ -68,7 +65,7 @@ export default function BookShow({
                                 asChild
                                 className="-ml-3 text-muted-foreground hover:text-foreground"
                             >
-                                <Link href={CatalogController.url()}>
+                                <Link href={books.index.url()}>
                                     <ArrowLeft className="mr-2 size-4" />
                                     Kembali ke Katalog
                                 </Link>

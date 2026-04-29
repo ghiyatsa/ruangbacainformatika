@@ -68,7 +68,6 @@ class LoanResource extends Resource
         return parent::getEloquentQuery()
             ->with([
                 'user',
-                'kioskDevice',
                 'items.bookItem.book',
             ])
             ->withCount([

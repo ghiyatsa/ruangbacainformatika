@@ -141,9 +141,9 @@ test('google users can access onboarding only once', function () {
         ->patch(route('register.whatsapp.store'), [
             'whatsapp' => '08123456789',
         ])
-        ->assertRedirect(route('profile.edit', absolute: false));
+        ->assertRedirect(route('settings.profile.edit', absolute: false));
 
     $this->actingAs($user->fresh())
         ->get(route('register.whatsapp'))
-        ->assertRedirect(route('profile.edit', absolute: false));
+        ->assertRedirect(route('settings.profile.edit', absolute: false));
 });

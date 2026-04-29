@@ -55,18 +55,18 @@ export default function BookListItem({ book }: BookListItemProps) {
                 <Badge
                     variant={
                         !book.isAvailable
-                            ? 'outline'
+                            ? 'secondary'
                             : book.isBorrowable
                               ? 'default'
                               : 'secondary'
                     }
-                    className="text-[10px]"
+                    className="text-[10px] backdrop-blur-sm"
                 >
                     {!book.isAvailable
                         ? 'Kosong'
                         : !book.isBorrowable
                           ? 'Referensi'
-                          : `${book.availableItemsCount} tersedia`}
+                          : 'Tersedia'}
                 </Badge>
             </div>
 

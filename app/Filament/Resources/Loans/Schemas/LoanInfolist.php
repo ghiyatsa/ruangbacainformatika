@@ -20,9 +20,6 @@ class LoanInfolist
                         TextEntry::make('user.email')
                             ->label('Email Member')
                             ->copyable(),
-                        TextEntry::make('kioskDevice.name')
-                            ->label('Perangkat Kiosk')
-                            ->placeholder('Tidak tercatat'),
                         TextEntry::make('status')
                             ->label('Status')
                             ->badge()

@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 
-import { AppHeader } from '@/components/app-header';
+import { AppHeader } from '@/components/layouts/AppHeader';
 import CatalogSection from '@/components/welcome/CatalogSection';
 import DomainHighlights from '@/components/welcome/DomainHighlights';
 import Footer from '@/components/welcome/Footer';

@@ -32,7 +32,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if (! $user instanceof User || $user->hasRequiredProfileDetails()) {
-            return to_route('profile.edit');
+            return to_route('settings.profile.edit');
         }
 
         return Inertia::render('auth/register-whatsapp');
@@ -55,7 +55,7 @@ class ProfileController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
 
-        return to_route('profile.edit');
+        return to_route('settings.profile.edit');
     }
 
     public function storeOnboarding(ProfileOnboardingRequest $request): RedirectResponse
@@ -66,7 +66,7 @@ class ProfileController extends Controller
         // Removal of Google auth requirement
 
         if ($user->hasRequiredProfileDetails()) {
-            return to_route('profile.edit');
+            return to_route('settings.profile.edit');
         }
 
         $user->forceFill([
@@ -76,6 +76,6 @@ class ProfileController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Onboarding selesai.')]);
 
-        return to_route('profile.edit');
+        return to_route('settings.profile.edit');
     }
 }

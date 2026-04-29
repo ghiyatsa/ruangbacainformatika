@@ -82,6 +82,7 @@ class GoogleController extends Controller
             }
 
             Auth::guard('web')->login($user);
+            request()->session()->put('auth.password_confirmed_at', time());
             request()->session()->regenerate();
 
             return $this->authenticationRedirector->redirectResponse(request(), $user);

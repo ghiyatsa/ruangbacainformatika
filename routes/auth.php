@@ -36,8 +36,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('signed')
         ->name('verification.verify');
 
-    Route::get('register/whatsapp', [ProfileController::class, 'complete'])->name('register.whatsapp');
-    Route::patch('register/whatsapp', [ProfileController::class, 'storeOnboarding'])->name('register.whatsapp.store');
+    Route::get('onboarding', [ProfileController::class, 'complete'])->name('register.whatsapp');
+    Route::patch('onboarding', [ProfileController::class, 'storeOnboarding'])->name('register.whatsapp.store');
 
-    Route::redirect('/profile', '/settings/profile')->name('profile.show');
+    Route::redirect('/profile', '/settings/profile')->name('settings.profile.show');
 });

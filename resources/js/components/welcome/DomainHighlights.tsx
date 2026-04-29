@@ -10,7 +10,7 @@ import {
     Terminal,
 } from 'lucide-react';
 
-import LogoLoop from '@/components/LogoLoop';
+import LogoLoop from '@/components/common/LogoLoop';
 
 interface DomainHighlightsProps {
     categories?: {

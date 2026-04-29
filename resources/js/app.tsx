@@ -1,10 +1,11 @@
 import { createInertiaApp } from '@inertiajs/react';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
-import AppLayout from '@/layouts/app-layout';
-import AuthLayout from '@/layouts/auth-layout';
-import SettingsLayout from '@/layouts/settings/layout';
+import AppLayout from '@/layouts/AppLayout';
+import AuthLayout from '@/layouts/AuthLayout';
+import SettingsLayout from '@/layouts/SettingsLayout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -13,6 +14,12 @@ createInertiaApp({
     layout: (name) => {
         switch (true) {
             case name === 'welcome':
+                return null;
+            case name.startsWith('kiosk/'):
+                return null;
+            case name.startsWith('catalog'):
+                return null;
+            case name.startsWith('books/'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
@@ -25,10 +32,12 @@ createInertiaApp({
     strictMode: true,
     withApp(app) {
         return (
-            <TooltipProvider>
-                {app}
-                <Toaster />
-            </TooltipProvider>
+            <ErrorBoundary>
+                <TooltipProvider>
+                    {app}
+                    <Toaster />
+                </TooltipProvider>
+            </ErrorBoundary>
         );
     },
     progress: {

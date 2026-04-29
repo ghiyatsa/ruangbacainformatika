@@ -1,11 +1,11 @@
 import { Form, Head, Link, setLayoutProps, usePage } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
+import Heading from '@/components/common/Heading';
+import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { edit } from '@/routes/profile';
+import settings from '@/routes/settings';
 import { send } from '@/routes/verification';
 
 export default function Profile({
@@ -146,7 +146,7 @@ Profile.layout = {
     breadcrumbs: [
         {
             title: 'Pengaturan profil',
-            href: edit(),
+            href: settings.profile.edit(),
         },
     ],
 };

@@ -1,10 +1,10 @@
 import { Link } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { lazy, Suspense } from 'react';
-import CatalogController from '@/actions/App/Http/Controllers/CatalogController';
-import CountUp from '@/components/CountUp';
-import ShinyText from '@/components/ShinyText';
-import StarBorder from '@/components/StarBorder';
+import CountUp from '@/components/common/CountUp';
+import ShinyText from '@/components/common/ShinyText';
+import StarBorder from '@/components/common/StarBorder';
+import books from '@/routes/books';
 import type { WelcomeProps } from './types';
 
 interface HeroProps {
@@ -80,7 +80,7 @@ export default function Hero({ stats }: HeroProps) {
 
                     <div className="w-full max-w-xl">
                         <Link
-                            href={CatalogController.url()}
+                            href={books.index.url()}
                             className="block transition-transform"
                         >
                             <StarBorder

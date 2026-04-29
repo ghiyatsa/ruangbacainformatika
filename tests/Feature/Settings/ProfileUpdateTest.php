@@ -7,7 +7,7 @@ test('profile page is displayed', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
-        ->get(route('profile.edit'));
+        ->get(route('settings.profile.edit'));
 
     $response->assertOk();
 });
@@ -31,7 +31,7 @@ test('profile information can be updated', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
-        ->patch(route('profile.update'), [
+        ->patch(route('settings.profile.update'), [
             'name' => 'Test User',
             'email' => 'changed@example.com',
             'whatsapp' => '08123456789',
@@ -39,7 +39,7 @@ test('profile information can be updated', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect(route('profile.edit'));
+        ->assertRedirect(route('settings.profile.edit'));
 
     $user->refresh();
 
@@ -52,14 +52,14 @@ test('email verification status is unchanged when the email address is unchanged
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
-        ->patch(route('profile.update'), [
+        ->patch(route('settings.profile.update'), [
             'name' => 'Test User',
             'whatsapp' => '08123456789',
         ]);
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect(route('profile.edit'));
+        ->assertRedirect(route('settings.profile.edit'));
 
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
@@ -70,7 +70,7 @@ test('users cannot update their email address from profile settings', function (
     ]);
 
     $response = $this->actingAs($user)
-        ->patch(route('profile.update'), [
+        ->patch(route('settings.profile.update'), [
             'name' => 'Test User',
             'email' => 'outside@example.com',
             'whatsapp' => '08123456789',
@@ -78,7 +78,7 @@ test('users cannot update their email address from profile settings', function (
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect(route('profile.edit'));
+        ->assertRedirect(route('settings.profile.edit'));
 
     expect($user->refresh()->email)->toBe('230170001@mhs.unimal.ac.id');
     expect($user->email_verified_at)->not->toBeNull();

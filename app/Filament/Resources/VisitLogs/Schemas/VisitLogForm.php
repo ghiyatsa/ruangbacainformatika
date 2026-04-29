@@ -47,9 +47,6 @@ class VisitLogForm
                         Placeholder::make('visited_at')
                             ->label('Waktu Kunjungan')
                             ->content(fn ($record) => $record?->visited_at?->translatedFormat('d M Y H:i') ?? '-'),
-                        Placeholder::make('kioskDevice.name')
-                            ->label('Perangkat Kiosk')
-                            ->content(fn ($record) => $record?->kioskDevice?->name ?? 'Tidak tercatat'),
                         Textarea::make('notes')
                             ->label('Catatan')
                             ->rows(4)

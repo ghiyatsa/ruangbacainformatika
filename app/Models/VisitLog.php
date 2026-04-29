@@ -6,7 +6,6 @@ use Database\Factories\VisitLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 class VisitLog extends Model
@@ -23,7 +22,6 @@ class VisitLog extends Model
     public const VISITOR_TYPE_UMUM = 'umum';
 
     protected $fillable = [
-        'kiosk_device_id',
         'name',
         'visitor_type',
         'identity_number',
@@ -60,11 +58,6 @@ class VisitLog extends Model
             'administration' => 'Administrasi',
             'other' => 'Lainnya',
         ];
-    }
-
-    public function kioskDevice(): BelongsTo
-    {
-        return $this->belongsTo(KioskDevice::class);
     }
 
     public function scopeVisitedBetween(Builder $query, ?string $from, ?string $until): Builder

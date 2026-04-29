@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Responses\Auth\RegisterResponse;
 use App\Models\User;
+use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 
@@ -72,4 +74,34 @@ test('manual registration stores whatsapp when provided', function () {
     $user = User::query()->where('email', '230170009@mhs.unimal.ac.id')->firstOrFail();
 
     expect($user->whatsapp)->toBe('08123456789');
+});
+
+test('kiosk registration redirects to email verification and returns to kiosk after verification', function () {
+    $response = $this->post(route('register'), [
+        'name' => 'Kiosk User',
+        'email' => '230170010@mhs.unimal.ac.id',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'redirect_to' => route('kiosk.index', absolute: false),
+    ]);
+
+    $user = User::query()->where('email', '230170010@mhs.unimal.ac.id')->firstOrFail();
+
+    $this->assertAuthenticatedAs($user);
+    $response->assertRedirect(route('verification.notice', absolute: false));
+    $this->assertTrue(session()->has(RegisterResponse::KIOSK_RETURN_AFTER_VERIFICATION_KEY));
+
+    $verificationUrl = URL::temporarySignedRoute(
+        'verification.verify',
+        now()->addMinutes(60),
+        [
+            'id' => $user->getKey(),
+            'hash' => sha1($user->getEmailForVerification()),
+        ],
+    );
+
+    $this->actingAs($user)
+        ->withSession([RegisterResponse::KIOSK_RETURN_AFTER_VERIFICATION_KEY => true])
+        ->get($verificationUrl)
+        ->assertRedirect(route('kiosk.index'));
 });

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\KioskDevice;
 use App\Models\Loan;
 use App\Models\LoanItem;
 use Filament\Widgets\StatsOverviewWidget;
@@ -19,7 +18,7 @@ class OperationsOverviewStats extends StatsOverviewWidget
 
     protected ?string $heading = 'Operasional Hari Ini';
 
-    protected ?string $description = 'Ringkasan cepat untuk memantau sirkulasi dan perangkat kiosk.';
+    protected ?string $description = 'Ringkasan cepat untuk memantau sirkulasi perpustakaan.';
 
     protected function getStats(): array
     {
@@ -34,18 +33,6 @@ class OperationsOverviewStats extends StatsOverviewWidget
                 ->descriptionIcon('heroicon-m-arrow-uturn-left')
                 ->chart($this->getReturnedItemsTrend())
                 ->color('success'),
-            Stat::make('Kiosk Menunggu Approval', KioskDevice::query()->where('status', KioskDevice::STATUS_PENDING)->count())
-                ->description('Perangkat baru yang masih menunggu persetujuan.')
-                ->descriptionIcon('heroicon-m-computer-desktop')
-                ->color('primary'),
-            Stat::make('Kiosk Offline > 1 Jam', KioskDevice::query()
-                ->where(fn ($query) => $query
-                    ->whereNull('last_seen_at')
-                    ->orWhere('last_seen_at', '<', now()->subHour()))
-                ->count())
-                ->description('Perangkat yang perlu dicek koneksi atau statusnya.')
-                ->descriptionIcon('heroicon-m-signal-slash')
-                ->color('danger'),
         ];
     }
 

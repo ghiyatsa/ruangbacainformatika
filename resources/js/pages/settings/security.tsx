@@ -2,11 +2,11 @@ import { Form, Head } from '@inertiajs/react';
 import { Monitor, ShieldCheck, Smartphone } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
-import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
-import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
-import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
+import TwoFactorRecoveryCodes from '@/components/auth/TwoFactorRecoveryCodes';
+import TwoFactorSetupModal from '@/components/auth/TwoFactorSetupModal';
+import Heading from '@/components/common/Heading';
+import InputError from '@/components/common/InputError';
+import PasswordInput from '@/components/common/PasswordInput';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
-import { edit } from '@/routes/security';
+import settings from '@/routes/settings';
 import { disable, enable } from '@/routes/two-factor';
 
 type Session = {
@@ -445,7 +445,7 @@ Security.layout = {
     breadcrumbs: [
         {
             title: 'Pengaturan keamanan',
-            href: edit(),
+            href: settings.security.edit(),
         },
     ],
 };

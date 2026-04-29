@@ -20,6 +20,7 @@ export type CatalogBook = {
 };
 
 export type PaginatedBooks = {
+    index: any;
     data: CatalogBook[];
     current_page: number;
     last_page: number;

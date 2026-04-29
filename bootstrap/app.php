@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureKioskPinIsValid;
 use App\Http\Middleware\EnsureProfileIsCompleted;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -36,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'profile.completed' => EnsureProfileIsCompleted::class,
+            'kiosk.pin' => EnsureKioskPinIsValid::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

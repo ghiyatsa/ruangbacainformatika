@@ -1,9 +1,9 @@
 import { Form, Head } from '@inertiajs/react';
 import { store } from '@/actions/Laravel/Fortify/Http/Controllers/AuthenticatedSessionController';
-import GoogleIcon from '@/components/google-icon';
-import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
-import TextLink from '@/components/text-link';
+import GoogleIcon from '@/components/common/GoogleIcon';
+import InputError from '@/components/common/InputError';
+import PasswordInput from '@/components/common/PasswordInput';
+import TextLink from '@/components/common/TextLink';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -54,8 +54,10 @@ export default function Login({
                 ) : null}
 
                 <Form
-                    {...store.form()}
+                    action={store.url()}
+                    method="post"
                     resetOnSuccess={['password']}
+                    disableWhileProcessing
                     className="flex flex-col gap-6"
                 >
                     {({ processing, errors }) => (

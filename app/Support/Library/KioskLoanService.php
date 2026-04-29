@@ -4,7 +4,6 @@ namespace App\Support\Library;
 
 use App\Models\Book;
 use App\Models\BookItem;
-use App\Models\KioskDevice;
 use App\Models\Loan;
 use App\Models\LoanItem;
 use App\Models\User;
@@ -20,7 +19,7 @@ class KioskLoanService
         protected SettingRepository $settingRepository,
     ) {}
 
-    public function borrow(?KioskDevice $kioskDevice, string $memberIdentifier, string $isbn): Loan
+    public function borrow(string $memberIdentifier, string $isbn): Loan
     {
         $member = $this->resolveMember($memberIdentifier);
 
@@ -53,12 +52,11 @@ class KioskLoanService
             ]);
         }
 
-        return DB::transaction(function () use ($kioskDevice, $member, $isbn): Loan {
+        return DB::transaction(function () use ($member, $isbn): Loan {
             $borrowedAt = now();
 
             $loan = Loan::query()->create([
                 'user_id' => $member->id,
-                'kiosk_device_id' => $kioskDevice?->id,
                 'status' => Loan::STATUS_BORROWED,
                 'borrowed_at' => $borrowedAt,
                 'due_at' => $this->calculateDueAt($borrowedAt),
