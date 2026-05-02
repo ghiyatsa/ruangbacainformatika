@@ -2,6 +2,8 @@
 
 use App\Models\User;
 use Spatie\Permission\Models\Role;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 function makeSuperAdmin(): User
 {
@@ -17,59 +19,71 @@ function makeSuperAdmin(): User
     return $user;
 }
 
-test('guests are redirected away from the admin panel', function () {
-    $this->get('/admin')->assertRedirect(route('login'));
+it('guests are redirected away from the admin panel', function () {
+    get('/admin')->assertRedirect(route('login'));
 });
 
-test('non admin users can not access the admin panel', function () {
+it('non admin users can not access the admin panel', function () {
     $user = User::factory()->create();
 
-    $this->actingAs($user)
+    /** @var User $user */
+    actingAs($user)
         ->get('/admin')
         ->assertForbidden();
 });
 
-test('super admin users can access the admin dashboard', function () {
+it('super admin users can access the admin dashboard', function () {
     $user = makeSuperAdmin();
 
-    $this->actingAs($user)
+    actingAs($user)
         ->get('/admin')
         ->assertOk();
 });
 
-test('super admin users can access the admin users resource', function () {
+it('super admin users can access the admin users resource', function () {
     $user = makeSuperAdmin();
 
-    $this->actingAs($user)
+    actingAs($user)
         ->get('/admin/users')
         ->assertOk();
 });
 
-test('super admin users can render the general settings form', function () {
+it('super admin users can render the general settings form', function () {
     $user = makeSuperAdmin();
 
-    $this->actingAs($user)
+    actingAs($user)
         ->get(route('filament.admin.settings.pages.general-settings'))
         ->assertOk()
         ->assertSee('Nama Situs')
+        ->assertSee('Slogan')
         ->assertSee('WhatsApp Bantuan')
+        ->assertSee('Simpan');
+});
+
+it('super admin users can render the library settings form', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get(route('filament.admin.settings.pages.library'))
+        ->assertOk()
         ->assertSee('Maksimal Buku Dipinjam')
         ->assertSee('Durasi Peminjaman (Hari Kerja)')
         ->assertSee('Simpan');
 });
 
-test('super admin users are redirected from settings cluster to the first settings page', function () {
+
+it('super admin users are redirected from settings cluster to the first settings page', function () {
     $user = makeSuperAdmin();
 
-    $this->actingAs($user)
+    actingAs($user)
         ->get('/admin/settings')
         ->assertRedirect(route('filament.admin.settings.pages.general-settings', absolute: false));
 });
 
-test('super admin users can access key admin resources', function (string $path) {
+it('super admin users can access key admin resources', function (string $path) {
     $user = makeSuperAdmin();
 
-    $this->actingAs($user)
+    actingAs($user)
         ->get($path)
         ->assertOk();
 })->with([
@@ -79,6 +93,6 @@ test('super admin users can access key admin resources', function (string $path)
     '/admin/publishers',
     '/admin/loans',
     '/admin/visit-logs',
-    '/admin/kiosk-devices',
+    '/admin/settings/kiosk',
     '/admin/settings/general-settings',
 ]);

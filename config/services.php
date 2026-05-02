@@ -40,5 +40,10 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URL', env('GOOGLE_REDIRECT_URI', '/auth/google/callback')),
     ],
+    'similarity_api' => [
+        'url' => env('SIMILARITY_API_URL', 'http://localhost:8181'),
+        'secret' => env('SIMILARITY_API_SECRET', 'changeme-secret-token'),
+        'timeout' => env('SIMILARITY_API_TIMEOUT', 10),
+    ],
 
 ];

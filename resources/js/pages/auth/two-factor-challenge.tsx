@@ -55,7 +55,8 @@ export default function TwoFactorChallenge() {
 
             <div className="flex flex-col gap-6">
                 <Form
-                    {...store.form()}
+                    action={store.url()}
+                    method="post"
                     className="flex flex-col gap-6"
                     resetOnError
                     resetOnSuccess={!showRecoveryInput}

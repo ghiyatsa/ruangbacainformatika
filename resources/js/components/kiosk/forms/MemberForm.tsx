@@ -1,6 +1,5 @@
 import { Form } from '@inertiajs/react';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
-import { store as registerUser } from '@/actions/Laravel/Fortify/Http/Controllers/RegisteredUserController';
 import PasswordInput from '@/components/common/PasswordInput';
 import { KioskField } from '@/components/kiosk/KioskField';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { FormBackButton } from './FormBackButton';
 export function MemberForm({ onBack }: { onBack: () => void }) {
     return (
         <Form
-            action={registerUser.url()}
+            action={KioskController.storeMember.url()}
             method="post"
             resetOnError
             resetOnSuccess={['password', 'password_confirmation']}
@@ -21,12 +20,6 @@ export function MemberForm({ onBack }: { onBack: () => void }) {
         >
             {({ errors, processing }) => (
                 <>
-                    <input
-                        type="hidden"
-                        name="redirect_to"
-                        value={KioskController.show.url()}
-                    />
-
                     <FormBackButton onBack={onBack} />
 
                     <FieldGroup className="grid gap-5 sm:grid-cols-2">
@@ -59,6 +52,22 @@ export function MemberForm({ onBack }: { onBack: () => void }) {
                                 autoComplete="email"
                                 placeholder="nama@unimal.ac.id"
                                 aria-invalid={Boolean(errors.email)}
+                            />
+                        </KioskField>
+
+                        <KioskField
+                            label="No. WhatsApp"
+                            htmlFor="reg-whatsapp"
+                            error={errors.whatsapp}
+                            required
+                        >
+                            <Input
+                                id="reg-whatsapp"
+                                name="whatsapp"
+                                type="tel"
+                                autoComplete="tel"
+                                placeholder="08123456789"
+                                aria-invalid={Boolean(errors.whatsapp)}
                             />
                         </KioskField>
 

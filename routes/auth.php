@@ -32,9 +32,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
-    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-        ->middleware('signed')
-        ->name('verification.verify');
+    Route::get('/email/verify/{id}/{hash}', function () {
+        return redirect()->route('verification.notice');
+    })->name('verification.verify');
+
+    Route::post('/email/verify', [EmailVerificationController::class, 'verify'])
+        ->middleware('throttle:6,1')
+        ->name('verification.submit');
 
     Route::get('onboarding', [ProfileController::class, 'complete'])->name('register.whatsapp');
     Route::patch('onboarding', [ProfileController::class, 'storeOnboarding'])->name('register.whatsapp.store');

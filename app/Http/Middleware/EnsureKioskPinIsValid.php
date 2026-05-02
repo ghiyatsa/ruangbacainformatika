@@ -21,6 +21,8 @@ class EnsureKioskPinIsValid
     public function handle(Request $request, Closure $next): Response
     {
         if ($this->kioskPinManager->isVerified($request)) {
+            $this->kioskPinManager->updateLastActive($request);
+
             return $next($request);
         }
 

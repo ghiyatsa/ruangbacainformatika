@@ -3,23 +3,31 @@
 namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
+use App\Models\KioskDevice;
 use App\Support\Kiosk\KioskPinManager;
 use App\Support\Settings\SettingRepository;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\TextInput;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput as FormTextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\EmbeddedTable;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 
-class KioskSettings extends Page
+class KioskSettings extends Page implements HasTable
 {
+    use InteractsWithTable;
+
     protected static ?string $navigationLabel = 'Kiosk';
 
     protected static ?string $title = 'Pengaturan Kiosk';
@@ -51,7 +59,7 @@ class KioskSettings extends Page
                 Section::make('Akses Kios')
                     ->description('PIN ini wajib dimasukkan sebelum pengunjung dapat menggunakan kiosk.')
                     ->schema([
-                        TextInput::make('pin')
+                        FormTextInput::make('pin')
                             ->label('PIN Kiosk')
                             ->password()
                             ->revealable()
@@ -60,31 +68,20 @@ class KioskSettings extends Page
                             ->minLength(4)
                             ->maxLength(8),
                     ]),
-                Section::make('Sesi Kiosk')
-                    ->description('Kelola sesi PIN aktif tanpa mengubah PIN kiosk.')
+
+                Section::make('Daftar Perangkat Kiosk')
+                    ->description('Daftar browser yang saat ini memiliki sesi kiosk aktif.')
                     ->schema([
-                        Placeholder::make('session_version')
-                            ->label('Versi sesi aktif')
-                            ->content(fn (): string => (string) $this->kioskPinManager()->currentSessionVersion()),
-                        Actions::make([
-                            Action::make('rotateSessions')
-                                ->label('Reset Semua Sesi')
-                                ->color('warning')
-                                ->requiresConfirmation()
-                                ->modalHeading('Reset semua sesi kiosk?')
-                                ->modalDescription('Semua browser kiosk yang sudah memasukkan PIN akan diminta memasukkan PIN ulang.')
-                                ->action('rotateSessions'),
-                        ]),
-                    ])
-                    ->columns(2),
+                        EmbeddedTable::make(),
+                    ]),
                 Section::make('Tampilan Kiosk')
                     ->description('Atur teks dan perilaku dasar yang tampil pada monitor kiosk.')
                     ->schema([
-                        TextInput::make('title')
+                        FormTextInput::make('title')
                             ->label('Judul')
                             ->required()
                             ->maxLength(255),
-                        TextInput::make('subtitle')
+                        FormTextInput::make('subtitle')
                             ->label('Subjudul')
                             ->maxLength(255),
                     ])
@@ -151,6 +148,53 @@ class KioskSettings extends Page
     protected function settingRepository(): SettingRepository
     {
         return app(SettingRepository::class);
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(KioskDevice::query())
+            ->searchable(false)
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Nama Perangkat')
+                    ->placeholder('Tanpa Nama')
+                    ->searchable(),
+                TextColumn::make('ip_address')
+                    ->label('IP Address')
+                    ->searchable(),
+                TextColumn::make('user_agent')
+                    ->label('Browser / Sistem Operasi')
+                    ->wrap()
+                    ->size('xs')
+                    ->color('gray'),
+                TextColumn::make('last_active_at')
+                    ->label('Terakhir Aktif')
+                    ->dateTime()
+                    ->color('gray')
+                    ->sortable(),
+            ])
+            ->recordActions([
+                EditAction::make()
+                    ->label('Ubah Nama')
+                    ->icon(Heroicon::Pencil)
+                    ->modalWidth('sm')
+                    ->schema([
+                        FormTextInput::make('name')
+                            ->label('Nama Perangkat')
+                            ->required(),
+                    ]),
+                Action::make('revoke')
+                    ->label('Keluarkan')
+                    ->icon(Heroicon::Trash)
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Keluarkan Perangkat')
+                    ->modalDescription('Apakah Anda yakin ingin mengeluarkan perangkat ini dari sesi kiosk?')
+                    ->action(fn (Action $action) => $action->getRecord()->delete()),
+            ])
+            ->emptyStateHeading('Tidak ada perangkat aktif')
+            ->emptyStateDescription('Belum ada browser yang masuk ke mode kiosk.');
     }
 
     protected function kioskPinManager(): KioskPinManager

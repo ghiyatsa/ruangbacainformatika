@@ -5,58 +5,65 @@ use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 use Spatie\Permission\Models\Role;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertAuthenticated;
+use function Pest\Laravel\assertGuest;
+use function Pest\Laravel\get;
+use function Pest\Laravel\post;
 
-test('login screen can be rendered', function () {
-    $response = $this->get(route('login'));
-
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('auth/login')
-        ->where('canResetPassword', true)
-        ->where('canRegister', true)
-        ->where('canLoginWithGoogle', filled(config('services.google.client_id'))
-            && filled(config('services.google.client_secret'))
-            && filled(config('services.google.redirect'))),
-    );
+it('login screen can be rendered', function () {
+    get(route('login'))
+        ->assertInertia(
+            fn(Assert $page) => $page
+                ->component('auth/login')
+                ->where('canResetPassword', true)
+                ->where('canRegister', true)
+                ->where('canLoginWithGoogle', filled(config('services.google.client_id'))
+                    && filled(config('services.google.client_secret'))
+                    && filled(config('services.google.redirect'))),
+        );
 });
 
-test('users can authenticate using the login screen', function () {
+it('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
-    $response = $this->post(route('login'), [
+    post(route('login'), [
         'email' => $user->email,
         'password' => 'password',
-    ]);
+    ])
+        ->assertRedirect(route('home', absolute: false));
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('home', absolute: false));
+    assertAuthenticated();
 });
 
-test('administrative users are redirected to admin after login', function () {
+
+it('administrative users are redirected to admin after login', function () {
     $user = User::factory()->create();
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
     $user->assignRole('super_admin');
 
-    $response = $this->post(route('login'), [
+    post(route('login'), [
         'email' => $user->email,
         'password' => 'password',
-    ]);
+    ])
+        ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
+    assertAuthenticated();
 });
 
-test('authenticated users are redirected away from login screen using shared redirect logic', function () {
+
+it('authenticated users are redirected away from login screen using shared redirect logic', function () {
     $user = User::factory()->create();
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
     $user->assignRole('super_admin');
 
-    $response = $this->actingAs($user)->get(route('login'));
-
-    $response->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
+    /** @var User $user */
+    actingAs($user)->get(route('login'))
+        ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
 });
 
-test('users with two factor enabled are redirected to two factor challenge', function () {
-    $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
+it('users with two factor enabled are redirected to two factor challenge', function () {
+    skipUnlessFortifyHas(Features::twoFactorAuthentication());
 
     Features::twoFactorAuthentication([
         'confirm' => true,
@@ -71,45 +78,48 @@ test('users with two factor enabled are redirected to two factor challenge', fun
         'two_factor_confirmed_at' => now(),
     ])->save();
 
-    $response = $this->post(route('login'), [
+    post(route('login'), [
         'email' => $user->email,
         'password' => 'password',
-    ]);
+    ])
+        ->assertRedirect(route('two-factor.login'))
+        ->assertSessionHas('login.id', $user->id);
 
-    $response->assertRedirect(route('two-factor.login'));
-    $response->assertSessionHas('login.id', $user->id);
-    $this->assertGuest();
+    assertGuest();
 });
 
-test('users can not authenticate with invalid password', function () {
+
+it('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
-    $this->post(route('login'), [
+    post(route('login'), [
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
 
-    $this->assertGuest();
+    assertGuest();
 });
 
-test('users can logout', function () {
+
+it('users can logout', function () {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->post(route('logout'));
+    /** @var User $user */
+    actingAs($user)->post(route('logout'))
+        ->assertRedirect(route('home'));
 
-    $this->assertGuest();
-    $response->assertRedirect(route('home'));
+    assertGuest();
 });
 
-test('users are rate limited', function () {
+
+it('users are rate limited', function () {
     $user = User::factory()->create();
 
-    RateLimiter::increment(strtolower($user->email).'|127.0.0.1', amount: 5);
+    RateLimiter::increment(strtolower($user->email) . '|127.0.0.1', amount: 5);
 
-    $response = $this->post(route('login'), [
+    post(route('login'), [
         'email' => $user->email,
         'password' => 'wrong-password',
-    ]);
-
-    $response->assertSessionHasErrors('email');
+    ])
+        ->assertSessionHasErrors('email');
 });

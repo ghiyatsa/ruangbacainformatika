@@ -29,8 +29,6 @@ class LoanInfolist
                                 Loan::STATUS_RETURNED => 'success',
                                 default => 'gray',
                             }),
-                        TextEntry::make('items_count')
-                            ->label('Total Item'),
                         TextEntry::make('active_items_count')
                             ->label('Item Belum Kembali'),
                         TextEntry::make('borrowed_at')

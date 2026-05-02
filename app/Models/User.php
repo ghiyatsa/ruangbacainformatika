@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\Auth\VerifyEmailOtpNotification;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -142,5 +143,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         }
 
         return $this->canAccessAdminPanel();
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailOtpNotification);
     }
 }

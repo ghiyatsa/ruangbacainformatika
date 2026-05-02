@@ -56,25 +56,7 @@ class GeneralSettings extends Page
                             ->helperText('Nomor kontak yang bisa dihubungi jika ada kendala akses atau layanan.'),
                     ])
                     ->columns(2),
-                Section::make('Aturan Peminjaman')
-                    ->description('Batas operasional peminjaman yang dipakai kiosk dan validasi layanan.')
-                    ->schema([
-                        TextInput::make('loan_max_books')
-                            ->label('Maksimal Buku Dipinjam')
-                            ->numeric()
-                            ->required()
-                            ->minValue(1)
-                            ->maxValue(10)
-                            ->helperText('Jumlah maksimal buku aktif yang boleh dipinjam satu member dalam waktu bersamaan.'),
-                        TextInput::make('loan_duration_days')
-                            ->label('Durasi Peminjaman (Hari Kerja)')
-                            ->numeric()
-                            ->required()
-                            ->minValue(1)
-                            ->maxValue(30)
-                            ->helperText('Default operasional pinjam adalah 5 hari kerja. Tempo otomatis melewati Sabtu dan Minggu.'),
-                    ])
-                    ->columns(2),
+
             ])
                 ->livewireSubmitHandler('save')
                 ->footer([
@@ -96,8 +78,6 @@ class GeneralSettings extends Page
             'site_name' => $data['site_name'] ?? null,
             'site_tagline' => $data['site_tagline'] ?? null,
             'support_whatsapp' => $data['support_whatsapp'] ?? null,
-            'loan_max_books' => $data['loan_max_books'] ?? 3,
-            'loan_duration_days' => $data['loan_duration_days'] ?? 5,
         ]);
 
         Notification::make()
@@ -119,8 +99,6 @@ class GeneralSettings extends Page
             'site_name' => config('app.name'),
             'site_tagline' => 'Sistem pendataan pengunjung dan layanan perpustakaan',
             'support_whatsapp' => '',
-            'loan_max_books' => '3',
-            'loan_duration_days' => '5',
         ];
     }
 

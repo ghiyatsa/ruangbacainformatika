@@ -14,6 +14,10 @@ Route::post('/kiosk/loans/return', [KioskController::class, 'storeReturn'])
     ->middleware('kiosk.pin')
     ->name('kiosk.loans.return');
 
+Route::post('/kiosk/members', [KioskController::class, 'storeMember'])
+    ->middleware('kiosk.pin')
+    ->name('kiosk.members.store');
+
 Route::post('/kiosk/pin', [KioskController::class, 'verifyPin'])
     ->middleware('throttle:8,1')
     ->name('kiosk.pin.store');

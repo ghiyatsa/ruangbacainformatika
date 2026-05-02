@@ -33,10 +33,11 @@ class BookResource extends JsonResource
             'pages' => $this->pages,
             'language' => $this->language,
             'itemsCount' => $this->items_count ?? 0,
-            'availableItemsCount' => $this->available_items_count ?? 0,
+            'availableItemsCount' => $this->is_borrowable ? ($this->available_items_count ?? 0) : 0,
             'isFeatured' => $this->is_featured,
             'isBorrowable' => $this->is_borrowable,
-            'isAvailable' => ($this->available_items_count ?? 0) > 0,
+            'isAvailable' => $this->is_borrowable && ($this->available_items_count ?? 0) > 0,
         ];
+
     }
 }

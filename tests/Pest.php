@@ -14,8 +14,20 @@ use Tests\TestCase;
 |
 */
 
+use Laravel\Fortify\Features;
+
 uses(TestCase::class, LazilyRefreshDatabase::class)->in('Feature');
 uses(TestCase::class)->in('Unit');
+
+/**
+ * Skip the current test if the given Fortify feature is not enabled.
+ */
+function skipUnlessFortifyHas(string $feature, ?string $message = null): void
+{
+    if (! Features::enabled($feature)) {
+        test()->markTestSkipped($message ?? "Fortify feature [{$feature}] is not enabled.");
+    }
+}
 
 /*
 |--------------------------------------------------------------------------

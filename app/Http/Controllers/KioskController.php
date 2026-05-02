@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class KioskController extends Controller
 {
@@ -28,6 +29,9 @@ class KioskController extends Controller
         $siteSettings = $this->settingRepository->sectionValues('general', [
             'site_name' => config('app.name'),
             'site_tagline' => 'Sistem pendataan pengunjung',
+        ]);
+
+        $librarySettings = $this->settingRepository->sectionValues('library', [
             'loan_max_books' => 3,
         ]);
 
@@ -44,7 +48,7 @@ class KioskController extends Controller
                 'pageSubtitle' => 'Masukkan PIN dari super admin untuk mengaktifkan perangkat ini.',
                 'siteName' => $siteSettings['site_name'],
                 'siteTagline' => $siteSettings['site_tagline'],
-                'loanMaxBooks' => max((int) $siteSettings['loan_max_books'], 1),
+                'loanMaxBooks' => max((int) $librarySettings['loan_max_books'], 1),
                 'visitorTypeOptions' => VisitLog::visitorTypeOptions(),
                 'purposeOptions' => VisitLog::purposeOptions(),
             ]);
@@ -65,7 +69,7 @@ class KioskController extends Controller
                 : $kioskSettings['subtitle'],
             'siteName' => $siteSettings['site_name'],
             'siteTagline' => $siteSettings['site_tagline'],
-            'loanMaxBooks' => max((int) $siteSettings['loan_max_books'], 1),
+            'loanMaxBooks' => max((int) $librarySettings['loan_max_books'], 1),
             'visitorTypeOptions' => VisitLog::visitorTypeOptions(),
             'purposeOptions' => VisitLog::purposeOptions(),
         ]);
@@ -88,6 +92,15 @@ class KioskController extends Controller
         return redirect()
             ->route('kiosk.index')
             ->with('success', 'PIN berhasil diverifikasi.');
+    }
+
+    public function storeMember(Request $request, CreatesNewUsers $creator): RedirectResponse
+    {
+        $creator->create($request->all());
+
+        return redirect()
+            ->route('kiosk.index')
+            ->with('success', 'Pendaftaran member berhasil. Silakan gunakan akun Anda untuk layanan mandiri.');
     }
 
     public function store(SubmitVisitRequest $request): RedirectResponse

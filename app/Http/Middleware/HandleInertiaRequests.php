@@ -51,6 +51,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
+            'verification_resend_available_at' => $request->session()->get('verification_resend_available_at'),
         ];
     }
 }

@@ -2,118 +2,94 @@
 
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\URL;
 use Laravel\Fortify\Features;
 use Spatie\Permission\Models\Role;
+use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
-    $this->skipUnlessFortifyHas(Features::emailVerification());
+    skipUnlessFortifyHas(Features::emailVerification());
 });
 
-test('email verification screen can be rendered', function () {
+it('email verification screen can be rendered', function () {
     $user = User::factory()->unverified()->create();
 
-    $response = $this->actingAs($user)->get(route('verification.notice'));
-
-    $response->assertOk();
+    actingAs($user)->get(route('verification.notice'))
+        ->assertOk();
 });
 
-test('email can be verified', function () {
+it('email can be verified', function () {
     $user = User::factory()->unverified()->create();
 
     Event::fake();
+    Cache::put("email_verification_otp_{$user->id}", '123456', now()->addMinutes(10));
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)],
-    );
-
-    $response = $this->actingAs($user)->get($verificationUrl);
+    actingAs($user)->post(route('verification.submit'), [
+        'otp' => '123456',
+    ])->assertRedirect(route('home', absolute: false));
 
     Event::assertDispatched(Verified::class);
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(route('home', absolute: false));
 });
 
-test('email is not verified with invalid hash', function () {
+
+it('email is not verified with invalid otp', function () {
     $user = User::factory()->unverified()->create();
 
     Event::fake();
+    Cache::put("email_verification_otp_{$user->id}", '123456', now()->addMinutes(10));
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1('wrong-email')],
-    );
-
-    $this->actingAs($user)->get($verificationUrl);
+    actingAs($user)->post(route('verification.submit'), [
+        'otp' => '654321',
+    ])->assertSessionHasErrors('otp');
 
     Event::assertNotDispatched(Verified::class);
     expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
 });
 
-test('email is not verified with invalid user id', function () {
-    $user = User::factory()->unverified()->create();
 
-    Event::fake();
-
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => 123, 'hash' => sha1($user->email)],
-    );
-
-    $this->actingAs($user)->get($verificationUrl);
-
-    Event::assertNotDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
-});
-
-test('verified user is redirected to their landing page from verification prompt', function () {
+it('verified user is redirected to their landing page from verification prompt', function () {
     $user = User::factory()->create();
 
     Event::fake();
 
-    $response = $this->actingAs($user)->get(route('verification.notice'));
+    /** @var User $user */
+    actingAs($user)->get(route('verification.notice'))
+        ->assertRedirect(route('home', absolute: false));
 
     Event::assertNotDispatched(Verified::class);
-    $response->assertRedirect(route('home', absolute: false));
 });
 
-test('already verified user visiting verification link is redirected without firing event again', function () {
+
+it('already verified user submitting otp is redirected without firing event again', function () {
     $user = User::factory()->create();
 
     Event::fake();
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)],
-    );
+    /** @var User $user */
+    actingAs($user)->post(route('verification.submit'), [
+        'otp' => '123456',
+    ])
 
-    $this->actingAs($user)->get($verificationUrl)
         ->assertRedirect(route('home', absolute: false));
 
     Event::assertNotDispatched(Verified::class);
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
 });
 
-test('verified administrative users are redirected to admin after email verification', function () {
+it('verified administrative users are redirected to admin after email verification', function () {
     $user = User::factory()->unverified()->create();
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
     $user->assignRole('super_admin');
 
     Event::fake();
+    Cache::put("email_verification_otp_{$user->id}", '123456', now()->addMinutes(10));
 
-    $verificationUrl = URL::temporarySignedRoute(
-        'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)],
-    );
+    actingAs($user)->post(route('verification.submit'), [
+        'otp' => '123456',
+    ])
 
-    $this->actingAs($user)->get($verificationUrl)
         ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
 
     Event::assertDispatched(Verified::class);

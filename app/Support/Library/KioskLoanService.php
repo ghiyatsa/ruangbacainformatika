@@ -101,7 +101,7 @@ class KioskLoanService
 
         return DB::transaction(function () use ($member, $isbn): int {
             $loanItem = LoanItem::query()
-                ->whereNull('returned_at')
+                ->whereNull('returned_at', 'and', false)
                 ->whereHas('bookItem.book', fn ($query) => $query->where('isbn', $isbn))
                 ->whereHas('loan', function ($query) use ($member) {
                     $query
@@ -141,18 +141,18 @@ class KioskLoanService
 
     public function loanMaxBooks(): int
     {
-        return max((int) $this->settingRepository->get('general', 'loan_max_books', 3), 1);
+        return max((int) $this->settingRepository->get('library', 'loan_max_books', 3), 1);
     }
 
     public function loanDurationDays(): int
     {
-        return max((int) $this->settingRepository->get('general', 'loan_duration_days', 5), 1);
+        return max((int) $this->settingRepository->get('library', 'loan_duration_days', 5), 1);
     }
 
     protected function activeLoanCount(User $user): int
     {
         return LoanItem::query()
-            ->whereNull('returned_at')
+            ->whereNull('returned_at', 'and', false)
             ->whereHas('loan', fn ($query) => $query->whereBelongsTo($user))
             ->count();
     }

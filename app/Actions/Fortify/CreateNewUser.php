@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Support\Kiosk\KioskPinManager;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -30,15 +31,18 @@ class CreateNewUser implements CreatesNewUsers
 
         Validator::make($normalizedInput, [
             ...$this->profileRules(),
+            'whatsapp' => $this->whatsappRules(required: true),
             'password' => $this->passwordRules(),
         ])->validate();
+
+        $isKioskRegistration = app(KioskPinManager::class)->isVerified(request());
 
         $user = User::create([
             'name' => $normalizedInput['name'],
             'email' => $normalizedInput['email'],
             'password' => $normalizedInput['password'],
             'whatsapp' => $normalizedInput['whatsapp'] ?: null,
-            'is_approved' => str_ends_with($normalizedInput['email'], '@mhs.unimal.ac.id'),
+            'is_approved' => $isKioskRegistration || str_ends_with($normalizedInput['email'], '@mhs.unimal.ac.id'),
         ]);
 
         if (Role::query()->where('name', 'member')->exists() && $user->shouldReceiveMemberRole()) {

@@ -62,11 +62,6 @@ class LoansTable
                             ->where('internal_code', 'like', "%{$search}%"));
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('items_count')
-                    ->label('Total Item')
-                    ->badge()
-                    ->color('primary')
-                    ->sortable(),
                 TextColumn::make('active_items_count')
                     ->label('Belum Kembali')
                     ->badge()

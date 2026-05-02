@@ -8,7 +8,7 @@ use App\Support\Library\KioskLoanService;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
-test('members must fill whatsapp before borrowing books', function () {
+it('members must fill whatsapp before borrowing books', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $member = User::factory()->create([
@@ -37,11 +37,11 @@ test('members must fill whatsapp before borrowing books', function () {
 
     $service = app(KioskLoanService::class);
 
-    expect(fn () => $service->borrow($member->nim(), '9786020000001'))
+    expect(fn() => $service->borrow($member->nim(), '9786020000001'))
         ->toThrow(ValidationException::class, 'Nomor WhatsApp wajib diisi pada profil sebelum meminjam buku.');
 });
 
-test('books marked as not borrowable cannot be borrowed', function () {
+it('books marked as not borrowable cannot be borrowed', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $member = User::factory()->create([
@@ -72,6 +72,6 @@ test('books marked as not borrowable cannot be borrowed', function () {
 
     $service = app(KioskLoanService::class);
 
-    expect(fn () => $service->borrow($member->nim(), '9786020000002'))
+    expect(fn() => $service->borrow($member->nim(), '9786020000002'))
         ->toThrow(ValidationException::class, 'Buku dengan ISBN 9786020000002 ditandai tidak boleh dipinjam.');
 });

@@ -6,3 +6,8 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+use App\Console\Commands\SyncSkripsiCommand;
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command(SyncSkripsiCommand::class)->daily();
