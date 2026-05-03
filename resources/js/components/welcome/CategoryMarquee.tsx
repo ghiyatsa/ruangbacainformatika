@@ -10,9 +10,10 @@ import {
     Terminal,
 } from 'lucide-react';
 
-import LogoLoop from '@/components/common/LogoLoop';
+import VelocityScroll from '@/components/common/VelocityScroll';
+import categoriesRoute from '@/routes/books/categories';
 
-interface DomainHighlightsProps {
+interface CategoryMarqueeProps {
     categories?: {
         id: number;
         name: string;
@@ -32,17 +33,23 @@ const icons = [
     Terminal,
 ];
 
-export default function DomainHighlights({
+export default function CategoryMarquee({
     categories = [],
-}: DomainHighlightsProps) {
-    const items = categories.map((category, index) => {
+}: CategoryMarqueeProps) {
+    if (categories.length === 0) {
+        return null;
+    }
+
+    const renderCategoryCard = (category: any, index: number) => {
         const Icon = icons[index % icons.length];
 
         return {
             node: (
-                <div className="py-3 sm:py-4">
+                <div className="py-2 sm:py-3">
                     <Link
-                        href={`/katalog?category=${category.slug}`}
+                        href={categoriesRoute.show.url({
+                            category: category.slug,
+                        })}
                         className="relative flex w-56 flex-col rounded-2xl border bg-background p-4 text-left text-base whitespace-normal transition-all duration-300 group-hover/loop:opacity-40 hover:opacity-100! sm:w-72 sm:p-6"
                     >
                         <div className="mb-3 flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary transition-colors sm:mb-4 sm:size-12">
@@ -59,24 +66,41 @@ export default function DomainHighlights({
                 </div>
             ),
         };
-    });
+    };
 
-    if (items.length === 0) {
-        return null;
-    }
+    const midPoint = Math.ceil(categories.length / 2);
+    const row1 = categories
+        .slice(0, midPoint)
+        .map((cat, i) => renderCategoryCard(cat, i));
+    const row2 = categories
+        .slice(midPoint)
+        .map((cat, i) => renderCategoryCard(cat, i + midPoint));
+
+    const row2Items = row2.length > 0 ? row2 : row1;
 
     return (
         <section className="py-6 sm:py-8">
             <div className="container mx-auto">
-                <LogoLoop
-                    logos={items}
-                    speed={30}
-                    pauseOnHover
-                    fadeOut
-                    logoHeight={160}
-                    gap={16}
-                    className="group/loop"
-                />
+                <div className="flex flex-col overflow-hidden">
+                    <VelocityScroll
+                        items={row1}
+                        speed={30}
+                        direction="left"
+                        pauseOnHover
+                        fadeOut
+                        gap={16}
+                        className="group/loop"
+                    />
+                    <VelocityScroll
+                        items={row2Items}
+                        speed={30}
+                        direction="right"
+                        pauseOnHover
+                        fadeOut
+                        gap={16}
+                        className="group/loop"
+                    />
+                </div>
             </div>
         </section>
     );

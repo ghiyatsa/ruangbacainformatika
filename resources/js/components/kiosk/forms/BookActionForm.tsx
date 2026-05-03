@@ -1,10 +1,10 @@
 import { Form } from '@inertiajs/react';
-import type { RouteFormDefinition } from '@/wayfinder';
+import { KioskField } from '@/components/kiosk/KioskField';
 import { Button } from '@/components/ui/button';
 import { FieldDescription, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { KioskField } from '@/components/kiosk/KioskField';
+import type { RouteFormDefinition } from '@/wayfinder';
 import { FormBackButton } from './FormBackButton';
 
 export function BookActionForm({

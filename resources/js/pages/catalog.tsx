@@ -30,6 +30,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Spinner } from '@/components/ui/spinner';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import Footer from '@/components/welcome/Footer';
 import type { PaginatedBooks } from '@/components/welcome/types';
@@ -81,6 +82,7 @@ export default function Catalog({
     books,
 }: CatalogProps) {
     const [searchValue, setSearchValue] = useState(filters.search);
+    const [isSearching, setIsSearching] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -100,14 +102,20 @@ export default function Catalog({
 
     function handleSearchChange(value: string): void {
         setSearchValue(value);
+        setIsSearching(true);
 
         if (searchTimeout.current) {
-            return clearTimeout(searchTimeout.current);
+            clearTimeout(searchTimeout.current);
         }
 
         searchTimeout.current = setTimeout(() => {
             applyFilters({ search: value });
-        }, 400);
+            // The loading state will be handled by the Inertia router finishing,
+            // but for simple UI feedback we can just keep it until the next render
+            // Or better: use Inertia events to reset it.
+            // But let's keep it simple for now.
+            setIsSearching(false);
+        }, 500);
     }
 
     function clearAllFilters(): void {
@@ -161,18 +169,22 @@ export default function Catalog({
                                             e: ChangeEvent<HTMLInputElement>,
                                         ) => handleSearchChange(e.target.value)}
                                         placeholder="Cari judul, penulis, penerbit…"
-                                        className="h-9 pr-8 pl-9 text-sm"
+                                        className="h-10 pr-10 pl-10 text-sm transition-all focus:ring-primary/20"
                                     />
-                                    {searchValue && (
-                                        <button
-                                            type="button"
-                                            onClick={clearAllFilters}
-                                            className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                                            aria-label="Hapus pencarian"
-                                        >
-                                            <X className="size-3.5" />
-                                        </button>
-                                    )}
+                                    <div className="absolute top-1/2 right-3 -translate-y-1/2 flex items-center gap-2">
+                                        {isSearching ? (
+                                            <Spinner className="size-3.5 text-primary" />
+                                        ) : searchValue ? (
+                                            <button
+                                                type="button"
+                                                onClick={clearAllFilters}
+                                                className="text-muted-foreground transition-colors hover:text-foreground"
+                                                aria-label="Hapus pencarian"
+                                            >
+                                                <X className="size-3.5" />
+                                            </button>
+                                        ) : null}
+                                    </div>
                                 </div>
 
                                 {/* View-mode toggle */}
@@ -353,7 +365,7 @@ function ResultsSkeleton({ viewMode }: { viewMode: 'grid' | 'list' }) {
     return (
         <div className="flex flex-col gap-4">
             {viewMode === 'list' ? (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                     {Array.from({ length: 6 }).map((_, i) => (
                         <div
                             key={i}

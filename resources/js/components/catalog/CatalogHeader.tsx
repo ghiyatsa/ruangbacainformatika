@@ -1,11 +1,11 @@
 import { GraduationCap, LayoutGrid, LayoutList } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import {
     ToggleGroup,
     ToggleGroupItem,
 } from '@/components/ui/toggle-group';
+import { cn } from '@/lib/utils';
 
 interface CatalogHeaderProps {
     title: string;

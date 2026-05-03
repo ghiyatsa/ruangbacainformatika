@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Loans\Schemas;
 
-use App\Models\Loan;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -13,35 +12,21 @@ class LoanInfolist
     {
         return $schema
             ->components([
-                Section::make('Informasi Peminjaman')
+                Section::make('Informasi Member')
                     ->schema([
-                        TextEntry::make('user.name')
-                            ->label('Member'),
-                        TextEntry::make('user.email')
+                        TextEntry::make('name')
+                            ->label('Nama Member'),
+                        TextEntry::make('email')
                             ->label('Email Member')
                             ->copyable(),
-                        TextEntry::make('status')
-                            ->label('Status')
+                        TextEntry::make('whatsapp')
+                            ->label('WhatsApp')
+                            ->copyable()
+                            ->placeholder('-'),
+                        TextEntry::make('active_loans_count')
+                            ->label('Transaksi Aktif')
                             ->badge()
-                            ->formatStateUsing(fn (string $state): string => Loan::statusOptions()[$state] ?? $state)
-                            ->color(fn (string $state): string => match ($state) {
-                                Loan::STATUS_BORROWED => 'warning',
-                                Loan::STATUS_RETURNED => 'success',
-                                default => 'gray',
-                            }),
-                        TextEntry::make('active_items_count')
-                            ->label('Item Belum Kembali'),
-                        TextEntry::make('borrowed_at')
-                            ->label('Waktu Pinjam')
-                            ->dateTime('d M Y H:i'),
-                        TextEntry::make('due_at')
-                            ->label('Jatuh Tempo')
-                            ->dateTime('d M Y H:i')
-                            ->placeholder('-'),
-                        TextEntry::make('returned_at')
-                            ->label('Waktu Selesai')
-                            ->dateTime('d M Y H:i')
-                            ->placeholder('-'),
+                            ->color('warning'),
                     ])
                     ->columns(2),
             ]);

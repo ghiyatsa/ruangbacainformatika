@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import type { KioskProps } from '@/pages/Kiosk/types';
+import type { KioskProps } from '@/pages/kiosk/types';
 
 export function PinStep({ pageTitle, pageSubtitle, siteName }: KioskProps) {
     return (

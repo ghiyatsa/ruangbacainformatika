@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { MoonIcon, SunIcon, UserCircle } from 'lucide-react';
+import { GlobalSearch } from '@/components/layouts/GlobalSearch';
 import { UserMenuContent } from '@/components/layouts/UserMenuContent';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +24,10 @@ export function AppHeader() {
         <header className="sticky top-3 z-50 w-full px-3 sm:top-6 sm:px-6">
             <div className="mx-auto flex h-14 max-w-7xl items-center justify-between rounded-2xl border border-accent/50 bg-background/50 px-3 backdrop-blur-md sm:h-16 sm:px-4 dark:bg-background/20">
                 <AppLogo />
+
+                <div className="hidden flex-1 justify-center px-6 md:flex">
+                    <GlobalSearch />
+                </div>
 
                 <div className="flex items-center gap-2">
                     <Button

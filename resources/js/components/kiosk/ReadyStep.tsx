@@ -3,12 +3,12 @@ import { BookMarked, BookUp, ClipboardList, Library, Sparkles, UserPlus } from '
 import type { LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FlashMessage } from '@/components/kiosk/FlashMessage';
-import { KioskPanel } from '@/components/kiosk/KioskPanel';
-import { MenuGrid } from '@/components/kiosk/MenuGrid';
 import { BorrowForm } from '@/components/kiosk/forms/BorrowForm';
 import { MemberForm } from '@/components/kiosk/forms/MemberForm';
 import { ReturnForm } from '@/components/kiosk/forms/ReturnForm';
 import { VisitForm } from '@/components/kiosk/forms/VisitForm';
+import { KioskPanel } from '@/components/kiosk/KioskPanel';
+import { MenuGrid } from '@/components/kiosk/MenuGrid';
 import { Badge } from '@/components/ui/badge';
 import { kioskMenuItems } from '@/pages/kiosk/menu';
 import type { FlashProps, KioskMenu, KioskProps } from '@/pages/kiosk/types';
@@ -27,19 +27,27 @@ export function ReadyStep(props: KioskProps) {
     const { props: pageProps } = usePage<FlashProps>();
     const flashSuccess = pageProps.flash?.success;
     const [flashVisible, setFlashVisible] = useState(Boolean(flashSuccess));
+    const [prevFlash, setPrevFlash] = useState(flashSuccess);
+
+    if (flashSuccess !== prevFlash) {
+        setPrevFlash(flashSuccess);
+
+        if (flashSuccess) {
+            setFlashVisible(true);
+        }
+    }
+
     const activeItem = kioskMenuItems.find((item) => item.key === activeMenu);
 
     useEffect(() => {
-        if (!flashSuccess) {
+        if (!flashVisible || !flashSuccess) {
             return;
         }
-
-        setFlashVisible(true);
 
         const timer = window.setTimeout(() => setFlashVisible(false), 5000);
 
         return () => window.clearTimeout(timer);
-    }, [flashSuccess]);
+    }, [flashVisible, flashSuccess]);
 
     const PanelIcon = activeMenu !== 'landing' ? MENU_ICONS[activeMenu] : null;
 

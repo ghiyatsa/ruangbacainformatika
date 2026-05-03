@@ -4,6 +4,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SimilarityController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,9 @@ Route::get('/books/categories/{category:slug}', [CategoryController::class, 'sho
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
 Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
 Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');
+
+Route::get('/search', SearchController::class)->name('search');
+
 require __DIR__.'/kiosk.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/settings.php';

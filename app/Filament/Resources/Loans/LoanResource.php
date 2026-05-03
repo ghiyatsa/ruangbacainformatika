@@ -5,10 +5,10 @@ namespace App\Filament\Resources\Loans;
 use App\Filament\Resources\Loans\Pages\ListLoans;
 use App\Filament\Resources\Loans\Pages\ViewLoan;
 use App\Filament\Resources\Loans\RelationManagers\ItemsRelationManager;
-use App\Filament\Resources\Loans\Schemas\LoanForm;
 use App\Filament\Resources\Loans\Schemas\LoanInfolist;
 use App\Filament\Resources\Loans\Tables\LoansTable;
 use App\Models\Loan;
+use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -19,22 +19,22 @@ use UnitEnum;
 
 class LoanResource extends Resource
 {
-    protected static ?string $model = Loan::class;
+    protected static ?string $model = User::class;
 
     protected static string|UnitEnum|null $navigationGroup = 'Operasional';
 
     protected static ?string $navigationLabel = 'Peminjaman';
 
-    protected static ?string $modelLabel = 'Peminjaman';
+    protected static ?string $modelLabel = 'Member Peminjam';
 
-    protected static ?string $pluralModelLabel = 'Peminjaman';
+    protected static ?string $pluralModelLabel = 'Member Peminjam';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function getNavigationBadge(): ?string
     {
         return (string) static::getModel()::query()
-            ->where('status', Loan::STATUS_BORROWED)
+            ->whereHas('loans', fn (Builder $query) => $query->where('status', Loan::STATUS_BORROWED))
             ->count();
     }
 
@@ -45,12 +45,12 @@ class LoanResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Total peminjaman aktif';
+        return 'Jumlah member dengan peminjaman aktif';
     }
 
     public static function form(Schema $schema): Schema
     {
-        return LoanForm::configure($schema);
+        return $schema->components([]);
     }
 
     public static function infolist(Schema $schema): Schema
@@ -66,13 +66,15 @@ class LoanResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with([
-                'user',
-                'items.bookItem.book',
-            ])
+            ->whereHas('loans')
             ->withCount([
-                'items',
-                'items as active_items_count' => fn (Builder $query): Builder => $query->whereNull('returned_at'),
+                'loans as active_loans_count' => fn (Builder $query) => $query->where('status', Loan::STATUS_BORROWED),
+            ])
+            ->with([
+                'loans' => fn ($q) => $q->withCount([
+                    'items',
+                    'items as active_items_count' => fn ($iq) => $iq->whereNull('returned_at'),
+                ]),
             ]);
     }
 

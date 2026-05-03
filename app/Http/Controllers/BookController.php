@@ -13,6 +13,8 @@ class BookController extends Controller
     {
         abort_if(! $book->is_published, 404);
 
+        $book->increment('view_count', 1);
+
         $book->load([
             'authors:id,name',
             'categories:id,name',

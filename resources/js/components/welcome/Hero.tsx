@@ -1,10 +1,8 @@
-import { Link } from '@inertiajs/react';
 import { ArrowRight, Search } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import CountUp from '@/components/common/CountUp';
 import ShinyText from '@/components/common/ShinyText';
 import StarBorder from '@/components/common/StarBorder';
-import books from '@/routes/books';
 import type { WelcomeProps } from './types';
 
 interface HeroProps {
@@ -77,43 +75,54 @@ export default function Hero({ stats }: HeroProps) {
                     <p className="max-w-xl px-2 text-base leading-relaxed text-muted-foreground sm:max-w-2xl sm:px-0 sm:text-lg md:text-xl">
                         Akses ratusan buku akademik, literatur teknologi
                         terbaru, dan karya ilmiah khusus bidang Teknik
-                        Informatika Universitas Malikussaleh dalam satu platform
-                        terintegrasi.
+                        Informatika Universitas Malikussaleh
                     </p>
 
                     {/* Search CTA */}
-                    <div className="w-full max-w-sm sm:max-w-xl">
-                        <Link
-                            href={books.index.url()}
-                            className="block transition-transform hover:scale-[1.02]"
+                    <div className="flex w-max justify-center px-4 sm:px-0">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                window.dispatchEvent(
+                                    new CustomEvent('open-global-search'),
+                                );
+                            }}
+                            className="relative w-full max-w-sm transition-transform hover:scale-[1.02] sm:max-w-xl"
                         >
                             <StarBorder
                                 as="div"
                                 color="var(--color-primary)"
                                 contentClassName="backdrop-blur-sm bg-muted/50 px-4 py-3 rounded-2xl"
-                                className="rounded-2xl"
+                                className="w-full rounded-2xl"
                             >
                                 <div className="flex items-center gap-3 text-muted-foreground">
                                     <Search className="size-5 shrink-0" />
                                     <span className="text-sm font-normal sm:text-base">
                                         Cari judul buku, penulis, atau subjek...
                                     </span>
-                                    <ArrowRight className="ml-auto size-4 shrink-0 opacity-50" />
+                                    <div className="ml-auto flex items-center gap-2">
+                                        <kbd className="pointer-events-none hidden items-center gap-1 rounded border bg-muted/50 px-1.5 font-mono text-[10px] font-medium opacity-70 sm:flex">
+                                            <span className="text-xs">⌘</span>K
+                                        </kbd>
+                                        <ArrowRight className="size-4 shrink-0 opacity-50" />
+                                    </div>
                                 </div>
                             </StarBorder>
-                        </Link>
+                        </button>
                     </div>
 
                     {/* Stats */}
                     <div className="mt-2 w-full max-w-2xl">
-                        <div className="grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-16 sm:gap-y-4 text-sm text-muted-foreground">
+                        <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground sm:flex sm:flex-wrap sm:justify-center sm:gap-x-16 sm:gap-y-4">
                             <div className="flex flex-col items-center gap-1 sm:gap-2">
                                 <CountUp
                                     to={stats.booksCount}
                                     duration={1.5}
                                     className="text-3xl font-bold text-foreground sm:text-4xl"
                                 />
-                                <span className="text-xs sm:text-sm">Judul Buku</span>
+                                <span className="text-xs sm:text-sm">
+                                    Judul Buku
+                                </span>
                             </div>
                             <div className="flex flex-col items-center gap-1 sm:gap-2">
                                 <CountUp
@@ -121,7 +130,9 @@ export default function Hero({ stats }: HeroProps) {
                                     duration={1.5}
                                     className="text-3xl font-bold text-foreground sm:text-4xl"
                                 />
-                                <span className="text-xs sm:text-sm">Eksemplar Tersedia</span>
+                                <span className="text-xs sm:text-sm">
+                                    Eksemplar Tersedia
+                                </span>
                             </div>
                             <div className="flex flex-col items-center gap-1 sm:gap-2">
                                 <CountUp
@@ -129,7 +140,9 @@ export default function Hero({ stats }: HeroProps) {
                                     duration={1.5}
                                     className="text-3xl font-bold text-foreground sm:text-4xl"
                                 />
-                                <span className="text-xs sm:text-sm">Rekomendasi Unggulan</span>
+                                <span className="text-xs sm:text-sm">
+                                    Rekomendasi Unggulan
+                                </span>
                             </div>
                         </div>
                     </div>

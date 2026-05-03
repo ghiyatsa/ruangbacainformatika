@@ -42,7 +42,6 @@ import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import Footer from '@/components/welcome/Footer';
 import type { PaginatedBooks } from '@/components/welcome/types';
-import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import categoriesRoute from '@/routes/books/categories';
 
@@ -98,9 +97,11 @@ export default function CategoryPage({
 
     function handleSearchChange(value: string): void {
         setSearchValue(value);
+
         if (searchTimeout.current) {
             clearTimeout(searchTimeout.current);
         }
+
         searchTimeout.current = setTimeout(() => {
             applyFilters({ search: value });
         }, 400);

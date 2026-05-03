@@ -1,10 +1,16 @@
 import { Form, Head } from '@inertiajs/react';
-import { Monitor, ShieldCheck, Smartphone } from 'lucide-react';
+import {
+    CheckCircle2,
+    Key,
+    Monitor,
+    ShieldAlert,
+    ShieldCheck,
+    Smartphone,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import TwoFactorRecoveryCodes from '@/components/auth/TwoFactorRecoveryCodes';
 import TwoFactorSetupModal from '@/components/auth/TwoFactorSetupModal';
-import Heading from '@/components/common/Heading';
 import InputError from '@/components/common/InputError';
 import PasswordInput from '@/components/common/PasswordInput';
 import { Button } from '@/components/ui/button';
@@ -18,7 +24,9 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
+import { cn } from '@/lib/utils';
 import settings from '@/routes/settings';
 import { disable, enable } from '@/routes/two-factor';
 
@@ -79,16 +87,25 @@ export default function Security({
     return (
         <>
             <Head title="Pengaturan keamanan" />
-
             <h1 className="sr-only">Pengaturan keamanan</h1>
 
-            <div className="flex flex-col gap-12">
+            <div className="flex flex-col gap-10">
+                {/* ── Change Password ── */}
                 <section className="flex flex-col gap-6">
-                    <Heading
-                        variant="small"
-                        title="Perbarui kata sandi"
-                        description="Pastikan akun Anda menggunakan kata sandi yang panjang dan acak agar tetap aman."
-                    />
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <Key className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <h2 className="text-base font-semibold">
+                                Perbarui kata sandi
+                            </h2>
+                            <p className="mt-0.5 text-sm text-muted-foreground">
+                                Pastikan akun Anda menggunakan kata sandi yang
+                                panjang dan acak agar tetap aman.
+                            </p>
+                        </div>
+                    </div>
 
                     <Form
                         {...SecurityController.update.form()}
@@ -110,24 +127,22 @@ export default function Security({
                                 currentPasswordInput.current?.focus();
                             }
                         }}
-                        className="flex flex-col gap-6"
+                        className="flex flex-col gap-5"
                     >
-                        {({ errors, processing }) => (
-                            <div className="grid gap-4">
+                        {({ errors, processing, recentlySuccessful }) => (
+                            <div className="flex flex-col gap-5">
                                 <div className="grid gap-2">
                                     <Label htmlFor="current_password">
                                         Kata sandi saat ini
                                     </Label>
-
                                     <PasswordInput
                                         id="current_password"
                                         ref={currentPasswordInput}
                                         name="current_password"
-                                        className="mt-1 block w-full"
+                                        className="w-full"
                                         autoComplete="current-password"
                                         placeholder="Kata sandi saat ini"
                                     />
-
                                     <InputError
                                         message={errors.current_password}
                                     />
@@ -137,16 +152,14 @@ export default function Security({
                                     <Label htmlFor="password">
                                         Kata sandi baru
                                     </Label>
-
                                     <PasswordInput
                                         id="password"
                                         ref={passwordInput}
                                         name="password"
-                                        className="mt-1 block w-full"
+                                        className="w-full"
                                         autoComplete="new-password"
-                                        placeholder="New password"
+                                        placeholder="Kata sandi baru"
                                     />
-
                                     <InputError message={errors.password} />
                                 </div>
 
@@ -154,53 +167,92 @@ export default function Security({
                                     <Label htmlFor="password_confirmation">
                                         Konfirmasi kata sandi baru
                                     </Label>
-
                                     <PasswordInput
                                         id="password_confirmation"
                                         name="password_confirmation"
-                                        className="mt-1 block w-full"
+                                        className="w-full"
                                         autoComplete="new-password"
-                                        placeholder="Confirm password"
+                                        placeholder="Konfirmasi kata sandi baru"
                                     />
-
                                     <InputError
                                         message={errors.password_confirmation}
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3 pt-1">
                                     <Button
                                         disabled={processing}
                                         data-test="update-password-button"
                                     >
-                                        Simpan kata sandi
+                                        {processing
+                                            ? 'Menyimpan…'
+                                            : 'Simpan kata sandi'}
                                     </Button>
+
+                                    {recentlySuccessful && (
+                                        <span className="flex items-center gap-1.5 text-sm font-medium text-green-600 dark:text-green-400">
+                                            <CheckCircle2 className="h-4 w-4" />
+                                            Tersimpan
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         )}
                     </Form>
                 </section>
 
+                {/* ── Two Factor Auth ── */}
                 {canManageTwoFactor && (
-                    <section className="flex flex-col gap-6">
-                        <Heading
-                            variant="small"
-                            title="Otentikasi dua faktor"
-                            description="Tingkatkan keamanan akun Anda dengan menggunakan otentikasi dua faktor."
-                        />
-                        {twoFactorEnabled ? (
-                            <div className="flex flex-col items-start justify-start gap-4">
-                                {isConfirmed ? (
-                                    <>
-                                        <p className="text-sm text-muted-foreground">
-                                            Anda telah mengaktifkan otentikasi
-                                            dua faktor. Anda akan dimintai pin
-                                            acak yang aman saat login, yang
-                                            dapat Anda ambil dari aplikasi yang
-                                            didukung TOTP di ponsel Anda.
-                                        </p>
+                    <>
+                        <Separator />
+                        <section className="flex flex-col gap-6">
+                            <div className="flex items-start gap-3">
+                                <div
+                                    className={cn(
+                                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
+                                        twoFactorEnabled && isConfirmed
+                                            ? 'bg-green-100 text-green-600 dark:bg-green-950/50 dark:text-green-400'
+                                            : 'bg-primary/10 text-primary',
+                                    )}
+                                >
+                                    {twoFactorEnabled && isConfirmed ? (
+                                        <ShieldCheck className="h-4 w-4" />
+                                    ) : (
+                                        <ShieldAlert className="h-4 w-4" />
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <h2 className="text-base font-semibold">
+                                            Otentikasi dua faktor
+                                        </h2>
+                                        {twoFactorEnabled && isConfirmed && (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-400">
+                                                <CheckCircle2 className="h-3 w-3" />
+                                                Aktif
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="mt-0.5 text-sm text-muted-foreground">
+                                        Tingkatkan keamanan akun Anda dengan
+                                        menggunakan otentikasi dua faktor.
+                                    </p>
+                                </div>
+                            </div>
 
-                                        <div className="relative inline">
+                            {twoFactorEnabled ? (
+                                <div className="flex flex-col items-start gap-4">
+                                    {isConfirmed ? (
+                                        <>
+                                            <p className="text-sm text-muted-foreground">
+                                                Anda telah mengaktifkan
+                                                otentikasi dua faktor. Anda
+                                                akan dimintai pin acak yang
+                                                aman saat login, yang dapat
+                                                Anda ambil dari aplikasi yang
+                                                didukung TOTP di ponsel Anda.
+                                            </p>
+
                                             <Form {...disable.form()}>
                                                 {({ processing }) => (
                                                     <Button
@@ -212,62 +264,64 @@ export default function Security({
                                                     </Button>
                                                 )}
                                             </Form>
-                                        </div>
 
-                                        <TwoFactorRecoveryCodes
-                                            recoveryCodesList={
-                                                recoveryCodesList
-                                            }
-                                            fetchRecoveryCodes={
-                                                fetchRecoveryCodes
-                                            }
-                                            errors={errors}
-                                        />
-                                    </>
-                                ) : (
-                                    <>
-                                        <p className="text-sm text-muted-foreground">
-                                            Anda belum selesai mengonfigurasi
-                                            otentikasi dua faktor. Selesaikan
-                                            pengaturan untuk meningkatkan
-                                            keamanan akun Anda.
-                                        </p>
-
-                                        <div className="flex items-center gap-3">
-                                            <Button
-                                                onClick={() =>
-                                                    setShowSetupModal(true)
+                                            <TwoFactorRecoveryCodes
+                                                recoveryCodesList={
+                                                    recoveryCodesList
                                                 }
-                                            >
-                                                <ShieldCheck />
-                                                Selesaikan pengaturan
-                                            </Button>
+                                                fetchRecoveryCodes={
+                                                    fetchRecoveryCodes
+                                                }
+                                                errors={errors}
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-400">
+                                                Anda belum selesai
+                                                mengonfigurasi otentikasi dua
+                                                faktor. Selesaikan pengaturan
+                                                untuk meningkatkan keamanan
+                                                akun Anda.
+                                            </div>
 
-                                            <Form {...disable.form()}>
-                                                {({ processing }) => (
-                                                    <Button
-                                                        variant="ghost"
-                                                        type="submit"
-                                                        disabled={processing}
-                                                    >
-                                                        Batalkan pengaturan
-                                                    </Button>
-                                                )}
-                                            </Form>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-start justify-start gap-4">
-                                <p className="text-sm text-muted-foreground">
-                                    Saat Anda mengaktifkan otentikasi dua
-                                    faktor, Anda akan dimintai pin yang aman
-                                    saat login. Pin ini dapat diambil dari
-                                    aplikasi yang didukung TOTP di ponsel Anda.
-                                </p>
+                                            <div className="flex items-center gap-3">
+                                                <Button
+                                                    onClick={() =>
+                                                        setShowSetupModal(true)
+                                                    }
+                                                >
+                                                    <ShieldCheck className="h-4 w-4" />
+                                                    Selesaikan pengaturan
+                                                </Button>
 
-                                <div>
+                                                <Form {...disable.form()}>
+                                                    {({ processing }) => (
+                                                        <Button
+                                                            variant="ghost"
+                                                            type="submit"
+                                                            disabled={
+                                                                processing
+                                                            }
+                                                        >
+                                                            Batalkan pengaturan
+                                                        </Button>
+                                                    )}
+                                                </Form>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-start gap-4">
+                                    <p className="text-sm text-muted-foreground">
+                                        Saat Anda mengaktifkan otentikasi dua
+                                        faktor, Anda akan dimintai pin yang
+                                        aman saat login. Pin ini dapat diambil
+                                        dari aplikasi yang didukung TOTP di
+                                        ponsel Anda.
+                                    </p>
+
                                     <Form
                                         {...enable.form()}
                                         onSuccess={() =>
@@ -284,157 +338,189 @@ export default function Security({
                                         )}
                                     </Form>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        <TwoFactorSetupModal
-                            isOpen={showSetupModal}
-                            onClose={() => setShowSetupModal(false)}
-                            requiresConfirmation={requiresConfirmation}
-                            twoFactorEnabled={twoFactorEnabled}
-                            twoFactorConfirmed={twoFactorConfirmed}
-                            qrCodeSvg={qrCodeSvg}
-                            manualSetupKey={manualSetupKey}
-                            clearSetupData={clearSetupData}
-                            fetchSetupData={fetchSetupData}
-                            errors={errors}
-                        />
-                    </section>
+                            <TwoFactorSetupModal
+                                isOpen={showSetupModal}
+                                onClose={() => setShowSetupModal(false)}
+                                requiresConfirmation={requiresConfirmation}
+                                twoFactorEnabled={twoFactorEnabled}
+                                twoFactorConfirmed={twoFactorConfirmed}
+                                qrCodeSvg={qrCodeSvg}
+                                manualSetupKey={manualSetupKey}
+                                clearSetupData={clearSetupData}
+                                fetchSetupData={fetchSetupData}
+                                errors={errors}
+                            />
+                        </section>
+                    </>
                 )}
 
+                {/* ── Browser Sessions ── */}
                 {sessions.length > 0 && (
-                    <section className="flex flex-col gap-6">
-                        <Heading
-                            variant="small"
-                            title="Sesi browser"
-                            description="Kelola dan keluarkan sesi aktif Anda di browser dan perangkat lain."
-                        />
-
-                        <div className="flex flex-col gap-4">
-                            <p className="text-sm text-muted-foreground">
-                                Jika perlu, Anda dapat keluar dari semua sesi
-                                browser Anda yang lain di semua perangkat Anda.
-                                Beberapa sesi terbaru Anda tercantum di bawah
-                                ini; namun, daftar ini mungkin tidak lengkap.
-                                Jika Anda merasa akun Anda telah disusupi, Anda
-                                juga harus memperbarui kata sandi Anda.
-                            </p>
+                    <>
+                        <Separator />
+                        <section className="flex flex-col gap-6">
+                            <div>
+                                <h2 className="text-base font-semibold">
+                                    Sesi browser
+                                </h2>
+                                <p className="mt-0.5 text-sm text-muted-foreground">
+                                    Kelola dan keluarkan sesi aktif Anda di
+                                    browser dan perangkat lain.
+                                </p>
+                            </div>
 
                             <div className="flex flex-col gap-4">
-                                {sessions.map((session) => (
-                                    <div
-                                        key={session.id}
-                                        className="flex items-center gap-4 rounded-lg border p-4"
-                                    >
-                                        <div className="text-muted-foreground">
-                                            {session.agent.is_desktop ? (
-                                                <Monitor className="size-8" />
-                                            ) : (
-                                                <Smartphone className="size-8" />
-                                            )}
-                                        </div>
+                                <p className="text-sm text-muted-foreground">
+                                    Jika perlu, Anda dapat keluar dari semua
+                                    sesi browser Anda yang lain di semua
+                                    perangkat Anda. Jika Anda merasa akun Anda
+                                    telah disusupi, Anda juga harus memperbarui
+                                    kata sandi Anda.
+                                </p>
 
-                                        <div className="flex flex-col">
-                                            <div className="text-sm font-medium">
-                                                {session.agent.platform} -{' '}
-                                                {session.agent.browser}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {session.ip_address} •{' '}
-                                                {session.is_current_device ? (
-                                                    <span className="font-semibold text-green-600 dark:text-green-400">
-                                                        Perangkat ini
-                                                    </span>
+                                {/* Session list */}
+                                <div className="flex flex-col gap-2">
+                                    {sessions.map((session) => (
+                                        <div
+                                            key={session.id}
+                                            className={cn(
+                                                'flex items-center gap-4 rounded-xl border p-4 transition-colors',
+                                                session.is_current_device
+                                                    ? 'border-primary/30 bg-primary/5'
+                                                    : 'bg-muted/40',
+                                            )}
+                                        >
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-background text-muted-foreground shadow-xs">
+                                                {session.agent
+                                                    .is_desktop ? (
+                                                    <Monitor className="h-5 w-5" />
                                                 ) : (
-                                                    <span>
-                                                        Terakhir aktif{' '}
-                                                        {session.last_active}
-                                                    </span>
+                                                    <Smartphone className="h-5 w-5" />
                                                 )}
                                             </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
 
-                            <div className="mt-2">
-                                <Dialog
-                                    open={confirmingLogout}
-                                    onOpenChange={setConfirmingLogout}
-                                >
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline">
-                                            Keluar dari Sesi Browser Lain
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>
-                                                Keluar dari Sesi Browser Lain
-                                            </DialogTitle>
-                                            <DialogDescription>
-                                                Silakan masukkan kata sandi Anda
-                                                untuk mengonfirmasi bahwa Anda
-                                                ingin keluar dari sesi browser
-                                                Anda yang lain di semua
-                                                perangkat Anda.
-                                            </DialogDescription>
-                                        </DialogHeader>
-
-                                        <Form
-                                            {...SecurityController.destroy.form()}
-                                            onSuccess={() =>
-                                                setConfirmingLogout(false)
-                                            }
-                                        >
-                                            {({ errors, processing }) => (
-                                                <div className="space-y-4">
-                                                    <div className="grid gap-2">
-                                                        <Label htmlFor="password_session">
-                                                            Kata sandi
-                                                        </Label>
-                                                        <PasswordInput
-                                                            id="password_session"
-                                                            name="password"
-                                                            placeholder="Masukkan kata sandi Anda"
-                                                        />
-                                                        <InputError
-                                                            message={
-                                                                errors.password
-                                                            }
-                                                        />
-                                                    </div>
-
-                                                    <DialogFooter>
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            onClick={() =>
-                                                                setConfirmingLogout(
-                                                                    false,
-                                                                )
-                                                            }
-                                                        >
-                                                            Batal
-                                                        </Button>
-                                                        <Button
-                                                            type="submit"
-                                                            disabled={
-                                                                processing
-                                                            }
-                                                        >
-                                                            Keluar dari Sesi
-                                                            Browser Lain
-                                                        </Button>
-                                                    </DialogFooter>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="text-sm font-medium">
+                                                        {
+                                                            session.agent
+                                                                .platform
+                                                        }{' '}
+                                                        —{' '}
+                                                        {
+                                                            session.agent
+                                                                .browser
+                                                        }
+                                                    </span>
+                                                    {session.is_current_device && (
+                                                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/60 dark:text-green-400">
+                                                            <CheckCircle2 className="h-3 w-3" />
+                                                            Perangkat ini
+                                                        </span>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </Form>
-                                    </DialogContent>
-                                </Dialog>
+                                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                                    {session.ip_address}
+                                                    {!session.is_current_device && (
+                                                        <>
+                                                            {' '}
+                                                            •{' '}
+                                                            {
+                                                                session.last_active
+                                                            }
+                                                        </>
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Logout dialog */}
+                                <div className="mt-2">
+                                    <Dialog
+                                        open={confirmingLogout}
+                                        onOpenChange={setConfirmingLogout}
+                                    >
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline">
+                                                Keluar dari Sesi Browser Lain
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>
+                                                    Keluar dari Sesi Browser
+                                                    Lain
+                                                </DialogTitle>
+                                                <DialogDescription>
+                                                    Silakan masukkan kata sandi
+                                                    Anda untuk mengonfirmasi
+                                                    bahwa Anda ingin keluar
+                                                    dari sesi browser Anda yang
+                                                    lain di semua perangkat
+                                                    Anda.
+                                                </DialogDescription>
+                                            </DialogHeader>
+
+                                            <Form
+                                                {...SecurityController.destroy.form()}
+                                                onSuccess={() =>
+                                                    setConfirmingLogout(false)
+                                                }
+                                            >
+                                                {({ errors, processing }) => (
+                                                    <div className="space-y-4">
+                                                        <div className="grid gap-2">
+                                                            <Label htmlFor="password_session">
+                                                                Kata sandi
+                                                            </Label>
+                                                            <PasswordInput
+                                                                id="password_session"
+                                                                name="password"
+                                                                placeholder="Masukkan kata sandi Anda"
+                                                            />
+                                                            <InputError
+                                                                message={
+                                                                    errors.password
+                                                                }
+                                                            />
+                                                        </div>
+
+                                                        <DialogFooter>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                onClick={() =>
+                                                                    setConfirmingLogout(
+                                                                        false,
+                                                                    )
+                                                                }
+                                                            >
+                                                                Batal
+                                                            </Button>
+                                                            <Button
+                                                                type="submit"
+                                                                disabled={
+                                                                    processing
+                                                                }
+                                                            >
+                                                                Keluar dari
+                                                                Sesi Browser
+                                                                Lain
+                                                            </Button>
+                                                        </DialogFooter>
+                                                    </div>
+                                                )}
+                                            </Form>
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
                             </div>
-                        </div>
-                    </section>
+                        </section>
+                    </>
                 )}
             </div>
         </>

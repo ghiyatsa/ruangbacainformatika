@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Star } from 'lucide-react';
+import { BookOpen, Eye, Star } from 'lucide-react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { Badge } from '@/components/ui/badge';
 import type { CatalogBook } from '@/components/welcome/types';
@@ -104,6 +104,11 @@ export default function BookCard({ book }: BookCardProps) {
                                     <span>{book.pages} hal</span>
                                 </>
                             )}
+                            <span className="text-border">·</span>
+                            <div className="flex items-center gap-1">
+                                <Eye className="size-3" />
+                                <span>{book.viewCount}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

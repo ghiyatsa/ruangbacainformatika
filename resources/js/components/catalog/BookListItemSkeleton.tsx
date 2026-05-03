@@ -32,7 +32,7 @@ export default function BookListItemSkeleton() {
                             Kategori
                         </span>
                     </div>
-                    <p className="text-sm font-semibold leading-snug">
+                    <p className="text-sm leading-snug font-semibold">
                         Judul buku placeholder
                     </p>
                     <p className="text-xs text-muted-foreground">

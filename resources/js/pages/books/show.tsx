@@ -4,6 +4,7 @@ import {
     Building2,
     Calendar,
     CheckCircle2,
+    Eye,
     FileText,
     Globe,
     Hash,
@@ -47,6 +48,7 @@ interface BookDetailsProps {
             isFeatured: boolean;
             isBorrowable: boolean;
             isAvailable: boolean;
+            viewCount: number;
         };
     };
     canRegister?: boolean;
@@ -243,6 +245,16 @@ export default function BookShow({ book: { data: book } }: BookDetailsProps) {
                                             {book.publishedYear}
                                         </div>
                                     )}
+
+                                    <div className="inline-flex items-center gap-2 rounded-full border bg-muted/60 px-4 py-2 text-sm font-medium text-muted-foreground backdrop-blur-sm">
+                                        <Eye className="size-4" />
+                                        <span>
+                                            <strong className="text-foreground">
+                                                {book.viewCount.toLocaleString()}
+                                            </strong>{' '}
+                                            kali dilihat
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

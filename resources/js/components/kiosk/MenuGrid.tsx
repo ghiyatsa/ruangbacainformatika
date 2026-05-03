@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { kioskMenuItems } from '@/pages/kiosk/menu';
-import type { KioskMenu } from '@/pages/Kiosk/types';
+import type { KioskMenu } from '@/pages/kiosk/types';
 
 const MENU_GRADIENTS = [
     {

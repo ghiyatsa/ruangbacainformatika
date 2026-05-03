@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Star } from 'lucide-react';
+import { BookOpen, Eye, Star } from 'lucide-react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import type { CatalogBook } from '@/components/welcome/types';
 
@@ -77,9 +77,15 @@ export default function BookListItem({ book }: BookListItemProps) {
             </div>
 
             {/* Page count — desktop only */}
-            <div className="hidden shrink-0 items-center gap-1 text-[11px] text-muted-foreground sm:flex">
-                <BookOpen className="size-3" />
-                <span>{book.pages ? `${book.pages} hal` : '—'}</span>
+            <div className="hidden shrink-0 items-center gap-3 text-[11px] text-muted-foreground sm:flex">
+                <div className="flex items-center gap-1">
+                    <BookOpen className="size-3" />
+                    <span>{book.pages ? `${book.pages} hal` : '—'}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Eye className="size-3" />
+                    <span>{book.viewCount}</span>
+                </div>
             </div>
         </Link>
     );

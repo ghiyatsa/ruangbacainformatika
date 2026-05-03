@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 
 import { AppHeader } from '@/components/layouts/AppHeader';
 import CatalogSection from '@/components/welcome/CatalogSection';
-import DomainHighlights from '@/components/welcome/DomainHighlights';
+import CategoryMarquee from '@/components/welcome/CategoryMarquee';
 import Footer from '@/components/welcome/Footer';
 import Hero from '@/components/welcome/Hero';
 import type { WelcomeProps } from '@/components/welcome/types';
@@ -33,7 +33,7 @@ export default function Welcome({
                 <main className="flex-1">
                     <Hero stats={stats} />
 
-                    <DomainHighlights categories={categories} />
+                    <CategoryMarquee categories={categories} />
 
                     <CatalogSection
                         stats={stats}

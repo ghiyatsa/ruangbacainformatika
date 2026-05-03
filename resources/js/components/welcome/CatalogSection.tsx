@@ -6,6 +6,7 @@ import {
     Calendar,
     ChevronLeft,
     ChevronRight,
+    Eye,
     GraduationCap,
     LayoutGrid,
     LayoutList,
@@ -211,6 +212,10 @@ function FeaturedSpotlight({
                                             {c}
                                         </span>
                                     ))}
+                                    <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                        <Eye className="size-3" />
+                                        {book.viewCount}
+                                    </span>
                                 </div>
 
                                 {/* Author */}

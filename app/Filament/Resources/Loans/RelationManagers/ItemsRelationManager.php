@@ -3,23 +3,28 @@
 namespace App\Filament\Resources\Loans\RelationManagers;
 
 use App\Filament\Resources\Loans\Pages\ViewLoan;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class ItemsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'items';
+    protected static string $relationship = 'loanItems';
 
     protected static bool $isLazy = false;
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         return $pageClass === ViewLoan::class
-            && (auth()->user()?->hasAdministrativeRole() ?? false);
+            && (Auth::user()?->hasAdministrativeRole() ?? false);
     }
 
     public function form(Schema $schema): Schema
@@ -32,6 +37,14 @@ class ItemsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('bookItem.book.title')
             ->columns([
+                TextColumn::make('loan.borrowed_at')
+                    ->label('Waktu Pinjam')
+                    ->dateTime('d M Y H:i')
+                    ->sortable(),
+                TextColumn::make('loan.id')
+                    ->label('ID Pinjam')
+                    ->formatStateUsing(fn (int $state): string => "#{$state}")
+                    ->sortable(),
                 TextColumn::make('bookItem.book.title')
                     ->label('Judul Buku')
                     ->searchable(),
@@ -70,7 +83,30 @@ class ItemsRelationManager extends RelationManager
                     ->placeholder('-'),
             ])
             ->filters([
-                //
+                TernaryFilter::make('returned')
+                    ->label('Status Kembali')
+                    ->placeholder('Semua')
+                    ->trueLabel('Sudah Kembali')
+                    ->falseLabel('Belum Kembali')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNotNull('loan_items.returned_at'),
+                        false: fn (Builder $query) => $query->whereNull('loan_items.returned_at'),
+                    ),
+                Filter::make('borrowed_at')
+                    ->label('Tanggal Pinjam')
+                    ->schema([
+                        DatePicker::make('from')->label('Pinjam Dari'),
+                        DatePicker::make('until')->label('Pinjam Sampai'),
+                    ])
+                    ->query(
+                        fn (Builder $query, array $data): Builder => $query->when(
+                            $data['from'],
+                            fn (Builder $query, $date): Builder => $query->whereHas('loan', fn ($q) => $q->whereDate('borrowed_at', '>=', $date)),
+                        )->when(
+                            $data['until'],
+                            fn (Builder $query, $date): Builder => $query->whereHas('loan', fn ($q) => $q->whereDate('borrowed_at', '<=', $date)),
+                        ),
+                    ),
             ])
             ->headerActions([])
             ->recordActions([])

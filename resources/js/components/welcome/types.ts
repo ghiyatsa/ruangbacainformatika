@@ -17,6 +17,7 @@ export type CatalogBook = {
     isFeatured: boolean;
     isBorrowable: boolean;
     isAvailable: boolean;
+    viewCount: number;
 };
 
 export type PaginatedBooks = {

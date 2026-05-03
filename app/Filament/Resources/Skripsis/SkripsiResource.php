@@ -31,7 +31,7 @@ class SkripsiResource extends Resource
 
     protected static ?string $modelLabel = 'Skripsi';
 
-    protected static ?string $recordTitleAttribute = 'title';
+    protected static ?string $recordTitleAttribute = 'student_id';
 
     public static function getNavigationBadge(): ?string
     {
