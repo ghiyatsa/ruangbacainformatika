@@ -76,6 +76,7 @@ export default function Profile({
                                         placeholder="Email address"
                                         readOnly
                                         disabled
+                                        suppressHydrationWarning
                                     />
                                 </div>
 

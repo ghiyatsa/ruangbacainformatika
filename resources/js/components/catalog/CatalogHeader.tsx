@@ -1,8 +1,11 @@
 import { GraduationCap, LayoutGrid, LayoutList } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import {
+    ToggleGroup,
+    ToggleGroupItem,
+} from '@/components/ui/toggle-group';
 
 interface CatalogHeaderProps {
     title: string;
@@ -29,40 +32,36 @@ export default function CatalogHeader({
             )}
         >
             <div className="flex flex-col gap-3">
-                <Badge variant="secondary" className="w-fit">
-                    <GraduationCap className="mr-1.5 size-3.5" />
-                    {badgeText}
-                </Badge>
+                {badgeText && (
+                    <Badge variant="secondary" className="w-fit">
+                        <GraduationCap data-icon="inline-start" />
+                        {badgeText}
+                    </Badge>
+                )}
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                    <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                         {title}
-                    </h1>
+                    </h2>
                     <div className="mt-1.5 text-sm text-muted-foreground">
                         {description}
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-1 self-start rounded-lg border bg-muted/50 p-1">
-                <Button
-                    variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="size-8"
-                    onClick={() => onViewModeChange('grid')}
-                >
-                    <LayoutGrid className="size-4" />
-                    <span className="sr-only">Grid view</span>
-                </Button>
-                <Button
-                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                    size="icon"
-                    className="size-8"
-                    onClick={() => onViewModeChange('list')}
-                >
-                    <LayoutList className="size-4" />
-                    <span className="sr-only">List view</span>
-                </Button>
-            </div>
+            <ToggleGroup
+                type="single"
+                value={viewMode}
+                onValueChange={(val) => val && onViewModeChange(val as 'grid' | 'list')}
+                variant="outline"
+                className="self-start"
+            >
+                <ToggleGroupItem value="grid" aria-label="Grid view">
+                    <LayoutGrid data-icon />
+                </ToggleGroupItem>
+                <ToggleGroupItem value="list" aria-label="List view">
+                    <LayoutList data-icon />
+                </ToggleGroupItem>
+            </ToggleGroup>
         </div>
     );
 }

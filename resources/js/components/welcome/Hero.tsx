@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import CountUp from '@/components/common/CountUp';
 import ShinyText from '@/components/common/ShinyText';
@@ -15,7 +15,7 @@ const Antigravity = lazy(() => import('@/components/Antigravity'));
 
 export default function Hero({ stats }: HeroProps) {
     return (
-        <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-32">
+        <section className="relative overflow-hidden pt-20 pb-24 sm:pt-28 sm:pb-32 lg:pt-36 lg:pb-40">
             <div className="pointer-events-none absolute inset-0 -z-10 h-full w-full">
                 <Suspense fallback={null}>
                     <Antigravity
@@ -38,8 +38,9 @@ export default function Hero({ stats }: HeroProps) {
                 </Suspense>
             </div>
 
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="flex flex-col items-center gap-8 text-center">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col items-center gap-6 text-center sm:gap-8">
+                    {/* Badge */}
                     <StarBorder
                         as="div"
                         className="rounded-full"
@@ -63,7 +64,8 @@ export default function Hero({ stats }: HeroProps) {
                         </div>
                     </StarBorder>
 
-                    <h1 className="max-w-4xl font-heading text-4xl leading-[1.1] font-bold tracking-tight sm:text-6xl lg:text-7xl">
+                    {/* Heading */}
+                    <h1 className="max-w-4xl font-heading text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
                         Gerbang Pengetahuan{' '}
                         <span className="bg-linear-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
                             Informatika
@@ -71,17 +73,19 @@ export default function Hero({ stats }: HeroProps) {
                         Masa Depan.
                     </h1>
 
-                    <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+                    {/* Description */}
+                    <p className="max-w-xl px-2 text-base leading-relaxed text-muted-foreground sm:max-w-2xl sm:px-0 sm:text-lg md:text-xl">
                         Akses ratusan buku akademik, literatur teknologi
                         terbaru, dan karya ilmiah khusus bidang Teknik
                         Informatika Universitas Malikussaleh dalam satu platform
                         terintegrasi.
                     </p>
 
-                    <div className="w-full max-w-xl">
+                    {/* Search CTA */}
+                    <div className="w-full max-w-sm sm:max-w-xl">
                         <Link
                             href={books.index.url()}
-                            className="block transition-transform"
+                            className="block transition-transform hover:scale-[1.02]"
                         >
                             <StarBorder
                                 as="div"
@@ -90,40 +94,42 @@ export default function Hero({ stats }: HeroProps) {
                                 className="rounded-2xl"
                             >
                                 <div className="flex items-center gap-3 text-muted-foreground">
-                                    <Search className="size-5" />
-                                    <span className="text-base font-normal">
+                                    <Search className="size-5 shrink-0" />
+                                    <span className="text-sm font-normal sm:text-base">
                                         Cari judul buku, penulis, atau subjek...
                                     </span>
+                                    <ArrowRight className="ml-auto size-4 shrink-0 opacity-50" />
                                 </div>
                             </StarBorder>
                         </Link>
                     </div>
 
-                    <div className="w-full max-w-2xl">
-                        <div className="mt-4 flex flex-wrap justify-center gap-x-20 gap-y-2 text-sm text-muted-foreground">
-                            <div className="flex flex-col gap-2">
+                    {/* Stats */}
+                    <div className="mt-2 w-full max-w-2xl">
+                        <div className="grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-16 sm:gap-y-4 text-sm text-muted-foreground">
+                            <div className="flex flex-col items-center gap-1 sm:gap-2">
                                 <CountUp
                                     to={stats.booksCount}
                                     duration={1.5}
-                                    className="text-4xl font-bold text-foreground"
+                                    className="text-3xl font-bold text-foreground sm:text-4xl"
                                 />
-                                <span>Jumlah Buku</span>
+                                <span className="text-xs sm:text-sm">Judul Buku</span>
                             </div>
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col items-center gap-1 sm:gap-2">
                                 <CountUp
                                     to={stats.availableItemsCount}
                                     duration={1.5}
-                                    className="text-4xl font-bold text-foreground"
+                                    className="text-3xl font-bold text-foreground sm:text-4xl"
                                 />
-                                <span>Eksemplar Tersedia</span>
+                                <span className="text-xs sm:text-sm">Eksemplar Tersedia</span>
                             </div>
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col items-center gap-1 sm:gap-2">
                                 <CountUp
                                     to={stats.featuredCount}
                                     duration={1.5}
-                                    className="text-4xl font-bold text-foreground"
+                                    className="text-3xl font-bold text-foreground sm:text-4xl"
                                 />
-                                <span>Rekomendasi Unggulan</span>
+                                <span className="text-xs sm:text-sm">Rekomendasi Unggulan</span>
                             </div>
                         </div>
                     </div>

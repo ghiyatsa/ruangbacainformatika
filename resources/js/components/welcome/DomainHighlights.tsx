@@ -40,18 +40,18 @@ export default function DomainHighlights({
 
         return {
             node: (
-                <div className="py-4">
+                <div className="py-3 sm:py-4">
                     <Link
                         href={`/katalog?category=${category.slug}`}
-                        className="relative flex w-72 flex-col rounded-2xl border bg-background p-6 text-left text-base whitespace-normal transition-all duration-300 group-hover/loop:opacity-40 hover:opacity-100!"
+                        className="relative flex w-56 flex-col rounded-2xl border bg-background p-4 text-left text-base whitespace-normal transition-all duration-300 group-hover/loop:opacity-40 hover:opacity-100! sm:w-72 sm:p-6"
                     >
-                        <div className="mb-4 flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary transition-colors">
-                            <Icon className="size-6" />
+                        <div className="mb-3 flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary transition-colors sm:mb-4 sm:size-12">
+                            <Icon className="size-5 sm:size-6" />
                         </div>
-                        <h3 className="mb-2 leading-tight font-bold text-foreground">
+                        <h3 className="mb-1.5 text-sm leading-tight font-bold text-foreground sm:mb-2 sm:text-base">
                             {category.name}
                         </h3>
-                        <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                        <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                             {category.description ||
                                 'Jelajahi koleksi literatur dan referensi pada kategori ini.'}
                         </p>
@@ -61,24 +61,22 @@ export default function DomainHighlights({
         };
     });
 
+    if (items.length === 0) {
+        return null;
+    }
+
     return (
-        <section className="py-8">
-            <div className="container mx-auto px-6 lg:px-8">
-                {items.length > 0 ? (
-                    <LogoLoop
-                        logos={items}
-                        speed={30}
-                        pauseOnHover
-                        fadeOut
-                        logoHeight={180}
-                        gap={24}
-                        className="group/loop"
-                    />
-                ) : (
-                    <div className="text-center text-sm text-muted-foreground">
-                        Belum ada kategori tersedia.
-                    </div>
-                )}
+        <section className="py-6 sm:py-8">
+            <div className="container mx-auto">
+                <LogoLoop
+                    logos={items}
+                    speed={30}
+                    pauseOnHover
+                    fadeOut
+                    logoHeight={160}
+                    gap={16}
+                    className="group/loop"
+                />
             </div>
         </section>
     );

@@ -20,8 +20,8 @@ export function AppHeader() {
     const { appearance, updateAppearance } = useAppearance();
 
     return (
-        <header className="sticky top-6 z-50 w-full px-6">
-            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl border border-accent/50 bg-background/50 px-4 backdrop-blur-md dark:bg-background/20">
+        <header className="sticky top-3 z-50 w-full px-3 sm:top-6 sm:px-6">
+            <div className="mx-auto flex h-14 max-w-7xl items-center justify-between rounded-2xl border border-accent/50 bg-background/50 px-3 backdrop-blur-md sm:h-16 sm:px-4 dark:bg-background/20">
                 <AppLogo />
 
                 <div className="flex items-center gap-2">

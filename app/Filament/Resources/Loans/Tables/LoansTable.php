@@ -40,33 +40,28 @@ class LoansTable
                     ->toggleable(),
                 TextColumn::make('book_isbns')
                     ->label('ISBN Buku')
-                    ->state(fn (Loan $record): string => $record->items
+                    ->state(fn(Loan $record): string => $record->items
                         ->pluck('bookItem.book.isbn')
                         ->filter()
                         ->unique()
                         ->implode(', '))
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('items.bookItem.book', fn (Builder $bookQuery): Builder => $bookQuery
+                        return $query->whereHas('items.bookItem.book', fn(Builder $bookQuery): Builder => $bookQuery
                             ->where('isbn', 'like', "%{$search}%"));
                     })
                     ->toggleable(),
                 TextColumn::make('book_item_codes')
                     ->label('Kode Eksemplar')
-                    ->state(fn (Loan $record): string => $record->items
+                    ->state(fn(Loan $record): string => $record->items
                         ->pluck('bookItem.internal_code')
                         ->filter()
                         ->unique()
                         ->implode(', '))
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('items.bookItem', fn (Builder $bookItemQuery): Builder => $bookItemQuery
+                        return $query->whereHas('items.bookItem', fn(Builder $bookItemQuery): Builder => $bookItemQuery
                             ->where('internal_code', 'like', "%{$search}%"));
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('active_items_count')
-                    ->label('Belum Kembali')
-                    ->badge()
-                    ->color('warning')
-                    ->sortable(),
                 TextColumn::make('loan_duration')
                     ->label('Durasi')
                     ->state(function (Loan $record): string {
@@ -101,8 +96,8 @@ class LoansTable
                     ->toggleable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => Loan::statusOptions()[$state] ?? $state)
-                    ->color(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn(string $state): string => Loan::statusOptions()[$state] ?? $state)
+                    ->color(fn(string $state): string => match ($state) {
                         Loan::STATUS_BORROWED => 'warning',
                         Loan::STATUS_RETURNED => 'success',
                         default => 'gray',
@@ -128,28 +123,28 @@ class LoansTable
                         return $query
                             ->when(
                                 filled($data['borrowed_from'] ?? null),
-                                fn (Builder $query): Builder => $query->where('borrowed_at', '>=', Carbon::parse($data['borrowed_from'])->startOfDay()),
+                                fn(Builder $query): Builder => $query->where('borrowed_at', '>=', Carbon::parse($data['borrowed_from'])->startOfDay()),
                             )
                             ->when(
                                 filled($data['borrowed_until'] ?? null),
-                                fn (Builder $query): Builder => $query->where('borrowed_at', '<=', Carbon::parse($data['borrowed_until'])->endOfDay()),
+                                fn(Builder $query): Builder => $query->where('borrowed_at', '<=', Carbon::parse($data['borrowed_until'])->endOfDay()),
                             );
                     }),
                 Filter::make('active')
                     ->label('Masih Dipinjam')
-                    ->query(fn (Builder $query): Builder => $query->where('status', Loan::STATUS_BORROWED)),
+                    ->query(fn(Builder $query): Builder => $query->where('status', Loan::STATUS_BORROWED)),
                 Filter::make('today')
                     ->label('Hari Ini')
-                    ->query(fn (Builder $query): Builder => $query->whereDate('borrowed_at', today())),
+                    ->query(fn(Builder $query): Builder => $query->whereDate('borrowed_at', today())),
                 Filter::make('this_week')
                     ->label('Minggu Ini')
-                    ->query(fn (Builder $query): Builder => $query->whereBetween('borrowed_at', [
+                    ->query(fn(Builder $query): Builder => $query->whereBetween('borrowed_at', [
                         now()->startOfWeek(),
                         now()->endOfWeek(),
                     ])),
                 Filter::make('overdue_7_days')
                     ->label('Melewati Jatuh Tempo')
-                    ->query(fn (Builder $query): Builder => $query
+                    ->query(fn(Builder $query): Builder => $query
                         ->where('status', Loan::STATUS_BORROWED)
                         ->whereNotNull('due_at')
                         ->where('due_at', '<', now())),

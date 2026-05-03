@@ -2,10 +2,10 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\LibraryOverviewStats;
-use App\Filament\Widgets\OperationsAttentionTable;
-use App\Filament\Widgets\OperationsOverviewStats;
-use App\Filament\Widgets\VisitOverviewStats;
+use App\Filament\Widgets\LoanActivityChartWidget;
+use App\Filament\Widgets\OperationsOverviewWidget;
+use App\Filament\Widgets\OverdueLoanTableWidget;
+use App\Filament\Widgets\TodayVisitorsWidget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -47,10 +47,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                OperationsOverviewStats::class,
-                OperationsAttentionTable::class,
-                LibraryOverviewStats::class,
-                VisitOverviewStats::class,
+                OperationsOverviewWidget::class,
+                LoanActivityChartWidget::class,
+                TodayVisitorsWidget::class,
+                OverdueLoanTableWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

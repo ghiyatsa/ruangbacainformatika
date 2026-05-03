@@ -12,7 +12,6 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\Alignment;
 
 class GeneralSettings extends Page
 {
