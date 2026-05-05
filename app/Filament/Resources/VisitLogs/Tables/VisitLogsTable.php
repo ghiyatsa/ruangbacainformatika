@@ -4,9 +4,7 @@ namespace App\Filament\Resources\VisitLogs\Tables;
 
 use App\Filament\Exports\VisitLogExporter;
 use App\Models\VisitLog;
-use App\Support\Library\LibraryResourceActionFactory;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Forms\Components\DatePicker;
@@ -85,11 +83,7 @@ class VisitLogsTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Data'),
-                    LibraryResourceActionFactory::deleteAction(
-                        singularLabel: 'Data Kunjungan',
-                        fallbackReason: 'Terjadi kendala saat memproses penghapusan data kunjungan tersebut.',
-                        modalDescription: 'Pastikan data kunjungan yang dipilih memang perlu dihapus dari catatan operasional.',
-                    ),
+
                 ])
                     ->label('Aksi'),
             ])
@@ -97,13 +91,7 @@ class VisitLogsTable
                 ExportAction::make()
                     ->label('Ekspor Data')
                     ->exporter(VisitLogExporter::class),
-                BulkActionGroup::make([
-                    LibraryResourceActionFactory::deleteBulkAction(
-                        singularLabel: 'data kunjungan',
-                        pluralLabel: 'data kunjungan',
-                        genericFailureReason: 'terjadi kendala saat proses penghapusan',
-                    ),
-                ]),
+
             ])
             ->defaultSort('visited_at', 'desc');
     }

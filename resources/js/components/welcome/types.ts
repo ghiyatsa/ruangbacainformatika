@@ -1,13 +1,14 @@
 export type CatalogBook = {
     id: number;
     title: string;
+    subtitle: string | null;
     slug: string;
     isbn: string | null;
     description: string;
     shortDescription: string;
     coverImageUrl: string;
-    authors: string[];
-    categories: string[];
+    authors?: string[];
+    categories?: { name: string; slug: string }[];
     publisher: string | null;
     publishedYear: number | null;
     pages: number | null;
@@ -25,11 +26,13 @@ export type PaginatedBooks = {
     data: CatalogBook[];
     current_page: number;
     last_page: number;
+    per_page: number;
     total: number;
     from: number | null;
     to: number | null;
     prev_page_url: string | null;
     next_page_url: string | null;
+    links: { url: string | null; label: string; active: boolean }[];
 };
 
 export type WelcomeProps = {

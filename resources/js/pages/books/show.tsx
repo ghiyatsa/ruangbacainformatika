@@ -38,7 +38,7 @@ interface BookDetailsProps {
             description: string;
             coverImageUrl: string;
             authors: string[];
-            categories: string[];
+            categories: { name: string; slug: string }[];
             publisher: string | null;
             publishedYear: number | null;
             pages: number | null;
@@ -93,7 +93,8 @@ export default function BookShow({ book: { data: book } }: BookDetailsProps) {
           ? 'Tersedia untuk Dipinjam'
           : 'Tidak Tersedia';
 
-    const AvailabilityIcon = !book.isBorrowable || book.isAvailable ? CheckCircle2 : XCircle;
+    const AvailabilityIcon =
+        !book.isBorrowable || book.isAvailable ? CheckCircle2 : XCircle;
 
     const availabilityBg = !book.isBorrowable
         ? 'bg-amber-500/10 border-amber-500/20'
@@ -185,13 +186,19 @@ export default function BookShow({ book: { data: book } }: BookDetailsProps) {
                                         </Badge>
                                     )}
                                     {book.categories.map((category) => (
-                                        <Badge
-                                            key={category}
-                                            variant="secondary"
-                                            className="bg-muted/80 backdrop-blur-sm"
+                                        <Link
+                                            key={category.slug}
+                                            href={books.categories.show.url(
+                                                category.slug,
+                                            )}
                                         >
-                                            {category}
-                                        </Badge>
+                                            <Badge
+                                                variant="secondary"
+                                                className="bg-muted/80 backdrop-blur-sm"
+                                            >
+                                                {category.name}
+                                            </Badge>
+                                        </Link>
                                     ))}
                                 </div>
 
@@ -224,16 +231,20 @@ export default function BookShow({ book: { data: book } }: BookDetailsProps) {
                                             {book.isBorrowable ? (
                                                 <>
                                                     <strong className="text-foreground">
-                                                        {book.availableItemsCount}
+                                                        {
+                                                            book.availableItemsCount
+                                                        }
                                                     </strong>{' '}
-                                                    dari {book.itemsCount} eksemplar
+                                                    dari {book.itemsCount}{' '}
+                                                    eksemplar
                                                 </>
                                             ) : (
                                                 <>
                                                     <strong className="text-foreground">
                                                         {book.itemsCount}
                                                     </strong>{' '}
-                                                    eksemplar tersedia di perpustakaan
+                                                    eksemplar tersedia di
+                                                    perpustakaan
                                                 </>
                                             )}
                                         </span>

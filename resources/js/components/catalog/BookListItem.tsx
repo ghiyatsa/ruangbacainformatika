@@ -45,20 +45,25 @@ export default function BookListItem({ book }: BookListItemProps) {
             {/* Content */}
             <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                    {book.categories.slice(0, 1).map((category) => (
+                    {Array.from(book.categories || []).slice(0, 1).map((category: any, index) => (
                         <span
-                            key={category}
+                            key={category.slug || `cat-${index}`}
                             className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
                         >
-                            {category}
+                            {category.name}
                         </span>
                     ))}
                 </div>
                 <p className="line-clamp-1 text-sm leading-snug font-semibold transition-colors group-hover:text-primary">
                     {book.title}
                 </p>
+                {book.subtitle && (
+                    <p className="line-clamp-1 -mt-0.5 text-[11px] text-muted-foreground/80 italic">
+                        {book.subtitle}
+                    </p>
+                )}
                 <p className="line-clamp-1 text-xs text-muted-foreground">
-                    {book.authors.join(', ') || 'Penulis tidak tersedia'}
+                    {Array.from(book.authors || []).join(', ') || 'Penulis tidak tersedia'}
                     {book.publishedYear && (
                         <span className="ml-2 text-[11px]">
                             · {book.publishedYear}

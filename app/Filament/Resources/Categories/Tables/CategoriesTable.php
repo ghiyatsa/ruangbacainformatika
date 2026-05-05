@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\Categories\Tables;
 
-use App\Support\Library\LibraryResourceActionFactory;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -50,22 +48,9 @@ class CategoriesTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Kategori'),
-                    LibraryResourceActionFactory::deleteAction(
-                        singularLabel: 'Kategori',
-                        fallbackReason: 'Masih ada data terkait yang membuat kategori ini tidak bisa dihapus saat ini.',
-                        modalDescription: 'Kategori hanya bisa dihapus jika sudah tidak dipakai oleh data buku mana pun.',
-                    ),
                 ])
                     ->label('Aksi'),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    LibraryResourceActionFactory::deleteBulkAction(
-                        singularLabel: 'kategori',
-                        pluralLabel: 'kategori',
-                        genericFailureReason: 'masih dipakai oleh data buku',
-                    ),
-                ]),
-            ]);
+            ->toolbarActions([]);
     }
 }

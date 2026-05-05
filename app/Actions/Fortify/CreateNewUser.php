@@ -3,17 +3,13 @@
 namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
-use App\Concerns\ProfileValidationRules;
 use App\Models\User;
-use App\Support\Kiosk\KioskPinManager;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use Spatie\Permission\Models\Role;
 
 class CreateNewUser implements CreatesNewUsers
 {
-    use PasswordValidationRules, ProfileValidationRules;
+    use PasswordValidationRules;
 
     /**
      * Validate and create a newly registered user.
@@ -22,33 +18,22 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        $normalizedInput = [
-            ...$input,
-            'name' => Str::of((string) ($input['name'] ?? ''))->squish()->toString(),
-            'email' => Str::lower(trim((string) ($input['email'] ?? ''))),
-            'whatsapp' => trim((string) ($input['whatsapp'] ?? '')),
-        ];
-
-        Validator::make($normalizedInput, [
-            ...$this->profileRules(),
-            'whatsapp' => $this->whatsappRules(required: true),
+        Validator::make($input, [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+            ],
             'password' => $this->passwordRules(),
         ])->validate();
 
-        $isKioskRegistration = app(KioskPinManager::class)->isVerified(request());
-
-        $user = User::create([
-            'name' => $normalizedInput['name'],
-            'email' => $normalizedInput['email'],
-            'password' => $normalizedInput['password'],
-            'whatsapp' => $normalizedInput['whatsapp'] ?: null,
-            'is_approved' => $isKioskRegistration || str_ends_with($normalizedInput['email'], '@mhs.unimal.ac.id'),
+        return User::create([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'password' => $input['password'],
         ]);
-
-        if (Role::query()->where('name', 'member')->exists() && $user->shouldReceiveMemberRole()) {
-            $user->assignRole('member');
-        }
-
-        return $user;
     }
 }

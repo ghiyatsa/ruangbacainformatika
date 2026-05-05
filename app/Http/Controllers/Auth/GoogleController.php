@@ -33,7 +33,7 @@ class GoogleController extends Controller
                 'message' => 'Konfigurasi login Google belum lengkap.',
             ]);
 
-            return redirect()->route('login');
+            return redirect()->route('onboarding');
         }
 
         return Socialite::driver('google')

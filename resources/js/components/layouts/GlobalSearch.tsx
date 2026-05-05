@@ -1,15 +1,16 @@
 import { router } from '@inertiajs/react';
 import { BookOpen, Search } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
+import AnimatedList from '@/components/AnimatedList';
 import {
     CommandDialog,
     CommandEmpty,
-    CommandGroup,
     CommandInput,
-    CommandItem,
     CommandList,
 } from '@/components/ui/command';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 interface SearchResult {
     id: number;
@@ -44,17 +45,23 @@ export function GlobalSearch() {
         };
     }, []);
 
-    React.useEffect(() => {
-        const timeoutId = setTimeout(async () => {
-            if (!query) {
-                setResults([]);
-                setIsLoading(false);
+    const handleQueryChange = (v: string) => {
+        setQuery(v);
 
-                return;
-            }
-
+        if (!v) {
+            setResults([]);
+            setIsLoading(false);
+        } else {
             setIsLoading(true);
+        }
+    };
 
+    React.useEffect(() => {
+        if (!query) {
+            return;
+        }
+
+        const timeoutId = setTimeout(async () => {
             try {
                 const response = await fetch(
                     `/search?q=${encodeURIComponent(query)}`,
@@ -96,49 +103,90 @@ export function GlobalSearch() {
                 <CommandInput
                     placeholder="Ketik judul buku atau penulis..."
                     value={query}
-                    onValueChange={setQuery}
+                    onValueChange={handleQueryChange}
                 />
-                <CommandList>
-                    <CommandEmpty>
-                        {isLoading ? (
-                            <div className="space-y-2 p-4">
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-3/4" />
-                            </div>
-                        ) : (
-                            'Tidak ada hasil ditemukan.'
-                        )}
-                    </CommandEmpty>
-                    {results.length > 0 && (
-                        <CommandGroup heading="Buku">
-                            {results.map((book) => (
-                                <CommandItem
-                                    key={book.id}
-                                    value={book.title}
-                                    onSelect={() => onSelect(book.slug)}
-                                    className="flex items-center gap-3 py-3"
-                                >
-                                    <div className="size-10 shrink-0 overflow-hidden rounded-md border">
-                                        <img
-                                            src={book.coverImageUrl}
-                                            alt=""
-                                            className="h-full w-full object-cover"
-                                        />
-                                    </div>
-                                    <div className="flex flex-1 flex-col">
-                                        <span className="line-clamp-1 font-medium">
-                                            {book.title}
-                                        </span>
-                                        <span className="line-clamp-1 text-xs text-muted-foreground">
-                                            {book.authors.join(', ')}
-                                        </span>
-                                    </div>
-                                    <BookOpen className="ml-auto size-4 text-muted-foreground" />
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
+                <AnimatePresence initial={false}>
+                    {query.length > 0 && (
+                        <motion.div
+                            key="search-content"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{
+                                type: 'spring',
+                                duration: 0.4,
+                                bounce: 0,
+                            }}
+                            className="overflow-hidden"
+                        >
+                            <div className="-mx-2 h-px bg-border" />
+                            <CommandList>
+                                {(isLoading || results.length === 0) && (
+                                    <CommandEmpty>
+                                        {isLoading ? (
+                                            <div className="space-y-2 p-4">
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-3/4" />
+                                            </div>
+                                        ) : (
+                                            'Tidak ada hasil ditemukan.'
+                                        )}
+                                    </CommandEmpty>
+                                )}
+
+                                {results.length > 0 && !isLoading && (
+                                    <AnimatedList<SearchResult>
+                                        items={results}
+                                        onItemSelect={(book) =>
+                                            onSelect(book.slug)
+                                        }
+                                        showGradients
+                                        renderItem={(
+                                            book,
+                                            index,
+                                            isSelected,
+                                        ) => (
+                                            <div
+                                                className={cn(
+                                                    'flex items-center gap-3 rounded-lg px-3 py-3 transition-colors',
+                                                    isSelected
+                                                        ? 'bg-accent text-accent-foreground'
+                                                        : 'hover:bg-accent/50',
+                                                )}
+                                            >
+                                                <div className="aspect-2/3 w-9 shrink-0 overflow-hidden rounded-sm border bg-muted shadow-sm">
+                                                    <img
+                                                        src={book.coverImageUrl}
+                                                        alt=""
+                                                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-1 flex-col gap-0.5">
+                                                    <span className="line-clamp-1 font-semibold tracking-tight">
+                                                        {book.title}
+                                                    </span>
+                                                    <span className="line-clamp-1 text-xs text-muted-foreground">
+                                                        {book.authors.join(
+                                                            ', ',
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <BookOpen
+                                                    className={cn(
+                                                        'ml-auto size-4 transition-colors',
+                                                        isSelected
+                                                            ? 'text-accent-foreground'
+                                                            : 'text-muted-foreground',
+                                                    )}
+                                                />
+                                            </div>
+                                        )}
+                                    />
+                                )}
+                            </CommandList>
+                        </motion.div>
                     )}
-                </CommandList>
+                </AnimatePresence>
             </CommandDialog>
         </>
     );

@@ -4,16 +4,15 @@ import {
     BookOpen,
     ChevronLeft,
     ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
     GraduationCap,
     Hash,
     LayoutGrid,
     LayoutList,
     Library,
-    Search,
-    X,
 } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
+import { useState } from 'react';
 import BookCard from '@/components/catalog/BookCard';
 import BookCardSkeleton from '@/components/catalog/BookCardSkeleton';
 import BookListItem from '@/components/catalog/BookListItem';
@@ -36,7 +35,6 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from '@/components/ui/empty';
-import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -71,6 +69,173 @@ interface CategoryPageProps {
     books: PaginatedBooks;
 }
 
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+function Pagination({ books }: { books: PaginatedBooks }) {
+    if (books.last_page <= 1) {
+        return null;
+    }
+
+    function navigateTo(url: string | null): void {
+        if (!url) {
+            return;
+        }
+
+        router.visit(url, {
+            preserveScroll: false,
+            onSuccess: () => window.scrollTo({ top: 0, behavior: 'smooth' }),
+        });
+    }
+
+    // Filter only numeric page links (exclude "Previous" / "Next" labels)
+    const pageLinks = books.links.filter((l) => !isNaN(Number(l.label)));
+
+    const current = books.current_page;
+    const last = books.last_page;
+    const delta = 2;
+    const rangeStart = Math.max(1, current - delta);
+    const rangeEnd = Math.min(last, current + delta);
+
+    const visiblePageLinks = pageLinks.filter((l) => {
+        const n = Number(l.label);
+
+        return n >= rangeStart && n <= rangeEnd;
+    });
+
+    const showFirst = rangeStart > 1;
+    const showLast = rangeEnd < last;
+    const showStartEllipsis = rangeStart > 2;
+    const showEndEllipsis = rangeEnd < last - 1;
+
+    return (
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+            {/* Count summary */}
+            <p className="text-sm text-muted-foreground">
+                Menampilkan{' '}
+                <span className="font-semibold text-foreground">
+                    {books.from}–{books.to}
+                </span>{' '}
+                dari{' '}
+                <span className="font-semibold text-foreground">
+                    {books.total.toLocaleString('id-ID')}
+                </span>{' '}
+                buku
+            </p>
+
+            {/* Page controls */}
+            <div className="flex items-center gap-1">
+                {/* Jump to first */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    disabled={current === 1}
+                    onClick={() => navigateTo(books.links[0]?.url ?? null)}
+                    aria-label="Halaman pertama"
+                >
+                    <ChevronsLeft className="size-4" />
+                </Button>
+
+                {/* Previous */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    disabled={!books.prev_page_url}
+                    onClick={() => navigateTo(books.prev_page_url)}
+                    aria-label="Halaman sebelumnya"
+                >
+                    <ChevronLeft className="size-4" />
+                </Button>
+
+                {/* Page 1 if outside range */}
+                {showFirst && (
+                    <>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-sm"
+                            onClick={() =>
+                                navigateTo(
+                                    pageLinks.find((l) => l.label === '1')?.url ?? null,
+                                )
+                            }
+                        >
+                            1
+                        </Button>
+                        {showStartEllipsis && (
+                            <span className="px-1 text-sm text-muted-foreground">…</span>
+                        )}
+                    </>
+                )}
+
+                {/* Numbered pages */}
+                {visiblePageLinks.map((link) => (
+                    <Button
+                        key={link.label}
+                        variant={link.active ? 'default' : 'ghost'}
+                        size="icon"
+                        className="size-8 text-sm"
+                        onClick={() => navigateTo(link.url)}
+                        disabled={link.active}
+                        aria-current={link.active ? 'page' : undefined}
+                    >
+                        {link.label}
+                    </Button>
+                ))}
+
+                {/* Last page if outside range */}
+                {showLast && (
+                    <>
+                        {showEndEllipsis && (
+                            <span className="px-1 text-sm text-muted-foreground">…</span>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-sm"
+                            onClick={() =>
+                                navigateTo(
+                                    pageLinks.find((l) => l.label === String(last))?.url ??
+                                        null,
+                                )
+                            }
+                        >
+                            {last}
+                        </Button>
+                    </>
+                )}
+
+                {/* Next */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    disabled={!books.next_page_url}
+                    onClick={() => navigateTo(books.next_page_url)}
+                    aria-label="Halaman berikutnya"
+                >
+                    <ChevronRight className="size-4" />
+                </Button>
+
+                {/* Jump to last */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    disabled={current === last}
+                    onClick={() =>
+                        navigateTo(books.links[books.links.length - 1]?.url ?? null)
+                    }
+                    aria-label="Halaman terakhir"
+                >
+                    <ChevronsRight className="size-4" />
+                </Button>
+            </div>
+        </div>
+    );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CategoryPage({
@@ -80,41 +245,7 @@ export default function CategoryPage({
     categories,
     books,
 }: CategoryPageProps) {
-    const [searchValue, setSearchValue] = useState(filters.search);
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
-    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const applyFilters = useCallback(
-        (params: { search?: string }) => {
-            router.get(
-                categoriesRoute.show.url(category.slug),
-                { search: params.search ?? filters.search },
-                { preserveScroll: true, replace: true },
-            );
-        },
-        [category.slug, filters.search],
-    );
-
-    function handleSearchChange(value: string): void {
-        setSearchValue(value);
-
-        if (searchTimeout.current) {
-            clearTimeout(searchTimeout.current);
-        }
-
-        searchTimeout.current = setTimeout(() => {
-            applyFilters({ search: value });
-        }, 400);
-    }
-
-    function clearSearch(): void {
-        setSearchValue('');
-        router.get(
-            categoriesRoute.show.url(category.slug),
-            {},
-            { preserveScroll: true, replace: true },
-        );
-    }
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     const hasSearch = filters.search !== '';
 
@@ -136,10 +267,7 @@ export default function CategoryPage({
                 <AppHeader />
 
                 {/* ── Hero ── */}
-                <CategoryHero
-                    category={category}
-                    stats={stats}
-                />
+                <CategoryHero category={category} stats={stats} />
 
                 {/* ── Other categories strip ── */}
                 {categories.length > 1 && (
@@ -175,32 +303,8 @@ export default function CategoryPage({
                 {/* ── Main content ── */}
                 <main className="flex-1 py-10">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        {/* Toolbar — mirrors catalog.tsx */}
+                        {/* Toolbar */}
                         <div className="mb-6 flex flex-wrap items-center gap-3">
-                            {/* Search */}
-                            <div className="relative flex-1">
-                                <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    id="category-search"
-                                    value={searchValue}
-                                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                        handleSearchChange(e.target.value)
-                                    }
-                                    placeholder={`Cari di ${category.name}…`}
-                                    className="h-9 pr-8 pl-9 text-sm"
-                                />
-                                {searchValue && (
-                                    <button
-                                        type="button"
-                                        onClick={clearSearch}
-                                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                                        aria-label="Hapus pencarian"
-                                    >
-                                        <X className="size-3.5" />
-                                    </button>
-                                )}
-                            </div>
-
                             {/* View-mode toggle */}
                             <ToggleGroup
                                 type="single"
@@ -226,15 +330,6 @@ export default function CategoryPage({
                                     <span className="text-muted-foreground">Pencarian:</span>
                                     &ldquo;{filters.search}&rdquo;
                                 </Badge>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 text-muted-foreground"
-                                    onClick={clearSearch}
-                                >
-                                    <X data-icon="inline-start" />
-                                    Hapus filter
-                                </Button>
                             </div>
                         )}
 
@@ -325,14 +420,14 @@ function CategoryHero({
                             <span className="flex items-center gap-1.5">
                                 <BookOpen className="size-4" />
                                 <span className="font-semibold text-foreground">
-                                    {stats.searchResultsCount}
+                                    {stats.searchResultsCount.toLocaleString('id-ID')}
                                 </span>{' '}
                                 judul buku
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <Library className="size-4" />
                                 <span className="font-semibold text-foreground">
-                                    {stats.availableItemsCount}
+                                    {stats.availableItemsCount.toLocaleString('id-ID')}
                                 </span>{' '}
                                 eksemplar tersedia
                             </span>
@@ -358,11 +453,8 @@ function CategorySkeleton({ viewMode }: { viewMode: 'grid' | 'list' }) {
         <div className="flex flex-col gap-4">
             {viewMode === 'list' ? (
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="overflow-hidden rounded-xl border bg-card"
-                        >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="overflow-hidden rounded-xl border bg-card">
                             <BookListItemSkeleton />
                         </div>
                     ))}
@@ -394,12 +486,12 @@ function CategoryResults({
     viewMode: 'grid' | 'list';
 }) {
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
             {/* Result count — only when searching */}
             {hasSearch && (
                 <p className="text-sm text-muted-foreground">
                     <span className="font-semibold text-foreground">
-                        {stats.searchResultsCount}
+                        {stats.searchResultsCount.toLocaleString('id-ID')}
                     </span>{' '}
                     hasil untuk &ldquo;{searchValue}&rdquo;
                 </p>
@@ -445,62 +537,7 @@ function CategoryResults({
             {books.total > 0 && (
                 <>
                     <Separator />
-                    <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                        <p className="text-sm text-muted-foreground">
-                            <span className="font-semibold text-foreground">
-                                {books.from}–{books.to}
-                            </span>{' '}
-                            dari{' '}
-                            <span className="font-semibold text-foreground">
-                                {books.total}
-                            </span>{' '}
-                            buku
-                        </p>
-
-                        <div className="flex items-center gap-2">
-                            <Button
-                                asChild={!!books.prev_page_url}
-                                disabled={!books.prev_page_url}
-                                variant="outline"
-                                size="sm"
-                            >
-                                {books.prev_page_url ? (
-                                    <Link href={books.prev_page_url} preserveScroll>
-                                        <ChevronLeft data-icon="inline-start" />
-                                        Sebelumnya
-                                    </Link>
-                                ) : (
-                                    <span>
-                                        <ChevronLeft data-icon="inline-start" />
-                                        Sebelumnya
-                                    </span>
-                                )}
-                            </Button>
-
-                            <span className="px-1 text-xs text-muted-foreground">
-                                {books.current_page} / {books.last_page}
-                            </span>
-
-                            <Button
-                                asChild={!!books.next_page_url}
-                                disabled={!books.next_page_url}
-                                variant="outline"
-                                size="sm"
-                            >
-                                {books.next_page_url ? (
-                                    <Link href={books.next_page_url} preserveScroll>
-                                        Berikutnya
-                                        <ChevronRight data-icon="inline-end" />
-                                    </Link>
-                                ) : (
-                                    <span>
-                                        Berikutnya
-                                        <ChevronRight data-icon="inline-end" />
-                                    </span>
-                                )}
-                            </Button>
-                        </div>
-                    </div>
+                    <Pagination books={books} />
                 </>
             )}
         </div>

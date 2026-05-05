@@ -36,7 +36,7 @@ class CatalogController extends Controller
             ->orderByDesc('is_featured')
             ->orderByDesc('published_year')
             ->orderBy('title')
-            ->paginate(12)
+            ->paginate(24)
             ->withQueryString();
 
         return Inertia::render('catalog', [

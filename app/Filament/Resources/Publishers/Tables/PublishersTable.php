@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\Publishers\Tables;
 
-use App\Support\Library\LibraryResourceActionFactory;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -56,22 +54,9 @@ class PublishersTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Penerbit'),
-                    LibraryResourceActionFactory::deleteAction(
-                        singularLabel: 'Penerbit',
-                        fallbackReason: 'Masih ada data terkait yang membuat penerbit ini tidak bisa dihapus saat ini.',
-                        modalDescription: 'Penerbit hanya bisa dihapus jika sudah tidak dipakai oleh data buku mana pun.',
-                    ),
                 ])
                     ->label('Aksi'),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    LibraryResourceActionFactory::deleteBulkAction(
-                        singularLabel: 'penerbit',
-                        pluralLabel: 'penerbit',
-                        genericFailureReason: 'masih dipakai oleh data buku',
-                    ),
-                ]),
-            ]);
+            ->toolbarActions([]);
     }
 }

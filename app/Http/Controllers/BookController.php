@@ -17,7 +17,7 @@ class BookController extends Controller
 
         $book->load([
             'authors:id,name',
-            'categories:id,name',
+            'categories:id,name,slug',
             'publisher:id,name',
         ])->loadCount([
             'items',

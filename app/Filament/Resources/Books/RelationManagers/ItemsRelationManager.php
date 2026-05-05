@@ -3,10 +3,9 @@
 namespace App\Filament\Resources\Books\RelationManagers;
 
 use App\Filament\Resources\Books\RelationManagers\Actions\GenerateBookItemCodeAction;
-use App\Support\Library\LibraryResourceActionFactory;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -22,7 +21,7 @@ class ItemsRelationManager extends RelationManager
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
-        return auth()->user()?->can('update', $ownerRecord) ?? false;
+        return Filament::auth()->user()?->can('update', $ownerRecord) ?? false;
     }
 
     public function form(Schema $schema): Schema
@@ -105,20 +104,8 @@ class ItemsRelationManager extends RelationManager
             ->recordActions([
                 EditAction::make()
                     ->label('Ubah'),
-                LibraryResourceActionFactory::deleteAction(
-                    singularLabel: 'Eksemplar',
-                    fallbackReason: 'Masih ada data terkait yang membuat eksemplar ini tidak bisa dihapus saat ini.',
-                    modalDescription: 'Eksemplar hanya bisa dihapus jika belum pernah masuk transaksi peminjaman.',
-                ),
+
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    LibraryResourceActionFactory::deleteBulkAction(
-                        singularLabel: 'eksemplar',
-                        pluralLabel: 'eksemplar',
-                        genericFailureReason: 'sudah memiliki riwayat sirkulasi',
-                    ),
-                ]),
-            ]);
+            ->toolbarActions([]);
     }
 }

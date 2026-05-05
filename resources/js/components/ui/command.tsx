@@ -57,7 +57,7 @@ function CommandDialog({
         )}
         showCloseButton={showCloseButton}
       >
-        <Command className="border-none bg-transparent p-0! **:[[data-slot=command-input-wrapper]]:border-b **:[[data-slot=command-input-wrapper]]:px-2 **:[[data-slot=command-input-wrapper]]:py-1 **:[[data-slot=command-input-wrapper]]:pb-1 **:[[data-slot=command-input]]:h-12 **:[[data-slot=command-list]]:max-h-[min(400px,var(--radix-popover-content-available-height))]">
+        <Command className="border-none bg-transparent p-0!  **:[[data-slot=command-input-wrapper]]:px-2 **:[[data-slot=command-input-wrapper]]:py-1 **:[[data-slot=command-input-wrapper]]:pb-1 **:[[data-slot=command-input]]:h-12 **:[[data-slot=command-list]]:max-h-[min(400px,var(--radix-popover-content-available-height))]">
           {children}
         </Command>
       </DialogContent>
@@ -71,7 +71,7 @@ function CommandInput({
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
-      <InputGroup className="h-8! rounded-lg! border-none shadow-none! *:data-[slot=input-group-addon]:pl-2!">
+      <InputGroup className="h-8! rounded-lg! border-none shadow-none! *:data-[slot=input-group-addon]:pl-2! bg-transparent!">
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn(

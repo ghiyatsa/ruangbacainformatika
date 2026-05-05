@@ -33,7 +33,7 @@ class BookForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
+                            ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', Str::slug($state)))
                             ->placeholder('Masukkan judul buku'),
 
                         TextInput::make('slug')
@@ -43,6 +43,12 @@ class BookForm
                             ->required()
                             ->unique('books', 'slug', ignoreRecord: true)
                             ->maxLength(255),
+
+                        TextInput::make('subtitle')
+                            ->label('Subjudul')
+                            ->maxLength(255)
+                            ->placeholder('Masukkan subjudul buku (jika ada)')
+                            ->columnSpanFull(),
 
                         Textarea::make('description')
                             ->label('Deskripsi Singkat')
@@ -136,7 +142,7 @@ class BookForm
                                         } catch (\Exception $exception) {
                                             Notification::make()
                                                 ->title('Gagal mengunduh gambar')
-                                                ->body('Detail Error: '.$exception->getMessage())
+                                                ->body('Detail Error: ' . $exception->getMessage())
                                                 ->danger()
                                                 ->send();
                                         }
@@ -148,7 +154,7 @@ class BookForm
                             ->directory('books/covers')
                             ->disk('public')
                             ->saveUploadedFileUsing(
-                                fn (TemporaryUploadedFile $file, Get $get): string => app(BookCoverImage::class)->storeFromUploadedFile($file, baseName: $get('slug') ?: $get('title')),
+                                fn(TemporaryUploadedFile $file, Get $get): string => app(BookCoverImage::class)->storeFromUploadedFile($file, baseName: $get('slug') ?: $get('title')),
                             )
                             ->deleteUploadedFileUsing(function (string $file) {
                                 if (Storage::disk('public')->exists($file)) {
@@ -156,6 +162,11 @@ class BookForm
                                 }
                             })
                             ->imageEditor()
+                            ->imageEditorAspectRatioOptions([
+                                '3:4',
+                            ])
+                            ->imageAspectRatio('3:4')
+                            ->automaticallyCropImagesToAspectRatio()
                             ->maxSize(2048)
                             ->helperText('Jika cover kosong atau URL gagal diunduh, sistem akan memakai cover default.')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),

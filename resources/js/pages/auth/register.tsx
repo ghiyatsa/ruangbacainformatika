@@ -40,7 +40,6 @@ export default function Register({ canLoginWithGoogle }: Props) {
                 <Form
                     action={store.url()}
                     method="post"
-                    resetOnSuccess={['password', 'password_confirmation']}
                     disableWhileProcessing
                     className="flex flex-col gap-6"
                 >
@@ -49,7 +48,7 @@ export default function Register({ canLoginWithGoogle }: Props) {
                             {canLoginWithGoogle ? (
                                 <div className="relative text-center text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     <span className="relative z-10 bg-card px-3">
-                                        Or continue with email
+                                        Or register with email
                                     </span>
                                     <div className="absolute inset-x-0 top-1/2 border-t border-border" />
                                 </div>
@@ -57,16 +56,16 @@ export default function Register({ canLoginWithGoogle }: Props) {
 
                             <div className="grid gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
+                                    <Label htmlFor="name">Full name</Label>
                                     <Input
                                         id="name"
-                                        type="text"
+                                        name="name"
                                         required
                                         autoFocus
                                         tabIndex={1}
                                         autoComplete="name"
-                                        name="name"
-                                        placeholder="Full name"
+                                        placeholder="Full Name"
+                                        suppressHydrationWarning
                                     />
                                     <InputError message={errors.name} />
                                 </div>
@@ -76,11 +75,12 @@ export default function Register({ canLoginWithGoogle }: Props) {
                                     <Input
                                         id="email"
                                         type="email"
+                                        name="email"
                                         required
                                         tabIndex={2}
                                         autoComplete="email"
-                                        name="email"
-                                        placeholder="nama@unimal.ac.id"
+                                        placeholder="email@example.com"
+                                        suppressHydrationWarning
                                     />
                                     <InputError message={errors.email} />
                                 </div>
@@ -89,10 +89,10 @@ export default function Register({ canLoginWithGoogle }: Props) {
                                     <Label htmlFor="password">Password</Label>
                                     <PasswordInput
                                         id="password"
-                                        required
-                                        tabIndex={4}
-                                        autoComplete="new-password"
                                         name="password"
+                                        required
+                                        tabIndex={3}
+                                        autoComplete="new-password"
                                         placeholder="Password"
                                     />
                                     <InputError message={errors.password} />
@@ -104,11 +104,11 @@ export default function Register({ canLoginWithGoogle }: Props) {
                                     </Label>
                                     <PasswordInput
                                         id="password_confirmation"
-                                        required
-                                        tabIndex={5}
-                                        autoComplete="new-password"
                                         name="password_confirmation"
-                                        placeholder="Confirm password"
+                                        required
+                                        tabIndex={4}
+                                        autoComplete="new-password"
+                                        placeholder="Confirm Password"
                                     />
                                     <InputError
                                         message={errors.password_confirmation}
@@ -118,8 +118,7 @@ export default function Register({ canLoginWithGoogle }: Props) {
                                 <Button
                                     type="submit"
                                     className="w-full"
-                                    tabIndex={6}
-                                    data-test="register-user-button"
+                                    tabIndex={5}
                                     disabled={processing}
                                     size={'lg'}
                                 >
@@ -130,7 +129,7 @@ export default function Register({ canLoginWithGoogle }: Props) {
 
                             <div className="text-center text-sm text-muted-foreground">
                                 Already have an account?{' '}
-                                <TextLink href={login()} tabIndex={7}>
+                                <TextLink href={login()} tabIndex={6}>
                                     Log in
                                 </TextLink>
                             </div>
@@ -144,5 +143,5 @@ export default function Register({ canLoginWithGoogle }: Props) {
 
 Register.layout = {
     title: 'Create an account',
-    description: 'Enter your email and password below to register.',
+    description: 'Enter your details below to create your account',
 };

@@ -1,10 +1,11 @@
-import { Form, Head, usePage } from '@inertiajs/react';
+import { Form, Head, Link, usePage } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { logout } from '@/routes';
 
 export default function RegisterWhatsapp() {
     const { auth } = usePage().props;
@@ -66,6 +67,17 @@ export default function RegisterWhatsapp() {
                         </div>
                     )}
                 </Form>
+
+                <div className="text-center">
+                    <Link
+                        href={logout().url}
+                        method="post"
+                        as="button"
+                        className="text-sm text-muted-foreground underline underline-offset-4 hover:text-primary transition-colors"
+                    >
+                        Bukan akun Anda? Keluar
+                    </Link>
+                </div>
             </div>
         </>
     );

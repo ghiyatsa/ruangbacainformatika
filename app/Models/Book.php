@@ -34,6 +34,7 @@ class Book extends Model
 
     protected $fillable = [
         'title',
+        'subtitle',
         'slug',
         'isbn',
         'issn',
@@ -102,6 +103,7 @@ class Book extends Model
             foreach ($terms as $term) {
                 $q->where(function (Builder $inner) use ($term) {
                     $inner->where('title', 'like', "%{$term}%")
+                        ->orWhere('subtitle', 'like', "%{$term}%")
                         ->orWhere('isbn', 'like', "%{$term}%")
                         ->orWhere('issn', 'like', "%{$term}%")
                         ->orWhere('ddc_code', 'like', "%{$term}%")

@@ -14,12 +14,12 @@ class SkripsiObserver
     private function payload(Skripsi $skripsi): array
     {
         return [
-            'laravel_id' => $skripsi->id,
+            'skripsi_id' => $skripsi->id,
             'judul' => $skripsi->title,
             'abstrak' => $skripsi->abstract,
             'kata_kunci' => $skripsi->keywords,
             'tahun' => $skripsi->year,
-            'program_studi' => null, // ruangbaca doesn't have program_studi
+            'program_studi' => 'Teknik Informatika',
             'nim' => $skripsi->student_id,
             'nama_mahasiswa' => $skripsi->author_name,
         ];

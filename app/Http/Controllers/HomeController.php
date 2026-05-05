@@ -28,7 +28,7 @@ class HomeController extends Controller
             ->orderByDesc('is_featured')
             ->orderByDesc('published_year')
             ->orderBy('title')
-            ->paginate(4);
+            ->paginate(10);
 
         return Inertia::render('welcome', [
             'canRegister' => Features::enabled(Features::registration()),

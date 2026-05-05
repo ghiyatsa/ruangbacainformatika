@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\Authors\Tables;
 
-use App\Support\Library\LibraryResourceActionFactory;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -56,22 +54,9 @@ class AuthorsTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Penulis'),
-                    LibraryResourceActionFactory::deleteAction(
-                        singularLabel: 'Penulis',
-                        fallbackReason: 'Masih ada data terkait yang membuat penulis ini tidak bisa dihapus saat ini.',
-                        modalDescription: 'Penulis hanya bisa dihapus jika sudah tidak terhubung dengan data buku mana pun.',
-                    ),
                 ])
                     ->label('Aksi'),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    LibraryResourceActionFactory::deleteBulkAction(
-                        singularLabel: 'penulis',
-                        pluralLabel: 'penulis',
-                        genericFailureReason: 'masih terhubung dengan data buku',
-                    ),
-                ]),
-            ]);
+            ->toolbarActions([]);
     }
 }

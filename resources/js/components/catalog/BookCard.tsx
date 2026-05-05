@@ -1,8 +1,44 @@
 import { Link } from '@inertiajs/react';
 import { BookOpen, Eye, Star } from 'lucide-react';
+import { useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { Badge } from '@/components/ui/badge';
 import type { CatalogBook } from '@/components/welcome/types';
+
+/* ───────────────────────────────────────────────────
+ * Cover image with error fallback
+ * ─────────────────────────────────────────────────── */
+function CoverImage({
+    src,
+    alt,
+    className,
+}: {
+    src: string;
+    alt: string;
+    className?: string;
+}) {
+    const [errored, setErrored] = useState(false);
+
+    if (errored) {
+        return (
+            <div
+                className={`flex items-center justify-center bg-muted ${className ?? ''}`}
+            >
+                <BookOpen className="size-10 text-muted-foreground/40" />
+            </div>
+        );
+    }
+
+    return (
+        <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            className={className}
+            onError={() => setErrored(true)}
+        />
+    );
+}
 
 interface BookCardProps {
     book: CatalogBook;
@@ -31,11 +67,10 @@ export default function BookCard({ book }: BookCardProps) {
             <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 dark:hover:shadow-primary/10">
                 {/* Cover image area */}
                 <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-                    <img
+                    <CoverImage
                         src={book.coverImageUrl}
                         alt={book.title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
                     />
 
                     {/* Gradient overlay on hover */}
@@ -64,14 +99,16 @@ export default function BookCard({ book }: BookCardProps) {
                 <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
                     {/* Categories */}
                     <div className="flex flex-wrap gap-1">
-                        {book.categories.slice(0, 2).map((c) => (
-                            <span
-                                key={c}
-                                className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
-                            >
-                                {c}
-                            </span>
-                        ))}
+                        {Array.from(book.categories ?? []).slice(0, 2).map(
+                            (category: { name: string; slug: string }, index) => (
+                                <span
+                                    key={category.slug || `cat-${index}`}
+                                    className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                >
+                                    {category.name}
+                                </span>
+                            ),
+                        )}
                     </div>
 
                     {/* Title */}
@@ -79,9 +116,15 @@ export default function BookCard({ book }: BookCardProps) {
                         {book.title}
                     </h3>
 
+                    {book.subtitle && (
+                        <p className="line-clamp-1 -mt-1 text-[11px] text-muted-foreground/80 italic">
+                            {book.subtitle}
+                        </p>
+                    )}
+
                     {/* Author */}
                     <p className="line-clamp-1 text-xs text-muted-foreground">
-                        {book.authors.join(', ') || 'Penulis tidak tersedia'}
+                        {Array.from(book.authors || []).join(', ') || 'Penulis tidak tersedia'}
                     </p>
 
                     {/* Spacer to push footer down */}

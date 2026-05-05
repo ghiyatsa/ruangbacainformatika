@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Books\Tables;
 
 use App\Filament\Imports\BookImporter;
 use App\Models\Book;
-use App\Support\Library\LibraryResourceActionFactory;
 use App\Support\Media\BookCoverImage;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
@@ -50,6 +49,14 @@ class BooksTable
                         $record->issn ? "ISSN: {$record->issn}" : null,
                     ])->filter()->join(' | ') ?: '-')
                     ->wrap(),
+
+                TextColumn::make('subtitle')
+                    ->label('Subjudul')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('categories.name')
                     ->label('Kategori')
@@ -147,7 +154,6 @@ class BooksTable
                 SelectFilter::make('published_year')
                     ->label('Tahun Terbit')
                     ->options(fn (): array => Book::query()
-                        ->whereNotNull('published_year')
                         ->orderByDesc('published_year')
                         ->pluck('published_year', 'published_year')
                         ->all()),
@@ -156,11 +162,6 @@ class BooksTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Buku'),
-                    LibraryResourceActionFactory::deleteAction(
-                        singularLabel: 'Buku',
-                        fallbackReason: 'Masih ada data terkait yang membuat buku ini tidak bisa dihapus saat ini.',
-                        modalDescription: 'Buku hanya bisa dihapus jika sudah tidak memiliki eksemplar aktif maupun riwayat sirkulasi yang terkait.',
-                    ),
                 ])
                     ->label('Aksi'),
             ])
@@ -203,11 +204,6 @@ class BooksTable
                         ->action(fn (Collection $records) => $records->each(fn (Book $record) => $record->update(['is_borrowable' => true])))
                         ->deselectRecordsAfterCompletion(),
 
-                    LibraryResourceActionFactory::deleteBulkAction(
-                        singularLabel: 'buku',
-                        pluralLabel: 'buku',
-                        genericFailureReason: 'masih memiliki eksemplar atau riwayat sirkulasi',
-                    ),
                 ]),
             ]);
     }

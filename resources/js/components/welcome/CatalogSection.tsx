@@ -7,20 +7,25 @@ import {
     ChevronLeft,
     ChevronRight,
     Eye,
-    GraduationCap,
     LayoutGrid,
     LayoutList,
+    Library,
     Sparkles,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import BookCard from '@/components/catalog/BookCard';
 import BookCardSkeleton from '@/components/catalog/BookCardSkeleton';
 import BookListItem from '@/components/catalog/BookListItem';
 import BookListItemSkeleton from '@/components/catalog/BookListItemSkeleton';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import booksRoute from '@/routes/books';
 import type { CatalogBook, WelcomeProps } from './types';
 
@@ -54,6 +59,42 @@ function availabilityColor(book: CatalogBook): string {
     return 'text-emerald-600 dark:text-emerald-400';
 }
 
+const SLIDE_DURATION = 5000;
+
+/* ───────────────────────────────────────────────────
+ * Cover image with fallback on error
+ * ─────────────────────────────────────────────────── */
+function CoverImage({
+    src,
+    alt,
+    className,
+}: {
+    src: string;
+    alt: string;
+    className?: string;
+}) {
+    const [errored, setErrored] = useState(false);
+
+    if (errored) {
+        return (
+            <div
+                className={`flex items-center justify-center bg-muted ${className ?? ''}`}
+            >
+                <BookOpen className="size-10 text-muted-foreground/40" />
+            </div>
+        );
+    }
+
+    return (
+        <img
+            src={src}
+            alt={alt}
+            className={className}
+            onError={() => setErrored(true)}
+        />
+    );
+}
+
 /* ───────────────────────────────────────────────────
  * Featured Book Spotlight (horizontal carousel)
  * ─────────────────────────────────────────────────── */
@@ -64,39 +105,65 @@ function FeaturedSpotlight({
 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const count = featuredBooks?.length ?? 0;
+
+    const goTo = useCallback((index: number) => {
+        setCurrentIndex(index);
+        setProgress(0);
+    }, []);
 
     const goNext = useCallback(() => {
         if (count <= 1) {
             return;
         }
 
-        setCurrentIndex((prev) => (prev + 1) % count);
-    }, [count]);
+        goTo((currentIndex + 1) % count);
+    }, [count, currentIndex, goTo]);
 
     const goPrev = useCallback(() => {
         if (count <= 1) {
             return;
         }
 
-        setCurrentIndex((prev) => (prev - 1 + count) % count);
-    }, [count]);
+        goTo((currentIndex - 1 + count) % count);
+    }, [count, currentIndex, goTo]);
 
     useEffect(() => {
         if (count <= 1 || isPaused) {
             return;
         }
 
-        const interval = setInterval(goNext, 5000);
+        // Progress tick every 50ms
+        progressRef.current = setInterval(() => {
+            setProgress((p) => Math.min(p + 50 / SLIDE_DURATION, 1));
+        }, 50);
 
-        return () => clearInterval(interval);
-    }, [count, isPaused, goNext]);
+        intervalRef.current = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % count);
+            setProgress(0);
+        }, SLIDE_DURATION);
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+
+            if (progressRef.current) {
+                clearInterval(progressRef.current);
+            }
+        };
+    }, [count, isPaused, currentIndex]);
 
     const book = featuredBooks?.[currentIndex] || null;
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/[0.04] via-transparent to-primary/[0.02]">
+        <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-background/40 backdrop-blur-sm dark:bg-background/10">
+            {/* Gradient Overlay for premium look and background pattern integration */}
+            <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/10 via-transparent to-primary/5 opacity-50 dark:from-primary/20 dark:to-transparent" />
             <Deferred
                 data="featuredBooks"
                 fallback={
@@ -145,7 +212,7 @@ function FeaturedSpotlight({
                 <AnimatePresence mode="wait">
                     {book ? (
                         <motion.div
-                            key={book.id}
+                            key={book.id || currentIndex}
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -12 }}
@@ -160,7 +227,7 @@ function FeaturedSpotlight({
                                 className="group/cover mx-auto w-36 shrink-0 sm:mx-0 sm:w-40 md:w-44"
                             >
                                 <div className="aspect-3/4 overflow-hidden rounded-xl border bg-background shadow-lg ring-1 ring-black/5 transition-transform duration-300 group-hover/cover:scale-[1.03] dark:ring-white/5">
-                                    <img
+                                    <CoverImage
                                         src={book.coverImageUrl}
                                         alt={book.title}
                                         className="h-full w-full object-cover"
@@ -176,6 +243,15 @@ function FeaturedSpotlight({
                                         Koleksi Sorotan
                                     </span>
                                 </div>
+
+                                {/* Author — prominent position */}
+                                {Array.from(book.authors || []).length > 0 && (
+                                    <p className="text-xs font-medium text-primary/70">
+                                        {Array.from(book.authors || []).join(
+                                            ', ',
+                                        )}
+                                    </p>
+                                )}
 
                                 <Link
                                     href={BookController.show(book.slug)}
@@ -204,25 +280,32 @@ function FeaturedSpotlight({
                                         <BookOpen className="size-3" />
                                         {availabilityLabel(book)}
                                     </span>
-                                    {book.categories.slice(0, 2).map((c) => (
-                                        <span
-                                            key={c}
-                                            className="rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                                        >
-                                            {c}
-                                        </span>
-                                    ))}
+                                    {Array.from(book.categories ?? [])
+                                        .slice(0, 2)
+                                        .map(
+                                            (
+                                                category: {
+                                                    name: string;
+                                                    slug: string;
+                                                },
+                                                index,
+                                            ) => (
+                                                <span
+                                                    key={
+                                                        category.slug ||
+                                                        `cat-${index}`
+                                                    }
+                                                    className="rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                                                >
+                                                    {category.name}
+                                                </span>
+                                            ),
+                                        )}
                                     <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
                                         <Eye className="size-3" />
                                         {book.viewCount}
                                     </span>
                                 </div>
-
-                                {/* Author */}
-                                <p className="text-xs text-muted-foreground">
-                                    {book.authors.join(', ') ||
-                                        'Penulis tidak tersedia'}
-                                </p>
                             </div>
                         </motion.div>
                     ) : (
@@ -239,21 +322,33 @@ function FeaturedSpotlight({
                 </AnimatePresence>
             </Deferred>
 
-            {/* Navigation + pagination */}
+            {/* Navigation + pagination with progress indicator */}
             {count > 1 && (
                 <div className="flex items-center justify-between border-t border-primary/10 px-5 py-3 sm:px-8">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                         {featuredBooks?.map((_, i) => (
                             <button
                                 key={i}
-                                onClick={() => setCurrentIndex(i)}
-                                className={`h-1.5 rounded-full transition-all duration-300 ${
-                                    i === currentIndex
-                                        ? 'w-6 bg-primary'
-                                        : 'w-1.5 bg-primary/20 hover:bg-primary/40'
-                                }`}
+                                onClick={() => goTo(i)}
+                                className="group relative h-1.5 overflow-hidden rounded-full transition-all duration-300"
+                                style={{
+                                    width: i === currentIndex ? 28 : 6,
+                                    backgroundColor:
+                                        i === currentIndex
+                                            ? 'hsl(var(--primary) / 0.2)'
+                                            : 'hsl(var(--primary) / 0.2)',
+                                }}
                                 aria-label={`Buku sorotan ${i + 1}`}
-                            />
+                            >
+                                {i === currentIndex ? (
+                                    <motion.div
+                                        className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                                        style={{ width: `${progress * 100}%` }}
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 rounded-full bg-primary/20 transition-colors group-hover:bg-primary/40" />
+                                )}
+                            </button>
                         ))}
                     </div>
                     <div className="flex items-center gap-1">
@@ -281,6 +376,33 @@ function FeaturedSpotlight({
 }
 
 /* ───────────────────────────────────────────────────
+ * Empty state
+ * ─────────────────────────────────────────────────── */
+function EmptyCatalogState() {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center gap-4 rounded-2xl border border-dashed bg-muted/30 px-6 py-16 text-center"
+        >
+            <div className="flex size-14 items-center justify-center rounded-full bg-muted">
+                <Library className="size-7 text-muted-foreground" />
+            </div>
+            <div className="flex flex-col gap-1">
+                <p className="font-semibold text-foreground">
+                    Belum ada koleksi terbaru
+                </p>
+                <p className="text-sm text-muted-foreground">
+                    Koleksi buku akan muncul di sini setelah ditambahkan ke
+                    katalog.
+                </p>
+            </div>
+        </motion.div>
+    );
+}
+
+/* ───────────────────────────────────────────────────
  * Main Section
  * ─────────────────────────────────────────────────── */
 export default function CatalogSection({
@@ -288,8 +410,9 @@ export default function CatalogSection({
     featuredBooks,
     books,
 }: CatalogSectionProps) {
-    const previewBooks = books?.data?.slice(0, 8) || [];
+    const previewBooks = books?.data?.slice(0, 12) || [];
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const totalBooks = stats?.booksCount ?? 0;
 
     return (
         <section className="py-16 sm:py-20 lg:py-28">
@@ -303,60 +426,83 @@ export default function CatalogSection({
                         {/* Header */}
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                             <div className="flex flex-col gap-2">
-                                <Badge variant="secondary" className="w-fit">
-                                    <GraduationCap className="mr-1.5 size-3.5" />
-                                    Koleksi Akademik Terkurasi
-                                </Badge>
+                                {/* Section badge */}
+                                <div className="flex items-center gap-2">
+                                    <BookOpen className="size-3.5 text-primary" />
+                                    <span className="text-xs font-bold tracking-widest text-primary uppercase">
+                                        Katalog
+                                    </span>
+                                </div>
                                 <div>
                                     <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                                        Eksplorasi Katalog Digital
+                                        Buku Terbaru
                                     </h2>
                                     <p className="mt-1 text-sm text-muted-foreground">
-                                        Akses terbuka untuk penelusuran pustaka
-                                        guna mendukung riset dan pembelajaran.
+                                        Koleksi buku yang baru saja ditambahkan
+                                        ke dalam katalog.
                                     </p>
                                 </div>
                             </div>
 
-                            {/* View mode toggle */}
-                            <div className="flex items-center gap-1 self-start rounded-lg border bg-muted/50 p-1 sm:self-auto">
-                                <Button
-                                    variant={
-                                        viewMode === 'grid'
-                                            ? 'secondary'
-                                            : 'ghost'
-                                    }
-                                    size="icon"
-                                    className="size-8"
-                                    onClick={() => setViewMode('grid')}
-                                >
-                                    <LayoutGrid className="size-4" />
-                                    <span className="sr-only">Grid view</span>
-                                </Button>
-                                <Button
-                                    variant={
-                                        viewMode === 'list'
-                                            ? 'secondary'
-                                            : 'ghost'
-                                    }
-                                    size="icon"
-                                    className="size-8"
-                                    onClick={() => setViewMode('list')}
-                                >
-                                    <LayoutList className="size-4" />
-                                    <span className="sr-only">List view</span>
-                                </Button>
-                            </div>
+                            {/* View mode toggle with tooltips */}
+                            <TooltipProvider>
+                                <div className="flex items-center gap-1 self-start rounded-lg border bg-muted/50 p-1 sm:self-auto">
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant={
+                                                    viewMode === 'grid'
+                                                        ? 'secondary'
+                                                        : 'ghost'
+                                                }
+                                                size="icon"
+                                                className="size-8"
+                                                onClick={() =>
+                                                    setViewMode('grid')
+                                                }
+                                                aria-label="Tampilan grid"
+                                            >
+                                                <LayoutGrid className="size-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Tampilan Grid
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant={
+                                                    viewMode === 'list'
+                                                        ? 'secondary'
+                                                        : 'ghost'
+                                                }
+                                                size="icon"
+                                                className="size-8"
+                                                onClick={() =>
+                                                    setViewMode('list')
+                                                }
+                                                aria-label="Tampilan daftar"
+                                            >
+                                                <LayoutList className="size-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            Tampilan Daftar
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
+                            </TooltipProvider>
                         </div>
 
-                        {/* Book grid / list */}
+                        {/* Book grid / list with AnimatePresence */}
                         <Deferred
                             data="books"
                             fallback={
                                 <div className="animate-in duration-500 fade-in">
                                     {viewMode === 'grid' ? (
-                                        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-                                            {Array.from({ length: 8 }).map(
+                                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                                            {Array.from({ length: 10 }).map(
                                                 (_, i) => (
                                                     <BookCardSkeleton key={i} />
                                                 ),
@@ -365,7 +511,7 @@ export default function CatalogSection({
                                     ) : (
                                         <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
                                             <div className="flex flex-col divide-y divide-border">
-                                                {Array.from({ length: 6 }).map(
+                                                {Array.from({ length: 10 }).map(
                                                     (_, i) => (
                                                         <BookListItemSkeleton
                                                             key={i}
@@ -378,56 +524,76 @@ export default function CatalogSection({
                                 </div>
                             }
                         >
-                            {previewBooks.length > 0 && (
-                                <div className="animate-in duration-500 fade-in">
-                                    {viewMode === 'grid' ? (
-                                        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-                                            {previewBooks.map((book) => (
-                                                <BookCard
-                                                    key={book.id}
-                                                    book={book}
-                                                />
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                                            {previewBooks.map((book) => (
-                                                <div
-                                                    key={book.id}
-                                                    className="overflow-hidden rounded-xl border bg-card"
-                                                >
-                                                    <BookListItem book={book} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                            {previewBooks.length > 0 ? (
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={viewMode}
+                                        initial={{ opacity: 0, y: 6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -6 }}
+                                        transition={{ duration: 0.25 }}
+                                    >
+                                        {viewMode === 'grid' ? (
+                                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                                                {previewBooks.map(
+                                                    (book, index) => (
+                                                        <BookCard
+                                                            key={
+                                                                book.id ||
+                                                                `grid-${index}`
+                                                            }
+                                                            book={book}
+                                                        />
+                                                    ),
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                                                {previewBooks.map(
+                                                    (book, index) => (
+                                                        <div
+                                                            key={
+                                                                book.id ||
+                                                                `list-${index}`
+                                                            }
+                                                            className="overflow-hidden rounded-xl border bg-card"
+                                                        >
+                                                            <BookListItem
+                                                                book={book}
+                                                            />
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                </AnimatePresence>
+                            ) : (
+                                <EmptyCatalogState />
                             )}
                         </Deferred>
 
-                        {/* CTA */}
-                        <div className="flex flex-col items-center gap-4 rounded-xl border bg-muted/30 p-6 sm:flex-row sm:justify-between sm:p-8">
-                            <div className="text-center sm:text-left">
-                                <p className="font-semibold">
-                                    Jelajahi katalog lengkap
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {stats.booksCount} judul tersedia ·{' '}
-                                    {stats.availableItemsCount} eksemplar siap
-                                    dipinjam
-                                </p>
-                            </div>
+                        {/* CTA — centered with total count */}
+                        <div className="flex flex-col items-center gap-2">
                             <Button
                                 asChild
                                 size="lg"
-                                className="gap-2 rounded-xl"
+                                className="gap-2 rounded-xl px-8"
                             >
                                 <Link href={booksRoute.index.url()}>
                                     <BookOpen className="size-4" />
-                                    Lihat Semua Buku
+                                    {totalBooks > 0
+                                        ? `Lihat Semua ${totalBooks.toLocaleString('id-ID')}+ Buku`
+                                        : 'Lihat Semua Buku'}
                                     <ArrowRight className="size-4" />
                                 </Link>
                             </Button>
+                            {totalBooks > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                    Menampilkan {previewBooks.length} dari{' '}
+                                    {totalBooks.toLocaleString('id-ID')} koleksi
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

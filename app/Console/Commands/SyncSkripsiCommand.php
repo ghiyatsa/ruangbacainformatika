@@ -37,12 +37,17 @@ class SyncSkripsiCommand extends Command
         $failed = 0;
 
         Skripsi::select([
-            'id', 'title', 'abstract', 'keywords',
-            'year', 'student_id', 'author_name',
+            'id',
+            'title',
+            'abstract',
+            'keywords',
+            'year',
+            'student_id',
+            'author_name',
         ])
             ->chunkById($chunk, function ($skripsis) use ($bar, &$success, &$failed) {
                 $items = $skripsis->map(fn ($s) => [
-                    'laravel_id' => $s->id,
+                    'skripsi_id' => $s->id,
                     'judul' => $s->title,
                     'abstrak' => $s->abstract,
                     'kata_kunci' => $s->keywords,

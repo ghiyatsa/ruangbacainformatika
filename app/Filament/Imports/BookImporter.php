@@ -30,6 +30,9 @@ class BookImporter extends Importer
                     $record->title = $state;
                     $record->slug = Str::slug($state);
                 }),
+            ImportColumn::make('subtitle')
+                ->label('Subjudul')
+                ->rules(['nullable', 'max:255']),
             ImportColumn::make('isbn')
                 ->label('ISBN')
                 ->rules(['max:20']),
