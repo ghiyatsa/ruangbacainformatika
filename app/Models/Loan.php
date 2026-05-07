@@ -24,6 +24,7 @@ class Loan extends Model
         'borrowed_at',
         'due_at',
         'returned_at',
+        'reminder_sent_at',
     ];
 
     public static function statusOptions(): array
@@ -40,6 +41,7 @@ class Loan extends Model
             'borrowed_at' => 'datetime',
             'due_at' => 'datetime',
             'returned_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
         ];
     }
 
@@ -71,7 +73,7 @@ class Loan extends Model
             return 'Transaksi peminjaman ini tidak dapat dihapus karena masih berstatus aktif.';
         }
 
-        if ($this->items()->whereNull('returned_at')->exists()) {
+        if ($this->items()->whereNull('returned_at', 'and', false)->exists()) {
             return 'Transaksi peminjaman ini tidak dapat dihapus karena masih terdapat item yang belum dikembalikan.';
         }
 
