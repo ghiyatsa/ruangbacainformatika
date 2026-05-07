@@ -5,10 +5,10 @@
     LOG_CHANNEL = 'stderr'
 
 [phases.setup]
-    nixPkgs = ['php83', 'php83Packages.composer', 'nodejs_20', 'mysql-client']
+    nixPkgs = ['php83', 'php83Extensions.intl', 'php83Extensions.zip', 'php83Extensions.exif', 'php83Extensions.gd', 'php83Extensions.imagick', 'php83Extensions.bcmath', 'php83Extensions.mbstring', 'php83Packages.composer', 'nodejs_20', 'mysql-client']
 
 [phases.install]
-    cmds = ['composer install --no-interaction --optimize-autoloader --no-dev']
+    cmds = ['composer install --no-interaction --optimize-autoloader --no-dev --ignore-platform-req=ext-intl --ignore-platform-req=ext-zip --ignore-platform-req=ext-exif']
 
 [phases.build]
     cmds = ['npm install', 'npm run build']
