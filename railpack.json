@@ -1,0 +1,4 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "phpExtensions": ["intl", "zip", "exif"]
+}
