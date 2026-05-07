@@ -9,44 +9,64 @@ use Illuminate\Support\Facades\Log;
 
 class SimilarityApiService
 {
-    private string $baseUrl;
+    private ?string $baseUrl = null;
 
-    private string $secret;
+    private ?string $secret = null;
 
-    private int $timeout;
+    private ?int $timeout = null;
 
-    private ?string $hfToken;
+    private ?string $hfToken = null;
 
-    public function __construct(private SettingRepository $settings)
+    public function __construct(private SettingRepository $settings) {}
+
+    private function getBaseUrl(): string
     {
-        $this->baseUrl = rtrim($this->settings->get('integration', 'similarity_api_url', config('services.similarity_api.url', 'http://localhost:8181')), '/');
-        $rawSecret = $this->settings->get('integration', 'similarity_api_secret', config('services.similarity_api.secret', 'changeme-secret-token'));
-        try {
-            $this->secret = filled($rawSecret) ? decrypt($rawSecret) : '';
-        } catch (\Exception) {
-            $this->secret = (string) $rawSecret; // plain text fallback (before migration)
-        }
-        $this->timeout = (int) $this->settings->get('integration', 'similarity_api_timeout', config('services.similarity_api.timeout', 10));
+        return $this->baseUrl ??= rtrim($this->settings->get('integration', 'similarity_api_url', config('services.similarity_api.url', 'http://localhost:8181')), '/');
+    }
 
-        $this->hfToken = config('services.huggingface.token');
+    private function getSecret(): string
+    {
+        if ($this->secret === null) {
+            $rawSecret = $this->settings->get('integration', 'similarity_api_secret', config('services.similarity_api.secret', 'changeme-secret-token'));
+            try {
+                $this->secret = filled($rawSecret) ? decrypt($rawSecret) : '';
+            } catch (\Exception) {
+                $this->secret = (string) $rawSecret;
+            }
+        }
+
+        return $this->secret;
+    }
+
+    private function getTimeout(): int
+    {
+        return $this->timeout ??= (int) $this->settings->get('integration', 'similarity_api_timeout', config('services.similarity_api.timeout', 10));
+    }
+
+    private function getHfToken(): ?string
+    {
+        return $this->hfToken ??= config('services.huggingface.token');
     }
 
     private function client(): PendingRequest
     {
-        $request = Http::baseUrl($this->baseUrl)
-            ->timeout($this->timeout)
+        $request = Http::baseUrl($this->getBaseUrl())
+            ->timeout($this->getTimeout())
             ->acceptJson();
+
+        $secret = $this->getSecret();
+        $hfToken = $this->getHfToken();
 
         // If HF token is present, use it for Bearer auth (Hugging Face Private Space requirement)
         // And send the app secret in a custom header
-        if ($this->hfToken) {
-            $request->withToken($this->hfToken)
+        if ($hfToken) {
+            $request->withToken($hfToken)
                 ->withHeaders([
-                    'X-Similarity-Api-Secret' => $this->secret,
+                    'X-Similarity-Api-Secret' => $secret,
                 ]);
         } else {
             // Default behavior if not using HF Private Space
-            $request->withToken($this->secret);
+            $request->withToken($secret);
         }
 
         return $request;
