@@ -6,7 +6,8 @@
     NIXPACKS_NODE_VERSION = '24'
 
 [phases.setup]
-    nixPkgs = ['php83', 'php83Packages.composer', 'nodejs', 'mysql-client', 'pkg-config', 'libxml2', 'zlib', 'libzip', 'icu']
+    nixpkgsArchive = '549bd84d6279f9852cae6225e372cc67fb91a4c1'
+    nixPkgs = ['php83', 'php83Packages.composer', 'nodejs_24', 'mysql-client', 'pkg-config', 'libxml2', 'zlib', 'libzip', 'icu']
 
 [phases.install]
     cmds = ['composer install --no-interaction --optimize-autoloader --no-dev --ignore-platform-reqs']
