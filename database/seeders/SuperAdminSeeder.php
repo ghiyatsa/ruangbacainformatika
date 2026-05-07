@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -18,7 +17,7 @@ class SuperAdminSeeder extends Seeder
         $role = Role::firstOrCreate(['name' => 'super_admin']);
 
         $user = User::firstOrCreate(
-            ['email' => 'admin@admin.com'],
+            ['email' => 'said.230170162@mhs.unimal.ac.id'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
