@@ -1,19 +1,24 @@
-import { TooltipProvider } from '@/components/ui/tooltip';
-import AppLayoutTemplate from '@/layouts/AppHeaderLayout';
-import type { BreadcrumbItem } from '@/types';
+import { usePage } from '@inertiajs/react';
+import { AppContent } from '@/components/layouts/AppContent';
+import { AppShell } from '@/components/layouts/AppShell';
+import Footer from '@/components/layouts/footer';
+import { AppHeader } from '@/components/layouts/header';
+import type { AppLayoutProps } from '@/types';
 
 export default function AppLayout({
-    breadcrumbs = [],
     children,
-}: {
-    breadcrumbs?: BreadcrumbItem[];
-    children: React.ReactNode;
-}) {
+    hideSearch = false,
+}: AppLayoutProps & { hideSearch?: boolean }) {
+    const { component } = usePage();
+    const isWelcome = component === 'welcome';
+
     return (
-        <TooltipProvider>
-            <AppLayoutTemplate breadcrumbs={breadcrumbs}>
+        <AppShell variant="header">
+            <AppHeader hideSearch={hideSearch} />
+            <AppContent variant={isWelcome ? 'full' : 'header'}>
                 {children}
-            </AppLayoutTemplate>
-        </TooltipProvider>
+            </AppContent>
+            <Footer />
+        </AppShell>
     );
 }

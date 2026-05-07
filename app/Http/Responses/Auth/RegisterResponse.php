@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses\Auth;
 
-use App\Support\Auth\AuthenticationRedirector;
+use App\Services\Auth\AuthenticationRedirector;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;

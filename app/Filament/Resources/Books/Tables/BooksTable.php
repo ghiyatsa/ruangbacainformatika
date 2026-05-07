@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Books\Tables;
 
 use App\Filament\Imports\BookImporter;
 use App\Models\Book;
-use App\Support\Media\BookCoverImage;
+use App\Services\BookCoverImageService;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -36,7 +36,7 @@ class BooksTable
                 ImageColumn::make('cover_image')
                     ->label('Cover')
                     ->alignCenter()
-                    ->defaultImageUrl(app(BookCoverImage::class)->getDefaultCoverUrl())
+                    ->defaultImageUrl(app(BookCoverImageService::class)->getDefaultCoverUrl())
                     ->disk('public'),
 
                 TextColumn::make('title')

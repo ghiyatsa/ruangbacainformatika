@@ -8,7 +8,7 @@ use App\Http\Responses\Auth\LoginResponse;
 use App\Http\Responses\Auth\LogoutResponse;
 use App\Http\Responses\Auth\RegisterResponse;
 use App\Http\Responses\Auth\SuccessfulPasswordResetLinkRequestResponse;
-use App\Support\Auth\LoginViewData;
+use App\Support\LoginViewData;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;

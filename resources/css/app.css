@@ -155,6 +155,30 @@
     html {
         @apply font-sans;
     }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply bg-muted-foreground/20 rounded-full border-2 border-solid border-transparent bg-clip-padding;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-muted-foreground/40;
+    }
+
+    /* Firefox */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--muted-foreground) transparent;
+    }
 }
 
 @theme inline {
@@ -221,6 +245,7 @@
         }
     }
 
-    --animate-star-movement-bottom: star-movement-bottom linear infinite alternate;
+    --animate-star-movement-bottom: star-movement-bottom linear infinite
+        alternate;
     --animate-star-movement-top: star-movement-top linear infinite alternate;
 }

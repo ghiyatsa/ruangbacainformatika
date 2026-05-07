@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Repositories\SettingRepository;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -14,19 +15,41 @@ class SimilarityApiService
 
     private int $timeout;
 
-    public function __construct()
+    private ?string $hfToken;
+
+    public function __construct(private SettingRepository $settings)
     {
-        $this->baseUrl = rtrim(config('services.similarity_api.url', 'http://localhost:8181'), '/');
-        $this->secret = config('services.similarity_api.secret', 'changeme-secret-token');
-        $this->timeout = (int) config('services.similarity_api.timeout', 10);
+        $this->baseUrl = rtrim($this->settings->get('integration', 'similarity_api_url', config('services.similarity_api.url', 'http://localhost:8181')), '/');
+        $rawSecret = $this->settings->get('integration', 'similarity_api_secret', config('services.similarity_api.secret', 'changeme-secret-token'));
+        try {
+            $this->secret = filled($rawSecret) ? decrypt($rawSecret) : '';
+        } catch (\Exception) {
+            $this->secret = (string) $rawSecret; // plain text fallback (before migration)
+        }
+        $this->timeout = (int) $this->settings->get('integration', 'similarity_api_timeout', config('services.similarity_api.timeout', 10));
+
+        $this->hfToken = config('services.huggingface.token');
     }
 
     private function client(): PendingRequest
     {
-        return Http::baseUrl($this->baseUrl)
+        $request = Http::baseUrl($this->baseUrl)
             ->timeout($this->timeout)
-            ->withToken($this->secret)
             ->acceptJson();
+
+        // If HF token is present, use it for Bearer auth (Hugging Face Private Space requirement)
+        // And send the app secret in a custom header
+        if ($this->hfToken) {
+            $request->withToken($this->hfToken)
+                ->withHeaders([
+                    'X-Similarity-Api-Secret' => $this->secret,
+                ]);
+        } else {
+            // Default behavior if not using HF Private Space
+            $request->withToken($this->secret);
+        }
+
+        return $request;
     }
 
     /**
@@ -118,7 +141,7 @@ class SimilarityApiService
     public function isHealthy(): bool
     {
         try {
-            return Http::baseUrl($this->baseUrl)
+            return $this->client()
                 ->timeout(5)
                 ->get('/health')
                 ->successful();

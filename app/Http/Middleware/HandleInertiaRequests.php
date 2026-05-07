@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Support\Auth\AuthenticationRedirector;
+use App\Services\Auth\AuthenticationRedirector;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -52,6 +52,7 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
             ],
             'verification_resend_available_at' => $request->session()->get('verification_resend_available_at'),
+            'password_reset_resend_available_at' => $request->session()->get('password_reset_resend_available_at'),
         ];
     }
 }

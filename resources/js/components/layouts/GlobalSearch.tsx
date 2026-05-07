@@ -2,7 +2,7 @@ import { router } from '@inertiajs/react';
 import { BookOpen, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
-import AnimatedList from '@/components/AnimatedList';
+import AnimatedList from '@/components/common/AnimatedList';
 import {
     CommandDialog,
     CommandEmpty,

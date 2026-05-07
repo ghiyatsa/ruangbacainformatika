@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Auth\AuthenticationRedirector;
-use App\Support\Auth\CampusEmail;
-use App\Support\Auth\GoogleAccountData;
+use App\Services\Auth\AuthenticationRedirector;
+use App\Support\CampusEmail;
+use App\Support\GoogleAccountData;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;

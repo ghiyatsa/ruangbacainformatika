@@ -7,24 +7,18 @@ import AppLayout from '@/layouts/AppLayout';
 import AuthLayout from '@/layouts/AuthLayout';
 import SettingsLayout from '@/layouts/SettingsLayout';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Ruang Baca';
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => (title ? `${title} — ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name === 'welcome':
-                return null;
-            case name.startsWith('kiosk/'):
-                return null;
-            case name.startsWith('catalog'):
-                return null;
-            case name.startsWith('books/'):
-                return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
                 return [AppLayout, SettingsLayout];
+            case name.startsWith('kiosk/'):
+                return null;
             default:
                 return AppLayout;
         }

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Books\RelationManagers\Actions;
 
-use App\Filament\Resources\Books\RelationManagers\Support\BookItemCodeGenerator;
+use App\Support\BookItemCodeGenerator;
 use Filament\Actions\Action;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Icons\Heroicon;

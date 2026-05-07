@@ -1,15 +1,15 @@
 <?php
 
 use App\Models\Setting;
-use App\Support\Kiosk\KioskPinManager;
+use App\Services\KioskPinManager;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 use Mockery;
+
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Pest\Laravel\instance;
 use function Pest\Laravel\post;
-
 
 beforeEach(function () {
     Setting::query()->create([
@@ -23,7 +23,7 @@ it('kiosk shows pin entry when not verified', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin')
                 ->has('visitorTypeOptions')
@@ -48,7 +48,7 @@ it('kiosk allows access after valid pin entry', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'ready')
                 ->where('activeMenu', 'landing'),
@@ -67,7 +67,7 @@ it('rotating kiosk sessions requires the pin again', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin'),
         );

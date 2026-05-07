@@ -46,4 +46,13 @@ return [
         'timeout' => env('SIMILARITY_API_TIMEOUT', 10),
     ],
 
+    'huggingface' => [
+        'token' => env('HF_TOKEN'),
+    ],
+
+    'turnstile' => [
+        'key' => env('TURNSTILE_SITE_KEY'),
+        'secret' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
 ];

@@ -6,8 +6,8 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Publisher;
-use App\Support\Library\BookItemBatchCreator;
-use App\Support\Media\BookCoverImage;
+use App\Services\BookCoverImageService;
+use App\Services\BookItemBatchCreator;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -58,7 +58,7 @@ class BookImporter extends Importer
                     }
 
                     $baseName = $record->slug ?: $this->data['title'] ?? null;
-                    $coverImage = app(BookCoverImage::class)->tryStoreFromUrl($state, baseName: $baseName);
+                    $coverImage = app(BookCoverImageService::class)->tryStoreFromUrl($state, baseName: $baseName);
 
                     if (filled($coverImage)) {
                         $record->cover_image = $coverImage;

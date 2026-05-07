@@ -1,6 +1,7 @@
 // Components
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import InputError from '@/components/common/InputError';
 import TextLink from '@/components/common/TextLink';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,28 @@ import { login } from '@/routes';
 import { email } from '@/routes/password';
 
 export default function ForgotPassword({ status }: { status?: string }) {
+    const { password_reset_resend_available_at } = usePage<{
+        password_reset_resend_available_at?: number;
+    }>().props;
+
+    const [now, setNow] = useState<number>(() => Math.floor(Date.now() / 1000));
+
+    useEffect(() => {
+        if (!password_reset_resend_available_at) {
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setNow(Math.floor(Date.now() / 1000));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [password_reset_resend_available_at]);
+
+    const countdown = password_reset_resend_available_at
+        ? Math.max(0, password_reset_resend_available_at - now)
+        : 0;
+
     return (
         <>
             <Head title="Forgot password" />
@@ -21,7 +44,11 @@ export default function ForgotPassword({ status }: { status?: string }) {
             )}
 
             <div className="flex flex-col gap-6">
-                <Form action={email.url()} method="post" className="flex flex-col gap-6">
+                <Form
+                    action={email.url()}
+                    method="post"
+                    className="flex flex-col gap-6"
+                >
                     {({ processing, errors }) => (
                         <div className="grid gap-4">
                             <div className="grid gap-2">
@@ -40,14 +67,16 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
                             <Button
                                 className="w-full"
-                                disabled={processing}
+                                disabled={processing || countdown > 0}
                                 data-test="email-password-reset-link-button"
                                 size={'lg'}
                             >
                                 {processing && (
                                     <LoaderCircle className="h-4 w-4 animate-spin" />
                                 )}
-                                Email password reset link
+                                {countdown > 0
+                                    ? `Resend link (${countdown}s)`
+                                    : 'Email password reset link'}
                             </Button>
                         </div>
                     )}

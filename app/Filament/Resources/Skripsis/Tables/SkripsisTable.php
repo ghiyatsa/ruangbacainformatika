@@ -26,7 +26,6 @@ class SkripsisTable
                     ->label('Judul')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold')
                     ->wrap(),
                 TextColumn::make('author_name')
                     ->label('Nama')

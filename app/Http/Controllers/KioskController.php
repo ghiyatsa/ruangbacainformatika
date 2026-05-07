@@ -7,9 +7,9 @@ use App\Http\Requests\Kiosk\ReturnBookRequest;
 use App\Http\Requests\Kiosk\SubmitVisitRequest;
 use App\Http\Requests\Kiosk\VerifyPinRequest;
 use App\Models\VisitLog;
-use App\Support\Kiosk\KioskPinManager;
-use App\Support\Library\KioskLoanService;
-use App\Support\Settings\SettingRepository;
+use App\Repositories\SettingRepository;
+use App\Services\KioskLoanService;
+use App\Services\KioskPinManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -119,7 +119,7 @@ class KioskController extends Controller
     {
         $loan = $this->kioskLoanService->borrow(
             (string) $request->validated('member_identifier'),
-            $request->validatedIsbn(),
+            $request->validatedIsbns(),
         );
 
         return redirect()
@@ -131,7 +131,7 @@ class KioskController extends Controller
     {
         $returnedCount = $this->kioskLoanService->returnBooks(
             (string) $request->validated('member_identifier'),
-            $request->validatedIsbn(),
+            $request->validatedIsbns(),
         );
 
         return redirect()

@@ -22,7 +22,8 @@ abstract class KioskBookActionRequest extends FormRequest
     {
         return [
             'member_identifier' => ['required', 'string', 'max:255'],
-            'isbn' => [
+            'isbns' => ['required', 'array', 'min:1'],
+            'isbns.*' => [
                 'required',
                 'string',
                 'max:20',
@@ -33,14 +34,23 @@ abstract class KioskBookActionRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $isbns = collect($this->input('isbns', []))
+            ->map(fn ($isbn) => Str::of((string) $isbn)->trim()->toString())
+            ->filter()
+            ->values()
+            ->all();
+
         $this->merge([
             'member_identifier' => Str::of((string) $this->input('member_identifier'))->squish()->toString(),
-            'isbn' => Str::of((string) $this->input('isbn'))->trim()->toString(),
+            'isbns' => $isbns,
         ]);
     }
 
-    public function validatedIsbn(): string
+    /**
+     * @return array<int, string>
+     */
+    public function validatedIsbns(): array
     {
-        return (string) $this->validated('isbn');
+        return (array) $this->validated('isbns');
     }
 }

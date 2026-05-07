@@ -11,5 +11,7 @@ class SettingsCluster extends Cluster
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
+    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::Squares2x2;
+
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
 }

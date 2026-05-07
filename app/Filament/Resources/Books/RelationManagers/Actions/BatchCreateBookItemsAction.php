@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Books\RelationManagers\Actions;
 
-use App\Support\Library\BookItemBatchCreator;
+use App\Services\BookItemBatchCreator;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;

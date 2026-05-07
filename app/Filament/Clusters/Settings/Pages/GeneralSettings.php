@@ -3,7 +3,8 @@
 namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
-use App\Support\Settings\SettingRepository;
+use App\Repositories\SettingRepository;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -12,12 +13,17 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class GeneralSettings extends Page
 {
     protected string $view = 'filament.clusters.settings.pages.general-settings';
 
     protected static ?string $cluster = SettingsCluster::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
+
+    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::GlobeAlt;
 
     public ?array $data = [];
 

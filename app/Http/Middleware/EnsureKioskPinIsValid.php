@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Support\Kiosk\KioskPinManager;
+use App\Services\KioskPinManager;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Books\Schemas;
 
-use App\Support\Media\BookCoverImage;
+use App\Services\BookCoverImageService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -33,7 +33,7 @@ class BookForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', Str::slug($state)))
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
                             ->placeholder('Masukkan judul buku'),
 
                         TextInput::make('slug')
@@ -133,7 +133,7 @@ class BookForm
                                         }
 
                                         try {
-                                            $set('cover_image', app(BookCoverImage::class)->storeFromUrl($url, baseName: $get('slug') ?: $get('title')));
+                                            $set('cover_image', app(BookCoverImageService::class)->storeFromUrl($url, baseName: $get('slug') ?: $get('title')));
 
                                             Notification::make()
                                                 ->title('Gambar berhasil diunduh!')
@@ -142,7 +142,7 @@ class BookForm
                                         } catch (\Exception $exception) {
                                             Notification::make()
                                                 ->title('Gagal mengunduh gambar')
-                                                ->body('Detail Error: ' . $exception->getMessage())
+                                                ->body('Detail Error: '.$exception->getMessage())
                                                 ->danger()
                                                 ->send();
                                         }
@@ -154,7 +154,7 @@ class BookForm
                             ->directory('books/covers')
                             ->disk('public')
                             ->saveUploadedFileUsing(
-                                fn(TemporaryUploadedFile $file, Get $get): string => app(BookCoverImage::class)->storeFromUploadedFile($file, baseName: $get('slug') ?: $get('title')),
+                                fn (TemporaryUploadedFile $file, Get $get): string => app(BookCoverImageService::class)->storeFromUploadedFile($file, baseName: $get('slug') ?: $get('title')),
                             )
                             ->deleteUploadedFileUsing(function (string $file) {
                                 if (Storage::disk('public')->exists($file)) {

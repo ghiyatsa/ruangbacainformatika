@@ -4,8 +4,8 @@ namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Models\KioskDevice;
-use App\Support\Kiosk\KioskPinManager;
-use App\Support\Settings\SettingRepository;
+use App\Repositories\SettingRepository;
+use App\Services\KioskPinManager;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -37,6 +37,8 @@ class KioskSettings extends Page implements HasTable
     protected static ?string $cluster = SettingsCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
+
+    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::ComputerDesktop;
 
     protected string $view = 'filament.clusters.settings.pages.kiosk-settings';
 
@@ -176,7 +178,7 @@ class KioskSettings extends Page implements HasTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->label('Ubah Nama')
+                    ->hiddenLabel()
                     ->icon(Heroicon::Pencil)
                     ->modalWidth('sm')
                     ->schema([
@@ -185,7 +187,7 @@ class KioskSettings extends Page implements HasTable
                             ->required(),
                     ]),
                 Action::make('revoke')
-                    ->label('Keluarkan')
+                    ->hiddenLabel()
                     ->icon(Heroicon::Trash)
                     ->color('danger')
                     ->requiresConfirmation()

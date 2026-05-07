@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { History, LogOut, Settings } from 'lucide-react';
 import { UserInfo } from '@/components/common/UserInfo';
 import {
     DropdownMenuGroup,
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
+import loans from '@/routes/loans';
 import settings from '@/routes/settings';
 import type { User } from '@/types';
 
@@ -33,6 +34,17 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full cursor-pointer"
+                        href={loans.history.url()}
+                        prefetch
+                        onClick={cleanup}
+                    >
+                        <History className="mr-2 h-4 w-4" />
+                        Riwayat Pinjam
+                    </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"
