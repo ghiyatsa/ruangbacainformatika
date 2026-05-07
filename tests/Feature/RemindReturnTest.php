@@ -4,6 +4,7 @@ use App\Models\Loan;
 use App\Models\User;
 use App\Notifications\LoanReminderNotification;
 use Illuminate\Support\Facades\Notification;
+use function Pest\Laravel\artisan;
 
 it('sends reminders for loans due tomorrow', function () {
     Notification::fake();
@@ -16,7 +17,7 @@ it('sends reminders for loans due tomorrow', function () {
         'reminder_sent_at' => null,
     ]);
 
-    $this->artisan('app:remind-return')
+    artisan('app:remind-return')
         ->expectsOutput('Sending reminders for 1 loans...')
         ->expectsOutput('Reminders sent successfully!')
         ->assertExitCode(0);
@@ -24,7 +25,7 @@ it('sends reminders for loans due tomorrow', function () {
     Notification::assertSentTo(
         $user,
         LoanReminderNotification::class,
-        fn ($notification) => $notification->toArray($user)['loan_id'] === $loan->id
+        fn($notification) => $notification->toArray($user)['loan_id'] === $loan->id
     );
 
     expect($loan->fresh()->reminder_sent_at)->not->toBeNull();
@@ -41,7 +42,7 @@ it('does not send reminders for loans already reminded', function () {
         'reminder_sent_at' => now(),
     ]);
 
-    $this->artisan('app:remind-return')
+    artisan('app:remind-return')
         ->expectsOutput('No books are due tomorrow.')
         ->assertExitCode(0);
 
@@ -67,7 +68,7 @@ it('does not send reminders for loans not due tomorrow', function () {
         'due_at' => now()->addDays(2),
     ]);
 
-    $this->artisan('app:remind-return')
+    artisan('app:remind-return')
         ->expectsOutput('No books are due tomorrow.')
         ->assertExitCode(0);
 

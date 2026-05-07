@@ -4,7 +4,6 @@ use App\Models\Setting;
 use App\Services\KioskPinManager;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
-use Mockery;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
@@ -23,7 +22,7 @@ it('kiosk shows pin entry when not verified', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin')
                 ->has('visitorTypeOptions')
@@ -40,7 +39,7 @@ it('kiosk allows access after valid pin entry', function () {
         'ip_address' => '127.0.0.1',
     ]);
 
-    $mock = Mockery::mock(KioskPinManager::class);
+    $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
@@ -48,7 +47,7 @@ it('kiosk allows access after valid pin entry', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'ready')
                 ->where('activeMenu', 'landing'),
@@ -56,7 +55,7 @@ it('kiosk allows access after valid pin entry', function () {
 });
 
 it('rotating kiosk sessions requires the pin again', function () {
-    $mock = Mockery::mock(KioskPinManager::class);
+    $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('rotateSessions')->once()->andReturn(2);
     $mock->shouldReceive('isVerified')->andReturn(false);
     $mock->shouldIgnoreMissing();
@@ -67,7 +66,7 @@ it('rotating kiosk sessions requires the pin again', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin'),
         );

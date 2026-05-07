@@ -39,7 +39,7 @@ it('home page shows published books from the catalog', function () {
                         ->has('books.data', 1)
                         ->where('books.data.0.title', 'Laskar Pelangi')
                         ->where('books.data.0.authors.0', 'Andrea Hirata')
-                        ->where('books.data.0.categories.0', 'Novel')
+                        ->where('books.data.0.categories.0.name', 'Novel')
                         ->where('books.data.0.isAvailable', true)
                 ),
         );
