@@ -4,6 +4,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoanHistoryController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SimilarityController;
 use App\Http\Controllers\SkripsiController;
@@ -19,6 +20,8 @@ Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('
 
 Route::get('/search', SearchController::class)->name('search');
 
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::middleware(['auth', 'profile.completed'])->group(function () {
     Route::get('/loans/history', LoanHistoryController::class)->name('loans.history');
 });

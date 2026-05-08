@@ -398,7 +398,8 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                     '[--velocity-scroll-itemHeight:28px]',
                     '[--velocity-scroll-fadeColorAuto:#ffffff]',
                     'dark:[--velocity-scroll-fadeColorAuto:#0b0b0b]',
-                    scaleOnHover && 'py-[calc(var(--velocity-scroll-itemHeight)*0.1)]',
+                    scaleOnHover &&
+                        'py-[calc(var(--velocity-scroll-itemHeight)*0.1)]',
                     className,
                 ),
             [isVertical, scaleOnHover, className],

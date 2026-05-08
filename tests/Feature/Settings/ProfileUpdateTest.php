@@ -2,9 +2,8 @@
 
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
+
 use function Pest\Laravel\actingAs;
-
-
 
 it('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -26,7 +25,7 @@ it('google users with incomplete profile are redirected to onboarding page', fun
     actingAs($user)
         ->get(route('register.whatsapp'))
         ->assertInertia(
-            fn(AssertableInertia $page) => $page
+            fn (AssertableInertia $page) => $page
                 ->component('auth/register-whatsapp'),
         );
 });

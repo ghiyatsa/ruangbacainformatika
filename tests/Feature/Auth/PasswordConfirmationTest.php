@@ -13,7 +13,7 @@ it('confirm password screen can be rendered', function () {
     actingAs($user)->get(route('password.confirm'))
         ->assertOk()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('auth/confirm-password'),
         );
 });

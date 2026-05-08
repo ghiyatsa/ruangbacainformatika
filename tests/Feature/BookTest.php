@@ -2,6 +2,7 @@
 
 use App\Models\Book;
 use Inertia\Testing\AssertableInertia as Assert;
+
 use function Pest\Laravel\get;
 
 test('book detail page renders correctly', function () {

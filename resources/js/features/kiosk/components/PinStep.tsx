@@ -79,7 +79,7 @@ export function PinStep({ pageTitle, pageSubtitle, siteName }: KioskProps) {
                                         autoFocus
                                         maxLength={8}
                                         placeholder="Masukkan PIN"
-                                        className="text-center tracking-widest text-lg"
+                                        className="text-center text-lg tracking-widest"
                                         aria-invalid={Boolean(errors.pin)}
                                     />
                                 </KioskField>

@@ -20,7 +20,7 @@ beforeEach(function () {
 it('registration screen can be rendered', function () {
     get(route('register'))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('auth/register')
                 ->where('canLoginWithGoogle', filled(config('services.google.client_id'))
                     && filled(config('services.google.client_secret'))
@@ -63,7 +63,6 @@ it('mahasiswa outside teknik informatika cannot register', function () {
         ->assertSessionHasErrors('email')
         ->assertRedirect(route('register'));
 });
-
 
 it('manual registration stores whatsapp when provided', function () {
     post(route('register'), [

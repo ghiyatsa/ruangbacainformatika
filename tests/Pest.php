@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Tests\TestCase;
-
+use Laravel\Fortify\Features;
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -14,7 +13,7 @@ use Tests\TestCase;
 |
 */
 
-use Laravel\Fortify\Features;
+use Tests\TestCase;
 
 uses(TestCase::class, LazilyRefreshDatabase::class)->in('Feature');
 uses(TestCase::class)->in('Unit');

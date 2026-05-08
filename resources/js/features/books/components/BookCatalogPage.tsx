@@ -8,10 +8,7 @@ import { BookCatalogFilters } from '@/features/books/components/BookCatalogFilte
 import { BookCatalogHeader } from '@/features/books/components/BookCatalogHeader';
 import { BookCatalogResults } from '@/features/books/components/BookCatalogResults';
 import { BookGridSkeleton } from '@/features/books/components/BookGridSkeleton';
-import type {
-    BookCatalogPageProps,
-    ViewMode,
-} from '@/features/books/types';
+import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
 import booksRoute from '@/routes/books';
 
 export default function BookCatalogPage({
@@ -80,10 +77,7 @@ export default function BookCatalogPage({
                 data="books"
                 fallback={<BookGridSkeleton viewMode={viewMode} />}
             >
-                <BookCatalogResults
-                    books={books}
-                    viewMode={viewMode}
-                />
+                <BookCatalogResults books={books} viewMode={viewMode} />
             </Deferred>
         </CatalogPageLayout>
     );

@@ -41,16 +41,18 @@ export function SimilarityResultCard({ item, index }: ResultCardProps) {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex items-start gap-3">
-                        <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                        <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                             {index + 1}
                         </span>
                         <div className="space-y-1">
-                            <h3 className="text-sm leading-snug font-semibold group-hover:text-primary transition-colors">
+                            <h3 className="text-sm leading-snug font-semibold transition-colors group-hover:text-primary">
                                 {item.judul}
                             </h3>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <User className="size-3 shrink-0" />
-                                <span>{item.nama_mahasiswa || 'Tidak diketahui'}</span>
+                                <span>
+                                    {item.nama_mahasiswa || 'Tidak diketahui'}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -59,13 +61,13 @@ export function SimilarityResultCard({ item, index }: ResultCardProps) {
                 <div className="flex shrink-0 items-center gap-3 pl-9 sm:pl-0">
                     <Badge
                         variant="outline"
-                        className={`gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold ${cfg.badgeClass}`}
+                        className={`gap-1 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${cfg.badgeClass}`}
                     >
                         <LevelIcon className="size-3" />
                         {cfg.label}
                     </Badge>
                     {item.student_id && (
-                        <ExternalLink className="size-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                        <ExternalLink className="size-4 text-muted-foreground/40 transition-colors group-hover:text-primary" />
                     )}
                 </div>
             </div>
@@ -80,7 +82,7 @@ export function SimilarityResultCard({ item, index }: ResultCardProps) {
     );
 
     return (
-        <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 border-muted/60">
+        <Card className="group relative overflow-hidden border-muted/60 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
             <div
                 className={`absolute top-0 left-0 h-full w-1 transition-all duration-300 group-hover:w-1.5 ${cfg.bg}`}
             />
@@ -88,7 +90,7 @@ export function SimilarityResultCard({ item, index }: ResultCardProps) {
             {item.student_id ? (
                 <Link
                     href={`/skripsi/${item.student_id}`}
-                    className="block outline-none focus-visible:ring-2 focus-visible:ring-primary ring-inset"
+                    className="block outline-none ring-inset focus-visible:ring-2 focus-visible:ring-primary"
                 >
                     {Content}
                 </Link>

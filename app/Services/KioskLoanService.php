@@ -62,7 +62,7 @@ class KioskLoanService
             foreach ($isbns as $index => $isbn) {
                 $bookItem = BookItem::query()
                     ->available()
-                    ->whereHas('book', fn($query) => $query
+                    ->whereHas('book', fn ($query) => $query
                         ->where('isbn', $isbn)
                         ->where('is_borrowable', true))
                     ->lockForUpdate()
@@ -119,7 +119,7 @@ class KioskLoanService
             foreach ($isbns as $index => $isbn) {
                 $loanItem = LoanItem::query()
                     ->whereNull('returned_at', 'and', false)
-                    ->whereHas('bookItem.book', fn($query) => $query->where('isbn', $isbn))
+                    ->whereHas('bookItem.book', fn ($query) => $query->where('isbn', $isbn))
                     ->whereHas('loan', function ($query) use ($member) {
                         $query
                             ->whereBelongsTo($member)
@@ -145,7 +145,7 @@ class KioskLoanService
 
                 $loan = $loanItem->loan->fresh('items');
 
-                if ($loan && $loan->items->every(fn(LoanItem $item): bool => $item->isReturned())) {
+                if ($loan && $loan->items->every(fn (LoanItem $item): bool => $item->isReturned())) {
                     $loan->forceFill([
                         'status' => Loan::STATUS_RETURNED,
                         'returned_at' => now(),
@@ -173,7 +173,7 @@ class KioskLoanService
     {
         return LoanItem::query()
             ->whereNull('returned_at', 'and', false)
-            ->whereHas('loan', fn($query) => $query->whereBelongsTo($user))
+            ->whereHas('loan', fn ($query) => $query->whereBelongsTo($user))
             ->count();
     }
 
@@ -186,7 +186,7 @@ class KioskLoanService
         }
 
         return User::query()
-            ->where('email', 'like', '%' . $memberIdentifier . '@mhs.unimal.ac.id')
+            ->where('email', 'like', '%'.$memberIdentifier.'@mhs.unimal.ac.id')
             ->first();
     }
 

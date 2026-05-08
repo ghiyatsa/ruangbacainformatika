@@ -285,7 +285,12 @@ export default function TwoFactorSetupModal({
                 'Untuk menyelesaikan pengaktifan otentikasi dua faktor, pindai kode QR atau masukkan kunci pengaturan di aplikasi otentikator Anda',
             buttonText: 'Lanjutkan',
         };
-    }, [twoFactorEnabled, twoFactorConfirmed, requiresConfirmation, showVerificationStep]);
+    }, [
+        twoFactorEnabled,
+        twoFactorConfirmed,
+        requiresConfirmation,
+        showVerificationStep,
+    ]);
 
     const resetModalState = useCallback(() => {
         setShowVerificationStep(false);
@@ -311,7 +316,12 @@ export default function TwoFactorSetupModal({
         }
 
         handleClose();
-    }, [twoFactorEnabled, twoFactorConfirmed, requiresConfirmation, handleClose]);
+    }, [
+        twoFactorEnabled,
+        twoFactorConfirmed,
+        requiresConfirmation,
+        handleClose,
+    ]);
 
     const fetchSetupDataRef = useRef(fetchSetupData);
 

@@ -167,7 +167,7 @@
     }
 
     ::-webkit-scrollbar-thumb {
-        @apply bg-muted-foreground/20 rounded-full border-2 border-solid border-transparent bg-clip-padding;
+        @apply rounded-full border-2 border-solid border-transparent bg-muted-foreground/20 bg-clip-padding;
     }
 
     ::-webkit-scrollbar-thumb:hover {

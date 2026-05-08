@@ -65,7 +65,10 @@ export function MobileDrawer({
                             </a>
                         </Button>
                         {canRegister && (
-                            <Button asChild className="w-full rounded-xl text-sm">
+                            <Button
+                                asChild
+                                className="w-full rounded-xl text-sm"
+                            >
                                 <a
                                     href={register.url()}
                                     onClick={() => setMobileOpen(false)}

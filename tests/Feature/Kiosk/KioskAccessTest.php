@@ -22,7 +22,7 @@ it('kiosk shows pin entry when not verified', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin')
                 ->has('visitorTypeOptions')
@@ -47,7 +47,7 @@ it('kiosk allows access after valid pin entry', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'ready')
                 ->where('activeMenu', 'landing'),
@@ -66,7 +66,7 @@ it('rotating kiosk sessions requires the pin again', function () {
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin'),
         );

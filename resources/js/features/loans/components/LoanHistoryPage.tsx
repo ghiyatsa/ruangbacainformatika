@@ -392,4 +392,3 @@ export default function LoanHistoryPage({ loans }: Props) {
         </>
     );
 }
-

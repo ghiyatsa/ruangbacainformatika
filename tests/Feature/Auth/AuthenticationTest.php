@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 use Spatie\Permission\Models\Role;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertGuest;
@@ -14,7 +15,7 @@ use function Pest\Laravel\post;
 it('login screen can be rendered', function () {
     get(route('login'))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('auth/login')
                 ->where('canResetPassword', true)
                 ->where('canRegister', true)
@@ -36,7 +37,6 @@ it('users can authenticate using the login screen', function () {
     assertAuthenticated();
 });
 
-
 it('administrative users are redirected to admin after login', function () {
     $user = User::factory()->create();
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
@@ -50,7 +50,6 @@ it('administrative users are redirected to admin after login', function () {
 
     assertAuthenticated();
 });
-
 
 it('authenticated users are redirected away from login screen using shared redirect logic', function () {
     $user = User::factory()->create();
@@ -88,7 +87,6 @@ it('users with two factor enabled are redirected to two factor challenge', funct
     assertGuest();
 });
 
-
 it('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
@@ -100,7 +98,6 @@ it('users can not authenticate with invalid password', function () {
     assertGuest();
 });
 
-
 it('users can logout', function () {
     $user = User::factory()->create();
 
@@ -111,11 +108,10 @@ it('users can logout', function () {
     assertGuest();
 });
 
-
 it('users are rate limited', function () {
     $user = User::factory()->create();
 
-    RateLimiter::increment(strtolower($user->email) . '|127.0.0.1', amount: 5);
+    RateLimiter::increment(strtolower($user->email).'|127.0.0.1', amount: 5);
 
     post(route('login'), [
         'email' => $user->email,

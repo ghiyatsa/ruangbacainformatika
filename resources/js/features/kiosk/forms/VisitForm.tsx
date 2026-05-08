@@ -210,7 +210,7 @@ export function VisitForm({
                                 name="notes"
                                 rows={3}
                                 placeholder="Keterangan tambahan"
-                                className="w-full min-h-20 rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+                                className="min-h-20 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
                                 aria-invalid={Boolean(errors.notes)}
                             />
                         </KioskField>

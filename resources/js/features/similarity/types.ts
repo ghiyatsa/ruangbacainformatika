@@ -1,8 +1,4 @@
-import {
-    AlertCircle,
-    CheckCircle2,
-    TriangleAlert,
-} from 'lucide-react';
+import { AlertCircle, CheckCircle2, TriangleAlert } from 'lucide-react';
 import type { ElementType } from 'react';
 
 export interface SimilarityItem {

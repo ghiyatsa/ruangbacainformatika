@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Notifications\Auth\VerifyEmailOtpNotification;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
+
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Laravel\Fortify\Features;
 use Spatie\Permission\Models\Role;
+
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
@@ -33,7 +34,6 @@ it('email can be verified', function () {
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
 });
 
-
 it('email is not verified with invalid otp', function () {
     $user = User::factory()->unverified()->create();
 
@@ -48,7 +48,6 @@ it('email is not verified with invalid otp', function () {
     expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
 });
 
-
 it('verified user is redirected to their landing page from verification prompt', function () {
     $user = User::factory()->create();
 
@@ -60,7 +59,6 @@ it('verified user is redirected to their landing page from verification prompt',
 
     Event::assertNotDispatched(Verified::class);
 });
-
 
 it('already verified user submitting otp is redirected without firing event again', function () {
     $user = User::factory()->create();

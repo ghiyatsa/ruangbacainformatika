@@ -60,7 +60,7 @@ export default function BookListItem({ book }: BookListItemProps) {
                     {book.title}
                 </p>
                 {book.subtitle && (
-                    <p className="line-clamp-1 -mt-0.5 text-[11px] text-muted-foreground/80 italic">
+                    <p className="-mt-0.5 line-clamp-1 text-[11px] text-muted-foreground/80 italic">
                         {book.subtitle}
                     </p>
                 )}

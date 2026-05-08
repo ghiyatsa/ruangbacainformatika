@@ -31,4 +31,3 @@ export function BookGridSkeleton({ viewMode }: { viewMode: ViewMode }) {
         </div>
     );
 }
-

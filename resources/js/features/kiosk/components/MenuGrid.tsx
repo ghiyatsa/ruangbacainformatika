@@ -55,7 +55,7 @@ export function MenuGrid({
 
                         <div className="flex w-full items-end justify-between gap-2">
                             <div className="flex flex-col gap-1">
-                                <span className="font-semibold leading-tight text-foreground">
+                                <span className="leading-tight font-semibold text-foreground">
                                     {item.label}
                                 </span>
                                 <span className="text-sm text-muted-foreground">
@@ -63,9 +63,7 @@ export function MenuGrid({
                                 </span>
                             </div>
 
-                            <ChevronRight
-                                className="size-4 shrink-0 translate-x-0 text-muted-foreground/50 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100"
-                            />
+                            <ChevronRight className="size-4 shrink-0 translate-x-0 text-muted-foreground/50 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
                         </div>
                     </button>
                 );

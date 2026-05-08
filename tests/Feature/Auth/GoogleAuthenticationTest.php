@@ -5,13 +5,13 @@ use Inertia\Testing\AssertableInertia;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Spatie\Permission\Models\Role;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\assertGuest;
 use function Pest\Laravel\get;
-use function Pest\Laravel\patch;
 
 beforeEach(function () {
     config()->set('services.google', [
@@ -24,7 +24,7 @@ beforeEach(function () {
 it('google login button is enabled when google is configured', function () {
     get(route('login'))
         ->assertInertia(
-            fn(AssertableInertia $page) => $page
+            fn (AssertableInertia $page) => $page
                 ->component('auth/login')
                 ->where('canLoginWithGoogle', true),
         );
@@ -33,7 +33,7 @@ it('google login button is enabled when google is configured', function () {
 it('google registration button is enabled when google is configured', function () {
     get(route('register'))
         ->assertInertia(
-            fn(AssertableInertia $page) => $page
+            fn (AssertableInertia $page) => $page
                 ->component('auth/register')
                 ->where('canLoginWithGoogle', true),
         );
@@ -144,7 +144,7 @@ it('google users can access onboarding only once', function () {
     actingAs($user)
         ->get(route('register.whatsapp'))
         ->assertInertia(
-            fn(AssertableInertia $page) => $page
+            fn (AssertableInertia $page) => $page
                 ->component('auth/register-whatsapp'),
         );
 

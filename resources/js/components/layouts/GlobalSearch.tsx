@@ -31,7 +31,10 @@ interface SearchResponse {
 export function GlobalSearch() {
     const [open, setOpen] = React.useState(false);
     const [query, setQuery] = React.useState('');
-    const [results, setResults] = React.useState<SearchResponse>({ books: [], skripsis: [] });
+    const [results, setResults] = React.useState<SearchResponse>({
+        books: [],
+        skripsis: [],
+    });
     const [isLoading, setIsLoading] = React.useState(false);
 
     React.useEffect(() => {
@@ -86,15 +89,18 @@ export function GlobalSearch() {
         return () => clearTimeout(timeoutId);
     }, [query]);
 
-    const onSelect = React.useCallback((item: SearchResult, type: 'book' | 'skripsi') => {
-        setOpen(false);
+    const onSelect = React.useCallback(
+        (item: SearchResult, type: 'book' | 'skripsi') => {
+            setOpen(false);
 
-        if (type === 'book') {
-            router.visit(`/books/${item.slug}`);
-        } else {
-            router.visit(`/skripsi/${item.studentId}`);
-        }
-    }, []);
+            if (type === 'book') {
+                router.visit(`/books/${item.slug}`);
+            } else {
+                router.visit(`/skripsi/${item.studentId}`);
+            }
+        },
+        [],
+    );
 
     return (
         <>
@@ -134,7 +140,9 @@ export function GlobalSearch() {
                         >
                             <div className="-mx-2 h-px bg-border" />
                             <CommandList>
-                                {(isLoading || (results.books.length === 0 && results.skripsis.length === 0)) && (
+                                {(isLoading ||
+                                    (results.books.length === 0 &&
+                                        results.skripsis.length === 0)) && (
                                     <CommandEmpty>
                                         {isLoading ? (
                                             <div className="space-y-2 p-4">
@@ -147,68 +155,114 @@ export function GlobalSearch() {
                                     </CommandEmpty>
                                 )}
 
-                                {(results.books.length > 0 || results.skripsis.length > 0) && !isLoading && (
-                                    <AnimatedList<SearchResult & { itemType: 'book' | 'skripsi' }>
-                                        items={[
-                                            ...results.books.map((b) => ({ ...b, itemType: 'book' as const })),
-                                            ...results.skripsis.map((s) => ({ ...s, itemType: 'skripsi' as const })),
-                                        ]}
-                                        onItemSelect={(item) => onSelect(item, item.itemType)}
-                                        showGradients
-                                        renderItem={(item, index, isSelected) => (
-                                            <div
-                                                className={cn(
-                                                    'flex items-center gap-3 rounded-lg px-3 py-3 transition-colors',
-                                                    isSelected
-                                                        ? 'bg-accent text-accent-foreground'
-                                                        : 'hover:bg-accent/50',
-                                                )}
-                                            >
-                                                {item.itemType === 'book' ? (
-                                                    <>
-                                                        <div className="aspect-2/3 w-9 shrink-0 overflow-hidden rounded-sm border bg-muted shadow-sm">
-                                                            <img
-                                                                src={item.coverImageUrl}
-                                                                alt=""
-                                                                className="h-full w-full object-cover"
-                                                            />
-                                                        </div>
-                                                        <div className="flex flex-1 flex-col gap-0.5">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="line-clamp-1 font-semibold tracking-tight">
-                                                                    {item.title}
-                                                                </span>
-                                                                <Badge variant="outline" className="h-4 px-1 text-[9px] uppercase">Buku</Badge>
+                                {(results.books.length > 0 ||
+                                    results.skripsis.length > 0) &&
+                                    !isLoading && (
+                                        <AnimatedList<
+                                            SearchResult & {
+                                                itemType: 'book' | 'skripsi';
+                                            }
+                                        >
+                                            items={[
+                                                ...results.books.map((b) => ({
+                                                    ...b,
+                                                    itemType: 'book' as const,
+                                                })),
+                                                ...results.skripsis.map(
+                                                    (s) => ({
+                                                        ...s,
+                                                        itemType:
+                                                            'skripsi' as const,
+                                                    }),
+                                                ),
+                                            ]}
+                                            onItemSelect={(item) =>
+                                                onSelect(item, item.itemType)
+                                            }
+                                            showGradients
+                                            renderItem={(
+                                                item,
+                                                index,
+                                                isSelected,
+                                            ) => (
+                                                <div
+                                                    className={cn(
+                                                        'flex items-center gap-3 rounded-lg px-3 py-3 transition-colors',
+                                                        isSelected
+                                                            ? 'bg-accent text-accent-foreground'
+                                                            : 'hover:bg-accent/50',
+                                                    )}
+                                                >
+                                                    {item.itemType ===
+                                                    'book' ? (
+                                                        <>
+                                                            <div className="aspect-2/3 w-9 shrink-0 overflow-hidden rounded-sm border bg-muted shadow-sm">
+                                                                <img
+                                                                    src={
+                                                                        item.coverImageUrl
+                                                                    }
+                                                                    alt=""
+                                                                    className="h-full w-full object-cover"
+                                                                />
                                                             </div>
-                                                            <span className="line-clamp-1 text-xs text-muted-foreground">
-                                                                {item.authors?.join(', ')}
-                                                            </span>
-                                                        </div>
-                                                        <BookOpen className="ml-auto size-4 text-muted-foreground" />
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-sm border bg-muted shadow-sm">
-                                                            <GraduationCap className="size-5 text-muted-foreground" />
-                                                        </div>
-                                                        <div className="flex flex-1 flex-col gap-0.5">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="line-clamp-1 font-semibold tracking-tight">
-                                                                    {item.title}
+                                                            <div className="flex flex-1 flex-col gap-0.5">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="line-clamp-1 font-semibold tracking-tight">
+                                                                        {
+                                                                            item.title
+                                                                        }
+                                                                    </span>
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="h-4 px-1 text-[9px] uppercase"
+                                                                    >
+                                                                        Buku
+                                                                    </Badge>
+                                                                </div>
+                                                                <span className="line-clamp-1 text-xs text-muted-foreground">
+                                                                    {item.authors?.join(
+                                                                        ', ',
+                                                                    )}
                                                                 </span>
-                                                                <Badge variant="outline" className="h-4 px-1 text-[9px] uppercase">Skripsi</Badge>
                                                             </div>
-                                                            <span className="line-clamp-1 text-xs text-muted-foreground">
-                                                                {item.authorName} • {item.studentId}
-                                                            </span>
-                                                        </div>
-                                                        <Search className="ml-auto size-4 text-muted-foreground" />
-                                                    </>
-                                                )}
-                                            </div>
-                                        )}
-                                    />
-                                )}
+                                                            <BookOpen className="ml-auto size-4 text-muted-foreground" />
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-sm border bg-muted shadow-sm">
+                                                                <GraduationCap className="size-5 text-muted-foreground" />
+                                                            </div>
+                                                            <div className="flex flex-1 flex-col gap-0.5">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="line-clamp-1 font-semibold tracking-tight">
+                                                                        {
+                                                                            item.title
+                                                                        }
+                                                                    </span>
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="h-4 px-1 text-[9px] uppercase"
+                                                                    >
+                                                                        Skripsi
+                                                                    </Badge>
+                                                                </div>
+                                                                <span className="line-clamp-1 text-xs text-muted-foreground">
+                                                                    {
+                                                                        item.authorName
+                                                                    }{' '}
+                                                                    •{' '}
+                                                                    {
+                                                                        item.studentId
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                            <Search className="ml-auto size-4 text-muted-foreground" />
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+                                        />
+                                    )}
                             </CommandList>
                         </motion.div>
                     )}

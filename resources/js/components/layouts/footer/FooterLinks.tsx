@@ -1,12 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { BookOpen, ExternalLink, GraduationCap, Wrench } from 'lucide-react';
 import { motion } from 'motion/react';
-import {
-    CATALOG_LINKS,
-    INFO_LINKS,
-    SERVICE_LINKS,
-    fadeUp,
-} from './constants';
+import { CATALOG_LINKS, INFO_LINKS, SERVICE_LINKS, fadeUp } from './constants';
 
 export function FooterLinks() {
     return (
@@ -90,9 +85,7 @@ export function FooterLinks() {
                                 href={href}
                                 target={external ? '_blank' : undefined}
                                 rel={
-                                    external
-                                        ? 'noopener noreferrer'
-                                        : undefined
+                                    external ? 'noopener noreferrer' : undefined
                                 }
                                 className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
                             >

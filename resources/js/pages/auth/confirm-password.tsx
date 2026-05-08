@@ -12,35 +12,39 @@ export default function ConfirmPassword() {
             <Head title="Confirm password" />
 
             <div className="flex flex-col gap-6">
-                <Form {...store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
+                <Form
+                    {...store.form()}
+                    resetOnSuccess={['password']}
+                    className="flex flex-col gap-6"
+                >
                     {({ processing, errors }) => (
                         <div className="grid gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <PasswordInput
-                                id="password"
-                                name="password"
-                                placeholder="Password"
-                                autoComplete="current-password"
-                                autoFocus
-                            />
+                            <div className="grid gap-2">
+                                <Label htmlFor="password">Password</Label>
+                                <PasswordInput
+                                    id="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    autoComplete="current-password"
+                                    autoFocus
+                                />
 
-                            <InputError message={errors.password} />
+                                <InputError message={errors.password} />
+                            </div>
+
+                            <Button
+                                className="w-full"
+                                disabled={processing}
+                                data-test="confirm-password-button"
+                                size={'lg'}
+                            >
+                                {processing && <Spinner />}
+                                Confirm password
+                            </Button>
                         </div>
-
-                        <Button
-                            className="w-full"
-                            disabled={processing}
-                            data-test="confirm-password-button"
-                            size={'lg'}
-                        >
-                            {processing && <Spinner />}
-                            Confirm password
-                        </Button>
-                    </div>
-                )}
-            </Form>
-        </div>
+                    )}
+                </Form>
+            </div>
         </>
     );
 }

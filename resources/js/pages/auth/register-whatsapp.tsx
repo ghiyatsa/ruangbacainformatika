@@ -25,45 +25,45 @@ export default function RegisterWhatsapp() {
                 >
                     {({ processing, errors }) => (
                         <div className="grid gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email kampus</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                value={auth.user.email}
-                                readOnly
-                                disabled
-                                autoComplete="username"
-                            />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">Email kampus</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={auth.user.email}
+                                    readOnly
+                                    disabled
+                                    autoComplete="username"
+                                />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
-                            <Input
-                                id="whatsapp"
-                                name="whatsapp"
-                                type="tel"
-                                autoFocus
-                                required
-                                autoComplete="tel"
-                                placeholder="08123456789"
-                            />
-                            <p className="text-sm text-muted-foreground">
-                                Nomor ini wajib diisi sebelum akun bisa
-                                digunakan untuk meminjam buku.
-                            </p>
-                            <InputError message={errors.whatsapp} />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
+                                <Input
+                                    id="whatsapp"
+                                    name="whatsapp"
+                                    type="tel"
+                                    autoFocus
+                                    required
+                                    autoComplete="tel"
+                                    placeholder="08123456789"
+                                />
+                                <p className="text-sm text-muted-foreground">
+                                    Nomor ini wajib diisi sebelum akun bisa
+                                    digunakan untuk meminjam buku.
+                                </p>
+                                <InputError message={errors.whatsapp} />
+                            </div>
 
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={processing}
-                            size={'lg'}
-                        >
-                            {processing ? <Spinner /> : null}
-                            Simpan dan lanjutkan
-                        </Button>
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={processing}
+                                size={'lg'}
+                            >
+                                {processing ? <Spinner /> : null}
+                                Simpan dan lanjutkan
+                            </Button>
                         </div>
                     )}
                 </Form>
@@ -73,7 +73,7 @@ export default function RegisterWhatsapp() {
                         href={logout().url}
                         method="post"
                         as="button"
-                        className="text-sm text-muted-foreground underline underline-offset-4 hover:text-primary transition-colors"
+                        className="text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-primary"
                     >
                         Bukan akun Anda? Keluar
                     </Link>
@@ -85,6 +85,5 @@ export default function RegisterWhatsapp() {
 
 RegisterWhatsapp.layout = {
     title: 'Lengkapi nomor WhatsApp',
-    description:
-        'Satu langkah terakhir untuk melengkapi profil Anda.',
+    description: 'Satu langkah terakhir untuk melengkapi profil Anda.',
 };

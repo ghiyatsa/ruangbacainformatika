@@ -68,10 +68,7 @@ export default function SkripsiCatalogPage({
             </div>
 
             {/* Results */}
-            <Deferred
-                data="skripsis"
-                fallback={<SkripsiGridSkeleton />}
-            >
+            <Deferred data="skripsis" fallback={<SkripsiGridSkeleton />}>
                 <SkripsiCatalogResults skripsis={skripsis} />
             </Deferred>
         </CatalogPageLayout>

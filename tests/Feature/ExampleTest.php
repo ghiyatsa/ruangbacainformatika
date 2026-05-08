@@ -6,6 +6,7 @@ use App\Models\BookItem;
 use App\Models\Category;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
+
 use function Pest\Laravel\get;
 
 it('home page shows published books from the catalog', function () {
@@ -26,14 +27,14 @@ it('home page shows published books from the catalog', function () {
 
     get(route('home'))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('welcome')
                 ->where('canRegister', Features::enabled(Features::registration()))
                 ->where('stats.booksCount', 1)
                 ->where('stats.featuredCount', 1)
                 ->where('stats.availableItemsCount', 1)
                 ->loadDeferredProps(
-                    fn(Assert $reload) => $reload
+                    fn (Assert $reload) => $reload
                         ->has('featuredBooks', 1)
                         ->where('featuredBooks.0.title', 'Laskar Pelangi')
                         ->has('books.data', 1)
@@ -50,7 +51,7 @@ it('home page does not expose search filtering', function () {
 
     get(route('home', ['search' => 'Atomic']))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('welcome')
                 ->where('filters.search', ''),
         );
@@ -67,11 +68,11 @@ it('home page excludes non-borrowable books from available counts', function () 
 
     get(route('home'))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('welcome')
                 ->where('stats.availableItemsCount', 0)
                 ->loadDeferredProps(
-                    fn(Assert $reload) => $reload
+                    fn (Assert $reload) => $reload
                         ->has('featuredBooks', 1)
                         ->where('featuredBooks.0.title', 'Ensiklopedia Arsip')
                         ->where('featuredBooks.0.availableItemsCount', 0)

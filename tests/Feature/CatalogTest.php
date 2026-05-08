@@ -5,6 +5,7 @@ use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Category;
 use Inertia\Testing\AssertableInertia as Assert;
+
 use function Pest\Laravel\get;
 
 test('catalog page renders published books', function () {
@@ -15,7 +16,7 @@ test('catalog page renders published books', function () {
 
     get(route('books.index'))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('catalog')
                 ->loadDeferredProps(fn (Assert $reload) => $reload
                     ->has('books.data', 1)
@@ -31,7 +32,7 @@ test('catalog page search filters by title', function () {
 
     get(route('books.index', ['search' => 'Pragmatic']))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('catalog')
                 ->where('filters.search', 'Pragmatic')
                 ->loadDeferredProps(fn (Assert $reload) => $reload
@@ -50,7 +51,7 @@ test('catalog page search filters by author', function () {
 
     get(route('books.index', ['search' => 'Robert Martin']))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('catalog')
                 ->loadDeferredProps(fn (Assert $reload) => $reload
                     ->has('books.data', 1)
@@ -68,7 +69,7 @@ test('catalog page filters by category', function () {
 
     get(route('books.index', ['category' => 'programming']))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('catalog')
                 ->where('filters.category', 'programming')
                 ->loadDeferredProps(fn (Assert $reload) => $reload
@@ -83,7 +84,7 @@ test('catalog page returns empty results for no match', function () {
 
     get(route('books.index', ['search' => 'xyznonexistent999']))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('catalog')
                 ->where('stats.searchResultsCount', 0)
                 ->loadDeferredProps(fn (Assert $reload) => $reload
@@ -99,7 +100,7 @@ test('catalog stats include books count and available items count', function () 
 
     get(route('books.index'))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('catalog')
                 ->where('stats.booksCount', 1)
                 ->where('stats.availableItemsCount', 1),
@@ -116,7 +117,7 @@ test('catalog availability excludes books marked as not borrowable', function ()
 
     get(route('books.index'))
         ->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('catalog')
                 ->where('stats.availableItemsCount', 0)
                 ->loadDeferredProps(fn (Assert $reload) => $reload
@@ -126,4 +127,3 @@ test('catalog availability excludes books marked as not borrowable', function ()
                 ),
         );
 });
-

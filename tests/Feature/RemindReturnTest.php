@@ -4,6 +4,7 @@ use App\Models\Loan;
 use App\Models\User;
 use App\Notifications\LoanReminderNotification;
 use Illuminate\Support\Facades\Notification;
+
 use function Pest\Laravel\artisan;
 
 it('sends reminders for loans due tomorrow', function () {
@@ -25,7 +26,7 @@ it('sends reminders for loans due tomorrow', function () {
     Notification::assertSentTo(
         $user,
         LoanReminderNotification::class,
-        fn($notification) => $notification->toArray($user)['loan_id'] === $loan->id
+        fn ($notification) => $notification->toArray($user)['loan_id'] === $loan->id
     );
 
     expect($loan->fresh()->reminder_sent_at)->not->toBeNull();

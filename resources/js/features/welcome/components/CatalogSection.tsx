@@ -245,11 +245,12 @@ function FeaturedSpotlight({
                                 </div>
 
                                 {/* Author — prominent position */}
-                                {Array.isArray(book.authors) && book.authors.length > 0 && (
-                                    <p className="text-xs font-medium text-primary/70">
-                                        {book.authors.join(', ')}
-                                    </p>
-                                )}
+                                {Array.isArray(book.authors) &&
+                                    book.authors.length > 0 && (
+                                        <p className="text-xs font-medium text-primary/70">
+                                            {book.authors.join(', ')}
+                                        </p>
+                                    )}
 
                                 <Link
                                     href={BookController.show(book.slug)}
@@ -280,7 +281,8 @@ function FeaturedSpotlight({
                                     </span>
                                     {(Array.isArray(book.categories)
                                         ? book.categories
-                                        : [])
+                                        : []
+                                    )
                                         .slice(0, 2)
                                         .map((category, index) => (
                                             <span
@@ -528,7 +530,10 @@ export default function CatalogSection({
                                         {viewMode === 'grid' ? (
                                             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                                                 {previewBooks.map(
-                                                    (book: CatalogBook, index: number) => (
+                                                    (
+                                                        book: CatalogBook,
+                                                        index: number,
+                                                    ) => (
                                                         <BookCard
                                                             key={
                                                                 book.id ||
@@ -542,7 +547,10 @@ export default function CatalogSection({
                                         ) : (
                                             <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                                                 {previewBooks.map(
-                                                    (book: CatalogBook, index: number) => (
+                                                    (
+                                                        book: CatalogBook,
+                                                        index: number,
+                                                    ) => (
                                                         <div
                                                             key={
                                                                 book.id ||
@@ -593,4 +601,3 @@ export default function CatalogSection({
         </section>
     );
 }
-

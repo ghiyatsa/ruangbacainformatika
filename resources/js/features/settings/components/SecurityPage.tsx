@@ -104,7 +104,11 @@ export default function SecurityPage({
                     }}
                     className="flex flex-col gap-5"
                 >
-                    {({ errors: formErrors, processing, recentlySuccessful }) => (
+                    {({
+                        errors: formErrors,
+                        processing,
+                        recentlySuccessful,
+                    }) => (
                         <div className="flex flex-col gap-5">
                             <div className="grid gap-2">
                                 <Label htmlFor="current_password">
@@ -237,8 +241,12 @@ export default function SecurityPage({
                                             )}
                                         </Form>
                                         <TwoFactorRecoveryCodes
-                                            recoveryCodesList={recoveryCodesList}
-                                            fetchRecoveryCodes={fetchRecoveryCodes}
+                                            recoveryCodesList={
+                                                recoveryCodesList
+                                            }
+                                            fetchRecoveryCodes={
+                                                fetchRecoveryCodes
+                                            }
                                             errors={errors}
                                         />
                                     </>
@@ -446,7 +454,9 @@ export default function SecurityPage({
                                                         </Button>
                                                         <Button
                                                             type="submit"
-                                                            disabled={processing}
+                                                            disabled={
+                                                                processing
+                                                            }
                                                         >
                                                             Keluar dari Sesi
                                                             Browser Lain

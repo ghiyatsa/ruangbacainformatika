@@ -35,11 +35,11 @@ export default function ProfilePage({
             <div className="flex flex-col gap-10">
                 {/* Avatar + name banner */}
                 <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground text-xl font-semibold shadow-md shadow-primary/20 select-none">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-xl font-semibold text-primary-foreground shadow-md shadow-primary/20 select-none">
                         {initials || <User className="h-7 w-7" />}
                     </div>
                     <div>
-                        <p className="text-base font-semibold leading-tight">
+                        <p className="text-base leading-tight font-semibold">
                             {auth.user.name}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -135,9 +135,7 @@ export default function ProfilePage({
                                         id="whatsapp"
                                         type="tel"
                                         className="w-full"
-                                        defaultValue={
-                                            auth.user.whatsapp ?? ''
-                                        }
+                                        defaultValue={auth.user.whatsapp ?? ''}
                                         name="whatsapp"
                                         autoComplete="tel"
                                         placeholder="08123456789"
@@ -164,9 +162,8 @@ export default function ProfilePage({
                                             {status ===
                                                 'verification-link-sent' && (
                                                 <p className="mt-1.5 text-sm font-medium text-green-600 dark:text-green-400">
-                                                    Tautan verifikasi baru
-                                                    telah dikirim ke email
-                                                    Anda.
+                                                    Tautan verifikasi baru telah
+                                                    dikirim ke email Anda.
                                                 </p>
                                             )}
                                         </div>

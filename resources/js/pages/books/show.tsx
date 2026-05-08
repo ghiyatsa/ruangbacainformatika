@@ -4,4 +4,3 @@ import type { BookDetailPageProps } from '@/features/books/components/BookDetail
 export default function BookShow(props: BookDetailPageProps) {
     return <BookDetailPage {...props} />;
 }
-

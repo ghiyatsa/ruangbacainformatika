@@ -15,7 +15,9 @@ interface SkripsiCatalogResultsProps {
     skripsis: PaginatedSkripsis;
 }
 
-export function SkripsiCatalogResults({ skripsis }: SkripsiCatalogResultsProps) {
+export function SkripsiCatalogResults({
+    skripsis,
+}: SkripsiCatalogResultsProps) {
     const total = skripsis.total ?? 0;
 
     return (

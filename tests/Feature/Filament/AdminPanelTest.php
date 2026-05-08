@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Spatie\Permission\Models\Role;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
@@ -70,7 +71,6 @@ it('super admin users can render the library settings form', function () {
         ->assertSee('Durasi Peminjaman (Hari Kerja)')
         ->assertSee('Simpan');
 });
-
 
 it('super admin users are redirected from settings cluster to the first settings page', function () {
     $user = makeSuperAdmin();

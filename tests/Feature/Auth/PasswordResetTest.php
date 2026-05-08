@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
+
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
 
@@ -70,4 +71,3 @@ it('password cannot be reset with invalid token', function () {
         'password_confirmation' => 'newpassword123',
     ])->assertSessionHasErrors('email');
 });
-

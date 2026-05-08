@@ -80,7 +80,11 @@ export function HeaderActions({
                             <UserAvatar name={auth.user.name} />
                         </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuContent
+                        className="w-56"
+                        align="end"
+                        forceMount
+                    >
                         <UserMenuContent user={auth.user} />
                     </DropdownMenuContent>
                 </DropdownMenu>
