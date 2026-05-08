@@ -23,7 +23,7 @@ import {
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
-import type { BookData } from '@/features/catalog/types';
+import type { BookData } from '@/features/books/types';
 import books from '@/routes/books';
 
 export interface BookDetailPageProps {
@@ -112,7 +112,7 @@ export default function BookDetailPage({
                     />
                     <div className="absolute inset-0 bg-linear-to-b from-background/30 via-background/60 to-background" />
 
-                    <div className="relative mx-auto max-w-7xl px-6 pt-28 pb-0 sm:pt-36 lg:px-8">
+                    <div className="relative mx-auto max-w-7xl px-6 pt-28 pb-12 sm:pt-36 lg:px-8">
                         <Breadcrumb className="mb-8">
                             <BreadcrumbList>
                                 <BreadcrumbItem>
@@ -137,10 +137,10 @@ export default function BookDetailPage({
                             </BreadcrumbList>
                         </Breadcrumb>
 
-                        <div className="grid gap-10 md:grid-cols-12 md:gap-12">
+                        <div className="grid items-center gap-10 md:grid-cols-12 md:gap-12">
                             {/* Cover */}
                             <div className="md:col-span-3">
-                                <div className="group relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/20 dark:shadow-black/40">
+                                <div className="group relative overflow-hidden rounded-2xl border border-white/10">
                                     <img
                                         src={book.coverImageUrl}
                                         alt={`Cover buku ${book.title}`}
@@ -151,7 +151,7 @@ export default function BookDetailPage({
                             </div>
 
                             {/* Title & Meta */}
-                            <div className="flex flex-col justify-end pb-10 md:col-span-9">
+                            <div className="flex flex-col justify-center md:col-span-9">
                                 <div className="mb-3 flex flex-wrap gap-1.5">
                                     {book.isFeatured && (
                                         <Badge className="gap-1 border-primary/20 bg-primary/15 text-primary hover:bg-primary/20">
@@ -162,9 +162,11 @@ export default function BookDetailPage({
                                     {book.categories.map((category) => (
                                         <Link
                                             key={category.slug}
-                                            href={books.categories.show.url(
-                                                category.slug,
-                                            )}
+                                            href={books.index.url({
+                                                query: {
+                                                    category: category.slug,
+                                                },
+                                            })}
                                         >
                                             <Badge
                                                 variant="secondary"
@@ -242,104 +244,94 @@ export default function BookDetailPage({
                 </div>
 
                 {/* Main Content */}
-                <div className="py-10">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="grid gap-8 md:grid-cols-12 md:gap-10">
-                            {/* Sidebar */}
-                            <aside className="md:col-span-4 lg:col-span-3">
-                                <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
-                                    <div className="p-5">
-                                        <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                            Informasi Buku
-                                        </h2>
-                                    </div>
-                                    <Separator />
-                                    <div className="p-2">
-                                        {book.publisher && (
-                                            <DetailItem
-                                                icon={
-                                                    <Building2 className="size-4" />
-                                                }
-                                                label="Penerbit"
-                                                value={book.publisher}
-                                            />
-                                        )}
-                                        {book.publishedYear && (
-                                            <DetailItem
-                                                icon={
-                                                    <Calendar className="size-4" />
-                                                }
-                                                label="Tahun Terbit"
-                                                value={String(
-                                                    book.publishedYear,
-                                                )}
-                                            />
-                                        )}
-                                        {(book.isbn || book.issn) && (
-                                            <DetailItem
-                                                icon={
-                                                    <Hash className="size-4" />
-                                                }
-                                                label={
-                                                    book.isbn ? 'ISBN' : 'ISSN'
-                                                }
-                                                value={
-                                                    book.isbn ||
-                                                    book.issn ||
-                                                    '—'
-                                                }
-                                            />
-                                        )}
-                                        {book.pages && (
-                                            <DetailItem
-                                                icon={
-                                                    <FileText className="size-4" />
-                                                }
-                                                label="Jumlah Halaman"
-                                                value={`${book.pages} halaman`}
-                                            />
-                                        )}
-                                        <DetailItem
-                                            icon={<Globe className="size-4" />}
-                                            label="Bahasa"
-                                            value={book.language}
-                                        />
-                                    </div>
+                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="grid gap-8 md:grid-cols-12 md:gap-10">
+                        {/* Sidebar */}
+                        <aside className="md:col-span-4 lg:col-span-3">
+                            <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+                                <div className="p-5">
+                                    <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                                        Informasi Buku
+                                    </h2>
                                 </div>
-                            </aside>
-
-                            {/* Synopsis */}
-                            <div className="md:col-span-8 lg:col-span-9">
-                                <section>
-                                    <div className="mb-5 flex items-center gap-3">
-                                        <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                            <BookOpen className="size-4" />
-                                        </div>
-                                        <h2 className="text-xl font-bold">
-                                            Sinopsis
-                                        </h2>
-                                    </div>
-
-                                    {book.description ? (
-                                        <div className="space-y-4 text-base leading-[1.85] text-muted-foreground">
-                                            {book.description
-                                                .split('\n')
-                                                .filter(Boolean)
-                                                .map((paragraph, i) => (
-                                                    <p key={i}>{paragraph}</p>
-                                                ))}
-                                        </div>
-                                    ) : (
-                                        <div className="rounded-2xl border border-dashed bg-muted/30 p-10 text-center">
-                                            <BookOpen className="mx-auto mb-3 size-10 text-muted-foreground/40" />
-                                            <p className="text-sm text-muted-foreground">
-                                                Sinopsis belum tersedia untuk
-                                                buku ini.
-                                            </p>
-                                        </div>
+                                <Separator />
+                                <div className="p-2">
+                                    {book.publisher && (
+                                        <DetailItem
+                                            icon={
+                                                <Building2 className="size-4" />
+                                            }
+                                            label="Penerbit"
+                                            value={book.publisher}
+                                        />
                                     )}
-                                </section>
+                                    {book.publishedYear && (
+                                        <DetailItem
+                                            icon={
+                                                <Calendar className="size-4" />
+                                            }
+                                            label="Tahun Terbit"
+                                            value={String(book.publishedYear)}
+                                        />
+                                    )}
+                                    {(book.isbn || book.issn) && (
+                                        <DetailItem
+                                            icon={<Hash className="size-4" />}
+                                            label={book.isbn ? 'ISBN' : 'ISSN'}
+                                            value={
+                                                book.isbn || book.issn || '—'
+                                            }
+                                        />
+                                    )}
+                                    {book.pages && (
+                                        <DetailItem
+                                            icon={
+                                                <FileText className="size-4" />
+                                            }
+                                            label="Jumlah Halaman"
+                                            value={`${book.pages} halaman`}
+                                        />
+                                    )}
+                                    <DetailItem
+                                        icon={<Globe className="size-4" />}
+                                        label="Bahasa"
+                                        value={book.language}
+                                    />
+                                </div>
                             </div>
+                        </aside>
+
+                        {/* Synopsis */}
+                        <div className="md:col-span-8 lg:col-span-9">
+                            <section>
+                                <div className="mb-5 flex items-center gap-3">
+                                    <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                        <BookOpen className="size-4" />
+                                    </div>
+                                    <h2 className="text-xl font-bold">
+                                        Sinopsis
+                                    </h2>
+                                </div>
+
+                                {book.description ? (
+                                    <div className="space-y-4 text-base leading-[1.85] text-muted-foreground">
+                                        {book.description
+                                            .split('\n')
+                                            .filter(Boolean)
+                                            .map((paragraph, i) => (
+                                                <p key={i}>{paragraph}</p>
+                                            ))}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-2xl border border-dashed bg-muted/30 p-10 text-center">
+                                        <BookOpen className="mx-auto mb-3 size-10 text-muted-foreground/40" />
+                                        <p className="text-sm text-muted-foreground">
+                                            Sinopsis belum tersedia untuk buku
+                                            ini.
+                                        </p>
+                                    </div>
+                                )}
+                            </section>
                         </div>
                     </div>
                 </div>
@@ -347,3 +339,4 @@ export default function BookDetailPage({
         </>
     );
 }
+

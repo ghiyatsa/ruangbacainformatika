@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 import VelocityScroll from '@/components/common/VelocityScroll';
-import categoriesRoute from '@/routes/books/categories';
+import booksRoute from '@/routes/books';
 
 interface CategoryMarqueeProps {
     categories?: {
@@ -47,8 +47,10 @@ export default function CategoryMarquee({
             node: (
                 <div className="py-2 sm:py-3">
                     <Link
-                        href={categoriesRoute.show.url({
-                            category: category.slug,
+                        href={booksRoute.index.url({
+                            query: {
+                                category: category.slug,
+                            },
                         })}
                         className="relative flex w-56 flex-col rounded-2xl border bg-background p-4 text-left text-base whitespace-normal transition-all duration-300 group-hover/loop:opacity-40 hover:opacity-100! sm:w-72 sm:p-6"
                     >

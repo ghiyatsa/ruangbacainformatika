@@ -98,14 +98,6 @@ export default function SkripsiDetailPage({
                             </div>
 
                             <div className="flex flex-col justify-center">
-                                <Badge
-                                    variant="secondary"
-                                    className="mb-3 w-fit gap-1.5 bg-primary/10 text-primary hover:bg-primary/15"
-                                >
-                                    <BookMarked className="size-3" />
-                                    Skripsi
-                                </Badge>
-
                                 <h1 className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
                                     {skripsi.title}
                                 </h1>

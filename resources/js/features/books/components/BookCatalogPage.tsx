@@ -1,24 +1,30 @@
 import { Deferred, router } from '@inertiajs/react';
 import { Search, X } from 'lucide-react';
+import { useState } from 'react';
 import { CatalogPageLayout } from '@/components/catalog/CatalogPageLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { SkripsiCatalogFilters } from '@/features/skripsi/components/SkripsiCatalogFilters';
-import { SkripsiCatalogHeader } from '@/features/skripsi/components/SkripsiCatalogHeader';
-import { SkripsiCatalogResults } from '@/features/skripsi/components/SkripsiCatalogResults';
-import { SkripsiGridSkeleton } from '@/features/skripsi/components/SkripsiGridSkeleton';
-import type { SkripsiCatalogPageProps } from '@/features/skripsi/types';
-import skripsiRoute from '@/routes/skripsi';
+import { BookCatalogFilters } from '@/features/books/components/BookCatalogFilters';
+import { BookCatalogHeader } from '@/features/books/components/BookCatalogHeader';
+import { BookCatalogResults } from '@/features/books/components/BookCatalogResults';
+import { BookGridSkeleton } from '@/features/books/components/BookGridSkeleton';
+import type {
+    BookCatalogPageProps,
+    ViewMode,
+} from '@/features/books/types';
+import booksRoute from '@/routes/books';
 
-export default function SkripsiCatalogPage({
+export default function BookCatalogPage({
     filters,
-    years,
-    total,
-    skripsis,
-}: SkripsiCatalogPageProps) {
+    stats,
+    categories,
+    books,
+}: BookCatalogPageProps) {
+    const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
     function clearAllFilters(): void {
         router.get(
-            skripsiRoute.index.url(),
+            booksRoute.index.url(),
             {},
             { preserveScroll: true, replace: true },
         );
@@ -26,14 +32,16 @@ export default function SkripsiCatalogPage({
 
     return (
         <CatalogPageLayout
-            title="Katalog Skripsi"
-            header={<SkripsiCatalogHeader total={total} />}
+            title="Katalog Buku"
+            header={<BookCatalogHeader total={stats.booksCount ?? 0} />}
         >
             <div className="flex flex-col gap-6">
-                <SkripsiCatalogFilters
+                <BookCatalogFilters
                     filters={filters}
-                    years={years}
-                    total={total}
+                    stats={stats}
+                    categories={categories}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
                 />
 
                 {/* Active Search Badge */}
@@ -69,10 +77,13 @@ export default function SkripsiCatalogPage({
 
             {/* Results */}
             <Deferred
-                data="skripsis"
-                fallback={<SkripsiGridSkeleton />}
+                data="books"
+                fallback={<BookGridSkeleton viewMode={viewMode} />}
             >
-                <SkripsiCatalogResults skripsis={skripsis} />
+                <BookCatalogResults
+                    books={books}
+                    viewMode={viewMode}
+                />
             </Deferred>
         </CatalogPageLayout>
     );

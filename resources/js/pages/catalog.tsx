@@ -1,6 +1,6 @@
-import CatalogPage from '@/features/catalog/components/CatalogPage';
-import type { CatalogPageProps } from '@/features/catalog/components/CatalogPage';
+import BookCatalogPage from '@/features/books/components/BookCatalogPage';
+import type { BookCatalogPageProps } from '@/features/books/types';
 
-export default function Catalog(props: CatalogPageProps) {
-    return <CatalogPage {...props} />;
+export default function Catalog(props: BookCatalogPageProps) {
+    return <BookCatalogPage {...props} />;
 }

@@ -1,6 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { GraduationCap } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -10,13 +8,13 @@ import {
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-interface SkripsiHeaderProps {
+interface SkripsiCatalogHeaderProps {
     total: number;
 }
 
-export function SkripsiHeader({ total }: SkripsiHeaderProps) {
+export function SkripsiCatalogHeader({ total }: SkripsiCatalogHeaderProps) {
     return (
-        <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
+        <div className="relative -mt-20 overflow-hidden bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
             <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
             <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-12 sm:pt-40 lg:px-8">
                 <Breadcrumb className="mb-8">
@@ -28,19 +26,12 @@ export function SkripsiHeader({ total }: SkripsiHeaderProps) {
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
-                            <BreadcrumbPage>Skripsi</BreadcrumbPage>
+                            <BreadcrumbPage>Katalog Skripsi</BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
 
                 <div className="flex flex-col gap-4">
-                    <Badge
-                        variant="secondary"
-                        className="w-fit gap-1.5 bg-primary/10 text-primary hover:bg-primary/15"
-                    >
-                        <GraduationCap className="size-3.5" />
-                        Koleksi Akademik
-                    </Badge>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                             Katalog Skripsi

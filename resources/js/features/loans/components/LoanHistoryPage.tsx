@@ -21,7 +21,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { BookPagination } from '@/features/catalog/components/BookPagination';
+import { BookPagination } from '@/features/books/components/BookPagination';
 import { cn } from '@/lib/utils';
 
 interface LoanItem {
@@ -392,3 +392,4 @@ export default function LoanHistoryPage({ loans }: Props) {
         </>
     );
 }
+

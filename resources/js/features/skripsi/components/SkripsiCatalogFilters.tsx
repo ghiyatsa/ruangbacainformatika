@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { GraduationCap } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -6,18 +7,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import type { SkripsiFilters as FilterTypes } from '@/features/skripsi/types';
 import skripsiRoute from '@/routes/skripsi';
 
-interface SkripsiFiltersProps {
+interface SkripsiCatalogFiltersProps {
     filters: FilterTypes;
     years: number[];
     total: number;
 }
 
-export function SkripsiFilters({ filters, years, total }: SkripsiFiltersProps) {
-    const hasActiveFilters = filters.year !== null || filters.search !== '';
-
+export function SkripsiCatalogFilters({
+    filters,
+    years,
+    total,
+}: SkripsiCatalogFiltersProps) {
     function applyFilters(overrides: Partial<FilterTypes>): void {
         const next = { ...filters, ...overrides };
         router.get(
@@ -31,9 +35,28 @@ export function SkripsiFilters({ filters, years, total }: SkripsiFiltersProps) {
     }
 
     return (
-        <div className="mb-8 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+                {/* Result Count Badge */}
+                <div className="hidden items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground lg:flex">
+                    <GraduationCap className="size-3.5" />
+                    <span>
+                        <strong className="text-foreground">
+                            {total.toLocaleString('id-ID')}
+                        </strong>{' '}
+                        Hasil
+                    </span>
+                </div>
+
+                <Separator
+                    orientation="vertical"
+                    className="hidden h-8 lg:block"
+                />
+
+                <div className="flex items-center gap-2">
+                    <span className="hidden text-xs font-medium text-muted-foreground sm:inline-block">
+                        Tahun:
+                    </span>
                     <Select
                         value={filters.year ? String(filters.year) : 'all'}
                         onValueChange={(val) =>
@@ -44,7 +67,7 @@ export function SkripsiFilters({ filters, years, total }: SkripsiFiltersProps) {
                     >
                         <SelectTrigger
                             id="skripsi-year-filter"
-                            className="w-36"
+                            className="h-10 w-36 rounded-lg shadow-xs"
                         >
                             <SelectValue placeholder="Semua Tahun" />
                         </SelectTrigger>
@@ -57,15 +80,6 @@ export function SkripsiFilters({ filters, years, total }: SkripsiFiltersProps) {
                             ))}
                         </SelectContent>
                     </Select>
-
-                    {hasActiveFilters && (
-                        <p className="text-sm text-muted-foreground">
-                            <span className="font-semibold text-foreground">
-                                {total.toLocaleString('id-ID')}
-                            </span>{' '}
-                            hasil ditemukan
-                        </p>
-                    )}
                 </div>
             </div>
         </div>

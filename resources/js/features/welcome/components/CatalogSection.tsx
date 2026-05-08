@@ -22,10 +22,10 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import BookCard from '@/features/catalog/components/BookCard';
-import BookCardSkeleton from '@/features/catalog/components/BookCardSkeleton';
-import BookListItem from '@/features/catalog/components/BookListItem';
-import BookListItemSkeleton from '@/features/catalog/components/BookListItemSkeleton';
+import BookCard from '@/features/books/components/BookCard';
+import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
+import BookListItem from '@/features/books/components/BookListItem';
+import BookListItemSkeleton from '@/features/books/components/BookListItemSkeleton';
 import type { CatalogBook, WelcomeProps } from '@/features/welcome/types';
 import booksRoute from '@/routes/books';
 
@@ -593,3 +593,4 @@ export default function CatalogSection({
         </section>
     );
 }
+

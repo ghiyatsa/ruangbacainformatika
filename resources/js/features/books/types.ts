@@ -1,6 +1,8 @@
+import type { PaginatedBooks } from '@/features/welcome/types';
+
 export type ViewMode = 'grid' | 'list';
 
-export interface CatalogStats {
+export interface BookCatalogStats {
     booksCount?: number;
     availableItemsCount: number;
     searchResultsCount: number;
@@ -11,6 +13,14 @@ export interface CategoryItem {
     name: string;
     slug: string;
     booksCount: number;
+}
+
+export interface BookCatalogPageProps {
+    canRegister?: boolean;
+    filters: { search: string; category: string };
+    stats: BookCatalogStats;
+    categories: CategoryItem[];
+    books: PaginatedBooks;
 }
 
 export interface BookData {

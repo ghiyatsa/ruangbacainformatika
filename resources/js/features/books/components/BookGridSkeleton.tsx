@@ -1,6 +1,6 @@
-import BookCardSkeleton from '@/features/catalog/components/BookCardSkeleton';
-import BookListItemSkeleton from '@/features/catalog/components/BookListItemSkeleton';
-import type { ViewMode } from '@/features/catalog/types';
+import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
+import BookListItemSkeleton from '@/features/books/components/BookListItemSkeleton';
+import type { ViewMode } from '@/features/books/types';
 
 /**
  * Shared loading skeleton for the book grid/list.
@@ -31,3 +31,4 @@ export function BookGridSkeleton({ viewMode }: { viewMode: ViewMode }) {
         </div>
     );
 }
+
