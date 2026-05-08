@@ -1,8 +1,9 @@
 import { router } from '@inertiajs/react';
-import { BookOpen, Search } from 'lucide-react';
+import { BookOpen, GraduationCap, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import AnimatedList from '@/components/common/AnimatedList';
+import { Badge } from '@/components/ui/badge';
 import {
     CommandDialog,
     CommandEmpty,
@@ -16,14 +17,21 @@ interface SearchResult {
     id: number;
     title: string;
     slug: string;
-    coverImageUrl: string;
-    authors: string[];
+    coverImageUrl?: string;
+    authors?: string[];
+    authorName?: string;
+    studentId?: string;
+}
+
+interface SearchResponse {
+    books: SearchResult[];
+    skripsis: SearchResult[];
 }
 
 export function GlobalSearch() {
     const [open, setOpen] = React.useState(false);
     const [query, setQuery] = React.useState('');
-    const [results, setResults] = React.useState<SearchResult[]>([]);
+    const [results, setResults] = React.useState<SearchResponse>({ books: [], skripsis: [] });
     const [isLoading, setIsLoading] = React.useState(false);
 
     React.useEffect(() => {
@@ -49,7 +57,7 @@ export function GlobalSearch() {
         setQuery(v);
 
         if (!v) {
-            setResults([]);
+            setResults({ books: [], skripsis: [] });
             setIsLoading(false);
         } else {
             setIsLoading(true);
@@ -67,7 +75,7 @@ export function GlobalSearch() {
                     `/search?q=${encodeURIComponent(query)}`,
                 );
                 const data = await response.json();
-                setResults(data.data || []);
+                setResults(data || { books: [], skripsis: [] });
             } catch (error) {
                 console.error('Search failed:', error);
             } finally {
@@ -78,9 +86,14 @@ export function GlobalSearch() {
         return () => clearTimeout(timeoutId);
     }, [query]);
 
-    const onSelect = React.useCallback((slug: string) => {
+    const onSelect = React.useCallback((item: SearchResult, type: 'book' | 'skripsi') => {
         setOpen(false);
-        router.visit(`/books/${slug}`);
+
+        if (type === 'book') {
+            router.visit(`/books/${item.slug}`);
+        } else {
+            router.visit(`/skripsi/${item.studentId}`);
+        }
     }, []);
 
     return (
@@ -121,7 +134,7 @@ export function GlobalSearch() {
                         >
                             <div className="-mx-2 h-px bg-border" />
                             <CommandList>
-                                {(isLoading || results.length === 0) && (
+                                {(isLoading || (results.books.length === 0 && results.skripsis.length === 0)) && (
                                     <CommandEmpty>
                                         {isLoading ? (
                                             <div className="space-y-2 p-4">
@@ -134,18 +147,15 @@ export function GlobalSearch() {
                                     </CommandEmpty>
                                 )}
 
-                                {results.length > 0 && !isLoading && (
-                                    <AnimatedList<SearchResult>
-                                        items={results}
-                                        onItemSelect={(book) =>
-                                            onSelect(book.slug)
-                                        }
+                                {(results.books.length > 0 || results.skripsis.length > 0) && !isLoading && (
+                                    <AnimatedList<SearchResult & { itemType: 'book' | 'skripsi' }>
+                                        items={[
+                                            ...results.books.map((b) => ({ ...b, itemType: 'book' as const })),
+                                            ...results.skripsis.map((s) => ({ ...s, itemType: 'skripsi' as const })),
+                                        ]}
+                                        onItemSelect={(item) => onSelect(item, item.itemType)}
                                         showGradients
-                                        renderItem={(
-                                            book,
-                                            index,
-                                            isSelected,
-                                        ) => (
+                                        renderItem={(item, index, isSelected) => (
                                             <div
                                                 className={cn(
                                                     'flex items-center gap-3 rounded-lg px-3 py-3 transition-colors',
@@ -154,31 +164,47 @@ export function GlobalSearch() {
                                                         : 'hover:bg-accent/50',
                                                 )}
                                             >
-                                                <div className="aspect-2/3 w-9 shrink-0 overflow-hidden rounded-sm border bg-muted shadow-sm">
-                                                    <img
-                                                        src={book.coverImageUrl}
-                                                        alt=""
-                                                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                                                    />
-                                                </div>
-                                                <div className="flex flex-1 flex-col gap-0.5">
-                                                    <span className="line-clamp-1 font-semibold tracking-tight">
-                                                        {book.title}
-                                                    </span>
-                                                    <span className="line-clamp-1 text-xs text-muted-foreground">
-                                                        {book.authors.join(
-                                                            ', ',
-                                                        )}
-                                                    </span>
-                                                </div>
-                                                <BookOpen
-                                                    className={cn(
-                                                        'ml-auto size-4 transition-colors',
-                                                        isSelected
-                                                            ? 'text-accent-foreground'
-                                                            : 'text-muted-foreground',
-                                                    )}
-                                                />
+                                                {item.itemType === 'book' ? (
+                                                    <>
+                                                        <div className="aspect-2/3 w-9 shrink-0 overflow-hidden rounded-sm border bg-muted shadow-sm">
+                                                            <img
+                                                                src={item.coverImageUrl}
+                                                                alt=""
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <div className="flex flex-1 flex-col gap-0.5">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="line-clamp-1 font-semibold tracking-tight">
+                                                                    {item.title}
+                                                                </span>
+                                                                <Badge variant="outline" className="h-4 px-1 text-[9px] uppercase">Buku</Badge>
+                                                            </div>
+                                                            <span className="line-clamp-1 text-xs text-muted-foreground">
+                                                                {item.authors?.join(', ')}
+                                                            </span>
+                                                        </div>
+                                                        <BookOpen className="ml-auto size-4 text-muted-foreground" />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-sm border bg-muted shadow-sm">
+                                                            <GraduationCap className="size-5 text-muted-foreground" />
+                                                        </div>
+                                                        <div className="flex flex-1 flex-col gap-0.5">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="line-clamp-1 font-semibold tracking-tight">
+                                                                    {item.title}
+                                                                </span>
+                                                                <Badge variant="outline" className="h-4 px-1 text-[9px] uppercase">Skripsi</Badge>
+                                                            </div>
+                                                            <span className="line-clamp-1 text-xs text-muted-foreground">
+                                                                {item.authorName} • {item.studentId}
+                                                            </span>
+                                                        </div>
+                                                        <Search className="ml-auto size-4 text-muted-foreground" />
+                                                    </>
+                                                )}
                                             </div>
                                         )}
                                     />

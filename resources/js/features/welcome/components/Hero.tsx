@@ -2,7 +2,6 @@ import { Link } from '@inertiajs/react';
 import { ArrowRight, BookOpen, BookText, Search, Star } from 'lucide-react';
 import type { Variants } from 'motion/react';
 import { motion } from 'motion/react';
-import { lazy, Suspense } from 'react';
 import CountUp from '@/components/common/CountUp';
 import ShinyText from '@/components/common/ShinyText';
 import StarBorder from '@/components/common/StarBorder';
@@ -13,7 +12,7 @@ interface HeroProps {
     stats: WelcomeProps['stats'];
 }
 
-const Antigravity = lazy(() => import('@/components/common/Antigravity'));
+// const Antigravity = lazy(() => import('@/components/common/Antigravity'));
 
 const STATS = [
     {
@@ -63,7 +62,7 @@ export default function Hero({ stats }: HeroProps) {
     return (
         <section className="relative top-0 flex h-svh flex-col justify-center overflow-hidden pt-20 sm:pt-24">
             {/* Particle background */}
-            <div className="pointer-events-none absolute inset-0 -z-10 h-full w-full">
+            {/* <div className="pointer-events-none absolute inset-0 -z-10 h-full w-full">
                 <Suspense fallback={null}>
                     <Antigravity
                         count={300}
@@ -83,7 +82,7 @@ export default function Hero({ stats }: HeroProps) {
                         fieldStrength={10}
                     />
                 </Suspense>
-            </div>
+            </div> */}
 
             {/* Multi-layer radial glows */}
             <div
@@ -150,10 +149,9 @@ export default function Hero({ stats }: HeroProps) {
                         variants={item}
                         className="max-w-lg text-base leading-relaxed text-muted-foreground sm:max-w-xl sm:text-lg"
                     >
-                        Perpustakaan digital resmi Program Studi Teknik
-                        Informatika Universitas Malikussaleh. Mendukung riset,
-                        pembelajaran akademik, dan pengembangan literasi
-                        teknologi mahasiswa.
+                        Pusat riset, pembelajaran akademik, dan pengembangan
+                        literasi teknologi mahasiswa Program Studi Teknik
+                        Informatika Universitas Malikussaleh.
                     </motion.p>
 
                     {/* CTAs */}

@@ -77,8 +77,14 @@ export default function SkripsiDetailPage({
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
+                                    <BreadcrumbLink asChild>
+                                        <Link href="/skripsi">Skripsi</Link>
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
                                     <BreadcrumbPage className="max-w-xs truncate">
-                                        {skripsi.title}
+                                        {skripsi.studentId}
                                     </BreadcrumbPage>
                                 </BreadcrumbItem>
                             </BreadcrumbList>
@@ -207,7 +213,7 @@ export default function SkripsiDetailPage({
                                     </div>
 
                                     {skripsi.abstract ? (
-                                        <div className="space-y-4 text-base leading-[1.85] text-muted-foreground">
+                                        <div className="space-y-4 text-justify text-base leading-[1.85] text-muted-foreground">
                                             {skripsi.abstract
                                                 .split('\n')
                                                 .filter(Boolean)

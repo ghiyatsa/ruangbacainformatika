@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BookResource;
+use App\Http\Resources\SkripsiResource;
+use App\Models\Book;
+use App\Models\Skripsi;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -17,13 +21,24 @@ class SearchController extends Controller
             return response()->json([]);
         }
 
-        $books = \App\Models\Book::query()
+        $books = Book::query()
             ->published()
             ->search($search)
             ->with(['authors:id,name', 'categories:id,name'])
-            ->limit(8)
+            ->limit(5)
             ->get();
 
-        return \App\Http\Resources\BookResource::collection($books);
+        $skripsis = Skripsi::query()
+            ->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('author_name', 'like', "%{$search}%");
+            })
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'books' => BookResource::collection($books)->resolve(),
+            'skripsis' => SkripsiResource::collection($skripsis)->resolve(),
+        ]);
     }
 }
