@@ -14,7 +14,7 @@ import { UserAvatar } from './UserAvatar';
 interface HeaderActionsProps {
     auth: Auth;
     canRegister?: boolean;
-    appearance: string;
+    resolvedAppearance: 'light' | 'dark';
     updateAppearance: (appearance: 'light' | 'dark' | 'system') => void;
     hideSearch: boolean;
 }
@@ -22,7 +22,7 @@ interface HeaderActionsProps {
 export function HeaderActions({
     auth,
     canRegister = true,
-    appearance,
+    resolvedAppearance,
     updateAppearance,
     hideSearch,
 }: HeaderActionsProps) {
@@ -57,14 +57,16 @@ export function HeaderActions({
                 size="icon"
                 className="h-9 w-9 rounded-xl"
                 onClick={() =>
-                    updateAppearance(appearance === 'dark' ? 'light' : 'dark')
+                    updateAppearance(
+                        resolvedAppearance === 'dark' ? 'light' : 'dark',
+                    )
                 }
                 aria-label="Toggle theme"
             >
-                {appearance === 'dark' ? (
-                    <SunIcon className="h-[18px] w-[18px] text-amber-400" />
+                {resolvedAppearance === 'dark' ? (
+                    <SunIcon className="h-[18px] w-[18px] text-primary" />
                 ) : (
-                    <MoonIcon className="h-[18px] w-[18px]" />
+                    <MoonIcon className="h-[18px] w-[18px] text-primary" />
                 )}
                 <span className="sr-only">Toggle theme</span>
             </Button>

@@ -16,7 +16,7 @@ export default function BookListItemSkeleton() {
         >
             <div className="flex items-center gap-4 px-4 py-3.5 sm:gap-5 sm:px-5 sm:py-4">
                 {/* Thumbnail placeholder */}
-                <div className="h-18 w-12 shrink-0 overflow-hidden rounded-lg border bg-muted sm:h-20 sm:w-14">
+                <div className="h-18 w-12 shrink-0 overflow-hidden rounded-lg border bg-muted/50 sm:h-20 sm:w-14 dark:bg-muted/20">
                     <img
                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E"
                         alt=""
@@ -28,7 +28,7 @@ export default function BookListItemSkeleton() {
                 {/* Content placeholder */}
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <div className="flex items-center gap-1.5">
-                        <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px]">
+                        <span className="rounded-md bg-muted/50 px-1.5 py-0.5 text-[10px] dark:bg-muted/20">
                             Kategori
                         </span>
                     </div>

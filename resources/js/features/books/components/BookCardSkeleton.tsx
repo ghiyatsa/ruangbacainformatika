@@ -15,7 +15,7 @@ export default function BookCardSkeleton() {
         >
             <div className="flex h-full flex-col overflow-hidden rounded-2xl border bg-card">
                 {/* Cover placeholder */}
-                <div className="relative aspect-3/4 overflow-hidden bg-muted">
+                <div className="relative aspect-3/4 overflow-hidden bg-muted/50 dark:bg-muted/20">
                     <img
                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E"
                         alt=""
@@ -27,7 +27,7 @@ export default function BookCardSkeleton() {
                 {/* Content placeholder */}
                 <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
                     <div className="flex gap-1">
-                        <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px]">
+                        <span className="rounded-md bg-muted/50 px-1.5 py-0.5 text-[10px] dark:bg-muted/20">
                             Kategori
                         </span>
                     </div>

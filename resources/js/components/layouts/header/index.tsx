@@ -13,7 +13,7 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
         auth: Auth;
         canRegister?: boolean;
     }>().props;
-    const { appearance, updateAppearance } = useAppearance();
+    const { resolvedAppearance, updateAppearance } = useAppearance();
     const [mobileOpen, setMobileOpen] = React.useState(false);
 
     const currentUrl = usePage().url;
@@ -41,7 +41,7 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
     return (
         <header className="fixed top-3 z-50 w-full px-3 sm:top-5 sm:px-5">
             {/* Main bar */}
-            <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 rounded-2xl border border-white/10 bg-background/60 px-3 shadow-lg shadow-black/5 backdrop-blur-xl transition-all duration-300 sm:h-16 sm:px-5 dark:bg-background/30 dark:shadow-black/20">
+            <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 rounded-2xl border border-border/50 bg-background/80 px-3 shadow-xl backdrop-blur-xl transition-all duration-300 sm:h-16 sm:px-5 dark:bg-background/40 dark:border-white/10">
                 {/* Left: Logo */}
                 <div className="flex shrink-0 items-center gap-6">
                     <AppLogo />
@@ -53,7 +53,7 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                     <HeaderActions
                         auth={auth}
                         canRegister={canRegister}
-                        appearance={appearance}
+                        resolvedAppearance={resolvedAppearance}
                         updateAppearance={updateAppearance}
                         hideSearch={hideSearch}
                     />
