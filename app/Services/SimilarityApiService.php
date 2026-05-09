@@ -15,6 +15,10 @@ class SimilarityApiService
 
     private ?int $timeout = null;
 
+    private ?int $topK = null;
+
+    private ?float $threshold = null;
+
     private ?string $hfToken = null;
 
     public function __construct(private SettingRepository $settings) {}
@@ -41,6 +45,16 @@ class SimilarityApiService
     private function getTimeout(): int
     {
         return $this->timeout ??= (int) $this->settings->get('integration', 'similarity_api_timeout', config('services.similarity_api.timeout', 10));
+    }
+
+    private function getTopK(): int
+    {
+        return $this->topK ??= (int) $this->settings->get('integration', 'similarity_api_top_k', 5);
+    }
+
+    private function getThreshold(): float
+    {
+        return $this->threshold ??= (float) $this->settings->get('integration', 'similarity_api_threshold', 0.5);
     }
 
     private function getHfToken(): ?string
@@ -77,12 +91,16 @@ class SimilarityApiService
      *
      * @param  int  $topK  Jumlah hasil teratas (default 5)
      * @param  float  $threshold  Skor minimum (default 0.5)
+     * @return array|null Null jika terjadi kesalahan API
      */
     public function checkSimilarity(
         string $judul,
-        int $topK = 5,
-        float $threshold = 0.5,
-    ): array {
+        ?int $topK = null,
+        ?float $threshold = null,
+    ): ?array {
+        $topK ??= $this->getTopK();
+        $threshold ??= $this->getThreshold();
+
         try {
             $response = $this->client()->post('/api/v1/similarity/check', [
                 'judul' => $judul,
@@ -102,7 +120,7 @@ class SimilarityApiService
             Log::error('Similarity API: connection error', ['error' => $e->getMessage()]);
         }
 
-        return ['total_found' => 0, 'results' => [], 'peringatan' => null];
+        return null;
     }
 
     /**

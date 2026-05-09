@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Skripsi;
 use App\Observers\SkripsiObserver;
+use App\Repositories\SettingRepository;
 use App\Services\SimilarityApiService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -33,8 +34,28 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->configureDefaults();
+        $this->configureTurnstile();
 
         Skripsi::observe(SkripsiObserver::class);
+    }
+
+    protected function configureTurnstile(): void
+    {
+        try {
+            // Only load settings if table exists to avoid errors during migrations
+            if (app()->runningInConsole() && ! app()->runningUnitTests()) {
+                return;
+            }
+
+            $settings = app(SettingRepository::class);
+            $enabled = $settings->get('integration', 'turnstile_enabled', false);
+
+            config([
+                'services.turnstile.enabled' => filter_var($enabled, FILTER_VALIDATE_BOOLEAN),
+            ]);
+        } catch (\Exception) {
+            // Silence errors during initial setup or if table doesn't exist
+        }
     }
 
     /**

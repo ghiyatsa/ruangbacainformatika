@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { BookOpen, GraduationCap, Search } from 'lucide-react';
+import { BookOpen, GraduationCap, Search, ClipboardCheck } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import AnimatedList from '@/components/common/AnimatedList';
@@ -26,6 +26,7 @@ interface SearchResult {
 interface SearchResponse {
     books: SearchResult[];
     skripsis: SearchResult[];
+    internshipReports: SearchResult[];
 }
 
 export function GlobalSearch() {
@@ -34,6 +35,7 @@ export function GlobalSearch() {
     const [results, setResults] = React.useState<SearchResponse>({
         books: [],
         skripsis: [],
+        internshipReports: [],
     });
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -60,7 +62,7 @@ export function GlobalSearch() {
         setQuery(v);
 
         if (!v) {
-            setResults({ books: [], skripsis: [] });
+            setResults({ books: [], skripsis: [], internshipReports: [] });
             setIsLoading(false);
         } else {
             setIsLoading(true);
@@ -78,7 +80,7 @@ export function GlobalSearch() {
                     `/search?q=${encodeURIComponent(query)}`,
                 );
                 const data = await response.json();
-                setResults(data || { books: [], skripsis: [] });
+                setResults(data || { books: [], skripsis: [], internshipReports: [] });
             } catch (error) {
                 console.error('Search failed:', error);
             } finally {
@@ -90,13 +92,15 @@ export function GlobalSearch() {
     }, [query]);
 
     const onSelect = React.useCallback(
-        (item: SearchResult, type: 'book' | 'skripsi') => {
+        (item: SearchResult, type: 'book' | 'skripsi' | 'internship_report') => {
             setOpen(false);
 
             if (type === 'book') {
                 router.visit(`/books/${item.slug}`);
-            } else {
+            } else if (type === 'skripsi') {
                 router.visit(`/skripsi/${item.studentId}`);
+            } else {
+                router.visit(`/internship-reports/${item.studentId}`);
             }
         },
         [],
@@ -142,7 +146,8 @@ export function GlobalSearch() {
                             <CommandList>
                                 {(isLoading ||
                                     (results.books.length === 0 &&
-                                        results.skripsis.length === 0)) && (
+                                        results.skripsis.length === 0 &&
+                                        results.internshipReports.length === 0)) && (
                                     <CommandEmpty>
                                         {isLoading ? (
                                             <div className="space-y-2 p-4">
@@ -156,11 +161,12 @@ export function GlobalSearch() {
                                 )}
 
                                 {(results.books.length > 0 ||
-                                    results.skripsis.length > 0) &&
+                                    results.skripsis.length > 0 ||
+                                    results.internshipReports.length > 0) &&
                                     !isLoading && (
                                         <AnimatedList<
                                             SearchResult & {
-                                                itemType: 'book' | 'skripsi';
+                                                itemType: 'book' | 'skripsi' | 'internship_report';
                                             }
                                         >
                                             items={[
@@ -173,6 +179,13 @@ export function GlobalSearch() {
                                                         ...s,
                                                         itemType:
                                                             'skripsi' as const,
+                                                    }),
+                                                ),
+                                                ...results.internshipReports.map(
+                                                    (ir) => ({
+                                                        ...ir,
+                                                        itemType:
+                                                            'internship_report' as const,
                                                     }),
                                                 ),
                                             ]}
@@ -227,7 +240,7 @@ export function GlobalSearch() {
                                                             </div>
                                                             <BookOpen className="ml-auto size-4 text-muted-foreground" />
                                                         </>
-                                                    ) : (
+                                                    ) : item.itemType === 'skripsi' ? (
                                                         <>
                                                             <div className="flex size-9 shrink-0 items-center justify-center rounded-sm border bg-muted shadow-sm">
                                                                 <GraduationCap className="size-5 text-muted-foreground" />
@@ -244,6 +257,37 @@ export function GlobalSearch() {
                                                                         className="h-4 px-1 text-[9px] uppercase"
                                                                     >
                                                                         Skripsi
+                                                                    </Badge>
+                                                                </div>
+                                                                <span className="line-clamp-1 text-xs text-muted-foreground">
+                                                                    {
+                                                                        item.authorName
+                                                                    }{' '}
+                                                                    •{' '}
+                                                                    {
+                                                                        item.studentId
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                            <Search className="ml-auto size-4 text-muted-foreground" />
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-sm border bg-muted shadow-sm">
+                                                                <ClipboardCheck className="size-5 text-muted-foreground" />
+                                                            </div>
+                                                            <div className="flex flex-1 flex-col gap-0.5">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="line-clamp-1 font-semibold tracking-tight">
+                                                                        {
+                                                                            item.title
+                                                                        }
+                                                                    </span>
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="h-4 px-1 text-[9px] uppercase"
+                                                                    >
+                                                                        Laporan KP
                                                                     </Badge>
                                                                 </div>
                                                                 <span className="line-clamp-1 text-xs text-muted-foreground">

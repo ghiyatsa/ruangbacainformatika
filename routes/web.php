@@ -3,6 +3,7 @@
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InternshipReportController;
 use App\Http\Controllers\LoanHistoryController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SearchController;
@@ -15,6 +16,8 @@ Route::get('/books', CatalogController::class)->name('books.index');
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
 Route::get('/skripsi', [SkripsiController::class, 'index'])->name('skripsi.index');
 Route::get('/skripsi/{skripsi:student_id}', [SkripsiController::class, 'show'])->name('skripsi.show');
+Route::get('/internship-reports', [InternshipReportController::class, 'index'])->name('internship-reports.index');
+Route::get('/internship-reports/{internshipReport:student_id}', [InternshipReportController::class, 'show'])->name('internship-reports.show');
 Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
 Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');
 

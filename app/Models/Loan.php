@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Database\Factories\LoanFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
 
 class Loan extends Model
 {
@@ -62,9 +62,10 @@ class Loan extends Model
 
     public function isOverdue(): bool
     {
-        return $this->status === self::STATUS_BORROWED
-            && $this->due_at instanceof Carbon
-            && $this->due_at->isPast();
+        $endDate = $this->returned_at ?: now();
+
+        return $this->due_at instanceof CarbonInterface
+            && $endDate->greaterThan($this->due_at);
     }
 
     public function deletionBlockedReason(): ?string

@@ -55,7 +55,8 @@ class OverdueLoanTableWidget extends BaseTableWidget
 
                 TextColumn::make('overdue_days')
                     ->label('Terlambat')
-                    ->state(fn (Loan $record): string => now()->diffInDays($record->due_at).' hari')
+                    ->state(fn (Loan $record): int => abs((int) now()->diffInDays($record->due_at)))
+                    ->suffix(' hari')
                     ->badge()
                     ->color('danger'),
 
@@ -79,7 +80,7 @@ class OverdueLoanTableWidget extends BaseTableWidget
                 Action::make('view')
                     ->label('Lihat Detail')
                     ->icon(Heroicon::OutlinedEye)
-                    ->url(fn (Loan $record): string => LoanResource::getUrl('view', ['record' => $record]))
+                    ->url(fn (Loan $record): string => LoanResource::getUrl('view', ['record' => $record->user]))
                     ->openUrlInNewTab(),
             ])
             ->emptyStateIcon(Heroicon::OutlinedCheckCircle)

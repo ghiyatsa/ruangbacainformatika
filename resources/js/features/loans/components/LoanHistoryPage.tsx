@@ -60,18 +60,34 @@ interface PaginatedData<T> {
 
 interface Props {
     loans: PaginatedData<Loan>;
+    stats: {
+        total: number;
+        active: number;
+        overdue: number;
+        returned: number;
+    };
 }
 
 function LoanStatusBadge({ loan }: { loan: Loan }) {
     if (loan.status === 'returned') {
         return (
-            <Badge
-                variant="success"
-                className="gap-1.5 border border-emerald-200/60 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-400"
-            >
-                <CheckCircle2 className="size-3" />
-                {loan.statusLabel}
-            </Badge>
+            <div className="flex items-center gap-2">
+                <Badge
+                    variant="success"
+                    className="gap-1.5 border border-emerald-200/60 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-400"
+                >
+                    <CheckCircle2 className="size-3" />
+                    {loan.statusLabel}
+                </Badge>
+                {loan.isOverdue && (
+                    <Badge
+                        variant="destructive"
+                        className="h-5 px-1.5 text-[10px] font-bold tracking-wider uppercase"
+                    >
+                        Terlambat
+                    </Badge>
+                )}
+            </div>
         );
     }
 
@@ -79,7 +95,7 @@ function LoanStatusBadge({ loan }: { loan: Loan }) {
         return (
             <Badge
                 variant="destructive"
-                className="gap-1.5 px-2.5 py-1 text-xs font-semibold"
+                className="animate-pulse gap-1.5 px-2.5 py-1 text-xs font-semibold"
             >
                 <AlertTriangle className="size-3" />
                 Terlambat
@@ -107,7 +123,7 @@ function LoanCard({ loan }: { loan: Loan }) {
             className={cn(
                 'overflow-hidden border transition-shadow duration-200 hover:shadow-md',
                 isOverdue && !isReturned
-                    ? 'border-destructive/20 ring-1 ring-destructive/10'
+                    ? 'border-destructive/30 bg-destructive/2 ring-1 ring-destructive/15'
                     : 'border-border/60',
             )}
         >
@@ -228,9 +244,22 @@ function LoanCard({ loan }: { loan: Loan }) {
                                         Kembali
                                     </span>
                                 ) : (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-200/80 dark:bg-blue-950/50 dark:text-blue-400 dark:ring-blue-800/60">
-                                        <BookOpen className="size-3" />
-                                        Dipinjam
+                                    <span
+                                        className={cn(
+                                            'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1',
+                                            loan.isOverdue
+                                                ? 'bg-destructive/10 text-destructive ring-destructive/20'
+                                                : 'bg-blue-50 text-blue-700 ring-blue-200/80 dark:bg-blue-950/50 dark:text-blue-400 dark:ring-blue-800/60',
+                                        )}
+                                    >
+                                        {loan.isOverdue ? (
+                                            <AlertTriangle className="size-3" />
+                                        ) : (
+                                            <BookOpen className="size-3" />
+                                        )}
+                                        {loan.isOverdue
+                                            ? 'Terlambat'
+                                            : 'Dipinjam'}
                                     </span>
                                 )}
                             </div>
@@ -254,15 +283,8 @@ function LoanCard({ loan }: { loan: Loan }) {
     );
 }
 
-function StatsBar({ loans }: { loans: PaginatedData<Loan> }) {
-    const total = loans.total;
-    const active = loans.data.filter(
-        (l) => l.status !== 'returned' && !l.isOverdue,
-    ).length;
-    const overdue = loans.data.filter(
-        (l) => l.isOverdue && l.status !== 'returned',
-    ).length;
-    const returned = loans.data.filter((l) => l.status === 'returned').length;
+function StatsBar({ stats }: { stats: Props['stats'] }) {
+    const { total, active, overdue, returned } = stats;
 
     return (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -324,7 +346,7 @@ function StatsBar({ loans }: { loans: PaginatedData<Loan> }) {
     );
 }
 
-export default function LoanHistoryPage({ loans }: Props) {
+export default function LoanHistoryPage({ loans, stats }: Props) {
     return (
         <>
             <Head title="Riwayat Peminjaman" />
@@ -350,7 +372,7 @@ export default function LoanHistoryPage({ loans }: Props) {
                 {loans.data.length > 0 ? (
                     <div className="space-y-6">
                         {/* Stats */}
-                        <StatsBar loans={loans} />
+                        <StatsBar stats={stats} />
 
                         <Separator className="opacity-50" />
 

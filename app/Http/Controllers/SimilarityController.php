@@ -16,16 +16,22 @@ class SimilarityController extends Controller
     public function index(): Response
     {
         return Inertia::render('similarity', [
+            'turnstileEnabled' => config('services.turnstile.enabled', false),
             'turnstileSiteKey' => config('services.turnstile.key'),
         ]);
     }
 
     public function check(Request $request, SimilarityApiService $api): JsonResponse
     {
-        $validated = $request->validate([
+        $rules = [
             'judul' => 'required|string|min:5',
-            'cf-turnstile-response' => ['required', 'string', new Turnstile],
-        ], [
+        ];
+
+        if (config('services.turnstile.enabled', false)) {
+            $rules['cf-turnstile-response'] = ['required', 'string', new Turnstile];
+        }
+
+        $validated = $request->validate($rules, [
             'cf-turnstile-response.required' => 'Silakan selesaikan verifikasi keamanan.',
             'cf-turnstile-response.turnstile' => 'Verifikasi keamanan gagal, silakan coba lagi.',
         ]);
@@ -40,8 +46,16 @@ class SimilarityController extends Controller
 
         $cacheKey = 'similarity_check_'.md5(strtolower($judul));
 
-        $hasil = Cache::remember($cacheKey, now()->addDay(), function () use ($judul, $api) {
+        $hasil = Cache::get($cacheKey);
+
+        if ($hasil === null) {
             $hasil = $api->checkSimilarity($judul);
+
+            if ($hasil === null) {
+                return response()->json([
+                    'message' => 'Layanan pemindaian kemiripan sedang tidak tersedia atau sedang "Sleep". Silakan coba lagi dalam beberapa detik.',
+                ], 503);
+            }
 
             if (! empty($hasil['results'])) {
                 $skripsiIds = collect($hasil['results'])->pluck('skripsi_id')->filter()->toArray();
@@ -66,8 +80,8 @@ class SimilarityController extends Controller
                 }, $hasil['results']);
             }
 
-            return $hasil;
-        });
+            Cache::put($cacheKey, $hasil, now()->addDay());
+        }
 
         return response()->json($hasil);
     }

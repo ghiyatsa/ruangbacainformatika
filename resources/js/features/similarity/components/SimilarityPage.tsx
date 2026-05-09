@@ -1,9 +1,9 @@
-import { Head } from '@inertiajs/react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import axios from 'axios';
 import { AlertCircle, BookOpen, Loader2, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useRef, useState } from 'react';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -20,8 +20,10 @@ import { SimilarityResultsSection } from '@/features/similarity/components/Simil
 import type { SimilarityResult } from '@/features/similarity/types';
 
 export default function SimilarityPage({
+    turnstileEnabled,
     turnstileSiteKey,
 }: {
+    turnstileEnabled: boolean;
     turnstileSiteKey: string;
 }) {
     const [title, setTitle] = useState('');
@@ -52,7 +54,7 @@ export default function SimilarityPage({
             return;
         }
 
-        if (!turnstileToken) {
+        if (turnstileEnabled && !turnstileToken) {
             setError('Silakan selesaikan verifikasi keamanan.');
 
             return;
@@ -92,20 +94,10 @@ export default function SimilarityPage({
     };
 
     return (
-        <>
-            <Head title="Cek Kemiripan Judul" />
-
-            <div
-                className="pointer-events-none fixed inset-0 z-0 opacity-[0.03] dark:opacity-[0.05]"
-                style={{
-                    backgroundImage:
-                        'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-                    backgroundSize: '24px 24px',
-                }}
-            />
-
-            <div className="relative z-10 flex flex-col">
-                {/* Hero */}
+        <PageLayout
+            title="Cek Kemiripan Judul"
+            maxWidth="7xl"
+            header={
                 <section className="relative -mt-20 border-b bg-linear-to-br from-primary/5 via-background to-muted/30 pt-34 pb-14 sm:-mt-28 sm:pt-48 sm:pb-20">
                     <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
@@ -125,115 +117,101 @@ export default function SimilarityPage({
                         </p>
                     </div>
                 </section>
-
-                {/* Main Content */}
-                <section className="py-10">
-                    <div className="mx-auto max-w-7xl space-y-8 px-6 lg:px-8">
-                        <div className="mx-auto max-w-3xl space-y-8">
-                            {/* Search Card */}
-                            <Card className="shadow-lg">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Search className="size-5 text-primary" />
-                                        Pemeriksaan Judul
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Masukkan judul skripsi yang ingin Anda
-                                        ajukan ke perpustakaan.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <form
-                                        onSubmit={handleSubmit}
-                                        className="space-y-4"
+            }
+        >
+            <div className="mx-auto max-w-3xl space-y-8">
+                {/* Search Card */}
+                <Card className="shadow-lg">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Search className="size-5 text-primary" />
+                            Pemeriksaan Judul
+                        </CardTitle>
+                        <CardDescription>
+                            Masukkan judul skripsi yang ingin Anda ajukan ke
+                            perpustakaan.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="judul">Judul Skripsi</Label>
+                                <div className="flex flex-col gap-3 sm:flex-row">
+                                    <Input
+                                        id="judul"
+                                        placeholder="Contoh: Implementasi Algoritma KNN pada Sistem Rekomendasi..."
+                                        value={title}
+                                        onChange={(e) =>
+                                            setTitle(e.target.value)
+                                        }
+                                        className="flex-1"
+                                        disabled={loading}
+                                        autoComplete="off"
+                                    />
+                                    <Button
+                                        id="btn-cek-kemiripan"
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full gap-2 sm:w-auto"
                                     >
-                                        <div className="space-y-2">
-                                            <Label htmlFor="judul">
-                                                Judul Skripsi
-                                            </Label>
-                                            <div className="flex flex-col gap-3 sm:flex-row">
-                                                <Input
-                                                    id="judul"
-                                                    placeholder="Contoh: Implementasi Algoritma KNN pada Sistem Rekomendasi..."
-                                                    value={title}
-                                                    onChange={(e) =>
-                                                        setTitle(e.target.value)
-                                                    }
-                                                    className="flex-1"
-                                                    disabled={loading}
-                                                    autoComplete="off"
-                                                />
-                                                <Button
-                                                    id="btn-cek-kemiripan"
-                                                    type="submit"
-                                                    disabled={loading}
-                                                    className="w-full gap-2 sm:w-auto"
-                                                >
-                                                    {loading ? (
-                                                        <Loader2 className="size-4 animate-spin" />
-                                                    ) : (
-                                                        <Search className="size-4" />
-                                                    )}
-                                                    {loading
-                                                        ? 'Memeriksa...'
-                                                        : 'Cek Sekarang'}
-                                                </Button>
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                Minimal 5 kata. Hasil diurutkan
-                                                berdasarkan tingkat kemiripan.
-                                            </p>
-                                        </div>
-
-                                        {turnstileSiteKey && (
-                                            <div className="flex justify-center">
-                                                <Turnstile
-                                                    ref={turnstileRef}
-                                                    siteKey={turnstileSiteKey}
-                                                    onSuccess={(token) =>
-                                                        setTurnstileToken(token)
-                                                    }
-                                                    onExpire={() =>
-                                                        setTurnstileToken(null)
-                                                    }
-                                                    onError={() =>
-                                                        setTurnstileToken(null)
-                                                    }
-                                                />
-                                            </div>
+                                        {loading ? (
+                                            <Loader2 className="size-4 animate-spin" />
+                                        ) : (
+                                            <Search className="size-4" />
                                         )}
+                                        {loading
+                                            ? 'Memeriksa...'
+                                            : 'Cek Sekarang'}
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Minimal 5 kata. Hasil diurutkan berdasarkan
+                                    tingkat kemiripan.
+                                </p>
+                            </div>
 
-                                        {error && (
-                                            <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                                                <AlertCircle className="size-4 shrink-0" />
-                                                {error}
-                                            </div>
-                                        )}
-                                    </form>
-                                </CardContent>
-                            </Card>
-
-                            {/* Results */}
-                            {result && (
-                                <div ref={resultsRef} className="scroll-mt-24">
-                                    <Separator className="my-2" />
-                                    <SimilarityResultsSection result={result} />
+                            {turnstileEnabled && turnstileSiteKey && (
+                                <div className="flex justify-center">
+                                    <Turnstile
+                                        ref={turnstileRef}
+                                        siteKey={turnstileSiteKey}
+                                        onSuccess={(token) =>
+                                            setTurnstileToken(token)
+                                        }
+                                        onExpire={() => setTurnstileToken(null)}
+                                        onError={() => setTurnstileToken(null)}
+                                    />
                                 </div>
                             )}
 
-                            {/* How it works — shown before first search */}
-                            {!result && !loading && (
-                                <div className="space-y-4">
-                                    <p className="text-center text-sm font-medium text-muted-foreground">
-                                        Cara kerja
-                                    </p>
-                                    <SimilarityHowItWorks />
+                            {error && (
+                                <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                                    <AlertCircle className="size-4 shrink-0" />
+                                    {error}
                                 </div>
                             )}
-                        </div>
+                        </form>
+                    </CardContent>
+                </Card>
+
+                {/* Results */}
+                {result && (
+                    <div ref={resultsRef} className="scroll-mt-24">
+                        <Separator className="my-2" />
+                        <SimilarityResultsSection result={result} />
                     </div>
-                </section>
+                )}
+
+                {/* How it works — shown before first search */}
+                {!result && !loading && (
+                    <div className="space-y-4">
+                        <p className="text-center text-sm font-medium text-muted-foreground">
+                            Cara kerja
+                        </p>
+                        <SimilarityHowItWorks />
+                    </div>
+                )}
             </div>
-        </>
+        </PageLayout>
     );
 }

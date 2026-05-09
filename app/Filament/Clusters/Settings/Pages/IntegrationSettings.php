@@ -7,6 +7,7 @@ use App\Repositories\SettingRepository;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
@@ -39,12 +40,11 @@ class IntegrationSettings extends Page
     {
         $values = $this->settingRepository()->sectionValues('integration', $this->defaultValues());
 
-        // Decrypt only the secret field
+        // Decrypt secret fields
         if (filled($values['similarity_api_secret'] ?? null)) {
             try {
                 $values['similarity_api_secret'] = decrypt($values['similarity_api_secret']);
             } catch (\Exception) {
-                // Already plain text (e.g. before migration)
             }
         }
 
@@ -60,6 +60,17 @@ class IntegrationSettings extends Page
     {
         return $schema->components([
             Form::make([
+                Section::make('Cloudflare Turnstile')
+                    ->description('Konfigurasi Cloudflare Turnstile untuk keamanan form (Anti-Bot).')
+                    ->schema([
+                        Toggle::make('turnstile_enabled')
+                            ->label('Aktifkan Turnstile')
+                            ->helperText('Jika diaktifkan, beberapa form akan menggunakan verifikasi Turnstile (Site Key & Secret Key diambil dari sistem).')
+                            ->onIcon('heroicon-m-check')
+                            ->offIcon('heroicon-m-x-mark')
+                            ->onColor('success')
+                            ->offColor('danger'),
+                    ]),
                 Section::make('API Kemiripan Skripsi')
                     ->description('Konfigurasi endpoint untuk mendeteksi kemiripan judul mahasiswa.')
                     ->schema([
@@ -101,6 +112,23 @@ class IntegrationSettings extends Page
                             ->minValue(1)
                             ->maxValue(60)
                             ->default(10),
+                        TextInput::make('similarity_api_top_k')
+                            ->label('Top K (Jumlah Hasil)')
+                            ->helperText('Jumlah dokumen termirip yang akan dikembalikan.')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1)
+                            ->maxValue(50)
+                            ->default(5),
+                        TextInput::make('similarity_api_threshold')
+                            ->label('Threshold (Ambang Batas)')
+                            ->helperText('Skor kemiripan minimum (0.0 - 1.0). Semakin tinggi semakin ketat.')
+                            ->numeric()
+                            ->required()
+                            ->minValue(0)
+                            ->maxValue(1)
+                            ->step(0.01)
+                            ->default(0.5),
                     ])
                     ->columns(2),
 
@@ -134,17 +162,20 @@ class IntegrationSettings extends Page
     {
         $data = $this->form->getState();
 
-        // Encrypt only the secret before persisting
-        $secret = filled($data['similarity_api_secret'] ?? null)
+        // Encrypt secret fields before persisting
+        $similaritySecret = filled($data['similarity_api_secret'] ?? null)
             ? encrypt($data['similarity_api_secret'])
             : null;
 
         $this->settingRepository()->putMany('integration', [
             'similarity_api_url' => $data['similarity_api_url'] ?? null,
-            'similarity_api_secret' => $secret,
+            'similarity_api_secret' => $similaritySecret,
             'similarity_api_timeout' => $data['similarity_api_timeout'] ?? 10,
             'whatsapp_api_url' => $data['whatsapp_api_url'] ?? null,
             'whatsapp_api_token' => $data['whatsapp_api_token'] ?? null,
+            'turnstile_enabled' => $data['turnstile_enabled'] ?? false,
+            'similarity_api_top_k' => $data['similarity_api_top_k'] ?? 5,
+            'similarity_api_threshold' => $data['similarity_api_threshold'] ?? 0.5,
         ]);
 
         Notification::make()
@@ -160,6 +191,7 @@ class IntegrationSettings extends Page
             } catch (\Exception) {
             }
         }
+
         $this->form->fill($values);
     }
 
@@ -174,6 +206,9 @@ class IntegrationSettings extends Page
             'similarity_api_timeout' => 10,
             'whatsapp_api_url' => '',
             'whatsapp_api_token' => '',
+            'turnstile_enabled' => false,
+            'similarity_api_top_k' => 5,
+            'similarity_api_threshold' => 0.5,
         ];
     }
 

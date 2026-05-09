@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { PageLayout } from '@/components/layouts/PageLayout';
 
 interface CatalogPageLayoutProps {
     title: string;
@@ -17,30 +17,15 @@ export function CatalogPageLayout({
     children,
 }: CatalogPageLayoutProps) {
     return (
-        <>
-            <Head title={title} />
-
-            {/* Dot-grid background */}
-            <div
-                className="pointer-events-none fixed inset-0 z-0 opacity-[0.03] dark:opacity-[0.05]"
-                style={{
-                    backgroundImage:
-                        'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-                    backgroundSize: '24px 24px',
-                }}
-            />
-
-            <div className="relative z-10">
-                {header}
-
-                <main className="pb-16">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="flex flex-col gap-8 md:gap-10">
-                            {children}
-                        </div>
-                    </div>
-                </main>
+        <PageLayout
+            title={title}
+            header={header}
+            maxWidth="7xl"
+            className="pb-16 pt-0"
+        >
+            <div className="flex flex-col gap-8 md:gap-10">
+                {children}
             </div>
-        </>
+        </PageLayout>
     );
 }

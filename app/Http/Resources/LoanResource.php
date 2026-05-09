@@ -18,7 +18,9 @@ class LoanResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status,
-            'statusLabel' => Loan::statusOptions()[$this->status] ?? $this->status,
+            'statusLabel' => ($this->isOverdue() && $this->status === Loan::STATUS_BORROWED)
+                ? 'Terlambat'
+                : (Loan::statusOptions()[$this->status] ?? $this->status),
             'borrowedAt' => $this->borrowed_at?->translatedFormat('d F Y H:i'),
             'dueAt' => $this->due_at?->translatedFormat('d F Y H:i'),
             'returnedAt' => $this->returned_at?->translatedFormat('d F Y H:i') ?? '-',
