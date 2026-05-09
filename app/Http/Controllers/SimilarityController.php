@@ -52,9 +52,15 @@ class SimilarityController extends Controller
             $hasil = $api->checkSimilarity($judul);
 
             if ($hasil === null) {
+                if (! $api->isHealthy()) {
+                    return response()->json([
+                        'message' => 'Layanan pemindaian kemiripan sedang tidak tersedia atau sedang "Sleep". Silakan coba lagi dalam beberapa detik (tunggu sekitar 30-60 detik untuk bangun).',
+                    ], 503);
+                }
+
                 return response()->json([
-                    'message' => 'Layanan pemindaian kemiripan sedang tidak tersedia atau sedang "Sleep". Silakan coba lagi dalam beberapa detik.',
-                ], 503);
+                    'message' => 'Gagal melakukan pemindaian kemiripan. Jika masalah berlanjut, hubungi administrator untuk memastikan indeks data sudah tersedia.',
+                ], 500);
             }
 
             if (! empty($hasil['results'])) {

@@ -60,7 +60,7 @@ export default function Hero({ stats }: HeroProps) {
     };
 
     return (
-        <section className="relative top-0 flex h-svh flex-col justify-center overflow-hidden pt-20 sm:pt-24">
+        <section className="relative top-0 flex min-h-svh flex-col justify-center overflow-hidden pt-32 pb-12 sm:h-svh sm:pt-24 sm:pb-0">
             {/* Particle background */}
             {/* <div className="pointer-events-none absolute inset-0 -z-10 h-full w-full">
                 <Suspense fallback={null}>
