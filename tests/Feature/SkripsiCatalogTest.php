@@ -1,0 +1,60 @@
+<?php
+
+use App\Models\Skripsi;
+use Inertia\Testing\AssertableInertia as Assert;
+
+use function Pest\Laravel\get;
+
+test('skripsi catalog page renders results', function () {
+    Skripsi::factory()->create([
+        'title' => 'Analisis Sistem Informasi',
+        'author_name' => 'Budi Santoso',
+        'year' => 2024,
+    ]);
+
+    get(route('skripsi.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('skripsi/index')
+            ->where('total', 1)
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('skripsis.data', 1)
+                ->where('skripsis.data.0.title', 'Analisis Sistem Informasi')
+            ));
+});
+
+test('skripsi catalog page filters by search keyword', function () {
+    Skripsi::factory()->create(['title' => 'Sistem Informasi Akademik']);
+    Skripsi::factory()->create(['title' => 'Jaringan Komputer']);
+
+    get(route('skripsi.index', ['search' => 'Akademik']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('skripsi/index')
+            ->where('filters.search', 'Akademik')
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('skripsis.data', 1)
+                ->where('skripsis.data.0.title', 'Sistem Informasi Akademik')
+            ));
+});
+
+test('skripsi catalog page filters by year', function () {
+    Skripsi::factory()->create([
+        'title' => 'Skripsi 2024',
+        'year' => 2024,
+    ]);
+    Skripsi::factory()->create([
+        'title' => 'Skripsi 2023',
+        'year' => 2023,
+    ]);
+
+    get(route('skripsi.index', ['year' => 2024]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('skripsi/index')
+            ->where('filters.year', 2024)
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('skripsis.data', 1)
+                ->where('skripsis.data.0.title', 'Skripsi 2024')
+            ));
+});

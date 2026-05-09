@@ -1,14 +1,6 @@
 import { BookMarked } from 'lucide-react';
-import {
-    Empty,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from '@/components/ui/empty';
-import { Separator } from '@/components/ui/separator';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import SkripsiCard from '@/features/skripsi/components/SkripsiCard';
-import { SkripsiPagination } from '@/features/skripsi/components/SkripsiPagination';
 import type { PaginatedSkripsis } from '@/features/skripsi/types';
 
 interface SkripsiCatalogResultsProps {
@@ -18,7 +10,6 @@ interface SkripsiCatalogResultsProps {
 export function SkripsiCatalogResults({
     skripsis,
 }: SkripsiCatalogResultsProps) {
-    const total = skripsis.total ?? 0;
 
     return (
         <div className="flex flex-col gap-6">
@@ -40,13 +31,6 @@ export function SkripsiCatalogResults({
                         </EmptyDescription>
                     </EmptyHeader>
                 </Empty>
-            )}
-
-            {total > 0 && (
-                <>
-                    <Separator />
-                    <SkripsiPagination skripsis={skripsis} />
-                </>
             )}
         </div>
     );

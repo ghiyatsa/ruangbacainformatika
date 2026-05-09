@@ -63,6 +63,7 @@ function PaginationLink({
   onError,
   onCancel,
   onFinish,
+  type,
   ...props
 }: PaginationLinkProps) {
   const inertiaProps = {
@@ -94,7 +95,8 @@ function PaginationLink({
       disabled={disabled}
     >
       {disabled ? (
-        <span
+        <button
+          type="button"
           aria-disabled
           data-slot="pagination-link"
           data-active={isActive}

@@ -15,11 +15,20 @@ export interface CategoryItem {
     booksCount: number;
 }
 
+export interface BookCatalogFilters {
+    search: string;
+    category: string;
+    year: number | null;
+    featured: boolean;
+    availability: boolean;
+}
+
 export interface BookCatalogPageProps {
     canRegister?: boolean;
-    filters: { search: string; category: string };
+    filters: BookCatalogFilters;
     stats: BookCatalogStats;
     categories: CategoryItem[];
+    years: number[];
     books: PaginatedBooks;
 }
 
@@ -36,7 +45,7 @@ export interface BookData {
     publisher: string | null;
     publishedYear: number | null;
     pages: number | null;
-    language: string;
+    language: string | null;
     itemsCount: number;
     availableItemsCount: number;
     isFeatured: boolean;

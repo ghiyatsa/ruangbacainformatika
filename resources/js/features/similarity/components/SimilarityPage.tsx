@@ -1,8 +1,9 @@
 import { Turnstile } from '@marsidev/react-turnstile';
-import axios from 'axios';
+import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { AlertCircle, BookOpen, Loader2, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useRef, useState } from 'react';
+import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { SimilarityHowItWorks } from '@/features/similarity/components/SimilarityHowItWorks';
 import { SimilarityResultsSection } from '@/features/similarity/components/SimilarityResultsSection';
 import type { SimilarityResult } from '@/features/similarity/types';
+import similarityRoute from '@/routes/similarity';
 
 export default function SimilarityPage({
     turnstileEnabled,
@@ -32,7 +34,7 @@ export default function SimilarityPage({
     const [error, setError] = useState<string | null>(null);
     const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
     const resultsRef = useRef<HTMLDivElement>(null);
-    const turnstileRef = useRef<any>(null);
+    const turnstileRef = useRef<TurnstileInstance | null>(null);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -65,11 +67,32 @@ export default function SimilarityPage({
         setResult(null);
 
         try {
-            const response = await axios.post('/similarity/check', {
-                judul: title,
-                'cf-turnstile-response': turnstileToken,
+            const response = await fetch(similarityRoute.check.url(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                    judul: title,
+                    'cf-turnstile-response': turnstileToken,
+                }),
             });
-            setResult(response.data);
+
+            const data = (await response.json()) as
+                | SimilarityResult
+                | { message?: string };
+
+            if (!response.ok) {
+                throw new Error(
+                    'message' in data && data.message
+                        ? data.message
+                        : 'Terjadi kesalahan saat memeriksa kemiripan.',
+                );
+            }
+
+            setResult(data as SimilarityResult);
 
             setTimeout(() => {
                 resultsRef.current?.scrollIntoView({
@@ -78,13 +101,10 @@ export default function SimilarityPage({
                 });
             }, 100);
         } catch (err: unknown) {
-            const message =
+            setError(
                 err instanceof Error
                     ? err.message
-                    : 'Terjadi kesalahan saat memeriksa kemiripan.';
-            setError(
-                (axios.isAxiosError(err) && err.response?.data?.message) ||
-                    message,
+                    : 'Terjadi kesalahan saat memeriksa kemiripan.',
             );
         } finally {
             setLoading(false);
@@ -98,30 +118,28 @@ export default function SimilarityPage({
             title="Cek Kemiripan Judul"
             maxWidth="7xl"
             header={
-                <section className="relative -mt-20 border-b bg-linear-to-br from-primary/5 via-background to-muted/30 pt-34 pb-14 sm:-mt-28 sm:pt-48 sm:pb-20">
-                    <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
+                <LibraryPageHero
+                    badge={
+                        <>
                             <BookOpen className="size-4 text-primary" />
                             Layanan Perpustakaan
-                        </div>
-                        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
+                        </>
+                    }
+                    title={
+                        <>
                             Cek Kemiripan{' '}
                             <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                                 Judul Skripsi
                             </span>
-                        </h1>
-                        <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-                            Verifikasi keaslian judul penelitian Anda sebelum
-                            mengajukan proposal. Sistem kami membandingkan
-                            secara semantik dengan seluruh koleksi perpustakaan.
-                        </p>
-                    </div>
-                </section>
+                        </>
+                    }
+                    description="Verifikasi keaslian judul penelitian Anda sebelum mengajukan proposal. Sistem kami membandingkan secara semantik dengan seluruh koleksi perpustakaan."
+                />
             }
         >
-            <div className="mx-auto max-w-3xl space-y-8">
+            <div className="mx-auto max-w-4xl space-y-8">
                 {/* Search Card */}
-                <Card className="shadow-lg">
+                <Card className="border-border/60 bg-card/90 shadow-sm">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Search className="size-5 text-primary" />

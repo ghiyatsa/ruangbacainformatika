@@ -41,7 +41,12 @@ class HomeController extends Controller
             ),
             'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
             'featuredBooks' => Inertia::defer(fn () => $this->featuredBooks()),
-            'books' => Inertia::defer(fn () => BookResource::collection($books)),
+            'books' => Inertia::defer(function () use ($books) {
+                $paginated = $books->toArray();
+                $paginated['data'] = BookResource::collection($books->getCollection())->resolve();
+
+                return $paginated;
+            }),
         ]);
     }
 

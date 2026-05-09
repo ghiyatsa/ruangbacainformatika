@@ -11,6 +11,7 @@ import {
     RotateCcw,
 } from 'lucide-react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
+import { ResourcePagination } from '@/components/catalog/ResourcePagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,8 +22,9 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { BookPagination } from '@/features/books/components/BookPagination';
 import { cn } from '@/lib/utils';
+import booksRoute from '@/routes/books';
+import type { PaginationData } from '@/types/pagination';
 
 interface LoanItem {
     id: number;
@@ -45,21 +47,8 @@ interface Loan {
     itemsCount: number;
 }
 
-interface PaginatedData<T> {
-    data: T[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number | null;
-    to: number | null;
-    prev_page_url: string | null;
-    next_page_url: string | null;
-    links: { url: string | null; label: string; active: boolean }[];
-}
-
 interface Props {
-    loans: PaginatedData<Loan>;
+    loans: PaginationData<Loan>;
     stats: {
         total: number;
         active: number;
@@ -385,7 +374,10 @@ export default function LoanHistoryPage({ loans, stats }: Props) {
 
                         {/* Pagination */}
                         <div className="pt-4">
-                            <BookPagination books={loans as any} />
+                            <ResourcePagination
+                                data={loans}
+                                resourceName="peminjaman"
+                            />
                         </div>
                     </div>
                 ) : (
@@ -403,7 +395,7 @@ export default function LoanHistoryPage({ loans, stats }: Props) {
                             variant="outline"
                             className="mt-6 gap-2"
                         >
-                            <Link href="/books">
+                            <Link href={booksRoute.index.url()}>
                                 <BookOpen className="size-4" />
                                 Jelajahi Katalog
                             </Link>

@@ -1,3 +1,5 @@
+import type { PaginationData } from '@/types/pagination';
+
 export interface SkripsiData {
     id: number;
     title: string;
@@ -19,18 +21,7 @@ export interface SkripsiFilters {
     year: number | null;
 }
 
-export interface PaginatedSkripsis {
-    data: SkripsiData[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number | null;
-    to: number | null;
-    prev_page_url: string | null;
-    next_page_url: string | null;
-    links: { url: string | null; label: string; active: boolean }[];
-}
+export type PaginatedSkripsis = PaginationData<SkripsiData>;
 
 export interface SkripsiCatalogPageProps {
     filters: SkripsiFilters;

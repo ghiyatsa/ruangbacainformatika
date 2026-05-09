@@ -23,11 +23,17 @@ class CatalogController extends Controller
             ->toString();
 
         $categorySlug = $request->string('category')->toString();
+        $year = $request->integer('year') ?: null;
+        $featured = $request->boolean('featured');
+        $availability = $request->boolean('availability');
 
         $books = Book::query()
             ->published()
             ->search($search)
             ->forCategory($categorySlug)
+            ->forYear($year)
+            ->when($featured, fn ($q) => $q->featured())
+            ->onlyAvailable($availability)
             ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
             ->withCount([
                 'items',
@@ -43,13 +49,27 @@ class CatalogController extends Controller
             'filters' => [
                 'search' => $search,
                 'category' => $categorySlug,
+                'year' => $year,
+                'featured' => $featured,
+                'availability' => $availability,
             ],
             'stats' => array_merge(
                 $this->catalogService->getStats(),
                 ['searchResultsCount' => $books->total()]
             ),
+            'years' => Book::published()
+                ->whereNotNull('published_year')
+                ->distinct()
+                ->orderByDesc('published_year')
+                ->pluck('published_year')
+                ->all(),
             'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
-            'books' => Inertia::defer(fn () => BookResource::collection($books)),
+            'books' => Inertia::defer(function () use ($books) {
+                $paginated = $books->toArray();
+                $paginated['data'] = BookResource::collection($books->getCollection())->resolve();
+
+                return $paginated;
+            }),
         ]);
     }
 }

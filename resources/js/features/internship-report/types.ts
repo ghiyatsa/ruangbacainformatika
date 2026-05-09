@@ -1,3 +1,5 @@
+import type { PaginationData } from '@/types/pagination';
+
 export interface InternshipReportData {
     id: number;
     title: string;
@@ -19,18 +21,7 @@ export interface InternshipReportFilters {
     year: number | null;
 }
 
-export interface PaginatedInternshipReports {
-    data: InternshipReportData[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number | null;
-    to: number | null;
-    prev_page_url: string | null;
-    next_page_url: string | null;
-    links: { url: string | null; label: string; active: boolean }[];
-}
+export type PaginatedInternshipReports = PaginationData<InternshipReportData>;
 
 export interface InternshipReportCatalogPageProps {
     filters: InternshipReportFilters;

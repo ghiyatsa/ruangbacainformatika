@@ -1,4 +1,5 @@
 import { Mail, MapPin, Phone } from 'lucide-react';
+import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,70 +16,88 @@ import { Textarea } from '@/components/ui/textarea';
 export function ContactPage() {
     return (
         <PageLayout
-            title="Contact Us"
-            description="Have a question about our collections or need assistance? Reach out to us and we'll be happy to help."
+            title="Hubungi Kami"
             maxWidth="5xl"
+            header={
+                <LibraryPageHero
+                    badge={
+                        <>
+                            <Mail className="size-4 text-primary" />
+                            Layanan Bantuan
+                        </>
+                    }
+                    title={
+                        <>
+                            Kami Siap{' '}
+                            <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                                Membantu
+                            </span>
+                        </>
+                    }
+                    description="Punya pertanyaan tentang koleksi, akses akun, atau layanan perpustakaan? Kirim pesan atau hubungi kami melalui kanal yang tersedia."
+                />
+            }
         >
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                <Card className="h-full">
+                <Card className="h-full border-border/60 bg-card/90 shadow-sm">
                     <CardHeader>
-                        <CardTitle>Send us a message</CardTitle>
+                        <CardTitle>Kirim Pesan</CardTitle>
                         <CardDescription>
-                            Fill out the form below and we'll get back to you as
-                            soon as possible.
+                            Isi formulir berikut dan kami akan merespons
+                            sesegera mungkin.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form
                             className="space-y-4"
-                            onSubmit={(e) => e.preventDefault()}
+                            onSubmit={(event) => event.preventDefault()}
                         >
                             <div className="space-y-2">
-                                <Label htmlFor="name">Full Name</Label>
+                                <Label htmlFor="name">Nama Lengkap</Label>
                                 <Input
                                     id="name"
-                                    placeholder="Enter your full name"
+                                    placeholder="Masukkan nama lengkap Anda"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
+                                <Label htmlFor="email">Alamat Email</Label>
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="Enter your email address"
+                                    placeholder="Masukkan alamat email Anda"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="subject">Subject</Label>
+                                <Label htmlFor="subject">Subjek</Label>
                                 <Input
                                     id="subject"
-                                    placeholder="What is this regarding?"
+                                    placeholder="Pesan ini tentang apa?"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="message">Message</Label>
+                                <Label htmlFor="message">Pesan</Label>
                                 <Textarea
                                     id="message"
-                                    placeholder="Type your message here..."
+                                    placeholder="Tulis pesan Anda di sini..."
                                     className="min-h-[120px]"
                                 />
                             </div>
                             <Button type="submit" className="w-full">
-                                Send Message
+                                Kirim Pesan
                             </Button>
                         </form>
                     </CardContent>
                 </Card>
 
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="border-border/60 bg-card/90 shadow-sm">
                         <CardContent className="flex items-start gap-4 p-6">
                             <div className="shrink-0 rounded-full bg-primary/10 p-3 text-primary">
                                 <MapPin className="h-6 w-6" />
                             </div>
                             <div>
                                 <h3 className="mb-1 text-lg font-semibold text-foreground">
-                                    Our Location
+                                    Lokasi Kami
                                 </h3>
                                 <p className="text-muted-foreground">
                                     Kampus Bukit Indah
@@ -93,14 +112,14 @@ export function ContactPage() {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="border-border/60 bg-card/90 shadow-sm">
                         <CardContent className="flex items-start gap-4 p-6">
                             <div className="shrink-0 rounded-full bg-primary/10 p-3 text-primary">
                                 <Mail className="h-6 w-6" />
                             </div>
                             <div>
                                 <h3 className="mb-1 text-lg font-semibold text-foreground">
-                                    Email Us
+                                    Email Kami
                                 </h3>
                                 <p className="text-muted-foreground">
                                     info.tif@unimal.ac.id
@@ -111,14 +130,14 @@ export function ContactPage() {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="border-border/60 bg-card/90 shadow-sm">
                         <CardContent className="flex items-start gap-4 p-6">
                             <div className="shrink-0 rounded-full bg-primary/10 p-3 text-primary">
                                 <Phone className="h-6 w-6" />
                             </div>
                             <div>
                                 <h3 className="mb-1 text-lg font-semibold text-foreground">
-                                    Call Us
+                                    Telepon Kami
                                 </h3>
                                 <p className="text-muted-foreground">
                                     +62 123 4567 8900

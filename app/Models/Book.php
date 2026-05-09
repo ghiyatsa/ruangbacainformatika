@@ -133,6 +133,24 @@ class Book extends Model
         );
     }
 
+    public function scopeForYear(Builder $query, ?int $year): Builder
+    {
+        if (! $year) {
+            return $query;
+        }
+
+        return $query->where('published_year', $year);
+    }
+
+    public function scopeOnlyAvailable(Builder $query, bool $available = true): Builder
+    {
+        if (! $available) {
+            return $query;
+        }
+
+        return $query->whereHas('items', fn (Builder $q) => $q->available());
+    }
+
     public function canBeDeleted(): bool
     {
         return $this->deletionBlockedReason() === null;

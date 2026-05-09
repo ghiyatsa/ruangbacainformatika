@@ -6,10 +6,8 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from '@/components/ui/empty';
-import { Separator } from '@/components/ui/separator';
 import BookCard from '@/features/books/components/BookCard';
 import BookListItem from '@/features/books/components/BookListItem';
-import { BookPagination } from '@/features/books/components/BookPagination';
 import type { ViewMode } from '@/features/books/types';
 import type { PaginatedBooks } from '@/features/welcome/types';
 
@@ -55,13 +53,6 @@ export function BookCatalogResults({
                         </EmptyDescription>
                     </EmptyHeader>
                 </Empty>
-            )}
-
-            {books.total > 0 && (
-                <>
-                    <Separator />
-                    <BookPagination books={books} />
-                </>
             )}
         </div>
     );

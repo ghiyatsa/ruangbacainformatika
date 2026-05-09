@@ -1,5 +1,7 @@
 import { router } from '@inertiajs/react';
 import { LayoutGrid, LayoutList, Library } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -13,13 +15,15 @@ import type {
     CategoryItem,
     BookCatalogStats,
     ViewMode,
+    BookCatalogFilters as FilterTypes,
 } from '@/features/books/types';
 import booksRoute from '@/routes/books';
 
 interface BookCatalogFiltersProps {
-    filters: { search: string; category: string };
+    filters: FilterTypes;
     stats: BookCatalogStats;
     categories: CategoryItem[];
+    years: number[];
     viewMode: ViewMode;
     onViewModeChange: (mode: ViewMode) => void;
 }
@@ -28,13 +32,18 @@ export function BookCatalogFilters({
     filters,
     stats,
     categories,
+    years,
     viewMode,
     onViewModeChange,
 }: BookCatalogFiltersProps) {
-    function handleCategoryChange(slug: string): void {
+    function applyFilters(overrides: Partial<FilterTypes>): void {
+        const next = { ...filters, ...overrides };
         router.get(
             booksRoute.index.url(),
-            { ...filters, category: slug === 'all' ? '' : slug },
+            {
+                ...next,
+                category: next.category === 'all' ? '' : next.category,
+            },
             { preserveScroll: true, replace: true },
         );
     }
@@ -65,9 +74,9 @@ export function BookCatalogFilters({
                     </span>
                     <Select
                         value={filters.category || 'all'}
-                        onValueChange={handleCategoryChange}
+                        onValueChange={(val) => applyFilters({ category: val })}
                     >
-                        <SelectTrigger className="h-10 w-[180px] rounded-lg shadow-xs sm:w-[220px]">
+                        <SelectTrigger className="h-10 w-[160px] rounded-lg shadow-xs sm:w-[200px]">
                             <SelectValue placeholder="Pilih Kategori" />
                         </SelectTrigger>
                         <SelectContent>
@@ -84,6 +93,74 @@ export function BookCatalogFilters({
                             ))}
                         </SelectContent>
                     </Select>
+                </div>
+
+                <Separator orientation="vertical" className="h-8" />
+
+                {/* Year Select */}
+                <div className="flex items-center gap-2">
+                    <span className="hidden text-xs font-medium text-muted-foreground sm:inline-block">
+                        Tahun:
+                    </span>
+                    <Select
+                        value={filters.year ? String(filters.year) : 'all'}
+                        onValueChange={(val) =>
+                            applyFilters({
+                                year: val === 'all' ? null : Number(val),
+                            })
+                        }
+                    >
+                        <SelectTrigger className="h-10 w-28 rounded-lg shadow-xs sm:w-32">
+                            <SelectValue placeholder="Tahun" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Semua</SelectItem>
+                            {years.map((y) => (
+                                <SelectItem key={y} value={String(y)}>
+                                    {y}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <Separator
+                    orientation="vertical"
+                    className="hidden h-8 md:block"
+                />
+
+                {/* Featured Toggle */}
+                <div className="flex items-center gap-2">
+                    <Checkbox
+                        id="featured-filter"
+                        checked={filters.featured}
+                        onCheckedChange={(checked) =>
+                            applyFilters({ featured: !!checked })
+                        }
+                    />
+                    <Label
+                        htmlFor="featured-filter"
+                        className="cursor-pointer text-xs font-medium text-muted-foreground select-none"
+                    >
+                        Unggulan
+                    </Label>
+                </div>
+
+                {/* Availability Toggle */}
+                <div className="flex items-center gap-2">
+                    <Checkbox
+                        id="availability-filter"
+                        checked={filters.availability}
+                        onCheckedChange={(checked) =>
+                            applyFilters({ availability: !!checked })
+                        }
+                    />
+                    <Label
+                        htmlFor="availability-filter"
+                        className="cursor-pointer text-xs font-medium text-muted-foreground select-none"
+                    >
+                        Tersedia
+                    </Label>
                 </div>
 
                 <Separator orientation="vertical" className="h-8" />

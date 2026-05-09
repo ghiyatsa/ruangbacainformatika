@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { BackgroundPattern } from '@/components/layouts/BackgroundPattern';
 import { cn } from '@/lib/utils';
 
 interface PageLayoutProps {
@@ -83,16 +84,7 @@ export function PageLayout({
         <div className="relative flex min-h-[calc(100vh-(--spacing(20)))] flex-col sm:min-h-[calc(100vh-(--spacing(28)))]">
             <Head title={title} />
 
-            {showBackground && (
-                <div
-                    className="pointer-events-none fixed inset-0 z-0 opacity-[0.03] dark:opacity-[0.05]"
-                    style={{
-                        backgroundImage:
-                            'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-                        backgroundSize: '24px 24px',
-                    }}
-                />
-            )}
+            {showBackground ? <BackgroundPattern /> : null}
 
             <div className="relative z-10 flex flex-1 flex-col">
                 {header ? (

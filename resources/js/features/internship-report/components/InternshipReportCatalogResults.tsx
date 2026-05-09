@@ -1,15 +1,7 @@
 import { BookMarked } from 'lucide-react';
-import {
-    Empty,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from '@/components/ui/empty';
-import { Separator } from '@/components/ui/separator';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import type { PaginatedInternshipReports } from '@/features/internship-report/types';
 import InternshipReportCard from './InternshipReportCard';
-import { InternshipReportPagination } from './InternshipReportPagination';
 
 interface InternshipReportCatalogResultsProps {
     reports: PaginatedInternshipReports;
@@ -18,7 +10,6 @@ interface InternshipReportCatalogResultsProps {
 export function InternshipReportCatalogResults({
     reports,
 }: InternshipReportCatalogResultsProps) {
-    const total = reports.total ?? 0;
 
     return (
         <div className="flex flex-col gap-6">
@@ -40,13 +31,6 @@ export function InternshipReportCatalogResults({
                         </EmptyDescription>
                     </EmptyHeader>
                 </Empty>
-            )}
-
-            {total > 0 && (
-                <>
-                    <Separator />
-                    <InternshipReportPagination reports={reports} />
-                </>
             )}
         </div>
     );

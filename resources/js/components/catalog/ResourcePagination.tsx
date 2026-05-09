@@ -8,26 +8,30 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
-import type { PaginatedBooks } from '@/features/welcome/types';
+import type { PaginationData } from '@/types/pagination';
 
-interface BookPaginationProps {
-    books: PaginatedBooks;
+interface ResourcePaginationProps<T> {
+    data: PaginationData<T>;
+    resourceName: string;
 }
 
 /**
- * Shared pagination control used by the catalog and category pages.
+ * Shared pagination control used by all resource catalogs.
  * Renders nothing when there is only one page.
  */
-export function BookPagination({ books }: BookPaginationProps) {
-    if (books.last_page <= 1) {
+export function ResourcePagination<T>({
+    data,
+    resourceName,
+}: ResourcePaginationProps<T>) {
+    if (data.last_page <= 1) {
         return null;
     }
 
-    const current = books.current_page;
-    const last = books.last_page;
+    const current = data.current_page;
+    const last = data.last_page;
 
     // Filter out "Previous" and "Next" links from the links array
-    const pageLinks = books.links.filter((link) => !isNaN(Number(link.label)));
+    const pageLinks = data.links.filter((link) => !isNaN(Number(link.label)));
 
     const delta = 1;
     const rangeStart = Math.max(1, current - delta);
@@ -44,20 +48,20 @@ export function BookPagination({ books }: BookPaginationProps) {
             <p className="text-sm text-muted-foreground">
                 Menampilkan{' '}
                 <span className="font-semibold text-foreground">
-                    {books.from}–{books.to}
+                    {data.from ?? 0}–{data.to ?? 0}
                 </span>{' '}
                 dari{' '}
                 <span className="font-semibold text-foreground">
-                    {books.total.toLocaleString('id-ID')}
+                    {(data.total ?? 0).toLocaleString('id-ID')}
                 </span>{' '}
-                buku
+                {resourceName}
             </p>
 
             <Pagination className="mx-0 w-auto">
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationLink
-                            href={books.links[0]?.url ?? '#'}
+                            href={data.first_page_url ?? '#'}
                             disabled={current === 1}
                             aria-label="Halaman pertama"
                             size="icon"
@@ -68,8 +72,8 @@ export function BookPagination({ books }: BookPaginationProps) {
 
                     <PaginationItem>
                         <PaginationPrevious
-                            href={books.prev_page_url ?? '#'}
-                            disabled={!books.prev_page_url}
+                            href={data.prev_page_url ?? '#'}
+                            disabled={!data.prev_page_url}
                         />
                     </PaginationItem>
 
@@ -127,16 +131,14 @@ export function BookPagination({ books }: BookPaginationProps) {
 
                     <PaginationItem>
                         <PaginationNext
-                            href={books.next_page_url ?? '#'}
-                            disabled={!books.next_page_url}
+                            href={data.next_page_url ?? '#'}
+                            disabled={!data.next_page_url}
                         />
                     </PaginationItem>
 
                     <PaginationItem>
                         <PaginationLink
-                            href={
-                                books.links[books.links.length - 1]?.url ?? '#'
-                            }
+                            href={data.last_page_url ?? '#'}
                             disabled={current === last}
                             aria-label="Halaman terakhir"
                             size="icon"

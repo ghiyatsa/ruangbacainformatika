@@ -1,3 +1,5 @@
+import type { PaginationData } from '@/types/pagination';
+
 export type CatalogBook = {
     id: number;
     title: string;
@@ -21,19 +23,7 @@ export type CatalogBook = {
     viewCount: number;
 };
 
-export type PaginatedBooks = {
-    index: any;
-    data: CatalogBook[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number | null;
-    to: number | null;
-    prev_page_url: string | null;
-    next_page_url: string | null;
-    links: { url: string | null; label: string; active: boolean }[];
-};
+export type PaginatedBooks = PaginationData<CatalogBook>;
 
 export type WelcomeProps = {
     canRegister?: boolean;

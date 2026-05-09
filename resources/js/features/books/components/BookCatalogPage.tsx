@@ -1,11 +1,7 @@
-import { Deferred, router } from '@inertiajs/react';
-import { Search, X } from 'lucide-react';
+import { router } from '@inertiajs/react';
 import { useState } from 'react';
-import { CatalogPageLayout } from '@/components/catalog/CatalogPageLayout';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { CatalogPage } from '@/components/catalog/CatalogPage';
 import { BookCatalogFilters } from '@/features/books/components/BookCatalogFilters';
-import { BookCatalogHeader } from '@/features/books/components/BookCatalogHeader';
 import { BookCatalogResults } from '@/features/books/components/BookCatalogResults';
 import { BookGridSkeleton } from '@/features/books/components/BookGridSkeleton';
 import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
@@ -15,6 +11,7 @@ export default function BookCatalogPage({
     filters,
     stats,
     categories,
+    years,
     books,
 }: BookCatalogPageProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -27,58 +24,49 @@ export default function BookCatalogPage({
         );
     }
 
+    function removeFilter(key: string): void {
+        const next = { ...filters };
+
+        if (key === 'search') {
+            next.search = '';
+        } else if (key === 'year') {
+            next.year = null;
+        } else if (key === 'featured') {
+            next.featured = false;
+        } else if (key === 'availability') {
+            next.availability = false;
+        }
+
+        router.get(booksRoute.index.url(), next, {
+            preserveScroll: true,
+            replace: true,
+        });
+    }
+
     return (
-        <CatalogPageLayout
+        <CatalogPage
             title="Katalog Buku"
-            header={<BookCatalogHeader total={stats.booksCount ?? 0} />}
-        >
-            <div className="flex flex-col gap-6">
+            resourceName="judul buku"
+            breadcrumbLabel="Katalog Buku"
+            totalCount={stats.booksCount ?? 0}
+            paginationData={books}
+            filters={filters}
+            onClearFilters={clearAllFilters}
+            onRemoveFilter={removeFilter}
+            filtersPanel={
                 <BookCatalogFilters
                     filters={filters}
                     stats={stats}
                     categories={categories}
+                    years={years}
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
                 />
-
-                {/* Active Search Badge */}
-                {filters.search && (
-                    <div className="flex items-center gap-2">
-                        <Badge
-                            variant="secondary"
-                            className="gap-1.5 py-1.5 pr-2 pl-2.5"
-                        >
-                            <Search className="size-3 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                                Hasil pencarian:
-                            </span>
-                            &ldquo;{filters.search}&rdquo;
-                            <button
-                                onClick={clearAllFilters}
-                                className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
-                            >
-                                <X className="size-3" />
-                            </button>
-                        </Badge>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 text-xs text-muted-foreground"
-                            onClick={clearAllFilters}
-                        >
-                            Hapus semua filter
-                        </Button>
-                    </div>
-                )}
-            </div>
-
-            {/* Results */}
-            <Deferred
-                data="books"
-                fallback={<BookGridSkeleton viewMode={viewMode} />}
-            >
-                <BookCatalogResults books={books} viewMode={viewMode} />
-            </Deferred>
-        </CatalogPageLayout>
+            }
+            deferredData="books"
+            fallback={<BookGridSkeleton viewMode={viewMode} />}
+        >
+            <BookCatalogResults books={books} viewMode={viewMode} />
+        </CatalogPage>
     );
 }
