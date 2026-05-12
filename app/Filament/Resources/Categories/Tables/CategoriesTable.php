@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Categories\Tables;
 
 use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -48,9 +51,14 @@ class CategoriesTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Kategori'),
+                    DeleteAction::make(),
                 ])
                     ->label('Aksi'),
             ])
-            ->toolbarActions([]);
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 }

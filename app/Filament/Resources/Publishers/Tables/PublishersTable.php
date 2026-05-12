@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Publishers\Tables;
 
 use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -54,9 +57,14 @@ class PublishersTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Penerbit'),
+                    DeleteAction::make(),
                 ])
                     ->label('Aksi'),
             ])
-            ->toolbarActions([]);
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 }
