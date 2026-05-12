@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import CountUp from '@/components/common/CountUp';
 import ShinyText from '@/components/common/ShinyText';
 import StarBorder from '@/components/common/StarBorder';
+import { Kbd } from '@/components/ui/kbd';
 import type { WelcomeProps } from '@/features/welcome/types';
 import books from '@/routes/books';
 
@@ -61,29 +62,6 @@ export default function Hero({ stats }: HeroProps) {
 
     return (
         <section className="relative top-0 flex min-h-svh flex-col justify-center overflow-hidden pt-32 pb-12 sm:h-svh sm:pt-24 sm:pb-0">
-            {/* Particle background */}
-            {/* <div className="pointer-events-none absolute inset-0 -z-10 h-full w-full">
-                <Suspense fallback={null}>
-                    <Antigravity
-                        count={300}
-                        magnetRadius={10}
-                        ringRadius={7}
-                        waveSpeed={0.4}
-                        waveAmplitude={1}
-                        particleSize={1}
-                        lerpSpeed={0.05}
-                        color="#2900cd"
-                        autoAnimate
-                        particleVariance={1}
-                        rotationSpeed={0}
-                        depthFactor={1}
-                        pulseSpeed={3}
-                        particleShape="capsule"
-                        fieldStrength={10}
-                    />
-                </Suspense>
-            </div> */}
-
             {/* Multi-layer radial glows */}
             <div
                 className="pointer-events-none absolute inset-0 -z-10"
@@ -177,12 +155,7 @@ export default function Hero({ stats }: HeroProps) {
                                         Cari buku, penulis, subjek...
                                     </span>
                                     <div className="flex items-center gap-1.5">
-                                        <kbd className="pointer-events-none hidden items-center gap-0.5 rounded border border-border bg-muted/70 px-1.5 font-mono text-[10px] font-medium sm:flex">
-                                            <span className="text-[11px]">
-                                                ⌘
-                                            </span>
-                                            K
-                                        </kbd>
+                                        <Kbd>⌘ K</Kbd>
                                         <ArrowRight className="size-3.5 shrink-0 opacity-40 transition-all group-hover:translate-x-0.5 group-hover:opacity-80" />
                                     </div>
                                 </div>

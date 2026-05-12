@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
-import { Mail, MapPin, Terminal } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
+import { RuangBacaLogo } from '@/components/common/RuangBacaLogo';
 import { home } from '@/routes';
 import { fadeUp } from './constants';
 
@@ -19,9 +20,7 @@ export function FooterBrand() {
                 href={home.url()}
                 className="group mb-5 inline-flex items-center gap-3"
             >
-                <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25 transition-shadow duration-200 group-hover:shadow-lg group-hover:shadow-primary/35">
-                    <Terminal className="size-5" />
-                </div>
+                <RuangBacaLogo className="size-10" />
                 <div className="flex flex-col">
                     <span className="text-sm font-bold tracking-wider uppercase">
                         Ruang Baca

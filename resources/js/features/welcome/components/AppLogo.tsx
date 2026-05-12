@@ -5,7 +5,7 @@ import { home } from '@/routes';
 export const AppLogo = () => {
     return (
         <Link href={home.url()} className="flex items-center gap-3">
-            <RuangBacaLogo className="size-9" />
+            <RuangBacaLogo className="size-10" />
             <div className="flex flex-col">
                 <span className="text-sm font-bold tracking-wider uppercase">
                     Ruang Baca

@@ -188,7 +188,7 @@ function FeaturedSpotlight({
                 }
             >
                 <AnimatePresence mode="wait">
-                    {book ? (
+                    {book && (
                         <motion.div
                             key={book.id || currentIndex}
                             initial={{ opacity: 0, y: 12 }}
@@ -279,16 +279,6 @@ function FeaturedSpotlight({
                                     </span>
                                 </div>
                             </div>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="empty"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="px-8 py-14 text-center text-muted-foreground"
-                        >
-                            Belum ada koleksi sorotan.
                         </motion.div>
                     )}
                 </AnimatePresence>
