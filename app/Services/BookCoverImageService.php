@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Image\Enums\Fit;
@@ -23,49 +22,6 @@ class BookCoverImageService
         ?string $baseName = null,
     ): string {
         return $this->storeAsWebp($file->getRealPath(), $directory, $disk, $baseName);
-    }
-
-    public function storeFromUrl(
-        string $url,
-        string $directory = 'books/covers',
-        string $disk = 'public',
-        ?string $baseName = null,
-    ): string {
-        $temporaryPath = tempnam(sys_get_temp_dir(), 'book-cover-');
-
-        if ($temporaryPath === false) {
-            throw new \RuntimeException('Temporary file could not be created.');
-        }
-
-        try {
-            $response = Http::withUserAgent('Mozilla/5.0')
-                ->timeout(15)
-                ->throw()
-                ->get($url);
-
-            file_put_contents($temporaryPath, $response->body());
-
-            return $this->storeAsWebp($temporaryPath, $directory, $disk, $baseName);
-        } finally {
-            if (file_exists($temporaryPath)) {
-                unlink($temporaryPath);
-            }
-        }
-    }
-
-    public function tryStoreFromUrl(
-        string $url,
-        string $directory = 'books/covers',
-        string $disk = 'public',
-        ?string $baseName = null,
-    ): ?string {
-        try {
-            return $this->storeFromUrl($url, $directory, $disk, $baseName);
-        } catch (\Throwable $exception) {
-            report($exception);
-
-            return null;
-        }
     }
 
     public function storeAsWebp(

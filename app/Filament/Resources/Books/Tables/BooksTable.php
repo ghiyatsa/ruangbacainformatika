@@ -8,6 +8,8 @@ use App\Services\BookCoverImageService;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
 use Filament\Support\Icons\Heroicon;
@@ -162,6 +164,7 @@ class BooksTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Buku'),
+                    DeleteAction::make(),
                 ])
                     ->label('Aksi'),
             ])
@@ -204,6 +207,23 @@ class BooksTable
                         ->action(fn (Collection $records) => $records->each(fn (Book $record) => $record->update(['is_borrowable' => true])))
                         ->deselectRecordsAfterCompletion(),
 
+                    BulkAction::make('publish_selected')
+                        ->label('Publikasikan')
+                        ->icon(Heroicon::OutlinedCheckBadge)
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(fn (Collection $records) => $records->each(fn (Book $record) => $record->update(['is_published' => true])))
+                        ->deselectRecordsAfterCompletion(),
+
+                    BulkAction::make('unpublish_selected')
+                        ->label('Batal Publikasikan')
+                        ->icon(Heroicon::OutlinedXCircle)
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(fn (Collection $records) => $records->each(fn (Book $record) => $record->update(['is_published' => false])))
+                        ->deselectRecordsAfterCompletion(),
+
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

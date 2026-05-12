@@ -3,18 +3,15 @@
 namespace App\Filament\Resources\Books\Schemas;
 
 use App\Services\BookCoverImageService;
-use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -112,42 +109,6 @@ class BookForm
                     ->description('Deskripsi dan gambar sampul buku')
                     ->schema([
 
-                        TextInput::make('cover_url')
-                            ->hiddenLabel()
-                            ->placeholder('Tempel URL gambar di sini...')
-                            ->url()
-                            ->suffixAction(
-                                Action::make('fetch_image')
-                                    ->icon(Heroicon::OutlinedArrowDownCircle)
-                                    ->action(function (Get $get, Set $set): void {
-                                        $url = $get('cover_url');
-
-                                        if (blank($url)) {
-                                            Notification::make()
-                                                ->title('URL Cover Buku Kosong')
-                                                ->body('Silahkan masukkan URL gambar cover buku terlebih dahulu.')
-                                                ->warning()
-                                                ->send();
-
-                                            return;
-                                        }
-
-                                        try {
-                                            $set('cover_image', app(BookCoverImageService::class)->storeFromUrl($url, baseName: $get('slug') ?: $get('title')));
-
-                                            Notification::make()
-                                                ->title('Gambar berhasil diunduh!')
-                                                ->success()
-                                                ->send();
-                                        } catch (\Exception $exception) {
-                                            Notification::make()
-                                                ->title('Gagal mengunduh gambar')
-                                                ->body('Detail Error: '.$exception->getMessage())
-                                                ->danger()
-                                                ->send();
-                                        }
-                                    }),
-                            ),
                         FileUpload::make('cover_image')
                             ->hiddenLabel()
                             ->image()
@@ -168,7 +129,7 @@ class BookForm
                             ->imageAspectRatio('3:4')
                             ->automaticallyCropImagesToAspectRatio()
                             ->maxSize(2048)
-                            ->helperText('Jika cover kosong atau URL gagal diunduh, sistem akan memakai cover default.')
+                            ->helperText('Sistem akan memakai cover default jika tidak ada gambar yang diunggah.')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                     ])
                     ->columns(1),

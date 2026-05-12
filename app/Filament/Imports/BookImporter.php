@@ -6,7 +6,6 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Publisher;
-use App\Services\BookCoverImageService;
 use App\Services\BookItemBatchCreator;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -49,23 +48,6 @@ class BookImporter extends Importer
 
             ImportColumn::make('description'),
 
-            ImportColumn::make('cover_url')
-                ->label('URL Cover Buku')
-                ->rules(['nullable', 'url'])
-                ->fillRecordUsing(function ($record, $state, $data) {
-                    if (blank($state)) {
-                        return;
-                    }
-
-                    $baseName = $record->slug ?: ($data['title'] ?? null);
-
-                    $coverImage = app(BookCoverImageService::class)
-                        ->tryStoreFromUrl($state, baseName: $baseName);
-
-                    if (filled($coverImage)) {
-                        $record->cover_image = $coverImage;
-                    }
-                }),
             ImportColumn::make('edition'),
             ImportColumn::make('published_year')
                 ->label('Tahun Terbit'),
