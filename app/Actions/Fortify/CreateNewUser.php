@@ -26,28 +26,22 @@ class CreateNewUser implements CreatesNewUsers
                 'max:255',
                 'unique:users',
                 function ($attribute, $value, $fail) {
-                    if (! str_ends_with($value, '@unimal.ac.id') && ! str_ends_with($value, '@mhs.unimal.ac.id')) {
-                        $fail('Email harus menggunakan domain @unimal.ac.id atau @mhs.unimal.ac.id');
+                    $campusEmail = app(\App\Support\CampusEmail::class);
+                    $message = $campusEmail->validationMessage($value);
 
-                        return;
-                    }
-
-                    if (str_ends_with($value, '@mhs.unimal.ac.id')) {
-                        $username = explode('@', $value)[0];
-                        if (! str_starts_with($username, '23017')) {
-                            $fail('Hanya mahasiswa Teknik Informatika (angkatan 23, prodi 017) yang dapat mendaftar.');
-                        }
+                    if ($message) {
+                        $fail($message);
                     }
                 },
             ],
-            'whatsapp' => ['required', 'string', 'min:10', 'max:15'],
+            'whatsapp' => ['nullable', 'string', 'min:10', 'max:15'],
             'password' => $this->passwordRules(),
         ])->validate();
 
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],
-            'whatsapp' => $input['whatsapp'],
+            'whatsapp' => $input['whatsapp'] ?? null,
             'password' => $input['password'],
         ]);
     }

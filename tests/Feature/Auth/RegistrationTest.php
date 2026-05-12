@@ -40,6 +40,18 @@ it('new users can register', function () {
     assertAuthenticated();
 });
 
+it('new users can register with name prefix in email', function () {
+    post(route('register'), [
+        'name' => 'Zakiatunniza',
+        'email' => 'zakiatunniza.230170013@mhs.unimal.ac.id',
+        'whatsapp' => '08123456780',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->assertRedirect(route('verification.notice', absolute: false));
+
+    assertAuthenticated();
+});
+
 it('users cannot register with non-campus email', function () {
     from(route('register'))->post(route('register'), [
         'name' => 'Test User',
