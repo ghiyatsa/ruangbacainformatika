@@ -1,5 +1,11 @@
 import { BookMarked } from 'lucide-react';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import {
+    Empty,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from '@/components/ui/empty';
 import type { PaginatedInternshipReports } from '@/features/internship-report/types';
 import InternshipReportCard from './InternshipReportCard';
 
@@ -10,6 +16,9 @@ interface InternshipReportCatalogResultsProps {
 export function InternshipReportCatalogResults({
     reports,
 }: InternshipReportCatalogResultsProps) {
+    if (!reports) {
+        return null;
+    }
 
     return (
         <div className="flex flex-col gap-6">

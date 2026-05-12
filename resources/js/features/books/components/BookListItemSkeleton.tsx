@@ -1,58 +1,35 @@
-import { AutoSkeleton } from 'auto-skeleton-react';
 import { BookOpen } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * Skeleton loader for BookListItem — uses auto-skeleton-react to
- * mirror the real list item's DOM structure automatically.
+ * Skeleton loader for BookListItem — uses shadcn Skeleton to
+ * mirror the real list item's layout.
  */
 export default function BookListItemSkeleton() {
     return (
-        <AutoSkeleton
-            loading={true}
-            config={{
-                animation: 'pulse',
-                borderRadius: 6,
-            }}
-        >
-            <div className="flex items-center gap-4 px-4 py-3.5 sm:gap-5 sm:px-5 sm:py-4">
-                {/* Thumbnail placeholder */}
-                <div className="h-18 w-12 shrink-0 overflow-hidden rounded-lg border bg-muted/50 sm:h-20 sm:w-14 dark:bg-muted/20">
-                    <img
-                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E"
-                        alt=""
-                        className="h-full w-full object-cover"
-                        data-skeleton-role="image"
-                    />
-                </div>
+        <div className="flex items-center gap-4 px-4 py-3.5 sm:gap-5 sm:px-5 sm:py-4">
+            {/* Thumbnail placeholder */}
+            <Skeleton className="h-18 w-12 shrink-0 rounded-lg sm:h-20 sm:w-14" />
 
-                {/* Content placeholder */}
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="flex items-center gap-1.5">
-                        <span className="rounded-md bg-muted/50 px-1.5 py-0.5 text-[10px] dark:bg-muted/20">
-                            Kategori
-                        </span>
-                    </div>
-                    <p className="text-sm leading-snug font-semibold">
-                        Judul buku placeholder
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                        Nama penulis · 2024
-                    </p>
+            {/* Content placeholder */}
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <div className="flex items-center gap-1.5">
+                    <Skeleton className="h-4 w-16" />
                 </div>
-
-                {/* Status placeholder */}
-                <div className="shrink-0">
-                    <span className="rounded-full px-2 py-0.5 text-[10px]">
-                        Tersedia
-                    </span>
-                </div>
-
-                {/* Page count — desktop */}
-                <div className="hidden shrink-0 items-center gap-1 text-[11px] sm:flex">
-                    <BookOpen className="size-3" />
-                    <span>200 hal</span>
-                </div>
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
             </div>
-        </AutoSkeleton>
+
+            {/* Status placeholder */}
+            <div className="shrink-0">
+                <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+
+            {/* Page count — desktop */}
+            <div className="hidden shrink-0 items-center gap-1 sm:flex">
+                <BookOpen className="size-3 text-muted-foreground/40" />
+                <Skeleton className="h-3 w-12" />
+            </div>
+        </div>
     );
 }

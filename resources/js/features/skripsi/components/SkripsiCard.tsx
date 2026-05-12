@@ -25,7 +25,7 @@ export default function SkripsiCard({ skripsi }: SkripsiCardProps) {
     return (
         <Link
             href={skripsiRoute.show.url(skripsi.studentId)}
-            className="group block focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
+            className="group block h-full focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
         >
             <Card className="relative flex h-full flex-col overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 dark:hover:shadow-primary/10">
                 <CardHeader className="gap-3">
@@ -60,6 +60,7 @@ export default function SkripsiCard({ skripsi }: SkripsiCardProps) {
                                 <span
                                     key={i}
                                     className="inline-flex items-center gap-0.5 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                    data-skeleton-ignore
                                 >
                                     <Tag className="size-2.5" />
                                     {kw}

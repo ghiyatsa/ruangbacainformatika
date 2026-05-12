@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Resources\BookResource;
 use App\Http\Resources\InternshipReportResource;
 use App\Http\Resources\SkripsiResource;
+use App\Http\Resources\ThesisResource;
 use App\Models\Book;
 use App\Models\InternshipReport;
 use App\Models\Skripsi;
+use App\Models\Thesis;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -46,10 +48,19 @@ class SearchController extends Controller
             ->limit(5)
             ->get();
 
+        $theses = Thesis::query()
+            ->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('author_name', 'like', "%{$search}%");
+            })
+            ->limit(5)
+            ->get();
+
         return response()->json([
             'books' => BookResource::collection($books)->resolve(),
             'skripsis' => SkripsiResource::collection($skripsis)->resolve(),
             'internshipReports' => InternshipReportResource::collection($internshipReports)->resolve(),
+            'theses' => ThesisResource::collection($theses)->resolve(),
         ]);
     }
 }

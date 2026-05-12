@@ -52,13 +52,15 @@ class BookImporter extends Importer
             ImportColumn::make('cover_url')
                 ->label('URL Cover Buku')
                 ->rules(['nullable', 'url'])
-                ->fillRecordUsing(function ($record, $state) {
+                ->fillRecordUsing(function ($record, $state, $data) {
                     if (blank($state)) {
                         return;
                     }
 
-                    $baseName = $record->slug ?: $this->data['title'] ?? null;
-                    $coverImage = app(BookCoverImageService::class)->tryStoreFromUrl($state, baseName: $baseName);
+                    $baseName = $record->slug ?: ($data['title'] ?? null);
+
+                    $coverImage = app(BookCoverImageService::class)
+                        ->tryStoreFromUrl($state, baseName: $baseName);
 
                     if (filled($coverImage)) {
                         $record->cover_image = $coverImage;

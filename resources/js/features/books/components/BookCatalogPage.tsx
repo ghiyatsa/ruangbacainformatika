@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
 import { BookCatalogFilters } from '@/features/books/components/BookCatalogFilters';
 import { BookCatalogResults } from '@/features/books/components/BookCatalogResults';
-import { BookGridSkeleton } from '@/features/books/components/BookGridSkeleton';
 import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
 import booksRoute from '@/routes/books';
 
@@ -64,7 +63,6 @@ export default function BookCatalogPage({
                 />
             }
             deferredData="books"
-            fallback={<BookGridSkeleton viewMode={viewMode} />}
         >
             <BookCatalogResults books={books} viewMode={viewMode} />
         </CatalogPage>

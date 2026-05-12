@@ -12,9 +12,14 @@ export interface SearchResponse {
     books: SearchResult[];
     skripsis: SearchResult[];
     internshipReports: SearchResult[];
+    theses: SearchResult[];
 }
 
-export type SearchItemType = 'book' | 'skripsi' | 'internship_report';
+export type SearchItemType =
+    | 'book'
+    | 'skripsi'
+    | 'internship_report'
+    | 'thesis';
 
 export type SearchListItem = SearchResult & {
     itemType: SearchItemType;

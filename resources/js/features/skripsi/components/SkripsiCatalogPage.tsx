@@ -2,7 +2,6 @@ import { router } from '@inertiajs/react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
 import { SkripsiCatalogFilters } from '@/features/skripsi/components/SkripsiCatalogFilters';
 import { SkripsiCatalogResults } from '@/features/skripsi/components/SkripsiCatalogResults';
-import { SkripsiGridSkeleton } from '@/features/skripsi/components/SkripsiGridSkeleton';
 import type { SkripsiCatalogPageProps } from '@/features/skripsi/types';
 import skripsiRoute from '@/routes/skripsi';
 
@@ -53,7 +52,6 @@ export default function SkripsiCatalogPage({
                 />
             }
             deferredData="skripsis"
-            fallback={<SkripsiGridSkeleton />}
         >
             <SkripsiCatalogResults skripsis={skripsis} />
         </CatalogPage>

@@ -20,6 +20,10 @@ export function BookCatalogResults({
     books,
     viewMode,
 }: BookCatalogResultsProps) {
+    if (!books) {
+        return null;
+    }
+
     return (
         <div className="flex flex-col gap-6">
             {books.data.length > 0 ? (

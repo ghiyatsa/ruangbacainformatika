@@ -4,7 +4,6 @@ import type { InternshipReportCatalogPageProps } from '@/features/internship-rep
 import internshipReportRoute from '@/routes/internship-reports';
 import { InternshipReportCatalogFilters } from './InternshipReportCatalogFilters';
 import { InternshipReportCatalogResults } from './InternshipReportCatalogResults';
-import { InternshipReportGridSkeleton } from './InternshipReportGridSkeleton';
 
 export default function InternshipReportCatalogPage({
     filters,
@@ -53,7 +52,6 @@ export default function InternshipReportCatalogPage({
                 />
             }
             deferredData="reports"
-            fallback={<InternshipReportGridSkeleton />}
         >
             <InternshipReportCatalogResults reports={reports} />
         </CatalogPage>

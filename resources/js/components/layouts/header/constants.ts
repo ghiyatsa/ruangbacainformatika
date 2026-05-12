@@ -1,5 +1,4 @@
-import type {
-    LucideIcon} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import {
     BookOpen,
     ClipboardCheck,
@@ -43,9 +42,16 @@ export const NAV_LINKS: NavItem[] = [
                 icon: GraduationCap,
             },
             {
+                label: 'Tesis',
+                href: '/thesis',
+                description: 'Koleksi tesis mahasiswa magister Informatika.',
+                icon: GraduationCap,
+            },
+            {
                 label: 'Laporan KP',
                 href: '/internship-reports',
-                description: 'Koleksi laporan kerja praktik mahasiswa Informatika.',
+                description:
+                    'Koleksi laporan kerja praktik mahasiswa Informatika.',
                 icon: ClipboardCheck,
             },
         ],

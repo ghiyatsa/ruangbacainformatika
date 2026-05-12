@@ -1,5 +1,11 @@
 import { BookMarked } from 'lucide-react';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import {
+    Empty,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from '@/components/ui/empty';
 import SkripsiCard from '@/features/skripsi/components/SkripsiCard';
 import type { PaginatedSkripsis } from '@/features/skripsi/types';
 
@@ -10,6 +16,9 @@ interface SkripsiCatalogResultsProps {
 export function SkripsiCatalogResults({
     skripsis,
 }: SkripsiCatalogResultsProps) {
+    if (!skripsis) {
+        return null;
+    }
 
     return (
         <div className="flex flex-col gap-6">

@@ -21,7 +21,9 @@ interface InternshipReportCardProps {
     report: InternshipReportData;
 }
 
-export default function InternshipReportCard({ report }: InternshipReportCardProps) {
+export default function InternshipReportCard({
+    report,
+}: InternshipReportCardProps) {
     return (
         <Link
             href={internshipReportRoute.show.url(report.studentId)}

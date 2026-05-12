@@ -71,6 +71,29 @@ export function GlobalSearchResultRow({
                     </div>
                     <Search className="ml-auto size-4 text-muted-foreground" />
                 </>
+            ) : item.itemType === 'thesis' ? (
+                <>
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-sm border bg-muted shadow-sm">
+                        <GraduationCap className="size-5 text-muted-foreground" />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-0.5">
+                        <div className="flex items-center gap-2">
+                            <span className="line-clamp-1 font-semibold tracking-tight">
+                                {item.title}
+                            </span>
+                            <Badge
+                                variant="outline"
+                                className="h-4 px-1 text-[9px] uppercase"
+                            >
+                                Tesis
+                            </Badge>
+                        </div>
+                        <span className="line-clamp-1 text-xs text-muted-foreground">
+                            {item.authorName} - {item.studentId}
+                        </span>
+                    </div>
+                    <Search className="ml-auto size-4 text-muted-foreground" />
+                </>
             ) : (
                 <>
                     <div className="flex size-9 shrink-0 items-center justify-center rounded-sm border bg-muted shadow-sm">

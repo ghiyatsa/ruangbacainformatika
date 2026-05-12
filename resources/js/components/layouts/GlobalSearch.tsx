@@ -20,11 +20,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import booksRoute from '@/routes/books';
 import internshipReportsRoute from '@/routes/internship-reports';
 import skripsiRoute from '@/routes/skripsi';
+import thesisRoute from '@/routes/thesis';
 
 const EMPTY_RESULTS: SearchResponse = {
     books: [],
     skripsis: [],
     internshipReports: [],
+    theses: [],
 };
 
 const SEARCH_ENDPOINT = '/search';
@@ -43,6 +45,10 @@ function flattenSearchResults(results: SearchResponse): SearchListItem[] {
             ...report,
             itemType: 'internship_report' as const,
         })),
+        ...results.theses.map((thesis) => ({
+            ...thesis,
+            itemType: 'thesis' as const,
+        })),
     ];
 }
 
@@ -55,6 +61,12 @@ function visitSearchResult(item: SearchResult, type: SearchItemType): void {
 
     if (type === 'skripsi') {
         router.visit(skripsiRoute.show.url(item.studentId ?? ''));
+
+        return;
+    }
+
+    if (type === 'thesis') {
+        router.visit(thesisRoute.show.url(item.studentId ?? ''));
 
         return;
     }

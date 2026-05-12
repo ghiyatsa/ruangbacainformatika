@@ -1,5 +1,5 @@
 import { Deferred, Link } from '@inertiajs/react';
-import { AutoSkeleton } from 'auto-skeleton-react';
+
 import {
     ArrowRight,
     BookOpen,
@@ -16,6 +16,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
     Tooltip,
     TooltipContent,
@@ -167,46 +168,23 @@ function FeaturedSpotlight({
             <Deferred
                 data="featuredBooks"
                 fallback={
-                    <AutoSkeleton
-                        loading={true}
-                        config={{
-                            animation: 'pulse',
-                            borderRadius: 8,
-                        }}
-                    >
-                        <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-8">
-                            <div className="mx-auto w-36 shrink-0 sm:mx-0 sm:w-40 md:w-44">
-                                <div className="aspect-3/4 overflow-hidden rounded-xl border bg-background">
-                                    <img
-                                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E"
-                                        alt=""
-                                        className="h-full w-full object-cover"
-                                        data-skeleton-role="image"
-                                    />
-                                </div>
+                    <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-8">
+                        <div className="mx-auto w-36 shrink-0 sm:mx-0 sm:w-40 md:w-44">
+                            <Skeleton className="aspect-3/4 w-full rounded-xl" />
+                        </div>
+                        <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-8 w-full" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-5/6" />
                             </div>
-                            <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">
-                                <span className="text-xs font-bold uppercase">
-                                    Koleksi Sorotan
-                                </span>
-                                <h3 className="text-lg font-bold sm:text-xl">
-                                    Judul buku sorotan placeholder teks
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Deskripsi singkat buku sorotan yang sedang
-                                    dimuat
-                                </p>
-                                <div className="flex gap-2">
-                                    <span className="rounded-full border px-2.5 py-1 text-xs">
-                                        2024
-                                    </span>
-                                    <span className="rounded-full border px-2.5 py-1 text-xs">
-                                        Tersedia
-                                    </span>
-                                </div>
+                            <div className="flex gap-2">
+                                <Skeleton className="h-6 w-16 rounded-full" />
+                                <Skeleton className="h-6 w-16 rounded-full" />
                             </div>
                         </div>
-                    </AutoSkeleton>
+                    </div>
                 }
             >
                 <AnimatePresence mode="wait">
