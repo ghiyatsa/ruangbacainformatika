@@ -7,6 +7,7 @@ import {
     Tag,
     User,
 } from 'lucide-react';
+import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { Badge } from '@/components/ui/badge';
@@ -151,6 +152,13 @@ export default function SkripsiDetailPage({
                             </div>
                         </div>
                     ) : null}
+
+                    <CatalogReportCard
+                        catalogType="skripsi"
+                        catalogId={skripsi.id}
+                        catalogLabel="Skripsi"
+                        catalogTitle={skripsi.title}
+                    />
                 </div>
             }
         >

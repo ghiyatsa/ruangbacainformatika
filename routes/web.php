@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\CatalogReportController;
+use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InternshipReportController;
 use App\Http\Controllers\LoanHistoryController;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 Route::get('/books', CatalogController::class)->name('books.index');
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
+Route::post('/catalog-reports', [CatalogReportController::class, 'store'])->name('catalog-reports.store');
 Route::get('/skripsi', [SkripsiController::class, 'index'])->name('skripsi.index');
 Route::get('/skripsi/{skripsi:student_id}', [SkripsiController::class, 'show'])->name('skripsi.show');
 Route::get('/internship-reports', [InternshipReportController::class, 'index'])->name('internship-reports.index');
@@ -28,6 +31,7 @@ Route::get('/search', SearchController::class)->name('search');
 
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::post('/contact', [ContactMessageController::class, 'store'])->name('contact.store');
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service');
 Route::middleware(['auth', 'profile.completed'])->group(function () {

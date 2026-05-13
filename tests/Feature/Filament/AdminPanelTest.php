@@ -2,6 +2,8 @@
 
 use App\Filament\Resources\Authors\AuthorResource;
 use App\Filament\Resources\Books\BookResource;
+use App\Filament\Resources\CatalogReports\CatalogReportResource;
+use App\Filament\Resources\ContactMessages\ContactMessageResource;
 use App\Filament\Resources\InternshipReports\InternshipReportResource;
 use App\Filament\Resources\Loans\LoanResource;
 use App\Filament\Resources\Skripsis\SkripsiResource;
@@ -184,6 +186,8 @@ it('filament resources expose consistent navigation metadata', function () {
         ->and(UserResource::getNavigationBadgeColor())->toBe('primary')
         ->and(LoanResource::getNavigationBadgeColor())->toBe('warning')
         ->and(LoanResource::getNavigationBadgeTooltip())->toBe('Total pinjaman aktif')
+        ->and(ContactMessageResource::getNavigationBadgeColor())->toBe('warning')
+        ->and(ContactMessageResource::getNavigationBadgeTooltip())->toBe('Pesan kontak baru')
         ->and(VisitLogResource::getNavigationBadgeColor())->toBe('primary')
         ->and(VisitLogResource::getNavigationBadgeTooltip())->toBe('Kunjungan hari ini')
         ->and(AuthorResource::getNavigationBadgeColor())->toBe('gray')
@@ -208,6 +212,8 @@ it('super admin users can access key admin resources', function (string $path) {
         ->assertOk();
 })->with([
     '/admin/books',
+    '/admin/contact-messages',
+    '/admin/catalog-reports',
     '/admin/authors',
     '/admin/categories',
     '/admin/publishers',
@@ -219,6 +225,18 @@ it('super admin users can access key admin resources', function (string $path) {
 
 it('super admin users can render concise empty state copy on book management resources', function () {
     $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin/contact-messages')
+        ->assertOk()
+        ->assertSee('Belum ada pesan kontak')
+        ->assertSee('Pesan dari halaman contact akan tampil di sini.');
+
+    actingAs($user)
+        ->get('/admin/catalog-reports')
+        ->assertOk()
+        ->assertSee('Belum ada laporan katalog')
+        ->assertSee('Laporan dari halaman detail katalog akan tampil di sini.');
 
     actingAs($user)
         ->get('/admin/books')
@@ -266,4 +284,19 @@ it('super admin users can access the books resource when some books have no publ
     actingAs($user)
         ->get('/admin/books')
         ->assertOk();
+});
+
+it('filament catalog report resource exposes pending navigation badge metadata', function () {
+    expect(CatalogReportResource::getNavigationBadgeColor())->toBe('warning')
+        ->and(CatalogReportResource::getNavigationBadgeTooltip())->toBe('Laporan menunggu tindak lanjut');
+});
+
+it('super admin users can see the contact messages widget on the dashboard', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin')
+        ->assertOk()
+        ->assertSee('Pesan Kontak Terbaru')
+        ->assertSee('Pesan dari halaman contact akan tampil di sini.');
 });

@@ -7,6 +7,7 @@ import {
     Tag,
     User,
 } from 'lucide-react';
+import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { Badge } from '@/components/ui/badge';
@@ -49,9 +50,7 @@ export default function InternshipReportDetailPage({
                                 <BreadcrumbItem>
                                     <BreadcrumbLink asChild>
                                         <Link
-                                            href={
-                                                internshipReportsRoute.index.url()
-                                            }
+                                            href={internshipReportsRoute.index.url()}
                                         >
                                             Laporan KP
                                         </Link>
@@ -155,6 +154,13 @@ export default function InternshipReportDetailPage({
                             </div>
                         </div>
                     ) : null}
+
+                    <CatalogReportCard
+                        catalogType="internship_report"
+                        catalogId={report.id}
+                        catalogLabel="Laporan KP"
+                        catalogTitle={report.title}
+                    />
                 </div>
             }
         >

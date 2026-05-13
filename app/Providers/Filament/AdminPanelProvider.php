@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
@@ -50,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
                 OperationsOverviewWidget::class,
                 LoanActivityChartWidget::class,
                 TodayVisitorsWidget::class,
+                ContactMessagesTableWidget::class,
                 OverdueLoanTableWidget::class,
             ])
             ->middleware([

@@ -1,6 +1,18 @@
-import { Clock3, Mail, MapPin } from 'lucide-react';
+import { Form, usePage } from '@inertiajs/react';
+import {
+    Clock3,
+    Mail,
+    MapPin,
+    MessageSquareText,
+    Phone,
+    Send,
+    User,
+} from 'lucide-react';
+import ContactMessageController from '@/actions/App/Http/Controllers/ContactMessageController';
+import InputError from '@/components/common/InputError';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -8,8 +20,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export function ContactPage() {
+    const user = usePage().props.auth?.user;
+
     return (
         <PageLayout
             title="Hubungi Kami"
@@ -35,35 +52,36 @@ export function ContactPage() {
                 />
             }
         >
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                <Card className="h-full border-border/60 bg-card/90 shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Informasi Kontak</CardTitle>
-                        <CardDescription>
-                            Gunakan kanal resmi berikut untuk kebutuhan
-                            informasi dan koordinasi layanan.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4 text-sm leading-7 text-muted-foreground">
-                        <p>
-                            Untuk pertanyaan umum, silakan kirim email ke
-                            alamat resmi program studi atau pengelola ruang
-                            baca.
-                        </p>
-                        <p>
-                            Jika permintaan berkaitan dengan akun, peminjaman,
-                            atau pembaruan data, sertakan nama dan identitas
-                            akademik Anda agar proses tindak lanjut lebih cepat.
-                        </p>
-                        <p>
-                            Untuk kebutuhan yang bersifat administratif,
-                            gunakan bahasa yang singkat dan jelas agar proses
-                            verifikasi dapat dilakukan lebih cepat.
-                        </p>
-                    </CardContent>
-                </Card>
-
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_0.95fr]">
                 <div className="space-y-6">
+                    <Card className="border-border/60 bg-card/90 shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Informasi Kontak</CardTitle>
+                            <CardDescription>
+                                Gunakan kanal resmi berikut untuk kebutuhan
+                                informasi dan koordinasi layanan.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4 text-sm leading-7 text-muted-foreground">
+                            <p>
+                                Untuk pertanyaan umum, silakan kirim email ke
+                                alamat resmi program studi atau pengelola ruang
+                                baca.
+                            </p>
+                            <p>
+                                Jika permintaan berkaitan dengan akun,
+                                peminjaman, atau pembaruan data, sertakan nama
+                                dan identitas akademik Anda agar proses tindak
+                                lanjut lebih cepat.
+                            </p>
+                            <p>
+                                Untuk kebutuhan yang bersifat administratif,
+                                gunakan bahasa yang singkat dan jelas agar
+                                proses verifikasi dapat dilakukan lebih cepat.
+                            </p>
+                        </CardContent>
+                    </Card>
+
                     <Card className="border-border/60 bg-card/90 shadow-sm">
                         <CardContent className="flex items-start gap-4 p-6">
                             <div className="shrink-0 rounded-full bg-primary/10 p-3 text-primary">
@@ -121,6 +139,140 @@ export function ContactPage() {
                         </CardContent>
                     </Card>
                 </div>
+
+                <Card className="border-border/60 bg-card/95 shadow-sm">
+                    <CardHeader>
+                        <CardTitle>Kirim Pesan</CardTitle>
+                        <CardDescription>
+                            Sampaikan pertanyaan, kendala, atau kebutuhan
+                            koordinasi melalui form ini.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Form
+                            action={ContactMessageController.store()}
+                            resetOnSuccess
+                            className="space-y-5"
+                        >
+                            {({ processing, errors, recentlySuccessful }) => (
+                                <>
+                                    <div className="grid gap-5 sm:grid-cols-2">
+                                        <div className="grid gap-2">
+                                            <Label
+                                                htmlFor="contact_name"
+                                                className="flex items-center gap-1.5"
+                                            >
+                                                <User className="size-3.5 text-muted-foreground" />
+                                                Nama
+                                            </Label>
+                                            <Input
+                                                id="contact_name"
+                                                name="name"
+                                                required
+                                                defaultValue={user?.name ?? ''}
+                                                placeholder="Nama lengkap Anda"
+                                            />
+                                            <InputError message={errors.name} />
+                                        </div>
+
+                                        <div className="grid gap-2">
+                                            <Label
+                                                htmlFor="contact_email"
+                                                className="flex items-center gap-1.5"
+                                            >
+                                                <Mail className="size-3.5 text-muted-foreground" />
+                                                Email
+                                            </Label>
+                                            <Input
+                                                id="contact_email"
+                                                type="email"
+                                                name="email"
+                                                required
+                                                defaultValue={user?.email ?? ''}
+                                                placeholder="nama@email.com"
+                                            />
+                                            <InputError message={errors.email} />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid gap-2">
+                                        <Label
+                                            htmlFor="contact_phone"
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <Phone className="size-3.5 text-muted-foreground" />
+                                            Nomor telepon
+                                        </Label>
+                                        <Input
+                                            id="contact_phone"
+                                            name="phone"
+                                            placeholder="Opsional"
+                                        />
+                                        <InputError message={errors.phone} />
+                                    </div>
+
+                                    <div className="grid gap-2">
+                                        <Label
+                                            htmlFor="contact_subject"
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <MessageSquareText className="size-3.5 text-muted-foreground" />
+                                            Subjek
+                                        </Label>
+                                        <Input
+                                            id="contact_subject"
+                                            name="subject"
+                                            required
+                                            placeholder="Contoh: Kendala akses akun"
+                                        />
+                                        <InputError message={errors.subject} />
+                                    </div>
+
+                                    <div className="grid gap-2">
+                                        <Label
+                                            htmlFor="contact_message"
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <Send className="size-3.5 text-muted-foreground" />
+                                            Pesan
+                                        </Label>
+                                        <Textarea
+                                            id="contact_message"
+                                            name="message"
+                                            required
+                                            rows={7}
+                                            minLength={20}
+                                            placeholder="Jelaskan kebutuhan atau kendala Anda secara singkat dan jelas."
+                                        />
+                                        <InputError message={errors.message} />
+                                    </div>
+
+                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <p className="text-sm text-muted-foreground">
+                                            Tim admin akan menerima pesan ini
+                                            melalui panel Filament.
+                                        </p>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            {processing
+                                                ? 'Mengirim...'
+                                                : 'Kirim pesan'}
+                                        </Button>
+                                    </div>
+
+                                    {recentlySuccessful ? (
+                                        <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                                            Pesan berhasil dikirim.
+                                        </p>
+                                    ) : null}
+                                </>
+                            )}
+                        </Form>
+                    </CardContent>
+                </Card>
             </div>
         </PageLayout>
     );

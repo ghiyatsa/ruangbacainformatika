@@ -12,6 +12,7 @@ import {
     Star,
     XCircle,
 } from 'lucide-react';
+import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { Badge } from '@/components/ui/badge';
@@ -210,48 +211,57 @@ export default function BookDetailPage({
                 </div>
             }
             sidebar={
-                <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
-                    <div className="p-5">
-                        <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                            Informasi Buku
-                        </h2>
+                <div className="space-y-4">
+                    <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+                        <div className="p-5">
+                            <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                                Informasi Buku
+                            </h2>
+                        </div>
+                        <Separator />
+                        <div className="p-2">
+                            {book.publisher ? (
+                                <ResourceDetailItem
+                                    icon={<Building2 className="size-4" />}
+                                    label="Penerbit"
+                                    value={book.publisher}
+                                />
+                            ) : null}
+                            {book.publishedYear ? (
+                                <ResourceDetailItem
+                                    icon={<Calendar className="size-4" />}
+                                    label="Tahun Terbit"
+                                    value={String(book.publishedYear)}
+                                />
+                            ) : null}
+                            {book.isbn || book.issn ? (
+                                <ResourceDetailItem
+                                    icon={<Hash className="size-4" />}
+                                    label={book.isbn ? 'ISBN' : 'ISSN'}
+                                    value={book.isbn ?? book.issn ?? '-'}
+                                />
+                            ) : null}
+                            {book.pages ? (
+                                <ResourceDetailItem
+                                    icon={<FileText className="size-4" />}
+                                    label="Jumlah Halaman"
+                                    value={`${book.pages} halaman`}
+                                />
+                            ) : null}
+                            <ResourceDetailItem
+                                icon={<Globe className="size-4" />}
+                                label="Bahasa"
+                                value={book.language ?? '-'}
+                            />
+                        </div>
                     </div>
-                    <Separator />
-                    <div className="p-2">
-                        {book.publisher ? (
-                            <ResourceDetailItem
-                                icon={<Building2 className="size-4" />}
-                                label="Penerbit"
-                                value={book.publisher}
-                            />
-                        ) : null}
-                        {book.publishedYear ? (
-                            <ResourceDetailItem
-                                icon={<Calendar className="size-4" />}
-                                label="Tahun Terbit"
-                                value={String(book.publishedYear)}
-                            />
-                        ) : null}
-                        {book.isbn || book.issn ? (
-                            <ResourceDetailItem
-                                icon={<Hash className="size-4" />}
-                                label={book.isbn ? 'ISBN' : 'ISSN'}
-                                value={book.isbn ?? book.issn ?? '-'}
-                            />
-                        ) : null}
-                        {book.pages ? (
-                            <ResourceDetailItem
-                                icon={<FileText className="size-4" />}
-                                label="Jumlah Halaman"
-                                value={`${book.pages} halaman`}
-                            />
-                        ) : null}
-                        <ResourceDetailItem
-                            icon={<Globe className="size-4" />}
-                            label="Bahasa"
-                            value={book.language ?? '-'}
-                        />
-                    </div>
+
+                    <CatalogReportCard
+                        catalogType="book"
+                        catalogId={book.id}
+                        catalogLabel="Buku"
+                        catalogTitle={book.title}
+                    />
                 </div>
             }
         >
