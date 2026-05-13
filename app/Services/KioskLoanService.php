@@ -21,9 +21,9 @@ class KioskLoanService
     ) {}
 
     /**
-     * @param  array<int, string>  $isbns
+     * @param  array<int, int>  $bookIds
      */
-    public function borrow(string $memberIdentifier, array $isbns): Loan
+    public function borrow(string $memberIdentifier, array $bookIds): Loan
     {
         $member = $this->resolveMember($memberIdentifier);
 
@@ -41,15 +41,15 @@ class KioskLoanService
 
         $loanLimit = $this->loanMaxBooks();
         $activeLoanCount = $this->activeLoanCount($member);
-        $requestCount = count($isbns);
+        $requestCount = count($bookIds);
 
         if (($activeLoanCount + $requestCount) > $loanLimit) {
             throw ValidationException::withMessages([
-                'isbns' => "Member ini hanya boleh memiliki maksimal {$loanLimit} buku yang sedang dipinjam. Anda saat ini memiliki {$activeLoanCount} pinjaman aktif.",
+                'book_ids' => "Member ini hanya boleh memiliki maksimal {$loanLimit} buku yang sedang dipinjam. Anda saat ini memiliki {$activeLoanCount} pinjaman aktif.",
             ]);
         }
 
-        $loan = DB::transaction(function () use ($member, $isbns): Loan {
+        $loan = DB::transaction(function () use ($member, $bookIds): Loan {
             $borrowedAt = now();
 
             $loan = Loan::query()->create([
@@ -59,26 +59,26 @@ class KioskLoanService
                 'due_at' => $this->calculateDueAt($borrowedAt),
             ]);
 
-            foreach ($isbns as $index => $isbn) {
+            foreach ($bookIds as $index => $bookId) {
                 $bookItem = BookItem::query()
                     ->available()
                     ->whereHas('book', fn ($query) => $query
-                        ->where('isbn', $isbn)
+                        ->whereKey($bookId)
                         ->where('is_borrowable', true))
                     ->lockForUpdate()
                     ->first();
 
-                if (! $bookItem) {
-                    $book = Book::query()->where('isbn', $isbn)->first();
+                $book = Book::query()->find($bookId);
 
+                if (! $bookItem) {
                     if ($book && ! $book->is_borrowable) {
                         throw ValidationException::withMessages([
-                            "isbns.{$index}" => "Buku dengan ISBN {$isbn} ditandai tidak boleh dipinjam.",
+                            "book_ids.{$index}" => "Buku {$book->title} ditandai tidak boleh dipinjam.",
                         ]);
                     }
 
                     throw ValidationException::withMessages([
-                        "isbns.{$index}" => "Buku dengan ISBN {$isbn} sedang tidak tersedia untuk dipinjam.",
+                        "book_ids.{$index}" => 'Buku yang dipilih sedang tidak tersedia untuk dipinjam.',
                     ]);
                 }
 

@@ -8,6 +8,7 @@ use App\Filament\Resources\Skripsis\SkripsiResource;
 use App\Filament\Resources\Theses\ThesisResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\VisitLogs\VisitLogResource;
+use App\Models\Book;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
@@ -253,4 +254,16 @@ it('super admin users can render concise empty state copy on book management res
         ->get('/admin/internship-reports')
         ->assertOk()
         ->assertSee('Data laporan KP akan tampil di sini.');
+});
+
+it('super admin users can access the books resource when some books have no published year', function () {
+    $user = makeSuperAdmin();
+
+    Book::factory()->create([
+        'published_year' => null,
+    ]);
+
+    actingAs($user)
+        ->get('/admin/books')
+        ->assertOk();
 });

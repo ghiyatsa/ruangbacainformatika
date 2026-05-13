@@ -4,13 +4,11 @@ import { BookActionForm } from './BookActionForm';
 export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
     return (
         <BookActionForm
-            action={{
-                action: KioskController.borrow.url(),
-                method: 'post',
-            }}
+            action={KioskController.borrow.form()}
             submitLabel="Pinjam Buku"
             description={`Maksimal ${loanMaxBooks} buku aktif per anggota.`}
             maxInputs={loanMaxBooks}
+            bookSearchUrl={KioskController.searchBooks.url()}
         />
     );
 }

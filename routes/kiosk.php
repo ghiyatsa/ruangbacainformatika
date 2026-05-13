@@ -10,6 +10,9 @@ Route::post('/kiosk/visits', [KioskController::class, 'store'])
 Route::post('/kiosk/loans/borrow', [KioskController::class, 'borrow'])
     ->middleware('kiosk.pin')
     ->name('kiosk.loans.borrow');
+Route::get('/kiosk/books/search', [KioskController::class, 'searchBooks'])
+    ->middleware('kiosk.pin')
+    ->name('kiosk.books.search');
 Route::post('/kiosk/loans/return', [KioskController::class, 'storeReturn'])
     ->middleware('kiosk.pin')
     ->name('kiosk.loans.return');

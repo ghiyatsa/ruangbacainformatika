@@ -14,6 +14,19 @@ export interface KioskProps {
     purposeOptions: Record<string, string>;
 }
 
+export interface KioskBookSearchResult {
+    id: number;
+    title: string;
+    slug: string;
+    isbn: string | null;
+    issn: string | null;
+    coverImageUrl?: string;
+    authors?: string[];
+    availableItemsCount: number;
+    isBorrowable: boolean;
+    isAvailable: boolean;
+}
+
 export interface FlashProps {
     [key: string]: unknown;
     flash?: {

@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Kiosk\BorrowBookRequest;
 use App\Http\Requests\Kiosk\ReturnBookRequest;
+use App\Http\Requests\Kiosk\SearchBooksRequest;
 use App\Http\Requests\Kiosk\SubmitVisitRequest;
 use App\Http\Requests\Kiosk\VerifyPinRequest;
+use App\Http\Resources\BookResource;
+use App\Models\Book;
 use App\Models\VisitLog;
 use App\Repositories\SettingRepository;
 use App\Services\KioskLoanService;
 use App\Services\KioskPinManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -115,11 +119,39 @@ class KioskController extends Controller
             ->with('success', 'Data kunjungan berhasil disimpan.');
     }
 
+    public function searchBooks(SearchBooksRequest $request): JsonResponse
+    {
+        $search = $request->validatedQuery();
+
+        if ($search === '') {
+            return response()->json([
+                'books' => [],
+            ]);
+        }
+
+        $books = Book::query()
+            ->search($search)
+            ->where('is_borrowable', true)
+            ->whereHas('items', fn ($query) => $query->available())
+            ->with(['authors:id,name'])
+            ->withCount('items')
+            ->withCount([
+                'items as available_items_count' => fn ($query) => $query->available(),
+            ])
+            ->orderBy('title')
+            ->limit(8)
+            ->get();
+
+        return response()->json([
+            'books' => BookResource::collection($books)->resolve(),
+        ]);
+    }
+
     public function borrow(BorrowBookRequest $request): RedirectResponse
     {
         $loan = $this->kioskLoanService->borrow(
             (string) $request->validated('member_identifier'),
-            $request->validatedIsbns(),
+            $request->validatedBookIds(),
         );
 
         return redirect()

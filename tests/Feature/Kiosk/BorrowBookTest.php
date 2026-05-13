@@ -42,7 +42,7 @@ it('members must fill whatsapp before borrowing books', function () {
 
     $service = app(KioskLoanService::class);
 
-    expect(fn () => $service->borrow($member->nim(), ['9786020000001']))
+    expect(fn () => $service->borrow($member->nim(), [$book->id]))
         ->toThrow(ValidationException::class, 'Nomor WhatsApp wajib diisi pada profil sebelum meminjam buku.');
 });
 
@@ -77,11 +77,11 @@ it('books marked as not borrowable cannot be borrowed', function () {
 
     $service = app(KioskLoanService::class);
 
-    expect(fn () => $service->borrow($member->nim(), ['9786020000002']))
-        ->toThrow(ValidationException::class, 'Buku dengan ISBN 9786020000002 ditandai tidak boleh dipinjam.');
+    expect(fn () => $service->borrow($member->nim(), [$book->id]))
+        ->toThrow(ValidationException::class, 'Buku Buku Referensi ditandai tidak boleh dipinjam.');
 });
 
-it('normalizes isbn input from kiosk before validating and borrowing', function () {
+it('borrows selected books from kiosk using book ids', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
     Notification::fake();
 
@@ -117,7 +117,7 @@ it('normalizes isbn input from kiosk before validating and borrowing', function 
 
     $response = $this->post(route('kiosk.loans.borrow'), [
         'member_identifier' => $member->nim(),
-        'isbns' => ['978-602-000-0003'],
+        'book_ids' => [$book->id],
     ]);
 
     $response
@@ -126,6 +126,74 @@ it('normalizes isbn input from kiosk before validating and borrowing', function 
 
     Notification::assertSentTo($member, LoanReceiptNotification::class);
 
-    expect($book->fresh()->isbn)->toBe('9786020000003')
-        ->and($bookItem->fresh()->status)->toBe('borrowed');
+    expect($bookItem->fresh()->status)->toBe('borrowed');
+});
+
+it('searches borrowable and available books for kiosk borrowing', function () {
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Search',
+        'slug' => 'penerbit-search',
+    ]);
+
+    $availableBook = Book::query()->create([
+        'title' => 'Pemrograman Laravel Lanjut',
+        'slug' => 'pemrograman-laravel-lanjut',
+        'isbn' => '9786020000004',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    BookItem::query()->create([
+        'book_id' => $availableBook->id,
+        'internal_code' => 'ITEM-004',
+        'status' => 'available',
+    ]);
+
+    $unavailableBook = Book::query()->create([
+        'title' => 'Pemrograman Laravel Habis',
+        'slug' => 'pemrograman-laravel-habis',
+        'isbn' => '9786020000005',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    BookItem::query()->create([
+        'book_id' => $unavailableBook->id,
+        'internal_code' => 'ITEM-005',
+        'status' => 'borrowed',
+    ]);
+
+    $nonBorrowableBook = Book::query()->create([
+        'title' => 'Referensi Internal Laravel',
+        'slug' => 'referensi-internal-laravel',
+        'isbn' => '9786020000006',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => false,
+    ]);
+
+    BookItem::query()->create([
+        'book_id' => $nonBorrowableBook->id,
+        'internal_code' => 'ITEM-006',
+        'status' => 'available',
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $response = $this->getJson(route('kiosk.books.search', [
+        'q' => 'Laravel',
+    ]));
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('books.0.id', $availableBook->id)
+        ->assertJsonPath('books.0.title', $availableBook->title);
+
+    expect(collect($response->json('books'))->pluck('id')->all())
+        ->toBe([$availableBook->id]);
 });

@@ -146,19 +146,29 @@ class BooksTable
                     ->query(fn (Builder $query): Builder => $query->whereNull('cover_image')),
                 SelectFilter::make('publisher')
                     ->label('Penerbit')
-                    ->relationship('publisher', 'name')
+                    ->relationship(
+                        'publisher',
+                        'name',
+                        fn (Builder $query): Builder => $query->whereNotNull('name')->orderBy('name'),
+                    )
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('categories')
                     ->label('Kategori')
-                    ->relationship('categories', 'name')
+                    ->relationship(
+                        'categories',
+                        'name',
+                        fn (Builder $query): Builder => $query->whereNotNull('name')->orderBy('name'),
+                    )
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('published_year')
                     ->label('Tahun Terbit')
                     ->options(fn (): array => Book::query()
+                        ->whereNotNull('published_year')
                         ->orderByDesc('published_year')
                         ->pluck('published_year', 'published_year')
+                        ->mapWithKeys(fn ($year): array => [(string) $year => (string) $year])
                         ->all()),
             ])
             ->recordActions([
