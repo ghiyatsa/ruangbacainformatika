@@ -33,6 +33,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
     direction = 'left',
     delay = 0,
 }) => {
+    const [hasMounted, setHasMounted] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const progress = useMotionValue(0);
     const elapsedRef = useRef(0);
@@ -42,8 +43,12 @@ const ShinyText: React.FC<ShinyTextProps> = ({
     const animationDuration = speed * 1000;
     const delayDuration = delay * 1000;
 
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
+
     useAnimationFrame((time) => {
-        if (disabled || isPaused) {
+        if (!hasMounted || disabled || isPaused) {
             lastTimeRef.current = null;
 
             return;
@@ -128,17 +133,32 @@ const ShinyText: React.FC<ShinyTextProps> = ({
         WebkitBackgroundClip: 'text',
         backgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
+        backgroundPosition: '150% center',
     };
 
     return (
-        <motion.span
-            className={`inline-block ${className}`}
-            style={{ ...gradientStyle, backgroundPosition }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-        >
-            {text}
-        </motion.span>
+        <>
+            {hasMounted ? (
+                <motion.span
+                    className={`inline-block ${className}`}
+                    style={{
+                        ...gradientStyle,
+                        backgroundPosition,
+                    }}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    {text}
+                </motion.span>
+            ) : (
+                <span
+                    className={`inline-block ${className}`}
+                    style={gradientStyle}
+                >
+                    {text}
+                </span>
+            )}
+        </>
     );
 };
 

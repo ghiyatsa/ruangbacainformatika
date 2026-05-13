@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Loans\Tables;
 
+use App\Filament\Resources\Loans\LoanResource;
 use App\Models\Loan;
 use App\Models\User;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -16,14 +18,15 @@ class LoansTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->searchPlaceholder('Cari nama member atau email')
+            ->searchPlaceholder('Cari nama anggota atau email')
             ->emptyStateHeading('Belum ada data peminjaman')
-            ->emptyStateDescription('Member yang meminjam buku akan tampil di sini.')
+            ->emptyStateDescription('Riwayat peminjaman anggota akan tampil di sini.')
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
+            ->recordUrl(fn (User $record): string => LoanResource::getUrl('view', ['record' => $record]))
             ->columns([
                 TextColumn::make('name')
-                    ->label('Member')
+                    ->label('Anggota')
                     ->searchable()
                     ->sortable()
                     ->description(fn (User $record): string => $record->email),
@@ -45,19 +48,19 @@ class LoansTable
             ])
             ->filters([
                 SelectFilter::make('loan_status')
-                    ->label('Status Peminjaman')
+                    ->label('Status')
                     ->options(Loan::statusOptions())
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         $data['value'],
                         fn (Builder $query, $value): Builder => $query->whereHas('loans', fn ($q) => $q->where('status', $value))
                     )),
                 Filter::make('borrowed_between')
-                    ->label('Rentang Tanggal Pinjam')
+                    ->label('Rentang Tanggal')
                     ->schema([
                         DatePicker::make('borrowed_from')
-                            ->label('Dari Tanggal'),
+                            ->label('Dari'),
                         DatePicker::make('borrowed_until')
-                            ->label('Sampai Tanggal'),
+                            ->label('Sampai'),
                     ])
                     ->query(
                         fn (Builder $query, array $data): Builder => $query->whereHas(
@@ -72,18 +75,21 @@ class LoansTable
                         )
                     ),
                 Filter::make('active_borrowers')
-                    ->label('Hanya Peminjam Aktif')
+                    ->label('Hanya pinjaman aktif')
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->whereHas('loans', fn ($q) => $q->where('status', Loan::STATUS_BORROWED))),
                 Filter::make('overdue_borrowers')
-                    ->label('Hanya Melewati Jatuh Tempo')
+                    ->label('Hanya lewat jatuh tempo')
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->whereHas('loans', fn ($q) => $q
                         ->where('status', Loan::STATUS_BORROWED)
                         ->whereNotNull('due_at')
                         ->where('due_at', '<', now()))),
             ])
-            ->recordActions([])
+            ->recordActions([
+                ViewAction::make()
+                    ->label('Lihat Detail'),
+            ])
             ->toolbarActions([])
             ->defaultSort('name', 'asc');
     }

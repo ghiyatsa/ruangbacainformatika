@@ -19,7 +19,7 @@ export default function ResetPassword({ token, email }: Props) {
 
             <div className="flex flex-col gap-6">
                 <Form
-                    {...update.form()}
+                    action={update()}
                     transform={(data) => ({ ...data, token, email })}
                     resetOnSuccess={['password', 'password_confirmation']}
                     className="flex flex-col gap-6"

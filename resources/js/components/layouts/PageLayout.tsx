@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { SeoHead } from '@/components/common/SeoHead';
 import { BackgroundPattern } from '@/components/layouts/BackgroundPattern';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +12,10 @@ interface PageLayoutProps {
      * A brief description shown in the default hero section
      */
     description?: string;
+    /**
+     * A brief description for search engines and social sharing
+     */
+    metaDescription?: string;
     /**
      * The main content of the page
      */
@@ -73,6 +77,7 @@ const maxWidthMap = {
 export function PageLayout({
     title,
     description,
+    metaDescription,
     children,
     maxWidth = '5xl',
     className,
@@ -82,7 +87,10 @@ export function PageLayout({
 }: PageLayoutProps) {
     return (
         <div className="relative flex min-h-[calc(100vh-(--spacing(20)))] flex-col sm:min-h-[calc(100vh-(--spacing(28)))]">
-            <Head title={title} />
+            <SeoHead
+                title={title}
+                description={metaDescription ?? description}
+            />
 
             {showBackground ? <BackgroundPattern /> : null}
 

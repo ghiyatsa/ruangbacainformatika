@@ -17,6 +17,12 @@ use Filament\Support\Icons\Heroicon;
 
 class GeneralSettings extends Page
 {
+    protected static ?string $navigationLabel = 'Umum';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $title = 'Pengaturan Umum';
+
     protected string $view = 'filament.clusters.settings.pages.general-settings';
 
     protected static ?string $cluster = SettingsCluster::class;
@@ -42,7 +48,7 @@ class GeneralSettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Identitas Situs')
-                    ->description('Pengaturan dasar yang dipakai di seluruh web.')
+                    ->description('Informasi utama yang tampil pada layanan perpustakaan.')
                     ->schema([
                         TextInput::make('site_name')
                             ->label('Nama Situs')
@@ -50,15 +56,15 @@ class GeneralSettings extends Page
                             ->maxLength(255)
                             ->placeholder('Ruang Baca'),
                         TextInput::make('site_tagline')
-                            ->label('Slogan')
+                            ->label('Tagline')
                             ->maxLength(255)
-                            ->placeholder('Sistem pendataan pengunjung dan layanan perpustakaan'),
+                            ->placeholder('Layanan perpustakaan yang rapi dan mudah diakses'),
                         TextInput::make('support_whatsapp')
                             ->label('WhatsApp Bantuan')
                             ->tel()
                             ->maxLength(255)
                             ->placeholder('0812xxxxxx')
-                            ->helperText('Nomor kontak yang bisa dihubungi jika ada kendala akses atau layanan.'),
+                            ->helperText('Nomor kontak bantuan.'),
                     ])
                     ->columns(2),
 
@@ -90,8 +96,6 @@ class GeneralSettings extends Page
             ->title('Pengaturan umum disimpan')
             ->send();
 
-        $this->settingRepository()->forget('general', 'loan_form_isbn_slots');
-
         $this->form->fill($this->settingRepository()->sectionValues('general', $this->defaultValues()));
     }
 
@@ -102,15 +106,10 @@ class GeneralSettings extends Page
     {
         return [
             'site_name' => config('app.name'),
-            'site_tagline' => 'Sistem pendataan pengunjung dan layanan perpustakaan',
+            'site_tagline' => 'Layanan perpustakaan yang rapi dan mudah diakses',
             'support_whatsapp' => '',
         ];
     }
-
-    // public function getFormActionsAlignment(): string|Alignment
-    // {
-    //     return Alignment::Start;
-    // }
 
     protected function settingRepository(): SettingRepository
     {

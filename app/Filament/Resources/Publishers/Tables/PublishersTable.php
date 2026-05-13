@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\Publishers\Tables;
 
+use App\Models\Publisher;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class PublishersTable
 {
@@ -17,7 +20,7 @@ class PublishersTable
         return $table
             ->searchPlaceholder('Cari nama penerbit atau kota')
             ->emptyStateHeading('Belum ada penerbit')
-            ->emptyStateDescription('Penerbit membantu menjaga metadata buku tetap rapi dan konsisten.')
+            ->emptyStateDescription('Data penerbit akan tampil di sini.')
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama Penerbit')
@@ -57,13 +60,44 @@ class PublishersTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Penerbit'),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->label('Hapus Penerbit')
+                        ->before(function (DeleteAction $action, Publisher $record): void {
+                            if (! $reason = $record->deletionBlockedReason()) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Penerbit tidak dapat dihapus')
+                                ->body($reason)
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ])
                     ->label('Aksi'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Hapus Penerbit')
+                        ->before(function (DeleteBulkAction $action, Collection $records): void {
+                            /** @var Publisher|null $blockedRecord */
+                            $blockedRecord = $records->first(fn (Publisher $record): bool => $record->deletionBlockedReason() !== null);
+
+                            if (! $blockedRecord) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Beberapa penerbit tidak dapat dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada penerbit yang digunakan oleh buku.')
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ]),
             ]);
     }

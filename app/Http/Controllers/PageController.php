@@ -16,4 +16,14 @@ class PageController extends Controller
     {
         return Inertia::render('contact');
     }
+
+    public function privacyPolicy(): Response
+    {
+        return Inertia::render('privacy-policy');
+    }
+
+    public function termsOfService(): Response
+    {
+        return Inertia::render('terms-of-service');
+    }
 }

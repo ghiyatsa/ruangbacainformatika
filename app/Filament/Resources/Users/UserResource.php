@@ -23,6 +23,8 @@ class UserResource extends Resource
 
     protected static ?string $navigationLabel = 'Pengguna';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'Pengguna';
 
     protected static ?string $pluralModelLabel = 'Pengguna';
@@ -38,7 +40,7 @@ class UserResource extends Resource
 
     public static function getNavigationBadgeColor(): string|array|null
     {
-        return 'danger';
+        return 'primary';
     }
 
     public static function getNavigationBadgeTooltip(): ?string

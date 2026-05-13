@@ -12,6 +12,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
@@ -30,13 +31,13 @@ class BooksTable
         return $table
             ->searchPlaceholder('Cari judul, ISBN, atau penerbit')
             ->emptyStateHeading('Belum ada data buku')
-            ->emptyStateDescription('Tambahkan buku baru atau impor koleksi agar katalog mulai terisi.')
+            ->emptyStateDescription('Data buku akan tampil di sini.')
             ->emptyStateIcon(Heroicon::OutlinedBookOpen)
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
             ->columns([
                 ImageColumn::make('cover_image')
-                    ->label('Cover')
+                    ->label('Sampul')
                     ->alignCenter()
                     ->defaultImageUrl(app(BookCoverImageService::class)->getDefaultCoverUrl())
                     ->disk('public'),
@@ -95,7 +96,7 @@ class BooksTable
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 IconColumn::make('is_published')
-                    ->label('Dipublikasi')
+                    ->label('Dipublikasikan')
                     ->boolean(),
 
                 IconColumn::make('is_featured')
@@ -107,7 +108,7 @@ class BooksTable
                     ->boolean(),
 
                 TextColumn::make('view_count')
-                    ->label('Views')
+                    ->label('Dilihat')
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -120,28 +121,28 @@ class BooksTable
             ])
             ->filters([
                 TernaryFilter::make('is_published')
-                    ->label('Status Publikasi')
-                    ->placeholder('Semua status')
+                    ->label('Publikasi')
+                    ->placeholder('Semua')
                     ->trueLabel('Dipublikasikan')
                     ->falseLabel('Draf'),
                 TernaryFilter::make('is_featured')
-                    ->label('Sorotan')
-                    ->placeholder('Semua buku')
-                    ->trueLabel('Hanya sorotan')
-                    ->falseLabel('Bukan sorotan'),
+                    ->label('Unggulan')
+                    ->placeholder('Semua')
+                    ->trueLabel('Unggulan')
+                    ->falseLabel('Bukan unggulan'),
                 TernaryFilter::make('is_borrowable')
-                    ->label('Status Peminjaman')
-                    ->placeholder('Semua buku')
+                    ->label('Peminjaman')
+                    ->placeholder('Semua')
                     ->trueLabel('Boleh dipinjam')
                     ->falseLabel('Tidak boleh dipinjam'),
                 Filter::make('out_of_stock')
-                    ->label('Stok habis')
+                    ->label('Hanya stok habis')
                     ->query(fn (Builder $query): Builder => $query->whereDoesntHave(
                         'items',
                         fn (Builder $query): Builder => $query->where('status', 'available'),
                     )),
                 Filter::make('without_cover')
-                    ->label('Tanpa cover')
+                    ->label('Tanpa sampul')
                     ->query(fn (Builder $query): Builder => $query->whereNull('cover_image')),
                 SelectFilter::make('publisher')
                     ->label('Penerbit')
@@ -164,7 +165,21 @@ class BooksTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Buku'),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->label('Hapus Buku')
+                        ->before(function (DeleteAction $action, Book $record): void {
+                            if (! $reason = $record->deletionBlockedReason()) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Buku tidak dapat dihapus')
+                                ->body($reason)
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ])
                     ->label('Aksi'),
             ])
@@ -176,7 +191,7 @@ class BooksTable
                     ->color('info'),
                 BulkActionGroup::make([
                     BulkAction::make('feature_selected')
-                        ->label('Tandai Sebagai Unggulan')
+                        ->label('Tandai Unggulan')
                         ->icon(Heroicon::OutlinedStar)
                         ->color('warning')
                         ->requiresConfirmation()
@@ -184,7 +199,7 @@ class BooksTable
                         ->deselectRecordsAfterCompletion(),
 
                     BulkAction::make('unfeature_selected')
-                        ->label('Hapus Dari Unggulan')
+                        ->label('Batalkan Unggulan')
                         ->icon(Heroicon::OutlinedArchiveBoxXMark)
                         ->color('gray')
                         ->requiresConfirmation()
@@ -192,7 +207,7 @@ class BooksTable
                         ->deselectRecordsAfterCompletion(),
 
                     BulkAction::make('mark_non_borrowable')
-                        ->label('Tandai Tidak Boleh Dipinjam')
+                        ->label('Nonaktifkan Pinjam')
                         ->icon(Heroicon::OutlinedNoSymbol)
                         ->color('danger')
                         ->requiresConfirmation()
@@ -200,7 +215,7 @@ class BooksTable
                         ->deselectRecordsAfterCompletion(),
 
                     BulkAction::make('mark_borrowable')
-                        ->label('Tandai Boleh Dipinjam')
+                        ->label('Aktifkan Pinjam')
                         ->icon(Heroicon::OutlinedCheckCircle)
                         ->color('success')
                         ->requiresConfirmation()
@@ -216,14 +231,31 @@ class BooksTable
                         ->deselectRecordsAfterCompletion(),
 
                     BulkAction::make('unpublish_selected')
-                        ->label('Batal Publikasikan')
+                        ->label('Batalkan Publikasi')
                         ->icon(Heroicon::OutlinedXCircle)
                         ->color('danger')
                         ->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each(fn (Book $record) => $record->update(['is_published' => false])))
                         ->deselectRecordsAfterCompletion(),
 
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Hapus Terpilih')
+                        ->before(function (DeleteBulkAction $action, Collection $records): void {
+                            /** @var Book|null $blockedRecord */
+                            $blockedRecord = $records->first(fn (Book $record): bool => $record->deletionBlockedReason() !== null);
+
+                            if (! $blockedRecord) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Beberapa buku tidak dapat dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada data yang terhubung dengan buku terpilih.')
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ]),
             ]);
     }

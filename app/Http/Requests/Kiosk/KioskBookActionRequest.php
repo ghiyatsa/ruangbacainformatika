@@ -26,7 +26,9 @@ abstract class KioskBookActionRequest extends FormRequest
             'isbns.*' => [
                 'required',
                 'string',
-                'max:20',
+                'min:10',
+                'max:13',
+                'regex:/^[0-9]+$/',
                 Rule::exists(Book::class, 'isbn'),
             ],
         ];
@@ -35,7 +37,7 @@ abstract class KioskBookActionRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $isbns = collect($this->input('isbns', []))
-            ->map(fn ($isbn) => Str::of((string) $isbn)->trim()->toString())
+            ->map(fn ($isbn) => preg_replace('/\D+/', '', Str::of((string) $isbn)->trim()->toString()) ?? '')
             ->filter()
             ->values()
             ->all();

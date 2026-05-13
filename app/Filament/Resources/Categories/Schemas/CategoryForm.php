@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Categories\Schemas;
 
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -11,6 +12,17 @@ use Illuminate\Support\Str;
 
 class CategoryForm
 {
+    /**
+     * @return array<int, Field>
+     */
+    public static function optionFormSchema(): array
+    {
+        return [
+            static::nameField(),
+            static::descriptionField(),
+        ];
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -18,13 +30,9 @@ class CategoryForm
                 Section::make('Informasi Dasar')
                     ->description('Data kategori buku')
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Nama Kategori')
-                            ->required()
-                            ->maxLength(255)
+                        static::nameField()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
-                            ->placeholder('Contoh: Fiksi, Non-Fiksi, Sains, dll'),
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
                         TextInput::make('slug')
                             ->label('Slug')
@@ -39,13 +47,27 @@ class CategoryForm
                 Section::make('Deskripsi')
                     ->description('Penjelasan tentang kategori ini')
                     ->schema([
-                        Textarea::make('description')
-                            ->label('Deskripsi')
-                            ->rows(8)
-                            ->maxLength(65535)
-                            ->placeholder('Jelaskan apa isi kategori ini dan jenis buku apa yang termasuk di dalamnya...')
-                            ->columnSpanFull(),
+                        static::descriptionField(),
                     ]),
             ]);
+    }
+
+    protected static function nameField(): TextInput
+    {
+        return TextInput::make('name')
+            ->label('Nama Kategori')
+            ->required()
+            ->maxLength(255)
+            ->placeholder('Contoh: Fiksi, Non-Fiksi, Sains');
+    }
+
+    protected static function descriptionField(): Textarea
+    {
+        return Textarea::make('description')
+            ->label('Deskripsi')
+            ->rows(8)
+            ->maxLength(65535)
+            ->placeholder('Jelaskan fokus kategori ini secara singkat...')
+            ->columnSpanFull();
     }
 }

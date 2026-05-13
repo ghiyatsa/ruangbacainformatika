@@ -26,7 +26,7 @@ export function PasswordSection({
             />
 
             <Form
-                {...SecurityController.update.form()}
+                action={SecurityController.update()}
                 options={{ preserveScroll: true }}
                 resetOnError={[
                     'password',

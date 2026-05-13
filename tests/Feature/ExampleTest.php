@@ -80,3 +80,14 @@ it('home page excludes non-borrowable books from available counts', function () 
                 ),
         );
 });
+
+it('home page exposes zeroed stats when the catalog is empty', function () {
+    get(route('home'))
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('welcome')
+                ->where('stats.booksCount', 0)
+                ->where('stats.featuredCount', 0)
+                ->where('stats.availableItemsCount', 0),
+        );
+});

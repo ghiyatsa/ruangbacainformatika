@@ -93,10 +93,10 @@ class ItemsRelationManager extends RelationManager
                         false: fn (Builder $query) => $query->whereNull('loan_items.returned_at'),
                     ),
                 Filter::make('borrowed_at')
-                    ->label('Tanggal Pinjam')
+                    ->label('Rentang Tanggal')
                     ->schema([
-                        DatePicker::make('from')->label('Pinjam Dari'),
-                        DatePicker::make('until')->label('Pinjam Sampai'),
+                        DatePicker::make('from')->label('Dari'),
+                        DatePicker::make('until')->label('Sampai'),
                     ])
                     ->query(
                         fn (Builder $query, array $data): Builder => $query->when(

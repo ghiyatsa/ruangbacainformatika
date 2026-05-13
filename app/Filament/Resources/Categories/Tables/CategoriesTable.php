@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\Categories\Tables;
 
+use App\Models\Category;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class CategoriesTable
 {
@@ -17,7 +20,7 @@ class CategoriesTable
         return $table
             ->searchPlaceholder('Cari nama kategori')
             ->emptyStateHeading('Belum ada kategori')
-            ->emptyStateDescription('Kategori membantu pengelola mengelompokkan koleksi dengan cepat.')
+            ->emptyStateDescription('Data kategori akan tampil di sini.')
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama Kategori')
@@ -51,13 +54,44 @@ class CategoriesTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Kategori'),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->label('Hapus Kategori')
+                        ->before(function (DeleteAction $action, Category $record): void {
+                            if (! $reason = $record->deletionBlockedReason()) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Kategori tidak dapat dihapus')
+                                ->body($reason)
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ])
                     ->label('Aksi'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Hapus Kategori')
+                        ->before(function (DeleteBulkAction $action, Collection $records): void {
+                            /** @var Category|null $blockedRecord */
+                            $blockedRecord = $records->first(fn (Category $record): bool => $record->deletionBlockedReason() !== null);
+
+                            if (! $blockedRecord) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Beberapa kategori tidak dapat dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada kategori yang digunakan oleh buku.')
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ]),
             ]);
     }

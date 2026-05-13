@@ -28,6 +28,8 @@ Route::get('/search', SearchController::class)->name('search');
 
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service');
 Route::middleware(['auth', 'profile.completed'])->group(function () {
     Route::get('/loans/history', LoanHistoryController::class)->name('loans.history');
 });

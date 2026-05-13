@@ -13,7 +13,7 @@ export default function ConfirmPassword() {
 
             <div className="flex flex-col gap-6">
                 <Form
-                    {...store.form()}
+                    action={store()}
                     resetOnSuccess={['password']}
                     className="flex flex-col gap-6"
                 >

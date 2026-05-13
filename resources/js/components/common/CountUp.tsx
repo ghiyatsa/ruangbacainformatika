@@ -27,6 +27,7 @@ export default function CountUp({
     onEnd,
 }: CountUpProps) {
     const ref = useRef<HTMLSpanElement>(null);
+    const initialValue = direction === 'down' ? to : from;
     const motionValue = useMotionValue(direction === 'down' ? to : from);
 
     const damping = 20 + 40 * (1 / duration);
@@ -78,11 +79,9 @@ export default function CountUp({
 
     useEffect(() => {
         if (ref.current) {
-            ref.current.textContent = formatValue(
-                direction === 'down' ? to : from,
-            );
+            ref.current.textContent = formatValue(initialValue);
         }
-    }, [from, to, direction, formatValue]);
+    }, [formatValue, initialValue]);
 
     useEffect(() => {
         if (isInView && startWhen) {
@@ -108,18 +107,7 @@ export default function CountUp({
                 clearTimeout(durationTimeoutId);
             };
         }
-    }, [
-        isInView,
-        startWhen,
-        motionValue,
-        direction,
-        from,
-        to,
-        delay,
-        onStart,
-        onEnd,
-        duration,
-    ]);
+    }, [isInView, startWhen, motionValue, direction, from, to, delay, onStart, onEnd, duration]);
 
     useEffect(() => {
         const unsubscribe = springValue.on('change', (latest: number) => {
@@ -131,5 +119,9 @@ export default function CountUp({
         return () => unsubscribe();
     }, [springValue, formatValue]);
 
-    return <span className={className} ref={ref} />;
+    return (
+        <span className={className} ref={ref}>
+            {formatValue(initialValue)}
+        </span>
+    );
 }

@@ -69,7 +69,7 @@ export function TwoFactorSection({
                                 dapat Anda ambil dari aplikasi TOTP di ponsel
                                 Anda.
                             </p>
-                            <Form {...disable.form()}>
+                            <Form action={disable()}>
                                 {({ processing }) => (
                                     <Button
                                         variant="destructive"
@@ -103,7 +103,7 @@ export function TwoFactorSection({
                                     <ShieldCheck className="h-4 w-4" />
                                     Selesaikan pengaturan
                                 </Button>
-                                <Form {...disable.form()}>
+                                <Form action={disable()}>
                                     {({ processing }) => (
                                         <Button
                                             variant="ghost"
@@ -125,7 +125,7 @@ export function TwoFactorSection({
                             diambil dari aplikasi TOTP di ponsel Anda.
                         </p>
                         <Form
-                            {...enable.form()}
+                            action={enable()}
                             onSuccess={() => setShowSetupModal(true)}
                         >
                             {({ processing }) => (

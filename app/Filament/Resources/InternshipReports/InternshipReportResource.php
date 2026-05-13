@@ -27,9 +27,13 @@ class InternshipReportResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Manajemen Tugas Akhir';
 
-    protected static ?string $navigationLabel = 'Data Laporan KP';
+    protected static ?string $navigationLabel = 'Laporan KP';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $modelLabel = 'Laporan KP';
+
+    protected static ?string $pluralModelLabel = 'Laporan KP';
 
     protected static ?string $recordTitleAttribute = 'student_id';
 
@@ -40,7 +44,12 @@ class InternshipReportResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Total data laporan KP';
+        return 'Total laporan KP';
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'gray';
     }
 
     public static function form(Schema $schema): Schema

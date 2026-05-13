@@ -59,6 +59,11 @@ export default function BookDetailPage({
     return (
         <ResourceDetailPage
             title={book.title}
+            description={
+                book.description
+                    ? book.description.slice(0, 160)
+                    : `Detail buku ${book.title} di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+            }
             hero={
                 <div className="relative -mt-20 overflow-hidden sm:-mt-28">
                     <div

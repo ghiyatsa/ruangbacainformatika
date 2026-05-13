@@ -51,7 +51,7 @@ export default function SimilarityPage({
         }
 
         if (words.length < 5) {
-            setError('Masukkan minimal 3 kata agar hasil lebih akurat.');
+            setError('Masukkan minimal 5 kata agar hasil lebih akurat.');
 
             return;
         }
@@ -116,6 +116,7 @@ export default function SimilarityPage({
     return (
         <PageLayout
             title="Cek Kemiripan Judul"
+            metaDescription="Periksa kemiripan judul skripsi dengan koleksi Ruang Baca Teknik Informatika sebelum pengajuan proposal."
             maxWidth="7xl"
             header={
                 <LibraryPageHero
@@ -222,11 +223,36 @@ export default function SimilarityPage({
 
                 {/* How it works — shown before first search */}
                 {!result && !loading && (
-                    <div className="space-y-4">
-                        <p className="text-center text-sm font-medium text-muted-foreground">
-                            Cara kerja
-                        </p>
-                        <SimilarityHowItWorks />
+                    <div className="space-y-6">
+                        <Card className="border-border/60 bg-card/90 shadow-sm">
+                            <CardHeader>
+                                <CardTitle className="text-center">
+                                    Cara Kerja
+                                </CardTitle>
+                                <CardDescription className="text-center">
+                                    Proses pemeriksaan dirancang ringkas dan
+                                    mudah dipahami.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <SimilarityHowItWorks />
+                            </CardContent>
+                        </Card>
+
+                        <Card className="border-border/60 bg-card/90 shadow-sm">
+                            <CardHeader>
+                                <CardTitle>Catatan Layanan</CardTitle>
+                                <CardDescription>
+                                    Gunakan judul yang paling mendekati rencana
+                                    final agar hasil lebih relevan.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-3 text-sm text-muted-foreground">
+                                <p>Hasil ini membantu tahap awal verifikasi judul.</p>
+                                <p>Keputusan akademik tetap mengikuti kebijakan program studi.</p>
+                                <p>Perbaikan kata kunci dapat memengaruhi tingkat kemiripan.</p>
+                            </CardContent>
+                        </Card>
                     </div>
                 )}
             </div>

@@ -34,7 +34,10 @@ class BookImporter extends Importer
                 ->rules(['nullable', 'max:255']),
             ImportColumn::make('isbn')
                 ->label('ISBN')
-                ->rules(['max:20']),
+                ->rules(['nullable', 'max:20'])
+                ->fillRecordUsing(function ($record, $state) {
+                    $record->isbn = preg_replace('/\D+/', '', trim((string) $state));
+                }),
             ImportColumn::make('authors')
                 ->label('Penulis')
                 ->fillRecordUsing(function ($record, $state) {}),
@@ -131,7 +134,7 @@ class BookImporter extends Importer
 
     public function resolveRecord(): ?Model
     {
-        $isbn = trim((string) ($this->data['isbn'] ?? ''));
+        $isbn = preg_replace('/\D+/', '', trim((string) ($this->data['isbn'] ?? ''))) ?? '';
 
         if (blank($isbn)) {
             return new Book;

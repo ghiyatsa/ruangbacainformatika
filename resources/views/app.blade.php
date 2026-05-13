@@ -47,21 +47,22 @@
 
         <x-inertia::head>
             <title>{{ config('app.name', 'Ruang Baca Informatika') }}</title>
-            <meta name="description" content="Pusat riset, pembelajaran akademik, dan pengembangan literasi teknologi mahasiswa Program Studi Teknik Informatika Universitas Malikussaleh.">
+            <meta data-inertia="description" name="description" content="Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.">
+            <meta data-inertia="robots" name="robots" content="index,follow">
+            <link data-inertia="canonical" rel="canonical" href="{{ url()->current() }}">
 
             <!-- Open Graph / Facebook -->
-            <meta property="og:type" content="website">
-            <meta property="og:url" content="{{ url()->current() }}">
-            <meta property="og:title" content="{{ config('app.name', 'Ruang Baca Informatika') }}">
-            <meta property="og:description" content="Pusat riset, pembelajaran akademik, dan pengembangan literasi teknologi mahasiswa Program Studi Teknik Informatika Universitas Malikussaleh.">
-            <meta property="og:image" content="{{ asset('images/og-image.png') }}">
+            <meta data-inertia="og:type" property="og:type" content="website">
+            <meta data-inertia="og:url" property="og:url" content="{{ url()->current() }}">
+            <meta data-inertia="og:title" property="og:title" content="{{ config('app.name', 'Ruang Baca Informatika') }}">
+            <meta data-inertia="og:description" property="og:description" content="Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.">
+            <meta data-inertia="og:image" property="og:image" content="{{ asset('images/og-image.png') }}">
 
             <!-- Twitter -->
-            <meta property="twitter:card" content="summary_large_image">
-            <meta property="twitter:url" content="{{ url()->current() }}">
-            <meta property="twitter:title" content="{{ config('app.name', 'Ruang Baca Informatika') }}">
-            <meta property="twitter:description" content="Pusat riset, pembelajaran akademik, dan pengembangan literasi teknologi mahasiswa Program Studi Teknik Informatika Universitas Malikussaleh.">
-            <meta property="twitter:image" content="{{ asset('images/og-image.png') }}">
+            <meta data-inertia="twitter:card" property="twitter:card" content="summary_large_image">
+            <meta data-inertia="twitter:title" property="twitter:title" content="{{ config('app.name', 'Ruang Baca Informatika') }}">
+            <meta data-inertia="twitter:description" property="twitter:description" content="Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.">
+            <meta data-inertia="twitter:image" property="twitter:image" content="{{ asset('images/og-image.png') }}">
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

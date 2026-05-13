@@ -25,9 +25,11 @@ class LoanResource extends Resource
 
     protected static ?string $navigationLabel = 'Peminjaman';
 
-    protected static ?string $modelLabel = 'Member Peminjam';
+    protected static ?int $navigationSort = 1;
 
-    protected static ?string $pluralModelLabel = 'Member Peminjam';
+    protected static ?string $modelLabel = 'Peminjaman';
+
+    protected static ?string $pluralModelLabel = 'Peminjaman';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
@@ -45,7 +47,7 @@ class LoanResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Jumlah member dengan peminjaman aktif';
+        return 'Total pinjaman aktif';
     }
 
     public static function form(Schema $schema): Schema

@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { SeoHead } from '@/components/common/SeoHead';
 import CatalogSection from '@/features/welcome/components/CatalogSection';
 import CategoryMarquee from '@/features/welcome/components/CategoryMarquee';
 import Hero from '@/features/welcome/components/Hero';
@@ -12,7 +12,10 @@ export default function WelcomePage({
 }: WelcomeProps) {
     return (
         <>
-            <Head title="Digital Library of Informatics Engineering UNIMAL" />
+            <SeoHead
+                title="Beranda"
+                description="Jelajahi koleksi buku, skripsi, tesis, dan laporan KP di Ruang Baca Teknik Informatika Universitas Malikussaleh."
+            />
 
             {/* Pattern Overlay */}
             <div

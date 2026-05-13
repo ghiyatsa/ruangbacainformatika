@@ -27,7 +27,12 @@ export default function InternshipReportDetailPage({
 }: InternshipReportShowProps) {
     return (
         <ResourceDetailPage
-            title={report.studentId}
+            title={report.title}
+            description={
+                report.abstract
+                    ? report.abstract.slice(0, 160)
+                    : `Detail laporan KP ${report.title} di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+            }
             hero={
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />

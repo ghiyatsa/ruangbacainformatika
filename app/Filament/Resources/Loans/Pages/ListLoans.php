@@ -8,4 +8,6 @@ use Filament\Resources\Pages\ListRecords;
 class ListLoans extends ListRecords
 {
     protected static string $resource = LoanResource::class;
+
+    protected static ?string $title = 'Peminjaman';
 }

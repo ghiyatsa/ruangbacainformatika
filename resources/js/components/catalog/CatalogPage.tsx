@@ -5,6 +5,7 @@ import type { PaginationData } from '@/types/pagination';
 
 interface CatalogPageProps<T> {
     title: string;
+    metaDescription?: string;
     resourceName: string;
     breadcrumbLabel: string;
     totalCount: number;
@@ -19,6 +20,7 @@ interface CatalogPageProps<T> {
 
 export function CatalogPage<T>({
     title,
+    metaDescription,
     resourceName,
     breadcrumbLabel,
     totalCount,
@@ -32,6 +34,7 @@ export function CatalogPage<T>({
     return (
         <CatalogPageLayout
             title={title}
+            metaDescription={metaDescription}
             resourceName={resourceName}
             breadcrumbLabel={breadcrumbLabel}
             totalCount={totalCount}

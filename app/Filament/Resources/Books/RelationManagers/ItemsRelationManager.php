@@ -19,6 +19,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -74,6 +75,9 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('internal_code')
+            ->searchPlaceholder('Cari kode atau lokasi rak')
+            ->emptyStateHeading('Belum ada eksemplar buku')
+            ->emptyStateDescription('Tambahkan eksemplar untuk buku ini.')
             ->columns([
                 TextColumn::make('internal_code')
                     ->label('Kode Barcode')
@@ -103,26 +107,81 @@ class ItemsRelationManager extends RelationManager
                     }),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'available' => 'Tersedia di Rak',
+                        'borrowed' => 'Sedang Dipinjam',
+                        'reserved' => 'Dipesan',
+                        'maintenance' => 'Dalam Perbaikan',
+                    ]),
+                SelectFilter::make('condition')
+                    ->label('Kondisi')
+                    ->options([
+                        'good' => 'Bagus',
+                        'damaged' => 'Rusak',
+                        'lost' => 'Hilang',
+                    ]),
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Tambah Eksemplar'),
+                    ->label('Tambah Eksemplar')
+                    ->modalHeading('Tambah Eksemplar')
+                    ->modalSubmitActionLabel('Simpan'),
                 BatchCreateBookItemsAction::make(),
             ])
             ->recordActions([
                 EditAction::make()
-                    ->label('Ubah'),
+                    ->label('Ubah')
+                    ->modalHeading('Ubah Eksemplar')
+                    ->modalSubmitActionLabel('Simpan'),
                 DeleteAction::make()
-                    ->label('Hapus'),
+                    ->label('Hapus')
+                    ->modalHeading('Hapus Eksemplar')
+                    ->modalDescription('Eksemplar ini akan dihapus.')
+                    ->modalSubmitActionLabel('Hapus')
+                    ->before(function (DeleteAction $action, Model $record): void {
+                        if (! method_exists($record, 'deletionBlockedReason') || ! $reason = $record->deletionBlockedReason()) {
+                            return;
+                        }
+
+                        Notification::make()
+                            ->warning()
+                            ->title('Eksemplar belum dapat dihapus')
+                            ->body($reason)
+                            ->send();
+
+                        $action->halt();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Hapus Eksemplar'),
+                        ->label('Hapus Terpilih')
+                        ->modalHeading('Hapus Eksemplar Terpilih')
+                        ->modalDescription('Eksemplar terpilih akan dihapus.')
+                        ->modalSubmitActionLabel('Hapus')
+                        ->before(function (DeleteBulkAction $action, Collection $records): void {
+                            $blockedRecord = $records->first(fn (Model $record): bool => method_exists($record, 'deletionBlockedReason') && filled($record->deletionBlockedReason()));
+
+                            if (! $blockedRecord) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Beberapa eksemplar tidak dapat dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada eksemplar yang terhubung dengan riwayat peminjaman.')
+                                ->send();
+
+                            $action->halt();
+                        }),
                     BulkAction::make('updateShelfLocation')
                         ->label('Ubah Lokasi Rak')
                         ->icon(Heroicon::OutlinedRectangleGroup)
+                        ->modalHeading('Ubah Lokasi Rak')
+                        ->modalDescription('Lokasi baru akan diterapkan ke eksemplar terpilih.')
+                        ->modalSubmitActionLabel('Simpan')
                         ->schema([
                             TextInput::make('shelf_location')
                                 ->label('Lokasi Rak Baru')
@@ -137,7 +196,7 @@ class ItemsRelationManager extends RelationManager
                             Notification::make()
                                 ->success()
                                 ->title('Lokasi rak diperbarui')
-                                ->body("Lokasi rak untuk {$records->count()} eksemplar berhasil diubah menjadi {$data['shelf_location']}.")
+                                ->body("{$records->count()} eksemplar diperbarui ke {$data['shelf_location']}.")
                                 ->send();
                         })
                         ->deselectRecordsAfterCompletion(),

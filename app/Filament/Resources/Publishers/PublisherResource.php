@@ -23,6 +23,8 @@ class PublisherResource extends Resource
 
     protected static ?string $navigationLabel = 'Penerbit';
 
+    protected static ?int $navigationSort = 3;
+
     protected static ?string $modelLabel = 'Penerbit';
 
     protected static ?string $pluralModelLabel = 'Penerbit';
@@ -41,6 +43,11 @@ class PublisherResource extends Resource
     public static function getNavigationBadgeTooltip(): ?string
     {
         return 'Total penerbit';
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'gray';
     }
 
     public static function form(Schema $schema): Schema

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Inertia\ExceptionResponse;
+use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->configureDefaults();
+        $this->configureInertiaExceptionHandling();
         $this->configureTurnstile();
 
         Skripsi::observe(SkripsiObserver::class);
@@ -56,6 +59,27 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception) {
             // Silence errors during initial setup or if table doesn't exist
         }
+    }
+
+    protected function configureInertiaExceptionHandling(): void
+    {
+        Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
+            $statusCode = $response->statusCode();
+
+            if (app()->environment('local') && in_array($statusCode, [500, 503], true)) {
+                return null;
+            }
+
+            if (in_array($statusCode, [403, 404, 419, 429, 500, 503], true)) {
+                return $response
+                    ->render('error-page', [
+                        'status' => $statusCode,
+                    ])
+                    ->withSharedData();
+            }
+
+            return null;
+        });
     }
 
     /**

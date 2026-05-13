@@ -1,5 +1,13 @@
 <?php
 
+use App\Filament\Resources\Authors\AuthorResource;
+use App\Filament\Resources\Books\BookResource;
+use App\Filament\Resources\InternshipReports\InternshipReportResource;
+use App\Filament\Resources\Loans\LoanResource;
+use App\Filament\Resources\Skripsis\SkripsiResource;
+use App\Filament\Resources\Theses\ThesisResource;
+use App\Filament\Resources\Users\UserResource;
+use App\Filament\Resources\VisitLogs\VisitLogResource;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
@@ -55,9 +63,11 @@ it('super admin users can render the general settings form', function () {
     actingAs($user)
         ->get(route('filament.admin.settings.pages.general-settings'))
         ->assertOk()
+        ->assertSee('Pengaturan Umum')
         ->assertSee('Nama Situs')
-        ->assertSee('Slogan')
+        ->assertSee('Tagline')
         ->assertSee('WhatsApp Bantuan')
+        ->assertSee('Nomor kontak bantuan.')
         ->assertSee('Simpan');
 });
 
@@ -69,7 +79,116 @@ it('super admin users can render the library settings form', function () {
         ->assertOk()
         ->assertSee('Maksimal Buku Dipinjam')
         ->assertSee('Durasi Peminjaman (Hari Kerja)')
+        ->assertSee('Batas pinjaman aktif per anggota.')
+        ->assertSee('Dihitung dalam hari kerja.')
         ->assertSee('Simpan');
+});
+
+it('super admin users can render the kiosk settings actions', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin/settings/kiosk')
+        ->assertOk()
+        ->assertSee('Pengaturan Kios')
+        ->assertSee('Reset Sesi Perangkat')
+        ->assertSee('Perangkat Aktif')
+        ->assertSee('PIN Kios')
+        ->assertSee('Kosongkan jika tidak diubah.');
+});
+
+it('super admin users can render the create user form with a password field', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin/users/create')
+        ->assertOk()
+        ->assertSee('Kata Sandi')
+        ->assertSee('Peran')
+        ->assertSee('Minimal 8 karakter.')
+        ->assertSee('Pilih sesuai hak akses.')
+        ->assertSee('Aktifkan jika akun siap dipakai.');
+});
+
+it('super admin users can render book relation helpers on the create book form', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin/books/create')
+        ->assertOk()
+        ->assertSee('Pilih atau tambah penerbit.')
+        ->assertSee('Pilih atau tambah penulis.')
+        ->assertSee('Pilih atau tambah kategori.')
+        ->assertSee('Gunakan angka saja.')
+        ->assertSee('Gunakan 4 digit tahun.')
+        ->assertSee('JPG, PNG, atau WEBP. Maksimal 2 MB.');
+});
+
+it('super admin users can render concise table filter and bulk action labels', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin/books')
+        ->assertOk()
+        ->assertSee('Publikasi')
+        ->assertSee('Unggulan')
+        ->assertSee('Peminjaman')
+        ->assertSee('Hanya stok habis')
+        ->assertSee('Tanpa sampul')
+        ->assertSee('Tandai Unggulan')
+        ->assertSee('Aktifkan Pinjam')
+        ->assertSee('Hapus Terpilih');
+
+    actingAs($user)
+        ->get('/admin/loans')
+        ->assertOk()
+        ->assertSee('Hanya pinjaman aktif')
+        ->assertSee('Hanya lewat jatuh tempo');
+
+    actingAs($user)
+        ->get('/admin/visit-logs')
+        ->assertOk()
+        ->assertSee('Kunjungan')
+        ->assertSee('Data kunjungan akan tampil di sini.')
+        ->assertSee('Ekspor');
+});
+
+it('super admin users can render consistent resource headings', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin/loans')
+        ->assertOk()
+        ->assertSee('Peminjaman');
+
+    actingAs($user)
+        ->get('/admin/skripsis')
+        ->assertOk()
+        ->assertSee('Skripsi');
+
+    actingAs($user)
+        ->get('/admin/theses')
+        ->assertOk()
+        ->assertSee('Tesis');
+
+    actingAs($user)
+        ->get('/admin/internship-reports')
+        ->assertOk()
+        ->assertSee('Laporan KP');
+});
+
+it('filament resources expose consistent navigation metadata', function () {
+    expect(BookResource::getNavigationBadgeColor())->toBe('gray')
+        ->and(BookResource::getNavigationBadgeTooltip())->toBe('Total buku')
+        ->and(UserResource::getNavigationBadgeColor())->toBe('primary')
+        ->and(LoanResource::getNavigationBadgeColor())->toBe('warning')
+        ->and(LoanResource::getNavigationBadgeTooltip())->toBe('Total pinjaman aktif')
+        ->and(VisitLogResource::getNavigationBadgeColor())->toBe('primary')
+        ->and(VisitLogResource::getNavigationBadgeTooltip())->toBe('Kunjungan hari ini')
+        ->and(AuthorResource::getNavigationBadgeColor())->toBe('gray')
+        ->and(SkripsiResource::getNavigationBadgeColor())->toBe('gray')
+        ->and(ThesisResource::getNavigationBadgeColor())->toBe('gray')
+        ->and(InternshipReportResource::getNavigationBadgeColor())->toBe('gray');
 });
 
 it('super admin users are redirected from settings cluster to the first settings page', function () {
@@ -96,3 +215,42 @@ it('super admin users can access key admin resources', function (string $path) {
     '/admin/settings/kiosk',
     '/admin/settings/general-settings',
 ]);
+
+it('super admin users can render concise empty state copy on book management resources', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin/books')
+        ->assertOk()
+        ->assertSee('Data buku akan tampil di sini.');
+
+    actingAs($user)
+        ->get('/admin/authors')
+        ->assertOk()
+        ->assertSee('Data penulis akan tampil di sini.');
+
+    actingAs($user)
+        ->get('/admin/categories')
+        ->assertOk()
+        ->assertSee('Data kategori akan tampil di sini.');
+
+    actingAs($user)
+        ->get('/admin/publishers')
+        ->assertOk()
+        ->assertSee('Data penerbit akan tampil di sini.');
+
+    actingAs($user)
+        ->get('/admin/skripsis')
+        ->assertOk()
+        ->assertSee('Data skripsi akan tampil di sini.');
+
+    actingAs($user)
+        ->get('/admin/theses')
+        ->assertOk()
+        ->assertSee('Data tesis akan tampil di sini.');
+
+    actingAs($user)
+        ->get('/admin/internship-reports')
+        ->assertOk()
+        ->assertSee('Data laporan KP akan tampil di sini.');
+});

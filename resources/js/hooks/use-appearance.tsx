@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 
 export type ResolvedAppearance = 'light' | 'dark';
 export type Appearance = ResolvedAppearance | 'system';
@@ -27,7 +27,7 @@ function getStoredAppearance(): Appearance {
     return (localStorage.getItem('appearance') as Appearance) || 'system';
 }
 
-let currentAppearance: Appearance = typeof window !== 'undefined' ? getStoredAppearance() : 'system';
+let currentAppearance: Appearance = 'system';
 
 function setCookie(name: string, value: string, days = 365): void {
     if (typeof document === 'undefined') {
@@ -89,8 +89,7 @@ export function initializeTheme(): void {
         setCookie('appearance', 'system');
     }
 
-    currentAppearance = getStoredAppearance();
-    applyTheme(currentAppearance);
+    applyTheme(getStoredAppearance());
     notify();
 
     // Set up system theme change listener
@@ -103,6 +102,15 @@ export function useAppearance(): UseAppearanceReturn {
         () => currentAppearance,
         () => 'system',
     );
+
+    useEffect(() => {
+        const storedAppearance = getStoredAppearance();
+
+        if (currentAppearance !== storedAppearance) {
+            currentAppearance = storedAppearance;
+            notify();
+        }
+    }, []);
 
     const resolvedAppearance: ResolvedAppearance = isDarkMode(appearance)
         ? 'dark'

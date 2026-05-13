@@ -37,6 +37,7 @@ export default function SkripsiCatalogPage({
     return (
         <CatalogPage
             title="Katalog Skripsi"
+            metaDescription="Telusuri koleksi skripsi mahasiswa Teknik Informatika Universitas Malikussaleh sebagai referensi topik dan penelitian."
             resourceName="skripsi"
             breadcrumbLabel="Katalog Skripsi"
             totalCount={total}

@@ -27,7 +27,12 @@ export default function SkripsiDetailPage({
 }: SkripsiShowProps) {
     return (
         <ResourceDetailPage
-            title={skripsi.studentId}
+            title={skripsi.title}
+            description={
+                skripsi.abstract
+                    ? skripsi.abstract.slice(0, 160)
+                    : `Detail skripsi ${skripsi.title} di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+            }
             hero={
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />

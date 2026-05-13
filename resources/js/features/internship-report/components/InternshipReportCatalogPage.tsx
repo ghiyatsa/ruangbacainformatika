@@ -37,6 +37,7 @@ export default function InternshipReportCatalogPage({
     return (
         <CatalogPage
             title="Katalog Laporan KP"
+            metaDescription="Akses koleksi laporan kerja praktik mahasiswa Teknik Informatika Universitas Malikussaleh sebagai referensi pengalaman lapangan."
             resourceName="laporan"
             breadcrumbLabel="Katalog Laporan KP"
             totalCount={total}

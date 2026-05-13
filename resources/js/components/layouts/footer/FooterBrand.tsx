@@ -15,7 +15,6 @@ export function FooterBrand() {
             whileInView="show"
             viewport={{ once: true, amount: 0.3 }}
         >
-            {/* Logo */}
             <Link
                 href={home.url()}
                 className="group mb-5 inline-flex items-center gap-3"
@@ -37,11 +36,10 @@ export function FooterBrand() {
                 akademik, dan pengembangan literasi teknologi mahasiswa.
             </p>
 
-            {/* Contact details */}
             <div className="flex flex-col gap-2.5">
                 <div className="flex items-start gap-2.5 text-xs text-muted-foreground">
                     <MapPin className="mt-0.5 size-3.5 shrink-0 text-primary/70" />
-                    <span>Jl. Cot Tengku Nie, Reuleut, Aceh Utara — 24355</span>
+                    <span>Jl. Cot Tengku Nie, Reuleut, Aceh Utara 24355</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
                     <Mail className="size-3.5 shrink-0 text-primary/70" />

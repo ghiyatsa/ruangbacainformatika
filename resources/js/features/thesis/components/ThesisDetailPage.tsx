@@ -27,7 +27,12 @@ export default function ThesisDetailPage({
 }: ThesisShowProps) {
     return (
         <ResourceDetailPage
-            title={thesis.studentId}
+            title={thesis.title}
+            description={
+                thesis.abstract
+                    ? thesis.abstract.slice(0, 160)
+                    : `Detail tesis ${thesis.title} di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+            }
             hero={
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />

@@ -21,7 +21,7 @@ class UsersTable
         return $table
             ->searchPlaceholder('Cari nama, email, atau WhatsApp')
             ->emptyStateHeading('Belum ada pengguna')
-            ->emptyStateDescription('Pengguna baru akan muncul setelah registrasi atau dibuat dari panel admin.')
+            ->emptyStateDescription('Data pengguna akan tampil di sini.')
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
             ->columns([
@@ -39,33 +39,35 @@ class UsersTable
                     ->copyMessage('WhatsApp berhasil disalin'),
                 TextColumn::make('roles.name')
                     ->badge()
-                    ->label('Roles')
+                    ->label('Peran')
                     ->separator(', '),
                 IconColumn::make('is_approved')
-                    ->label('Status')
+                    ->label('Disetujui')
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('Dibuat')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Diperbarui')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TernaryFilter::make('is_approved')
-                    ->label('Persetujuan Akun')
-                    ->placeholder('Semua akun')
+                    ->label('Persetujuan')
+                    ->placeholder('Semua')
                     ->trueLabel('Sudah disetujui')
                     ->falseLabel('Belum disetujui'),
                 Filter::make('registered_between')
-                    ->label('Rentang Pendaftaran')
+                    ->label('Rentang Tanggal')
                     ->form([
                         DatePicker::make('registered_from')
-                            ->label('Dari Tanggal'),
+                            ->label('Dari'),
                         DatePicker::make('registered_until')
-                            ->label('Sampai Tanggal'),
+                            ->label('Sampai'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -80,11 +82,13 @@ class UsersTable
                     }),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->label('Ubah'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Hapus Terpilih'),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');

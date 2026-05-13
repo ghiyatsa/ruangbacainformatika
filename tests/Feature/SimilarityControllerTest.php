@@ -18,7 +18,7 @@ test('similarity check requires at least five words', function () {
     ])
         ->assertStatus(422)
         ->assertJson([
-            'message' => 'Judul terlalu singkat. Masukkan minimal 3 kata agar pengecekan lebih akurat.',
+            'message' => 'Judul terlalu singkat. Masukkan minimal 5 kata agar pengecekan lebih akurat.',
         ]);
 });
 

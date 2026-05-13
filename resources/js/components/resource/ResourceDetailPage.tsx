@@ -1,9 +1,10 @@
-import { Head } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { SeoHead } from '@/components/common/SeoHead';
 import { BackgroundPattern } from '@/components/layouts/BackgroundPattern';
 
 interface ResourceDetailPageProps {
     title: string;
+    description?: string;
     hero: ReactNode;
     sidebar: ReactNode;
     children: ReactNode;
@@ -11,13 +12,14 @@ interface ResourceDetailPageProps {
 
 export function ResourceDetailPage({
     title,
+    description,
     hero,
     sidebar,
     children,
 }: ResourceDetailPageProps) {
     return (
         <>
-            <Head title={title} />
+            <SeoHead title={title} description={description} type="article" />
             <BackgroundPattern />
 
             <div className="relative z-10 flex flex-col">

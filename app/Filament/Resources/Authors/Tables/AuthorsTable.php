@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\Authors\Tables;
 
+use App\Models\Author;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class AuthorsTable
 {
@@ -17,7 +20,7 @@ class AuthorsTable
         return $table
             ->searchPlaceholder('Cari nama penulis atau email')
             ->emptyStateHeading('Belum ada data penulis')
-            ->emptyStateDescription('Tambahkan penulis agar katalog buku lebih mudah ditelusuri.')
+            ->emptyStateDescription('Data penulis akan tampil di sini.')
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama')
@@ -57,13 +60,44 @@ class AuthorsTable
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Ubah Penulis'),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->label('Hapus Penulis')
+                        ->before(function (DeleteAction $action, Author $record): void {
+                            if (! $reason = $record->deletionBlockedReason()) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Penulis tidak dapat dihapus')
+                                ->body($reason)
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ])
                     ->label('Aksi'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->label('Hapus Penulis')
+                        ->before(function (DeleteBulkAction $action, Collection $records): void {
+                            /** @var Author|null $blockedRecord */
+                            $blockedRecord = $records->first(fn (Author $record): bool => $record->deletionBlockedReason() !== null);
+
+                            if (! $blockedRecord) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->warning()
+                                ->title('Beberapa penulis tidak dapat dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada penulis yang terhubung dengan buku.')
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ]),
             ]);
     }

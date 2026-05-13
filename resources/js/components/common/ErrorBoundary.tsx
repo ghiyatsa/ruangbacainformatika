@@ -1,5 +1,6 @@
 import type { ErrorInfo, ReactNode } from 'react';
 import React, { Component } from 'react';
+import { Button } from '@/components/ui/button';
 import AlertError from './AlertError';
 
 interface Props {
@@ -38,6 +39,15 @@ export class ErrorBoundary extends Component<Props, State> {
                             Silakan muat ulang halaman atau hubungi
                             administrator jika masalah berlanjut.
                         </p>
+                        <div className="mt-4 flex justify-center">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => window.location.reload()}
+                            >
+                                Muat ulang halaman
+                            </Button>
+                        </div>
                     </div>
                 </div>
             );

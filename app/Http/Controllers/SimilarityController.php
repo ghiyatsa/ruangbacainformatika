@@ -40,7 +40,7 @@ class SimilarityController extends Controller
 
         if (str_word_count($judul) < 5) {
             return response()->json([
-                'message' => 'Judul terlalu singkat. Masukkan minimal 3 kata agar pengecekan lebih akurat.',
+                'message' => 'Judul terlalu singkat. Masukkan minimal 5 kata agar pengecekan lebih akurat.',
             ], 422);
         }
 

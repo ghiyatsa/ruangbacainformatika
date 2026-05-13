@@ -14,12 +14,15 @@ class BatchCreateBookItemsAction
     public static function make(): Action
     {
         return Action::make('batch_create')
-            ->label('Tambah Sekaligus')
+            ->label('Tambah Beberapa Eksemplar')
             ->icon(Heroicon::OutlinedRectangleStack)
             ->color(Color::Yellow)
+            ->modalHeading('Tambah Beberapa Eksemplar')
+            ->modalDescription('Eksemplar baru akan dibuat berurutan.')
+            ->modalSubmitActionLabel('Simpan')
             ->schema([
                 TextInput::make('quantity')
-                    ->label('Jumlah')
+                    ->label('Jumlah Eksemplar')
                     ->numeric()
                     ->required()
                     ->minValue(1)
@@ -33,8 +36,8 @@ class BatchCreateBookItemsAction
 
                 Notification::make()
                     ->success()
-                    ->title('Berhasil!')
-                    ->body("{$quantity} eksemplar berhasil ditambahkan dengan barcode berurutan.")
+                    ->title('Eksemplar berhasil ditambahkan')
+                    ->body("{$quantity} eksemplar berhasil ditambahkan.")
                     ->send();
             });
     }

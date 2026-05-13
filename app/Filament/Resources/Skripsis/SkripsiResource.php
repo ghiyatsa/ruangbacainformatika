@@ -27,9 +27,13 @@ class SkripsiResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Manajemen Tugas Akhir';
 
-    protected static ?string $navigationLabel = 'Data Skripsi';
+    protected static ?string $navigationLabel = 'Skripsi';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $modelLabel = 'Skripsi';
+
+    protected static ?string $pluralModelLabel = 'Skripsi';
 
     protected static ?string $recordTitleAttribute = 'student_id';
 
@@ -40,7 +44,12 @@ class SkripsiResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Total data skripsi';
+        return 'Total skripsi';
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'gray';
     }
 
     public static function form(Schema $schema): Schema

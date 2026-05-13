@@ -20,11 +20,13 @@ class VisitLogResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Operasional';
 
-    protected static ?string $navigationLabel = 'Data Kunjungan';
+    protected static ?string $navigationLabel = 'Kunjungan';
 
-    protected static ?string $modelLabel = 'Data Kunjungan';
+    protected static ?int $navigationSort = 2;
 
-    protected static ?string $pluralModelLabel = 'Data Kunjungan';
+    protected static ?string $modelLabel = 'Kunjungan';
+
+    protected static ?string $pluralModelLabel = 'Kunjungan';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
@@ -42,7 +44,7 @@ class VisitLogResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Jumlah kunjungan hari ini';
+        return 'Kunjungan hari ini';
     }
 
     public static function form(Schema $schema): Schema

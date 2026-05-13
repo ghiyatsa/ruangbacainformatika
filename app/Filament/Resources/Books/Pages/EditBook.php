@@ -3,9 +3,33 @@
 namespace App\Filament\Resources\Books\Pages;
 
 use App\Filament\Resources\Books\BookResource;
+use App\Models\Book;
+use Filament\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditBook extends EditRecord
 {
     protected static string $resource = BookResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make()
+                ->label('Hapus Buku')
+                ->before(function (DeleteAction $action, Book $record): void {
+                    if (! $reason = $record->deletionBlockedReason()) {
+                        return;
+                    }
+
+                    Notification::make()
+                        ->warning()
+                        ->title('Buku tidak dapat dihapus')
+                        ->body($reason)
+                        ->send();
+
+                    $action->halt();
+                }),
+        ];
+    }
 }

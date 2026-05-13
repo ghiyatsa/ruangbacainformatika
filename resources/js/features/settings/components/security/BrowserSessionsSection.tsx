@@ -111,7 +111,7 @@ export function BrowserSessionsSection({
                                 </DialogDescription>
                             </DialogHeader>
                             <Form
-                                {...SecurityController.destroy.form()}
+                                action={SecurityController.destroy()}
                                 onSuccess={() => setConfirmingLogout(false)}
                             >
                                 {({ errors: formErrors, processing }) => (

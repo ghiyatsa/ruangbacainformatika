@@ -21,7 +21,7 @@ class VisitLogsTable
         return $table
             ->searchPlaceholder('Cari nama, identitas, atau instansi')
             ->emptyStateHeading('Belum ada data kunjungan')
-            ->emptyStateDescription('Data kunjungan dari kiosk akan tercatat otomatis di sini.')
+            ->emptyStateDescription('Data kunjungan akan tampil di sini.')
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
             ->columns([
@@ -65,9 +65,9 @@ class VisitLogsTable
                     ->label('Rentang Tanggal')
                     ->form([
                         DatePicker::make('visited_from')
-                            ->label('Dari Tanggal'),
+                            ->label('Dari'),
                         DatePicker::make('visited_until')
-                            ->label('Sampai Tanggal'),
+                            ->label('Sampai'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->visitedBetween(
@@ -82,14 +82,13 @@ class VisitLogsTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
-                        ->label('Ubah Data'),
-
+                        ->label('Ubah'),
                 ])
                     ->label('Aksi'),
             ])
             ->toolbarActions([
                 ExportAction::make()
-                    ->label('Ekspor Data')
+                    ->label('Ekspor')
                     ->exporter(VisitLogExporter::class),
 
             ])

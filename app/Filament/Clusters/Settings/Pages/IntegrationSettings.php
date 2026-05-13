@@ -22,6 +22,8 @@ class IntegrationSettings extends Page
 {
     protected static ?string $navigationLabel = 'Integrasi API';
 
+    protected static ?int $navigationSort = 4;
+
     protected static ?string $title = 'Pengaturan Integrasi API';
 
     protected static ?string $slug = 'integrasi';
@@ -61,18 +63,18 @@ class IntegrationSettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Cloudflare Turnstile')
-                    ->description('Konfigurasi Cloudflare Turnstile untuk keamanan form (Anti-Bot).')
+                    ->description('Aktifkan verifikasi tambahan untuk membantu melindungi formulir dari bot.')
                     ->schema([
                         Toggle::make('turnstile_enabled')
                             ->label('Aktifkan Turnstile')
-                            ->helperText('Jika diaktifkan, beberapa form akan menggunakan verifikasi Turnstile (Site Key & Secret Key diambil dari sistem).')
+                            ->helperText('Aktifkan verifikasi tambahan.')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
                             ->offColor('danger'),
                     ]),
                 Section::make('API Kemiripan Skripsi')
-                    ->description('Konfigurasi endpoint untuk mendeteksi kemiripan judul mahasiswa.')
+                    ->description('Pengaturan layanan untuk memeriksa kemiripan judul karya ilmiah.')
                     ->schema([
                         TextInput::make('similarity_api_url')
                             ->label('URL Endpoint API')
@@ -88,19 +90,19 @@ class IntegrationSettings extends Page
                                 Action::make('generateSecret')
                                     ->icon('heroicon-m-key')
                                     ->color('warning')
-                                    ->tooltip('Generate Secret Baru')
+                                    ->tooltip('Buat secret baru')
                                     ->requiresConfirmation()
-                                    ->modalHeading('Generate Secret API')
-                                    ->modalDescription('Apakah Anda yakin ingin membuat secret baru? Secret lama akan diganti setelah Anda menyimpan pengaturan ini.')
-                                    ->modalSubmitActionLabel('Ya, Generate')
+                                    ->modalHeading('Buat Secret API Baru')
+                                    ->modalDescription('Secret lama akan diganti setelah disimpan.')
+                                    ->modalSubmitActionLabel('Buat Secret')
                                     ->action(function (Set $set) {
                                         $secret = Str::random(32);
                                         $set('similarity_api_secret', $secret);
 
                                         Notification::make()
                                             ->success()
-                                            ->title('Secret baru berhasil dibuat!')
-                                            ->body("Berikut adalah secret Anda: **{$secret}**\n\nSilakan salin secret ini sekarang. Setelah halaman ini disimpan, secret akan disembunyikan kembali.")
+                                            ->title('Secret baru berhasil dibuat')
+                                            ->body("Secret baru: **{$secret}**")
                                             ->persistent()
                                             ->send();
                                     })
@@ -114,7 +116,7 @@ class IntegrationSettings extends Page
                             ->default(10),
                         TextInput::make('similarity_api_top_k')
                             ->label('Top K (Jumlah Hasil)')
-                            ->helperText('Jumlah dokumen termirip yang akan dikembalikan.')
+                            ->helperText('Jumlah hasil yang ditampilkan.')
                             ->numeric()
                             ->required()
                             ->minValue(1)
@@ -122,7 +124,7 @@ class IntegrationSettings extends Page
                             ->default(5),
                         TextInput::make('similarity_api_threshold')
                             ->label('Threshold (Ambang Batas)')
-                            ->helperText('Skor kemiripan minimum (0.0 - 1.0). Semakin tinggi semakin ketat.')
+                            ->helperText('Semakin tinggi, semakin ketat.')
                             ->numeric()
                             ->required()
                             ->minValue(0)
@@ -133,7 +135,7 @@ class IntegrationSettings extends Page
                     ->columns(2),
 
                 Section::make('Notifikasi WhatsApp')
-                    ->description('Konfigurasi API gateway (contoh: Fonnte/Wablas) untuk pengiriman notifikasi otomatis ke WhatsApp peminjam.')
+                    ->description('Pengaturan gateway WhatsApp untuk pengiriman notifikasi otomatis kepada peminjam.')
                     ->schema([
                         TextInput::make('whatsapp_api_url')
                             ->label('URL Endpoint WhatsApp API')

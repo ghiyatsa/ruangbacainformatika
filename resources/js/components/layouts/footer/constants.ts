@@ -1,30 +1,23 @@
 import {
-    BookOpen,
-    BookText,
+    FileCheck,
     LogIn,
+    Mail,
     Search,
     Terminal,
     UserPlus,
     Wrench,
 } from 'lucide-react';
 import type { Variants } from 'motion/react';
-import { home, login, register, search } from '@/routes';
-import books from '@/routes/books';
+import {
+    contact,
+    home,
+    login,
+    privacyPolicy,
+    register,
+    search,
+    termsOfService,
+} from '@/routes';
 import similarity from '@/routes/similarity';
-
-export const CATALOG_LINKS = [
-    { label: 'Semua Buku', href: () => books.index.url(), icon: BookOpen },
-    {
-        label: 'Tersedia Dipinjam',
-        href: () => `${books.index.url()}?filter=available`,
-        icon: BookText,
-    },
-    {
-        label: 'Koleksi Unggulan',
-        href: () => `${books.index.url()}?filter=featured`,
-        icon: BookText,
-    },
-];
 
 export const INFO_LINKS = [
     {
@@ -41,6 +34,27 @@ export const INFO_LINKS = [
         label: 'Sistem Informasi Akademik',
         href: 'https://sia.unimal.ac.id',
         external: true,
+    },
+];
+
+export const LEGAL_LINKS = [
+    {
+        label: 'Kebijakan Privasi',
+        href: () => privacyPolicy.url(),
+        icon: FileCheck,
+        internal: true,
+    },
+    {
+        label: 'Syarat Layanan',
+        href: () => termsOfService.url(),
+        icon: FileCheck,
+        internal: true,
+    },
+    {
+        label: 'Kontak',
+        href: () => contact.url(),
+        icon: Mail,
+        internal: true,
     },
 ];
 

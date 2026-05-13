@@ -23,6 +23,8 @@ class AuthorResource extends Resource
 
     protected static ?string $navigationLabel = 'Penulis';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'Penulis';
 
     protected static ?string $pluralModelLabel = 'Penulis';
@@ -41,6 +43,11 @@ class AuthorResource extends Resource
     public static function getNavigationBadgeTooltip(): ?string
     {
         return 'Total penulis';
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'gray';
     }
 
     public static function form(Schema $schema): Schema

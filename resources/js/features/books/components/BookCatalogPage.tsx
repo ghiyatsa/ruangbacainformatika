@@ -45,6 +45,7 @@ export default function BookCatalogPage({
     return (
         <CatalogPage
             title="Katalog Buku"
+            metaDescription="Jelajahi katalog buku Ruang Baca Teknik Informatika Universitas Malikussaleh untuk referensi kuliah, riset, dan pembelajaran."
             resourceName="judul buku"
             breadcrumbLabel="Katalog Buku"
             totalCount={stats.booksCount ?? 0}

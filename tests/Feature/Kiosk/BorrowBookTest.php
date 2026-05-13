@@ -4,9 +4,14 @@ use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Publisher;
 use App\Models\User;
+use App\Notifications\LoanReceiptNotification;
 use App\Services\KioskLoanService;
+use App\Services\KioskPinManager;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
+
+use function Pest\Laravel\instance;
 
 it('members must fill whatsapp before borrowing books', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
@@ -74,4 +79,53 @@ it('books marked as not borrowable cannot be borrowed', function () {
 
     expect(fn () => $service->borrow($member->nim(), ['9786020000002']))
         ->toThrow(ValidationException::class, 'Buku dengan ISBN 9786020000002 ditandai tidak boleh dipinjam.');
+});
+
+it('normalizes isbn input from kiosk before validating and borrowing', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    Notification::fake();
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Test',
+        'slug' => 'penerbit-test',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Operasional',
+        'slug' => 'buku-operasional',
+        'isbn' => '978-602-000-0003',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $bookItem = BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-003',
+        'status' => 'available',
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $response = $this->post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $member->nim(),
+        'isbns' => ['978-602-000-0003'],
+    ]);
+
+    $response
+        ->assertRedirect(route('kiosk.index'))
+        ->assertSessionHas('success');
+
+    Notification::assertSentTo($member, LoanReceiptNotification::class);
+
+    expect($book->fresh()->isbn)->toBe('9786020000003')
+        ->and($bookItem->fresh()->status)->toBe('borrowed');
 });

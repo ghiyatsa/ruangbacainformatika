@@ -1,7 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, BookOpen, BookText, Search, Star } from 'lucide-react';
-import type { Variants } from 'motion/react';
-import { motion } from 'motion/react';
 import CountUp from '@/components/common/CountUp';
 import ShinyText from '@/components/common/ShinyText';
 import StarBorder from '@/components/common/StarBorder';
@@ -12,8 +10,6 @@ import books from '@/routes/books';
 interface HeroProps {
     stats: WelcomeProps['stats'];
 }
-
-// const Antigravity = lazy(() => import('@/components/common/Antigravity'));
 
 const STATS = [
     {
@@ -36,25 +32,6 @@ const STATS = [
     },
 ];
 
-const container: Variants = {
-    hidden: {},
-    show: {
-        transition: {
-            staggerChildren: 0.12,
-            delayChildren: 0.05,
-        },
-    },
-};
-
-const item: Variants = {
-    hidden: { opacity: 0, y: 22 },
-    show: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: 'easeOut' },
-    },
-};
-
 export default function Hero({ stats }: HeroProps) {
     const openSearch = () => {
         window.dispatchEvent(new CustomEvent('open-global-search'));
@@ -62,38 +39,28 @@ export default function Hero({ stats }: HeroProps) {
 
     return (
         <section className="relative top-0 flex min-h-svh flex-col justify-center overflow-hidden pt-32 pb-12 sm:h-svh sm:pt-24 sm:pb-0">
-            {/* Multi-layer radial glows */}
             <div
                 className="pointer-events-none absolute inset-0 -z-10"
                 aria-hidden="true"
             >
-                {/* Primary center glow */}
                 <div className="absolute top-[40%] left-1/2 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[100px] dark:bg-primary/15" />
-                {/* Secondary top-right accent */}
                 <div className="absolute -top-20 right-0 h-[400px] w-[400px] rounded-full bg-indigo-400/10 blur-[80px] dark:bg-indigo-500/15" />
-                {/* Tertiary bottom-left accent */}
                 <div className="absolute bottom-0 left-0 h-[300px] w-[500px] rounded-full bg-primary/5 blur-[80px] dark:bg-primary/10" />
             </div>
 
             <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-                <motion.div
-                    className="flex flex-col items-center gap-4 text-center sm:gap-6"
-                    variants={container}
-                    initial="hidden"
-                    animate="show"
-                >
-                    {/* Badge */}
-                    <motion.div variants={item}>
+                <div className="flex flex-col items-center gap-4 text-center sm:gap-6">
+                    <div>
                         <StarBorder
                             as="div"
                             className="rounded-full"
-                            contentClassName="rounded-full bg-muted/60 backdrop-blur-sm px-4 py-1.5"
+                            contentClassName="rounded-full bg-muted/60 px-4 py-1.5 backdrop-blur-sm"
                             color="var(--color-primary)"
                             speed="4s"
                         >
                             <div className="inline-flex items-center gap-2 text-sm font-medium">
                                 <ShinyText
-                                    text="✨ Pusat Literasi Digital Teknik Informatika"
+                                    text="Pusat Literasi Digital Teknik Informatika"
                                     speed={2}
                                     delay={0}
                                     color="var(--color-foreground)"
@@ -106,13 +73,9 @@ export default function Hero({ stats }: HeroProps) {
                                 />
                             </div>
                         </StarBorder>
-                    </motion.div>
+                    </div>
 
-                    {/* Heading */}
-                    <motion.h1
-                        variants={item}
-                        className="max-w-4xl font-heading text-4xl leading-[1.08] font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-                    >
+                    <h1 className="max-w-4xl font-heading text-4xl leading-[1.08] font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
                         Gerbang Pengetahuan{' '}
                         <span className="relative inline-block">
                             <span className="bg-linear-to-r from-primary via-indigo-500 to-violet-500 bg-clip-text text-transparent">
@@ -120,24 +83,15 @@ export default function Hero({ stats }: HeroProps) {
                             </span>
                         </span>{' '}
                         Masa Depan.
-                    </motion.h1>
+                    </h1>
 
-                    {/* Description */}
-                    <motion.p
-                        variants={item}
-                        className="max-w-lg text-base leading-relaxed text-muted-foreground sm:max-w-xl sm:text-lg"
-                    >
+                    <p className="max-w-lg text-base leading-relaxed text-muted-foreground sm:max-w-xl sm:text-lg">
                         Pusat riset, pembelajaran akademik, dan pengembangan
                         literasi teknologi mahasiswa Program Studi Teknik
                         Informatika Universitas Malikussaleh.
-                    </motion.p>
+                    </p>
 
-                    {/* CTAs */}
-                    <motion.div
-                        variants={item}
-                        className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center"
-                    >
-                        {/* Search CTA */}
+                    <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
                         <button
                             onClick={openSearch}
                             className="group relative w-full transition-all duration-200 hover:scale-[1.015] sm:max-w-sm"
@@ -146,7 +100,7 @@ export default function Hero({ stats }: HeroProps) {
                             <StarBorder
                                 as="div"
                                 color="var(--color-primary)"
-                                contentClassName="backdrop-blur-sm bg-background/60 px-4 py-3.5 rounded-2xl"
+                                contentClassName="rounded-2xl bg-background/60 px-4 py-3.5 backdrop-blur-sm"
                                 className="w-full rounded-2xl"
                             >
                                 <div className="flex items-center gap-3 text-muted-foreground">
@@ -155,14 +109,13 @@ export default function Hero({ stats }: HeroProps) {
                                         Cari buku, penulis, subjek...
                                     </span>
                                     <div className="flex items-center gap-1.5">
-                                        <Kbd>⌘ K</Kbd>
+                                        <Kbd>Ctrl K</Kbd>
                                         <ArrowRight className="size-3.5 shrink-0 opacity-40 transition-all group-hover:translate-x-0.5 group-hover:opacity-80" />
                                     </div>
                                 </div>
                             </StarBorder>
                         </button>
 
-                        {/* Primary CTA — Katalog */}
                         <Link
                             href={books.index.url()}
                             prefetch
@@ -172,10 +125,9 @@ export default function Hero({ stats }: HeroProps) {
                             Jelajahi Katalog
                             <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                         </Link>
-                    </motion.div>
+                    </div>
 
-                    {/* Stats */}
-                    <motion.div variants={item} className="w-full pt-2">
+                    <div className="w-full pt-2">
                         <div className="mx-auto grid max-w-2xl grid-cols-3 divide-x divide-border/50 overflow-hidden rounded-2xl border border-border/50 bg-background/60 backdrop-blur-sm">
                             {STATS.map(({ key, label, icon: Icon, suffix }) => (
                                 <div
@@ -203,8 +155,8 @@ export default function Hero({ stats }: HeroProps) {
                                 </div>
                             ))}
                         </div>
-                    </motion.div>
-                </motion.div>
+                    </div>
+                </div>
             </div>
         </section>
     );

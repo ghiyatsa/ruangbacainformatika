@@ -23,6 +23,8 @@ class CategoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Kategori';
 
+    protected static ?int $navigationSort = 4;
+
     protected static ?string $modelLabel = 'Kategori';
 
     protected static ?string $pluralModelLabel = 'Kategori';
@@ -41,6 +43,11 @@ class CategoryResource extends Resource
     public static function getNavigationBadgeTooltip(): ?string
     {
         return 'Total kategori';
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'gray';
     }
 
     public static function form(Schema $schema): Schema

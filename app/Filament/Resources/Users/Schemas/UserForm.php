@@ -14,19 +14,35 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nama Lengkap')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->placeholder('Masukkan nama lengkap pengguna'),
                 TextInput::make('email')
+                    ->label('Email')
                     ->email()
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->disabled(fn ($record) => $record !== null),
+                    ->disabled(fn ($record) => $record !== null)
+                    ->helperText(fn ($record): ?string => $record !== null ? 'Email tidak dapat diubah.' : null),
+                TextInput::make('password')
+                    ->label('Kata Sandi')
+                    ->password()
+                    ->revealable()
+                    ->required(fn ($record): bool => $record === null)
+                    ->minLength(8)
+                    ->maxLength(255)
+                    ->hidden(fn ($record): bool => $record !== null)
+                    ->helperText('Minimal 8 karakter.'),
                 Select::make('roles')
+                    ->label('Peran')
                     ->multiple()
                     ->relationship('roles', 'name')
-                    ->preload(),
+                    ->preload()
+                    ->helperText('Pilih sesuai hak akses.'),
                 Toggle::make('is_approved')
-                    ->label('Status Persetujuan')
+                    ->label('Akun Disetujui')
+                    ->helperText('Aktifkan jika akun siap dipakai.')
                     ->onIcon('heroicon-m-check')
                     ->offIcon('heroicon-m-x-mark')
                     ->onColor('success')
@@ -35,7 +51,8 @@ class UserForm
                     ->label('WhatsApp')
                     ->tel()
                     ->nullable()
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->placeholder('0812xxxxxx'),
             ]);
     }
 }

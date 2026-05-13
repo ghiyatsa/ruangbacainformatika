@@ -27,9 +27,13 @@ class ThesisResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Manajemen Tugas Akhir';
 
-    protected static ?string $navigationLabel = 'Data Tesis';
+    protected static ?string $navigationLabel = 'Tesis';
+
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $modelLabel = 'Tesis';
+
+    protected static ?string $pluralModelLabel = 'Tesis';
 
     protected static ?string $recordTitleAttribute = 'student_id';
 
@@ -40,7 +44,12 @@ class ThesisResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Total data tesis';
+        return 'Total tesis';
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'gray';
     }
 
     public static function form(Schema $schema): Schema

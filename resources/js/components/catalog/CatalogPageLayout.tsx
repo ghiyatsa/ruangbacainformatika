@@ -10,6 +10,7 @@ import type { PaginationData } from '@/types/pagination';
 
 interface CatalogPageLayoutProps<T> {
     title: string;
+    metaDescription?: string;
     resourceName: string;
     breadcrumbLabel: string;
     totalCount: number;
@@ -27,6 +28,7 @@ interface CatalogPageLayoutProps<T> {
  */
 export function CatalogPageLayout<T>({
     title,
+    metaDescription,
     resourceName,
     breadcrumbLabel,
     totalCount,
@@ -56,6 +58,7 @@ export function CatalogPageLayout<T>({
     return (
         <PageLayout
             title={title}
+            metaDescription={metaDescription}
             header={header ?? defaultHeader}
             maxWidth="7xl"
             className="pb-16 pt-0"

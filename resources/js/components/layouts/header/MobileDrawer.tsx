@@ -23,12 +23,14 @@ export function MobileDrawer({
     return (
         <div
             className={[
-                'mx-auto mt-2 max-w-7xl overflow-hidden rounded-2xl border border-border/50 bg-background/80 shadow-xl backdrop-blur-xl transition-all duration-300 ease-in-out dark:bg-background/40 dark:border-white/10',
-                mobileOpen ? 'max-h-128 opacity-100' : 'max-h-0 opacity-0',
+                'mx-auto mt-2 max-w-7xl overflow-hidden rounded-2xl border border-border/50 bg-background/80 shadow-xl backdrop-blur-xl transition-all duration-300 ease-in-out md:hidden dark:border-white/10 dark:bg-background/40',
+                mobileOpen
+                    ? 'max-h-[calc(100vh-6rem)] opacity-100'
+                    : 'max-h-0 opacity-0',
             ].join(' ')}
             aria-hidden={!mobileOpen}
         >
-            <div className="space-y-1 p-3">
+            <div className="max-h-[calc(100vh-6rem)] space-y-1 overflow-y-auto overscroll-contain p-3">
                 {/* Nav links */}
                 {NAV_LINKS.map((item) => (
                     <div key={item.label} className="space-y-0.5">
@@ -90,24 +92,24 @@ export function MobileDrawer({
                             asChild
                             className="w-full justify-start rounded-xl text-sm font-medium"
                         >
-                            <a
+                            <Link
                                 href={login.url()}
                                 onClick={() => setMobileOpen(false)}
                             >
                                 Masuk
-                            </a>
+                            </Link>
                         </Button>
                         {canRegister && (
                             <Button
                                 asChild
                                 className="w-full rounded-xl text-sm"
                             >
-                                <a
+                                <Link
                                     href={register.url()}
                                     onClick={() => setMobileOpen(false)}
                                 >
                                     Bergabung Sekarang
-                                </a>
+                                </Link>
                             </Button>
                         )}
                     </div>

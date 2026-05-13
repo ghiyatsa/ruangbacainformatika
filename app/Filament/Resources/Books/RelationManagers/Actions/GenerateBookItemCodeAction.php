@@ -13,7 +13,7 @@ class GenerateBookItemCodeAction
     {
         return Action::make('generateBarcode')
             ->icon(Heroicon::Sparkles)
-            ->tooltip('Buat kode')
+            ->tooltip('Buat kode otomatis')
             ->action(function (Set $set, $livewire): void {
                 $book = $livewire->getOwnerRecord();
                 $nextNumber = $book->items()->count() + 1;

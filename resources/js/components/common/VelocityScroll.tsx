@@ -60,6 +60,10 @@ const useResizeObserver = (
     elements: Array<React.RefObject<Element | null>>,
 ) => {
     useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         if (!window.ResizeObserver) {
             const handleResize = () => callback();
             window.addEventListener('resize', handleResize);
@@ -92,6 +96,10 @@ const useImageLoader = (
     onLoad: () => void,
 ) => {
     useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         const images = seqRef.current?.querySelectorAll('img') ?? [];
 
         if (images.length === 0) {
@@ -265,6 +273,7 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
         const trackRef = useRef<HTMLDivElement>(null);
         const seqRef = useRef<HTMLUListElement>(null);
 
+        const [hasMounted, setHasMounted] = useState(false);
         const [seqWidth, setSeqWidth] = useState<number>(0);
         const [seqHeight, setSeqHeight] = useState<number>(0);
         const [copyCount, setCopyCount] = useState<number>(
@@ -281,6 +290,10 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
         const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
             clamp: false,
         });
+
+        useEffect(() => {
+            setHasMounted(true);
+        }, []);
 
         const effectiveHoverSpeed = useMemo(() => {
             if (hoverSpeed !== undefined) {
@@ -539,6 +552,14 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
             [copyCount, items, renderScrollItem, isVertical],
         );
 
+        const staticItems = useMemo(
+            () =>
+                items.map((item, itemIndex) =>
+                    renderScrollItem(item, `static-${itemIndex}`),
+                ),
+            [items, renderScrollItem],
+        );
+
         const containerStyle = useMemo(
             (): React.CSSProperties => ({
                 width: isVertical
@@ -560,6 +581,26 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                 role="region"
                 aria-label={ariaLabel}
             >
+                {!hasMounted ? (
+                    <div
+                        className={cx(
+                            'relative z-0 select-none',
+                            isVertical ? 'w-full' : 'overflow-hidden',
+                        )}
+                    >
+                        <ul
+                            className={cx(
+                                'flex items-center',
+                                isVertical ? 'flex-col' : 'w-max',
+                            )}
+                            ref={seqRef}
+                            role="list"
+                        >
+                            {staticItems}
+                        </ul>
+                    </div>
+                ) : (
+                    <>
                 {fadeOut && (
                     <>
                         {isVertical ? (
@@ -616,6 +657,8 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                 >
                     {itemLists}
                 </div>
+                    </>
+                )}
             </div>
         );
     },

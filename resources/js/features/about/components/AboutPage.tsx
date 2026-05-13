@@ -13,6 +13,7 @@ export function AboutPage() {
     return (
         <PageLayout
             title="Tentang Kami"
+            metaDescription="Kenali Ruang Baca Teknik Informatika Universitas Malikussaleh sebagai layanan perpustakaan digital untuk pembelajaran dan riset akademik."
             maxWidth="5xl"
             header={
                 <LibraryPageHero
@@ -39,7 +40,7 @@ export function AboutPage() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <BookOpen className="size-5 text-primary" />
-                            Misi Kami
+                            Profil Layanan
                         </CardTitle>
                         <CardDescription>
                             Membuka akses referensi akademik yang rapi, cepat,
@@ -47,6 +48,9 @@ export function AboutPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="prose prose-slate dark:prose-invert max-w-none">
+                        <h3 className="mt-0 mb-3 text-xl font-semibold text-foreground">
+                            Misi Kami
+                        </h3>
                         <p className="mb-4 text-base leading-relaxed">
                             Ruang Baca adalah perpustakaan digital dan pusat
                             sumber belajar untuk Program Studi Teknik
@@ -105,12 +109,28 @@ export function AboutPage() {
                                 </p>
                             </div>
                             <div className="rounded-2xl border bg-muted/30 p-4">
-                                <p className="font-semibold">Jurnal & Artikel</p>
+                                <p className="font-semibold">Laporan KP</p>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                    Publikasi akademik pilihan yang relevan
-                                    dengan bidang informatika.
+                                    Dokumentasi kerja praktik sebagai referensi
+                                    pengalaman lapangan dan topik terapan.
                                 </p>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-border/60 bg-card/90 shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-base">
+                                Pengguna Utama
+                            </CardTitle>
+                            <CardDescription>
+                                Dirancang untuk kebutuhan akademik sehari-hari.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3 text-sm text-muted-foreground">
+                            <p>Mahasiswa untuk mencari referensi dan karya terdahulu.</p>
+                            <p>Dosen untuk mendukung pembelajaran dan pengayaan materi.</p>
+                            <p>Peneliti untuk menjelajahi topik dan arah riset terkait.</p>
                         </CardContent>
                     </Card>
                 </div>

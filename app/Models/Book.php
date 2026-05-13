@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -60,6 +61,15 @@ class Book extends Model
         'pages' => 'integer',
         'view_count' => 'integer',
     ];
+
+    protected function isbn(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value): ?string => filled($value)
+                ? preg_replace('/\D+/', '', $value)
+                : null,
+        );
+    }
 
     public function publisher(): BelongsTo
     {

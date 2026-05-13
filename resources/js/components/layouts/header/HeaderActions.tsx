@@ -1,4 +1,5 @@
-import { MoonIcon, Search, SunIcon } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { MoonIcon, Search } from 'lucide-react';
 import { GlobalSearch } from '@/components/layouts/GlobalSearch';
 import { UserMenuContent } from '@/components/layouts/UserMenuContent';
 import { Button } from '@/components/ui/button';
@@ -61,14 +62,10 @@ export function HeaderActions({
                         resolvedAppearance === 'dark' ? 'light' : 'dark',
                     )
                 }
-                aria-label="Toggle theme"
+                aria-label="Ubah tema"
             >
-                {resolvedAppearance === 'dark' ? (
-                    <SunIcon className="h-[18px] w-[18px] text-primary" />
-                ) : (
-                    <MoonIcon className="h-[18px] w-[18px] text-primary" />
-                )}
-                <span className="sr-only">Toggle theme</span>
+                <MoonIcon className="h-[18px] w-[18px] text-primary" />
+                <span className="sr-only">Ubah tema</span>
             </Button>
 
             {/* Auth: logged in */}
@@ -99,7 +96,7 @@ export function HeaderActions({
                         asChild
                         className="rounded-xl text-sm"
                     >
-                        <a href={login.url()}>Masuk</a>
+                        <Link href={login.url()}>Masuk</Link>
                     </Button>
                     {canRegister && (
                         <Button
@@ -107,7 +104,7 @@ export function HeaderActions({
                             size="sm"
                             className="rounded-xl text-sm shadow-md shadow-primary/15"
                         >
-                            <a href={register.url()}>Bergabung</a>
+                            <Link href={register.url()}>Bergabung</Link>
                         </Button>
                     )}
                 </div>

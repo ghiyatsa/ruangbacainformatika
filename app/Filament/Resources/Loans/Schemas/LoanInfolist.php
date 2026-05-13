@@ -12,12 +12,12 @@ class LoanInfolist
     {
         return $schema
             ->components([
-                Section::make('Informasi Member')
+                Section::make('Informasi Anggota')
                     ->schema([
                         TextEntry::make('name')
-                            ->label('Nama Member'),
+                            ->label('Nama Anggota'),
                         TextEntry::make('email')
-                            ->label('Email Member')
+                            ->label('Email Anggota')
                             ->copyable(),
                         TextEntry::make('whatsapp')
                             ->label('WhatsApp')

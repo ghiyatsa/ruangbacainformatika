@@ -25,6 +25,8 @@ class BookResource extends Resource
 
     protected static ?string $navigationLabel = 'Buku';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'Buku';
 
     protected static ?string $pluralModelLabel = 'Buku';
@@ -43,6 +45,11 @@ class BookResource extends Resource
     public static function getNavigationBadgeTooltip(): ?string
     {
         return 'Total buku';
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'gray';
     }
 
     public static function form(Schema $schema): Schema

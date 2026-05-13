@@ -1,7 +1,6 @@
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Clock3, Mail, MapPin } from 'lucide-react';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
-import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -9,14 +8,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 export function ContactPage() {
     return (
         <PageLayout
             title="Hubungi Kami"
+            metaDescription="Hubungi Ruang Baca Teknik Informatika Universitas Malikussaleh untuk pertanyaan layanan, koleksi, dan akses akun."
             maxWidth="5xl"
             header={
                 <LibraryPageHero
@@ -34,58 +31,35 @@ export function ContactPage() {
                             </span>
                         </>
                     }
-                    description="Punya pertanyaan tentang koleksi, akses akun, atau layanan perpustakaan? Kirim pesan atau hubungi kami melalui kanal yang tersedia."
+                    description="Hubungi kami untuk pertanyaan seputar koleksi, akses akun, dan layanan perpustakaan."
                 />
             }
         >
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <Card className="h-full border-border/60 bg-card/90 shadow-sm">
                     <CardHeader>
-                        <CardTitle>Kirim Pesan</CardTitle>
+                        <CardTitle>Informasi Kontak</CardTitle>
                         <CardDescription>
-                            Isi formulir berikut dan kami akan merespons
-                            sesegera mungkin.
+                            Gunakan kanal resmi berikut untuk kebutuhan
+                            informasi dan koordinasi layanan.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <form
-                            className="space-y-4"
-                            onSubmit={(event) => event.preventDefault()}
-                        >
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Nama Lengkap</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="Masukkan nama lengkap Anda"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Alamat Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="Masukkan alamat email Anda"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="subject">Subjek</Label>
-                                <Input
-                                    id="subject"
-                                    placeholder="Pesan ini tentang apa?"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="message">Pesan</Label>
-                                <Textarea
-                                    id="message"
-                                    placeholder="Tulis pesan Anda di sini..."
-                                    className="min-h-[120px]"
-                                />
-                            </div>
-                            <Button type="submit" className="w-full">
-                                Kirim Pesan
-                            </Button>
-                        </form>
+                    <CardContent className="space-y-4 text-sm leading-7 text-muted-foreground">
+                        <p>
+                            Untuk pertanyaan umum, silakan kirim email ke
+                            alamat resmi program studi atau pengelola ruang
+                            baca.
+                        </p>
+                        <p>
+                            Jika permintaan berkaitan dengan akun, peminjaman,
+                            atau pembaruan data, sertakan nama dan identitas
+                            akademik Anda agar proses tindak lanjut lebih cepat.
+                        </p>
+                        <p>
+                            Untuk kebutuhan yang bersifat administratif,
+                            gunakan bahasa yang singkat dan jelas agar proses
+                            verifikasi dapat dilakukan lebih cepat.
+                        </p>
                     </CardContent>
                 </Card>
 
@@ -133,14 +107,15 @@ export function ContactPage() {
                     <Card className="border-border/60 bg-card/90 shadow-sm">
                         <CardContent className="flex items-start gap-4 p-6">
                             <div className="shrink-0 rounded-full bg-primary/10 p-3 text-primary">
-                                <Phone className="h-6 w-6" />
+                                <Clock3 className="h-6 w-6" />
                             </div>
                             <div>
                                 <h3 className="mb-1 text-lg font-semibold text-foreground">
-                                    Telepon Kami
+                                    Waktu Layanan
                                 </h3>
                                 <p className="text-muted-foreground">
-                                    +62 123 4567 8900
+                                    Hari kerja sesuai jam operasional program
+                                    studi dan perpustakaan.
                                 </p>
                             </div>
                         </CardContent>

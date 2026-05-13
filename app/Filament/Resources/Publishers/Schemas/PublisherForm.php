@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Publishers\Schemas;
 
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -11,6 +12,18 @@ use Illuminate\Support\Str;
 
 class PublisherForm
 {
+    /**
+     * @return array<int, Field>
+     */
+    public static function optionFormSchema(): array
+    {
+        return [
+            static::nameField(),
+            static::cityField(),
+            static::descriptionField(),
+        ];
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -18,13 +31,9 @@ class PublisherForm
                 Section::make('Informasi Dasar')
                     ->description('Data penerbit')
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Nama Penerbit')
-                            ->required()
-                            ->maxLength(255)
+                        static::nameField()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
-                            ->placeholder('Nama lengkap penerbit'),
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
                         TextInput::make('slug')
                             ->label('Slug')
@@ -34,23 +43,42 @@ class PublisherForm
                             ->unique('publishers', 'slug', ignoreRecord: true)
                             ->maxLength(255),
 
-                        TextInput::make('city')
-                            ->label('Kota')
-                            ->maxLength(255)
-                            ->placeholder('Jakarta, Surabaya, Bandung, dll'),
+                        static::cityField(),
                     ])
                     ->columns(2),
 
                 Section::make('Deskripsi')
                     ->description('Informasi tentang penerbit')
                     ->schema([
-                        Textarea::make('description')
-                            ->label('Deskripsi')
-                            ->rows(8)
-                            ->maxLength(65535)
-                            ->placeholder('Ceritakan tentang sejarah, visi, dan misi penerbit...')
-                            ->columnSpanFull(),
+                        static::descriptionField(),
                     ]),
             ]);
+    }
+
+    protected static function nameField(): TextInput
+    {
+        return TextInput::make('name')
+            ->label('Nama Penerbit')
+            ->required()
+            ->maxLength(255)
+            ->placeholder('Nama lengkap penerbit');
+    }
+
+    protected static function cityField(): TextInput
+    {
+        return TextInput::make('city')
+            ->label('Kota')
+            ->maxLength(255)
+            ->placeholder('Jakarta, Surabaya, Bandung');
+    }
+
+    protected static function descriptionField(): Textarea
+    {
+        return Textarea::make('description')
+            ->label('Deskripsi')
+            ->rows(8)
+            ->maxLength(65535)
+            ->placeholder('Tuliskan profil singkat penerbit...')
+            ->columnSpanFull();
     }
 }

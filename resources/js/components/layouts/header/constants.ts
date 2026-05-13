@@ -8,6 +8,12 @@ import {
     Mail,
     ScanSearch,
 } from 'lucide-react';
+import { about, contact, home } from '@/routes';
+import books from '@/routes/books';
+import internshipReports from '@/routes/internship-reports';
+import similarity from '@/routes/similarity';
+import skripsi from '@/routes/skripsi';
+import thesis from '@/routes/thesis';
 
 export interface NavLink {
     label: string;
@@ -24,39 +30,39 @@ export interface NavItem {
 }
 
 export const NAV_LINKS: NavItem[] = [
-    { label: 'Beranda', href: '/', icon: Home },
+    { label: 'Beranda', href: home.url(), icon: Home },
     {
         label: 'Katalog',
         icon: BookOpen,
         children: [
             {
                 label: 'Buku',
-                href: '/books',
+                href: books.index.url(),
                 description: 'Koleksi buku teks dan referensi umum.',
                 icon: BookOpen,
             },
             {
                 label: 'Skripsi',
-                href: '/skripsi',
+                href: skripsi.index.url(),
                 description: 'Koleksi tugas akhir mahasiswa Informatika.',
                 icon: GraduationCap,
             },
             {
                 label: 'Tesis',
-                href: '/thesis',
+                href: thesis.index.url(),
                 description: 'Koleksi tesis mahasiswa magister Informatika.',
                 icon: GraduationCap,
             },
             {
                 label: 'Laporan KP',
-                href: '/internship-reports',
+                href: internshipReports.index.url(),
                 description:
                     'Koleksi laporan kerja praktik mahasiswa Informatika.',
                 icon: ClipboardCheck,
             },
         ],
     },
-    { label: 'Similarity', href: '/similarity', icon: ScanSearch },
-    { label: 'Tentang', href: '/about', icon: Info },
-    { label: 'Kontak', href: '/contact', icon: Mail },
+    { label: 'Cek Kemiripan', href: similarity.index.url(), icon: ScanSearch },
+    { label: 'Tentang', href: about.url(), icon: Info },
+    { label: 'Kontak', href: contact.url(), icon: Mail },
 ];

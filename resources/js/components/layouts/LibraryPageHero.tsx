@@ -22,13 +22,13 @@ export function LibraryPageHero({
             )}
         >
             <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
+                <div className="mb-6 inline-flex max-w-full items-center justify-center gap-2 rounded-full border bg-card px-4 py-1.5 text-center text-xs font-medium text-muted-foreground shadow-sm sm:text-sm">
                     {badge}
                 </div>
-                <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
+                <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
                     {title}
                 </h1>
-                <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+                <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
                     {description}
                 </p>
             </div>

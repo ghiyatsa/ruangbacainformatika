@@ -19,6 +19,8 @@ class LibrarySettings extends Page
 {
     protected static ?string $navigationLabel = 'Aturan Sirkulasi';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $title = 'Pengaturan Operasional Perpustakaan';
 
     protected static ?string $slug = 'library';
@@ -48,7 +50,7 @@ class LibrarySettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Aturan Peminjaman')
-                    ->description('Batas operasional peminjaman yang dipakai kiosk dan validasi layanan.')
+                    ->description('Aturan dasar peminjaman yang dipakai pada layanan mandiri dan proses administrasi.')
                     ->schema([
                         TextInput::make('loan_max_books')
                             ->label('Maksimal Buku Dipinjam')
@@ -56,14 +58,14 @@ class LibrarySettings extends Page
                             ->required()
                             ->minValue(1)
                             ->maxValue(10)
-                            ->helperText('Jumlah maksimal buku aktif yang boleh dipinjam satu member dalam waktu bersamaan.'),
+                            ->helperText('Batas pinjaman aktif per anggota.'),
                         TextInput::make('loan_duration_days')
                             ->label('Durasi Peminjaman (Hari Kerja)')
                             ->numeric()
                             ->required()
                             ->minValue(1)
                             ->maxValue(30)
-                            ->helperText('Default operasional pinjam adalah 5 hari kerja. Tempo otomatis melewati Sabtu dan Minggu.'),
+                            ->helperText('Dihitung dalam hari kerja.'),
                     ])
                     ->columns(2),
             ])
