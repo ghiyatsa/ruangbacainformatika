@@ -151,7 +151,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->canAccessAdminPanel();
     }
 
-    public function sendEmailVerificationNotification()
+    public function sendEmailVerificationNotification(): void
     {
         $this->notify(new VerifyEmailOtpNotification);
     }

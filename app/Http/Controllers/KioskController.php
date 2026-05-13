@@ -9,6 +9,7 @@ use App\Http\Requests\Kiosk\SubmitVisitRequest;
 use App\Http\Requests\Kiosk\VerifyPinRequest;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
+use App\Models\Loan;
 use App\Models\VisitLog;
 use App\Repositories\SettingRepository;
 use App\Services\KioskLoanService;
@@ -122,6 +123,8 @@ class KioskController extends Controller
     public function searchBooks(SearchBooksRequest $request): JsonResponse
     {
         $search = $request->validatedQuery();
+        $mode = $request->validatedMode();
+        $memberIdentifier = $request->validatedMemberIdentifier();
 
         if ($search === '') {
             return response()->json([
@@ -129,18 +132,9 @@ class KioskController extends Controller
             ]);
         }
 
-        $books = Book::query()
-            ->search($search)
-            ->where('is_borrowable', true)
-            ->whereHas('items', fn ($query) => $query->available())
-            ->with(['authors:id,name'])
-            ->withCount('items')
-            ->withCount([
-                'items as available_items_count' => fn ($query) => $query->available(),
-            ])
-            ->orderBy('title')
-            ->limit(8)
-            ->get();
+        $books = $mode === 'return'
+            ? $this->searchReturnableBooks($search, $memberIdentifier)
+            : $this->searchBorrowableBooks($search);
 
         return response()->json([
             'books' => BookResource::collection($books)->resolve(),
@@ -156,18 +150,60 @@ class KioskController extends Controller
 
         return redirect()
             ->route('kiosk.index')
-            ->with('success', "Peminjaman untuk {$loan->user->name} berhasil disimpan.");
+            ->with('success', "Peminjaman untuk {$loan->user->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.");
     }
 
     public function storeReturn(ReturnBookRequest $request): RedirectResponse
     {
-        $returnedCount = $this->kioskLoanService->returnBooks(
+        $returnedCount = $this->kioskLoanService->returnBooksByBookIds(
             (string) $request->validated('member_identifier'),
-            $request->validatedIsbns(),
+            $request->validatedBookIds(),
         );
 
         return redirect()
             ->route('kiosk.index')
             ->with('success', "{$returnedCount} buku berhasil dikembalikan.");
+    }
+
+    protected function searchBorrowableBooks(string $search)
+    {
+        return Book::query()
+            ->search($search)
+            ->where('is_borrowable', true)
+            ->whereHas('items', fn ($query) => $query->available())
+            ->with(['authors:id,name'])
+            ->withCount('items')
+            ->withCount([
+                'items as available_items_count' => fn ($query) => $query->available(),
+            ])
+            ->orderBy('title')
+            ->limit(8)
+            ->get();
+    }
+
+    protected function searchReturnableBooks(string $search, string $memberIdentifier)
+    {
+        $member = filled($memberIdentifier)
+            ? $this->kioskLoanService->findMemberByIdentifier($memberIdentifier)
+            : null;
+
+        if (! $member || ! $member->hasRole('member')) {
+            return collect();
+        }
+
+        return Book::query()
+            ->search($search)
+            ->whereHas('items.loanItems', function ($query) use ($member) {
+                $query
+                    ->whereNull('returned_at', 'and', false)
+                    ->whereHas('loan', fn ($loanQuery) => $loanQuery
+                        ->whereBelongsTo($member)
+                        ->where('status', Loan::STATUS_BORROWED));
+            })
+            ->with(['authors:id,name'])
+            ->withCount('items')
+            ->orderBy('title')
+            ->limit(8)
+            ->get();
     }
 }

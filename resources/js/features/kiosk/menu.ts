@@ -25,13 +25,13 @@ export const kioskMenuItems: KioskMenuItem[] = [
     {
         key: 'borrow',
         label: 'Peminjaman Buku',
-        description: 'Masukkan identitas anggota dan ISBN buku.',
+        description: 'Cari buku yang tersedia lalu proses pinjaman anggota.',
         icon: BookMarked,
     },
     {
         key: 'return',
         label: 'Pengembalian Buku',
-        description: 'Proses buku kembali dengan identitas anggota.',
+        description: 'Cari buku pinjaman aktif milik anggota untuk dikembalikan.',
         icon: BookUp,
     },
 ];

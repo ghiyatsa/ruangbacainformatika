@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\Auth\RegisterResponse;
 use App\Services\Auth\AuthenticationRedirector;
+use App\Support\MailDeliveryIssue;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class EmailVerificationController extends Controller
 {
@@ -49,7 +51,16 @@ class EmailVerificationController extends Controller
             ]);
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        try {
+            $request->user()->sendEmailVerificationNotification();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors([
+                'resend' => MailDeliveryIssue::verificationMessage($exception),
+            ]);
+        }
+
         $request->session()->put(
             'verification_resend_available_at',
             now()->addSeconds(self::RESEND_COOLDOWN_SECONDS)->timestamp,
@@ -57,7 +68,7 @@ class EmailVerificationController extends Controller
 
         return redirect()
             ->route('verification.notice')
-            ->with('status', 'Link verifikasi telah dikirim ulang ke email Anda.');
+            ->with('status', 'OTP verifikasi sedang dikirim ke email Anda. '.MailDeliveryIssue::queuedNotice());
     }
 
     public function verify(Request $request): RedirectResponse

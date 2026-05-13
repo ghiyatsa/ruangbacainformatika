@@ -60,13 +60,13 @@ export function KioskMenuModal({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="max-h-[92dvh] w-full max-w-2xl gap-0 overflow-hidden p-0"
+                className="max-h-[94dvh] w-[min(94vw,1440px)] max-w-none gap-0 overflow-hidden rounded-[2rem] p-0 sm:!max-w-none"
                 showCloseButton={false}
             >
                 {/* Gradient header */}
                 <div
                     className={cn(
-                        'relative overflow-hidden border-b bg-linear-to-br px-6 pt-6 pb-5',
+                        'relative overflow-hidden border-b bg-linear-to-br px-8 pt-7 pb-6',
                         theme.header,
                     )}
                 >
@@ -121,8 +121,8 @@ export function KioskMenuModal({
                 </div>
 
                 {/* Scrollable form body */}
-                <ScrollArea className="max-h-[calc(92dvh-5rem)]">
-                    <div className="px-6 py-6">{children}</div>
+                <ScrollArea className="max-h-[calc(94dvh-6rem)]">
+                    <div className="px-8 py-7">{children}</div>
                 </ScrollArea>
             </DialogContent>
         </Dialog>

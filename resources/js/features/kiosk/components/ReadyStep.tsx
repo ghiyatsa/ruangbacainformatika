@@ -31,6 +31,7 @@ export function ReadyStep(props: KioskProps) {
 
         if (flashSuccess) {
             setFlashVisible(true);
+            setActiveMenu(null);
         }
     }
 
@@ -50,18 +51,17 @@ export function ReadyStep(props: KioskProps) {
     const closeModal = () => setActiveMenu(null);
 
     return (
-        <div className="flex w-full max-w-5xl flex-col gap-6">
+        <div className="flex w-full max-w-[1500px] flex-col justify-center gap-8">
             {flashVisible ? <FlashMessage message={flashSuccess} /> : null}
 
-            {/* Hero header */}
-            <div className="relative overflow-hidden rounded-2xl border bg-linear-to-br from-background via-muted/30 to-background shadow-sm">
+            <div className="relative overflow-hidden rounded-[2rem] border bg-linear-to-br from-background via-muted/30 to-background shadow-sm">
                 <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-primary/5" />
 
-                <div className="relative px-8 pt-8 pb-7">
-                    <h1 className="mb-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                <div className="relative px-10 pt-10 pb-9 xl:px-12 xl:pt-12 xl:pb-10">
+                    <h1 className="mb-3 text-4xl font-bold tracking-tight xl:text-5xl">
                         {props.pageTitle}
                     </h1>
-                    <p className="max-w-lg text-muted-foreground">
+                    <p className="max-w-4xl text-base leading-7 text-muted-foreground xl:text-lg">
                         {props.pageSubtitle}
                     </p>
                 </div>
@@ -69,7 +69,6 @@ export function ReadyStep(props: KioskProps) {
 
             <MenuGrid onSelect={setActiveMenu} />
 
-            {/* Modal — renders outside landing grid flow */}
             <KioskMenuModal
                 open={activeMenu !== null}
                 onOpenChange={(open) => {

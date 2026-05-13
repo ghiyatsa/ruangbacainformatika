@@ -7,7 +7,7 @@ export function FlashMessage({ message }: { message?: string }) {
     }
 
     return (
-        <Alert className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+        <Alert className="relative z-[70] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 shadow-sm dark:text-emerald-400">
             <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
             <AlertTitle className="font-semibold">Berhasil</AlertTitle>
             <AlertDescription className="text-emerald-700/80 dark:text-emerald-400/80">

@@ -3,20 +3,25 @@
 namespace App\Notifications\Auth;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
+use Throwable;
 
-class VerifyEmailOtpNotification extends Notification
+class VerifyEmailOtpNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    public int $tries = 12;
 
     /**
      * Create a new notification instance.
      */
     public function __construct()
     {
-        //
+        $this->afterCommit();
+        $this->onQueue('mail');
     }
 
     /**
@@ -56,5 +61,25 @@ class VerifyEmailOtpNotification extends Notification
         return [
             //
         ];
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function backoff(): array
+    {
+        return [300, 900, 1800, 3600];
+    }
+
+    public function retryUntil(): \DateTimeInterface
+    {
+        return now()->addHours(12);
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        if ($exception) {
+            report($exception);
+        }
     }
 }

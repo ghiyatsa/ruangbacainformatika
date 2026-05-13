@@ -28,7 +28,7 @@ export function MenuGrid({
     onSelect: (menu: KioskMenu) => void;
 }) {
     return (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5 xl:grid-cols-2">
             {kioskMenuItems.map((item, i) => {
                 const Icon = item.icon;
                 const gradient = MENU_GRADIENTS[i % MENU_GRADIENTS.length];
@@ -39,8 +39,8 @@ export function MenuGrid({
                         type="button"
                         onClick={() => onSelect(item.key)}
                         className={cn(
-                            'group flex cursor-pointer flex-col items-start gap-4 rounded-xl border bg-linear-to-br p-5 text-left',
-                            'transition-all duration-200 hover:scale-[1.02] hover:shadow-md',
+                            'group flex min-h-56 cursor-pointer flex-col items-start gap-5 rounded-[1.75rem] border bg-linear-to-br p-6 text-left',
+                            'transition-all duration-200 hover:scale-[1.015] hover:shadow-md',
                             gradient.card,
                         )}
                     >
@@ -55,10 +55,10 @@ export function MenuGrid({
 
                         <div className="flex w-full items-end justify-between gap-2">
                             <div className="flex flex-col gap-1">
-                                <span className="leading-tight font-semibold text-foreground">
+                                <span className="text-lg leading-tight font-semibold text-foreground">
                                     {item.label}
                                 </span>
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm leading-6 text-muted-foreground">
                                     {item.description}
                                 </span>
                             </div>

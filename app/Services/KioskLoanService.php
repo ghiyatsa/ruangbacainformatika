@@ -13,6 +13,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class KioskLoanService
 {
@@ -94,8 +95,12 @@ class KioskLoanService
             return $loan->load('items.bookItem.book', 'user');
         });
 
-        // Kirim email notifikasi bukti peminjaman
-        $member->notify(new LoanReceiptNotification($loan));
+        // Jadwalkan pengiriman email tanpa mengganggu transaksi peminjaman.
+        try {
+            $member->notify(new LoanReceiptNotification($loan));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
 
         return $loan;
     }
@@ -105,7 +110,7 @@ class KioskLoanService
      */
     public function returnBooks(string $memberIdentifier, array $isbns): int
     {
-        $member = $this->resolveMember($memberIdentifier);
+        $member = $this->findMemberByIdentifier($memberIdentifier);
 
         if (! $member || ! $member->hasRole('member')) {
             throw ValidationException::withMessages([
@@ -179,6 +184,11 @@ class KioskLoanService
 
     protected function resolveMember(string $memberIdentifier): ?User
     {
+        return $this->findMemberByIdentifier($memberIdentifier);
+    }
+
+    public function findMemberByIdentifier(string $memberIdentifier): ?User
+    {
         if (str($memberIdentifier)->contains('@')) {
             return User::query()
                 ->where('email', $memberIdentifier)
@@ -188,6 +198,65 @@ class KioskLoanService
         return User::query()
             ->where('email', 'like', '%'.$memberIdentifier.'@mhs.unimal.ac.id')
             ->first();
+    }
+
+    /**
+     * @param  array<int, int>  $bookIds
+     */
+    public function returnBooksByBookIds(string $memberIdentifier, array $bookIds): int
+    {
+        $member = $this->findMemberByIdentifier($memberIdentifier);
+
+        if (! $member || ! $member->hasRole('member')) {
+            throw ValidationException::withMessages([
+                'member_identifier' => 'Member tidak ditemukan atau belum terdaftar sebagai member.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($member, $bookIds): int {
+            $returnedCount = 0;
+
+            foreach ($bookIds as $index => $bookId) {
+                $loanItem = LoanItem::query()
+                    ->whereNull('returned_at', 'and', false)
+                    ->whereHas('bookItem.book', fn ($query) => $query->whereKey($bookId))
+                    ->whereHas('loan', function ($query) use ($member) {
+                        $query
+                            ->whereBelongsTo($member)
+                            ->where('status', Loan::STATUS_BORROWED);
+                    })
+                    ->with(['loan.items', 'bookItem', 'bookItem.book'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $loanItem) {
+                    throw ValidationException::withMessages([
+                        "book_ids.{$index}" => 'Buku yang dipilih tidak tercatat sebagai pinjaman aktif untuk member ini.',
+                    ]);
+                }
+
+                $loanItem->forceFill([
+                    'returned_at' => now(),
+                ])->save();
+
+                $loanItem->bookItem->forceFill([
+                    'status' => 'available',
+                ])->save();
+
+                $loan = $loanItem->loan->fresh('items');
+
+                if ($loan && $loan->items->every(fn (LoanItem $item): bool => $item->isReturned())) {
+                    $loan->forceFill([
+                        'status' => Loan::STATUS_RETURNED,
+                        'returned_at' => now(),
+                    ])->save();
+                }
+
+                $returnedCount++;
+            }
+
+            return $returnedCount;
+        });
     }
 
     protected function calculateDueAt(CarbonInterface $borrowedAt): Carbon

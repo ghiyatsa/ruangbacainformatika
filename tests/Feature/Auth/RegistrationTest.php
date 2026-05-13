@@ -35,7 +35,12 @@ it('new users can register', function () {
         'whatsapp' => '08123456789',
         'password' => 'password',
         'password_confirmation' => 'password',
-    ])->assertRedirect(route('verification.notice', absolute: false));
+    ])
+        ->assertRedirect(route('verification.notice', absolute: false))
+        ->assertSessionHas(
+            'status',
+            'OTP verifikasi sedang dikirim ke email Anda. Jika layanan email sedang sibuk atau mencapai batas harian, sistem akan mencoba mengirim ulang secara otomatis.',
+        );
 
     assertAuthenticated();
 });

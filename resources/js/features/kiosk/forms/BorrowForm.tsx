@@ -9,6 +9,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
             description={`Maksimal ${loanMaxBooks} buku aktif per anggota.`}
             maxInputs={loanMaxBooks}
             bookSearchUrl={KioskController.searchBooks.url()}
+            bookSearchMode="borrow"
         />
     );
 }

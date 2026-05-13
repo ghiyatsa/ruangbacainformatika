@@ -24,7 +24,7 @@ export default function KioskPage(props: KioskProps) {
                 <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
             </div>
 
-            <main className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+            <main className="relative z-10 flex min-h-screen items-stretch justify-center px-6 py-10 lg:px-10 xl:px-12">
                 {props.step === 'pin' ? (
                     <PinStep {...props} />
                 ) : (

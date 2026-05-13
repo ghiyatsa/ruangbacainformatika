@@ -2,6 +2,8 @@ export type KioskStep = 'pin' | 'ready';
 
 export type KioskMenu = 'landing' | 'visit' | 'member' | 'borrow' | 'return';
 
+export type KioskBookSearchMode = 'borrow' | 'return';
+
 export interface KioskProps {
     step: KioskStep;
     activeMenu: KioskMenu;

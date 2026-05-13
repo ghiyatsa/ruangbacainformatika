@@ -20,6 +20,8 @@ class SearchBooksRequest extends FormRequest
     {
         return [
             'q' => ['nullable', 'string', 'max:255'],
+            'mode' => ['nullable', 'string', 'in:borrow,return'],
+            'member_identifier' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -27,11 +29,23 @@ class SearchBooksRequest extends FormRequest
     {
         $this->merge([
             'q' => Str::of((string) $this->input('q'))->squish()->toString(),
+            'mode' => Str::of((string) $this->input('mode'))->lower()->trim()->toString(),
+            'member_identifier' => Str::of((string) $this->input('member_identifier'))->squish()->toString(),
         ]);
     }
 
     public function validatedQuery(): string
     {
         return (string) $this->validated('q', '');
+    }
+
+    public function validatedMode(): string
+    {
+        return (string) $this->validated('mode', 'borrow');
+    }
+
+    public function validatedMemberIdentifier(): string
+    {
+        return (string) $this->validated('member_identifier', '');
     }
 }

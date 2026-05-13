@@ -20,63 +20,63 @@ export const RuangBacaLogo = (props: ComponentProps<'svg'>) => {
             <path
                 d="M1063.465,2681.729l1273.07,0"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeWidth="291.36"
             />
             <path
                 d="M1063.465,719.271l1273.07,0"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeWidth="291.36"
             />
             <path
                 d="M732.132,1063.465l0,1273.07"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeWidth="291.36"
             />
             <path
                 d="M2666.868,1063.465l0,1273.07"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeWidth="291.36"
             />
             <path
                 d="M1148.294,2220.218l559.706,-520.218l-559.706,-520.218"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeWidth="180.11"
             />
             <path
                 d="M2262.092,2220.218l-497.554,0"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeWidth="167.5"
             />
             <path
                 d="M2086.034,1179.782l0,342.905"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeOpacity="0.79"
                 strokeWidth="96.74"
             />
             <path
                 d="M2211.284,1179.782l0,342.905"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeOpacity="0.51"
                 strokeWidth="96.74"
             />
             <path
                 d="M1960.783,1179.782l0,342.905"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeWidth="96.74"
             />
             <path
                 d="M2336.535,1179.782l0,342.905"
                 fill="none"
-                className="stroke-foreground"
+                className="stroke-primary"
                 strokeOpacity="0.22"
                 strokeWidth="96.74"
             />

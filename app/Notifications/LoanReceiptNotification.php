@@ -4,19 +4,26 @@ namespace App\Notifications;
 
 use App\Models\Loan;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Throwable;
 
-class LoanReceiptNotification extends Notification
+class LoanReceiptNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    public int $tries = 12;
 
     /**
      * Create a new notification instance.
      */
     public function __construct(
         protected Loan $loan
-    ) {}
+    ) {
+        $this->afterCommit();
+        $this->onQueue('mail');
+    }
 
     /**
      * Get the notification's delivery channels.
@@ -68,5 +75,25 @@ class LoanReceiptNotification extends Notification
             'items_count' => $this->loan->items->count(),
             'due_at' => $this->loan->due_at,
         ];
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function backoff(): array
+    {
+        return [300, 900, 1800, 3600];
+    }
+
+    public function retryUntil(): \DateTimeInterface
+    {
+        return now()->addDay();
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        if ($exception) {
+            report($exception);
+        }
     }
 }

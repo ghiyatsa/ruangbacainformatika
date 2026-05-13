@@ -2,11 +2,14 @@
 
 use App\Models\Book;
 use App\Models\BookItem;
+use App\Models\Loan;
+use App\Models\LoanItem;
 use App\Models\Publisher;
 use App\Models\User;
 use App\Notifications\LoanReceiptNotification;
 use App\Services\KioskLoanService;
 use App\Services\KioskPinManager;
+use Illuminate\Contracts\Notifications\Dispatcher;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -129,6 +132,60 @@ it('borrows selected books from kiosk using book ids', function () {
     expect($bookItem->fresh()->status)->toBe('borrowed');
 });
 
+it('stores kiosk borrowing even when receipt email dispatch fails', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Dispatch Error',
+        'slug' => 'penerbit-dispatch-error',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Dispatch Error',
+        'slug' => 'buku-dispatch-error',
+        'isbn' => '9786020000099',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $bookItem = BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-099',
+        'status' => 'available',
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $dispatcher = mock(Dispatcher::class);
+    $dispatcher->shouldReceive('send')
+        ->once()
+        ->andThrow(new RuntimeException('Daily limit exceeded by mail provider.'));
+    app()->instance(Dispatcher::class, $dispatcher);
+
+    $response = $this->post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $member->nim(),
+        'book_ids' => [$book->id],
+    ]);
+
+    $response
+        ->assertRedirect(route('kiosk.index'))
+        ->assertSessionHas(
+            'success',
+            "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
+        );
+
+    expect($bookItem->fresh()->status)->toBe('borrowed');
+});
+
 it('searches borrowable and available books for kiosk borrowing', function () {
     $publisher = Publisher::query()->create([
         'name' => 'Penerbit Search',
@@ -196,4 +253,184 @@ it('searches borrowable and available books for kiosk borrowing', function () {
 
     expect(collect($response->json('books'))->pluck('id')->all())
         ->toBe([$availableBook->id]);
+});
+
+it('returns selected books from kiosk using book ids', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Return',
+        'slug' => 'penerbit-return',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Pengembalian',
+        'slug' => 'buku-pengembalian',
+        'isbn' => '9786020000010',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $bookItem = BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-010',
+        'status' => 'borrowed',
+    ]);
+
+    $loan = Loan::query()->create([
+        'user_id' => $member->id,
+        'status' => Loan::STATUS_BORROWED,
+        'borrowed_at' => now()->subDay(),
+        'due_at' => now()->addDays(3),
+    ]);
+
+    $loanItem = LoanItem::query()->create([
+        'loan_id' => $loan->id,
+        'book_item_id' => $bookItem->id,
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $response = $this->post(route('kiosk.loans.return'), [
+        'member_identifier' => $member->nim(),
+        'book_ids' => [$book->id],
+    ]);
+
+    $response
+        ->assertRedirect(route('kiosk.index'))
+        ->assertSessionHas('success');
+
+    expect($loanItem->fresh()->returned_at)->not->toBeNull()
+        ->and($bookItem->fresh()->status)->toBe('available')
+        ->and($loan->fresh()->status)->toBe(Loan::STATUS_RETURNED);
+});
+
+it('searches only active borrowed books for kiosk returns', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+    ]);
+    $member->assignRole('member');
+
+    $otherMember = User::factory()->create([
+        'whatsapp' => '08123456780',
+    ]);
+    $otherMember->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Return Search',
+        'slug' => 'penerbit-return-search',
+    ]);
+
+    $borrowedBook = Book::query()->create([
+        'title' => 'Laravel Return Aktif',
+        'slug' => 'laravel-return-aktif',
+        'isbn' => '9786020000011',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $borrowedItem = BookItem::query()->create([
+        'book_id' => $borrowedBook->id,
+        'internal_code' => 'ITEM-011',
+        'status' => 'borrowed',
+    ]);
+
+    $loan = Loan::query()->create([
+        'user_id' => $member->id,
+        'status' => Loan::STATUS_BORROWED,
+        'borrowed_at' => now()->subDay(),
+        'due_at' => now()->addDays(3),
+    ]);
+
+    LoanItem::query()->create([
+        'loan_id' => $loan->id,
+        'book_item_id' => $borrowedItem->id,
+    ]);
+
+    $returnedBook = Book::query()->create([
+        'title' => 'Laravel Sudah Kembali',
+        'slug' => 'laravel-sudah-kembali',
+        'isbn' => '9786020000012',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $returnedItem = BookItem::query()->create([
+        'book_id' => $returnedBook->id,
+        'internal_code' => 'ITEM-012',
+        'status' => 'available',
+    ]);
+
+    $returnedLoan = Loan::query()->create([
+        'user_id' => $member->id,
+        'status' => Loan::STATUS_RETURNED,
+        'borrowed_at' => now()->subDays(5),
+        'due_at' => now()->subDays(2),
+        'returned_at' => now()->subDay(),
+    ]);
+
+    LoanItem::query()->create([
+        'loan_id' => $returnedLoan->id,
+        'book_item_id' => $returnedItem->id,
+        'returned_at' => now()->subDay(),
+    ]);
+
+    $otherBook = Book::query()->create([
+        'title' => 'Laravel Member Lain',
+        'slug' => 'laravel-member-lain',
+        'isbn' => '9786020000013',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $otherItem = BookItem::query()->create([
+        'book_id' => $otherBook->id,
+        'internal_code' => 'ITEM-013',
+        'status' => 'borrowed',
+    ]);
+
+    $otherLoan = Loan::query()->create([
+        'user_id' => $otherMember->id,
+        'status' => Loan::STATUS_BORROWED,
+        'borrowed_at' => now()->subDay(),
+        'due_at' => now()->addDays(3),
+    ]);
+
+    LoanItem::query()->create([
+        'loan_id' => $otherLoan->id,
+        'book_item_id' => $otherItem->id,
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $response = $this->getJson(route('kiosk.books.search', [
+        'q' => 'Laravel',
+        'mode' => 'return',
+        'member_identifier' => $member->nim(),
+    ]));
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('books.0.id', $borrowedBook->id)
+        ->assertJsonPath('books.0.title', $borrowedBook->title);
+
+    expect(collect($response->json('books'))->pluck('id')->all())
+        ->toBe([$borrowedBook->id]);
 });

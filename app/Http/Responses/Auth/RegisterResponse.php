@@ -3,6 +3,7 @@
 namespace App\Http\Responses\Auth;
 
 use App\Services\Auth\AuthenticationRedirector;
+use App\Support\MailDeliveryIssue;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
@@ -27,6 +28,10 @@ class RegisterResponse implements RegisterResponseContract
         $request->session()->put(
             'verification_resend_available_at',
             now()->addSeconds(self::VERIFICATION_RESEND_COOLDOWN_SECONDS)->timestamp,
+        );
+        $request->session()->flash(
+            'status',
+            'OTP verifikasi sedang dikirim ke email Anda. '.MailDeliveryIssue::queuedNotice(),
         );
 
         if ($this->shouldReturnToKiosk($request->input('redirect_to'))) {
