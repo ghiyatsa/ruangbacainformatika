@@ -101,6 +101,7 @@ test('similarity api service waits for bulk upsert job completion', function () 
             expect($request['data'][0]['bobot_abstrak'])->toBe(0.25);
             expect($request['data'][0]['bobot_kata_kunci'])->toBe(0.1);
             expect($request['data'][1]['bobot_judul'])->toBe(0.65);
+            expect($request['reset_index'])->toBeFalse();
         }
 
         return match ($request->url()) {
@@ -141,5 +142,57 @@ test('similarity api service waits for bulk upsert job completion', function () 
         'https://similarity.test/api/v1/sync/bulk-upsert',
         'https://similarity.test/api/v1/sync/jobs/job-123',
         'https://similarity.test/api/v1/sync/jobs/job-123',
+    ]);
+});
+
+test('similarity api service can request a full reset before bulk upsert', function () {
+    Setting::query()->create([
+        'section' => 'integration',
+        'key' => 'similarity_api_url',
+        'value' => 'https://similarity.test',
+    ]);
+
+    Setting::query()->create([
+        'section' => 'integration',
+        'key' => 'similarity_api_secret',
+        'value' => encrypt('sync-secret'),
+    ]);
+
+    $requests = [];
+
+    Http::fake(function (Request $request) use (&$requests) {
+        $requests[] = $request->url();
+
+        return match ($request->url()) {
+            'https://similarity.test/api/v1/sync/bulk-upsert' => tap(
+                Http::response([
+                    'status' => 'accepted',
+                    'job_id' => 'job-reset',
+                ], 202),
+                function () use ($request): void {
+                    expect($request['reset_index'])->toBeTrue();
+                },
+            ),
+            'https://similarity.test/api/v1/sync/jobs/job-reset' => Http::response([
+                'job_id' => 'job-reset',
+                'status' => 'completed',
+                'total_received' => 1,
+                'total_processed' => 1,
+            ], 200),
+            default => Http::response(['message' => 'unexpected'], 500),
+        };
+    });
+
+    $result = app(SimilarityApiService::class)->bulkUpsert([
+        [
+            'skripsi_id' => 10,
+            'judul' => 'Judul reset penuh yang cukup panjang untuk batch sync',
+        ],
+    ], true);
+
+    expect($result)->toBeTrue();
+    expect($requests)->toBe([
+        'https://similarity.test/api/v1/sync/bulk-upsert',
+        'https://similarity.test/api/v1/sync/jobs/job-reset',
     ]);
 });

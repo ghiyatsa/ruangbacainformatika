@@ -14,6 +14,7 @@ class SimilarityFullSyncDispatcher
         if ($this->shouldRunSynchronously()) {
             $exitCode = Artisan::call('skripsi:sync', [
                 '--chunk' => $chunk,
+                '--reset' => true,
             ]);
 
             return [
@@ -24,6 +25,7 @@ class SimilarityFullSyncDispatcher
 
         Artisan::queue('skripsi:sync', [
             '--chunk' => $chunk,
+            '--reset' => true,
         ]);
 
         return [

@@ -10,6 +10,7 @@ test('similarity full sync dispatcher queues the sync command when not running s
         ->once()
         ->with('skripsi:sync', [
             '--chunk' => 100,
+            '--reset' => true,
         ]);
 
     $result = app(SimilarityFullSyncDispatcher::class)->dispatch();

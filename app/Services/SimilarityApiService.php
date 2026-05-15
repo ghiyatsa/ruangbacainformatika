@@ -275,7 +275,7 @@ class SimilarityApiService
      *
      * @param  array  $items  Array of associative arrays (same structure as upsert)
      */
-    public function bulkUpsert(array $items): bool
+    public function bulkUpsert(array $items, bool $resetIndex = false): bool
     {
         $items = array_map(
             fn (array $item): array => $this->withConfiguredWeights($item),
@@ -284,7 +284,10 @@ class SimilarityApiService
 
         try {
             $response = $this->sendWithRetry(
-                fn (PendingRequest $request): Response => $request->post('/api/v1/sync/bulk-upsert', ['data' => $items]),
+                fn (PendingRequest $request): Response => $request->post('/api/v1/sync/bulk-upsert', [
+                    'data' => $items,
+                    'reset_index' => $resetIndex,
+                ]),
             );
 
             if ($response->accepted()) {
