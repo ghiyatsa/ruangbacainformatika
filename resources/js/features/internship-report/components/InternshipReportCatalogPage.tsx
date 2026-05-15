@@ -1,5 +1,6 @@
-import { router } from '@inertiajs/react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
+import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
+import { router } from '@inertiajs/react';
 import type { InternshipReportCatalogPageProps } from '@/features/internship-report/types';
 import internshipReportRoute from '@/routes/internship-reports';
 import { InternshipReportCatalogFilters } from './InternshipReportCatalogFilters';
@@ -45,6 +46,7 @@ export default function InternshipReportCatalogPage({
             filters={filters}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
+            paginationVisibility="desktop-only"
             filtersPanel={
                 <InternshipReportCatalogFilters
                     filters={filters}
@@ -55,6 +57,12 @@ export default function InternshipReportCatalogPage({
             deferredData="reports"
         >
             <InternshipReportCatalogResults reports={reports} />
+            <MobileProgressivePagination
+                data={reports}
+                propKey="reports"
+                resourceLabel="laporan"
+                resetKey={JSON.stringify(filters)}
+            />
         </CatalogPage>
     );
 }

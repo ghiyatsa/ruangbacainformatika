@@ -127,3 +127,26 @@ test('catalog availability excludes books marked as not borrowable', function ()
                 ),
         );
 });
+
+test('catalog page returns the requested pagination page', function () {
+    foreach (range(1, 25) as $number) {
+        Book::factory()->published()->create([
+            'title' => sprintf('Book %02d', $number),
+            'published_year' => 2024,
+            'is_featured' => false,
+        ]);
+    }
+
+    get(route('books.index', ['page' => 2]))
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('catalog')
+                ->where('stats.searchResultsCount', 25)
+                ->loadDeferredProps(fn (Assert $reload) => $reload
+                    ->where('books.current_page', 2)
+                    ->where('books.next_page_url', null)
+                    ->has('books.data', 1)
+                    ->where('books.data.0.title', 'Book 25')
+                ),
+        );
+});

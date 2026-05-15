@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\RunFullSimilaritySync;
 use Illuminate\Support\Facades\Artisan;
 
 class SimilarityFullSyncDispatcher
@@ -11,11 +12,10 @@ class SimilarityFullSyncDispatcher
      */
     public function dispatch(int $chunk = 100): array
     {
+        $command = sprintf('skripsi:sync --chunk=%d --reset', $chunk);
+
         if ($this->shouldRunSynchronously()) {
-            $exitCode = Artisan::call('skripsi:sync', [
-                '--chunk' => $chunk,
-                '--reset' => true,
-            ]);
+            $exitCode = Artisan::call($command);
 
             return [
                 'mode' => 'sync',
@@ -23,10 +23,7 @@ class SimilarityFullSyncDispatcher
             ];
         }
 
-        Artisan::queue('skripsi:sync', [
-            '--chunk' => $chunk,
-            '--reset' => true,
-        ]);
+        RunFullSimilaritySync::dispatch($chunk);
 
         return [
             'mode' => 'queued',

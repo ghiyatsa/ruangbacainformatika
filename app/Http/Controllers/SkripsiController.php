@@ -47,7 +47,7 @@ class SkripsiController extends Controller
                 $paginated['data'] = SkripsiResource::collection($skripsis->getCollection())->resolve();
 
                 return $paginated;
-            }),
+            })->merge()->append('data'),
         ]);
     }
 

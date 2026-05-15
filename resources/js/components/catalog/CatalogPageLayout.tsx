@@ -20,6 +20,7 @@ interface CatalogPageLayoutProps<T> {
     filters?: CatalogActiveFilters;
     onClearFilters?: () => void;
     onRemoveFilter?: (key: string) => void;
+    paginationVisibility?: 'all' | 'desktop-only';
 }
 
 /**
@@ -38,6 +39,7 @@ export function CatalogPageLayout<T>({
     filters,
     onClearFilters,
     onRemoveFilter,
+    paginationVisibility = 'all',
 }: CatalogPageLayoutProps<T>) {
     const hasActiveFilters =
         filters &&
@@ -177,7 +179,9 @@ export function CatalogPageLayout<T>({
                 {children}
 
                 {paginationData && (
-                    <div className="mt-8">
+                    <div
+                        className={`mt-8 ${paginationVisibility === 'desktop-only' ? 'hidden md:block' : ''}`}
+                    >
                         <ResourcePagination
                             data={paginationData}
                             resourceName={resourceName}

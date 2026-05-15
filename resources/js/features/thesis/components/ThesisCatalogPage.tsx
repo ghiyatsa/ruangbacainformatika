@@ -1,5 +1,6 @@
-import { router } from '@inertiajs/react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
+import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
+import { router } from '@inertiajs/react';
 import { ThesisCatalogFilters } from '@/features/thesis/components/ThesisCatalogFilters';
 import { ThesisCatalogResults } from '@/features/thesis/components/ThesisCatalogResults';
 import type { ThesisCatalogPageProps } from '@/features/thesis/types';
@@ -45,6 +46,7 @@ export default function ThesisCatalogPage({
             filters={filters}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
+            paginationVisibility="desktop-only"
             filtersPanel={
                 <ThesisCatalogFilters
                     filters={filters}
@@ -55,6 +57,12 @@ export default function ThesisCatalogPage({
             deferredData="theses"
         >
             <ThesisCatalogResults theses={theses} />
+            <MobileProgressivePagination
+                data={theses}
+                propKey="theses"
+                resourceLabel="tesis"
+                resetKey={JSON.stringify(filters)}
+            />
         </CatalogPage>
     );
 }

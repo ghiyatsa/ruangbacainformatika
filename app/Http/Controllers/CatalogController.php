@@ -27,7 +27,7 @@ class CatalogController extends Controller
         $featured = $request->boolean('featured');
         $availability = $request->boolean('availability');
 
-        $books = Book::query()
+        $booksQuery = Book::query()
             ->published()
             ->search($search)
             ->forCategory($categorySlug)
@@ -41,9 +41,9 @@ class CatalogController extends Controller
             ])
             ->orderByDesc('is_featured')
             ->orderByDesc('published_year')
-            ->orderBy('title')
-            ->paginate(24)
-            ->withQueryString();
+            ->orderBy('title');
+
+        $searchResultsCount = (clone $booksQuery)->count();
 
         return Inertia::render('catalog', [
             'filters' => [
@@ -55,7 +55,7 @@ class CatalogController extends Controller
             ],
             'stats' => array_merge(
                 $this->catalogService->getStats(),
-                ['searchResultsCount' => $books->total()]
+                ['searchResultsCount' => $searchResultsCount]
             ),
             'years' => Book::published()
                 ->whereNotNull('published_year')
@@ -64,12 +64,16 @@ class CatalogController extends Controller
                 ->pluck('published_year')
                 ->all(),
             'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
-            'books' => Inertia::defer(function () use ($books) {
+            'books' => Inertia::defer(function () use ($booksQuery) {
+                $books = (clone $booksQuery)
+                    ->paginate(24)
+                    ->withQueryString();
+
                 $paginated = $books->toArray();
                 $paginated['data'] = BookResource::collection($books->getCollection())->resolve();
 
                 return $paginated;
-            }),
+            })->merge()->append('data'),
         ]);
     }
 }

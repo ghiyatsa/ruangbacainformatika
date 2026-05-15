@@ -463,7 +463,7 @@ export default function CatalogSection({
                             fallback={
                                 <div className="animate-in duration-500 fade-in">
                                     {viewMode === 'grid' ? (
-                                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
                                             {Array.from({ length: 10 }).map(
                                                 (_, i) => (
                                                     <BookCardSkeleton key={i} />
@@ -496,7 +496,7 @@ export default function CatalogSection({
                                         transition={{ duration: 0.25 }}
                                     >
                                         {viewMode === 'grid' ? (
-                                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
                                                 {previewBooks.map(
                                                     (
                                                         book: CatalogBook,

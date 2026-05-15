@@ -47,7 +47,7 @@ class InternshipReportController extends Controller
                 $paginated['data'] = InternshipReportResource::collection($reports->getCollection())->resolve();
 
                 return $paginated;
-            }),
+            })->merge()->append('data'),
         ]);
     }
 

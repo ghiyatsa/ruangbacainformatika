@@ -15,6 +15,7 @@ interface CatalogPageProps<T> {
     onRemoveFilter?: (key: string) => void;
     filtersPanel?: ReactNode;
     deferredData?: string;
+    paginationVisibility?: 'all' | 'desktop-only';
     children: ReactNode;
 }
 
@@ -29,6 +30,7 @@ export function CatalogPage<T>({
     onClearFilters,
     onRemoveFilter,
     filtersPanel,
+    paginationVisibility,
     children,
 }: CatalogPageProps<T>) {
     return (
@@ -42,6 +44,7 @@ export function CatalogPage<T>({
             filters={filters}
             onClearFilters={onClearFilters}
             onRemoveFilter={onRemoveFilter}
+            paginationVisibility={paginationVisibility}
         >
             {filtersPanel ? (
                 <div className="flex flex-col gap-6">{filtersPanel}</div>

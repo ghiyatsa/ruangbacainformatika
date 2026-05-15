@@ -47,7 +47,7 @@ class ThesisController extends Controller
                 $paginated['data'] = ThesisResource::collection($theses->getCollection())->resolve();
 
                 return $paginated;
-            }),
+            })->merge()->append('data'),
         ]);
     }
 

@@ -65,3 +65,26 @@ test('skripsi catalog page filters by year', function () {
                 ->where('skripsis.data.0.title', 'Skripsi 2024')
             ));
 });
+
+test('skripsi catalog page returns the requested pagination page', function () {
+    Queue::fake();
+
+    foreach (range(1, 21) as $number) {
+        Skripsi::factory()->create([
+            'title' => sprintf('Skripsi %02d', $number),
+            'year' => 2024,
+        ]);
+    }
+
+    get(route('skripsi.index', ['page' => 2]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('skripsi/index')
+            ->where('total', 21)
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->where('skripsis.current_page', 2)
+                ->where('skripsis.next_page_url', null)
+                ->has('skripsis.data', 1)
+                ->where('skripsis.data.0.title', 'Skripsi 21')
+            ));
+});

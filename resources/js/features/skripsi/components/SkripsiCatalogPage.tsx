@@ -1,5 +1,6 @@
-import { router } from '@inertiajs/react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
+import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
+import { router } from '@inertiajs/react';
 import { SkripsiCatalogFilters } from '@/features/skripsi/components/SkripsiCatalogFilters';
 import { SkripsiCatalogResults } from '@/features/skripsi/components/SkripsiCatalogResults';
 import type { SkripsiCatalogPageProps } from '@/features/skripsi/types';
@@ -45,6 +46,7 @@ export default function SkripsiCatalogPage({
             filters={filters}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
+            paginationVisibility="desktop-only"
             filtersPanel={
                 <SkripsiCatalogFilters
                     filters={filters}
@@ -55,6 +57,12 @@ export default function SkripsiCatalogPage({
             deferredData="skripsis"
         >
             <SkripsiCatalogResults skripsis={skripsis} />
+            <MobileProgressivePagination
+                data={skripsis}
+                propKey="skripsis"
+                resourceLabel="skripsi"
+                resetKey={JSON.stringify(filters)}
+            />
         </CatalogPage>
     );
 }
