@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(SimilarityApiService::class);
+        $this->app->scoped(SimilarityApiService::class);
     }
 
     /**

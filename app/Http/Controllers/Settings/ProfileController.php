@@ -35,7 +35,7 @@ class ProfileController extends Controller
             return to_route('settings.profile.edit');
         }
 
-        return Inertia::render('auth/register-whatsapp');
+        return Inertia::render('auth/register-profile');
     }
 
     /**
@@ -49,7 +49,7 @@ class ProfileController extends Controller
         $user->fill($request->validated());
         $user->save();
 
-        if (filled($user->whatsapp) && ! $user->hasCompletedProfile()) {
+        if ($user->hasRequiredProfileDetails() && ! $user->hasCompletedProfile()) {
             $user->markProfileAsCompleted();
         }
 
@@ -71,6 +71,7 @@ class ProfileController extends Controller
 
         $user->forceFill([
             'whatsapp' => $request->validated('whatsapp'),
+            'address' => $request->validated('address'),
         ]);
         $user->markProfileAsCompleted();
 

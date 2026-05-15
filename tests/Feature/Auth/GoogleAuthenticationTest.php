@@ -56,7 +56,7 @@ it('eligible users can authenticate with google', function () {
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('register.whatsapp', absolute: false));
+        ->assertRedirect(route('register.profile', absolute: false));
 
     assertAuthenticated();
 
@@ -71,6 +71,7 @@ it('eligible users can authenticate with google', function () {
 
     expect($user->hasVerifiedEmail())->toBeTrue();
     expect($user->whatsapp)->toBeNull();
+    expect($user->address)->toBeNull();
 });
 
 it('administrative users with complete profiles are redirected to admin after google login', function () {
@@ -137,24 +138,26 @@ it('google users can access onboarding only once', function () {
     $user = User::factory()->create([
         'auth_provider' => 'google',
         'whatsapp' => null,
+        'address' => null,
         'profile_completed_at' => null,
     ]);
 
     /** @var User $user */
     actingAs($user)
-        ->get(route('register.whatsapp'))
+        ->get(route('register.profile'))
         ->assertInertia(
             fn (AssertableInertia $page) => $page
-                ->component('auth/register-whatsapp'),
+                ->component('auth/register-profile'),
         );
 
     actingAs($user)
-        ->patch(route('register.whatsapp.store'), [
+        ->patch(route('register.profile.store'), [
             'whatsapp' => '08123456789',
+            'address' => 'Jl. Merdeka No. 1',
         ])
         ->assertRedirect(route('settings.profile.edit', absolute: false));
 
     actingAs($user->fresh())
-        ->get(route('register.whatsapp'))
+        ->get(route('register.profile'))
         ->assertRedirect(route('settings.profile.edit', absolute: false));
 });

@@ -18,7 +18,7 @@ class EnsureProfileIsCompleted
         if ($request->user() && ! $request->user()->hasRequiredProfileDetails()) {
             return $request->expectsJson()
                 ? abort(403, 'Your profile is incomplete.')
-                : redirect()->route('register.whatsapp');
+                : redirect()->route('register.profile');
         }
 
         return $next($request);

@@ -5,14 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
 import { logout } from '@/routes';
 
-export default function RegisterWhatsapp() {
+export default function RegisterProfile() {
     const { auth } = usePage().props;
 
     return (
         <>
-            <Head title="Lengkapi WhatsApp" />
+            <Head title="Lengkapi Profil" />
 
             <div className="flex flex-col gap-6">
                 <Form
@@ -48,11 +49,24 @@ export default function RegisterWhatsapp() {
                                     autoComplete="tel"
                                     placeholder="08123456789"
                                 />
-                                <p className="text-sm text-muted-foreground">
-                                    Nomor ini wajib diisi sebelum akun bisa
-                                    digunakan untuk meminjam buku.
-                                </p>
                                 <InputError message={errors.whatsapp} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="address">Alamat</Label>
+                                <Textarea
+                                    id="address"
+                                    name="address"
+                                    required
+                                    autoComplete="street-address"
+                                    className="min-h-28 resize-y"
+                                    placeholder="Masukkan alamat lengkap Anda"
+                                />
+                                <p className="text-sm text-muted-foreground">
+                                    Nomor WhatsApp dan alamat wajib diisi sebelum
+                                    akun bisa digunakan untuk meminjam buku.
+                                </p>
+                                <InputError message={errors.address} />
                             </div>
 
                             <Button
@@ -83,7 +97,7 @@ export default function RegisterWhatsapp() {
     );
 }
 
-RegisterWhatsapp.layout = {
-    title: 'Lengkapi nomor WhatsApp',
+RegisterProfile.layout = {
+    title: 'Lengkapi profil',
     description: 'Satu langkah terakhir untuk melengkapi profil Anda.',
 };

@@ -40,8 +40,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('verification.submit');
 
-    Route::get('register/whatsapp', [ProfileController::class, 'complete'])->name('register.whatsapp');
-    Route::patch('register/whatsapp', [ProfileController::class, 'storeOnboarding'])->name('register.whatsapp.store');
+    Route::get('register/profile', [ProfileController::class, 'complete'])->name('register.profile');
+    Route::patch('register/profile', [ProfileController::class, 'storeOnboarding'])->name('register.profile.store');
 
     Route::redirect('/profile', '/settings/profile')->name('settings.profile.show');
 });

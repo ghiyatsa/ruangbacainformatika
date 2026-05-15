@@ -6,6 +6,7 @@ use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
+use App\Filament\Widgets\SimilaritySyncOverviewWidget;
 use App\Filament\Widgets\TodayVisitorsWidget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -49,6 +50,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 OperationsOverviewWidget::class,
+                SimilaritySyncOverviewWidget::class,
                 LoanActivityChartWidget::class,
                 TodayVisitorsWidget::class,
                 ContactMessagesTableWidget::class,

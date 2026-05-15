@@ -33,7 +33,7 @@ class GoogleController extends Controller
                 'message' => 'Konfigurasi login Google belum lengkap.',
             ]);
 
-            return redirect()->route('register.whatsapp');
+            return redirect()->route('register.profile');
         }
 
         return Socialite::driver('google')

@@ -21,6 +21,7 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'whatsapp' => $this->whatsappRules(ignoreId: $this->user()?->id),
+            'address' => $this->addressRules(),
         ];
     }
 
@@ -29,6 +30,7 @@ class ProfileUpdateRequest extends FormRequest
         $this->merge([
             'name' => Str::of((string) $this->input('name'))->squish()->toString(),
             'whatsapp' => trim((string) $this->input('whatsapp')),
+            'address' => Str::of((string) $this->input('address'))->squish()->toString(),
         ]);
     }
 }

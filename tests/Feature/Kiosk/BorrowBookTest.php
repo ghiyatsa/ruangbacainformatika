@@ -16,11 +16,12 @@ use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\instance;
 
-it('members must fill whatsapp before borrowing books', function () {
+it('members must fill whatsapp and address before borrowing books', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $member = User::factory()->create([
         'whatsapp' => null,
+        'address' => null,
     ]);
     $member->assignRole('member');
 
@@ -46,7 +47,7 @@ it('members must fill whatsapp before borrowing books', function () {
     $service = app(KioskLoanService::class);
 
     expect(fn () => $service->borrow($member->nim(), [$book->id]))
-        ->toThrow(ValidationException::class, 'Nomor WhatsApp wajib diisi pada profil sebelum meminjam buku.');
+        ->toThrow(ValidationException::class, 'Nomor WhatsApp dan alamat wajib diisi pada profil sebelum meminjam buku.');
 });
 
 it('books marked as not borrowable cannot be borrowed', function () {

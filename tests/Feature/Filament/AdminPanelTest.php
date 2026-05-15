@@ -11,7 +11,10 @@ use App\Filament\Resources\Theses\ThesisResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\VisitLogs\VisitLogResource;
 use App\Models\Book;
+use App\Models\SimilaritySyncStatus;
+use App\Models\Skripsi;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -178,6 +181,72 @@ it('super admin users can render consistent resource headings', function () {
         ->get('/admin/internship-reports')
         ->assertOk()
         ->assertSee('Laporan KP');
+});
+
+it('super admin users can monitor similarity sync status from skripsi admin pages', function () {
+    Queue::fake();
+
+    $user = makeSuperAdmin();
+    $skripsi = Skripsi::factory()->create([
+        'student_id' => '2301700420',
+        'title' => 'Pemantauan sinkronisasi similarity pada admin',
+    ]);
+
+    SimilaritySyncStatus::query()->updateOrCreate(
+        ['source_skripsi_id' => $skripsi->id],
+        [
+            'status' => SimilaritySyncStatus::STATUS_FAILED,
+            'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+            'attempts' => 2,
+            'last_error' => 'Token similarity tidak valid.',
+            'last_attempt_at' => now(),
+        ],
+    );
+
+    actingAs($user)
+        ->get('/admin/skripsis')
+        ->assertOk()
+        ->assertSee('Sync Similarity')
+        ->assertSee('Gagal')
+        ->assertSee('Perlu diproses')
+        ->assertSee('Belum dijadwalkan')
+        ->assertSee('Sinkronkan Terpilih');
+
+    actingAs($user)
+        ->get("/admin/skripsis/{$skripsi->getKey()}")
+        ->assertOk()
+        ->assertSee('Data Skripsi')
+        ->assertSee('Sinkronisasi Similarity')
+        ->assertSee('Token similarity tidak valid.');
+});
+
+it('super admin users can see similarity sync overview on the admin dashboard', function () {
+    Queue::fake();
+
+    $user = makeSuperAdmin();
+    $skripsi = Skripsi::factory()->create([
+        'student_id' => '2301700520',
+    ]);
+
+    SimilaritySyncStatus::query()->updateOrCreate(
+        ['source_skripsi_id' => $skripsi->id],
+        [
+            'status' => SimilaritySyncStatus::STATUS_FAILED,
+            'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+            'attempts' => 1,
+            'last_error' => 'Bulk sinkronisasi ke Similarity API gagal.',
+            'last_attempt_at' => now(),
+        ],
+    );
+
+    actingAs($user)
+        ->get('/admin')
+        ->assertOk()
+        ->assertSee('Kesehatan Sinkronisasi Similarity')
+        ->assertSee('Sinkron Berhasil')
+        ->assertSee('Perlu Tindak Lanjut')
+        ->assertSee('Sedang Diproses')
+        ->assertSee('Belum Dijadwalkan');
 });
 
 it('filament resources expose consistent navigation metadata', function () {

@@ -5,6 +5,8 @@ import {
     useTransform,
 } from 'motion/react';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useHasMounted } from '@/hooks/use-has-mounted';
+
 
 interface ShinyTextProps {
     text: string;
@@ -33,7 +35,8 @@ const ShinyText: React.FC<ShinyTextProps> = ({
     direction = 'left',
     delay = 0,
 }) => {
-    const [hasMounted, setHasMounted] = useState(false);
+    const hasMounted = useHasMounted();
+
     const [isPaused, setIsPaused] = useState(false);
     const progress = useMotionValue(0);
     const elapsedRef = useRef(0);
@@ -43,9 +46,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
     const animationDuration = speed * 1000;
     const delayDuration = delay * 1000;
 
-    useEffect(() => {
-        setHasMounted(true);
-    }, []);
+
 
     useAnimationFrame((time) => {
         if (!hasMounted || disabled || isPaused) {

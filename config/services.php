@@ -44,6 +44,7 @@ return [
         'url' => env('SIMILARITY_API_URL', 'http://localhost:8181'),
         'secret' => env('SIMILARITY_API_SECRET', 'changeme-secret-token'),
         'timeout' => env('SIMILARITY_API_TIMEOUT', 10),
+        'dispatch' => env('SIMILARITY_SYNC_DISPATCH', 'auto'),
     ],
 
     'huggingface' => [

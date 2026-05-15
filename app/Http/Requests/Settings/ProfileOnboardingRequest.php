@@ -17,6 +17,7 @@ class ProfileOnboardingRequest extends FormRequest
     {
         return [
             'whatsapp' => $this->whatsappRules(required: true, ignoreId: $this->user()?->id),
+            'address' => $this->addressRules(required: true),
         ];
     }
 
@@ -24,6 +25,7 @@ class ProfileOnboardingRequest extends FormRequest
     {
         $this->merge([
             'whatsapp' => trim((string) $this->input('whatsapp')),
+            'address' => str((string) $this->input('address'))->squish()->toString(),
         ]);
     }
 }

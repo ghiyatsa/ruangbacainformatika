@@ -6,6 +6,8 @@ import React, {
     useRef,
     useState,
 } from 'react';
+import { useHasMounted } from '@/hooks/use-has-mounted';
+
 
 export type VelocityScrollItem =
     | {
@@ -273,7 +275,8 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
         const trackRef = useRef<HTMLDivElement>(null);
         const seqRef = useRef<HTMLUListElement>(null);
 
-        const [hasMounted, setHasMounted] = useState(false);
+        const hasMounted = useHasMounted();
+
         const [seqWidth, setSeqWidth] = useState<number>(0);
         const [seqHeight, setSeqHeight] = useState<number>(0);
         const [copyCount, setCopyCount] = useState<number>(
@@ -291,9 +294,7 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
             clamp: false,
         });
 
-        useEffect(() => {
-            setHasMounted(true);
-        }, []);
+
 
         const effectiveHoverSpeed = useMemo(() => {
             if (hoverSpeed !== undefined) {

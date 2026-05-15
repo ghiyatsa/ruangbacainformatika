@@ -18,15 +18,16 @@ it('google users with incomplete profile are redirected to onboarding page', fun
     $user = User::factory()->create([
         'auth_provider' => 'google',
         'whatsapp' => null,
+        'address' => null,
         'profile_completed_at' => null,
     ]);
 
     /** @var User $user */
     actingAs($user)
-        ->get(route('register.whatsapp'))
+        ->get(route('register.profile'))
         ->assertInertia(
             fn (AssertableInertia $page) => $page
-                ->component('auth/register-whatsapp'),
+                ->component('auth/register-profile'),
         );
 });
 
@@ -39,6 +40,7 @@ it('profile information can be updated', function () {
             'name' => 'Test User',
             'email' => 'changed@example.com',
             'whatsapp' => '08123456789',
+            'address' => 'Jl. Merdeka No. 1',
         ])
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('settings.profile.edit'));
@@ -47,6 +49,7 @@ it('profile information can be updated', function () {
 
     expect($user->name)->toBe('Test User');
     expect($user->whatsapp)->toBe('08123456789');
+    expect($user->address)->toBe('Jl. Merdeka No. 1');
     expect($user->email)->not->toBe('changed@example.com');
 });
 
@@ -58,6 +61,7 @@ it('email verification status is unchanged when the email address is unchanged',
         ->patch(route('settings.profile.update'), [
             'name' => 'Test User',
             'whatsapp' => '08123456789',
+            'address' => 'Jl. Merdeka No. 1',
         ])
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('settings.profile.edit'));
@@ -76,6 +80,7 @@ it('users cannot update their email address from profile settings', function () 
             'name' => 'Test User',
             'email' => 'outside@example.com',
             'whatsapp' => '08123456789',
+            'address' => 'Jl. Merdeka No. 1',
         ])
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('settings.profile.edit'));

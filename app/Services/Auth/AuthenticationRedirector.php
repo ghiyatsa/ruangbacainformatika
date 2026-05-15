@@ -15,6 +15,7 @@ class AuthenticationRedirector
     protected const DISALLOWED_INTENDED_PATHS = [
         '/login',
         '/register',
+        '/register/profile',
         '/auth/google',
         '/auth/google/callback',
     ];
@@ -59,7 +60,7 @@ class AuthenticationRedirector
         }
 
         if ($this->requiresProfileCompletion($user)) {
-            return route('register.whatsapp', absolute: false);
+            return route('register.profile', absolute: false);
         }
 
         if ($user->canAccessAdminPanel()) {

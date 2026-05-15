@@ -12,7 +12,7 @@ export default defineConfig(({ command }) => ({
             refresh: true,
         }),
         inertia({
-            ssr: command === 'build',
+            ssr: command === 'build' ? undefined : false,
         }),
         react({
             babel: {

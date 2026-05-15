@@ -20,6 +20,7 @@ trait ProfileValidationRules
             'name' => $this->nameRules(),
             'email' => $this->emailRules($userId),
             'whatsapp' => $this->whatsappRules(),
+            'address' => $this->addressRules(),
         ];
     }
 
@@ -74,6 +75,20 @@ trait ProfileValidationRules
             $ignoreId === null
                 ? Rule::unique(User::class, 'whatsapp')
                 : Rule::unique(User::class, 'whatsapp')->ignore($ignoreId),
+        ];
+    }
+
+    /**
+     * Get the validation rules used to validate user addresses.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function addressRules(bool $required = false): array
+    {
+        return [
+            $required ? 'required' : 'nullable',
+            'string',
+            'max:1000',
         ];
     }
 }

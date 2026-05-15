@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Repositories\SettingRepository;
+use App\Services\SimilarityFullSyncDispatcher;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -74,7 +75,7 @@ class IntegrationSettings extends Page
                             ->offColor('danger'),
                     ]),
                 Section::make('API Kemiripan Skripsi')
-                    ->description('Pengaturan layanan untuk memeriksa kemiripan judul karya ilmiah.')
+                    ->description('Pengaturan layanan untuk memeriksa kemiripan judul karya ilmiah. Ubah bobot mewajibkan sync ulang penuh.')
                     ->schema([
                         TextInput::make('similarity_api_url')
                             ->label('URL Endpoint API')
@@ -83,8 +84,7 @@ class IntegrationSettings extends Page
                             ->placeholder('http://localhost:8181'),
                         TextInput::make('similarity_api_secret')
                             ->label('Secret Token / API Key')
-                            ->password()
-                            ->revealable()
+                            ->autocomplete('off')
                             ->required()
                             ->suffixAction(
                                 Action::make('generateSecret')
@@ -131,6 +131,32 @@ class IntegrationSettings extends Page
                             ->maxValue(1)
                             ->step(0.01)
                             ->default(0.5),
+                        TextInput::make('similarity_weight_judul')
+                            ->label('Bobot Judul')
+                            ->helperText('Disarankan total bobot 1.00.')
+                            ->numeric()
+                            ->required()
+                            ->minValue(0)
+                            ->maxValue(1)
+                            ->step(0.01)
+                            ->default(0.7),
+                        TextInput::make('similarity_weight_abstrak')
+                            ->label('Bobot Abstrak')
+                            ->helperText('Perubahan bobot perlu sync ulang semua data.')
+                            ->numeric()
+                            ->required()
+                            ->minValue(0)
+                            ->maxValue(1)
+                            ->step(0.01)
+                            ->default(0.2),
+                        TextInput::make('similarity_weight_kata_kunci')
+                            ->label('Bobot Kata Kunci')
+                            ->numeric()
+                            ->required()
+                            ->minValue(0)
+                            ->maxValue(1)
+                            ->step(0.01)
+                            ->default(0.1),
                     ])
                     ->columns(2),
 
@@ -143,14 +169,37 @@ class IntegrationSettings extends Page
                             ->placeholder('https://api.fonnte.com/send'),
                         TextInput::make('whatsapp_api_token')
                             ->label('API Token')
-                            ->password()
-                            ->revealable(),
+                            ->autocomplete('off'),
                     ])
                     ->columns(2),
             ])
                 ->livewireSubmitHandler('save')
                 ->footer([
                     Actions::make([
+                        Action::make('resyncAllSkripsi')
+                            ->label('Sync Ulang Semua Skripsi')
+                            ->icon(Heroicon::OutlinedArrowPath)
+                            ->color('warning')
+                            ->requiresConfirmation()
+                            ->modalHeading('Sync Ulang Semua Skripsi')
+                            ->modalDescription('Gunakan setelah bobot similarity berubah agar seluruh embedding diperbarui.')
+                            ->modalSubmitActionLabel('Mulai Sync Ulang')
+                            ->action(function (): void {
+                                $result = app(SimilarityFullSyncDispatcher::class)->dispatch();
+
+                                Notification::make()
+                                    ->{$result['success'] ? 'success' : 'danger'}()
+                                    ->title($result['success']
+                                        ? ($result['mode'] === 'sync' ? 'Sync penuh selesai' : 'Sync penuh dijadwalkan')
+                                        : 'Sync penuh gagal')
+                                    ->body($result['success']
+                                        ? ($result['mode'] === 'sync'
+                                            ? 'Seluruh skripsi sudah diproses.'
+                                            : 'Pastikan worker queue aktif sampai selesai.')
+                                        : 'Periksa koneksi Similarity API lalu coba lagi.')
+                                    ->persistent($result['mode'] === 'queued')
+                                    ->send();
+                            }),
                         Action::make('save')
                             ->label('Simpan')
                             ->submit('save')
@@ -163,6 +212,19 @@ class IntegrationSettings extends Page
     public function save(): void
     {
         $data = $this->form->getState();
+        $weightsChanged = $this->weightsHaveChanged($data);
+
+        if (((float) ($data['similarity_weight_judul'] ?? 0)
+            + (float) ($data['similarity_weight_abstrak'] ?? 0)
+            + (float) ($data['similarity_weight_kata_kunci'] ?? 0)) <= 0) {
+            Notification::make()
+                ->danger()
+                ->title('Bobot tidak valid')
+                ->body('Total bobot harus lebih dari 0.')
+                ->send();
+
+            return;
+        }
 
         // Encrypt secret fields before persisting
         $similaritySecret = filled($data['similarity_api_secret'] ?? null)
@@ -178,12 +240,24 @@ class IntegrationSettings extends Page
             'turnstile_enabled' => $data['turnstile_enabled'] ?? false,
             'similarity_api_top_k' => $data['similarity_api_top_k'] ?? 5,
             'similarity_api_threshold' => $data['similarity_api_threshold'] ?? 0.5,
+            'similarity_weight_judul' => $data['similarity_weight_judul'] ?? 0.7,
+            'similarity_weight_abstrak' => $data['similarity_weight_abstrak'] ?? 0.2,
+            'similarity_weight_kata_kunci' => $data['similarity_weight_kata_kunci'] ?? 0.1,
         ]);
 
         Notification::make()
             ->success()
             ->title('Pengaturan integrasi disimpan')
             ->send();
+
+        if ($weightsChanged) {
+            Notification::make()
+                ->warning()
+                ->title('Bobot berubah')
+                ->body('Jalankan sync ulang semua skripsi.')
+                ->persistent()
+                ->send();
+        }
 
         // Re-fill form with decrypted value so UI stays consistent
         $values = $this->settingRepository()->sectionValues('integration', $this->defaultValues());
@@ -211,7 +285,23 @@ class IntegrationSettings extends Page
             'turnstile_enabled' => false,
             'similarity_api_top_k' => 5,
             'similarity_api_threshold' => 0.5,
+            'similarity_weight_judul' => 0.7,
+            'similarity_weight_abstrak' => 0.2,
+            'similarity_weight_kata_kunci' => 0.1,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function weightsHaveChanged(array $data): bool
+    {
+        $defaults = $this->defaultValues();
+        $stored = $this->settingRepository()->sectionValues('integration', $defaults);
+
+        return abs((float) ($stored['similarity_weight_judul'] ?? $defaults['similarity_weight_judul']) - (float) ($data['similarity_weight_judul'] ?? $defaults['similarity_weight_judul'])) > 0.0001
+            || abs((float) ($stored['similarity_weight_abstrak'] ?? $defaults['similarity_weight_abstrak']) - (float) ($data['similarity_weight_abstrak'] ?? $defaults['similarity_weight_abstrak'])) > 0.0001
+            || abs((float) ($stored['similarity_weight_kata_kunci'] ?? $defaults['similarity_weight_kata_kunci']) - (float) ($data['similarity_weight_kata_kunci'] ?? $defaults['similarity_weight_kata_kunci'])) > 0.0001;
     }
 
     protected function settingRepository(): SettingRepository

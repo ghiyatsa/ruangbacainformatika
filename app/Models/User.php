@@ -23,6 +23,7 @@ use Spatie\Permission\Traits\HasRoles;
     'password',
     'auth_provider',
     'whatsapp',
+    'address',
     'profile_completed_at',
     'is_approved',
 ])]
@@ -101,7 +102,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function hasRequiredProfileDetails(): bool
     {
-        return filled($this->whatsapp);
+        return filled($this->whatsapp) && filled($this->address);
     }
 
     public function loans(): HasMany

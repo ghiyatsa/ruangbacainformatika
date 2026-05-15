@@ -2,6 +2,7 @@
 
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
+use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\get;
 use function Pest\Laravel\postJson;
@@ -23,6 +24,8 @@ test('similarity check requires at least five words', function () {
 });
 
 test('similarity check normalizes api results for frontend', function () {
+    Queue::fake();
+
     $skripsi = Skripsi::factory()->create([
         'id' => 99,
         'student_id' => '2301700099',

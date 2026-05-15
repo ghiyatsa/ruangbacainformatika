@@ -2,47 +2,28 @@
 
 namespace App\Observers;
 
+use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
-use App\Services\SimilarityApiService;
+use App\Services\SimilaritySyncDispatcher;
+use App\Services\SimilaritySyncStatusService;
 
 class SkripsiObserver
 {
-    public function __construct(
-        private readonly SimilarityApiService $api
-    ) {}
-
-    private function payload(Skripsi $skripsi): array
-    {
-        return [
-            'skripsi_id' => $skripsi->id,
-            'judul' => $skripsi->title,
-            'abstrak' => $skripsi->abstract,
-            'kata_kunci' => $skripsi->keywords,
-            'tahun' => $skripsi->year,
-            'program_studi' => 'Teknik Informatika',
-            'nim' => $skripsi->student_id,
-            'nama_mahasiswa' => $skripsi->author_name,
-        ];
-    }
-
     public function created(Skripsi $skripsi): void
     {
-        dispatch(function () use ($skripsi) {
-            $this->api->upsert($this->payload($skripsi));
-        })->afterResponse();
+        app(SimilaritySyncStatusService::class)->markQueued($skripsi);
+        app(SimilaritySyncDispatcher::class)->dispatchUpsert($skripsi->getKey());
     }
 
     public function updated(Skripsi $skripsi): void
     {
-        dispatch(function () use ($skripsi) {
-            $this->api->upsert($this->payload($skripsi));
-        })->afterResponse();
+        app(SimilaritySyncStatusService::class)->markQueued($skripsi);
+        app(SimilaritySyncDispatcher::class)->dispatchUpsert($skripsi->getKey());
     }
 
     public function deleted(Skripsi $skripsi): void
     {
-        dispatch(function () use ($skripsi) {
-            $this->api->delete($skripsi->id);
-        })->afterResponse();
+        app(SimilaritySyncStatusService::class)->markQueued($skripsi, SimilaritySyncStatus::OPERATION_DELETE);
+        app(SimilaritySyncDispatcher::class)->dispatchDelete($skripsi->getKey());
     }
 }

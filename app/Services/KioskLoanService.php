@@ -34,9 +34,9 @@ class KioskLoanService
             ]);
         }
 
-        if (! filled($member->whatsapp)) {
+        if (! $member->hasRequiredProfileDetails()) {
             throw ValidationException::withMessages([
-                'member_identifier' => 'Nomor WhatsApp wajib diisi pada profil sebelum meminjam buku.',
+                'member_identifier' => 'Nomor WhatsApp dan alamat wajib diisi pada profil sebelum meminjam buku.',
             ]);
         }
 

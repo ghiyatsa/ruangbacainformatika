@@ -1,12 +1,15 @@
 <?php
 
 use App\Models\Skripsi;
+use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
 test('skripsi detail page renders correctly', function () {
+    Queue::fake();
     $skripsi = Skripsi::factory()->create([
+
         'title' => 'Analisis Sistem Informasi Perpustakaan',
         'author_name' => 'Budi Santoso',
         'student_id' => '1234567890',
@@ -32,7 +35,9 @@ test('skripsi detail page returns 404 for unknown nim', function () {
 });
 
 test('skripsi detail page exposes keywords as array', function () {
+    Queue::fake();
     $skripsi = Skripsi::factory()->create([
+
         'keywords' => 'machine learning, deep learning, neural network',
     ]);
 
@@ -45,6 +50,7 @@ test('skripsi detail page exposes keywords as array', function () {
 });
 
 test('skripsi detail page returns empty keywords array when none set', function () {
+    Queue::fake();
     $skripsi = Skripsi::factory()->create(['keywords' => null]);
 
     get(route('skripsi.show', ['skripsi' => $skripsi->student_id]))

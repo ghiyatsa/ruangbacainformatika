@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
+use App\Services\SimilaritySyncStatusService;
 use Illuminate\Console\Command;
 
 class SyncSkripsiCommand extends Command
@@ -13,7 +14,8 @@ class SyncSkripsiCommand extends Command
     protected $description = 'Sinkronisasi seluruh data skripsi ke Similarity API';
 
     public function __construct(
-        private readonly SimilarityApiService $api
+        private readonly SimilarityApiService $api,
+        private readonly SimilaritySyncStatusService $statusService,
     ) {
         parent::__construct();
     }
@@ -46,6 +48,10 @@ class SyncSkripsiCommand extends Command
             'author_name',
         ])
             ->chunkById($chunk, function ($skripsis) use ($bar, &$success, &$failed) {
+                foreach ($skripsis as $skripsi) {
+                    $this->statusService->markProcessing($skripsi->id);
+                }
+
                 $items = $skripsis->map(fn ($s) => [
                     'skripsi_id' => $s->id,
                     'judul' => $s->title,
@@ -58,8 +64,19 @@ class SyncSkripsiCommand extends Command
                 ])->values()->toArray();
 
                 if ($this->api->bulkUpsert($items)) {
+                    foreach ($skripsis as $skripsi) {
+                        $this->statusService->markSynced($skripsi->id);
+                    }
+
                     $success += count($items);
                 } else {
+                    foreach ($skripsis as $skripsi) {
+                        $this->statusService->markFailed(
+                            $skripsi->id,
+                            'Bulk sinkronisasi ke Similarity API gagal.',
+                        );
+                    }
+
                     $failed += count($items);
                 }
 

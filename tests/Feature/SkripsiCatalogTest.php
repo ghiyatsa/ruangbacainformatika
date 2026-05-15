@@ -1,12 +1,15 @@
 <?php
 
 use App\Models\Skripsi;
+use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
 test('skripsi catalog page renders results', function () {
+    Queue::fake();
     Skripsi::factory()->create([
+
         'title' => 'Analisis Sistem Informasi',
         'author_name' => 'Budi Santoso',
         'year' => 2024,
@@ -24,7 +27,9 @@ test('skripsi catalog page renders results', function () {
 });
 
 test('skripsi catalog page filters by search keyword', function () {
+    Queue::fake();
     Skripsi::factory()->create(['title' => 'Sistem Informasi Akademik']);
+
     Skripsi::factory()->create(['title' => 'Jaringan Komputer']);
 
     get(route('skripsi.index', ['search' => 'Akademik']))
@@ -39,7 +44,9 @@ test('skripsi catalog page filters by search keyword', function () {
 });
 
 test('skripsi catalog page filters by year', function () {
+    Queue::fake();
     Skripsi::factory()->create([
+
         'title' => 'Skripsi 2024',
         'year' => 2024,
     ]);

@@ -1,10 +1,11 @@
 import { Form, Link } from '@inertiajs/react';
-import { AtSign, CheckCircle2, Phone, User } from 'lucide-react';
+import { AtSign, CheckCircle2, MapPin, Phone, User } from 'lucide-react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
 import { cn } from '@/lib/utils';
 import { send } from '@/routes/verification';
@@ -102,6 +103,25 @@ export function ProfileInformationForm({
                                 placeholder="08123456789"
                             />
                             <InputError message={errors.whatsapp} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label
+                                htmlFor="address"
+                                className="flex items-center gap-1.5"
+                            >
+                                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                                Alamat
+                            </Label>
+                            <Textarea
+                                id="address"
+                                className="min-h-28 w-full resize-y"
+                                defaultValue={user.address ?? ''}
+                                name="address"
+                                autoComplete="street-address"
+                                placeholder="Alamat lengkap Anda"
+                            />
+                            <InputError message={errors.address} />
                         </div>
 
                         {mustVerifyEmail && user.email_verified_at === null ? (
