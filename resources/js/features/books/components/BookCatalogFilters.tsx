@@ -163,7 +163,10 @@ export function BookCatalogFilters({
                     </Label>
                 </div>
 
-                <Separator orientation="vertical" className="h-8" />
+                <Separator
+                    orientation="vertical"
+                    className="hidden h-8 md:block"
+                />
 
                 {/* View Mode */}
                 <ToggleGroup
@@ -173,7 +176,7 @@ export function BookCatalogFilters({
                         val && onViewModeChange(val as ViewMode)
                     }
                     variant="outline"
-                    className="gap-0 -space-x-px"
+                    className="hidden gap-0 -space-x-px md:flex"
                 >
                     <ToggleGroupItem
                         value="grid"

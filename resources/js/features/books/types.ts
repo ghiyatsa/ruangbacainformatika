@@ -35,6 +35,7 @@ export interface BookCatalogPageProps {
 export interface BookData {
     id: number;
     title: string;
+    subtitle: string | null;
     slug: string;
     isbn: string | null;
     issn: string | null;

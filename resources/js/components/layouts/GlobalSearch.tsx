@@ -31,6 +31,24 @@ const EMPTY_RESULTS: SearchResponse = {
 
 const SEARCH_ENDPOINT = '/search';
 
+function GlobalSearchResultSkeleton() {
+    return (
+        <div className="flex items-center gap-3 rounded-lg px-3 py-3">
+            <Skeleton className="h-[3.375rem] w-9 shrink-0 rounded-sm" />
+
+            <div className="flex flex-1 flex-col gap-1">
+                <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-4 w-12 rounded-full" />
+                </div>
+                <Skeleton className="h-3 w-1/2" />
+            </div>
+
+            <Skeleton className="size-4 shrink-0 rounded-full" />
+        </div>
+    );
+}
+
 function flattenSearchResults(results: SearchResponse): SearchListItem[] {
     return [
         ...results.books.map((book) => ({
@@ -180,9 +198,14 @@ export function GlobalSearch() {
                                 {(isLoading || !hasResults) && (
                                     <CommandEmpty>
                                         {isLoading ? (
-                                            <div className="space-y-2 p-4">
-                                                <Skeleton className="h-4 w-full" />
-                                                <Skeleton className="h-4 w-3/4" />
+                                            <div className="space-y-1 p-2">
+                                                {Array.from({ length: 4 }).map(
+                                                    (_, index) => (
+                                                        <GlobalSearchResultSkeleton
+                                                            key={index}
+                                                        />
+                                                    ),
+                                                )}
                                             </div>
                                         ) : (
                                             'Tidak ada hasil ditemukan.'

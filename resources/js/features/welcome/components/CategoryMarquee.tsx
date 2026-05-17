@@ -19,6 +19,7 @@ interface CategoryMarqueeProps {
         name: string;
         slug: string;
         description: string | null;
+        booksCount: number;
     }[];
 }
 
@@ -62,7 +63,7 @@ export default function CategoryMarquee({
                         </h3>
                         <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                             {category.description ||
-                                'Jelajahi koleksi literatur dan referensi pada kategori ini.'}
+                                'Buku pilihan dalam kategori ini.'}
                         </p>
                     </Link>
                 </div>

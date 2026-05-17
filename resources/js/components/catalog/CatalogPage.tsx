@@ -1,3 +1,4 @@
+import { Deferred } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { CatalogPageLayout } from '@/components/catalog/CatalogPageLayout';
 import type { CatalogActiveFilters } from '@/components/catalog/types';
@@ -15,6 +16,7 @@ interface CatalogPageProps<T> {
     onRemoveFilter?: (key: string) => void;
     filtersPanel?: ReactNode;
     deferredData?: string;
+    loadingFallback?: ReactNode;
     paginationVisibility?: 'all' | 'desktop-only';
     children: ReactNode;
 }
@@ -30,9 +32,20 @@ export function CatalogPage<T>({
     onClearFilters,
     onRemoveFilter,
     filtersPanel,
+    deferredData,
+    loadingFallback,
     paginationVisibility,
     children,
 }: CatalogPageProps<T>) {
+    const content =
+        deferredData && loadingFallback ? (
+            <Deferred data={deferredData} fallback={loadingFallback}>
+                {children}
+            </Deferred>
+        ) : (
+            children
+        );
+
     return (
         <CatalogPageLayout
             title={title}
@@ -50,7 +63,7 @@ export function CatalogPage<T>({
                 <div className="flex flex-col gap-6">{filtersPanel}</div>
             ) : null}
 
-            {children}
+            {content}
         </CatalogPageLayout>
     );
 }

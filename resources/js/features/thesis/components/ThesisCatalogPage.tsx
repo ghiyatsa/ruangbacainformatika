@@ -1,6 +1,7 @@
+import { router } from '@inertiajs/react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
 import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
-import { router } from '@inertiajs/react';
+import { CatalogResourceCardSkeleton } from '@/components/resource/CatalogResourceCardSkeleton';
 import { ThesisCatalogFilters } from '@/features/thesis/components/ThesisCatalogFilters';
 import { ThesisCatalogResults } from '@/features/thesis/components/ThesisCatalogResults';
 import type { ThesisCatalogPageProps } from '@/features/thesis/types';
@@ -55,13 +56,20 @@ export default function ThesisCatalogPage({
                 />
             }
             deferredData="theses"
+            loadingFallback={
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                    {Array.from({ length: 10 }).map((_, index) => (
+                        <CatalogResourceCardSkeleton key={index} />
+                    ))}
+                </div>
+            }
         >
             <ThesisCatalogResults theses={theses} />
             <MobileProgressivePagination
+                key={JSON.stringify(filters)}
                 data={theses}
                 propKey="theses"
                 resourceLabel="tesis"
-                resetKey={JSON.stringify(filters)}
             />
         </CatalogPage>
     );

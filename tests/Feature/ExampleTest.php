@@ -57,6 +57,90 @@ it('home page does not expose search filtering', function () {
         );
 });
 
+it('home page previews the newest books instead of prioritizing featured books', function () {
+    Book::factory()
+        ->published()
+        ->featured()
+        ->create([
+            'title' => 'Buku Unggulan Lama',
+            'created_at' => now()->subWeek(),
+            'updated_at' => now()->subWeek(),
+        ]);
+
+    Book::factory()
+        ->published()
+        ->create([
+            'title' => 'Buku Terbaru',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+    get(route('home'))
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('welcome')
+                ->loadDeferredProps(
+                    fn (Assert $reload) => $reload
+                        ->where('books.data.0.title', 'Buku Terbaru')
+                        ->where('books.data.1.title', 'Buku Unggulan Lama')
+                ),
+        );
+});
+
+it('home page exposes popular categories and most viewed books', function () {
+    $artificialIntelligence = Category::factory()->create([
+        'name' => 'Kecerdasan Buatan',
+        'description' => 'Pembelajaran mesin dan sistem cerdas.',
+    ]);
+
+    $networking = Category::factory()->create([
+        'name' => 'Jaringan Komputer',
+    ]);
+
+    $mostViewedBook = Book::factory()
+        ->published()
+        ->create([
+            'title' => 'Deep Learning Praktis',
+            'view_count' => 42,
+        ]);
+
+    $lessViewedBook = Book::factory()
+        ->published()
+        ->create([
+            'title' => 'Dasar Jaringan',
+            'view_count' => 12,
+        ]);
+
+    Book::factory()
+        ->unpublished()
+        ->create([
+            'title' => 'Draft Tidak Tampil',
+            'view_count' => 99,
+        ]);
+
+    $mostViewedBook->categories()->attach($artificialIntelligence);
+    $lessViewedBook->categories()->attach($networking);
+
+    get(route('home'))
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('welcome')
+                ->has('categories', 2)
+                ->where('categories.0.name', 'Jaringan Komputer')
+                ->where('categories.0.booksCount', 1)
+                ->where('categories.1.name', 'Kecerdasan Buatan')
+                ->where('categories.1.description', 'Pembelajaran mesin dan sistem cerdas.')
+                ->where('categories.1.booksCount', 1)
+                ->loadDeferredProps(
+                    fn (Assert $reload) => $reload
+                        ->has('popularBooks', 2)
+                        ->where('popularBooks.0.title', 'Deep Learning Praktis')
+                        ->where('popularBooks.0.viewCount', 42)
+                        ->where('popularBooks.1.title', 'Dasar Jaringan')
+                ),
+        );
+});
+
 it('home page excludes non-borrowable books from available counts', function () {
     $book = Book::factory()
         ->published()

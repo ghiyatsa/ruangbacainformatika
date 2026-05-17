@@ -25,8 +25,8 @@ class HomeController extends Controller
                 'items',
                 'items as available_items_count' => fn ($query) => $query->available(),
             ])
-            ->orderByDesc('is_featured')
-            ->orderByDesc('published_year')
+            ->latest()
+            ->orderByDesc('id')
             ->orderBy('title')
             ->paginate(10);
 
@@ -41,6 +41,7 @@ class HomeController extends Controller
             ),
             'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
             'featuredBooks' => Inertia::defer(fn () => $this->featuredBooks()),
+            'popularBooks' => Inertia::defer(fn () => $this->popularBooks()),
             'books' => Inertia::defer(function () use ($books) {
                 $paginated = $books->toArray();
                 $paginated['data'] = BookResource::collection($books->getCollection())->resolve();
@@ -64,6 +65,26 @@ class HomeController extends Controller
                 'items as available_items_count' => fn ($query) => $query->available(),
             ])
             ->limit(5)
+            ->get();
+
+        return BookResource::collection($books)->resolve();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function popularBooks(): array
+    {
+        $books = Book::query()
+            ->published()
+            ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
+            ->withCount([
+                'items',
+                'items as available_items_count' => fn ($query) => $query->available(),
+            ])
+            ->orderByDesc('view_count')
+            ->orderBy('title')
+            ->limit(6)
             ->get();
 
         return BookResource::collection($books)->resolve();

@@ -1,14 +1,16 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, BookOpen, BookText, Search, Star } from 'lucide-react';
+import { ArrowRight, BookOpen, BookText, Search, Tags } from 'lucide-react';
 import CountUp from '@/components/common/CountUp';
 import ShinyText from '@/components/common/ShinyText';
 import StarBorder from '@/components/common/StarBorder';
 import { Kbd } from '@/components/ui/kbd';
 import type { WelcomeProps } from '@/features/welcome/types';
+import { RUANG_BACA_DESCRIPTION } from '@/lib/brand';
 import books from '@/routes/books';
 
 interface HeroProps {
     stats: WelcomeProps['stats'];
+    categoriesCount: number;
 }
 
 const STATS = [
@@ -25,16 +27,22 @@ const STATS = [
         suffix: '+',
     },
     {
-        key: 'featuredCount' as const,
-        label: 'Rekomendasi Unggulan',
-        icon: Star,
-        suffix: '',
+        key: 'categoriesCount' as const,
+        label: 'Kategori Aktif',
+        icon: Tags,
+        suffix: '+',
     },
 ];
 
-export default function Hero({ stats }: HeroProps) {
+export default function Hero({ stats, categoriesCount }: HeroProps) {
     const openSearch = () => {
         window.dispatchEvent(new CustomEvent('open-global-search'));
+    };
+
+    const statsValues = {
+        booksCount: stats.booksCount,
+        availableItemsCount: stats.availableItemsCount,
+        categoriesCount,
     };
 
     return (
@@ -86,9 +94,7 @@ export default function Hero({ stats }: HeroProps) {
                     </h1>
 
                     <p className="max-w-lg text-base leading-relaxed text-muted-foreground sm:max-w-xl sm:text-lg">
-                        Pusat riset, pembelajaran akademik, dan pengembangan
-                        literasi teknologi mahasiswa Program Studi Teknik
-                        Informatika Universitas Malikussaleh.
+                        {RUANG_BACA_DESCRIPTION}
                     </p>
 
                     <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
@@ -139,7 +145,7 @@ export default function Hero({ stats }: HeroProps) {
                                     </div>
                                     <div className="flex items-baseline gap-0.5">
                                         <CountUp
-                                            to={stats[key]}
+                                            to={statsValues[key]}
                                             duration={1.8}
                                             className="text-2xl font-bold text-foreground tabular-nums sm:text-3xl"
                                         />

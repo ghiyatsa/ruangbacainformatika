@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { PaginationData } from '@/types/pagination';
 
@@ -8,25 +8,18 @@ interface MobileProgressivePaginationProps<T> {
     data?: PaginationData<T>;
     propKey: string;
     resourceLabel: string;
-    resetKey: string;
 }
 
 export function MobileProgressivePagination<T>({
     data,
     propKey,
     resourceLabel,
-    resetKey,
 }: MobileProgressivePaginationProps<T>) {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isAutoLoadEnabled, setIsAutoLoadEnabled] = useState(false);
     const autoLoadTriggerRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-        setIsAutoLoadEnabled(false);
-        setIsLoadingMore(false);
-    }, [resetKey]);
-
-    function loadMore(): void {
+    const loadMore = useCallback((): void => {
         if (!data?.next_page_url || isLoadingMore) {
             return;
         }
@@ -38,7 +31,7 @@ export function MobileProgressivePagination<T>({
             onStart: () => setIsLoadingMore(true),
             onFinish: () => setIsLoadingMore(false),
         });
-    }
+    }, [data, isLoadingMore, propKey]);
 
     function enableAutoLoad(): void {
         if (isAutoLoadEnabled) {
@@ -79,7 +72,7 @@ export function MobileProgressivePagination<T>({
         observer.observe(triggerElement);
 
         return () => observer.disconnect();
-    }, [data?.next_page_url, isAutoLoadEnabled, isLoadingMore]);
+    }, [data?.next_page_url, isAutoLoadEnabled, isLoadingMore, loadMore]);
 
     if (!data?.next_page_url && !isAutoLoadEnabled) {
         return null;
@@ -115,7 +108,7 @@ export function MobileProgressivePagination<T>({
                             {isLoadingMore ? (
                                 <div className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
                                     <LoaderCircle className="size-4 animate-spin" />
-                                    Memuat data berikutnya...
+                                    Memuat {resourceLabel} berikutnya...
                                 </div>
                             ) : null}
                         </div>
@@ -130,7 +123,7 @@ export function MobileProgressivePagination<T>({
                             {isLoadingMore ? (
                                 <>
                                     <LoaderCircle className="size-4 animate-spin" />
-                                    Memuat data berikutnya...
+                                    Memuat {resourceLabel} berikutnya...
                                 </>
                             ) : (
                                 'Muat lebih banyak'

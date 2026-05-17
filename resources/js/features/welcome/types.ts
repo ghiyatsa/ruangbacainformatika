@@ -41,7 +41,9 @@ export type WelcomeProps = {
         name: string;
         slug: string;
         description: string | null;
+        booksCount: number;
     }[];
     featuredBooks: CatalogBook[];
+    popularBooks: CatalogBook[];
     books: PaginatedBooks;
 };

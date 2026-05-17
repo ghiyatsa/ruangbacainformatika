@@ -90,7 +90,7 @@ export default function BookDetailPage({
                                 <BreadcrumbItem>
                                     <BreadcrumbLink asChild>
                                         <Link href={booksRoute.index.url()}>
-                                            Katalog
+                                            Katalog Buku
                                         </Link>
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
@@ -146,6 +146,12 @@ export default function BookDetailPage({
                                 <h1 className="mb-3 text-3xl leading-tight font-bold tracking-tight sm:text-4xl lg:text-5xl">
                                     {book.title}
                                 </h1>
+
+                                {book.subtitle ? (
+                                    <p className="mb-3 max-w-3xl text-base leading-relaxed text-muted-foreground italic sm:text-lg">
+                                        {book.subtitle}
+                                    </p>
+                                ) : null}
 
                                 <p className="mb-6 text-base font-medium text-muted-foreground sm:text-lg">
                                     {book.authors.length > 0

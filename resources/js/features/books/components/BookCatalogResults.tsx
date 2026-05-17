@@ -7,7 +7,6 @@ import {
     EmptyTitle,
 } from '@/components/ui/empty';
 import BookCard from '@/features/books/components/BookCard';
-import BookListItem from '@/features/books/components/BookListItem';
 import type { ViewMode } from '@/features/books/types';
 import type { PaginatedBooks } from '@/features/welcome/types';
 
@@ -30,16 +29,15 @@ export function BookCatalogResults({
                 viewMode === 'list' ? (
                     <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                         {books.data.map((book) => (
-                            <div
+                            <BookCard
                                 key={book.id}
-                                className="overflow-hidden rounded-xl border bg-card"
-                            >
-                                <BookListItem book={book} />
-                            </div>
+                                book={book}
+                                variant="compact"
+                            />
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6">
                         {books.data.map((book) => (
                             <BookCard key={book.id} book={book} />
                         ))}

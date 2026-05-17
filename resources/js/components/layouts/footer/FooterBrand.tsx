@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { Mail, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 import { RuangBacaLogo } from '@/components/common/RuangBacaLogo';
+import { RUANG_BACA_DESCRIPTION } from '@/lib/brand';
 import { home } from '@/routes';
 import { fadeUp } from './constants';
 
@@ -31,9 +32,7 @@ export function FooterBrand() {
             </Link>
 
             <p className="mb-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                Perpustakaan digital resmi Program Studi Teknik Informatika
-                Universitas Malikussaleh. Mendukung riset, pembelajaran
-                akademik, dan pengembangan literasi teknologi mahasiswa.
+                {RUANG_BACA_DESCRIPTION}
             </p>
 
             <div className="flex flex-col gap-2.5">

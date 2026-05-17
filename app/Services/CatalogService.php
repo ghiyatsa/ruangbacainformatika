@@ -41,7 +41,7 @@ class CatalogService
     public function getCategoriesWithCounts(): Collection
     {
         return Category::query()
-            ->select(['id', 'name', 'slug'])
+            ->select(['id', 'name', 'slug', 'description'])
             ->withCount([
                 'books as books_count' => fn (Builder $query): Builder => $query->published(),
             ])
@@ -51,6 +51,7 @@ class CatalogService
                 'id' => $category->id,
                 'name' => $category->name,
                 'slug' => $category->slug,
+                'description' => $category->description,
                 'booksCount' => (int) ($category->books_count ?? 0),
             ]);
     }

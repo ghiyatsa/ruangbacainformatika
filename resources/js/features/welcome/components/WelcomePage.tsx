@@ -1,5 +1,5 @@
 import { SeoHead } from '@/components/common/SeoHead';
-import CatalogSection from '@/features/welcome/components/CatalogSection';
+import CatalogSection from '@/features/welcome/components/catalog/CatalogSection';
 import CategoryMarquee from '@/features/welcome/components/CategoryMarquee';
 import Hero from '@/features/welcome/components/Hero';
 import type { WelcomeProps } from '@/features/welcome/types';
@@ -7,9 +7,14 @@ import type { WelcomeProps } from '@/features/welcome/types';
 export default function WelcomePage({
     stats,
     featuredBooks,
+    popularBooks,
     books,
     categories,
 }: WelcomeProps) {
+    const activeCategoriesCount = categories.filter(
+        (category) => category.booksCount > 0,
+    ).length;
+
     return (
         <>
             <SeoHead
@@ -28,14 +33,19 @@ export default function WelcomePage({
             />
 
             <div className="relative z-10">
-                <Hero stats={stats} />
+                <Hero
+                    stats={stats}
+                    categoriesCount={activeCategoriesCount}
+                />
 
                 <CategoryMarquee categories={categories} />
 
                 <CatalogSection
                     stats={stats}
                     featuredBooks={featuredBooks}
+                    popularBooks={popularBooks}
                     books={books}
+                    categories={categories}
                 />
             </div>
         </>

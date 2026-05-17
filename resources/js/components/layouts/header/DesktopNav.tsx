@@ -19,15 +19,15 @@ interface DesktopNavProps {
 
 export function DesktopNav({ isActive }: DesktopNavProps) {
     return (
-        <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList className="gap-1">
+        <NavigationMenu className="hidden min-w-0 md:flex">
+            <NavigationMenuList className="gap-0.5 lg:gap-1">
                 {NAV_LINKS.map((item) => (
                     <NavigationMenuItem key={item.label}>
                         {item.children ? (
                             <>
                                 <NavigationMenuTrigger
                                     className={cn(
-                                        'h-10 bg-transparent px-4 font-medium transition-colors',
+                                        'h-10 bg-transparent px-3 text-sm font-medium transition-colors lg:px-4',
                                         item.children.some((child) =>
                                             isActive(child.href),
                                         )
@@ -59,7 +59,7 @@ export function DesktopNav({ isActive }: DesktopNavProps) {
                                 active={item.href ? isActive(item.href) : false}
                                 className={cn(
                                     navigationMenuTriggerStyle(),
-                                    'h-10 bg-transparent px-4 font-medium transition-colors',
+                                    'h-10 bg-transparent px-3 text-sm font-medium transition-colors lg:px-4',
                                     item.href && isActive(item.href)
                                         ? 'text-primary'
                                         : 'text-muted-foreground hover:text-foreground',

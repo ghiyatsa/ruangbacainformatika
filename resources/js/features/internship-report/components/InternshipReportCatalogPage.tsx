@@ -1,6 +1,7 @@
+import { router } from '@inertiajs/react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
 import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
-import { router } from '@inertiajs/react';
+import { CatalogResourceCardSkeleton } from '@/components/resource/CatalogResourceCardSkeleton';
 import type { InternshipReportCatalogPageProps } from '@/features/internship-report/types';
 import internshipReportRoute from '@/routes/internship-reports';
 import { InternshipReportCatalogFilters } from './InternshipReportCatalogFilters';
@@ -55,13 +56,20 @@ export default function InternshipReportCatalogPage({
                 />
             }
             deferredData="reports"
+            loadingFallback={
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                    {Array.from({ length: 10 }).map((_, index) => (
+                        <CatalogResourceCardSkeleton key={index} />
+                    ))}
+                </div>
+            }
         >
             <InternshipReportCatalogResults reports={reports} />
             <MobileProgressivePagination
+                key={JSON.stringify(filters)}
                 data={reports}
                 propKey="reports"
                 resourceLabel="laporan"
-                resetKey={JSON.stringify(filters)}
             />
         </CatalogPage>
     );
