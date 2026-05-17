@@ -19,7 +19,7 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->searchPlaceholder('Cari nama, email, atau WhatsApp')
+            ->searchPlaceholder('Cari nama, email, WhatsApp, atau alamat')
             ->emptyStateHeading('Belum ada pengguna')
             ->emptyStateDescription('Data pengguna akan tampil di sini.')
             ->defaultPaginationPageOption(25)
@@ -37,6 +37,12 @@ class UsersTable
                     ->sortable()
                     ->copyable()
                     ->copyMessage('WhatsApp berhasil disalin'),
+                TextColumn::make('address')
+                    ->label('Alamat')
+                    ->searchable()
+                    ->limit(40)
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('roles.name')
                     ->badge()
                     ->label('Peran')

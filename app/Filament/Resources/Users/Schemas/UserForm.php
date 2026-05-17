@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -53,6 +54,13 @@ class UserForm
                     ->nullable()
                     ->unique(ignoreRecord: true)
                     ->placeholder('0812xxxxxx'),
+                Textarea::make('address')
+                    ->label('Alamat')
+                    ->nullable()
+                    ->maxLength(1000)
+                    ->rows(3)
+                    ->columnSpanFull()
+                    ->placeholder('Masukkan alamat lengkap pengguna'),
             ]);
     }
 }
