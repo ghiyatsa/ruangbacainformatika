@@ -55,7 +55,8 @@ export function MobileSheet({
 
             <SheetContent
                 side="right"
-                className="w-[min(92vw,24rem)] border-l border-border/60 bg-background/95 p-0 backdrop-blur-xl"
+                overlayClassName="bg-black/5 supports-backdrop-filter:backdrop-blur-none"
+                className="w-[min(92vw,24rem)] transform-gpu will-change-transform border-l border-border/60 bg-background p-0 shadow-xl [contain:layout_paint] data-closed:duration-150 data-open:duration-200"
             >
                 <SheetHeader className="gap-3 border-b border-border/60 px-5 py-4 text-left">
                     <AppLogo />

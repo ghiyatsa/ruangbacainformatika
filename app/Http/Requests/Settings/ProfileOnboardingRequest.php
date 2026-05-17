@@ -15,17 +15,21 @@ class ProfileOnboardingRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
+
         return [
-            'whatsapp' => $this->whatsappRules(required: true, ignoreId: $this->user()?->id),
-            'address' => $this->addressRules(required: true),
+            'whatsapp' => $this->whatsappRules(required: blank($user?->whatsapp), ignoreId: $user?->id),
+            'address' => $this->addressRules(required: blank($user?->address)),
         ];
     }
 
     protected function prepareForValidation(): void
     {
+        $user = $this->user();
+
         $this->merge([
-            'whatsapp' => trim((string) $this->input('whatsapp')),
-            'address' => str((string) $this->input('address'))->squish()->toString(),
+            'whatsapp' => trim((string) ($this->input('whatsapp') ?: $user?->whatsapp)),
+            'address' => str((string) ($this->input('address') ?: $user?->address))->squish()->toString(),
         ]);
     }
 }

@@ -161,3 +161,34 @@ it('google users can access onboarding only once', function () {
         ->get(route('register.profile'))
         ->assertRedirect(route('settings.profile.edit', absolute: false));
 });
+
+it('legacy users with whatsapp only can complete onboarding by adding an address', function () {
+    $user = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'address' => null,
+        'profile_completed_at' => null,
+    ]);
+
+    actingAs($user)
+        ->get(route('register.profile'))
+        ->assertInertia(
+            fn (AssertableInertia $page) => $page
+                ->component('auth/register-profile')
+                ->where('auth.user.whatsapp', '08123456789')
+                ->where('auth.user.address', null),
+        );
+
+    actingAs($user)
+        ->patch(route('register.profile.store'), [
+            'address' => 'Jl. Merdeka No. 1',
+        ])
+        ->assertRedirect(route('settings.profile.edit', absolute: false));
+
+    assertDatabaseHas('users', [
+        'id' => $user->id,
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Merdeka No. 1',
+    ]);
+
+    expect($user->fresh()->profile_completed_at)->not->toBeNull();
+});

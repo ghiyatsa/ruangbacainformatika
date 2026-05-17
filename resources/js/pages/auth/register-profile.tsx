@@ -10,6 +10,7 @@ import { logout } from '@/routes';
 
 export default function RegisterProfile() {
     const { auth } = usePage().props;
+    const hasWhatsapp = Boolean(auth.user.whatsapp);
 
     return (
         <>
@@ -44,7 +45,8 @@ export default function RegisterProfile() {
                                     id="whatsapp"
                                     name="whatsapp"
                                     type="tel"
-                                    autoFocus
+                                    defaultValue={auth.user.whatsapp ?? ''}
+                                    autoFocus={!hasWhatsapp}
                                     required
                                     autoComplete="tel"
                                     placeholder="08123456789"
@@ -57,14 +59,17 @@ export default function RegisterProfile() {
                                 <Textarea
                                     id="address"
                                     name="address"
+                                    defaultValue={auth.user.address ?? ''}
                                     required
                                     autoComplete="street-address"
                                     className="min-h-28 resize-y"
+                                    autoFocus={hasWhatsapp}
                                     placeholder="Masukkan alamat lengkap Anda"
                                 />
                                 <p className="text-sm text-muted-foreground">
-                                    Nomor WhatsApp dan alamat wajib diisi sebelum
-                                    akun bisa digunakan untuk meminjam buku.
+                                    {hasWhatsapp
+                                        ? 'Nomor WhatsApp sudah tersimpan. Lengkapi alamat agar akun bisa digunakan untuk meminjam buku.'
+                                        : 'Nomor WhatsApp dan alamat wajib diisi sebelum akun bisa digunakan untuk meminjam buku.'}
                                 </p>
                                 <InputError message={errors.address} />
                             </div>
