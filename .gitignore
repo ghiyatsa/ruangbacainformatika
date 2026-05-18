@@ -14,6 +14,7 @@
 .env
 .env.backup
 .env.production
+mailpit.exe
 .phpactor.json
 .phpunit.result.cache
 Homestead.json

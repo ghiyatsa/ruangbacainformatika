@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Kiosk\BorrowBookRequest;
+use App\Http\Requests\Kiosk\RegisterMemberRequest;
 use App\Http\Requests\Kiosk\ReturnBookRequest;
 use App\Http\Requests\Kiosk\SearchBooksRequest;
 use App\Http\Requests\Kiosk\SubmitVisitRequest;
@@ -14,6 +15,7 @@ use App\Models\VisitLog;
 use App\Repositories\SettingRepository;
 use App\Services\KioskLoanService;
 use App\Services\KioskPinManager;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,7 +52,7 @@ class KioskController extends Controller
                 'step' => 'pin',
                 'activeMenu' => 'landing',
                 'pageTitle' => 'Aktifkan Kiosk',
-                'pageSubtitle' => 'Masukkan PIN dari super admin untuk mengaktifkan perangkat ini.',
+                'pageSubtitle' => 'Masukkan PIN perangkat untuk mengaktifkan kiosk ini.',
                 'siteName' => $siteSettings['site_name'],
                 'siteTagline' => $siteSettings['site_tagline'],
                 'loanMaxBooks' => max((int) $librarySettings['loan_max_books'], 1),
@@ -84,7 +86,7 @@ class KioskController extends Controller
     {
         if (! $this->kioskPinManager->isConfigured()) {
             return back()->withErrors([
-                'pin' => 'PIN kiosk belum diatur oleh super admin.',
+                'pin' => 'PIN kiosk belum tersedia. Silakan hubungi petugas perpustakaan.',
             ])->onlyInput('pin');
         }
 
@@ -94,18 +96,24 @@ class KioskController extends Controller
             ])->onlyInput('pin');
         }
 
-        return redirect()
-            ->route('kiosk.index')
-            ->with('success', 'PIN berhasil diverifikasi.');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'PIN berhasil diverifikasi.',
+        ]);
+
+        return redirect()->route('kiosk.index');
     }
 
-    public function storeMember(Request $request, CreatesNewUsers $creator): RedirectResponse
+    public function storeMember(RegisterMemberRequest $request, CreatesNewUsers $creator): RedirectResponse
     {
-        $creator->create($request->all());
+        $creator->create($request->validated());
 
-        return redirect()
-            ->route('kiosk.index')
-            ->with('success', 'Pendaftaran member berhasil. Silakan gunakan akun Anda untuk layanan mandiri.');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Pendaftaran member berhasil. Silakan gunakan akun Anda untuk layanan mandiri.',
+        ]);
+
+        return redirect()->route('kiosk.index');
     }
 
     public function store(SubmitVisitRequest $request): RedirectResponse
@@ -115,9 +123,12 @@ class KioskController extends Controller
             'visited_at' => now(),
         ]);
 
-        return redirect()
-            ->route('kiosk.index')
-            ->with('success', 'Data kunjungan berhasil disimpan.');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Data kunjungan berhasil disimpan.',
+        ]);
+
+        return redirect()->route('kiosk.index');
     }
 
     public function searchBooks(SearchBooksRequest $request): JsonResponse
@@ -148,9 +159,12 @@ class KioskController extends Controller
             $request->validatedBookIds(),
         );
 
-        return redirect()
-            ->route('kiosk.index')
-            ->with('success', "Peminjaman untuk {$loan->user->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.");
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => "Peminjaman untuk {$loan->user->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
+        ]);
+
+        return redirect()->route('kiosk.index');
     }
 
     public function storeReturn(ReturnBookRequest $request): RedirectResponse
@@ -160,12 +174,15 @@ class KioskController extends Controller
             $request->validatedBookIds(),
         );
 
-        return redirect()
-            ->route('kiosk.index')
-            ->with('success', "{$returnedCount} buku berhasil dikembalikan.");
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => "{$returnedCount} buku berhasil dikembalikan.",
+        ]);
+
+        return redirect()->route('kiosk.index');
     }
 
-    protected function searchBorrowableBooks(string $search)
+    protected function searchBorrowableBooks(string $search): EloquentCollection
     {
         return Book::query()
             ->search($search)
@@ -181,14 +198,14 @@ class KioskController extends Controller
             ->get();
     }
 
-    protected function searchReturnableBooks(string $search, string $memberIdentifier)
+    protected function searchReturnableBooks(string $search, string $memberIdentifier): EloquentCollection
     {
         $member = filled($memberIdentifier)
             ? $this->kioskLoanService->findMemberByIdentifier($memberIdentifier)
             : null;
 
         if (! $member || ! $member->hasRole('member')) {
-            return collect();
+            return new EloquentCollection;
         }
 
         return Book::query()

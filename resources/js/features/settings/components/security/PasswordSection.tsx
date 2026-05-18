@@ -4,9 +4,12 @@ import type { RefObject } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import InputError from '@/components/common/InputError';
 import PasswordInput from '@/components/common/PasswordInput';
+import PasswordRequirements from '@/components/common/PasswordRequirements';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
+import { PASSWORD_MIN_LENGTH } from '@/lib/password-requirements';
+import { useState } from 'react';
 
 interface PasswordSectionProps {
     currentPasswordInput: RefObject<HTMLInputElement | null>;
@@ -17,6 +20,11 @@ export function PasswordSection({
     currentPasswordInput,
     passwordInput,
 }: PasswordSectionProps) {
+    const [password, setPassword] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const passwordsDoNotMatch =
+        passwordConfirmation.length > 0 && password !== passwordConfirmation;
+
     return (
         <section className="flex flex-col gap-6">
             <SettingsSectionHeader
@@ -73,7 +81,13 @@ export function PasswordSection({
                                 className="w-full"
                                 autoComplete="new-password"
                                 placeholder="Kata sandi baru"
+                                minLength={PASSWORD_MIN_LENGTH}
+                                value={password}
+                                onChange={(event) =>
+                                    setPassword(event.target.value)
+                                }
                             />
+                            <PasswordRequirements password={password} />
                             <InputError message={formErrors.password} />
                         </div>
 
@@ -87,7 +101,19 @@ export function PasswordSection({
                                 className="w-full"
                                 autoComplete="new-password"
                                 placeholder="Konfirmasi kata sandi baru"
+                                minLength={PASSWORD_MIN_LENGTH}
+                                value={passwordConfirmation}
+                                onChange={(event) =>
+                                    setPasswordConfirmation(
+                                        event.target.value,
+                                    )
+                                }
                             />
+                            {passwordsDoNotMatch ? (
+                                <p className="text-sm text-amber-600 dark:text-amber-400">
+                                    Konfirmasi kata sandi belum sama.
+                                </p>
+                            ) : null}
                             <InputError
                                 message={formErrors.password_confirmation}
                             />

@@ -93,13 +93,13 @@ it('password can be updated', function () {
         ->from(route('settings.security.edit'))
         ->put(route('settings.password.update'), [
             'current_password' => 'password',
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'password' => 'PasswordAman123!',
+            'password_confirmation' => 'PasswordAman123!',
         ])
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('settings.security.edit'));
 
-    expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
+    expect(Hash::check('PasswordAman123!', $user->refresh()->password))->toBeTrue();
 });
 
 it('correct password must be provided to update password', function () {
@@ -110,9 +110,41 @@ it('correct password must be provided to update password', function () {
         ->from(route('settings.security.edit'))
         ->put(route('settings.password.update'), [
             'current_password' => 'wrong-password',
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'password' => 'PasswordAman123!',
+            'password_confirmation' => 'PasswordAman123!',
         ])
         ->assertSessionHasErrors('current_password')
         ->assertRedirect(route('settings.security.edit'));
+});
+
+it('password update requires a strong password', function () {
+    $user = User::factory()->create();
+
+    /** @var User $user */
+    actingAs($user)
+        ->from(route('settings.security.edit'))
+        ->put(route('settings.password.update'), [
+            'current_password' => 'password',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])
+        ->assertSessionHasErrors('password')
+        ->assertRedirect(route('settings.security.edit'));
+});
+
+it('password update accepts password that meets the minimum rule', function () {
+    $user = User::factory()->create();
+
+    /** @var User $user */
+    actingAs($user)
+        ->from(route('settings.security.edit'))
+        ->put(route('settings.password.update'), [
+            'current_password' => 'password',
+            'password' => 'member123',
+            'password_confirmation' => 'member123',
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('settings.security.edit'));
+
+    expect(Hash::check('member123', $user->refresh()->password))->toBeTrue();
 });

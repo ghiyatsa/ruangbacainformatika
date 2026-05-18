@@ -10,6 +10,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -83,19 +84,23 @@ class EmailVerificationController extends Controller
 
         $cachedOtp = Cache::get("email_verification_otp_{$request->user()->id}");
 
-        if (! $cachedOtp || $cachedOtp != $request->otp) {
+        if (! is_string($cachedOtp) || ! Hash::check((string) $request->otp, $cachedOtp)) {
             return back()->withErrors(['otp' => 'Kode OTP tidak valid atau sudah kadaluarsa.']);
         }
 
         $request->user()->markEmailAsVerified();
+        $request->user()->trustUserAgent($request->userAgent());
         Cache::forget("email_verification_otp_{$request->user()->id}");
 
         event(new Verified($request->user()));
 
         if ($request->session()->pull(RegisterResponse::KIOSK_RETURN_AFTER_VERIFICATION_KEY, false)) {
-            return redirect()
-                ->route('kiosk.index')
-                ->with('success', 'Email berhasil diverifikasi. Silakan lanjut menggunakan kiosk.');
+            Inertia::flash('toast', [
+                'type' => 'success',
+                'message' => 'Email berhasil diverifikasi. Silakan lanjut menggunakan kiosk.',
+            ]);
+
+            return redirect()->route('kiosk.index');
         }
 
         return $this->authenticationRedirector

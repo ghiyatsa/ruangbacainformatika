@@ -70,7 +70,7 @@ class CatalogReportsTable
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('Belum ada laporan katalog')
-            ->emptyStateDescription('Laporan dari halaman detail katalog akan tampil di sini.');
+            ->emptyStateHeading('Belum ada umpan balik katalog')
+            ->emptyStateDescription('Masukan dari halaman detail katalog akan tampil di sini.');
     }
 }

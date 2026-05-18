@@ -6,3 +6,8 @@ cwd = "E:\\Laravel\\ruangbaca"
 [mcp_servers.shadcn]
 command = "npx"
 args = ["shadcn@latest", "mcp"]
+
+[mcp_servers.MCP_DOCKER]
+command = "docker"
+args = ["mcp", "gateway", "run", "--profile", "my_profile"]
+type = "stdio"

@@ -15,7 +15,7 @@ class RemindReturnCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $tomorrow = now()->addDay()->startOfDay();
         $tomorrowEnd = now()->addDay()->endOfDay();
@@ -31,7 +31,7 @@ class RemindReturnCommand extends Command
         if ($loans->isEmpty()) {
             $this->info('No books are due tomorrow.');
 
-            return;
+            return self::SUCCESS;
         }
 
         $this->info("Sending reminders for {$loans->count()} loans...");
@@ -43,5 +43,7 @@ class RemindReturnCommand extends Command
         }
 
         $this->info('Reminders sent successfully!');
+
+        return self::SUCCESS;
     }
 }

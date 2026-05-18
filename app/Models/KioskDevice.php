@@ -10,6 +10,7 @@ class KioskDevice extends Model
         'session_id',
         'device_token',
         'ip_address',
+        'network_scope',
         'user_agent',
         'name',
         'last_active_at',

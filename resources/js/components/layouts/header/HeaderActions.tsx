@@ -72,7 +72,7 @@ export function HeaderActions({
                     <DropdownMenuTrigger asChild>
                         <button
                             className="flex h-9 w-9 items-center justify-center rounded-full ring-2 ring-transparent transition-all duration-200 hover:ring-primary/40 focus-visible:ring-primary/60 focus-visible:outline-none"
-                            aria-label="User menu"
+                            aria-label="Menu pengguna"
                         >
                             <UserAvatar name={auth.user.name} />
                         </button>

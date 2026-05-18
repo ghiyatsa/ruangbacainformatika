@@ -57,10 +57,6 @@ class HandleInertiaRequests extends Middleware
                     : app(AuthenticationRedirector::class)->pathFor($request->user()),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'flash' => [
-                'success' => $session?->get('success'),
-                'error' => $session?->get('error'),
-            ],
             'status' => $session?->get('status'),
             'verification_resend_available_at' => $session?->get('verification_resend_available_at'),
             'password_reset_resend_available_at' => $session?->get('password_reset_resend_available_at'),

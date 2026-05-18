@@ -249,8 +249,8 @@ export function ContactPage() {
 
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <p className="text-sm text-muted-foreground">
-                                            Tim admin akan menerima pesan ini
-                                            melalui panel Filament.
+                                            Pesan Anda akan diterima oleh tim
+                                            pengelola perpustakaan.
                                         </p>
 
                                         <Button

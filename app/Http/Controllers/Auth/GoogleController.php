@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
-use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 use Throwable;
 
@@ -77,9 +76,9 @@ class GoogleController extends Controller
                 ])->save();
             }
 
-            if (Role::query()->where('name', 'member')->exists() && $user->shouldReceiveMemberRole()) {
-                $user->assignRole('member');
-            }
+            $user->trustUserAgent(request()->userAgent());
+
+            $user->assignMemberRoleIfAvailable();
 
             Auth::guard('web')->login($user);
             request()->session()->put('auth.password_confirmed_at', time());

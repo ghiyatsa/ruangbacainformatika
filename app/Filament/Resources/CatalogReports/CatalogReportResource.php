@@ -27,13 +27,13 @@ class CatalogReportResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Operasional';
 
-    protected static ?string $navigationLabel = 'Laporan Katalog';
+    protected static ?string $navigationLabel = 'Umpan Balik';
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $modelLabel = 'Laporan katalog';
+    protected static ?string $modelLabel = 'Umpan balik';
 
-    protected static ?string $pluralModelLabel = 'Laporan katalog';
+    protected static ?string $pluralModelLabel = 'Umpan balik';
 
     protected static ?string $recordTitleAttribute = 'catalog_title';
 
@@ -53,7 +53,7 @@ class CatalogReportResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Laporan menunggu tindak lanjut';
+        return 'Umpan balik menunggu tindak lanjut';
     }
 
     public static function getNavigationBadgeColor(): string|array|null

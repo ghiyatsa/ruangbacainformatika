@@ -27,13 +27,13 @@ class ContactMessageResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Operasional';
 
-    protected static ?string $navigationLabel = 'Pesan Kontak';
+    protected static ?string $navigationLabel = 'Korespondensi';
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $modelLabel = 'Pesan kontak';
+    protected static ?string $modelLabel = 'Korespondensi';
 
-    protected static ?string $pluralModelLabel = 'Pesan kontak';
+    protected static ?string $pluralModelLabel = 'Korespondensi';
 
     protected static ?string $recordTitleAttribute = 'subject';
 
@@ -53,7 +53,7 @@ class ContactMessageResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Pesan kontak baru';
+        return 'Korespondensi baru';
     }
 
     public static function getNavigationBadgeColor(): string|array|null

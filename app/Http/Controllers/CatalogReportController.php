@@ -40,7 +40,7 @@ class CatalogReportController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => 'Laporan berhasil dikirim. Admin akan meninjau data ini.',
+            'message' => 'Laporan berhasil dikirim. Tim pengelola perpustakaan akan meninjau data ini.',
         ]);
 
         return back(status: 303);

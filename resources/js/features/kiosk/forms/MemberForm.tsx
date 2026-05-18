@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
 import { KioskField } from '@/features/kiosk/components/KioskField';
 
 export function MemberForm() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
+    const [address, setAddress] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
 
@@ -19,6 +21,7 @@ export function MemberForm() {
         name.trim() !== '' &&
         email.trim() !== '' &&
         whatsapp.trim() !== '' &&
+        address.trim() !== '' &&
         password !== '' &&
         passwordConfirmation !== '';
 
@@ -103,6 +106,25 @@ export function MemberForm() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 aria-invalid={Boolean(errors.password)}
+                            />
+                        </KioskField>
+
+                        <KioskField
+                            label="Alamat"
+                            htmlFor="reg-address"
+                            error={errors.address}
+                            required
+                            className="sm:col-span-2"
+                        >
+                            <Textarea
+                                id="reg-address"
+                                name="address"
+                                autoComplete="street-address"
+                                placeholder="Alamat lengkap"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                aria-invalid={Boolean(errors.address)}
+                                rows={3}
                             />
                         </KioskField>
 

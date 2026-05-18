@@ -18,7 +18,7 @@ class ContactMessageController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => 'Pesan Anda berhasil dikirim. Admin akan segera meninjau kontak ini.',
+            'message' => 'Pesan Anda berhasil dikirim. Tim pengelola perpustakaan akan segera menindaklanjuti.',
         ]);
 
         return back(status: 303);

@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('loans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('kiosk_device_id')->nullable()->constrained()->nullOnDelete();
             $table->string('status')->default('borrowed');
             $table->timestamp('borrowed_at');
             $table->timestamp('due_at')->nullable();
             $table->timestamp('returned_at')->nullable();
+            $table->timestamp('reminder_sent_at')->nullable();
             $table->timestamps();
 
             $table->index(['user_id', 'status']);

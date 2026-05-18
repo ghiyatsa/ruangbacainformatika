@@ -51,8 +51,8 @@ it('password can be reset with valid token', function () {
         post(route('password.update'), [
             'token' => $notification->token,
             'email' => $user->email,
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'PasswordAman123!',
+            'password_confirmation' => 'PasswordAman123!',
         ])
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('login'));
@@ -67,7 +67,47 @@ it('password cannot be reset with invalid token', function () {
     post(route('password.update'), [
         'token' => 'invalid-token',
         'email' => $user->email,
-        'password' => 'newpassword123',
-        'password_confirmation' => 'newpassword123',
+        'password' => 'PasswordAman123!',
+        'password_confirmation' => 'PasswordAman123!',
     ])->assertSessionHasErrors('email');
+});
+
+it('password reset requires a strong password', function () {
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    post(route('password.email'), ['email' => $user->email]);
+
+    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+        post(route('password.update'), [
+            'token' => $notification->token,
+            'email' => $user->email,
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertSessionHasErrors('password');
+
+        return true;
+    });
+});
+
+it('password reset accepts password that meets the minimum rule', function () {
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    post(route('password.email'), ['email' => $user->email]);
+
+    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+        post(route('password.update'), [
+            'token' => $notification->token,
+            'email' => $user->email,
+            'password' => 'member123',
+            'password_confirmation' => 'member123',
+        ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('login'));
+
+        return true;
+    });
 });

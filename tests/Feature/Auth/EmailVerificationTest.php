@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Features;
 use Spatie\Permission\Models\Role;
 
@@ -24,21 +25,24 @@ it('email can be verified', function () {
     $user = User::factory()->unverified()->create();
 
     Event::fake();
-    Cache::put("email_verification_otp_{$user->id}", '123456', now()->addMinutes(10));
+    Cache::put("email_verification_otp_{$user->id}", Hash::make('123456'), now()->addMinutes(10));
 
     actingAs($user)->post(route('verification.submit'), [
         'otp' => '123456',
+    ], [
+        'User-Agent' => 'Verification Browser',
     ])->assertRedirect(route('home', absolute: false));
 
     Event::assertDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
+    expect($user->fresh()->hasVerifiedEmail())->toBeTrue()
+        ->and($user->fresh()->verified_user_agent_hash)->toBe(User::userAgentFingerprint('Verification Browser'));
 });
 
 it('email is not verified with invalid otp', function () {
     $user = User::factory()->unverified()->create();
 
     Event::fake();
-    Cache::put("email_verification_otp_{$user->id}", '123456', now()->addMinutes(10));
+    Cache::put("email_verification_otp_{$user->id}", Hash::make('123456'), now()->addMinutes(10));
 
     actingAs($user)->post(route('verification.submit'), [
         'otp' => '654321',
@@ -82,7 +86,7 @@ it('verified administrative users are redirected to admin after email verificati
     $user->assignRole('super_admin');
 
     Event::fake();
-    Cache::put("email_verification_otp_{$user->id}", '123456', now()->addMinutes(10));
+    Cache::put("email_verification_otp_{$user->id}", Hash::make('123456'), now()->addMinutes(10));
 
     actingAs($user)->post(route('verification.submit'), [
         'otp' => '123456',

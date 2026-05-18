@@ -21,7 +21,25 @@ class SearchBooksRequest extends FormRequest
         return [
             'q' => ['nullable', 'string', 'max:255'],
             'mode' => ['nullable', 'string', 'in:borrow,return'],
-            'member_identifier' => ['nullable', 'string', 'max:255'],
+            'member_identifier' => [
+                'nullable',
+                'string',
+                'max:255',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $identifier = Str::of((string) $value)->trim()->lower()->toString();
+
+                    if ($identifier === '') {
+                        return;
+                    }
+
+                    $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL) !== false;
+                    $isNim = preg_match('/^\d{9}$/', $identifier) === 1;
+
+                    if (! $isEmail && ! $isNim) {
+                        $fail('Masukkan email lengkap atau NIM 9 digit.');
+                    }
+                },
+            ],
         ];
     }
 
@@ -30,7 +48,7 @@ class SearchBooksRequest extends FormRequest
         $this->merge([
             'q' => Str::of((string) $this->input('q'))->squish()->toString(),
             'mode' => Str::of((string) $this->input('mode'))->lower()->trim()->toString(),
-            'member_identifier' => Str::of((string) $this->input('member_identifier'))->squish()->toString(),
+            'member_identifier' => Str::of((string) $this->input('member_identifier'))->trim()->lower()->toString(),
         ]);
     }
 

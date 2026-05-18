@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('catalog_type', 50)->index();
             $table->morphs('reportable');
             $table->string('catalog_title');
-            $table->string('catalog_identifier')->nullable();
+            $table->string('catalog_url')->nullable();
             $table->string('reporter_name')->nullable();
             $table->string('reporter_email')->nullable();
             $table->text('message');

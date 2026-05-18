@@ -59,18 +59,32 @@ class SimilarityController extends Controller
                 }
 
                 return response()->json([
-                    'message' => 'Gagal melakukan pemindaian kemiripan. Jika masalah berlanjut, hubungi administrator untuk memastikan indeks data sudah tersedia.',
+                    'message' => 'Gagal melakukan pemindaian kemiripan. Jika masalah berlanjut, silakan hubungi tim pengelola perpustakaan.',
                 ], 500);
             }
 
             if (! empty($hasil['results'])) {
-                $skripsiIds = collect($hasil['results'])->pluck('skripsi_id')->filter()->toArray();
+                $skripsiIds = collect($hasil['results'])
+                    ->pluck('id')
+                    ->filter(fn ($id) => is_numeric($id))
+                    ->map(fn ($id) => (int) $id)
+                    ->values()
+                    ->all();
+
                 $skripsis = Skripsi::whereIn('id', $skripsiIds)
-                    ->get(['id', 'student_id'])
+                    ->get(['id', 'title', 'author_name', 'student_id'])
                     ->keyBy('id');
 
                 $hasil['results'] = array_map(function ($item) use ($skripsis) {
-                    $item['student_id'] = $skripsis->get($item['skripsi_id'])?->student_id;
+                    $skripsiId = isset($item['id']) && is_numeric($item['id'])
+                        ? (int) $item['id']
+                        : null;
+                    $skripsi = $skripsiId !== null ? $skripsis->get($skripsiId) : null;
+
+                    $item['skripsi_id'] = $skripsiId;
+                    $item['judul'] = $skripsi?->title ?? 'Data skripsi tidak ditemukan';
+                    $item['nama_mahasiswa'] = $skripsi?->author_name ?? 'Tidak diketahui';
+                    $item['student_id'] = $skripsi?->student_id;
 
                     // Normalize similarity_persen to float if it's a string like "98.1%"
                     if (is_string($item['similarity_persen'])) {

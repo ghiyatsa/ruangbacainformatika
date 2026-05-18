@@ -60,13 +60,13 @@ export default function AuthLayout({
 
                 {isCardLayout && (
                     <FieldDescription className="text-center">
-                        By clicking continue, you agree to our{' '}
+                        Dengan melanjutkan, Anda menyetujui{' '}
                         <a href="#" className="underline underline-offset-4">
-                            Terms of Service
+                            Syarat dan Ketentuan
                         </a>{' '}
-                        and{' '}
+                        serta{' '}
                         <a href="#" className="underline underline-offset-4">
-                            Privacy Policy
+                            Kebijakan Privasi
                         </a>
                         .
                     </FieldDescription>

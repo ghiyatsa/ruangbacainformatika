@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Throwable;
 
 class VerifyEmailOtpNotification extends Notification implements ShouldQueue
@@ -41,7 +42,7 @@ class VerifyEmailOtpNotification extends Notification implements ShouldQueue
     {
         $otp = random_int(100000, 999999);
 
-        Cache::put("email_verification_otp_{$notifiable->id}", $otp, now()->addMinutes(15));
+        Cache::put("email_verification_otp_{$notifiable->id}", Hash::make((string) $otp), now()->addMinutes(15));
 
         return (new MailMessage)
             ->subject('Verifikasi Email - Kode OTP')

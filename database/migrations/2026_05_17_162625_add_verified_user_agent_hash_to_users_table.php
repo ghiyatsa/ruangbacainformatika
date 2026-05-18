@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('address');
+            $table->string('verified_user_agent_hash', 64)
+                ->nullable()
+                ->after('email_verified_at');
         });
     }
 
@@ -22,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->text('address')->nullable()->after('whatsapp');
+            $table->dropColumn('verified_user_agent_hash');
         });
     }
 };

@@ -43,7 +43,7 @@ jobs:
           node-version: '24'
 
       - name: Install Node Dependencies
-        run: npm i
+        run: npm ci
 
       - name: Add Flux Credentials Loaded From ENV
         run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
@@ -62,6 +62,14 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
+      - name: Run Code Style Checks
+        run: composer lint:check
+
+      - name: Run Frontend Checks
+        run: |
+          npm run lint:check
+          npm run types:check
+
       - name: Build Assets
         run: npm run build
 
@@ -69,4 +77,4 @@ jobs:
         run: php artisan migrate --force
 
       - name: Run Tests
-        run: ./vendor/bin/pest
+        run: php artisan test --compact

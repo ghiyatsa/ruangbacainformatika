@@ -42,6 +42,11 @@ class ContactMessagePolicy
         return $authUser->can('DeleteAny:ContactMessage');
     }
 
+    public function restore(AuthUser $authUser, ContactMessage $contactMessage): bool
+    {
+        return $authUser->can('Restore:ContactMessage');
+    }
+
     public function forceDelete(AuthUser $authUser, ContactMessage $contactMessage): bool
     {
         return $authUser->can('ForceDelete:ContactMessage');
@@ -50,11 +55,6 @@ class ContactMessagePolicy
     public function forceDeleteAny(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDeleteAny:ContactMessage');
-    }
-
-    public function restore(AuthUser $authUser, ContactMessage $contactMessage): bool
-    {
-        return $authUser->can('Restore:ContactMessage');
     }
 
     public function restoreAny(AuthUser $authUser): bool

@@ -37,3 +37,20 @@ test('unpublished book detail page returns 404', function () {
     get(route('books.show', $book))
         ->assertNotFound();
 });
+
+test('book editor state is persisted as structured data', function () {
+    $book = Book::factory()->create([
+        'cover_image_editor_state' => [
+            'x' => 12,
+            'y' => 8,
+            'zoom' => 1.2,
+        ],
+    ]);
+
+    expect($book->fresh()->cover_image_editor_state)
+        ->toBe([
+            'x' => 12,
+            'y' => 8,
+            'zoom' => 1.2,
+        ]);
+});

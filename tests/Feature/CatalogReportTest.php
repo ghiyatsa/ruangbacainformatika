@@ -22,7 +22,8 @@ test('guest can submit a catalog report for a published book', function () {
         'reporter_email' => 'mahasiswa@example.com',
         'message' => 'ISBN yang tampil tidak sesuai dengan data pada sampul buku.',
     ])
-        ->assertRedirect();
+        ->assertRedirect()
+        ->assertSessionHas('inertia.flash_data.toast.message', 'Laporan berhasil dikirim. Tim pengelola perpustakaan akan meninjau data ini.');
 
     assertDatabaseHas('catalog_reports', [
         'catalog_type' => CatalogReport::CATALOG_TYPE_BOOK,

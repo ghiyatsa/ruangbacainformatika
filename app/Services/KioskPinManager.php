@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\KioskDevice;
 use App\Repositories\SettingRepository;
+use App\Support\KioskNetworkGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +20,7 @@ class KioskPinManager
 
     public function __construct(
         protected SettingRepository $settingRepository,
+        protected KioskNetworkGuard $kioskNetworkGuard,
     ) {}
 
     public function isConfigured(): bool
@@ -47,7 +49,11 @@ class KioskPinManager
         if ($deviceToken && $currentPinHash) {
             $device = KioskDevice::query()->where('device_token', $deviceToken)->first();
 
-            if ($device) {
+            if (
+                $device
+                && $device->network_scope !== null
+                && $device->network_scope === $this->kioskNetworkGuard->networkScopeForRequest($request)
+            ) {
                 // Re-verify session
                 $request->session()->put(self::SESSION_PIN_HASH_KEY, $currentPinHash);
                 $request->session()->put(self::SESSION_VERSION_KEY, $this->currentSessionVersion());
@@ -57,6 +63,7 @@ class KioskPinManager
                     'session_id' => $request->session()->getId(),
                     'last_active_at' => now(),
                     'ip_address' => $request->ip(),
+                    'network_scope' => $this->kioskNetworkGuard->networkScopeForRequest($request),
                 ]);
 
                 return true;
@@ -89,6 +96,7 @@ class KioskPinManager
             [
                 'device_token' => $deviceToken,
                 'ip_address' => $request->ip(),
+                'network_scope' => $this->kioskNetworkGuard->networkScopeForRequest($request),
                 'user_agent' => $request->userAgent(),
                 'last_active_at' => now(),
             ]

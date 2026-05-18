@@ -13,7 +13,8 @@ it('visitors can submit the contact form', function () {
             'subject' => 'Pertanyaan layanan koleksi',
             'message' => 'Saya ingin menanyakan proses pembaruan data akun pada layanan ruang baca.',
         ])
-        ->assertRedirect(route('contact'));
+        ->assertRedirect(route('contact'))
+        ->assertSessionHas('inertia.flash_data.toast.message', 'Pesan Anda berhasil dikirim. Tim pengelola perpustakaan akan segera menindaklanjuti.');
 
     $this->assertDatabaseHas(ContactMessage::class, [
         'name' => 'Pengunjung Demo',

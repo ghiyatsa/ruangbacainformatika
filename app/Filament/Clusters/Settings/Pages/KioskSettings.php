@@ -6,9 +6,12 @@ use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Models\KioskDevice;
 use App\Repositories\SettingRepository;
 use App\Services\KioskPinManager;
+use App\Support\KioskNetworkGuard;
 use BackedEnum;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput as FormTextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -22,6 +25,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 
 class KioskSettings extends Page implements HasTable
@@ -71,6 +75,22 @@ class KioskSettings extends Page implements HasTable
                             ->required(fn (): bool => ! $this->kioskPinManager()->isConfigured())
                             ->minLength(4)
                             ->maxLength(8),
+                        Textarea::make('allowed_networks')
+                            ->label('Allowlist IP / Subnet')
+                            ->rows(4)
+                            ->placeholder("127.0.0.1\n192.168.10.0/24\n10.10.0.0/16")
+                            ->helperText('Kosongkan untuk mengizinkan semua jaringan. Pisahkan IP atau CIDR dengan baris baru atau koma.')
+                            ->rule(function (): Closure {
+                                return function (string $attribute, mixed $value, Closure $fail): void {
+                                    $invalidNetworks = collect($this->kioskNetworkGuard()->normalizeNetworks($value))
+                                        ->reject(fn (string $network): bool => $this->kioskNetworkGuard()->isValidNetwork($network))
+                                        ->values();
+
+                                    if ($invalidNetworks->isNotEmpty()) {
+                                        $fail('Format jaringan tidak valid: '.Arr::join($invalidNetworks->all(), ', '));
+                                    }
+                                };
+                            }),
                     ]),
 
                 Section::make('Perangkat Aktif')
@@ -117,19 +137,23 @@ class KioskSettings extends Page implements HasTable
     public function save(): void
     {
         $data = $this->form->getState();
+        $pinWasUpdated = filled($data['pin'] ?? null);
 
-        if (filled($data['pin'] ?? null)) {
+        if ($pinWasUpdated) {
             $this->settingRepository()->put('kiosk', 'pin_hash', Hash::make((string) $data['pin']));
+            $this->kioskPinManager()->rotateSessions();
         }
 
         $this->settingRepository()->putMany('kiosk', [
             'title' => $data['title'] ?? null,
             'subtitle' => $data['subtitle'] ?? null,
+            'allowed_networks' => collect($this->kioskNetworkGuard()->normalizeNetworks($data['allowed_networks'] ?? ''))->implode(PHP_EOL),
         ]);
 
         Notification::make()
             ->success()
             ->title('Pengaturan kios disimpan')
+            ->body($pinWasUpdated ? 'PIN diperbarui dan semua sesi perangkat lama telah direset.' : null)
             ->send();
 
         $this->form->fill($this->settingRepository()->sectionValues('kiosk', $this->defaultValues()));
@@ -142,6 +166,7 @@ class KioskSettings extends Page implements HasTable
     {
         return [
             'pin' => '',
+            'allowed_networks' => '',
             'title' => 'Pendataan Pengunjung Perpustakaan',
             'subtitle' => 'Silakan masukkan PIN untuk mengaktifkan perangkat kios.',
         ];
@@ -218,5 +243,10 @@ class KioskSettings extends Page implements HasTable
     protected function kioskPinManager(): KioskPinManager
     {
         return app(KioskPinManager::class);
+    }
+
+    protected function kioskNetworkGuard(): KioskNetworkGuard
+    {
+        return app(KioskNetworkGuard::class);
     }
 }

@@ -36,8 +36,8 @@ export class ErrorBoundary extends Component<Props, State> {
                             errors={['Terjadi kesalahan pada aplikasi.']}
                         />
                         <p className="mt-4 text-center text-sm text-muted-foreground">
-                            Silakan muat ulang halaman atau hubungi
-                            administrator jika masalah berlanjut.
+                            Silakan muat ulang halaman atau hubungi tim
+                            pengelola jika masalah berlanjut.
                         </p>
                         <div className="mt-4 flex justify-center">
                             <Button

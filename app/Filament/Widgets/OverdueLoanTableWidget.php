@@ -15,7 +15,7 @@ class OverdueLoanTableWidget extends BaseTableWidget
 {
     protected static ?int $sort = 3;
 
-    protected static ?string $heading = 'Peminjaman Terlambat';
+    protected static ?string $heading = 'Pinjaman Terlambat';
 
     protected int|string|array $columnSpan = 'full';
 
@@ -78,14 +78,14 @@ class OverdueLoanTableWidget extends BaseTableWidget
             ])
             ->recordActions([
                 Action::make('view')
-                    ->label('Lihat Detail')
+                    ->label('Lihat')
                     ->icon(Heroicon::OutlinedEye)
                     ->url(fn (Loan $record): string => LoanResource::getUrl('view', ['record' => $record->user]))
                     ->openUrlInNewTab(),
             ])
             ->emptyStateIcon(Heroicon::OutlinedCheckCircle)
-            ->emptyStateHeading('Tidak ada peminjaman terlambat')
-            ->emptyStateDescription('Semua peminjaman aktif masih dalam batas waktu.')
+            ->emptyStateHeading('Tidak ada pinjaman terlambat')
+            ->emptyStateDescription('Semua pinjaman masih tepat waktu.')
             ->paginated([5, 10]);
     }
 }

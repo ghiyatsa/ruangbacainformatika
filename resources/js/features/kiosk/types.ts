@@ -28,10 +28,3 @@ export interface KioskBookSearchResult {
     isBorrowable: boolean;
     isAvailable: boolean;
 }
-
-export interface FlashProps {
-    [key: string]: unknown;
-    flash?: {
-        success?: string;
-    };
-}

@@ -19,10 +19,10 @@ export default function BookCardSkeleton({
         >
             <Skeleton
                 className={cn(
-                    'w-24 shrink-0 self-stretch rounded-none',
+                    'aspect-3/4 w-32 shrink-0 self-start rounded-none',
                     isCompact
-                        ? 'sm:w-28'
-                        : 'sm:aspect-3/4 sm:h-auto sm:w-full sm:self-auto',
+                        ? 'sm:w-36'
+                        : 'sm:h-auto sm:w-full sm:self-auto',
                 )}
             />
 

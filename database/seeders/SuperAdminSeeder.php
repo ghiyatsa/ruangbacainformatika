@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 class SuperAdminSeeder extends Seeder
@@ -14,16 +15,26 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $role = Role::firstOrCreate(['name' => 'super_admin']);
+        $role = Role::query()->firstOrCreate([
+            'name' => 'super_admin',
+            'guard_name' => 'web',
+        ]);
 
-        $user = User::firstOrCreate(
-            ['email' => 'said.230170162@mhs.unimal.ac.id'],
+        $name = (string) config('app.super_admin.name');
+        $email = Str::lower((string) config('app.super_admin.email'));
+        $password = (string) config('app.super_admin.password');
+        $whatsapp = (string) config('app.super_admin.whatsapp');
+        $address = (string) config('app.super_admin.address');
+
+        $user = User::query()->updateOrCreate(
+            ['email' => $email],
             [
-                'name' => 'Super Admin',
-                'password' => Hash::make('password'),
+                'name' => $name,
+                'password' => Hash::make($password),
                 'email_verified_at' => now(),
                 'is_approved' => true,
-                'whatsapp' => '08123456789',
+                'whatsapp' => filled($whatsapp) ? $whatsapp : null,
+                'address' => filled($address) ? $address : null,
                 'profile_completed_at' => now(),
             ]
         );

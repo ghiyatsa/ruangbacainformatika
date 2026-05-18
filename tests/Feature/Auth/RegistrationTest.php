@@ -3,8 +3,10 @@
 use App\Http\Responses\Auth\RegisterResponse;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
+use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertAuthenticated;
@@ -15,6 +17,7 @@ use function Pest\Laravel\post;
 
 beforeEach(function () {
     skipUnlessFortifyHas(Features::registration());
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 });
 
 it('registration screen can be rendered', function () {
@@ -33,8 +36,8 @@ it('new users can register', function () {
         'name' => 'Test User',
         'email' => '230170001@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'PasswordAman123!',
+        'password_confirmation' => 'PasswordAman123!',
     ])
         ->assertRedirect(route('verification.notice', absolute: false))
         ->assertSessionHas(
@@ -50,8 +53,8 @@ it('new users can register with name prefix in email', function () {
         'name' => 'Zakiatunniza',
         'email' => 'zakiatunniza.230170013@mhs.unimal.ac.id',
         'whatsapp' => '08123456780',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'PasswordAman123!',
+        'password_confirmation' => 'PasswordAman123!',
     ])->assertRedirect(route('verification.notice', absolute: false));
 
     assertAuthenticated();
@@ -62,8 +65,8 @@ it('users cannot register with non-campus email', function () {
         'name' => 'Test User',
         'email' => 'test@example.com',
         'whatsapp' => '08123456789',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'PasswordAman123!',
+        'password_confirmation' => 'PasswordAman123!',
     ])
         ->assertSessionHasErrors('email')
         ->assertRedirect(route('register'));
@@ -74,11 +77,35 @@ it('mahasiswa outside teknik informatika cannot register', function () {
         'name' => 'Test User',
         'email' => '230160001@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'PasswordAman123!',
+        'password_confirmation' => 'PasswordAman123!',
     ])
         ->assertSessionHasErrors('email')
         ->assertRedirect(route('register'));
+});
+
+it('registration requires a strong password', function () {
+    from(route('register'))->post(route('register'), [
+        'name' => 'Test User',
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])
+        ->assertSessionHasErrors('password')
+        ->assertRedirect(route('register'));
+});
+
+it('registration accepts password that meets the minimum rule', function () {
+    post(route('register'), [
+        'name' => 'Minimal Password User',
+        'email' => '230170088@mhs.unimal.ac.id',
+        'whatsapp' => '08123456781',
+        'password' => 'member123',
+        'password_confirmation' => 'member123',
+    ])->assertRedirect(route('verification.notice', absolute: false));
+
+    assertAuthenticated();
 });
 
 it('manual registration stores whatsapp when provided', function () {
@@ -86,8 +113,8 @@ it('manual registration stores whatsapp when provided', function () {
         'name' => 'Test User',
         'email' => '230170009@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'PasswordAman123!',
+        'password_confirmation' => 'PasswordAman123!',
     ]);
 
     $user = User::query()->where('email', '230170009@mhs.unimal.ac.id')->firstOrFail();
@@ -95,13 +122,27 @@ it('manual registration stores whatsapp when provided', function () {
     expect($user->whatsapp)->toBe('08123456789');
 });
 
+it('manual registration assigns the member role when available', function () {
+    post(route('register'), [
+        'name' => 'Role Test User',
+        'email' => '230170099@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'password' => 'PasswordAman123!',
+        'password_confirmation' => 'PasswordAman123!',
+    ]);
+
+    $user = User::query()->where('email', '230170099@mhs.unimal.ac.id')->firstOrFail();
+
+    expect($user->hasRole('member'))->toBeTrue();
+});
+
 it('kiosk registration redirects to email verification and returns to kiosk after verification', function () {
     post(route('register'), [
         'name' => 'Kiosk User',
         'email' => '230170010@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'PasswordAman123!',
+        'password_confirmation' => 'PasswordAman123!',
         'redirect_to' => route('kiosk.index', absolute: false),
     ])->assertRedirect(route('verification.notice', absolute: false));
 
@@ -110,12 +151,13 @@ it('kiosk registration redirects to email verification and returns to kiosk afte
     assertAuthenticatedAs($user);
     expect(session()->has(RegisterResponse::KIOSK_RETURN_AFTER_VERIFICATION_KEY))->toBeTrue();
 
-    Cache::put("email_verification_otp_{$user->id}", '123456', now()->addMinutes(10));
+    Cache::put("email_verification_otp_{$user->id}", Hash::make('123456'), now()->addMinutes(10));
 
     actingAs($user)
         ->withSession([RegisterResponse::KIOSK_RETURN_AFTER_VERIFICATION_KEY => true])
         ->post(route('verification.submit'), [
             'otp' => '123456',
         ])
-        ->assertRedirect(route('kiosk.index'));
+        ->assertRedirect(route('kiosk.index'))
+        ->assertSessionHas('inertia.flash_data.toast.message', 'Email berhasil diverifikasi. Silakan lanjut menggunakan kiosk.');
 });

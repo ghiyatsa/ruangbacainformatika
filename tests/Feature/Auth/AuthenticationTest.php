@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use App\Notifications\Auth\VerifyEmailOtpNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
@@ -35,6 +37,27 @@ it('users can authenticate using the login screen', function () {
         ->assertRedirect(route('home', absolute: false));
 
     assertAuthenticated();
+});
+
+it('users must verify their email again when logging in from a new user agent', function () {
+    Notification::fake();
+
+    $user = User::factory()->create([
+        'verified_user_agent_hash' => User::userAgentFingerprint('Known Browser'),
+    ]);
+
+    post(route('login'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ], [
+        'User-Agent' => 'Different Browser',
+    ])
+        ->assertRedirect(route('verification.notice', absolute: false))
+        ->assertSessionHas('status');
+
+    Notification::assertSentTo($user, VerifyEmailOtpNotification::class);
+
+    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
 });
 
 it('administrative users are redirected to admin after login', function () {

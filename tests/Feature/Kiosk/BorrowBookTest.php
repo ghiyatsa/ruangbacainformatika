@@ -16,6 +16,20 @@ use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\instance;
 
+it('kiosk borrowing rejects partial member identifiers', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $response = $this->post(route('kiosk.loans.borrow'), [
+        'member_identifier' => '170020',
+        'book_ids' => [1],
+    ]);
+
+    $response->assertSessionHasErrors('member_identifier');
+});
+
 it('members must fill whatsapp and address before borrowing books', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
@@ -126,7 +140,10 @@ it('borrows selected books from kiosk using book ids', function () {
 
     $response
         ->assertRedirect(route('kiosk.index'))
-        ->assertSessionHas('success');
+        ->assertSessionHas(
+            'inertia.flash_data.toast.message',
+            "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
+        );
 
     Notification::assertSentTo($member, LoanReceiptNotification::class);
 
@@ -180,7 +197,7 @@ it('stores kiosk borrowing even when receipt email dispatch fails', function () 
     $response
         ->assertRedirect(route('kiosk.index'))
         ->assertSessionHas(
-            'success',
+            'inertia.flash_data.toast.message',
             "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
         );
 
@@ -308,7 +325,10 @@ it('returns selected books from kiosk using book ids', function () {
 
     $response
         ->assertRedirect(route('kiosk.index'))
-        ->assertSessionHas('success');
+        ->assertSessionHas(
+            'inertia.flash_data.toast.message',
+            '1 buku berhasil dikembalikan.',
+        );
 
     expect($loanItem->fresh()->returned_at)->not->toBeNull()
         ->and($bookItem->fresh()->status)->toBe('available')

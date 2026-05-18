@@ -20,7 +20,7 @@ export default function BookCollectionViewToggle({
 }: BookCollectionViewToggleProps) {
     return (
         <TooltipProvider>
-            <div className="flex items-center gap-1 rounded-lg border bg-muted/50 p-1">
+            <div className="hidden items-center gap-1 rounded-lg border bg-muted/50 p-1 sm:flex">
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button

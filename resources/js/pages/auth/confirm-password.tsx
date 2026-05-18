@@ -9,7 +9,7 @@ import { store } from '@/routes/password/confirm';
 export default function ConfirmPassword() {
     return (
         <>
-            <Head title="Confirm password" />
+            <Head title="Konfirmasi password" />
 
             <div className="flex flex-col gap-6">
                 <Form
@@ -24,7 +24,7 @@ export default function ConfirmPassword() {
                                 <PasswordInput
                                     id="password"
                                     name="password"
-                                    placeholder="Password"
+                                    placeholder="Masukkan password"
                                     autoComplete="current-password"
                                     autoFocus
                                 />
@@ -39,7 +39,7 @@ export default function ConfirmPassword() {
                                 size={'lg'}
                             >
                                 {processing && <Spinner />}
-                                Confirm password
+                                Konfirmasi password
                             </Button>
                         </div>
                     )}
@@ -50,7 +50,7 @@ export default function ConfirmPassword() {
 }
 
 ConfirmPassword.layout = {
-    title: 'Confirm your password',
+    title: 'Konfirmasi password Anda',
     description:
-        'This is a secure area of the application. Please confirm your password before continuing.',
+        'Ini adalah area aman aplikasi. Silakan konfirmasi password Anda sebelum melanjutkan.',
 };

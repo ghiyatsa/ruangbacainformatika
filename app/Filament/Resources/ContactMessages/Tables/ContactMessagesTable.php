@@ -62,7 +62,7 @@ class ContactMessagesTable
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('Belum ada pesan kontak')
-            ->emptyStateDescription('Pesan dari halaman contact akan tampil di sini.');
+            ->emptyStateHeading('Belum ada korespondensi')
+            ->emptyStateDescription('Pesan dari halaman kontak akan tampil di sini.');
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureKioskNetworkIsAllowed;
 use App\Http\Middleware\EnsureKioskPinIsValid;
 use App\Http\Middleware\EnsureProfileIsCompleted;
 use App\Http\Middleware\HandleAppearance;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'profile.completed' => EnsureProfileIsCompleted::class,
             'kiosk.pin' => EnsureKioskPinIsValid::class,
+            'kiosk.network' => EnsureKioskNetworkIsAllowed::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

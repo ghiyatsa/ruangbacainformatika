@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->text('address')->nullable()->after('whatsapp');
+        Schema::table('kiosk_devices', function (Blueprint $table) {
+            $table->string('network_scope')->nullable()->after('ip_address');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('address');
+        Schema::table('kiosk_devices', function (Blueprint $table) {
+            $table->dropColumn('network_scope');
         });
     }
 };

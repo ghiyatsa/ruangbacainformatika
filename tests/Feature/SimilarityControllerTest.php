@@ -28,6 +28,8 @@ test('similarity check normalizes api results for frontend', function () {
 
     $skripsi = Skripsi::factory()->create([
         'id' => 99,
+        'title' => 'Analisis Sentimen',
+        'author_name' => 'Nadia',
         'student_id' => '2301700099',
     ]);
 
@@ -38,9 +40,8 @@ test('similarity check normalizes api results for frontend', function () {
             'total_found' => 1,
             'results' => [
                 [
-                    'skripsi_id' => $skripsi->id,
-                    'judul' => 'Analisis Sentimen',
-                    'nama_mahasiswa' => 'Nadia',
+                    'id' => $skripsi->id,
+                    'similarity_score' => 0.981,
                     'similarity_persen' => '98.1%',
                     'level' => 'sangat tinggi',
                 ],
@@ -58,10 +59,32 @@ test('similarity check normalizes api results for frontend', function () {
             'results' => [
                 [
                     'skripsi_id' => 99,
+                    'judul' => 'Analisis Sentimen',
+                    'nama_mahasiswa' => 'Nadia',
                     'student_id' => '2301700099',
                     'similarity_persen' => 98.1,
                     'level' => 'SANGAT TINGGI',
                 ],
             ],
+        ]);
+});
+
+test('similarity check returns a neutral failure message when the service is unavailable internally', function () {
+    $service = Mockery::mock(SimilarityApiService::class);
+    $service->shouldReceive('checkSimilarity')
+        ->once()
+        ->andReturn(null);
+    $service->shouldReceive('isHealthy')
+        ->once()
+        ->andReturn(true);
+
+    app()->instance(SimilarityApiService::class, $service);
+
+    postJson(route('similarity.check'), [
+        'judul' => 'Analisis sentimen media sosial untuk layanan akademik kampus merdeka',
+    ])
+        ->assertStatus(500)
+        ->assertJson([
+            'message' => 'Gagal melakukan pemindaian kemiripan. Jika masalah berlanjut, silakan hubungi tim pengelola perpustakaan.',
         ]);
 });

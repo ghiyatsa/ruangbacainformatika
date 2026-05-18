@@ -171,19 +171,22 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
             >
                 <div
                     className={cn(
-                        'relative w-24 shrink-0 self-stretch overflow-hidden bg-muted',
-                        isCompact
-                            ? 'sm:w-28'
-                            : 'sm:aspect-3/4 sm:h-auto sm:w-full sm:self-auto',
+                        'relative aspect-3/4 w-32 shrink-0 self-start overflow-hidden bg-muted',
+                        isCompact ? 'sm:w-36' : 'sm:h-auto sm:w-full sm:self-auto',
                     )}
                 >
                     <CoverImage
                         src={book.coverImageUrl}
                         alt={book.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className={cn(
+                            'h-full w-full transition-transform duration-500 group-hover:scale-105',
+                            isCompact
+                                ? 'object-contain'
+                                : 'object-contain sm:object-cover',
+                        )}
                     />
 
-                    <div className="absolute inset-0 bg-linear-to-t from-black/92 via-black/45 to-black/10 opacity-100 transition-opacity duration-300 sm:from-black/60 sm:via-transparent sm:to-transparent sm:opacity-0 sm:group-hover:opacity-100" />
+                    <div className="absolute inset-0 hidden bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 sm:block sm:group-hover:opacity-100" />
 
                     <div className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold text-white shadow-sm backdrop-blur-sm">
                         <Eye className="size-3" />

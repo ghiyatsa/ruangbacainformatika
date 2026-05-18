@@ -15,11 +15,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
     'name',
     'email',
+    'verified_user_agent_hash',
     'password',
     'auth_provider',
     'whatsapp',
@@ -95,9 +97,71 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return ! $this->hasAdministrativeRole() && ! $this->hasRole('member');
     }
 
+    public function assignMemberRoleIfAvailable(): void
+    {
+        if (! Role::query()->where('name', 'member')->exists()) {
+            return;
+        }
+
+        if (! $this->shouldReceiveMemberRole()) {
+            return;
+        }
+
+        $this->assignRole('member');
+    }
+
     public function canAccessAdminPanel(): bool
     {
         return $this->hasVerifiedEmail() && $this->hasAdministrativeRole();
+    }
+
+    public static function userAgentFingerprint(?string $userAgent): ?string
+    {
+        $normalizedUserAgent = Str::of((string) $userAgent)
+            ->trim()
+            ->squish()
+            ->toString();
+
+        if ($normalizedUserAgent === '') {
+            return null;
+        }
+
+        return hash('sha256', $normalizedUserAgent);
+    }
+
+    public function shouldTrustCurrentUserAgent(?string $userAgent): bool
+    {
+        return $this->hasVerifiedEmail()
+            && blank($this->verified_user_agent_hash)
+            && filled(static::userAgentFingerprint($userAgent));
+    }
+
+    public function requiresEmailVerificationForUserAgent(?string $userAgent): bool
+    {
+        if (! $this->hasVerifiedEmail()) {
+            return false;
+        }
+
+        $fingerprint = static::userAgentFingerprint($userAgent);
+
+        if ($fingerprint === null || blank($this->verified_user_agent_hash)) {
+            return false;
+        }
+
+        return ! hash_equals((string) $this->verified_user_agent_hash, $fingerprint);
+    }
+
+    public function trustUserAgent(?string $userAgent): void
+    {
+        $fingerprint = static::userAgentFingerprint($userAgent);
+
+        if ($fingerprint === null) {
+            return;
+        }
+
+        $this->forceFill([
+            'verified_user_agent_hash' => $fingerprint,
+        ])->saveQuietly();
     }
 
     public function hasRequiredProfileDetails(): bool

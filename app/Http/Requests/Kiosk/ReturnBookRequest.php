@@ -15,7 +15,20 @@ class ReturnBookRequest extends KioskBookActionRequest
     public function rules(): array
     {
         return [
-            'member_identifier' => ['required', 'string', 'max:255'],
+            'member_identifier' => [
+                'required',
+                'string',
+                'max:255',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $identifier = Str::of((string) $value)->trim()->lower()->toString();
+                    $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL) !== false;
+                    $isNim = preg_match('/^\d{9}$/', $identifier) === 1;
+
+                    if (! $isEmail && ! $isNim) {
+                        $fail('Masukkan email lengkap atau NIM 9 digit.');
+                    }
+                },
+            ],
             'book_ids' => ['required', 'array', 'min:1'],
             'book_ids.*' => [
                 'required',
@@ -37,7 +50,7 @@ class ReturnBookRequest extends KioskBookActionRequest
             ->all();
 
         $this->merge([
-            'member_identifier' => Str::of((string) $this->input('member_identifier'))->squish()->toString(),
+            'member_identifier' => Str::of((string) $this->input('member_identifier'))->trim()->lower()->toString(),
             'book_ids' => $bookIds,
         ]);
     }

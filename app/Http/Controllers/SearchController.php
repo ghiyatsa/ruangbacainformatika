@@ -10,6 +10,7 @@ use App\Models\Book;
 use App\Models\InternshipReport;
 use App\Models\Skripsi;
 use App\Models\Thesis;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -17,11 +18,11 @@ class SearchController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
         $search = $request->string('q')->trim()->toString();
 
-        if (empty($search)) {
+        if ($search === '') {
             return response()->json([]);
         }
 

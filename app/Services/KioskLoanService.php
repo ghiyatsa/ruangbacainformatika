@@ -9,6 +9,7 @@ use App\Models\LoanItem;
 use App\Models\User;
 use App\Notifications\LoanReceiptNotification;
 use App\Repositories\SettingRepository;
+use App\Support\CampusEmail;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class KioskLoanService
 {
     public function __construct(
         protected SettingRepository $settingRepository,
+        protected CampusEmail $campusEmail,
     ) {}
 
     /**
@@ -189,15 +191,29 @@ class KioskLoanService
 
     public function findMemberByIdentifier(string $memberIdentifier): ?User
     {
-        if (str($memberIdentifier)->contains('@')) {
+        $normalizedIdentifier = str($memberIdentifier)->trim()->lower()->toString();
+
+        if (str($normalizedIdentifier)->contains('@')) {
             return User::query()
-                ->where('email', $memberIdentifier)
+                ->where('email', $normalizedIdentifier)
                 ->first();
         }
 
-        return User::query()
-            ->where('email', 'like', '%'.$memberIdentifier.'@mhs.unimal.ac.id')
-            ->first();
+        if (! preg_match('/^\d{9}$/', $normalizedIdentifier)) {
+            return null;
+        }
+
+        $matches = User::query()
+            ->where('email', 'like', '%'.$normalizedIdentifier.'@mhs.unimal.ac.id')
+            ->get()
+            ->filter(fn (User $user): bool => $this->campusEmail->extractIdentityNumber($user->email) === $normalizedIdentifier)
+            ->values();
+
+        if ($matches->count() !== 1) {
+            return null;
+        }
+
+        return $matches->first();
     }
 
     /**
