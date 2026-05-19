@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\KioskController;
+use App\Http\Controllers\KioskLoanDraftController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('kiosk.network')->group(function () {
@@ -11,6 +12,9 @@ Route::middleware('kiosk.network')->group(function () {
     Route::post('/kiosk/loans/borrow', [KioskController::class, 'borrow'])
         ->middleware('kiosk.pin')
         ->name('kiosk.loans.borrow');
+    Route::post('/kiosk/loans/drafts/consume', [KioskLoanDraftController::class, 'store'])
+        ->middleware('kiosk.pin')
+        ->name('kiosk.loan-drafts.consume');
     Route::get('/kiosk/books/search', [KioskController::class, 'searchBooks'])
         ->middleware('kiosk.pin')
         ->name('kiosk.books.search');

@@ -1,7 +1,14 @@
 import { Form } from '@inertiajs/react';
 import { useDeferredValue, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FieldDescription, FieldGroup } from '@/components/ui/field';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
@@ -19,6 +26,7 @@ export function BookActionForm({
     maxInputs = 3,
     bookSearchUrl,
     bookSearchMode = 'borrow',
+    autoFocus = true,
 }: {
     action: RouteFormDefinition<'post'>;
     submitLabel: string;
@@ -26,9 +34,11 @@ export function BookActionForm({
     maxInputs?: number;
     bookSearchUrl?: string;
     bookSearchMode?: KioskBookSearchMode;
+    autoFocus?: boolean;
 }) {
     const [memberIdentifier, setMemberIdentifier] = useState('');
     const [firstIsbn, setFirstIsbn] = useState('');
+    const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<KioskBookSearchResult[]>(
         [],
@@ -44,8 +54,9 @@ export function BookActionForm({
     const requiresMemberBeforeSearch = bookSearchMode === 'return';
     const memberIdentifierTrimmed = memberIdentifier.trim();
     const canSearchBooks = usesBookSearch
-        ? deferredSearchQuery.length >= 2 &&
-          (!requiresMemberBeforeSearch || memberIdentifierTrimmed !== '')
+        ? bookSearchMode === 'return'
+            ? isSearchDialogOpen && memberIdentifierTrimmed !== ''
+            : deferredSearchQuery.length > 0
         : false;
 
     const isComplete =
@@ -116,19 +127,44 @@ export function BookActionForm({
             !selectedBooks.some((selectedBook) => selectedBook.id === book.id),
     );
 
+    const resetBookSearch = () => {
+        setSearchQuery('');
+        setSearchResults([]);
+        setIsSearching(false);
+        setSearchError(null);
+    };
+
+    const handleSearchDialogChange = (open: boolean) => {
+        setIsSearchDialogOpen(open);
+
+        if (open) {
+            if (bookSearchMode === 'return' && memberIdentifierTrimmed !== '') {
+                setIsSearching(true);
+                setSearchError(null);
+            }
+        } else {
+            resetBookSearch();
+        }
+    };
+
+    const addSelectedBook = (book: KioskBookSearchResult) => {
+        setSelectedBooks((current) =>
+            current.length >= maxInputs ? current : [...current, book],
+        );
+        handleSearchDialogChange(false);
+    };
+
     return (
         <Form
             {...action}
             resetOnSuccess
             disableWhileProcessing
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4"
             onSuccess={() => {
                 setMemberIdentifier('');
                 setFirstIsbn('');
-                setSearchQuery('');
-                setSearchResults([]);
                 setSelectedBooks([]);
-                setSearchError(null);
+                handleSearchDialogChange(false);
             }}
         >
             {({ errors, processing }) => {
@@ -144,90 +180,61 @@ export function BookActionForm({
 
                 return (
                     <>
-                        <FieldDescription className="max-w-3xl text-sm leading-6">
-                            {description}
-                        </FieldDescription>
-
-                        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.95fr)]">
-                            <FieldGroup className="grid gap-5 rounded-3xl border border-border/70 bg-card/70 p-6 shadow-sm xl:p-7">
-                                <KioskField
-                                    label="Email / NIM"
-                                    htmlFor="book-member"
-                                    error={errors.member_identifier}
-                                    required
-                                >
-                                    <Input
-                                        id="book-member"
-                                        name="member_identifier"
-                                        autoFocus
-                                        placeholder="email@mhs.unimal.ac.id atau NIM"
-                                        value={memberIdentifier}
-                                        onChange={(e) => {
-                                            setMemberIdentifier(e.target.value);
-
-                                            if (bookSearchMode === 'return') {
-                                                setSearchResults([]);
-                                            }
-                                        }}
-                                        aria-invalid={Boolean(
-                                            errors.member_identifier,
-                                        )}
-                                        className="h-12 text-base"
-                                    />
-                                </KioskField>
-
-                                <KioskField
-                                    label={
-                                        usesBookSearch
-                                            ? 'Cari Buku'
-                                            : 'ISBN / ISSN Buku'
-                                    }
-                                    htmlFor={
-                                        usesBookSearch
-                                            ? 'book-search'
-                                            : 'book-isbn-0'
-                                    }
-                                    error={
-                                        usesBookSearch
-                                            ? hasBookIdsError
-                                                ? (errors.book_ids as string) ||
-                                                  'Pilih buku yang valid dari hasil pencarian.'
-                                                : undefined
-                                            : hasIsbnsError
-                                              ? (errors.isbns as string) ||
-                                                'Periksa kembali input ISBN Anda.'
-                                              : undefined
-                                    }
-                                    required
-                                >
-                                    {usesBookSearch ? (
-                                        <div className="grid gap-4">
+                        {usesBookSearch ? (
+                            <div className="grid gap-4">
+                                <FieldGroup className="grid gap-4 rounded-2xl border border-border/70 bg-card p-4">
+                                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_200px] lg:items-end">
+                                        <KioskField
+                                            label="Email atau NIM"
+                                            htmlFor="book-member"
+                                            error={errors.member_identifier}
+                                            required
+                                            className="min-w-0"
+                                        >
                                             <Input
-                                                id="book-search"
-                                                placeholder={
-                                                    bookSearchMode === 'borrow'
-                                                        ? 'Cari judul, penulis, ISBN, atau ISSN'
-                                                        : 'Cari buku yang sedang dipinjam member ini'
-                                                }
-                                                value={searchQuery}
+                                                id="book-member"
+                                                name="member_identifier"
+                                                autoFocus={autoFocus}
+                                                placeholder="email@mhs.unimal.ac.id atau NIM"
+                                                value={memberIdentifier}
                                                 onChange={(e) => {
-                                                    const nextQuery =
-                                                        e.target.value;
-
-                                                    setSearchQuery(nextQuery);
+                                                    setMemberIdentifier(
+                                                        e.target.value,
+                                                    );
 
                                                     if (
-                                                        nextQuery.trim()
-                                                            .length < 2
+                                                        bookSearchMode ===
+                                                        'return'
                                                     ) {
                                                         setSearchResults([]);
-                                                        setIsSearching(false);
                                                         setSearchError(null);
-                                                    } else {
-                                                        setIsSearching(true);
-                                                        setSearchError(null);
+
+                                                        if (
+                                                            isSearchDialogOpen &&
+                                                            e.target.value.trim() !==
+                                                                ''
+                                                        ) {
+                                                            setIsSearching(
+                                                                true,
+                                                            );
+                                                        }
                                                     }
                                                 }}
+                                                aria-invalid={Boolean(
+                                                    errors.member_identifier,
+                                                )}
+                                                className="h-12 text-base"
+                                            />
+                                        </KioskField>
+
+                                        <div className="grid gap-2">
+                                            <span className="text-sm font-medium text-foreground">
+                                                Buku
+                                            </span>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="h-12 w-full"
                                                 disabled={
                                                     selectedBooks.length >=
                                                         maxInputs ||
@@ -235,119 +242,186 @@ export function BookActionForm({
                                                         memberIdentifierTrimmed ===
                                                             '')
                                                 }
-                                                aria-invalid={Boolean(
-                                                    hasBookIdsError,
-                                                )}
-                                                className="h-13 text-base"
-                                            />
-
-                                            {requiresMemberBeforeSearch &&
-                                            memberIdentifierTrimmed === '' ? (
-                                                <p className="rounded-2xl border border-dashed border-border/70 bg-muted/35 px-4 py-3 text-sm text-muted-foreground">
-                                                    Masukkan Email atau NIM
-                                                    terlebih dahulu agar daftar
-                                                    buku pinjaman aktif bisa
-                                                    ditampilkan.
-                                                </p>
-                                            ) : null}
-
-                                            {searchError ? (
-                                                <p className="text-sm text-destructive">
-                                                    {searchError}
-                                                </p>
-                                            ) : null}
-
-                                            {canSearchBooks ? (
-                                                <div className="rounded-2xl border border-border/70 bg-background/80">
-                                                    <ScrollArea className="max-h-96">
-                                                        <div className="grid gap-2 p-3">
-                                                            {isSearching ? (
-                                                                <div className="flex items-center gap-2 px-3 py-4 text-sm text-muted-foreground">
-                                                                    <Spinner />
-                                                                    Mencari
-                                                                    buku...
-                                                                </div>
-                                                            ) : availableSearchResults.length >
-                                                              0 ? (
-                                                                availableSearchResults.map(
-                                                                    (book) => (
-                                                                        <button
-                                                                            key={
-                                                                                book.id
-                                                                            }
-                                                                            type="button"
-                                                                            className="rounded-2xl border border-transparent px-4 py-4 text-left transition hover:border-border hover:bg-accent/40"
-                                                                            onClick={() => {
-                                                                                setSelectedBooks(
-                                                                                    (
-                                                                                        current,
-                                                                                    ) =>
-                                                                                        current.length >=
-                                                                                        maxInputs
-                                                                                            ? current
-                                                                                            : [
-                                                                                                  ...current,
-                                                                                                  book,
-                                                                                              ],
-                                                                                );
-                                                                                setSearchQuery(
-                                                                                    '',
-                                                                                );
-                                                                                setSearchResults(
-                                                                                    [],
-                                                                                );
-                                                                                setSearchError(
-                                                                                    null,
-                                                                                );
-                                                                            }}
-                                                                        >
-                                                                            <p className="text-base font-semibold text-foreground">
-                                                                                {
-                                                                                    book.title
-                                                                                }
-                                                                            </p>
-                                                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                                                {book.authors?.join(
-                                                                                    ', ',
-                                                                                ) ||
-                                                                                    'Penulis belum tersedia'}
-                                                                            </p>
-                                                                            <p className="mt-2 text-sm text-muted-foreground">
-                                                                                {book.isbn
-                                                                                    ? `ISBN ${book.isbn}`
-                                                                                    : book.issn
-                                                                                      ? `ISSN ${book.issn}`
-                                                                                      : 'Tanpa ISBN/ISSN'}
-                                                                                {
-                                                                                    ' · '
-                                                                                }
-                                                                                {bookSearchMode ===
-                                                                                'borrow'
-                                                                                    ? `${book.availableItemsCount} eksemplar tersedia`
-                                                                                    : 'Masuk dalam pinjaman aktif member'}
-                                                                            </p>
-                                                                        </button>
-                                                                    ),
-                                                                )
-                                                            ) : (
-                                                                <p className="px-3 py-4 text-sm text-muted-foreground">
-                                                                    {bookSearchMode ===
-                                                                    'borrow'
-                                                                        ? 'Tidak ada buku yang cocok atau masih tersedia.'
-                                                                        : 'Tidak ada buku pinjaman aktif yang cocok untuk member ini.'}
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </ScrollArea>
-                                                </div>
-                                            ) : (
-                                                <p className="text-sm text-muted-foreground">
-                                                    Ketik minimal 2 karakter
-                                                    untuk mencari buku.
-                                                </p>
-                                            )}
+                                                onClick={() =>
+                                                    handleSearchDialogChange(
+                                                        true,
+                                                    )
+                                                }
+                                            >
+                                                Cari Buku
+                                            </Button>
                                         </div>
-                                    ) : (
+                                    </div>
+
+                                    <p className="text-sm text-muted-foreground">
+                                        {selectedBooks.length > 0
+                                            ? `${selectedBooks.length} buku dipilih`
+                                            : description}
+                                    </p>
+
+                                    {requiresMemberBeforeSearch &&
+                                    memberIdentifierTrimmed === '' ? (
+                                        <p className="rounded-2xl border border-dashed border-border/70 bg-muted/35 px-4 py-3 text-sm text-muted-foreground">
+                                            Isi Email atau NIM terlebih dahulu
+                                            untuk menampilkan daftar pinjaman
+                                            aktif.
+                                        </p>
+                                    ) : null}
+
+                                    {hasBookIdsError ? (
+                                        <p className="text-sm text-destructive">
+                                            {(errors.book_ids as string) ||
+                                                'Pilih buku yang valid dari hasil pencarian.'}
+                                        </p>
+                                    ) : null}
+
+                                    <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+                                        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/60 pb-3">
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-semibold text-foreground">
+                                                    Buku dipilih
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {bookSearchMode ===
+                                                    'borrow'
+                                                        ? 'Periksa pilihan sebelum simpan.'
+                                                        : 'Pilih buku yang ingin dikembalikan.'}
+                                                </p>
+                                            </div>
+                                            <div className="rounded-full border border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-foreground">
+                                                {selectedBooks.length} /{' '}
+                                                {maxInputs}
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 space-y-2.5">
+                                            {selectedBooks.map(
+                                                (book, index) => (
+                                                    <div
+                                                        key={book.id}
+                                                        className="rounded-xl border border-border/70 bg-background px-3 py-2.5"
+                                                    >
+                                                        <input
+                                                            type="hidden"
+                                                            name={`book_ids.${index}`}
+                                                            value={book.id}
+                                                        />
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div className="min-w-0 space-y-1">
+                                                                <p className="line-clamp-1 text-sm font-semibold text-foreground">
+                                                                    {
+                                                                        book.title
+                                                                    }
+                                                                </p>
+                                                                <p className="line-clamp-1 text-xs text-muted-foreground">
+                                                                    {book.authors?.join(
+                                                                        ', ',
+                                                                    ) ||
+                                                                        'Penulis belum tersedia'}
+                                                                    {' | '}
+                                                                    {book.isbn
+                                                                        ? `ISBN ${book.isbn}`
+                                                                        : book.issn
+                                                                          ? `ISSN ${book.issn}`
+                                                                          : 'Tanpa ISBN/ISSN'}
+                                                                </p>
+                                                            </div>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="shrink-0"
+                                                                onClick={() =>
+                                                                    setSelectedBooks(
+                                                                        (
+                                                                            current,
+                                                                        ) =>
+                                                                            current.filter(
+                                                                                (
+                                                                                    selectedBook,
+                                                                                ) =>
+                                                                                    selectedBook.id !==
+                                                                                    book.id,
+                                                                            ),
+                                                                    )
+                                                                }
+                                                            >
+                                                                Hapus
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ),
+                                            )}
+
+                                            {selectedBooks.length === 0 ? (
+                                                <div className="rounded-xl border border-dashed border-border/70 bg-background/70 px-4 py-5 text-sm text-muted-foreground">
+                                                    Belum ada buku yang
+                                                    dipilih.
+                                                </div>
+                                            ) : null}
+                                        </div>
+
+                                        <div className="mt-6 space-y-3 border-t border-border/60 pt-4">
+                                            {selectedBooks.length >=
+                                            maxInputs ? (
+                                                <p className="text-sm text-muted-foreground">
+                                                    Batas maksimal {maxInputs}{' '}
+                                                    buku sudah tercapai.
+                                                </p>
+                                            ) : null}
+
+                                            <Button
+                                                type="submit"
+                                                size="lg"
+                                                className="h-12 w-full text-base"
+                                                disabled={
+                                                    processing || !isComplete
+                                                }
+                                            >
+                                                {processing ? <Spinner /> : null}
+                                                {submitLabel}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </FieldGroup>
+                            </div>
+                        ) : (
+                            <div className="grid gap-4">
+                                <FieldGroup className="grid gap-2 rounded-2xl border border-border/70 bg-card p-4">
+                                    <KioskField
+                                        label="Email atau NIM"
+                                        htmlFor="book-member"
+                                        error={errors.member_identifier}
+                                        required
+                                    >
+                                        <Input
+                                            id="book-member"
+                                            name="member_identifier"
+                                            autoFocus={autoFocus}
+                                            placeholder="email@mhs.unimal.ac.id atau NIM"
+                                            value={memberIdentifier}
+                                            onChange={(e) =>
+                                                setMemberIdentifier(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            aria-invalid={Boolean(
+                                                errors.member_identifier,
+                                            )}
+                                            className="h-12 text-base"
+                                        />
+                                    </KioskField>
+                                    <KioskField
+                                        label="ISBN / ISSN Buku"
+                                        htmlFor="book-isbn-0"
+                                        error={
+                                            hasIsbnsError
+                                                ? (errors.isbns as string) ||
+                                                  'Periksa kembali input ISBN Anda.'
+                                                : undefined
+                                        }
+                                        required
+                                    >
                                         <div className="grid gap-3">
                                             <Input
                                                 key={0}
@@ -356,7 +430,9 @@ export function BookActionForm({
                                                 placeholder="Scan atau ketik ISBN/ISSN 1"
                                                 value={firstIsbn}
                                                 onChange={(e) =>
-                                                    setFirstIsbn(e.target.value)
+                                                    setFirstIsbn(
+                                                        e.target.value,
+                                                    )
                                                 }
                                                 aria-invalid={Boolean(
                                                     errors['isbns.0'],
@@ -378,94 +454,7 @@ export function BookActionForm({
                                                 />
                                             ))}
                                         </div>
-                                    )}
-                                </KioskField>
-                            </FieldGroup>
-
-                            <div className="flex h-full flex-col rounded-3xl border border-border/70 bg-linear-to-br from-muted/55 via-card to-card p-6 shadow-sm xl:p-7">
-                                <div className="space-y-2 border-b border-border/60 pb-4">
-                                    <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                        Ringkasan
-                                    </p>
-                                    <h3 className="text-2xl font-semibold tracking-tight text-foreground">
-                                        {selectedBooks.length} / {maxInputs}{' '}
-                                        buku dipilih
-                                    </h3>
-                                    <p className="text-sm leading-6 text-muted-foreground">
-                                        {bookSearchMode === 'borrow'
-                                            ? 'Pilih buku yang tersedia untuk dipinjam, lalu konfirmasi transaksi anggota.'
-                                            : 'Pilih buku dalam pinjaman aktif anggota ini, lalu selesaikan proses pengembalian.'}
-                                    </p>
-                                </div>
-
-                                <div className="mt-5 flex-1 space-y-3">
-                                    {selectedBooks.map((book, index) => (
-                                        <div
-                                            key={book.id}
-                                            className="rounded-2xl border border-border/70 bg-background/80 p-4"
-                                        >
-                                            <input
-                                                type="hidden"
-                                                name={`book_ids.${index}`}
-                                                value={book.id}
-                                            />
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="space-y-1.5">
-                                                    <p className="text-sm font-semibold text-foreground">
-                                                        {book.title}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {book.authors?.join(
-                                                            ', ',
-                                                        ) ||
-                                                            'Penulis belum tersedia'}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {book.isbn
-                                                            ? `ISBN ${book.isbn}`
-                                                            : book.issn
-                                                              ? `ISSN ${book.issn}`
-                                                              : 'Tanpa ISBN/ISSN'}
-                                                    </p>
-                                                </div>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setSelectedBooks(
-                                                            (current) =>
-                                                                current.filter(
-                                                                    (
-                                                                        selectedBook,
-                                                                    ) =>
-                                                                        selectedBook.id !==
-                                                                        book.id,
-                                                                ),
-                                                        )
-                                                    }
-                                                >
-                                                    Hapus
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))}
-
-                                    {selectedBooks.length === 0 ? (
-                                        <div className="rounded-2xl border border-dashed border-border/70 bg-background/60 px-4 py-6 text-sm text-muted-foreground">
-                                            Belum ada buku yang dipilih.
-                                        </div>
-                                    ) : null}
-                                </div>
-
-                                <div className="mt-6 space-y-3">
-                                    {selectedBooks.length >= maxInputs ? (
-                                        <p className="text-sm text-muted-foreground">
-                                            Batas maksimal {maxInputs} buku
-                                            sudah tercapai.
-                                        </p>
-                                    ) : null}
-
+                                    </KioskField>
                                     <Button
                                         type="submit"
                                         size="lg"
@@ -475,9 +464,157 @@ export function BookActionForm({
                                         {processing ? <Spinner /> : null}
                                         {submitLabel}
                                     </Button>
-                                </div>
+                                </FieldGroup>
                             </div>
-                        </div>
+                        )}
+
+                        {usesBookSearch ? (
+                            <Dialog
+                                open={isSearchDialogOpen}
+                                onOpenChange={handleSearchDialogChange}
+                            >
+                                <DialogContent className="max-w-4xl">
+                                    <DialogHeader>
+                                        <DialogTitle>Cari Buku</DialogTitle>
+                                        <DialogDescription>
+                                            {bookSearchMode === 'borrow'
+                                                ? 'Cari lalu pilih buku yang akan diproses.'
+                                                : 'Cari dari daftar pinjaman aktif member ini.'}
+                                        </DialogDescription>
+                                    </DialogHeader>
+
+                                    <div className="grid gap-4">
+                                        <Input
+                                            id="book-search"
+                                            placeholder={
+                                                bookSearchMode === 'borrow'
+                                                    ? 'Cari judul, penulis, ISBN, atau ISSN'
+                                                    : 'Filter judul, penulis, ISBN, atau ISSN'
+                                            }
+                                            value={searchQuery}
+                                            onChange={(e) => {
+                                                const nextQuery =
+                                                    e.target.value;
+
+                                                setSearchQuery(nextQuery);
+                                                setSearchError(null);
+
+                                                if (
+                                                    bookSearchMode ===
+                                                    'borrow'
+                                                ) {
+                                                    if (
+                                                        nextQuery.trim() === ''
+                                                    ) {
+                                                        setSearchResults([]);
+                                                        setIsSearching(false);
+                                                    } else {
+                                                        setIsSearching(true);
+                                                    }
+                                                } else {
+                                                    if (
+                                                        memberIdentifierTrimmed ===
+                                                        ''
+                                                    ) {
+                                                        setSearchResults([]);
+                                                        setIsSearching(false);
+                                                    } else {
+                                                        setIsSearching(true);
+                                                    }
+                                                }
+                                            }}
+                                            autoFocus
+                                            aria-invalid={Boolean(
+                                                hasBookIdsError,
+                                            )}
+                                            className="h-12 text-base"
+                                        />
+
+                                        {bookSearchMode === 'return' ? (
+                                            <p className="text-sm text-muted-foreground">
+                                                Daftar pinjaman aktif langsung
+                                                ditampilkan. Gunakan filter bila
+                                                perlu.
+                                            </p>
+                                        ) : null}
+
+                                        {searchError ? (
+                                            <p className="text-sm text-destructive">
+                                                {searchError}
+                                            </p>
+                                        ) : null}
+
+                                        <div className="rounded-2xl border border-border/70 bg-muted/25">
+                                            <ScrollArea className="h-80 rounded-2xl bg-muted/25">
+                                                <div className="grid gap-2 p-3">
+                                                    {bookSearchMode ===
+                                                        'borrow' &&
+                                                    searchQuery.trim() === '' ? (
+                                                        <p className="px-3 py-4 text-sm text-muted-foreground">
+                                                            Mulai ketik untuk
+                                                            mencari buku.
+                                                        </p>
+                                                    ) : isSearching ? (
+                                                        <div className="flex items-center gap-2 px-3 py-4 text-sm text-muted-foreground">
+                                                            <Spinner />
+                                                            Mencari buku...
+                                                        </div>
+                                                    ) : availableSearchResults.length >
+                                                      0 ? (
+                                                        availableSearchResults.map(
+                                                            (book) => (
+                                                                <button
+                                                                    key={
+                                                                        book.id
+                                                                    }
+                                                                    type="button"
+                                                                    className="rounded-xl border border-transparent px-3 py-3 text-left transition hover:border-border hover:bg-accent/40"
+                                                                    onClick={() =>
+                                                                        addSelectedBook(
+                                                                            book,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <p className="line-clamp-1 text-sm font-semibold text-foreground">
+                                                                        {
+                                                                            book.title
+                                                                        }
+                                                                    </p>
+                                                                    <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                                                                        {book.authors?.join(
+                                                                            ', ',
+                                                                        ) ||
+                                                                            'Penulis belum tersedia'}
+                                                                        {' | '}
+                                                                        {book.isbn
+                                                                            ? `ISBN ${book.isbn}`
+                                                                            : book.issn
+                                                                              ? `ISSN ${book.issn}`
+                                                                              : 'Tanpa ISBN/ISSN'}
+                                                                        {' | '}
+                                                                        {bookSearchMode ===
+                                                                        'borrow'
+                                                                            ? `${book.availableItemsCount} tersedia`
+                                                                            : 'Pinjaman aktif'}
+                                                                    </p>
+                                                                </button>
+                                                            ),
+                                                        )
+                                                    ) : (
+                                                        <p className="px-3 py-4 text-sm text-muted-foreground">
+                                                            {bookSearchMode ===
+                                                            'borrow'
+                                                                ? 'Tidak ada buku yang cocok atau tersedia.'
+                                                                : 'Tidak ada pinjaman aktif untuk member ini.'}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </ScrollArea>
+                                        </div>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        ) : null}
                     </>
                 );
             }}

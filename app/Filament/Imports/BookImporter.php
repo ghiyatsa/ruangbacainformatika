@@ -22,7 +22,7 @@ class BookImporter extends Importer
     {
         return [
             ImportColumn::make('title')
-                ->label('Judul Buku')
+                ->label('Judul')
                 ->requiredMapping()
                 ->rules(['required', 'max:255'])
                 ->fillRecordUsing(function ($record, $state) {
@@ -47,7 +47,7 @@ class BookImporter extends Importer
                 ->fillRecordUsing(function ($record, $state) {}),
 
             ImportColumn::make('ddc_code')
-                ->label('Kode DDC'),
+                ->label('Nomor DDC'),
 
             ImportColumn::make('description'),
 

@@ -32,11 +32,11 @@ export function MemberForm() {
             resetOnError
             resetOnSuccess={['password', 'password_confirmation']}
             disableWhileProcessing
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4"
         >
             {({ errors, processing }) => (
                 <>
-                    <FieldGroup className="grid gap-5 sm:grid-cols-2">
+                    <FieldGroup className="grid gap-4 sm:grid-cols-2">
                         <KioskField
                             label="Nama Lengkap"
                             htmlFor="reg-name"
@@ -110,25 +110,6 @@ export function MemberForm() {
                         </KioskField>
 
                         <KioskField
-                            label="Alamat"
-                            htmlFor="reg-address"
-                            error={errors.address}
-                            required
-                            className="sm:col-span-2"
-                        >
-                            <Textarea
-                                id="reg-address"
-                                name="address"
-                                autoComplete="street-address"
-                                placeholder="Alamat lengkap"
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
-                                aria-invalid={Boolean(errors.address)}
-                                rows={3}
-                            />
-                        </KioskField>
-
-                        <KioskField
                             label="Konfirmasi Password"
                             htmlFor="reg-password-confirm"
                             error={errors.password_confirmation}
@@ -147,6 +128,25 @@ export function MemberForm() {
                                 aria-invalid={Boolean(
                                     errors.password_confirmation,
                                 )}
+                            />
+                        </KioskField>
+
+                        <KioskField
+                            label="Alamat"
+                            htmlFor="reg-address"
+                            error={errors.address}
+                            required
+                            className="sm:col-span-2"
+                        >
+                            <Textarea
+                                id="reg-address"
+                                name="address"
+                                autoComplete="street-address"
+                                placeholder="Alamat lengkap"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                aria-invalid={Boolean(errors.address)}
+                                rows={2}
                             />
                         </KioskField>
                     </FieldGroup>

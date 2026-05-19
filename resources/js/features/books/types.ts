@@ -54,3 +54,11 @@ export interface BookData {
     isAvailable: boolean;
     viewCount: number;
 }
+
+export interface LoanRequestSummary {
+    count: number;
+    maxBooks: number;
+    activeLoansCount: number;
+    containsBook: boolean;
+    hasActiveQr: boolean;
+}

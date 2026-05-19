@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Form, Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
     Building2,
@@ -9,9 +9,12 @@ import {
     Globe,
     Hash,
     Library,
+    QrCode,
+    ShoppingCart,
     Star,
     XCircle,
 } from 'lucide-react';
+import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
@@ -24,18 +27,28 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { BookData } from '@/features/books/types';
+import type { BookData, LoanRequestSummary } from '@/features/books/types';
 import booksRoute from '@/routes/books';
 
 export interface BookDetailPageProps {
     book: { data: BookData };
-    canRegister?: boolean;
+    loanRequest?: LoanRequestSummary | null;
 }
 
 export default function BookDetailPage({
     book: { data: book },
+    loanRequest,
 }: BookDetailPageProps) {
+    const user = usePage().props.auth?.user;
+    const requestSummary = loanRequest ?? {
+        count: 0,
+        maxBooks: 0,
+        activeLoansCount: 0,
+        containsBook: false,
+        hasActiveQr: false,
+    };
     const availabilityColor = !book.isBorrowable
         ? 'text-amber-600 dark:text-amber-400'
         : book.isAvailable
@@ -78,7 +91,7 @@ export default function BookDetailPage({
                     />
                     <div className="absolute inset-0 bg-linear-to-b from-background/30 via-background/60 to-background" />
 
-                    <div className="relative mx-auto max-w-7xl px-6 pt-28 pb-12 sm:pt-36 lg:px-8">
+                    <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-12 sm:pt-40 lg:px-8">
                         <Breadcrumb className="mb-8">
                             <BreadcrumbList>
                                 <BreadcrumbItem>
@@ -261,6 +274,76 @@ export default function BookDetailPage({
                             />
                         </div>
                     </div>
+
+                    {user ? (
+                        <div className="rounded-2xl border bg-card/80 p-5 shadow-sm backdrop-blur-sm">
+                            <div className="flex items-start gap-3">
+                                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                    <ShoppingCart className="size-4" />
+                                </div>
+                                <div className="min-w-0">
+                                    <h2 className="text-sm font-semibold text-foreground">
+                                        Keranjang Peminjaman
+                                    </h2>
+                                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                        {requestSummary.count} dari{' '}
+                                        {requestSummary.maxBooks} slot keranjang
+                                        terisi. Pinjaman aktif Anda saat ini:{' '}
+                                        {requestSummary.activeLoansCount} buku.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 space-y-3">
+                                {book.isBorrowable && book.isAvailable ? (
+                                    <Form
+                                        {...LoanRequestController.storeBook.form()}
+                                    >
+                                        {({ processing }) => (
+                                            <>
+                                                <input
+                                                    type="hidden"
+                                                    name="book_id"
+                                                    value={book.id}
+                                                />
+                                                <Button
+                                                    type="submit"
+                                                    className="w-full"
+                                                    disabled={
+                                                        processing ||
+                                                        requestSummary.containsBook
+                                                    }
+                                                >
+                                                    <ShoppingCart className="size-4" />
+                                                    {requestSummary.containsBook
+                                                        ? 'Sudah Ada di Keranjang'
+                                                        : 'Tambah ke Keranjang Pinjam'}
+                                                </Button>
+                                            </>
+                                        )}
+                                    </Form>
+                                ) : null}
+
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="w-full"
+                                >
+                                    <Link href={LoanRequestController.show()}>
+                                        <QrCode className="size-4" />
+                                        Lihat QR Peminjaman
+                                    </Link>
+                                </Button>
+
+                                {requestSummary.hasActiveQr ? (
+                                    <p className="text-xs leading-5 text-muted-foreground">
+                                        QR aktif sudah tersedia di halaman
+                                        permintaan peminjaman Anda.
+                                    </p>
+                                ) : null}
+                            </div>
+                        </div>
+                    ) : null}
 
                     <CatalogReportCard
                         catalogType="book"

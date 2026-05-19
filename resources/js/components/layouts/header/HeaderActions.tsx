@@ -1,7 +1,8 @@
-import { Link } from '@inertiajs/react';
-import { MoonIcon, Search, SunIcon } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { MoonIcon, Search, ShoppingCart, SunIcon } from 'lucide-react';
 import { GlobalSearch } from '@/components/layouts/GlobalSearch';
 import { UserMenuContent } from '@/components/layouts/UserMenuContent';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -9,7 +10,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { register } from '@/routes';
-import type { Auth } from '@/types';
+import loans from '@/routes/loans';
+import type { Auth, LoanRequestCart } from '@/types';
 import { UserAvatar } from './UserAvatar';
 
 interface HeaderActionsProps {
@@ -27,6 +29,9 @@ export function HeaderActions({
     updateAppearance,
     hideSearch,
 }: HeaderActionsProps) {
+    const { loanRequestCart } = usePage<{
+        loanRequestCart: LoanRequestCart | null;
+    }>().props;
     const openSearch = () =>
         window.dispatchEvent(new Event('open-global-search'));
     const isDark = resolvedAppearance === 'dark';
@@ -68,23 +73,46 @@ export function HeaderActions({
             </Button>
 
             {auth.user ? (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <button
-                            className="flex h-9 w-9 items-center justify-center rounded-full ring-2 ring-transparent transition-all duration-200 hover:ring-primary/40 focus-visible:ring-primary/60 focus-visible:outline-none"
-                            aria-label="Menu pengguna"
-                        >
-                            <UserAvatar name={auth.user.name} />
-                        </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        className="w-56"
-                        align="end"
-                        forceMount
+                <>
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        className="relative h-9 w-9 rounded-xl"
                     >
-                        <UserMenuContent user={auth.user} />
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                        <Link
+                            href={loans.request.url()}
+                            aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
+                            title="Keranjang peminjaman"
+                        >
+                            <ShoppingCart className="h-[18px] w-[18px] text-primary" />
+                            <span className="sr-only">
+                                Keranjang peminjaman
+                            </span>
+                            <Badge className="absolute -top-1.5 -right-1.5 flex min-w-5 items-center justify-center rounded-full px-1 py-0 text-[10px] leading-none shadow-sm">
+                                {loanRequestCart?.count ?? 0}
+                            </Badge>
+                        </Link>
+                    </Button>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button
+                                className="flex h-9 w-9 items-center justify-center rounded-full ring-2 ring-transparent transition-all duration-200 hover:ring-primary/40 focus-visible:ring-primary/60 focus-visible:outline-none"
+                                aria-label="Menu pengguna"
+                            >
+                                <UserAvatar name={auth.user.name} />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            className="w-56"
+                            align="end"
+                            forceMount
+                        >
+                            <UserMenuContent user={auth.user} />
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </>
             ) : canRegister ? (
                 <div className="hidden items-center sm:flex">
                     <Button

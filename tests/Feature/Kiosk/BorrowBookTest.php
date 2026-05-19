@@ -139,7 +139,7 @@ it('borrows selected books from kiosk using book ids', function () {
     ]);
 
     $response
-        ->assertRedirect(route('kiosk.index'))
+        ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHas(
             'inertia.flash_data.toast.message',
             "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
@@ -195,7 +195,7 @@ it('stores kiosk borrowing even when receipt email dispatch fails', function () 
     ]);
 
     $response
-        ->assertRedirect(route('kiosk.index'))
+        ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHas(
             'inertia.flash_data.toast.message',
             "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
@@ -324,7 +324,7 @@ it('returns selected books from kiosk using book ids', function () {
     ]);
 
     $response
-        ->assertRedirect(route('kiosk.index'))
+        ->assertRedirect(route('kiosk.index', ['menu' => 'return']))
         ->assertSessionHas(
             'inertia.flash_data.toast.message',
             '1 buku berhasil dikembalikan.',
@@ -454,4 +454,80 @@ it('searches only active borrowed books for kiosk returns', function () {
 
     expect(collect($response->json('books'))->pluck('id')->all())
         ->toBe([$borrowedBook->id]);
+});
+
+it('lists active borrowed books for kiosk returns without a search query', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Return Default',
+        'slug' => 'penerbit-return-default',
+    ]);
+
+    $firstBook = Book::query()->create([
+        'title' => 'Buku Pinjaman Pertama',
+        'slug' => 'buku-pinjaman-pertama',
+        'isbn' => '9786020000101',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $firstItem = BookItem::query()->create([
+        'book_id' => $firstBook->id,
+        'internal_code' => 'ITEM-101',
+        'status' => 'borrowed',
+    ]);
+
+    $secondBook = Book::query()->create([
+        'title' => 'Buku Pinjaman Kedua',
+        'slug' => 'buku-pinjaman-kedua',
+        'isbn' => '9786020000102',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $secondItem = BookItem::query()->create([
+        'book_id' => $secondBook->id,
+        'internal_code' => 'ITEM-102',
+        'status' => 'borrowed',
+    ]);
+
+    $loan = Loan::query()->create([
+        'user_id' => $member->id,
+        'status' => Loan::STATUS_BORROWED,
+        'borrowed_at' => now()->subDay(),
+        'due_at' => now()->addDays(3),
+    ]);
+
+    LoanItem::query()->create([
+        'loan_id' => $loan->id,
+        'book_item_id' => $firstItem->id,
+    ]);
+
+    LoanItem::query()->create([
+        'loan_id' => $loan->id,
+        'book_item_id' => $secondItem->id,
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $response = $this->getJson(route('kiosk.books.search', [
+        'mode' => 'return',
+        'member_identifier' => $member->nim(),
+    ]));
+
+    $response->assertOk();
+
+    expect(collect($response->json('books'))->pluck('id')->sort()->values()->all())
+        ->toBe(collect([$firstBook->id, $secondBook->id])->sort()->values()->all());
 });

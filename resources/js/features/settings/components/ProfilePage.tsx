@@ -12,6 +12,7 @@ export default function ProfilePage({
     status,
 }: ProfilePageProps) {
     const { auth } = usePage<{ auth: Auth }>().props;
+    const user = auth.user!;
 
     return (
         <>
@@ -20,14 +21,14 @@ export default function ProfilePage({
 
             <div className="flex flex-col gap-10">
                 <ProfileSummary
-                    name={auth.user.name}
-                    email={auth.user.email}
+                    name={user.name}
+                    email={user.email}
                 />
 
                 <Separator />
 
                 <ProfileInformationForm
-                    user={auth.user}
+                    user={user}
                     mustVerifyEmail={mustVerifyEmail}
                     status={status}
                 />

@@ -174,6 +174,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(Loan::class);
     }
 
+    public function loanDrafts(): HasMany
+    {
+        return $this->hasMany(LoanDraft::class);
+    }
+
     public function loanItems(): HasManyThrough
     {
         return $this->hasManyThrough(LoanItem::class, Loan::class);

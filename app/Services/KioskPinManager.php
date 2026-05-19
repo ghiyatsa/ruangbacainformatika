@@ -143,7 +143,7 @@ class KioskPinManager
 
         $this->settingRepository->put('kiosk', 'session_version', $nextVersion);
 
-        KioskDevice::truncate();
+        KioskDevice::query()->delete();
 
         return $nextVersion;
     }

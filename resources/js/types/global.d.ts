@@ -1,4 +1,4 @@
-import type { Auth } from '@/types/auth';
+import type { Auth, LoanRequestCart } from '@/types/auth';
 
 declare module '@inertiajs/core' {
     export interface InertiaConfig {
@@ -13,6 +13,7 @@ declare module '@inertiajs/core' {
                 ogImage: string;
             };
             auth: Auth;
+            loanRequestCart: LoanRequestCart | null;
             sidebarOpen: boolean;
             [key: string]: unknown;
         };

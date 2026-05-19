@@ -43,16 +43,16 @@ class KioskController extends Controller
         ]);
 
         $kioskSettings = $this->settingRepository->sectionValues('kiosk', [
-            'title' => 'Pendataan Pengunjung Perpustakaan',
-            'subtitle' => 'Silakan masukkan PIN untuk mengaktifkan perangkat kiosk.',
+            'title' => 'Layanan Mandiri Perpustakaan',
+            'subtitle' => 'Pilih layanan yang ingin digunakan.',
         ]);
 
         if (! $this->kioskPinManager->isVerified($request)) {
             return Inertia::render('kiosk/index', [
                 'step' => 'pin',
                 'activeMenu' => 'landing',
-                'pageTitle' => 'Aktifkan Kiosk',
-                'pageSubtitle' => 'Masukkan PIN perangkat untuk mengaktifkan kiosk ini.',
+                'pageTitle' => 'Masuk Layanan Mandiri',
+                'pageSubtitle' => 'Masukkan PIN untuk mulai.',
                 'siteName' => $siteSettings['site_name'],
                 'siteTagline' => $siteSettings['site_tagline'],
                 'loanMaxBooks' => max((int) $librarySettings['loan_max_books'], 1),
@@ -64,7 +64,7 @@ class KioskController extends Controller
         $activeMenu = $request->string('menu')->toString();
 
         if (! in_array($activeMenu, ['landing', 'visit', 'member', 'borrow', 'return'], true)) {
-            $activeMenu = 'landing';
+            $activeMenu = 'visit';
         }
 
         return Inertia::render('kiosk/index', [
@@ -72,7 +72,7 @@ class KioskController extends Controller
             'activeMenu' => $activeMenu,
             'pageTitle' => $kioskSettings['title'],
             'pageSubtitle' => $activeMenu === 'landing'
-                ? 'Pilih layanan yang ingin digunakan pada kiosk ini.'
+                ? 'Pilih layanan yang ingin digunakan.'
                 : $kioskSettings['subtitle'],
             'siteName' => $siteSettings['site_name'],
             'siteTagline' => $siteSettings['site_tagline'],
@@ -113,7 +113,7 @@ class KioskController extends Controller
             'message' => 'Pendaftaran member berhasil. Silakan gunakan akun Anda untuk layanan mandiri.',
         ]);
 
-        return redirect()->route('kiosk.index');
+        return redirect()->route('kiosk.index', ['menu' => 'member']);
     }
 
     public function store(SubmitVisitRequest $request): RedirectResponse
@@ -128,7 +128,7 @@ class KioskController extends Controller
             'message' => 'Data kunjungan berhasil disimpan.',
         ]);
 
-        return redirect()->route('kiosk.index');
+        return redirect()->route('kiosk.index', ['menu' => 'visit']);
     }
 
     public function searchBooks(SearchBooksRequest $request): JsonResponse
@@ -137,7 +137,7 @@ class KioskController extends Controller
         $mode = $request->validatedMode();
         $memberIdentifier = $request->validatedMemberIdentifier();
 
-        if ($search === '') {
+        if ($mode === 'borrow' && $search === '') {
             return response()->json([
                 'books' => [],
             ]);
@@ -164,7 +164,7 @@ class KioskController extends Controller
             'message' => "Peminjaman untuk {$loan->user->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
         ]);
 
-        return redirect()->route('kiosk.index');
+        return redirect()->route('kiosk.index', ['menu' => 'borrow']);
     }
 
     public function storeReturn(ReturnBookRequest $request): RedirectResponse
@@ -179,7 +179,7 @@ class KioskController extends Controller
             'message' => "{$returnedCount} buku berhasil dikembalikan.",
         ]);
 
-        return redirect()->route('kiosk.index');
+        return redirect()->route('kiosk.index', ['menu' => 'return']);
     }
 
     protected function searchBorrowableBooks(string $search): EloquentCollection
@@ -209,7 +209,7 @@ class KioskController extends Controller
         }
 
         return Book::query()
-            ->search($search)
+            ->when($search !== '', fn ($query) => $query->search($search))
             ->whereHas('items.loanItems', function ($query) use ($member) {
                 $query
                     ->whereNull('returned_at', 'and', false)

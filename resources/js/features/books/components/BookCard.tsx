@@ -49,6 +49,15 @@ function CategoryBadges({
 }) {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [containerWidth, setContainerWidth] = useState<number | null>(null);
+    const orderedCategories = useMemo(
+        () =>
+            [...categories].sort(
+                (firstCategory, secondCategory) =>
+                    firstCategory.name.length - secondCategory.name.length ||
+                    firstCategory.name.localeCompare(secondCategory.name, 'id'),
+            ),
+        [categories],
+    );
 
     useEffect(() => {
         const container = containerRef.current;
@@ -71,12 +80,12 @@ function CategoryBadges({
     }, []);
 
     const visibleCount = useMemo(() => {
-        if (categories.length === 0) {
+        if (orderedCategories.length === 0) {
             return 0;
         }
 
         if (!containerWidth) {
-            return categories.length;
+            return orderedCategories.length;
         }
 
         const gapWidth = 4;
@@ -84,11 +93,11 @@ function CategoryBadges({
         let usedWidth = 0;
         let count = 0;
 
-        for (const category of categories) {
+        for (const category of orderedCategories) {
             const nextWidth =
                 estimateCategoryBadgeWidth(category.name) +
                 (count > 0 ? gapWidth : 0);
-            const hasHiddenAfterThis = count + 1 < categories.length;
+            const hasHiddenAfterThis = count + 1 < orderedCategories.length;
             const reservedWidth = hasHiddenAfterThis
                 ? counterWidth + gapWidth
                 : 0;
@@ -102,10 +111,10 @@ function CategoryBadges({
         }
 
         return Math.max(count, 1);
-    }, [categories, containerWidth]);
+    }, [containerWidth, orderedCategories]);
 
-    const visibleCategories = categories.slice(0, visibleCount);
-    const hiddenCategories = categories.slice(visibleCount);
+    const visibleCategories = orderedCategories.slice(0, visibleCount);
+    const hiddenCategories = orderedCategories.slice(visibleCount);
     const hiddenCategoryNames = hiddenCategories
         .map((category) => category.name)
         .join(', ');

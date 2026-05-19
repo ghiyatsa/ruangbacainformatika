@@ -6,32 +6,37 @@ export interface KioskMenuItem {
     key: Exclude<KioskMenu, 'landing'>;
     label: string;
     description: string;
+    helper: string;
     icon: LucideIcon;
 }
 
 export const kioskMenuItems: KioskMenuItem[] = [
     {
         key: 'visit',
-        label: 'Daftar Kunjungan',
-        description: 'Catat kedatangan pengunjung perpustakaan.',
+        label: 'Kunjungan',
+        description: 'Catat kehadiran',
+        helper: 'Isi data singkat lalu simpan.',
         icon: ClipboardList,
     },
     {
         key: 'member',
-        label: 'Registrasi Member',
-        description: 'Buat akun anggota seperti pendaftaran manual.',
+        label: 'Anggota Baru',
+        description: 'Buat akun anggota',
+        helper: 'Lengkapi identitas untuk mulai memakai layanan.',
         icon: UserPlus,
     },
     {
         key: 'borrow',
-        label: 'Peminjaman Buku',
-        description: 'Cari buku yang tersedia lalu proses pinjaman anggota.',
+        label: 'Pinjam Buku',
+        description: 'Pilih dan konfirmasi',
+        helper: 'Bisa scan QR atau input manual.',
         icon: BookMarked,
     },
     {
         key: 'return',
-        label: 'Pengembalian Buku',
-        description: 'Cari buku pinjaman aktif milik anggota untuk dikembalikan.',
+        label: 'Kembalikan Buku',
+        description: 'Tandai buku selesai',
+        helper: 'Cari pinjaman aktif lalu selesaikan.',
         icon: BookUp,
     },
 ];

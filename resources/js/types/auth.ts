@@ -13,9 +13,16 @@ export type User = {
 };
 
 export type Auth = {
-    user: User;
+    user: User | null;
     canAccessAdminPanel?: boolean;
     homeUrl?: string;
+};
+
+export type LoanRequestCart = {
+    count: number;
+    maxBooks: number;
+    activeLoansCount: number;
+    hasActiveQr: boolean;
 };
 
 export type TwoFactorSetupData = {

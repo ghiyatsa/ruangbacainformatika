@@ -6,7 +6,7 @@ export function ReturnForm({ loanMaxBooks }: { loanMaxBooks: number }) {
         <BookActionForm
             action={KioskController.storeReturn.form()}
             submitLabel="Kembalikan Buku"
-            description="Cari buku yang masih dipinjam oleh anggota ini, lalu tandai untuk dikembalikan."
+            description="Cari pinjaman aktif lalu selesaikan pengembalian."
             maxInputs={loanMaxBooks}
             bookSearchUrl={KioskController.searchBooks.url()}
             bookSearchMode="return"

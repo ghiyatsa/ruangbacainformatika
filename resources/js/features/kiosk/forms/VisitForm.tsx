@@ -44,11 +44,11 @@ export function VisitForm({
             method="post"
             resetOnSuccess
             disableWhileProcessing
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4"
         >
             {({ errors, processing }) => (
                 <>
-                    <FieldGroup className="grid gap-5 sm:grid-cols-2">
+                    <FieldGroup className="grid gap-4 sm:grid-cols-2">
                         <KioskField
                             label="Nama Lengkap"
                             htmlFor="visit-name"
@@ -208,7 +208,7 @@ export function VisitForm({
                             <textarea
                                 id="visit-notes"
                                 name="notes"
-                                rows={3}
+                                rows={2}
                                 placeholder="Keterangan tambahan"
                                 className="min-h-20 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
                                 aria-invalid={Boolean(errors.notes)}

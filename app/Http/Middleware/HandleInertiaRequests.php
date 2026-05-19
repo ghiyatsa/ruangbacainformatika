@@ -3,11 +3,16 @@
 namespace App\Http\Middleware;
 
 use App\Services\Auth\AuthenticationRedirector;
+use App\Services\LoanDraftService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
+    public function __construct(
+        protected LoanDraftService $loanDraftService,
+    ) {}
+
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -56,6 +61,9 @@ class HandleInertiaRequests extends Middleware
                     ? route('home', absolute: false)
                     : app(AuthenticationRedirector::class)->pathFor($request->user()),
             ],
+            'loanRequestCart' => $request->user()
+                ? $this->loanDraftService->summary($request->user())
+                : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'status' => $session?->get('status'),
             'verification_resend_available_at' => $session?->get('verification_resend_available_at'),

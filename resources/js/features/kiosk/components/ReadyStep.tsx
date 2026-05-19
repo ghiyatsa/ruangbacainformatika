@@ -1,7 +1,14 @@
+import { router } from '@inertiajs/react';
 import { BookMarked, BookUp, ClipboardList, UserPlus } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useState } from 'react';
-import { KioskMenuModal } from '@/features/kiosk/components/KioskMenuModal';
+import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { MenuGrid } from '@/features/kiosk/components/MenuGrid';
 import { BorrowForm } from '@/features/kiosk/forms/BorrowForm';
 import { MemberForm } from '@/features/kiosk/forms/MemberForm';
@@ -10,7 +17,7 @@ import { VisitForm } from '@/features/kiosk/forms/VisitForm';
 import { kioskMenuItems } from '@/features/kiosk/menu';
 import type { KioskMenu, KioskProps } from '@/features/kiosk/types';
 
-const MENU_ICONS: Record<string, LucideIcon> = {
+const MENU_ICONS: Record<Exclude<KioskMenu, 'landing'>, LucideIcon> = {
     visit: ClipboardList,
     member: UserPlus,
     borrow: BookMarked,
@@ -18,56 +25,84 @@ const MENU_ICONS: Record<string, LucideIcon> = {
 };
 
 export function ReadyStep(props: KioskProps) {
-    const [activeMenu, setActiveMenu] = useState<KioskMenu | null>(null);
+    const selectedMenu = props.activeMenu === 'landing' ? null : props.activeMenu;
+    const activeItem = kioskMenuItems.find((item) => item.key === selectedMenu);
+    const ActiveIcon = selectedMenu ? MENU_ICONS[selectedMenu] : null;
 
-    const activeItem = kioskMenuItems.find((item) => item.key === activeMenu);
-    const ActiveIcon = activeMenu ? MENU_ICONS[activeMenu] : null;
+    const handleSelect = (menu: KioskMenu) => {
+        if (menu === props.activeMenu) {
+            return;
+        }
 
-    const closeModal = () => setActiveMenu(null);
+        router.visit(KioskController.show({ query: { menu } }), {
+            only: ['activeMenu', 'pageSubtitle'],
+            preserveScroll: true,
+            preserveState: true,
+        });
+    };
 
     return (
-        <div className="flex w-full max-w-[1500px] flex-col justify-center gap-8">
-            <div className="relative overflow-hidden rounded-[2rem] border bg-linear-to-br from-background via-muted/30 to-background shadow-sm">
-                <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-primary/5" />
+        <div className="flex h-[calc(100dvh-2rem)] min-h-0 w-full flex-col gap-4 py-10">
+            <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+                <Card className="min-h-0 border-border/70">
+                    <CardHeader className="pb-4">
+                        <CardTitle>Pilih Layanan</CardTitle>
+                        <CardDescription>
+                            Semua layanan tersedia di halaman ini.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="min-h-0">
+                        <MenuGrid
+                            activeMenu={selectedMenu}
+                            onSelect={handleSelect}
+                        />
+                    </CardContent>
+                </Card>
 
-                <div className="relative px-10 pt-10 pb-9 xl:px-12 xl:pt-12 xl:pb-10">
-                    <h1 className="mb-3 text-4xl font-bold tracking-tight xl:text-5xl">
-                        {props.pageTitle}
-                    </h1>
-                    <p className="max-w-4xl text-base leading-7 text-muted-foreground xl:text-lg">
-                        {props.pageSubtitle}
-                    </p>
-                </div>
+                <Card className="min-h-0 border-border/70">
+                    <CardHeader className="pb-4">
+                        <div className="flex items-center gap-3">
+                            {ActiveIcon ? (
+                                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                    <ActiveIcon className="size-4" />
+                                </div>
+                            ) : null}
+                            <div>
+                                <CardTitle>
+                                    {activeItem?.label ?? 'Pilih layanan'}
+                                </CardTitle>
+                                <CardDescription>
+                                    {activeItem?.helper ??
+                                        'Pilih salah satu menu di samping untuk mulai.'}
+                                </CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+
+                    <CardContent className="min-h-0 overflow-auto">
+                        {selectedMenu === 'visit' ? (
+                            <VisitForm
+                                visitorTypeOptions={props.visitorTypeOptions}
+                                purposeOptions={props.purposeOptions}
+                            />
+                        ) : null}
+                        {selectedMenu === 'member' ? <MemberForm /> : null}
+                        {selectedMenu === 'borrow' ? (
+                            <BorrowForm loanMaxBooks={props.loanMaxBooks} />
+                        ) : null}
+                        {selectedMenu === 'return' ? (
+                            <ReturnForm loanMaxBooks={props.loanMaxBooks} />
+                        ) : null}
+                        {!selectedMenu ? (
+                            <div className="flex h-full min-h-56 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
+                                <p className="text-sm text-muted-foreground">
+                                    Pilih layanan di sebelah kiri untuk mulai.
+                                </p>
+                            </div>
+                        ) : null}
+                    </CardContent>
+                </Card>
             </div>
-
-            <MenuGrid onSelect={setActiveMenu} />
-
-            <KioskMenuModal
-                open={activeMenu !== null}
-                onOpenChange={(open) => {
-                    if (!open) {
-                        closeModal();
-                    }
-                }}
-                menuKey={activeMenu ?? 'visit'}
-                icon={ActiveIcon ?? ClipboardList}
-                title={activeItem?.label ?? props.pageTitle}
-                description={activeItem?.description}
-            >
-                {activeMenu === 'visit' && (
-                    <VisitForm
-                        visitorTypeOptions={props.visitorTypeOptions}
-                        purposeOptions={props.purposeOptions}
-                    />
-                )}
-                {activeMenu === 'member' && <MemberForm />}
-                {activeMenu === 'borrow' && (
-                    <BorrowForm loanMaxBooks={props.loanMaxBooks} />
-                )}
-                {activeMenu === 'return' && (
-                    <ReturnForm loanMaxBooks={props.loanMaxBooks} />
-                )}
-            </KioskMenuModal>
         </div>
     );
 }

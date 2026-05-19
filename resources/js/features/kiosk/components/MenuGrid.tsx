@@ -3,35 +3,18 @@ import { kioskMenuItems } from '@/features/kiosk/menu';
 import type { KioskMenu } from '@/features/kiosk/types';
 import { cn } from '@/lib/utils';
 
-const MENU_GRADIENTS = [
-    {
-        card: 'from-blue-500/10 to-cyan-500/5 border-blue-500/20 hover:border-blue-500/40',
-        icon: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
-    },
-    {
-        card: 'from-violet-500/10 to-purple-500/5 border-violet-500/20 hover:border-violet-500/40',
-        icon: 'bg-violet-500/15 text-violet-600 dark:text-violet-400',
-    },
-    {
-        card: 'from-amber-500/10 to-orange-500/5 border-amber-500/20 hover:border-amber-500/40',
-        icon: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
-    },
-    {
-        card: 'from-emerald-500/10 to-teal-500/5 border-emerald-500/20 hover:border-emerald-500/40',
-        icon: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
-    },
-];
-
 export function MenuGrid({
+    activeMenu,
     onSelect,
 }: {
+    activeMenu: KioskMenu | null;
     onSelect: (menu: KioskMenu) => void;
 }) {
     return (
-        <div className="grid gap-5 xl:grid-cols-2">
-            {kioskMenuItems.map((item, i) => {
+        <div className="grid gap-3">
+            {kioskMenuItems.map((item) => {
                 const Icon = item.icon;
-                const gradient = MENU_GRADIENTS[i % MENU_GRADIENTS.length];
+                const isActive = activeMenu === item.key;
 
                 return (
                     <button
@@ -39,32 +22,39 @@ export function MenuGrid({
                         type="button"
                         onClick={() => onSelect(item.key)}
                         className={cn(
-                            'group flex min-h-56 cursor-pointer flex-col items-start gap-5 rounded-[1.75rem] border bg-linear-to-br p-6 text-left',
-                            'transition-all duration-200 hover:scale-[1.015] hover:shadow-md',
-                            gradient.card,
+                            'flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-colors',
+                            isActive
+                                ? 'border-primary/30 bg-primary/8 text-foreground'
+                                : 'border-border/70 bg-background hover:bg-muted/40',
                         )}
                     >
-                        <div
-                            className={cn(
-                                'flex size-11 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110',
-                                gradient.icon,
-                            )}
-                        >
-                            <Icon className="size-5" />
-                        </div>
-
-                        <div className="flex w-full items-end justify-between gap-2">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-lg leading-tight font-semibold text-foreground">
-                                    {item.label}
-                                </span>
-                                <span className="text-sm leading-6 text-muted-foreground">
-                                    {item.description}
-                                </span>
+                        <div className="flex min-w-0 items-center gap-3">
+                            <div
+                                className={cn(
+                                    'flex size-9 shrink-0 items-center justify-center rounded-lg',
+                                    isActive
+                                        ? 'bg-primary/12 text-primary'
+                                        : 'bg-muted text-muted-foreground',
+                                )}
+                            >
+                                <Icon className="size-4" />
                             </div>
-
-                            <ChevronRight className="size-4 shrink-0 translate-x-0 text-muted-foreground/50 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold">
+                                    {item.label}
+                                </p>
+                                <p className="truncate text-xs text-muted-foreground">
+                                    {item.description}
+                                </p>
+                            </div>
                         </div>
+
+                        <ChevronRight
+                            className={cn(
+                                'size-4 shrink-0 text-muted-foreground',
+                                isActive && 'text-primary',
+                            )}
+                        />
                     </button>
                 );
             })}

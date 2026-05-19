@@ -15,6 +15,10 @@ class EnsureProfileIsCompleted
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->is('loans/request*')) {
+            return $next($request);
+        }
+
         if ($request->user() && ! $request->user()->hasRequiredProfileDetails()) {
             return $request->expectsJson()
                 ? abort(403, 'Your profile is incomplete.')

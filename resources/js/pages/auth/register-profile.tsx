@@ -10,7 +10,8 @@ import { logout } from '@/routes';
 
 export default function RegisterProfile() {
     const { auth } = usePage().props;
-    const hasWhatsapp = Boolean(auth.user.whatsapp);
+    const user = auth.user!;
+    const hasWhatsapp = Boolean(user.whatsapp);
 
     return (
         <>
@@ -32,7 +33,7 @@ export default function RegisterProfile() {
                                 <Input
                                     id="email"
                                     type="email"
-                                    value={auth.user.email}
+                                    value={user.email}
                                     readOnly
                                     disabled
                                     autoComplete="username"
@@ -45,7 +46,7 @@ export default function RegisterProfile() {
                                     id="whatsapp"
                                     name="whatsapp"
                                     type="tel"
-                                    defaultValue={auth.user.whatsapp ?? ''}
+                                    defaultValue={user.whatsapp ?? ''}
                                     autoFocus={!hasWhatsapp}
                                     required
                                     autoComplete="tel"
@@ -59,7 +60,7 @@ export default function RegisterProfile() {
                                 <Textarea
                                     id="address"
                                     name="address"
-                                    defaultValue={auth.user.address ?? ''}
+                                    defaultValue={user.address ?? ''}
                                     required
                                     autoComplete="street-address"
                                     className="min-h-28 resize-y"

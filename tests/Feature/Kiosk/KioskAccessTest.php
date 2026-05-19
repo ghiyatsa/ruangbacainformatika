@@ -43,7 +43,8 @@ it('kiosk shows pin entry when not verified', function () {
             fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin')
-                ->where('pageSubtitle', 'Masukkan PIN perangkat untuk mengaktifkan kiosk ini.')
+                ->where('pageTitle', 'Masuk Layanan Mandiri')
+                ->where('pageSubtitle', 'Masukkan PIN untuk mulai.')
                 ->has('visitorTypeOptions')
                 ->has('purposeOptions'),
         );
@@ -113,7 +114,24 @@ it('kiosk allows access after valid pin entry', function () {
             fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'ready')
-                ->where('activeMenu', 'landing'),
+                ->where('activeMenu', 'visit')
+                ->where('pageSubtitle', 'Pilih layanan yang ingin digunakan.'),
+        );
+});
+
+it('kiosk respects the selected menu query when already verified', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    get(route('kiosk.index', ['menu' => 'borrow']))
+        ->assertSuccessful()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('kiosk/index')
+                ->where('step', 'ready')
+                ->where('activeMenu', 'borrow'),
         );
 });
 
@@ -135,6 +153,31 @@ it('rotating kiosk sessions requires the pin again', function () {
         );
 });
 
+it('rotating kiosk sessions clears kiosk devices without breaking visit log history', function () {
+    $device = KioskDevice::query()->create([
+        'session_id' => 'rotate-session',
+        'device_token' => 'rotate-device-token',
+        'ip_address' => '10.10.10.10',
+        'network_scope' => '10.10.10.0/24',
+        'last_active_at' => now(),
+    ]);
+
+    $visitLog = VisitLog::query()->create([
+        'name' => 'Pengunjung Rotasi',
+        'visitor_type' => VisitLog::VISITOR_TYPE_MAHASISWA,
+        'identity_number' => '230170099',
+        'purpose' => 'borrow_return',
+        'kiosk_device_id' => $device->id,
+        'visited_at' => now(),
+    ]);
+
+    $nextVersion = app(KioskPinManager::class)->rotateSessions();
+
+    expect($nextVersion)->toBe(2)
+        ->and(KioskDevice::query()->count())->toBe(0)
+        ->and($visitLog->fresh()?->kiosk_device_id)->toBeNull();
+});
+
 it('kiosk member registration validates the required fields for borrowing readiness', function () {
     $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);
@@ -145,8 +188,8 @@ it('kiosk member registration validates the required fields for borrowing readin
         'name' => 'Member Kiosk',
         'email' => '230170020@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
     ])->assertSessionHasErrors(['address']);
 });
 
@@ -163,10 +206,10 @@ it('kiosk member registration creates a usable member account', function () {
         'email' => '230170021@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
         'address' => 'Jl. Teuku Umar No. 12, Lhokseumawe',
-        'password' => 'password',
-        'password_confirmation' => 'password',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
     ])
-        ->assertRedirect(route('kiosk.index'))
+        ->assertRedirect(route('kiosk.index', ['menu' => 'member']))
         ->assertSessionHas('inertia.flash_data.toast.message', 'Pendaftaran member berhasil. Silakan gunakan akun Anda untuk layanan mandiri.');
 
     $user = User::query()->where('email', '230170021@mhs.unimal.ac.id')->firstOrFail();
@@ -189,7 +232,7 @@ it('kiosk visit submission flashes a sonner toast after saving', function () {
         'purpose' => 'read',
         'notes' => 'Membaca koleksi terbaru.',
     ])
-        ->assertRedirect(route('kiosk.index'))
+        ->assertRedirect(route('kiosk.index', ['menu' => 'visit']))
         ->assertSessionHas('inertia.flash_data.toast.message', 'Data kunjungan berhasil disimpan.');
 
     assertDatabaseHas('visit_logs', [
