@@ -157,7 +157,10 @@ it('google users can access onboarding only once', function () {
         ])
         ->assertRedirect(route('settings.profile.edit', absolute: false));
 
-    actingAs($user->fresh())
+    $user->refresh();
+
+    /** @var User $user */
+    actingAs($user)
         ->get(route('register.profile'))
         ->assertRedirect(route('settings.profile.edit', absolute: false));
 });
@@ -169,6 +172,7 @@ it('legacy users with whatsapp only can complete onboarding by adding an address
         'profile_completed_at' => null,
     ]);
 
+    /** @var User $user */
     actingAs($user)
         ->get(route('register.profile'))
         ->assertInertia(
@@ -178,6 +182,7 @@ it('legacy users with whatsapp only can complete onboarding by adding an address
                 ->where('auth.user.address', null),
         );
 
+    /** @var User $user */
     actingAs($user)
         ->patch(route('register.profile.store'), [
             'address' => 'Jl. Merdeka No. 1',

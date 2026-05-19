@@ -5,7 +5,7 @@ use App\Services\SimilarityFullSyncDispatcher;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
 
-test('similarity full sync dispatcher queues the sync command when not running synchronously', function () {
+it('similarity full sync dispatcher queues the sync command when not running synchronously', function () {
     config()->set('app.env', 'production');
     Queue::fake();
 
@@ -21,7 +21,7 @@ test('similarity full sync dispatcher queues the sync command when not running s
     ]);
 });
 
-test('full similarity sync job runs the reset command', function () {
+it('full similarity sync job runs the reset command', function () {
     Artisan::spy();
 
     $job = new RunFullSimilaritySync(250);

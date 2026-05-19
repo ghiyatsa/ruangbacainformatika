@@ -6,7 +6,7 @@ use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use Illuminate\Support\Facades\Queue;
 
-test('creating a skripsi queues a similarity sync job', function () {
+it('creating a skripsi queues a similarity sync job', function () {
     Queue::fake();
 
     $skripsi = Skripsi::factory()->create();
@@ -21,7 +21,7 @@ test('creating a skripsi queues a similarity sync job', function () {
         ->toBe(SimilaritySyncStatus::STATUS_PENDING);
 });
 
-test('updating a skripsi queues a similarity sync job', function () {
+it('updating a skripsi queues a similarity sync job', function () {
     Queue::fake();
 
     $skripsi = Skripsi::factory()->create();
@@ -42,7 +42,7 @@ test('updating a skripsi queues a similarity sync job', function () {
         ->toBe(SimilaritySyncStatus::STATUS_PENDING);
 });
 
-test('deleting a skripsi queues a similarity removal job', function () {
+it('deleting a skripsi queues a similarity removal job', function () {
     Queue::fake();
 
     $skripsi = Skripsi::factory()->create();

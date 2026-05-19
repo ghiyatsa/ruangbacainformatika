@@ -5,7 +5,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
-test('internship report catalog page renders results', function () {
+it('internship report catalog page renders results', function () {
     InternshipReport::factory()->create([
         'title' => 'Implementasi Sistem Presensi',
         'author_name' => 'Rina Sari',
@@ -23,7 +23,7 @@ test('internship report catalog page renders results', function () {
             ));
 });
 
-test('internship report catalog page filters by search keyword', function () {
+it('internship report catalog page filters by search keyword', function () {
     InternshipReport::factory()->create(['title' => 'Laporan Aplikasi Arsip']);
     InternshipReport::factory()->create(['title' => 'Laporan Monitoring Server']);
 
@@ -38,7 +38,7 @@ test('internship report catalog page filters by search keyword', function () {
             ));
 });
 
-test('internship report detail page renders correctly', function () {
+it('internship report detail page renders correctly', function () {
     $report = InternshipReport::factory()->create([
         'title' => 'Pengembangan Dashboard Monitoring',
         'author_name' => 'Dewi Lestari',
@@ -60,12 +60,12 @@ test('internship report detail page renders correctly', function () {
         );
 });
 
-test('internship report detail page returns 404 for unknown nim', function () {
+it('internship report detail page returns 404 for unknown nim', function () {
     get(route('internship-reports.show', ['internshipReport' => '0000000000']))
         ->assertNotFound();
 });
 
-test('internship report catalog page returns the requested pagination page', function () {
+it('internship report catalog page returns the requested pagination page', function () {
     foreach (range(1, 21) as $number) {
         InternshipReport::factory()->create([
             'title' => sprintf('Laporan %02d', $number),

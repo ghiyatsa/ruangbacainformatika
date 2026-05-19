@@ -9,7 +9,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\post;
 
-test('guest can submit a catalog report for a published book', function () {
+it('guest can submit a catalog report for a published book', function () {
     $book = Book::factory()->published()->create([
         'title' => 'Clean Code',
         'isbn' => '9780132350884',
@@ -37,7 +37,7 @@ test('guest can submit a catalog report for a published book', function () {
     ]);
 });
 
-test('authenticated user catalog report is linked to their account', function () {
+it('authenticated user catalog report is linked to their account', function () {
     $user = User::factory()->create([
         'name' => 'Rina Pelapor',
         'email' => 'rina@example.com',
@@ -47,6 +47,7 @@ test('authenticated user catalog report is linked to their account', function ()
         'student_id' => '2201700001',
     ]);
 
+    /** @var User $user */
     actingAs($user);
 
     post(route('catalog-reports.store'), [
@@ -68,7 +69,7 @@ test('authenticated user catalog report is linked to their account', function ()
     ]);
 });
 
-test('catalog report submission validates the message and catalog type', function () {
+it('catalog report submission validates the message and catalog type', function () {
     post(route('catalog-reports.store'), [
         'catalog_type' => 'unknown',
         'catalog_id' => 999,

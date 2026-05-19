@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Queue;
 use function Pest\Laravel\get;
 use function Pest\Laravel\postJson;
 
-test('similarity page is displayed', function () {
+it('similarity page is displayed', function () {
     get(route('similarity.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page->component('similarity'));
 });
 
-test('similarity check requires at least five words', function () {
+it('similarity check requires at least five words', function () {
     postJson(route('similarity.check'), [
         'judul' => 'Sistem informasi akademik modern',
     ])
@@ -23,7 +23,7 @@ test('similarity check requires at least five words', function () {
         ]);
 });
 
-test('similarity check normalizes api results for frontend', function () {
+it('similarity check normalizes api results for frontend', function () {
     Queue::fake();
 
     $skripsi = Skripsi::factory()->create([
@@ -69,7 +69,7 @@ test('similarity check normalizes api results for frontend', function () {
         ]);
 });
 
-test('similarity check returns a neutral failure message when the service is unavailable internally', function () {
+it('similarity check returns a neutral failure message when the service is unavailable internally', function () {
     $service = Mockery::mock(SimilarityApiService::class);
     $service->shouldReceive('checkSimilarity')
         ->once()

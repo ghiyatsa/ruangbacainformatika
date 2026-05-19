@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\getJson;
 use function Pest\Laravel\instance;
+use function Pest\Laravel\post;
 
 it('kiosk borrowing rejects partial member identifiers', function () {
     $mock = mock(KioskPinManager::class);
@@ -22,12 +24,11 @@ it('kiosk borrowing rejects partial member identifiers', function () {
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
-    $response = $this->post(route('kiosk.loans.borrow'), [
+    post(route('kiosk.loans.borrow'), [
         'member_identifier' => '170020',
         'book_ids' => [1],
-    ]);
-
-    $response->assertSessionHasErrors('member_identifier');
+    ])
+        ->assertSessionHasErrors('member_identifier');
 });
 
 it('members must fill whatsapp and address before borrowing books', function () {
@@ -133,12 +134,10 @@ it('borrows selected books from kiosk using book ids', function () {
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
-    $response = $this->post(route('kiosk.loans.borrow'), [
+    post(route('kiosk.loans.borrow'), [
         'member_identifier' => $member->nim(),
         'book_ids' => [$book->id],
-    ]);
-
-    $response
+    ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHas(
             'inertia.flash_data.toast.message',
@@ -189,12 +188,10 @@ it('stores kiosk borrowing even when receipt email dispatch fails', function () 
         ->andThrow(new RuntimeException('Daily limit exceeded by mail provider.'));
     app()->instance(Dispatcher::class, $dispatcher);
 
-    $response = $this->post(route('kiosk.loans.borrow'), [
+    post(route('kiosk.loans.borrow'), [
         'member_identifier' => $member->nim(),
         'book_ids' => [$book->id],
-    ]);
-
-    $response
+    ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHas(
             'inertia.flash_data.toast.message',
@@ -260,16 +257,14 @@ it('searches borrowable and available books for kiosk borrowing', function () {
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
-    $response = $this->getJson(route('kiosk.books.search', [
+    getJson(route('kiosk.books.search', [
         'q' => 'Laravel',
-    ]));
-
-    $response
+    ]))
         ->assertOk()
         ->assertJsonPath('books.0.id', $availableBook->id)
         ->assertJsonPath('books.0.title', $availableBook->title);
 
-    expect(collect($response->json('books'))->pluck('id')->all())
+    expect(collect(getJson(route('kiosk.books.search', ['q' => 'Laravel']))->json('books'))->pluck('id')->all())
         ->toBe([$availableBook->id]);
 });
 
@@ -318,12 +313,10 @@ it('returns selected books from kiosk using book ids', function () {
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
-    $response = $this->post(route('kiosk.loans.return'), [
+    post(route('kiosk.loans.return'), [
         'member_identifier' => $member->nim(),
         'book_ids' => [$book->id],
-    ]);
-
-    $response
+    ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'return']))
         ->assertSessionHas(
             'inertia.flash_data.toast.message',
@@ -441,18 +434,20 @@ it('searches only active borrowed books for kiosk returns', function () {
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
-    $response = $this->getJson(route('kiosk.books.search', [
+    getJson(route('kiosk.books.search', [
         'q' => 'Laravel',
         'mode' => 'return',
         'member_identifier' => $member->nim(),
-    ]));
-
-    $response
+    ]))
         ->assertOk()
         ->assertJsonPath('books.0.id', $borrowedBook->id)
         ->assertJsonPath('books.0.title', $borrowedBook->title);
 
-    expect(collect($response->json('books'))->pluck('id')->all())
+    expect(collect(getJson(route('kiosk.books.search', [
+        'q' => 'Laravel',
+        'mode' => 'return',
+        'member_identifier' => $member->nim(),
+    ]))->json('books'))->pluck('id')->all())
         ->toBe([$borrowedBook->id]);
 });
 
@@ -521,13 +516,15 @@ it('lists active borrowed books for kiosk returns without a search query', funct
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
-    $response = $this->getJson(route('kiosk.books.search', [
+    getJson(route('kiosk.books.search', [
         'mode' => 'return',
         'member_identifier' => $member->nim(),
-    ]));
+    ]))
+        ->assertOk();
 
-    $response->assertOk();
-
-    expect(collect($response->json('books'))->pluck('id')->sort()->values()->all())
+    expect(collect(getJson(route('kiosk.books.search', [
+        'mode' => 'return',
+        'member_identifier' => $member->nim(),
+    ]))->json('books'))->pluck('id')->sort()->values()->all())
         ->toBe(collect([$firstBook->id, $secondBook->id])->sort()->values()->all());
 });

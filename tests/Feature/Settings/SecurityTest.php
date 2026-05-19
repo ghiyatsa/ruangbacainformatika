@@ -16,7 +16,6 @@ it('security page is displayed', function () {
     ]);
 
     $user = User::factory()->create();
-
     /** @var User $user */
     actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])

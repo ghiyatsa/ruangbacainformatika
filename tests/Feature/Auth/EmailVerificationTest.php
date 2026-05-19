@@ -17,6 +17,7 @@ beforeEach(function () {
 it('email verification screen can be rendered', function () {
     $user = User::factory()->unverified()->create();
 
+    /** @var User $user */
     actingAs($user)->get(route('verification.notice'))
         ->assertOk();
 });
@@ -27,6 +28,7 @@ it('email can be verified', function () {
     Event::fake();
     Cache::put("email_verification_otp_{$user->id}", Hash::make('123456'), now()->addMinutes(10));
 
+    /** @var User $user */
     actingAs($user)->post(route('verification.submit'), [
         'otp' => '123456',
     ], [
@@ -44,6 +46,7 @@ it('email is not verified with invalid otp', function () {
     Event::fake();
     Cache::put("email_verification_otp_{$user->id}", Hash::make('123456'), now()->addMinutes(10));
 
+    /** @var User $user */
     actingAs($user)->post(route('verification.submit'), [
         'otp' => '654321',
     ])->assertSessionHasErrors('otp');
@@ -88,6 +91,7 @@ it('verified administrative users are redirected to admin after email verificati
     Event::fake();
     Cache::put("email_verification_otp_{$user->id}", Hash::make('123456'), now()->addMinutes(10));
 
+    /** @var User $user */
     actingAs($user)->post(route('verification.submit'), [
         'otp' => '123456',
     ])

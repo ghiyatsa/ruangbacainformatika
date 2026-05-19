@@ -8,7 +8,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
-test('catalog page renders published books', function () {
+it('catalog page renders published books', function () {
     $book = Book::factory()->published()->create(['title' => 'Clean Code']);
     BookItem::factory()->available()->create(['book_id' => $book->id]);
 
@@ -26,7 +26,7 @@ test('catalog page renders published books', function () {
         );
 });
 
-test('catalog page search filters by title', function () {
+it('catalog page search filters by title', function () {
     $matching = Book::factory()->published()->create(['title' => 'The Pragmatic Programmer']);
     Book::factory()->published()->create(['title' => 'Clean Architecture']);
 
@@ -42,7 +42,7 @@ test('catalog page search filters by title', function () {
         );
 });
 
-test('catalog page search filters by author', function () {
+it('catalog page search filters by author', function () {
     $author = Author::factory()->create(['name' => 'Robert Martin']);
     $book = Book::factory()->published()->create(['title' => 'Clean Code']);
     $book->authors()->attach($author);
@@ -60,7 +60,7 @@ test('catalog page search filters by author', function () {
         );
 });
 
-test('catalog page filters by category', function () {
+it('catalog page filters by category', function () {
     $category = Category::factory()->create(['name' => 'Programming', 'slug' => 'programming']);
     $book = Book::factory()->published()->create(['title' => 'Laravel Book']);
     $book->categories()->attach($category);
@@ -79,7 +79,7 @@ test('catalog page filters by category', function () {
         );
 });
 
-test('catalog page returns empty results for no match', function () {
+it('catalog page returns empty results for no match', function () {
     Book::factory()->published()->create(['title' => 'Laravel Book']);
 
     get(route('books.index', ['search' => 'xyznonexistent999']))
@@ -93,7 +93,7 @@ test('catalog page returns empty results for no match', function () {
         );
 });
 
-test('catalog stats include books count and available items count', function () {
+it('catalog stats include books count and available items count', function () {
     $book = Book::factory()->published()->create();
     BookItem::factory()->available()->create(['book_id' => $book->id]);
     BookItem::factory()->borrowed()->create(['book_id' => $book->id]);
@@ -107,7 +107,7 @@ test('catalog stats include books count and available items count', function () 
         );
 });
 
-test('catalog availability excludes books marked as not borrowable', function () {
+it('catalog availability excludes books marked as not borrowable', function () {
     $book = Book::factory()
         ->published()
         ->nonBorrowable()
@@ -128,7 +128,7 @@ test('catalog availability excludes books marked as not borrowable', function ()
         );
 });
 
-test('catalog page returns the requested pagination page', function () {
+it('catalog page returns the requested pagination page', function () {
     foreach (range(1, 25) as $number) {
         Book::factory()->published()->create([
             'title' => sprintf('Book %02d', $number),

@@ -6,7 +6,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
-test('skripsi catalog page renders results', function () {
+it('skripsi catalog page renders results', function () {
     Queue::fake();
     Skripsi::factory()->create([
 
@@ -26,7 +26,7 @@ test('skripsi catalog page renders results', function () {
             ));
 });
 
-test('skripsi catalog page filters by search keyword', function () {
+it('skripsi catalog page filters by search keyword', function () {
     Queue::fake();
     Skripsi::factory()->create(['title' => 'Sistem Informasi Akademik']);
 
@@ -43,7 +43,7 @@ test('skripsi catalog page filters by search keyword', function () {
             ));
 });
 
-test('skripsi catalog page filters by year', function () {
+it('skripsi catalog page filters by year', function () {
     Queue::fake();
     Skripsi::factory()->create([
 
@@ -66,7 +66,7 @@ test('skripsi catalog page filters by year', function () {
             ));
 });
 
-test('skripsi catalog page returns the requested pagination page', function () {
+it('skripsi catalog page returns the requested pagination page', function () {
     Queue::fake();
 
     foreach (range(1, 21) as $number) {

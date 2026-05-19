@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\call;
 use function Pest\Laravel\get;
 use function Pest\Laravel\instance;
 use function Pest\Laravel\post;
@@ -29,11 +31,10 @@ it('kiosk denies access from networks outside the allowlist', function () {
         'value' => '192.168.10.0/24',
     ]);
 
-    $response = $this->call('GET', route('kiosk.index', absolute: false), [], [], [], [
+    call('GET', route('kiosk.index', absolute: false), [], [], [], [
         'REMOTE_ADDR' => '10.10.10.15',
-    ]);
-
-    $response->assertForbidden();
+    ])
+        ->assertForbidden();
 });
 
 it('kiosk shows pin entry when not verified', function () {
@@ -65,13 +66,11 @@ it('kiosk device cookies are only trusted from the same network scope', function
         'last_active_at' => now(),
     ]);
 
-    $response = $this->call('GET', route('kiosk.index', absolute: false), [], [
+    call('GET', route('kiosk.index', absolute: false), [], [
         KioskPinManager::COOKIE_DEVICE_TOKEN_KEY => 'trusted-device-token',
     ], [], [
         'REMOTE_ADDR' => '10.10.20.9',
-    ]);
-
-    $response
+    ])
         ->assertSuccessful()
         ->assertInertia(
             fn (Assert $page) => $page
@@ -172,10 +171,12 @@ it('rotating kiosk sessions clears kiosk devices without breaking visit log hist
     ]);
 
     $nextVersion = app(KioskPinManager::class)->rotateSessions();
+    $visitLog->refresh();
 
     expect($nextVersion)->toBe(2)
-        ->and(KioskDevice::query()->count())->toBe(0)
-        ->and($visitLog->fresh()?->kiosk_device_id)->toBeNull();
+        ->and($visitLog->kiosk_device_id)->toBeNull();
+
+    assertDatabaseCount('kiosk_devices', 0);
 });
 
 it('kiosk member registration validates the required fields for borrowing readiness', function () {

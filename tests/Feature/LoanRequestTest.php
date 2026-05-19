@@ -2,15 +2,18 @@
 
 use App\Models\Book;
 use App\Models\BookItem;
-use App\Models\Loan;
 use App\Models\LoanDraft;
 use App\Models\Publisher;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\withoutMiddleware;
+
 it('members can add books to a loan request and generate a qr draft', function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
+    withoutMiddleware(PreventRequestForgery::class);
 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
@@ -37,16 +40,16 @@ it('members can add books to a loan request and generate a qr draft', function (
         'status' => 'available',
     ]);
 
-    $this->actingAs($member)
+    /** @var User $member */
+    actingAs($member)
         ->post(route('loans.request.books.store'), [
             'book_id' => $book->id,
         ])
         ->assertRedirect();
 
-    $response = $this->actingAs($member)
-        ->post(route('loans.request.qr'));
-
-    $response
+    /** @var User $member */
+    actingAs($member)
+        ->post(route('loans.request.qr'))
         ->assertRedirect(route('loans.request'))
         ->assertSessionHas('inertia.flash_data.toast.message', 'QR peminjaman berhasil dibuat. Silakan tunjukkan ke kiosk lobi sebelum masa berlakunya habis.');
 
@@ -55,16 +58,16 @@ it('members can add books to a loan request and generate a qr draft', function (
         ->latest('id')
         ->first();
 
-    expect($draft)->not->toBeNull()
-        ->and($draft->status)->toBe(LoanDraft::STATUS_PENDING)
-        ->and($draft->token_hash)->not->toBeNull()
-        ->and($draft->items()->count())->toBe(1)
-        ->and(Loan::query()->count())->toBe(0)
-        ->and(session('loan_request_qr.payload'))->toBeString();
+    expect($draft)->toBeInstanceOf(LoanDraft::class);
+    expect($draft->status)->toBe(LoanDraft::STATUS_PENDING);
+    expect($draft->token_hash)->not->toBeNull();
+    expect($draft->items()->count())->toBe(1);
+    assertDatabaseCount('loans', 0);
+    expect(session('loan_request_qr.payload'))->toBeString();
 });
 
 it('legacy users without member role can still add books to the cart', function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
+    withoutMiddleware(PreventRequestForgery::class);
 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
@@ -90,7 +93,8 @@ it('legacy users without member role can still add books to the cart', function 
         'status' => 'available',
     ]);
 
-    $this->actingAs($user)
+    /** @var User $user */
+    actingAs($user)
         ->post(route('loans.request.books.store'), [
             'book_id' => $book->id,
         ])
@@ -100,12 +104,12 @@ it('legacy users without member role can still add books to the cart', function 
 
     $draft = LoanDraft::query()->whereBelongsTo($user)->latest('id')->first();
 
-    expect($draft)->not->toBeNull()
-        ->and($draft->items()->count())->toBe(1);
+    expect($draft)->toBeInstanceOf(LoanDraft::class);
+    expect($draft->items()->count())->toBe(1);
 });
 
 it('users can add books to cart before profile is complete but cannot generate qr yet', function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
+    withoutMiddleware(PreventRequestForgery::class);
 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
@@ -135,13 +139,15 @@ it('users can add books to cart before profile is complete but cannot generate q
         'status' => 'available',
     ]);
 
-    $this->actingAs($member)
+    /** @var User $member */
+    actingAs($member)
         ->post(route('loans.request.books.store'), [
             'book_id' => $book->id,
         ])
         ->assertRedirect();
 
-    $this->actingAs($member)
+    /** @var User $member */
+    actingAs($member)
         ->from(route('loans.request'))
         ->post(route('loans.request.qr'))
         ->assertRedirect(route('loans.request'))

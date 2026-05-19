@@ -8,7 +8,9 @@ use App\Services\SimilaritySyncDispatcher;
 use App\Services\SimilaritySyncStatusService;
 use Illuminate\Support\Facades\Queue;
 
-test('similarity sync dispatcher queues jobs when configured to queued mode', function () {
+use function Pest\Laravel\get;
+
+it('similarity sync dispatcher queues jobs when configured to queued mode', function () {
     Queue::fake();
     config()->set('services.similarity_api.dispatch', 'queued');
 
@@ -22,7 +24,7 @@ test('similarity sync dispatcher queues jobs when configured to queued mode', fu
     });
 });
 
-test('similarity sync dispatcher can run jobs immediately in sync mode', function () {
+it('similarity sync dispatcher can run jobs immediately in sync mode', function () {
     config()->set('services.similarity_api.dispatch', 'sync');
 
     $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
@@ -48,8 +50,7 @@ test('similarity sync dispatcher can run jobs immediately in sync mode', functio
         ->and($status->last_synced_at)->not->toBeNull();
 });
 
-test('example', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(200);
+it('example', function () {
+    get('/')
+        ->assertStatus(200);
 });

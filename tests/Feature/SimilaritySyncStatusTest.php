@@ -7,7 +7,7 @@ use App\Services\SimilarityApiService;
 use App\Services\SimilaritySyncStatusService;
 use Illuminate\Support\Facades\Queue;
 
-test('sync skripsi job marks status as synced after successful api upsert', function () {
+it('sync skripsi job marks status as synced after successful api upsert', function () {
     Queue::fake();
 
     $skripsi = Skripsi::factory()->create();
@@ -33,7 +33,7 @@ test('sync skripsi job marks status as synced after successful api upsert', func
         ->and($status->last_error)->toBeNull();
 });
 
-test('sync skripsi job marks status as failed after api error', function () {
+it('sync skripsi job marks status as failed after api error', function () {
     Queue::fake();
 
     $skripsi = Skripsi::factory()->create();

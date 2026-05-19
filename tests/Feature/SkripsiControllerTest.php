@@ -6,7 +6,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
-test('skripsi detail page renders correctly', function () {
+it('skripsi detail page renders correctly', function () {
     Queue::fake();
     $skripsi = Skripsi::factory()->create([
 
@@ -29,12 +29,12 @@ test('skripsi detail page renders correctly', function () {
         );
 });
 
-test('skripsi detail page returns 404 for unknown nim', function () {
+it('skripsi detail page returns 404 for unknown nim', function () {
     get(route('skripsi.show', ['skripsi' => '0000000000']))
         ->assertNotFound();
 });
 
-test('skripsi detail page exposes keywords as array', function () {
+it('skripsi detail page exposes keywords as array', function () {
     Queue::fake();
     $skripsi = Skripsi::factory()->create([
 
@@ -49,7 +49,7 @@ test('skripsi detail page exposes keywords as array', function () {
         );
 });
 
-test('skripsi detail page returns empty keywords array when none set', function () {
+it('skripsi detail page returns empty keywords array when none set', function () {
     Queue::fake();
     $skripsi = Skripsi::factory()->create(['keywords' => null]);
 

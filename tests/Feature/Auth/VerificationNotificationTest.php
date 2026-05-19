@@ -17,6 +17,7 @@ it('sends verification notification', function () {
 
     $user = User::factory()->unverified()->create();
 
+    /** @var User $user */
     actingAs($user)
         ->post(route('verification.send'))
         ->assertRedirect(route('verification.notice'))
@@ -51,6 +52,7 @@ it('shows a friendly message when verification email dispatch fails', function (
 
     app()->instance(Dispatcher::class, $dispatcher);
 
+    /** @var User $user */
     actingAs($user)
         ->from(route('verification.notice'))
         ->post(route('verification.send'))

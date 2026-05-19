@@ -5,7 +5,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
-test('thesis catalog page renders results', function () {
+it('thesis catalog page renders results', function () {
     Thesis::factory()->create([
         'title' => 'Analisis Sistem Cerdas',
         'author_name' => 'Andi Pratama',
@@ -23,7 +23,7 @@ test('thesis catalog page renders results', function () {
             ));
 });
 
-test('thesis catalog page filters by search keyword', function () {
+it('thesis catalog page filters by search keyword', function () {
     Thesis::factory()->create(['title' => 'Tesis Data Mining']);
     Thesis::factory()->create(['title' => 'Tesis Keamanan Jaringan']);
 
@@ -38,7 +38,7 @@ test('thesis catalog page filters by search keyword', function () {
             ));
 });
 
-test('thesis catalog page returns the requested pagination page', function () {
+it('thesis catalog page returns the requested pagination page', function () {
     foreach (range(1, 21) as $number) {
         Thesis::factory()->create([
             'title' => sprintf('Tesis %02d', $number),

@@ -242,7 +242,7 @@ it('super admin users can see similarity sync overview on the admin dashboard', 
     actingAs($user)
         ->get('/admin')
         ->assertOk()
-        ->assertSee('Kesehatan Sinkronisasi Similarity')
+        ->assertSee('Sinkronisasi Similarity')
         ->assertSee('Sinkron Berhasil')
         ->assertSee('Perlu Tindak Lanjut')
         ->assertSee('Sedang Diproses')
@@ -256,7 +256,7 @@ it('filament resources expose consistent navigation metadata', function () {
         ->and(LoanResource::getNavigationBadgeColor())->toBe('warning')
         ->and(LoanResource::getNavigationBadgeTooltip())->toBe('Total pinjaman aktif')
         ->and(ContactMessageResource::getNavigationBadgeColor())->toBe('warning')
-        ->and(ContactMessageResource::getNavigationBadgeTooltip())->toBe('Pesan kontak baru')
+        ->and(ContactMessageResource::getNavigationBadgeTooltip())->toBe('Korespondensi baru')
         ->and(VisitLogResource::getNavigationBadgeColor())->toBe('primary')
         ->and(VisitLogResource::getNavigationBadgeTooltip())->toBe('Kunjungan hari ini')
         ->and(AuthorResource::getNavigationBadgeColor())->toBe('gray')
@@ -298,14 +298,14 @@ it('super admin users can render concise empty state copy on book management res
     actingAs($user)
         ->get('/admin/contact-messages')
         ->assertOk()
-        ->assertSee('Belum ada pesan kontak')
-        ->assertSee('Pesan dari halaman contact akan tampil di sini.');
+        ->assertSee('Belum ada korespondensi')
+        ->assertSee('Pesan dari halaman kontak akan tampil di sini.');
 
     actingAs($user)
         ->get('/admin/catalog-reports')
         ->assertOk()
-        ->assertSee('Belum ada laporan katalog')
-        ->assertSee('Laporan dari halaman detail katalog akan tampil di sini.');
+        ->assertSee('Belum ada umpan balik katalog')
+        ->assertSee('Masukan dari halaman detail katalog akan tampil di sini.');
 
     actingAs($user)
         ->get('/admin/books')
@@ -357,7 +357,7 @@ it('super admin users can access the books resource when some books have no publ
 
 it('filament catalog report resource exposes pending navigation badge metadata', function () {
     expect(CatalogReportResource::getNavigationBadgeColor())->toBe('warning')
-        ->and(CatalogReportResource::getNavigationBadgeTooltip())->toBe('Laporan menunggu tindak lanjut');
+        ->and(CatalogReportResource::getNavigationBadgeTooltip())->toBe('Umpan balik menunggu tindak lanjut');
 });
 
 it('super admin users can see the contact messages widget on the dashboard', function () {
@@ -366,6 +366,6 @@ it('super admin users can see the contact messages widget on the dashboard', fun
     actingAs($user)
         ->get('/admin')
         ->assertOk()
-        ->assertSee('Pesan Kontak Terbaru')
-        ->assertSee('Pesan dari halaman contact akan tampil di sini.');
+        ->assertSee('Korespondensi Baru')
+        ->assertSee('Pesan dari halaman kontak muncul di sini.');
 });

@@ -5,7 +5,7 @@ use App\Services\SimilarityApiService;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
-test('similarity api service retries transient upstream failures', function () {
+it('similarity api service retries transient upstream failures', function () {
     Setting::query()->create([
         'section' => 'integration',
         'key' => 'similarity_api_url',
@@ -45,7 +45,7 @@ test('similarity api service retries transient upstream failures', function () {
     expect($attempts)->toBe(2);
 });
 
-test('similarity api service does not retry invalid credentials responses', function () {
+it('similarity api service does not retry invalid credentials responses', function () {
     Setting::query()->create([
         'section' => 'integration',
         'key' => 'similarity_api_url',
@@ -75,7 +75,7 @@ test('similarity api service does not retry invalid credentials responses', func
     expect($attempts)->toBe(1);
 });
 
-test('similarity api service waits for bulk upsert job completion', function () {
+it('similarity api service waits for bulk upsert job completion', function () {
     Setting::query()->create([
         'section' => 'integration',
         'key' => 'similarity_api_url',
@@ -145,7 +145,7 @@ test('similarity api service waits for bulk upsert job completion', function () 
     ]);
 });
 
-test('similarity api service can request a full reset before bulk upsert', function () {
+it('similarity api service can request a full reset before bulk upsert', function () {
     Setting::query()->create([
         'section' => 'integration',
         'key' => 'similarity_api_url',

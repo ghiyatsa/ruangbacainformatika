@@ -15,139 +15,159 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\from;
 use function Pest\Laravel\instance;
+use function Pest\Laravel\post;
+use function Pest\Laravel\withoutMiddleware;
 
-it('consumes a qr loan draft from kiosk and creates the final loan', function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
+function ensureMemberRole(): Role
+{
+    return Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+}
 
-    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
-    Notification::fake();
-
-    $member = User::factory()->create();
-    $member->assignRole('member');
-
-    $publisher = Publisher::query()->create([
-        'name' => 'Penerbit Consume',
-        'slug' => 'penerbit-consume',
+function makePublisher(string $name, string $slug): Publisher
+{
+    return Publisher::query()->create([
+        'name' => $name,
+        'slug' => $slug,
     ]);
+}
 
-    $book = Book::query()->create([
-        'title' => 'Buku Consume QR',
-        'slug' => 'buku-consume-qr',
-        'isbn' => '9786020000202',
+function makeBorrowableBook(Publisher $publisher, string $title, string $slug, string $isbn): Book
+{
+    return Book::query()->create([
+        'title' => $title,
+        'slug' => $slug,
+        'isbn' => $isbn,
         'publisher_id' => $publisher->id,
         'is_published' => true,
         'is_borrowable' => true,
     ]);
+}
 
-    $bookItem = BookItem::query()->create([
+function makeBookItem(Book $book, string $internalCode, string $status): BookItem
+{
+    return BookItem::query()->create([
         'book_id' => $book->id,
-        'internal_code' => 'ITEM-CONSUME-001',
-        'status' => 'available',
+        'internal_code' => $internalCode,
+        'status' => $status,
     ]);
+}
 
-    $this->actingAs($member)->post(route('loans.request.books.store'), [
-        'book_id' => $book->id,
-    ]);
-
-    $this->actingAs($member)->post(route('loans.request.qr'));
-
-    $payload = session('loan_request_qr.payload');
-
+function fakeVerifiedKioskPin(): void
+{
     $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);
     $mock->shouldIgnoreMissing();
-    instance(KioskPinManager::class, $mock);
 
-    $response = $this->post(route('kiosk.loan-drafts.consume'), [
-        'payload' => $payload,
+    instance(KioskPinManager::class, $mock);
+}
+
+it('consumes a qr loan draft from kiosk and creates the final loan', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    ensureMemberRole();
+    Notification::fake();
+
+    $member = User::factory()->create();
+    /** @var User $member */
+    $member->assignRole('member');
+
+    $publisher = makePublisher('Penerbit Consume', 'penerbit-consume');
+    $book = makeBorrowableBook($publisher, 'Buku Consume QR', 'buku-consume-qr', '9786020000202');
+    $bookItem = makeBookItem($book, 'ITEM-CONSUME-001', 'available');
+
+    actingAs($member)->post(route('loans.request.books.store'), [
+        'book_id' => $book->id,
     ]);
 
-    $response
+    actingAs($member)->post(route('loans.request.qr'));
+
+    $payload = session('loan_request_qr.payload');
+    /** @var string $payload */
+    fakeVerifiedKioskPin();
+
+    post(route('kiosk.loan-drafts.consume'), [
+        'payload' => $payload,
+    ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHas('inertia.flash_data.toast.message', '1 buku berhasil dipinjam.');
 
     $draft = LoanDraft::query()->whereBelongsTo($member)->latest('id')->first();
 
-    expect($draft)->not->toBeNull()
-        ->and($draft->status)->toBe(LoanDraft::STATUS_CONSUMED)
+    if (! $draft instanceof LoanDraft) {
+        test()->fail('Loan draft was not created.');
+    }
+
+    expect($draft->status)->toBe(LoanDraft::STATUS_CONSUMED)
         ->and($draft->consumed_at)->not->toBeNull()
         ->and($bookItem->fresh()->status)->toBe('borrowed');
 
-    expect(Loan::query()->whereBelongsTo($member)->count())->toBe(1);
+    assertDatabaseCount('loans', 1);
 
     Notification::assertSentTo($member, LoanReceiptNotification::class);
 });
 
 it('rejects expired qr loan drafts from kiosk', function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
+    withoutMiddleware(PreventRequestForgery::class);
 
-    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    ensureMemberRole();
 
     $member = User::factory()->create();
+    /** @var User $member */
     $member->assignRole('member');
 
-    $publisher = Publisher::query()->create([
-        'name' => 'Penerbit Expired',
-        'slug' => 'penerbit-expired',
-    ]);
+    $publisher = makePublisher('Penerbit Expired', 'penerbit-expired');
+    $book = makeBorrowableBook($publisher, 'Buku Expired QR', 'buku-expired-qr', '9786020000203');
+    makeBookItem($book, 'ITEM-EXPIRED-001', 'available');
 
-    $book = Book::query()->create([
-        'title' => 'Buku Expired QR',
-        'slug' => 'buku-expired-qr',
-        'isbn' => '9786020000203',
-        'publisher_id' => $publisher->id,
-        'is_published' => true,
-        'is_borrowable' => true,
-    ]);
-
-    BookItem::query()->create([
-        'book_id' => $book->id,
-        'internal_code' => 'ITEM-EXPIRED-001',
-        'status' => 'available',
-    ]);
-
-    $this->actingAs($member)->post(route('loans.request.books.store'), [
+    actingAs($member)->post(route('loans.request.books.store'), [
         'book_id' => $book->id,
     ]);
 
-    $this->actingAs($member)->post(route('loans.request.qr'));
+    actingAs($member)->post(route('loans.request.qr'));
 
     $payload = session('loan_request_qr.payload');
-
-    LoanDraft::query()
+    /** @var string $payload */
+    $draft = LoanDraft::query()
         ->whereBelongsTo($member)
         ->latest('id')
-        ->first()
-        ?->forceFill([
-            'expires_at' => now()->subMinute(),
-        ])->save();
+        ->first();
 
-    $mock = mock(KioskPinManager::class);
-    $mock->shouldReceive('isVerified')->andReturn(true);
-    $mock->shouldIgnoreMissing();
-    instance(KioskPinManager::class, $mock);
+    if (! $draft instanceof LoanDraft) {
+        test()->fail('Loan draft was not created.');
+    }
 
-    $response = $this->from(route('kiosk.index', ['menu' => 'borrow']))
+    $draft->forceFill([
+        'expires_at' => now()->subMinute(),
+    ])->save();
+
+    fakeVerifiedKioskPin();
+
+    from(route('kiosk.index', ['menu' => 'borrow']))
         ->post(route('kiosk.loan-drafts.consume'), [
             'payload' => $payload,
-        ]);
-
-    $response
+        ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHasErrors('payload');
 
     $draft = LoanDraft::query()->whereBelongsTo($member)->latest('id')->first();
 
-    expect($draft)->not->toBeNull()
-        ->and($draft->status)->toBe(LoanDraft::STATUS_EXPIRED)
-        ->and(Loan::query()->count())->toBe(0);
+    if (! $draft instanceof LoanDraft) {
+        test()->fail('Loan draft should still exist after being expired.');
+    }
+
+    expect($draft->status)->toBe(LoanDraft::STATUS_EXPIRED);
+
+    assertDatabaseCount('loans', 0);
 });
 
 it('rejects qr loan draft consumption when member already reached the loan limit', function () {
-    $this->withoutMiddleware(PreventRequestForgery::class);
+    withoutMiddleware(PreventRequestForgery::class);
 
-    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    ensureMemberRole();
 
     Setting::query()->updateOrCreate(
         ['section' => 'library', 'key' => 'loan_max_books'],
@@ -158,12 +178,10 @@ it('rejects qr loan draft consumption when member already reached the loan limit
         'whatsapp' => '08123456789',
         'address' => 'Jl. Banda Aceh No. 10',
     ]);
+    /** @var User $member */
     $member->assignRole('member');
 
-    $publisher = Publisher::query()->create([
-        'name' => 'Penerbit Batas Limit',
-        'slug' => 'penerbit-batas-limit',
-    ]);
+    $publisher = makePublisher('Penerbit Batas Limit', 'penerbit-batas-limit');
 
     $activeLoan = Loan::query()->create([
         'user_id' => $member->id,
@@ -173,20 +191,8 @@ it('rejects qr loan draft consumption when member already reached the loan limit
     ]);
 
     foreach ([1, 2, 3] as $index) {
-        $book = Book::query()->create([
-            'title' => "Buku Aktif {$index}",
-            'slug' => "buku-aktif-{$index}",
-            'isbn' => '97860200003'.$index,
-            'publisher_id' => $publisher->id,
-            'is_published' => true,
-            'is_borrowable' => true,
-        ]);
-
-        $bookItem = BookItem::query()->create([
-            'book_id' => $book->id,
-            'internal_code' => "ITEM-ACTIVE-{$index}",
-            'status' => 'borrowed',
-        ]);
+        $book = makeBorrowableBook($publisher, "Buku Aktif {$index}", "buku-aktif-{$index}", '97860200003'.$index);
+        $bookItem = makeBookItem($book, "ITEM-ACTIVE-{$index}", 'borrowed');
 
         LoanItem::query()->create([
             'loan_id' => $activeLoan->id,
@@ -194,20 +200,8 @@ it('rejects qr loan draft consumption when member already reached the loan limit
         ]);
     }
 
-    $draftBook = Book::query()->create([
-        'title' => 'Buku Draft QR',
-        'slug' => 'buku-draft-qr',
-        'isbn' => '9786020000399',
-        'publisher_id' => $publisher->id,
-        'is_published' => true,
-        'is_borrowable' => true,
-    ]);
-
-    BookItem::query()->create([
-        'book_id' => $draftBook->id,
-        'internal_code' => 'ITEM-DRAFT-QR',
-        'status' => 'available',
-    ]);
+    $draftBook = makeBorrowableBook($publisher, 'Buku Draft QR', 'buku-draft-qr', '9786020000399');
+    makeBookItem($draftBook, 'ITEM-DRAFT-QR', 'available');
 
     $payload = 'RB-LOAN-LIMIT-TEST-TOKEN';
     $draft = LoanDraft::query()->create([
@@ -222,20 +216,18 @@ it('rejects qr loan draft consumption when member already reached the loan limit
         'book_id' => $draftBook->id,
     ]);
 
-    $mock = mock(KioskPinManager::class);
-    $mock->shouldReceive('isVerified')->andReturn(true);
-    $mock->shouldIgnoreMissing();
-    instance(KioskPinManager::class, $mock);
+    fakeVerifiedKioskPin();
 
-    $response = $this->from(route('kiosk.index', ['menu' => 'borrow']))
+    from(route('kiosk.index', ['menu' => 'borrow']))
         ->post(route('kiosk.loan-drafts.consume'), [
             'payload' => $payload,
-        ]);
-
-    $response
+        ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHasErrors('book_ids');
 
-    expect($draft->fresh()?->status)->toBe(LoanDraft::STATUS_PENDING)
-        ->and(Loan::query()->count())->toBe(1);
+    $draft->refresh();
+
+    expect($draft->status)->toBe(LoanDraft::STATUS_PENDING);
+
+    assertDatabaseCount('loans', 1);
 });

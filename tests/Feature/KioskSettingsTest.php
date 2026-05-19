@@ -24,7 +24,7 @@ function makeKioskSettingsSuperAdmin(): User
     return $user;
 }
 
-test('kiosk settings rotate active sessions when the pin is updated', function () {
+it('kiosk settings rotate active sessions when the pin is updated', function () {
     $user = makeKioskSettingsSuperAdmin();
 
     actingAs($user);

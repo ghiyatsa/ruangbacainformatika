@@ -4,9 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
+use function Pest\Laravel\withoutVite;
 
 beforeEach(function () {
-    $this->withoutVite();
+    withoutVite();
 
     Route::middleware('web')->get('/_test/errors/403', fn () => abort(403));
     Route::middleware('web')->get('/_test/errors/500', function () {
@@ -14,7 +15,7 @@ beforeEach(function () {
     });
 });
 
-test('inertia requests render the shared error page for forbidden responses', function () {
+it('inertia requests render the shared error page for forbidden responses', function () {
     get('/_test/errors/403')
         ->assertForbidden()
         ->assertInertia(fn (Assert $page) => $page
@@ -24,7 +25,7 @@ test('inertia requests render the shared error page for forbidden responses', fu
             ->has('name'));
 });
 
-test('unknown pages render the shared not found page', function () {
+it('unknown pages render the shared not found page', function () {
     get('/halaman-acak-yang-tidak-ada')
         ->assertNotFound()
         ->assertInertia(fn (Assert $page) => $page
@@ -34,7 +35,7 @@ test('unknown pages render the shared not found page', function () {
             ->has('name'));
 });
 
-test('inertia requests render the shared error page for server errors', function () {
+it('inertia requests render the shared error page for server errors', function () {
     get('/_test/errors/500')
         ->assertServerError()
         ->assertInertia(fn (Assert $page) => $page

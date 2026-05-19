@@ -9,7 +9,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-test('book detail page renders correctly', function () {
+it('book detail page renders correctly', function () {
     $book = Book::factory()->published()->create([
         'title' => 'Test Book',
         'view_count' => 0,
@@ -26,7 +26,7 @@ test('book detail page renders correctly', function () {
     expect($book->fresh()->view_count)->toBe(1);
 });
 
-test('book detail page increments view count', function () {
+it('book detail page increments view count', function () {
     $book = Book::factory()->published()->create(['view_count' => 5]);
 
     get(route('books.show', $book));
@@ -35,7 +35,7 @@ test('book detail page increments view count', function () {
     expect($book->fresh()->view_count)->toBe(7);
 });
 
-test('book detail page shares loan request summary for authenticated users', function () {
+it('book detail page shares loan request summary for authenticated users', function () {
     $user = User::factory()->create();
     $book = Book::factory()->published()->create([
         'title' => 'Borrowable Book',
@@ -53,6 +53,7 @@ test('book detail page shares loan request summary for authenticated users', fun
         'book_id' => $book->id,
     ]);
 
+    /** @var User $user */
     actingAs($user);
 
     get(route('books.show', $book))
@@ -65,14 +66,14 @@ test('book detail page shares loan request summary for authenticated users', fun
         );
 });
 
-test('unpublished book detail page returns 404', function () {
+it('unpublished book detail page returns 404', function () {
     $book = Book::factory()->unpublished()->create();
 
     get(route('books.show', $book))
         ->assertNotFound();
 });
 
-test('book editor state is persisted as structured data', function () {
+it('book editor state is persisted as structured data', function () {
     $book = Book::factory()->create([
         'cover_image_editor_state' => [
             'x' => 12,

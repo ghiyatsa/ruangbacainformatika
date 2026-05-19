@@ -2,6 +2,7 @@
 
 use App\Models\ContactMessage;
 
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\from;
 
 it('visitors can submit the contact form', function () {
@@ -16,7 +17,7 @@ it('visitors can submit the contact form', function () {
         ->assertRedirect(route('contact'))
         ->assertSessionHas('inertia.flash_data.toast.message', 'Pesan Anda berhasil dikirim. Tim pengelola perpustakaan akan segera menindaklanjuti.');
 
-    $this->assertDatabaseHas(ContactMessage::class, [
+    assertDatabaseHas(ContactMessage::class, [
         'name' => 'Pengunjung Demo',
         'email' => 'pengunjung@example.com',
         'subject' => 'Pertanyaan layanan koleksi',

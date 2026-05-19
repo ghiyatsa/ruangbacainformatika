@@ -22,7 +22,7 @@ function makeIntegrationSuperAdmin(): User
     return $user;
 }
 
-test('integration settings can persist similarity weights and warn for full resync', function () {
+it('integration settings can persist similarity weights and warn for full resync', function () {
     $user = makeIntegrationSuperAdmin();
 
     actingAs($user);
@@ -49,7 +49,7 @@ test('integration settings can persist similarity weights and warn for full resy
         ->and(Setting::query()->where('section', 'integration')->where('key', 'similarity_weight_kata_kunci')->value('value'))->toBe('0.15');
 });
 
-test('integration settings page shows the full skripsi resync action', function () {
+it('integration settings page shows the full skripsi resync action', function () {
     $user = makeIntegrationSuperAdmin();
 
     actingAs($user);
