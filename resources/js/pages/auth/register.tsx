@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
 import { store } from '@/actions/Laravel/Fortify/Http/Controllers/RegisteredUserController';
 import GoogleIcon from '@/components/common/GoogleIcon';
 import InputError from '@/components/common/InputError';
@@ -13,7 +14,6 @@ import { PASSWORD_MIN_LENGTH } from '@/lib/password-requirements';
 import { cn } from '@/lib/utils';
 import { login } from '@/routes';
 import { google } from '@/routes/auth';
-import { useState } from 'react';
 
 type Props = {
     canLoginWithGoogle: boolean;

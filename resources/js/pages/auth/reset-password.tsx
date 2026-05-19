@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
 import InputError from '@/components/common/InputError';
 import PasswordInput from '@/components/common/PasswordInput';
 import PasswordRequirements from '@/components/common/PasswordRequirements';
@@ -8,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { PASSWORD_MIN_LENGTH } from '@/lib/password-requirements';
 import { update } from '@/routes/password';
-import { useState } from 'react';
 
 type Props = {
     token: string;
