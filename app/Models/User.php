@@ -201,8 +201,13 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
                         ->where('status', Loan::STATUS_RETURNED)
                         ->whereNotNull('due_at')
                         ->whereNotNull('returned_at')
-                        ->where('returned_at', '>', now()->subDays($cooldownDays))
-                        ->whereRaw('TIMESTAMPDIFF(DAY, due_at, returned_at) >= ?', [$thresholdDays]);
+                        ->where('returned_at', '>', now()->subDays($cooldownDays));
+
+                    if ($loanQuery->getConnection()->getDriverName() === 'sqlite') {
+                        $loanQuery->whereRaw('julianday(returned_at) - julianday(due_at) >= ?', [$thresholdDays]);
+                    } else {
+                        $loanQuery->whereRaw('TIMESTAMPDIFF(DAY, due_at, returned_at) >= ?', [$thresholdDays]);
+                    }
                 });
             }
         });
