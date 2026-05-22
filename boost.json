@@ -1,5 +1,6 @@
 {
     "agents": [
+        "codex",
         "kiro"
     ],
     "cloud": false,

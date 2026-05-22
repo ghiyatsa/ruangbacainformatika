@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\LoanReceiptNotification;
 use App\Repositories\SettingRepository;
 use App\Support\CampusEmail;
+use App\Support\LoanConsequenceService;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,7 @@ class KioskLoanService
     public function __construct(
         protected SettingRepository $settingRepository,
         protected CampusEmail $campusEmail,
+        protected LoanConsequenceService $loanConsequenceService,
     ) {}
 
     /**
@@ -39,6 +41,14 @@ class KioskLoanService
         if (! $member->hasRequiredProfileDetails()) {
             throw ValidationException::withMessages([
                 'member_identifier' => 'Nomor WhatsApp dan alamat wajib diisi pada profil sebelum meminjam buku.',
+            ]);
+        }
+
+        $restrictionMessage = $this->borrowingRestrictionMessage($member);
+
+        if ($restrictionMessage !== null) {
+            throw ValidationException::withMessages([
+                'member_identifier' => $restrictionMessage,
             ]);
         }
 
@@ -174,6 +184,11 @@ class KioskLoanService
     public function loanDurationDays(): int
     {
         return max((int) $this->settingRepository->get('library', 'loan_duration_days', 5), 1);
+    }
+
+    public function borrowingRestrictionMessage(User $user): ?string
+    {
+        return $this->loanConsequenceService->borrowingRestrictionMessage($user);
     }
 
     protected function activeLoanCount(User $user): int

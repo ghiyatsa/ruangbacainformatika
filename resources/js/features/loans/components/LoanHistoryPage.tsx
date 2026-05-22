@@ -233,7 +233,9 @@ export default function LoanHistoryPage({ loans, stats }: Props) {
                                                 <TableCell className="font-mono text-xs tracking-wider text-muted-foreground">
                                                     {loan.internalCode}
                                                 </TableCell>
-                                                <TableCell>{loan.borrowedAt}</TableCell>
+                                                <TableCell>
+                                                    {loan.borrowedAt}
+                                                </TableCell>
                                                 <TableCell
                                                     className={cn(
                                                         loan.isOverdue &&

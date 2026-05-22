@@ -107,7 +107,7 @@ export default function SkripsiCard({ skripsi }: SkripsiCardProps) {
                                         />
                                     </Button>
                                 </TooltipTrigger>
-                                <TooltipContent side="bottom" sideOffset={8}>
+                                <TooltipContent side="top" sideOffset={8}>
                                     {isBookmarkedByUser
                                         ? 'Hapus bookmark'
                                         : 'Simpan bookmark'}

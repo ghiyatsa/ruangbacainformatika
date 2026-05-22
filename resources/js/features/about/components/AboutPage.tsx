@@ -1,15 +1,27 @@
-import { BookOpen, GraduationCap } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { PublicPageSection } from '@/components/layouts/PublicPageSection';
+
+// PENTING: Silakan sesuaikan nama dan NIM tim Kerja Praktik Anda di sini
+const DEVELOPMENT_TEAM = [
+    { name: 'Nama Mahasiswa 1', nim: '210180001' },
+    { name: 'Nama Mahasiswa 2', nim: '210180002' },
+    { name: 'Nama Mahasiswa 3', nim: '210180003' },
+    { name: 'Nama Mahasiswa 4', nim: '210180004' },
+    { name: 'Nama Mahasiswa 5', nim: '210180005' },
+    { name: 'Nama Mahasiswa 6', nim: '210180006' },
+    { name: 'Nama Mahasiswa 7', nim: '210180007' },
+    { name: 'Nama Mahasiswa 8', nim: '210180008' },
+    { name: 'Nama Mahasiswa 9', nim: '210180009' },
+    { name: 'Nama Mahasiswa 10', nim: '210180010' },
+    { name: 'Nama Mahasiswa 11', nim: '210180011' },
+    { name: 'Nama Mahasiswa 12', nim: '210180012' },
+];
 
 export function AboutPage() {
+    const [coordinator, ...members] = DEVELOPMENT_TEAM;
+
     return (
         <PageLayout
             title="Tentang Kami"
@@ -20,122 +32,77 @@ export function AboutPage() {
                     title={
                         <>
                             Tentang{' '}
-                            <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                            <span className="bg-linear-to-r from-primary to-primary/75 bg-clip-text text-transparent">
                                 Ruang Baca
                             </span>
                         </>
                     }
-                    description="Perpustakaan digital Teknik Informatika Universitas Malikussaleh yang dirancang untuk membantu mahasiswa, dosen, dan peneliti menemukan referensi akademik dengan lebih mudah."
+                    description="Sistem Informasi Ruang Baca ini dirancang dan dikembangkan secara kolaboratif oleh 12 mahasiswa Program Studi Teknik Informatika Universitas Malikussaleh sebagai implementasi nyata proyek Kerja Praktik (KP)."
                 />
             }
         >
-            <div className="grid gap-6 lg:grid-cols-[1.35fr_0.85fr]">
-                <Card className="border-border/60 bg-card/90 shadow-sm">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <BookOpen className="size-5 text-primary" />
-                            Profil Layanan
-                        </CardTitle>
-                        <CardDescription>
-                            Membuka akses referensi akademik yang rapi, cepat,
-                            dan relevan untuk kebutuhan belajar dan riset.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="prose prose-slate dark:prose-invert max-w-none">
-                        <h3 className="mt-0 mb-3 text-xl font-semibold text-foreground">
-                            Misi Kami
-                        </h3>
-                        <p className="mb-4 text-base leading-relaxed">
-                            Ruang Baca adalah perpustakaan digital dan pusat
-                            sumber belajar untuk Program Studi Teknik
-                            Informatika di Universitas Malikussaleh. Misi kami
-                            adalah menyediakan akses yang mudah dan menyeluruh
-                            bagi mahasiswa, dosen, dan peneliti terhadap koleksi
-                            literatur akademik, termasuk buku ajar, bahan
-                            referensi, karya ilmiah, dan koleksi skripsi.
-                        </p>
-                        <p className="mb-4 text-base leading-relaxed">
-                            Kami ingin mendorong budaya belajar berkelanjutan
-                            dan riset yang unggul melalui platform modern dan
-                            mudah digunakan, sehingga civitas akademika dapat
-                            dengan mudah menemukan, meminjam, dan membaca bahan
-                            yang relevan untuk studi maupun proyek mereka.
-                        </p>
-                        <h3 className="mt-6 mb-3 text-xl font-semibold text-foreground">
-                            Visi Kami
-                        </h3>
-                        <p className="mb-0 text-base leading-relaxed">
-                            Menjadi repositori digital dan pusat pengetahuan
-                            yang unggul untuk mendukung komunitas Teknik
-                            Informatika melalui akses yang lancar ke sumber
-                            informasi berkualitas tinggi, demi mendorong inovasi
-                            dan kemajuan teknologi.
-                        </p>
-                    </CardContent>
-                </Card>
+            <div className="space-y-12">
+                <PublicPageSection
+                    title="Tim pengembang"
+                    description="Halaman ini menampilkan struktur tim penyusun yang membangun dan merawat pengalaman digital Ruang Baca."
+                >
+                    <div className="overflow-hidden rounded-3xl border border-border/40 bg-card/50 shadow-sm backdrop-blur-xs">
+                        <div className="relative aspect-video w-full bg-linear-to-b from-muted/50 to-muted/80 sm:aspect-21/9">
+                            <img
+                                src="/images/placeholder-team.jpg"
+                                alt="Foto bersama tim pengembang"
+                                className="absolute inset-0 h-full w-full object-cover opacity-90 grayscale transition-all duration-500 hover:scale-102 hover:grayscale-0"
+                                onError={(event) => {
+                                    event.currentTarget.style.display = 'none';
+                                    event.currentTarget.nextElementSibling?.classList.remove(
+                                        'hidden',
+                                    );
+                                }}
+                            />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-linear-to-b from-primary/5 to-primary/10 text-muted-foreground">
+                                <div className="flex size-14 items-center justify-center rounded-2xl border bg-background/80 shadow-xs backdrop-blur-xs">
+                                    <Users className="size-6 text-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                <div className="grid gap-6">
-                    <Card className="border-border/60 bg-card/90 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <GraduationCap className="size-5 text-primary" />
-                                Koleksi Utama
-                            </CardTitle>
-                            <CardDescription>
-                                Konten yang paling sering digunakan untuk
-                                pembelajaran, referensi, dan inspirasi riset.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="rounded-2xl border bg-muted/30 p-4">
-                                <p className="font-semibold">Buku</p>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Referensi pemrograman, rekayasa perangkat
-                                    lunak, jaringan, dan ilmu komputer.
-                                </p>
+                    <div className="space-y-4 pt-2">
+                        <div className="flex justify-center">
+                            <div className="w-full max-w-sm rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-card to-card px-5 py-5 text-center shadow-sm">
+                                <div className="space-y-2">
+                                    <p className="text-[11px] font-semibold tracking-[0.2em] text-primary uppercase">
+                                        Koordinator
+                                    </p>
+                                    <h3 className="text-sm font-semibold text-foreground">
+                                        {coordinator.name}
+                                    </h3>
+                                    <p className="font-mono text-xs text-muted-foreground">
+                                        NIM {coordinator.nim}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="rounded-2xl border bg-muted/30 p-4">
-                                <p className="font-semibold">Skripsi</p>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Arsip penelitian mahasiswa terdahulu untuk
-                                    referensi dan inspirasi topik baru.
-                                </p>
-                            </div>
-                            <div className="rounded-2xl border bg-muted/30 p-4">
-                                <p className="font-semibold">Laporan KP</p>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Dokumentasi kerja praktik sebagai referensi
-                                    pengalaman lapangan dan topik terapan.
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                        </div>
 
-                    <Card className="border-border/60 bg-card/90 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-base">
-                                Pengguna Utama
-                            </CardTitle>
-                            <CardDescription>
-                                Dirancang untuk kebutuhan akademik sehari-hari.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-3 text-sm text-muted-foreground">
-                            <p>
-                                Mahasiswa untuk mencari referensi dan karya
-                                terdahulu.
-                            </p>
-                            <p>
-                                Dosen untuk mendukung pembelajaran dan pengayaan
-                                materi.
-                            </p>
-                            <p>
-                                Peneliti untuk menjelajahi topik dan arah riset
-                                terkait.
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {members.map((member) => (
+                                <div
+                                    key={member.nim}
+                                    className="rounded-3xl border border-border/50 bg-card/60 px-4 py-4 text-center shadow-xs transition-colors hover:border-primary/20 hover:bg-primary/5"
+                                >
+                                    <div className="space-y-1">
+                                        <h3 className="text-sm font-semibold text-foreground">
+                                            {member.name}
+                                        </h3>
+                                        <p className="font-mono text-xs text-muted-foreground">
+                                            NIM {member.nim}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </PublicPageSection>
             </div>
         </PageLayout>
     );

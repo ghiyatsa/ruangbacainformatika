@@ -123,7 +123,9 @@ export default function InternshipReportDetailPage({
                                     <span className="text-border">&bull;</span>
                                     <span className="flex items-center gap-1.5">
                                         <Eye className="size-3.5" />
-                                        {report.viewCount.toLocaleString('id-ID')}
+                                        {report.viewCount.toLocaleString(
+                                            'id-ID',
+                                        )}
                                     </span>
                                 </div>
 

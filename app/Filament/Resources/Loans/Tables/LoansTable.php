@@ -85,6 +85,10 @@ class LoansTable
                         ->where('status', Loan::STATUS_BORROWED)
                         ->whereNotNull('due_at')
                         ->where('due_at', '<', now()))),
+                Filter::make('restricted_borrowers')
+                    ->label('Hanya akun dibatasi')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->borrowingRestricted()),
             ])
             ->recordActions([
                 ViewAction::make()

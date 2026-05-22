@@ -347,6 +347,14 @@ class LoanDraftService
                 'draft' => 'Nomor WhatsApp dan alamat wajib diisi pada profil sebelum meminjam buku.',
             ]);
         }
+
+        $restrictionMessage = $this->kioskLoanService->borrowingRestrictionMessage($user);
+
+        if ($restrictionMessage !== null) {
+            throw ValidationException::withMessages([
+                'draft' => $restrictionMessage,
+            ]);
+        }
     }
 
     protected function activeLoanCount(User $user): int

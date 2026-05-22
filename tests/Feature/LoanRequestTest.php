@@ -2,8 +2,11 @@
 
 use App\Models\Book;
 use App\Models\BookItem;
+use App\Models\Loan;
 use App\Models\LoanDraft;
+use App\Models\LoanItem;
 use App\Models\Publisher;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -344,5 +347,95 @@ it('members cannot generate a new qr while the current qr is still active', func
         ->assertRedirect(route('loans.request'))
         ->assertSessionHasErrors([
             'draft' => 'QR masih aktif. Tunggu hingga masa berlakunya berakhir.',
+        ]);
+});
+
+it('members cannot generate qr while borrowing access is suspended because of an overdue loan', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'library', 'key' => 'late_return_suspension_enabled'],
+        ['value' => '1'],
+    );
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'library', 'key' => 'late_return_suspend_after_days'],
+        ['value' => '1'],
+    );
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'library', 'key' => 'late_return_cooldown_days'],
+        ['value' => '3'],
+    );
+
+    $member = User::factory()->create([
+        'whatsapp' => '081234567892',
+        'address' => 'Jl. Kampus Baru',
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Suspended',
+        'slug' => 'penerbit-suspended',
+    ]);
+
+    $overdueBook = Book::query()->create([
+        'title' => 'Buku Terlambat Aktif',
+        'slug' => 'buku-terlambat-aktif',
+        'isbn' => '9786020000210',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $overdueItem = BookItem::query()->create([
+        'book_id' => $overdueBook->id,
+        'internal_code' => 'ITEM-OVERDUE-ACTIVE',
+        'status' => 'borrowed',
+    ]);
+
+    $overdueLoan = Loan::query()->create([
+        'user_id' => $member->id,
+        'status' => Loan::STATUS_BORROWED,
+        'borrowed_at' => now()->subDays(6),
+        'due_at' => now()->subDays(2),
+    ]);
+
+    LoanItem::query()->create([
+        'loan_id' => $overdueLoan->id,
+        'book_item_id' => $overdueItem->id,
+    ]);
+
+    $draftBook = Book::query()->create([
+        'title' => 'Buku Draft Suspended',
+        'slug' => 'buku-draft-suspended',
+        'isbn' => '9786020000211',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    BookItem::query()->create([
+        'book_id' => $draftBook->id,
+        'internal_code' => 'ITEM-DRAFT-SUSPENDED',
+        'status' => 'available',
+    ]);
+
+    actingAs($member)
+        ->post(route('loans.request.books.store'), [
+            'book_id' => $draftBook->id,
+        ])
+        ->assertRedirect();
+
+    actingAs($member)
+        ->from(route('loans.request'))
+        ->post(route('loans.request.qr'), [
+            'book_ids' => [$draftBook->id],
+        ])
+        ->assertRedirect(route('loans.request'))
+        ->assertSessionHasErrors([
+            'draft' => 'Akun ini sedang dibatasi karena memiliki pinjaman yang terlambat 2 hari. Kembalikan seluruh buku yang melewati batas pengembalian untuk meminjam lagi.',
         ]);
 });

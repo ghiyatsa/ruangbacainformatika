@@ -121,7 +121,9 @@ export default function ThesisDetailPage({
                                     <span className="text-border">&bull;</span>
                                     <span className="flex items-center gap-1.5">
                                         <Eye className="size-3.5" />
-                                        {thesis.viewCount.toLocaleString('id-ID')}
+                                        {thesis.viewCount.toLocaleString(
+                                            'id-ID',
+                                        )}
                                     </span>
                                 </div>
 

@@ -33,7 +33,7 @@ export function CatalogBookmarksDialog({
             <DialogTrigger asChild>{trigger}</DialogTrigger>
             <DialogContent
                 showCloseButton={false}
-                className="max-h-[85vh] overflow-hidden p-5 sm:max-w-2xl sm:p-6"
+                className="max-h-[85vh] overflow-hidden sm:max-w-2xl"
             >
                 <DialogHeader className="space-y-3 text-left">
                     <div className="flex items-start justify-between gap-3">

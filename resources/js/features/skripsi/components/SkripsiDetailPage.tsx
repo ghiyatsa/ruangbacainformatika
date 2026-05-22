@@ -120,7 +120,9 @@ export default function SkripsiDetailPage({
                                     <span className="text-border">&bull;</span>
                                     <span className="flex items-center gap-1.5">
                                         <Eye className="size-3.5" />
-                                        {skripsi.viewCount.toLocaleString('id-ID')}
+                                        {skripsi.viewCount.toLocaleString(
+                                            'id-ID',
+                                        )}
                                     </span>
                                 </div>
 

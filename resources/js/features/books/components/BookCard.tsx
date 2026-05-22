@@ -285,7 +285,7 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                                 />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom" sideOffset={8}>
+                        <TooltipContent side="top" sideOffset={8}>
                             {bookmarkLabel}
                         </TooltipContent>
                     </Tooltip>
@@ -369,7 +369,7 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent
-                                            side="left"
+                                            side="top"
                                             sideOffset={8}
                                         >
                                             {addToLoanRequestLabel}

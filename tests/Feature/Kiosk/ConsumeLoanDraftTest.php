@@ -235,3 +235,82 @@ it('rejects qr loan draft consumption when member already reached the loan limit
 
     assertDatabaseCount('loans', 1);
 });
+
+it('rejects qr loan draft consumption while a late return cooldown is still active', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    ensureMemberRole();
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'library', 'key' => 'late_return_suspension_enabled'],
+        ['value' => '1'],
+    );
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'library', 'key' => 'late_return_suspend_after_days'],
+        ['value' => '1'],
+    );
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'library', 'key' => 'late_return_cooldown_days'],
+        ['value' => '3'],
+    );
+
+    $member = User::factory()->create([
+        'whatsapp' => '081234567893',
+        'address' => 'Jl. Pendingin',
+    ]);
+    $member->assignRole('member');
+
+    $publisher = makePublisher('Penerbit Cooldown', 'penerbit-cooldown');
+
+    $previousBook = makeBorrowableBook($publisher, 'Buku Terlambat Kembali', 'buku-terlambat-kembali', '9786020000212');
+    $previousItem = makeBookItem($previousBook, 'ITEM-LATE-RETURN', 'available');
+
+    $returnedLoan = Loan::query()->create([
+        'user_id' => $member->id,
+        'status' => Loan::STATUS_RETURNED,
+        'borrowed_at' => now()->subDays(8),
+        'due_at' => now()->subDays(4),
+        'returned_at' => now()->subDay(),
+    ]);
+
+    LoanItem::query()->create([
+        'loan_id' => $returnedLoan->id,
+        'book_item_id' => $previousItem->id,
+        'returned_at' => now()->subDay(),
+    ]);
+
+    $draftBook = makeBorrowableBook($publisher, 'Buku Cooldown', 'buku-cooldown', '9786020000213');
+    makeBookItem($draftBook, 'ITEM-COOLDOWN-NEW', 'available');
+
+    $payload = 'RB-LOAN-COOLDOWN-TEST-TOKEN';
+    $draft = LoanDraft::query()->create([
+        'user_id' => $member->id,
+        'status' => LoanDraft::STATUS_PENDING,
+        'token_hash' => hash('sha256', $payload),
+        'expires_at' => now()->addMinutes(10),
+    ]);
+
+    LoanDraftItem::query()->create([
+        'loan_draft_id' => $draft->id,
+        'book_id' => $draftBook->id,
+    ]);
+
+    fakeVerifiedKioskPin();
+
+    from(route('kiosk.index', ['menu' => 'borrow']))
+        ->post(route('kiosk.loan-drafts.consume'), [
+            'payload' => $payload,
+        ])
+        ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
+        ->assertSessionHasErrors([
+            'member_identifier' => 'Akun ini sedang dibatasi karena pengembalian buku terlambat. Peminjaman dapat dilakukan kembali mulai '.now()->subDay()->addDays(3)->translatedFormat('d F Y H:i').'.',
+        ]);
+
+    $draft->refresh();
+
+    expect($draft->status)->toBe(LoanDraft::STATUS_PENDING);
+
+    assertDatabaseCount('loans', 1);
+});

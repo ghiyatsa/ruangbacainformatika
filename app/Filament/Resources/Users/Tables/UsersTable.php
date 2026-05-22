@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Models\User;
+use App\Support\LoanConsequenceService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -47,6 +49,13 @@ class UsersTable
                     ->badge()
                     ->label('Peran')
                     ->separator(', '),
+                TextColumn::make('borrowing_access')
+                    ->label('Status Pinjam')
+                    ->state(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['label'])
+                    ->badge()
+                    ->color(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['color'])
+                    ->description(fn (User $record): ?string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['detail'])
+                    ->wrap(),
                 IconColumn::make('is_approved')
                     ->label('Disetujui')
                     ->boolean(),
@@ -86,6 +95,10 @@ class UsersTable
                                 fn (Builder $query): Builder => $query->where('created_at', '<=', Carbon::parse($data['registered_until'])->endOfDay()),
                             );
                     }),
+                Filter::make('restricted_borrowers')
+                    ->label('Hanya akun dibatasi')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->borrowingRestricted()),
             ])
             ->recordActions([
                 EditAction::make()

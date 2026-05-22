@@ -53,7 +53,7 @@ export function HeaderActions({
                 </div>
             )}
 
-            <div className="flex items-center md:gap-1">
+            <div className="flex items-center">
                 {!hideSearch && (
                     <Button
                         variant="ghost"
@@ -89,9 +89,9 @@ export function HeaderActions({
                             size="icon"
                             className="relative h-9 w-9 rounded-xl"
                         >
-                            <Bookmark className="h-[18px] w-[18px] text-primary" />
+                            <Bookmark className="h-4.5 w-4.5 text-primary" />
                             <span className="sr-only">Bookmark</span>
-                            <Badge className="absolute -top-1.5 -right-1.5 flex min-w-5 items-center justify-center rounded-full px-1 py-0 text-[10px] leading-none shadow-sm">
+                            <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm">
                                 {bookmarkedCount}
                             </Badge>
                         </Button>
@@ -112,7 +112,7 @@ export function HeaderActions({
                         >
                             <ShoppingCart className="h-[18px] w-[18px] text-primary" />
                             <span className="sr-only">Keranjang pinjam</span>
-                            <Badge className="absolute -top-1.5 -right-1.5 flex min-w-5 items-center justify-center rounded-full px-1 py-0 text-[10px] leading-none shadow-sm">
+                            <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm">
                                 {loanRequestCart?.count ?? 0}
                             </Badge>
                         </Link>
@@ -121,9 +121,9 @@ export function HeaderActions({
                     <Button
                         asChild
                         size="sm"
-                        className="rounded-xl text-sm shadow-md shadow-primary/15"
+                        className="hidden rounded-xl text-sm shadow-md shadow-primary/15 md:inline-flex"
                     >
-                        <Link href={register.url()}>Bergabung</Link>
+                        <Link href={register.url()}>Daftar</Link>
                     </Button>
                 ) : null}
 

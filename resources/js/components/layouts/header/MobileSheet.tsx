@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sheet';
 import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookmarksDialog';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
-import { register } from '@/routes';
+import { login, register } from '@/routes';
 import loans from '@/routes/loans';
 import type { Auth, LoanRequestCart } from '@/types';
 import { AppLogo } from './AppLogo';
@@ -205,13 +205,24 @@ export function MobileSheet({
                     </nav>
                 </div>
 
-                {!auth.user && canRegister ? (
-                    <div className="border-t border-border/60 p-4">
-                        <Button asChild className="h-11 w-full rounded-xl">
+                {!auth.user ? (
+                    <div className="flex flex-col gap-2 border-t border-border/60 p-4">
+                        <Button
+                            asChild
+                            variant={canRegister ? 'outline' : 'default'}
+                            className="h-11 w-full rounded-xl"
+                        >
                             <SheetClose asChild>
-                                <Link href={register.url()}>Daftar</Link>
+                                <Link href={login.url()}>Masuk</Link>
                             </SheetClose>
                         </Button>
+                        {canRegister ? (
+                            <Button asChild className="h-11 w-full rounded-xl">
+                                <SheetClose asChild>
+                                    <Link href={register.url()}>Daftar</Link>
+                                </SheetClose>
+                            </Button>
+                        ) : null}
                     </div>
                 ) : null}
             </SheetContent>

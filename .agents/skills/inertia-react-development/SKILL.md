@@ -345,7 +345,7 @@ import { Link } from '@inertiajs/react'
 <Link
     href="/posts/1"
     component="Posts/Show"
-    pageProps=@{{ post: { id: 1, title: 'My Post' } }}
+    pageProps={{ post: { id: 1, title: 'My Post' } }}
 >
     View Post
 </Link>

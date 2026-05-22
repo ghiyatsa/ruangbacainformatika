@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Notifications\Auth\VerifyEmailOtpNotification;
+use App\Support\LoanConsequenceService;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -172,6 +174,38 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
+    }
+
+    public function scopeBorrowingRestricted(Builder $query): Builder
+    {
+        $loanConsequenceService = app(LoanConsequenceService::class);
+
+        if (! $loanConsequenceService->lateReturnSuspensionEnabled()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $thresholdDays = $loanConsequenceService->lateReturnSuspendAfterDays();
+        $cooldownDays = $loanConsequenceService->lateReturnCooldownDays();
+
+        return $query->where(function (Builder $restrictedQuery) use ($cooldownDays, $thresholdDays): void {
+            $restrictedQuery->whereHas('loans', function (Builder $loanQuery) use ($thresholdDays): void {
+                $loanQuery
+                    ->where('status', Loan::STATUS_BORROWED)
+                    ->whereNotNull('due_at')
+                    ->where('due_at', '<=', now()->subDays($thresholdDays));
+            });
+
+            if ($cooldownDays > 0) {
+                $restrictedQuery->orWhereHas('loans', function (Builder $loanQuery) use ($cooldownDays, $thresholdDays): void {
+                    $loanQuery
+                        ->where('status', Loan::STATUS_RETURNED)
+                        ->whereNotNull('due_at')
+                        ->whereNotNull('returned_at')
+                        ->where('returned_at', '>', now()->subDays($cooldownDays))
+                        ->whereRaw('TIMESTAMPDIFF(DAY, due_at, returned_at) >= ?', [$thresholdDays]);
+                });
+            }
+        });
     }
 
     public function loanDrafts(): HasMany

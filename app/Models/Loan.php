@@ -62,10 +62,22 @@ class Loan extends Model
 
     public function isOverdue(): bool
     {
-        $endDate = $this->returned_at ?: now();
+        return $this->lateDays() > 0;
+    }
 
-        return $this->due_at instanceof CarbonInterface
-            && $endDate->greaterThan($this->due_at);
+    public function lateDays(?CarbonInterface $reference = null): int
+    {
+        if (! $this->due_at instanceof CarbonInterface) {
+            return 0;
+        }
+
+        $endDate = $this->returned_at ?: $reference ?: now();
+
+        if (! $endDate->greaterThan($this->due_at)) {
+            return 0;
+        }
+
+        return $this->due_at->diffInDays($endDate);
     }
 
     public function deletionBlockedReason(): ?string

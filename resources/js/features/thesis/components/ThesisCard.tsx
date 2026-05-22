@@ -107,7 +107,7 @@ export default function ThesisCard({ thesis }: ThesisCardProps) {
                                         />
                                     </Button>
                                 </TooltipTrigger>
-                                <TooltipContent side="bottom" sideOffset={8}>
+                                <TooltipContent side="top" sideOffset={8}>
                                     {isBookmarkedByUser
                                         ? 'Hapus bookmark'
                                         : 'Simpan bookmark'}

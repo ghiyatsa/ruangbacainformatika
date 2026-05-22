@@ -1,6 +1,8 @@
 import { BookOpen, CircleCheck, Shield } from 'lucide-react';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { PublicInfoCard } from '@/components/layouts/PublicInfoCard';
+import { PublicPageSection } from '@/components/layouts/PublicPageSection';
 import {
     Card,
     CardContent,
@@ -30,79 +32,70 @@ export function TermsOfServicePage() {
                 />
             }
         >
-            <div className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
-                <Card className="border-border/60 bg-card/90 shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Ketentuan Penggunaan Layanan</CardTitle>
-                        <CardDescription>
-                            Layanan ini disediakan untuk mendukung pembelajaran,
-                            riset, dan administrasi akademik.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {terms.map((term) => (
-                            <div
-                                key={term}
-                                className="flex gap-3 rounded-2xl border bg-muted/20 p-4"
-                            >
-                                <CircleCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-                                <p className="text-sm leading-7 text-muted-foreground">
-                                    {term}
-                                </p>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
-
-                <div className="space-y-6">
+            <div className="space-y-10">
+                <div className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
                     <Card className="border-border/60 bg-card/90 shadow-sm">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <BookOpen className="size-4 text-primary" />
-                                Cakupan Layanan
-                            </CardTitle>
+                            <CardTitle>Ketentuan penggunaan layanan</CardTitle>
+                            <CardDescription>
+                                Layanan ini disediakan untuk mendukung
+                                pembelajaran, riset, dan administrasi akademik.
+                            </CardDescription>
                         </CardHeader>
-                        <CardContent className="text-sm leading-7 text-muted-foreground">
+                        <CardContent className="space-y-4">
+                            {terms.map((term) => (
+                                <div
+                                    key={term}
+                                    className="flex gap-3 rounded-2xl border bg-muted/20 p-4"
+                                >
+                                    <CircleCheck className="mt-0.5 size-4 shrink-0 text-primary" />
+                                    <p className="text-sm leading-7 text-muted-foreground">
+                                        {term}
+                                    </p>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+
+                    <div className="space-y-6">
+                        <PublicInfoCard
+                            title="Cakupan layanan"
+                            icon={BookOpen}
+                            tone="accent"
+                        >
                             Meliputi pencarian koleksi, akses informasi buku,
                             karya ilmiah, layanan akun, dan fitur pendukung
                             perpustakaan digital.
-                        </CardContent>
-                    </Card>
+                        </PublicInfoCard>
 
-                    <Card className="border-border/60 bg-card/90 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <Shield className="size-4 text-primary" />
-                                Tanggung Jawab
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-sm leading-7 text-muted-foreground">
+                        <PublicInfoCard title="Tanggung jawab" icon={Shield}>
                             Pengguna bertanggung jawab atas data akun, kepatuhan
                             penggunaan layanan, dan interaksi yang dilakukan
                             melalui sistem.
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-border/60 bg-card/90 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-base">Catatan</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3 text-sm text-muted-foreground">
-                            <p>
-                                Layanan dapat diperbarui mengikuti kebutuhan
-                                institusi.
-                            </p>
-                            <p>
-                                Penggunaan fitur tertentu dapat dibatasi untuk
-                                alasan operasional.
-                            </p>
-                            <p>
-                                Kebijakan akademik tetap menjadi acuan utama
-                                dalam penggunaan layanan.
-                            </p>
-                        </CardContent>
-                    </Card>
+                        </PublicInfoCard>
+                    </div>
                 </div>
+
+                <PublicPageSection
+                    title="Catatan penting"
+                    description="Ketentuan ini mendampingi kebijakan akademik dan dapat menyesuaikan kebutuhan layanan seiring perkembangan sistem."
+                >
+                    <div className="grid gap-5 md:grid-cols-3">
+                        <PublicInfoCard title="Pembaruan layanan">
+                            Layanan dapat diperbarui mengikuti kebutuhan
+                            institusi dan penyempurnaan sistem.
+                        </PublicInfoCard>
+                        <PublicInfoCard title="Batasan fitur">
+                            Penggunaan fitur tertentu dapat dibatasi untuk
+                            alasan keamanan, operasional, atau kepatuhan
+                            internal.
+                        </PublicInfoCard>
+                        <PublicInfoCard title="Acuan utama">
+                            Kebijakan akademik program studi tetap menjadi
+                            rujukan utama dalam penggunaan Ruang Baca.
+                        </PublicInfoCard>
+                    </div>
+                </PublicPageSection>
             </div>
         </PageLayout>
     );
