@@ -82,6 +82,13 @@ export default [
                         'index',
                         'type',
                     ],
+                    pathGroups: [
+                        {
+                            pattern: '@/**',
+                            group: 'internal',
+                        },
+                    ],
+                    pathGroupsExcludedImportTypes: ['builtin', 'external', 'type'],
                     alphabetize: {
                         order: 'asc',
                         caseInsensitive: true,
