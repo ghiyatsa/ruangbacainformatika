@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import type { LucideIcon } from 'lucide-react';
 import * as React from 'react';
 import {
     NavigationMenu,
@@ -12,6 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { NAV_LINKS } from './constants';
+import type { LucideIcon } from 'lucide-react';
 
 interface DesktopNavProps {
     isActive: (href: string) => boolean;

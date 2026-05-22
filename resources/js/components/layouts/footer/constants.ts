@@ -7,7 +7,6 @@ import {
     UserPlus,
     Wrench,
 } from 'lucide-react';
-import type { Variants } from 'motion/react';
 import {
     contact,
     home,
@@ -18,6 +17,7 @@ import {
     termsOfService,
 } from '@/routes';
 import similarity from '@/routes/similarity';
+import type { Variants } from 'motion/react';
 
 export const INFO_LINKS = [
     {

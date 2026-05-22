@@ -1,8 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { ArrowUpRight } from 'lucide-react';
-import type { WelcomeProps } from '@/features/welcome/types';
 import booksRoute from '@/routes/books';
 import SectionHeader from './SectionHeader';
+import type { WelcomeProps } from '@/features/welcome/types';
 
 export default function PopularCategories({
     categories,

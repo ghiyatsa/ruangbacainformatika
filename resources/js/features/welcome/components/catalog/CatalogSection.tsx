@@ -1,10 +1,10 @@
-import type { WelcomeProps } from '@/features/welcome/types';
 import CatalogCtaGrid from './CatalogCtaGrid';
 import FeaturedSpotlight from './FeaturedSpotlight';
 import NewBooksPreview from './NewBooksPreview';
 import PopularBooks from './PopularBooks';
 import PopularCategories from './PopularCategories';
 import SectionHeader from './SectionHeader';
+import type { WelcomeProps } from '@/features/welcome/types';
 
 interface CatalogSectionProps {
     stats: WelcomeProps['stats'];

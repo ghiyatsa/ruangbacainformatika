@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import booksRoute from '@/routes/books';
 import type {
     CategoryItem,
     BookCatalogStats,
     ViewMode,
     BookCatalogFilters as FilterTypes,
 } from '@/features/books/types';
-import booksRoute from '@/routes/books';
 
 interface BookCatalogFiltersProps {
     filters: FilterTypes;

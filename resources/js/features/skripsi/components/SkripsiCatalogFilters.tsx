@@ -8,8 +8,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import type { SkripsiFilters as FilterTypes } from '@/features/skripsi/types';
 import skripsiRoute from '@/routes/skripsi';
+import type { SkripsiFilters as FilterTypes } from '@/features/skripsi/types';
 
 interface SkripsiCatalogFiltersProps {
     filters: FilterTypes;

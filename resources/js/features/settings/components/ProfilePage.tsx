@@ -1,8 +1,8 @@
 import { Head, usePage } from '@inertiajs/react';
 import { Separator } from '@/components/ui/separator';
-import type { ProfileInformationFormProps } from '@/features/settings/components/profile/ProfileInformationForm';
 import { ProfileInformationForm } from '@/features/settings/components/profile/ProfileInformationForm';
 import { ProfileSummary } from '@/features/settings/components/profile/ProfileSummary';
+import type { ProfileInformationFormProps } from '@/features/settings/components/profile/ProfileInformationForm';
 import type { Auth } from '@/types';
 
 export type ProfilePageProps = Omit<ProfileInformationFormProps, 'user'>;

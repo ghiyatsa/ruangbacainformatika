@@ -1,6 +1,5 @@
 import { Form } from '@inertiajs/react';
 import { CheckCircle2, Key } from 'lucide-react';
-import type { RefObject } from 'react';
 import { useState } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import InputError from '@/components/common/InputError';
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
 import { PASSWORD_MIN_LENGTH } from '@/lib/password-requirements';
+import type { RefObject } from 'react';
 
 interface PasswordSectionProps {
     currentPasswordInput: RefObject<HTMLInputElement | null>;

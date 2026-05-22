@@ -3,11 +3,11 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
-import type { CatalogBook } from '@/features/welcome/types';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
-import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 import EmptyCatalogState from './EmptyCatalogState';
 import SectionHeader from './SectionHeader';
+import type { CatalogBook } from '@/features/welcome/types';
+import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 export default function PopularBooks({
     popularBooks,

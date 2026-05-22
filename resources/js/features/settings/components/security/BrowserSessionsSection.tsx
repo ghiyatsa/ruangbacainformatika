@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
-import type { Session } from '@/features/settings/types';
 import { cn } from '@/lib/utils';
+import type { Session } from '@/features/settings/types';
 
 interface BrowserSessionsSectionProps {
     sessions: Session[];

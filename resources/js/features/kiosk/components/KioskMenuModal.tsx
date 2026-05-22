@@ -1,5 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -9,6 +7,8 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 const MODAL_GRADIENTS: Record<
     string,

@@ -1,11 +1,11 @@
 import { usePage } from '@inertiajs/react';
 import * as React from 'react';
 import { useAppearance } from '@/hooks/use-appearance';
-import type { Auth } from '@/types';
 import { AppLogo } from './AppLogo';
 import { DesktopNav } from './DesktopNav';
 import { HeaderActions } from './HeaderActions';
 import { MobileSheet } from './MobileSheet';
+import type { Auth } from '@/types';
 
 export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
     const { auth, canRegister = true } = usePage<{

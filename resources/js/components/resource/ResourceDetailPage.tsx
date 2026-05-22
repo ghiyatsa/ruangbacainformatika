@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
 import { SeoHead } from '@/components/common/SeoHead';
 import { BackgroundPattern } from '@/components/layouts/BackgroundPattern';
+import type { ReactNode } from 'react';
 
 interface ResourceDetailPageProps {
     title: string;

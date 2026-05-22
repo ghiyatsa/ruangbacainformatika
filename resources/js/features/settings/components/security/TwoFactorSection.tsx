@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import TwoFactorRecoveryCodes from '@/features/auth/components/TwoFactorRecoveryCodes';
 import TwoFactorSetupModal from '@/features/auth/components/TwoFactorSetupModal';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
-import type { UseTwoFactorAuthReturn } from '@/hooks/use-two-factor-auth';
 import { cn } from '@/lib/utils';
 import { disable, enable } from '@/routes/two-factor';
+import type { UseTwoFactorAuthReturn } from '@/hooks/use-two-factor-auth';
 
 interface TwoFactorSectionProps {
     canManageTwoFactor: boolean;

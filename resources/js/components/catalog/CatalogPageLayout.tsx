@@ -1,11 +1,11 @@
 import { Calendar, CheckCircle, Search, Star, X } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { ResourceCatalogHeader } from '@/components/catalog/ResourceCatalogHeader';
 import { ResourcePagination } from '@/components/catalog/ResourcePagination';
-import type { CatalogActiveFilters } from '@/components/catalog/types';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import type { ReactNode } from 'react';
+import type { CatalogActiveFilters } from '@/components/catalog/types';
 import type { PaginationData } from '@/types/pagination';
 
 interface CatalogPageLayoutProps<T> {

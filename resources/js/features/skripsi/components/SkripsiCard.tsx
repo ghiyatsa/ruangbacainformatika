@@ -21,11 +21,11 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { SkripsiData } from '@/features/skripsi/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import skripsiRoute from '@/routes/skripsi';
+import type { SkripsiData } from '@/features/skripsi/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
 interface SkripsiCardProps {
     skripsi: SkripsiData;

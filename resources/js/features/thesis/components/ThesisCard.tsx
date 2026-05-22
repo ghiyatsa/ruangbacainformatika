@@ -21,11 +21,11 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { ThesisData } from '@/features/thesis/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import thesisRoute from '@/routes/thesis';
+import type { ThesisData } from '@/features/thesis/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
 interface ThesisCardProps {
     thesis: ThesisData;

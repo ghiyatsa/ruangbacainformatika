@@ -14,9 +14,9 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import type { QrCameraScannerHandle } from '@/features/kiosk/components/QrCameraScanner';
 import { QrCameraScanner } from '@/features/kiosk/components/QrCameraScanner';
 import { BookActionForm } from './BookActionForm';
+import type { QrCameraScannerHandle } from '@/features/kiosk/components/QrCameraScanner';
 
 function getQrErrorMessage(
     errors: Record<string, string | undefined>,

@@ -17,9 +17,9 @@ import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookm
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { login, register } from '@/routes';
 import loans from '@/routes/loans';
-import type { Auth, LoanRequestCart } from '@/types';
 import { AppLogo } from './AppLogo';
 import { NAV_LINKS } from './constants';
+import type { Auth, LoanRequestCart } from '@/types';
 
 interface MobileSheetProps {
     mobileOpen: boolean;

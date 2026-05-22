@@ -2,10 +2,10 @@ import { router } from '@inertiajs/react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
 import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
 import { CatalogResourceCardSkeleton } from '@/components/resource/CatalogResourceCardSkeleton';
-import type { InternshipReportCatalogPageProps } from '@/features/internship-report/types';
 import internshipReportRoute from '@/routes/internship-reports';
 import { InternshipReportCatalogFilters } from './InternshipReportCatalogFilters';
 import { InternshipReportCatalogResults } from './InternshipReportCatalogResults';
+import type { InternshipReportCatalogPageProps } from '@/features/internship-report/types';
 
 export default function InternshipReportCatalogPage({
     filters,

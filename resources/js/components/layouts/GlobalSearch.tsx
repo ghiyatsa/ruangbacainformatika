@@ -4,12 +4,6 @@ import * as React from 'react';
 import AnimatedList from '@/components/common/AnimatedList';
 import { GlobalSearchResultRow } from '@/components/layouts/global-search/GlobalSearchResultRow';
 import { GlobalSearchTrigger } from '@/components/layouts/global-search/GlobalSearchTrigger';
-import type {
-    SearchItemType,
-    SearchListItem,
-    SearchResponse,
-    SearchResult,
-} from '@/components/layouts/global-search/types';
 import {
     CommandDialog,
     CommandEmpty,
@@ -21,6 +15,12 @@ import booksRoute from '@/routes/books';
 import internshipReportsRoute from '@/routes/internship-reports';
 import skripsiRoute from '@/routes/skripsi';
 import thesisRoute from '@/routes/thesis';
+import type {
+    SearchItemType,
+    SearchListItem,
+    SearchResponse,
+    SearchResult,
+} from '@/components/layouts/global-search/types';
 
 const EMPTY_RESULTS: SearchResponse = {
     books: [],

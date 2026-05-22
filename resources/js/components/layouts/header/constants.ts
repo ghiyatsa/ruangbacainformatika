@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
 import {
     BookOpen,
     ClipboardCheck,
@@ -14,6 +13,7 @@ import internshipReports from '@/routes/internship-reports';
 import similarity from '@/routes/similarity';
 import skripsi from '@/routes/skripsi';
 import thesis from '@/routes/thesis';
+import type { LucideIcon } from 'lucide-react';
 
 export interface NavLink {
     label: string;

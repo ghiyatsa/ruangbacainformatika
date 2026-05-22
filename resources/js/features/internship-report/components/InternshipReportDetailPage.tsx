@@ -23,11 +23,11 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { InternshipReportShowProps } from '@/features/internship-report/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import internshipReportsRoute from '@/routes/internship-reports';
+import type { InternshipReportShowProps } from '@/features/internship-report/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
 export default function InternshipReportDetailPage({
     report: { data: report },

@@ -22,11 +22,11 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { SkripsiShowProps } from '@/features/skripsi/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import skripsiRoute from '@/routes/skripsi';
+import type { SkripsiShowProps } from '@/features/skripsi/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
 export default function SkripsiDetailPage({
     skripsi: { data: skripsi },

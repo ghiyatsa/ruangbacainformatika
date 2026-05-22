@@ -1,7 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
-import type { ReactNode } from 'react';
 import { createElement } from 'react';
-import type { Root } from 'react-dom/client';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Toaster } from '@/components/ui/sonner';
@@ -11,6 +9,8 @@ import { useFlashToast } from '@/hooks/use-flash-toast';
 import AppLayout from '@/layouts/AppLayout';
 import AuthLayout from '@/layouts/AuthLayout';
 import SettingsLayout from '@/layouts/SettingsLayout';
+import type { ReactNode } from 'react';
+import type { Root } from 'react-dom/client';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Ruang Baca';
 

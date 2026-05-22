@@ -1,6 +1,6 @@
 import { Deferred } from '@inertiajs/react';
-import type { ReactNode } from 'react';
 import { CatalogPageLayout } from '@/components/catalog/CatalogPageLayout';
+import type { ReactNode } from 'react';
 import type { CatalogActiveFilters } from '@/components/catalog/types';
 import type { PaginationData } from '@/types/pagination';
 

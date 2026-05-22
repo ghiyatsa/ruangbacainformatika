@@ -5,8 +5,8 @@ import { MobileProgressivePagination } from '@/components/catalog/MobileProgress
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import { BookCatalogFilters } from '@/features/books/components/BookCatalogFilters';
 import { BookCatalogResults } from '@/features/books/components/BookCatalogResults';
-import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
 import booksRoute from '@/routes/books';
+import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
 
 export default function BookCatalogPage({
     filters,

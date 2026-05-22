@@ -1,7 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 import { kioskMenuItems } from '@/features/kiosk/menu';
-import type { KioskMenu } from '@/features/kiosk/types';
 import { cn } from '@/lib/utils';
+import type { KioskMenu } from '@/features/kiosk/types';
 
 export function MenuGrid({
     activeMenu,

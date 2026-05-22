@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { Bookmark, Trash2, X } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +12,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import type { ReactNode } from 'react';
 
 interface CatalogBookmarksDialogProps {
     trigger: ReactNode;

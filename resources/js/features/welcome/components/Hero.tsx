@@ -4,9 +4,9 @@ import CountUp from '@/components/common/CountUp';
 import ShinyText from '@/components/common/ShinyText';
 import StarBorder from '@/components/common/StarBorder';
 import { Kbd } from '@/components/ui/kbd';
-import type { WelcomeProps } from '@/features/welcome/types';
 import { RUANG_BACA_DESCRIPTION } from '@/lib/brand';
 import books from '@/routes/books';
+import type { WelcomeProps } from '@/features/welcome/types';
 
 interface HeroProps {
     stats: WelcomeProps['stats'];

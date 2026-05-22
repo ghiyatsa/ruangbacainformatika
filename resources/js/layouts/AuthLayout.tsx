@@ -1,5 +1,4 @@
 import { usePage } from '@inertiajs/react';
-import type { ReactNode } from 'react';
 import { AppLogo } from '@/components/layouts/header/AppLogo';
 import {
     Card,
@@ -10,6 +9,7 @@ import {
 } from '@/components/ui/card';
 import { FieldDescription } from '@/components/ui/field';
 import { cn } from '@/lib/utils';
+import type { ReactNode } from 'react';
 
 export default function AuthLayout({
     title = '',

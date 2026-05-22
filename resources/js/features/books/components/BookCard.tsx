@@ -16,11 +16,11 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { CatalogBook } from '@/features/welcome/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
+import type { CatalogBook } from '@/features/welcome/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import type { Auth, LoanRequestCart } from '@/types';
 
 function CoverImage({

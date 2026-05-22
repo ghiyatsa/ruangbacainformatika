@@ -29,11 +29,11 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { BookData, LoanRequestSummary } from '@/features/books/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
+import type { BookData, LoanRequestSummary } from '@/features/books/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
 export interface BookDetailPageProps {
     book: { data: BookData };

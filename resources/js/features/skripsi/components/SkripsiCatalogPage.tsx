@@ -4,8 +4,8 @@ import { MobileProgressivePagination } from '@/components/catalog/MobileProgress
 import { CatalogResourceCardSkeleton } from '@/components/resource/CatalogResourceCardSkeleton';
 import { SkripsiCatalogFilters } from '@/features/skripsi/components/SkripsiCatalogFilters';
 import { SkripsiCatalogResults } from '@/features/skripsi/components/SkripsiCatalogResults';
-import type { SkripsiCatalogPageProps } from '@/features/skripsi/types';
 import skripsiRoute from '@/routes/skripsi';
+import type { SkripsiCatalogPageProps } from '@/features/skripsi/types';
 
 export default function SkripsiCatalogPage({
     filters,

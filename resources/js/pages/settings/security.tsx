@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import SecurityPage from '@/features/settings/components/SecurityPage';
-import type { SecurityPageProps } from '@/features/settings/types';
 import settings from '@/routes/settings';
+import type { SecurityPageProps } from '@/features/settings/types';
 
 export default function Security(props: SecurityPageProps) {
     return (

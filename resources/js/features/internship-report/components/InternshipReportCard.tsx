@@ -21,11 +21,11 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { InternshipReportData } from '@/features/internship-report/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import internshipReportRoute from '@/routes/internship-reports';
+import type { InternshipReportData } from '@/features/internship-report/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
 interface InternshipReportCardProps {
     report: InternshipReportData;

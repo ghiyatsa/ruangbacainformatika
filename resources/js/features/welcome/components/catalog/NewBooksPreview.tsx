@@ -5,12 +5,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
-import type { CatalogBook, WelcomeProps } from '@/features/welcome/types';
 import booksRoute from '@/routes/books';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
-import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 import EmptyCatalogState from './EmptyCatalogState';
 import SectionHeader from './SectionHeader';
+import type { CatalogBook, WelcomeProps } from '@/features/welcome/types';
+import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 interface NewBooksPreviewProps {
     books: WelcomeProps['books'];

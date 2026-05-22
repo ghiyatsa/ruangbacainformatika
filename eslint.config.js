@@ -80,11 +80,13 @@ export default [
                         'parent',
                         'sibling',
                         'index',
+                        'type',
                     ],
                     alphabetize: {
                         order: 'asc',
                         caseInsensitive: true,
                     },
+                    sortTypesGroup: true,
                 },
             ],
             'import/consistent-type-specifier-style': [

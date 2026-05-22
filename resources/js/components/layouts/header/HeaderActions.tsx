@@ -19,8 +19,8 @@ import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookm
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { register } from '@/routes';
 import loans from '@/routes/loans';
-import type { Auth, LoanRequestCart } from '@/types';
 import { UserAvatar } from './UserAvatar';
+import type { Auth, LoanRequestCart } from '@/types';
 
 interface HeaderActionsProps {
     auth: Auth;

@@ -8,8 +8,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import type { ThesisFilters as FilterTypes } from '@/features/thesis/types';
 import thesisRoute from '@/routes/thesis';
+import type { ThesisFilters as FilterTypes } from '@/features/thesis/types';
 
 interface ThesisCatalogFiltersProps {
     filters: FilterTypes;

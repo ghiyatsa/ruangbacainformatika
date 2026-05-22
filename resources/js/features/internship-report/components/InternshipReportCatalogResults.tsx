@@ -6,8 +6,8 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from '@/components/ui/empty';
-import type { PaginatedInternshipReports } from '@/features/internship-report/types';
 import InternshipReportCard from './InternshipReportCard';
+import type { PaginatedInternshipReports } from '@/features/internship-report/types';
 
 interface InternshipReportCatalogResultsProps {
     reports: PaginatedInternshipReports;

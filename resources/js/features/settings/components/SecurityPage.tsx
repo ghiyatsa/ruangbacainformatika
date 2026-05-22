@@ -3,8 +3,8 @@ import { Separator } from '@/components/ui/separator';
 import { BrowserSessionsSection } from '@/features/settings/components/security/BrowserSessionsSection';
 import { PasswordSection } from '@/features/settings/components/security/PasswordSection';
 import { TwoFactorSection } from '@/features/settings/components/security/TwoFactorSection';
-import type { SecurityPageProps } from '@/features/settings/types';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
+import type { SecurityPageProps } from '@/features/settings/types';
 
 export default function SecurityPage({
     canManageTwoFactor = false,

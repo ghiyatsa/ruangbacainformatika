@@ -1,5 +1,4 @@
 import { Turnstile } from '@marsidev/react-turnstile';
-import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import {
     Loader2,
     Sparkles,
@@ -10,7 +9,6 @@ import {
     Info,
     Search,
 } from 'lucide-react';
-import type { SubmitEvent } from 'react';
 import { useRef, useState, useEffect } from 'react';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
@@ -27,8 +25,10 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { SimilarityHowItWorks } from '@/features/similarity/components/SimilarityHowItWorks';
 import { SimilarityResultsSection } from '@/features/similarity/components/SimilarityResultsSection';
-import type { SimilarityResult } from '@/features/similarity/types';
 import similarityRoute from '@/routes/similarity';
+import type { TurnstileInstance } from '@marsidev/react-turnstile';
+import type { SubmitEvent } from 'react';
+import type { SimilarityResult } from '@/features/similarity/types';
 
 const EXAMPLES = [
     'Penerapan Algoritma K-Nearest Neighbors untuk Klasifikasi Kelayakan Kredit',

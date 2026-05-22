@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
 import { SeoHead } from '@/components/common/SeoHead';
 import { BackgroundPattern } from '@/components/layouts/BackgroundPattern';
 import { cn } from '@/lib/utils';
+import type { ReactNode } from 'react';
 
 interface PageLayoutProps {
     /**

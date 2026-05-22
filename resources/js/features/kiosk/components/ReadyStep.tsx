@@ -1,6 +1,5 @@
 import { router } from '@inertiajs/react';
 import { BookMarked, BookUp, ClipboardList, UserPlus } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
 import {
     Card,
@@ -15,6 +14,7 @@ import { MemberForm } from '@/features/kiosk/forms/MemberForm';
 import { ReturnForm } from '@/features/kiosk/forms/ReturnForm';
 import { VisitForm } from '@/features/kiosk/forms/VisitForm';
 import { kioskMenuItems } from '@/features/kiosk/menu';
+import type { LucideIcon } from 'lucide-react';
 import type { KioskMenu, KioskProps } from '@/features/kiosk/types';
 
 const MENU_ICONS: Record<Exclude<KioskMenu, 'landing'>, LucideIcon> = {

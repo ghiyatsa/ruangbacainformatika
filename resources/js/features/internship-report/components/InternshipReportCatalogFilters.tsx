@@ -8,8 +8,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import type { InternshipReportFilters as FilterTypes } from '@/features/internship-report/types';
 import internshipReportRoute from '@/routes/internship-reports';
+import type { InternshipReportFilters as FilterTypes } from '@/features/internship-report/types';
 
 interface InternshipReportCatalogFiltersProps {
     filters: FilterTypes;

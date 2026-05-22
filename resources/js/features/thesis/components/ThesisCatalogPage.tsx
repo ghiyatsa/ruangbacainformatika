@@ -4,8 +4,8 @@ import { MobileProgressivePagination } from '@/components/catalog/MobileProgress
 import { CatalogResourceCardSkeleton } from '@/components/resource/CatalogResourceCardSkeleton';
 import { ThesisCatalogFilters } from '@/features/thesis/components/ThesisCatalogFilters';
 import { ThesisCatalogResults } from '@/features/thesis/components/ThesisCatalogResults';
-import type { ThesisCatalogPageProps } from '@/features/thesis/types';
 import thesisRoute from '@/routes/thesis';
+import type { ThesisCatalogPageProps } from '@/features/thesis/types';
 
 export default function ThesisCatalogPage({
     filters,

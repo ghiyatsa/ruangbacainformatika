@@ -1,7 +1,7 @@
 import { setLayoutProps } from '@inertiajs/react';
 import ProfilePage from '@/features/settings/components/ProfilePage';
-import type { ProfilePageProps } from '@/features/settings/components/ProfilePage';
 import settings from '@/routes/settings';
+import type { ProfilePageProps } from '@/features/settings/components/ProfilePage';
 
 export default function Profile(props: ProfilePageProps) {
     setLayoutProps({

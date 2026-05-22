@@ -1,10 +1,10 @@
 import { Link } from '@inertiajs/react';
 import { Monitor, ShieldCheck, User } from 'lucide-react';
-import type { PropsWithChildren } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import settings from '@/routes/settings';
+import type { PropsWithChildren } from 'react';
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [

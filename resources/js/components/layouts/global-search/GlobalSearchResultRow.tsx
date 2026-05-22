@@ -1,7 +1,7 @@
 import { BookOpen, ClipboardCheck, GraduationCap, Search } from 'lucide-react';
-import type { SearchListItem } from '@/components/layouts/global-search/types';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import type { SearchListItem } from '@/components/layouts/global-search/types';
 
 interface GlobalSearchResultRowProps {
     item: SearchListItem;
