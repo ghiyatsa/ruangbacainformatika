@@ -45,8 +45,8 @@ class AppServiceProvider extends ServiceProvider
     protected function configureTurnstile(): void
     {
         try {
-            // Only load settings if table exists to avoid errors during migrations
-            if (app()->runningInConsole() && ! app()->runningUnitTests()) {
+            // Only load settings if not running in console (avoiding queries during migrations and tests boot)
+            if (app()->runningInConsole()) {
                 return;
             }
 

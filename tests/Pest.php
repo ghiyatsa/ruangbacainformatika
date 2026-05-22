@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +15,7 @@ use Laravel\Fortify\Features;
 
 use Tests\TestCase;
 
-uses(TestCase::class, LazilyRefreshDatabase::class)->in('Feature');
+uses(TestCase::class, RefreshDatabase::class)->in('Feature');
 uses(TestCase::class)->in('Unit');
 
 /**
