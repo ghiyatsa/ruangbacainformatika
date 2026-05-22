@@ -7,6 +7,7 @@ use App\Support\LoanConsequenceService;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
@@ -203,7 +204,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
                         ->whereNotNull('returned_at')
                         ->where('returned_at', '>', now()->subDays($cooldownDays));
 
-                    if ($loanQuery->getConnection()->getDriverName() === 'sqlite') {
+                    $connection = $loanQuery->getConnection();
+
+                    if ($connection instanceof Connection && $connection->getDriverName() === 'sqlite') {
                         $loanQuery->whereRaw('julianday(returned_at) - julianday(due_at) >= ?', [$thresholdDays]);
                     } else {
                         $loanQuery->whereRaw('TIMESTAMPDIFF(DAY, due_at, returned_at) >= ?', [$thresholdDays]);
