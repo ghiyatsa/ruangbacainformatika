@@ -45,7 +45,7 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                     <DesktopNav isActive={isActive} />
                 </div>
 
-                <div className="flex shrink-0 items-center gap-1 lg:gap-2">
+                <div className="flex shrink-0 items-center lg:gap-1">
                     <HeaderActions
                         auth={auth}
                         canRegister={canRegister}

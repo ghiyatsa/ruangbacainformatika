@@ -53,8 +53,10 @@ class InternshipReportController extends Controller
 
     public function show(InternshipReport $internshipReport): Response
     {
+        $internshipReport->increment('view_count');
+
         return Inertia::render('internship-report/show', [
-            'report' => new InternshipReportResource($internshipReport),
+            'report' => new InternshipReportResource($internshipReport->fresh()),
         ]);
     }
 }

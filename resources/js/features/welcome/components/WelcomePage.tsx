@@ -19,7 +19,7 @@ export default function WelcomePage({
         <>
             <SeoHead
                 title="Beranda"
-                description="Jelajahi koleksi buku, skripsi, tesis, dan laporan KP di Ruang Baca Teknik Informatika Universitas Malikussaleh."
+                description="Jelajahi koleksi buku, skripsi, tesis, dan laporan KP Ruang Baca Teknik Informatika Universitas Malikussaleh."
             />
 
             {/* Pattern Overlay */}
@@ -33,10 +33,7 @@ export default function WelcomePage({
             />
 
             <div className="relative z-10">
-                <Hero
-                    stats={stats}
-                    categoriesCount={activeCategoriesCount}
-                />
+                <Hero stats={stats} categoriesCount={activeCategoriesCount} />
 
                 <CategoryMarquee categories={categories} />
 

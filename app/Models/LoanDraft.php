@@ -26,6 +26,7 @@ class LoanDraft extends Model
         'token_hash',
         'expires_at',
         'consumed_at',
+        'selected_book_ids',
     ];
 
     protected function casts(): array
@@ -33,6 +34,7 @@ class LoanDraft extends Model
         return [
             'expires_at' => 'datetime',
             'consumed_at' => 'datetime',
+            'selected_book_ids' => 'array',
         ];
     }
 

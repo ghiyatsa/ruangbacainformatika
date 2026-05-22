@@ -1,7 +1,6 @@
 import type { ErrorInfo, ReactNode } from 'react';
 import React, { Component } from 'react';
-import { Button } from '@/components/ui/button';
-import AlertError from './AlertError';
+import ErrorPage from '@/pages/error-page';
 
 interface Props {
     children?: ReactNode;
@@ -28,29 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     public render() {
         if (this.state.hasError) {
-            return (
-                <div className="flex min-h-[400px] w-full items-center justify-center p-6">
-                    <div className="w-full max-w-md">
-                        <AlertError
-                            title="Terjadi Kesalahan"
-                            errors={['Terjadi kesalahan pada aplikasi.']}
-                        />
-                        <p className="mt-4 text-center text-sm text-muted-foreground">
-                            Silakan muat ulang halaman atau hubungi tim
-                            pengelola jika masalah berlanjut.
-                        </p>
-                        <div className="mt-4 flex justify-center">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => window.location.reload()}
-                            >
-                                Muat ulang halaman
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            );
+            return <ErrorPage status={500} />;
         }
 
         return this.props.children;

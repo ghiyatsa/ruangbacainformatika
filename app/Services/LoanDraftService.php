@@ -88,16 +88,6 @@ class LoanDraftService
             ]);
         }
 
-        $draftLimit = $this->kioskLoanService->loanMaxBooks();
-        $selectedBooksCount = $draft->items()->count();
-        $activeLoanCount = $this->activeLoanCount($user);
-
-        if (($activeLoanCount + $selectedBooksCount + 1) > $draftLimit) {
-            throw ValidationException::withMessages([
-                'book_id' => "Member ini hanya boleh memiliki maksimal {$draftLimit} buku yang sedang dipinjam. Anda saat ini memiliki {$activeLoanCount} pinjaman aktif.",
-            ]);
-        }
-
         $draft->items()->create([
             'book_id' => $book->id,
         ]);
@@ -121,9 +111,10 @@ class LoanDraftService
     }
 
     /**
+     * @param  array<int, int>  $selectedBookIds
      * @return array{draft: LoanDraft, payload: string, qr_svg: string}
      */
-    public function generateQr(User $user): array
+    public function generateQr(User $user, array $selectedBookIds): array
     {
         $this->ensureLoanDraftAccess($user);
         $this->ensureBorrowingProfileIsReady($user);
@@ -133,14 +124,54 @@ class LoanDraftService
 
         if ($draft->items->isEmpty()) {
             throw ValidationException::withMessages([
-                'draft' => 'Tambahkan minimal satu buku ke keranjang peminjaman terlebih dahulu.',
+                'draft' => 'Tambahkan minimal satu buku ke keranjang.',
             ]);
         }
 
-        foreach ($draft->items as $item) {
+        if ($draft->hasActiveToken()) {
+            throw ValidationException::withMessages([
+                'draft' => 'QR masih aktif. Tunggu hingga masa berlakunya berakhir.',
+            ]);
+        }
+
+        $draftLimit = $this->loanMaxBooks();
+        $activeLoanCount = $this->activeLoanCount($user);
+        $remainingQuota = max($draftLimit - $activeLoanCount, 0);
+        $normalizedSelectedBookIds = collect($selectedBookIds)
+            ->map(fn (int $bookId): int => (int) $bookId)
+            ->unique()
+            ->values();
+        $draftBookIds = $draft->items
+            ->pluck('book_id')
+            ->map(fn (mixed $bookId): int => (int) $bookId)
+            ->values();
+
+        if ($remainingQuota < 1) {
+            throw ValidationException::withMessages([
+                'book_ids' => "Member ini hanya boleh memiliki maksimal {$draftLimit} buku yang sedang dipinjam. Anda saat ini memiliki {$activeLoanCount} pinjaman aktif.",
+            ]);
+        }
+
+        if ($normalizedSelectedBookIds->diff($draftBookIds)->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'book_ids' => 'Pilih buku yang ada di keranjang.',
+            ]);
+        }
+
+        if ($normalizedSelectedBookIds->count() > $remainingQuota) {
+            throw ValidationException::withMessages([
+                'book_ids' => "Anda hanya dapat memilih maksimal {$remainingQuota} buku untuk QR ini.",
+            ]);
+        }
+
+        $selectedItems = $draft->items
+            ->filter(fn (LoanDraftItem $item): bool => $normalizedSelectedBookIds->contains($item->book_id))
+            ->values();
+
+        foreach ($selectedItems as $item) {
             if (! $item->book?->is_borrowable) {
                 throw ValidationException::withMessages([
-                    'draft' => "Buku {$item->book->title} tidak lagi dapat dipinjam.",
+                    'book_ids' => "Buku {$item->book->title} tidak lagi dapat dipinjam.",
                 ]);
             }
 
@@ -148,7 +179,7 @@ class LoanDraftService
 
             if (! $isAvailable) {
                 throw ValidationException::withMessages([
-                    'draft' => "Buku {$item->book->title} sedang tidak tersedia untuk dipinjam.",
+                    'book_ids' => "Buku {$item->book->title} sedang tidak tersedia untuk dipinjam.",
                 ]);
             }
         }
@@ -159,6 +190,7 @@ class LoanDraftService
             'expires_at' => now()->addMinutes(10),
             'status' => LoanDraft::STATUS_PENDING,
             'consumed_at' => null,
+            'selected_book_ids' => $normalizedSelectedBookIds->all(),
         ])->save();
 
         return [
@@ -221,15 +253,36 @@ class LoanDraftService
                 ]);
             }
 
+            $selectedBookIds = collect($draft->selected_book_ids ?: $draft->items->pluck('book_id')->all())
+                ->map(fn (mixed $bookId): int => (int) $bookId)
+                ->unique()
+                ->values()
+                ->all();
+
+            if ($selectedBookIds === []) {
+                throw ValidationException::withMessages([
+                    'payload' => 'QR peminjaman ini tidak memiliki buku yang dipilih.',
+                ]);
+            }
+
             $loan = $this->kioskLoanService->borrow(
                 $draft->user->email,
-                $draft->items->pluck('book_id')->map(fn (mixed $id): int => (int) $id)->all(),
+                $selectedBookIds,
             );
 
-            $draft->forceFill([
-                'status' => LoanDraft::STATUS_CONSUMED,
-                'consumed_at' => now(),
-            ])->save();
+            $draft->items()
+                ->whereIn('book_id', $selectedBookIds)
+                ->delete();
+
+            if ($draft->items()->exists()) {
+                $this->resetQrState($draft);
+            } else {
+                $draft->forceFill([
+                    'status' => LoanDraft::STATUS_CONSUMED,
+                    'consumed_at' => now(),
+                    'selected_book_ids' => null,
+                ])->save();
+            }
 
             return $loan;
         });
@@ -256,7 +309,7 @@ class LoanDraftService
     }
 
     /**
-     * @return array{count: int, maxBooks: int, activeLoansCount: int, hasActiveQr: bool}
+     * @return array{count: int, maxBooks: int, activeLoansCount: int, hasActiveQr: bool, bookIds: array<int, int>}
      */
     public function summary(User $user): array
     {
@@ -267,6 +320,7 @@ class LoanDraftService
             'maxBooks' => $this->loanMaxBooks(),
             'activeLoansCount' => $this->activeLoanCount($user),
             'hasActiveQr' => $draft?->hasActiveToken() ?? false,
+            'bookIds' => $draft?->items()->pluck('book_id')->map(fn (mixed $bookId): int => (int) $bookId)->all() ?? [],
         ];
     }
 
@@ -321,6 +375,7 @@ class LoanDraftService
             'expires_at' => null,
             'consumed_at' => null,
             'status' => LoanDraft::STATUS_PENDING,
+            'selected_book_ids' => null,
         ])->save();
 
         return $draft;

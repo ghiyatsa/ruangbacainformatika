@@ -63,7 +63,7 @@ export function CatalogPageLayout<T>({
             metaDescription={metaDescription}
             header={header ?? defaultHeader}
             maxWidth="7xl"
-            className="pb-16 pt-0"
+            className="pt-0 pb-16"
         >
             <div className="flex flex-col gap-8 md:gap-10">
                 {hasActiveFilters && onClearFilters && (

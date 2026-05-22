@@ -21,6 +21,7 @@ class SkripsiResource extends JsonResource
             'studentId' => $this->student_id,
             'year' => $this->year ? (int) $this->year : null,
             'abstract' => $this->abstract,
+            'viewCount' => (int) $this->view_count,
             'keywords' => $this->keywords
                 ? array_map('trim', explode(',', $this->keywords))
                 : [],

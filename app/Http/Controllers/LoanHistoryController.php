@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\LoanResource;
+use App\Http\Resources\LoanItemResource;
 use App\Models\Loan;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,31 +14,37 @@ class LoanHistoryController extends Controller
     public function __invoke(Request $request): Response
     {
         $user = $request->user();
-        $loansQuery = $user->loans();
+        $loanItemsQuery = $user->loanItems();
 
         $stats = [
-            'total' => $loansQuery->count(),
-            'active' => (clone $loansQuery)
-                ->where('status', Loan::STATUS_BORROWED)
-                ->where('due_at', '>=', now())
+            'total' => $loanItemsQuery->count(),
+            'active' => (clone $loanItemsQuery)
+                ->whereNull('loan_items.returned_at')
                 ->count(),
-            'overdue' => (clone $loansQuery)
-                ->where('status', Loan::STATUS_BORROWED)
-                ->where('due_at', '<', now())
+            'overdue' => (clone $loanItemsQuery)
+                ->whereNull('loan_items.returned_at')
+                ->whereHas('loan', fn (Builder $query): Builder => $query
+                    ->where('status', Loan::STATUS_BORROWED)
+                    ->where('due_at', '<', now()))
                 ->count(),
-            'returned' => (clone $loansQuery)
-                ->where('status', Loan::STATUS_RETURNED)
+            'returned' => (clone $loanItemsQuery)
+                ->whereNotNull('loan_items.returned_at')
                 ->count(),
         ];
 
-        $loans = $loansQuery
-            ->with(['items.bookItem.book'])
-            ->latest()
-            ->paginate(10);
+        $loanItems = $loanItemsQuery
+            ->with([
+                'loan:id,user_id,status,borrowed_at,due_at,returned_at',
+                'bookItem:id,book_id,internal_code',
+                'bookItem.book:id,title,slug',
+            ])
+            ->latest('loan_id')
+            ->latest('id')
+            ->paginate(15);
 
         return Inertia::render('loans/history', [
-            'loans' => array_merge($loans->toArray(), [
-                'data' => LoanResource::collection($loans->items())->resolve(),
+            'loans' => array_merge($loanItems->toArray(), [
+                'data' => LoanItemResource::collection($loanItems->items())->resolve(),
             ]),
             'stats' => $stats,
         ]);

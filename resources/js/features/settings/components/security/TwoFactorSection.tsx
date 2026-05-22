@@ -47,7 +47,9 @@ export function TwoFactorSection({
             <SettingsSectionHeader
                 title="Otentikasi dua faktor"
                 description="Tingkatkan keamanan akun Anda dengan menggunakan otentikasi dua faktor."
-                icon={twoFactorEnabled && isConfirmed ? ShieldCheck : ShieldAlert}
+                icon={
+                    twoFactorEnabled && isConfirmed ? ShieldCheck : ShieldAlert
+                }
                 iconClassName={cn(
                     twoFactorEnabled && isConfirmed
                         ? 'bg-green-100 text-green-600 dark:bg-green-950/50 dark:text-green-400'
@@ -91,9 +93,9 @@ export function TwoFactorSection({
                     ) : (
                         <>
                             <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-400">
-                                Anda belum selesai mengonfigurasi otentikasi
-                                dua faktor. Selesaikan pengaturan untuk
-                                meningkatkan keamanan akun Anda.
+                                Anda belum selesai mengonfigurasi otentikasi dua
+                                faktor. Selesaikan pengaturan untuk meningkatkan
+                                keamanan akun Anda.
                             </div>
                             <div className="flex items-center gap-3">
                                 <Button

@@ -34,12 +34,6 @@ export function ContactPage() {
             maxWidth="5xl"
             header={
                 <LibraryPageHero
-                    badge={
-                        <>
-                            <Mail className="size-4 text-primary" />
-                            Layanan Bantuan
-                        </>
-                    }
                     title={
                         <>
                             Kami Siap{' '}
@@ -48,7 +42,7 @@ export function ContactPage() {
                             </span>
                         </>
                     }
-                    description="Hubungi kami untuk pertanyaan seputar koleksi, akses akun, dan layanan perpustakaan."
+                    description="Hubungi kami untuk pertanyaan layanan, koleksi, atau akses akun."
                 />
             }
         >
@@ -58,26 +52,22 @@ export function ContactPage() {
                         <CardHeader>
                             <CardTitle>Informasi Kontak</CardTitle>
                             <CardDescription>
-                                Gunakan kanal resmi berikut untuk kebutuhan
-                                informasi dan koordinasi layanan.
+                                Gunakan kontak resmi berikut untuk informasi dan
+                                layanan.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm leading-7 text-muted-foreground">
                             <p>
-                                Untuk pertanyaan umum, silakan kirim email ke
-                                alamat resmi program studi atau pengelola ruang
-                                baca.
+                                Untuk pertanyaan umum, gunakan email resmi
+                                program studi atau pengelola ruang baca.
                             </p>
                             <p>
-                                Jika permintaan berkaitan dengan akun,
-                                peminjaman, atau pembaruan data, sertakan nama
-                                dan identitas akademik Anda agar proses tindak
+                                Jika terkait akun, peminjaman, atau data,
+                                sertakan nama dan identitas akademik Anda.
+                            </p>
+                            <p>
+                                Gunakan pesan yang singkat dan jelas agar tindak
                                 lanjut lebih cepat.
-                            </p>
-                            <p>
-                                Untuk kebutuhan yang bersifat administratif,
-                                gunakan bahasa yang singkat dan jelas agar
-                                proses verifikasi dapat dilakukan lebih cepat.
                             </p>
                         </CardContent>
                     </Card>
@@ -144,8 +134,7 @@ export function ContactPage() {
                     <CardHeader>
                         <CardTitle>Kirim Pesan</CardTitle>
                         <CardDescription>
-                            Sampaikan pertanyaan, kendala, atau kebutuhan
-                            koordinasi melalui form ini.
+                            Sampaikan pertanyaan atau kendala melalui form ini.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -170,7 +159,7 @@ export function ContactPage() {
                                                 name="name"
                                                 required
                                                 defaultValue={user?.name ?? ''}
-                                                placeholder="Nama lengkap Anda"
+                                                placeholder="Nama lengkap"
                                             />
                                             <InputError message={errors.name} />
                                         </div>
@@ -191,7 +180,9 @@ export function ContactPage() {
                                                 defaultValue={user?.email ?? ''}
                                                 placeholder="nama@email.com"
                                             />
-                                            <InputError message={errors.email} />
+                                            <InputError
+                                                message={errors.email}
+                                            />
                                         </div>
                                     </div>
 
@@ -242,15 +233,14 @@ export function ContactPage() {
                                             required
                                             rows={7}
                                             minLength={20}
-                                            placeholder="Jelaskan kebutuhan atau kendala Anda secara singkat dan jelas."
+                                            placeholder="Tulis pesan Anda secara singkat dan jelas."
                                         />
                                         <InputError message={errors.message} />
                                     </div>
 
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <p className="text-sm text-muted-foreground">
-                                            Pesan Anda akan diterima oleh tim
-                                            pengelola perpustakaan.
+                                            Pesan akan diterima tim pengelola.
                                         </p>
 
                                         <Button

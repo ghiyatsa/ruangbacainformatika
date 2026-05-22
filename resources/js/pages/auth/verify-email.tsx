@@ -3,7 +3,13 @@ import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { useEffect, useState } from 'react';
 import TextLink from '@/components/common/TextLink';
 import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import {
+    Field,
+    FieldDescription,
+    FieldError,
+    FieldGroup,
+    FieldLabel,
+} from '@/components/ui/field';
 import {
     InputOTP,
     InputOTPGroup,
@@ -62,7 +68,9 @@ export default function VerifyEmail({ status }: { status?: string }) {
                         <div className="text-left">
                             <FieldGroup>
                                 <Field data-invalid={Boolean(errors.otp)}>
-                                    <FieldLabel htmlFor="otp">Kode OTP</FieldLabel>
+                                    <FieldLabel htmlFor="otp">
+                                        Kode OTP
+                                    </FieldLabel>
                                     <FieldDescription>
                                         Masukkan 6 digit kode yang dikirim ke
                                         email Anda.
@@ -99,7 +107,9 @@ export default function VerifyEmail({ status }: { status?: string }) {
                             </FieldGroup>
                             <Button
                                 type="submit"
-                                disabled={processing || otp.length !== OTP_LENGTH}
+                                disabled={
+                                    processing || otp.length !== OTP_LENGTH
+                                }
                                 size={'lg'}
                                 className="mt-4 w-full"
                             >

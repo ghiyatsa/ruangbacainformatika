@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import {
+    Bookmark,
     Calendar,
     ChevronRight,
     ClipboardCheck,
@@ -8,13 +9,22 @@ import {
     User,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
 } from '@/components/ui/card';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { InternshipReportData } from '@/features/internship-report/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
+import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { cn } from '@/lib/utils';
 import internshipReportRoute from '@/routes/internship-reports';
 
 interface InternshipReportCardProps {
@@ -24,14 +34,34 @@ interface InternshipReportCardProps {
 export default function InternshipReportCard({
     report,
 }: InternshipReportCardProps) {
+    const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
+    const isBookmarkedByUser = isBookmarked({
+        catalogType: 'internship_report',
+        id: report.id,
+    });
+    const bookmarkRecord: CatalogBookmarkRecord = {
+        catalogType: 'internship_report',
+        id: report.id,
+        href: internshipReportRoute.show.url(report.studentId),
+        title: report.title,
+        subtitle: report.authorName,
+        meta: `NIM: ${report.studentId}`,
+        year: report.year,
+        coverImageUrl: null,
+        kindLabel: 'Laporan KP',
+        statusLabel: null,
+    };
+
     return (
-        <Link
-            href={internshipReportRoute.show.url(report.studentId)}
-            className="group block focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
-        >
+        <div className="group relative h-full">
+            <Link
+                href={internshipReportRoute.show.url(report.studentId)}
+                className="absolute inset-0 z-10 rounded-xl focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
+                aria-label={`Lihat detail laporan KP ${report.title}`}
+            />
             <Card className="relative flex h-full flex-col overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 dark:hover:shadow-primary/10">
                 <CardHeader className="gap-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between gap-3">
                         <Badge
                             variant="secondary"
                             className="gap-1 bg-primary/10 text-xs text-primary hover:bg-primary/15"
@@ -39,12 +69,53 @@ export default function InternshipReportCard({
                             <ClipboardCheck className="size-2.5" />
                             Laporan KP
                         </Badge>
-                        {report.year && (
-                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                                <Calendar className="size-3" />
-                                {report.year}
-                            </span>
-                        )}
+
+                        <div className="flex items-center gap-2">
+                            {report.year && (
+                                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                                    <Calendar className="size-3" />
+                                    {report.year}
+                                </span>
+                            )}
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        size="icon-sm"
+                                        variant="outline"
+                                        className={cn(
+                                            'relative z-20 shrink-0 rounded-full border-border/60 bg-background/90 shadow-sm backdrop-blur-sm hover:border-primary/30 hover:bg-primary/5',
+                                            isBookmarkedByUser &&
+                                                'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
+                                        )}
+                                        aria-label={
+                                            isBookmarkedByUser
+                                                ? 'Hapus bookmark'
+                                                : 'Simpan bookmark'
+                                        }
+                                        aria-pressed={isBookmarkedByUser}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            toggleBookmark(bookmarkRecord);
+                                        }}
+                                    >
+                                        <Bookmark
+                                            className={
+                                                isBookmarkedByUser
+                                                    ? 'fill-current'
+                                                    : ''
+                                            }
+                                        />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom" sideOffset={8}>
+                                    {isBookmarkedByUser
+                                        ? 'Hapus bookmark'
+                                        : 'Simpan bookmark'}
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
                     </div>
 
                     <div className="min-h-[3.75rem]">
@@ -96,6 +167,6 @@ export default function InternshipReportCard({
                     <ChevronRight className="size-4 text-muted-foreground/50 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
                 </CardFooter>
             </Card>
-        </Link>
+        </div>
     );
 }

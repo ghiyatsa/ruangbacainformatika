@@ -19,9 +19,9 @@ export function CatalogResourceCardSkeleton() {
             <div className="flex flex-1 flex-col gap-3 px-6 pb-6">
                 <div className="min-h-[1.5rem]">
                     <div className="flex flex-wrap gap-1">
-                    <Skeleton className="h-5 w-16" />
-                    <Skeleton className="h-5 w-20" />
-                    <Skeleton className="h-5 w-14" />
+                        <Skeleton className="h-5 w-16" />
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-5 w-14" />
                     </div>
                 </div>
             </div>

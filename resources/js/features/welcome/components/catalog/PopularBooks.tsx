@@ -21,7 +21,7 @@ export default function PopularBooks({
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader
                 title="Buku Populer"
-                subtitle="Koleksi yang paling sering dibuka oleh pengunjung."
+                subtitle="Koleksi yang paling sering dilihat."
                 action={
                     <BookCollectionViewToggle
                         viewMode={viewMode}
@@ -67,7 +67,8 @@ export default function PopularBooks({
                                     {previewBooks.map((book, index) => (
                                         <BookCard
                                             key={
-                                                book.id || `popular-grid-${index}`
+                                                book.id ||
+                                                `popular-grid-${index}`
                                             }
                                             book={book}
                                         />
@@ -78,7 +79,8 @@ export default function PopularBooks({
                                     {previewBooks.map((book, index) => (
                                         <BookCard
                                             key={
-                                                book.id || `popular-list-${index}`
+                                                book.id ||
+                                                `popular-list-${index}`
                                             }
                                             book={book}
                                             variant="compact"
@@ -90,8 +92,8 @@ export default function PopularBooks({
                     </AnimatePresence>
                 ) : (
                     <EmptyCatalogState
-                        title="Belum ada koleksi populer"
-                        description="Data akan tampil setelah katalog dilihat."
+                        title="Belum ada buku populer"
+                        description="Data akan tampil di sini."
                     />
                 )}
             </Deferred>

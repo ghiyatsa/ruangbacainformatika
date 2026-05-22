@@ -31,7 +31,12 @@ export function ResourcePagination<T>({
     const last = data.last_page;
 
     // Filter out "Previous" and "Next" links from the links array
-    const pageLinks = data.links.filter((link) => !isNaN(Number(link.label)));
+    const pageLinks = data.links.filter(
+        (link) =>
+            typeof link.label === 'string' &&
+            link.label.trim() !== '' &&
+            !Number.isNaN(Number(link.label)),
+    );
 
     const delta = 1;
     const rangeStart = Math.max(1, current - delta);
@@ -97,8 +102,10 @@ export function ResourcePagination<T>({
                         </>
                     )}
 
-                    {visibleLinks.map((link) => (
-                        <PaginationItem key={link.label}>
+                    {visibleLinks.map((link, index) => (
+                        <PaginationItem
+                            key={link.url ?? `${String(link.label)}-${index}`}
+                        >
                             <PaginationLink
                                 href={link.url ?? '#'}
                                 isActive={link.active}

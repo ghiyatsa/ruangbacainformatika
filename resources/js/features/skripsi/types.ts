@@ -7,6 +7,7 @@ export interface SkripsiData {
     studentId: string;
     year: number | null;
     abstract: string | null;
+    viewCount: number;
     keywords: string[];
 }
 

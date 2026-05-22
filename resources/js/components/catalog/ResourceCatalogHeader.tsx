@@ -48,8 +48,8 @@ export function ResourceCatalogHeader({
                             {title}
                         </h1>
                         <p className="mt-2 text-muted-foreground">
-                            {total.toLocaleString('id-ID')} {resourceName} tersedia
-                            dalam koleksi perpustakaan
+                            {total.toLocaleString('id-ID')} {resourceName}{' '}
+                            tersedia dalam koleksi perpustakaan
                         </p>
                     </div>
                 </div>

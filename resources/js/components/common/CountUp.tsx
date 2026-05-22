@@ -107,7 +107,18 @@ export default function CountUp({
                 clearTimeout(durationTimeoutId);
             };
         }
-    }, [isInView, startWhen, motionValue, direction, from, to, delay, onStart, onEnd, duration]);
+    }, [
+        isInView,
+        startWhen,
+        motionValue,
+        direction,
+        from,
+        to,
+        delay,
+        onStart,
+        onEnd,
+        duration,
+    ]);
 
     useEffect(() => {
         const unsubscribe = springValue.on('change', (latest: number) => {

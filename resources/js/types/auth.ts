@@ -23,6 +23,7 @@ export type LoanRequestCart = {
     maxBooks: number;
     activeLoansCount: number;
     hasActiveQr: boolean;
+    bookIds: number[];
 };
 
 export type TwoFactorSetupData = {

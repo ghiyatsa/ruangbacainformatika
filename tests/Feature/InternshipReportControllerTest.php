@@ -46,6 +46,7 @@ it('internship report detail page renders correctly', function () {
         'year' => 2025,
         'abstract' => 'Abstrak laporan kerja praktik.',
         'keywords' => 'dashboard, monitoring, sistem',
+        'view_count' => 9,
     ]);
 
     get(route('internship-reports.show', ['internshipReport' => $report->student_id]))
@@ -56,8 +57,11 @@ it('internship report detail page renders correctly', function () {
             ->where('report.data.authorName', 'Dewi Lestari')
             ->where('report.data.studentId', '2301700010')
             ->where('report.data.year', 2025)
+            ->where('report.data.viewCount', 10)
             ->where('report.data.keywords', ['dashboard', 'monitoring', 'sistem'])
         );
+
+    expect($report->fresh()->view_count)->toBe(10);
 });
 
 it('internship report detail page returns 404 for unknown nim', function () {
@@ -84,4 +88,13 @@ it('internship report catalog page returns the requested pagination page', funct
                 ->has('reports.data', 1)
                 ->where('reports.data.0.title', 'Laporan 21')
             ));
+});
+
+it('internship report detail page increments view count on each visit', function () {
+    $report = InternshipReport::factory()->create(['view_count' => 1]);
+
+    get(route('internship-reports.show', ['internshipReport' => $report->student_id]));
+    get(route('internship-reports.show', ['internshipReport' => $report->student_id]));
+
+    expect($report->fresh()->view_count)->toBe(3);
 });

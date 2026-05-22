@@ -2,14 +2,12 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface LibraryPageHeroProps {
-    badge: ReactNode;
     title: ReactNode;
     description: string;
     className?: string;
 }
 
 export function LibraryPageHero({
-    badge,
     title,
     description,
     className,
@@ -22,9 +20,6 @@ export function LibraryPageHero({
             )}
         >
             <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
-                <div className="mb-6 inline-flex max-w-full items-center justify-center gap-2 rounded-full border bg-card px-4 py-1.5 text-center text-xs font-medium text-muted-foreground shadow-sm sm:text-sm">
-                    {badge}
-                </div>
                 <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
                     {title}
                 </h1>

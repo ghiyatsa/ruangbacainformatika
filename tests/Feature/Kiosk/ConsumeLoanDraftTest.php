@@ -83,7 +83,9 @@ it('consumes a qr loan draft from kiosk and creates the final loan', function ()
         'book_id' => $book->id,
     ]);
 
-    actingAs($member)->post(route('loans.request.qr'));
+    actingAs($member)->post(route('loans.request.qr'), [
+        'book_ids' => [$book->id],
+    ]);
 
     $payload = session('loan_request_qr.payload');
     /** @var string $payload */
@@ -127,7 +129,9 @@ it('rejects expired qr loan drafts from kiosk', function () {
         'book_id' => $book->id,
     ]);
 
-    actingAs($member)->post(route('loans.request.qr'));
+    actingAs($member)->post(route('loans.request.qr'), [
+        'book_ids' => [$book->id],
+    ]);
 
     $payload = session('loan_request_qr.payload');
     /** @var string $payload */

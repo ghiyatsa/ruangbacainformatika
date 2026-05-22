@@ -36,7 +36,9 @@ export function evaluatePasswordStrength(password: string) {
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
     const hasSymbol = /[^A-Za-z0-9]/.test(password);
-    const hasValidBase = requirements.every((requirement) => requirement.passed);
+    const hasValidBase = requirements.every(
+        (requirement) => requirement.passed,
+    );
 
     let score = 0;
 
@@ -44,15 +46,21 @@ export function evaluatePasswordStrength(password: string) {
         score += 1;
     }
 
-    if (requirements.find((requirement) => requirement.key === 'length')?.passed) {
+    if (
+        requirements.find((requirement) => requirement.key === 'length')?.passed
+    ) {
         score += 1;
     }
 
-    if (requirements.find((requirement) => requirement.key === 'letter')?.passed) {
+    if (
+        requirements.find((requirement) => requirement.key === 'letter')?.passed
+    ) {
         score += 1;
     }
 
-    if (requirements.find((requirement) => requirement.key === 'number')?.passed) {
+    if (
+        requirements.find((requirement) => requirement.key === 'number')?.passed
+    ) {
         score += 1;
     }
 
@@ -76,7 +84,7 @@ export function evaluatePasswordStrength(password: string) {
         } as const;
     }
 
-    if (! hasValidBase || score <= 3) {
+    if (!hasValidBase || score <= 3) {
         return {
             score,
             percent: 33,

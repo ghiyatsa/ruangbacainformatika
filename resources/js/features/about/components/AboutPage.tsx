@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, LibraryBig } from 'lucide-react';
+import { BookOpen, GraduationCap } from 'lucide-react';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import {
@@ -17,12 +17,6 @@ export function AboutPage() {
             maxWidth="5xl"
             header={
                 <LibraryPageHero
-                    badge={
-                        <>
-                            <LibraryBig className="size-4 text-primary" />
-                            Profil Ruang Baca
-                        </>
-                    }
                     title={
                         <>
                             Tentang{' '}
@@ -56,10 +50,9 @@ export function AboutPage() {
                             sumber belajar untuk Program Studi Teknik
                             Informatika di Universitas Malikussaleh. Misi kami
                             adalah menyediakan akses yang mudah dan menyeluruh
-                            bagi mahasiswa, dosen, dan peneliti terhadap
-                            koleksi literatur akademik, termasuk buku ajar,
-                            bahan referensi, karya ilmiah, dan koleksi
-                            skripsi.
+                            bagi mahasiswa, dosen, dan peneliti terhadap koleksi
+                            literatur akademik, termasuk buku ajar, bahan
+                            referensi, karya ilmiah, dan koleksi skripsi.
                         </p>
                         <p className="mb-4 text-base leading-relaxed">
                             Kami ingin mendorong budaya belajar berkelanjutan
@@ -75,8 +68,8 @@ export function AboutPage() {
                             Menjadi repositori digital dan pusat pengetahuan
                             yang unggul untuk mendukung komunitas Teknik
                             Informatika melalui akses yang lancar ke sumber
-                            informasi berkualitas tinggi, demi mendorong
-                            inovasi dan kemajuan teknologi.
+                            informasi berkualitas tinggi, demi mendorong inovasi
+                            dan kemajuan teknologi.
                         </p>
                     </CardContent>
                 </Card>
@@ -128,9 +121,18 @@ export function AboutPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm text-muted-foreground">
-                            <p>Mahasiswa untuk mencari referensi dan karya terdahulu.</p>
-                            <p>Dosen untuk mendukung pembelajaran dan pengayaan materi.</p>
-                            <p>Peneliti untuk menjelajahi topik dan arah riset terkait.</p>
+                            <p>
+                                Mahasiswa untuk mencari referensi dan karya
+                                terdahulu.
+                            </p>
+                            <p>
+                                Dosen untuk mendukung pembelajaran dan pengayaan
+                                materi.
+                            </p>
+                            <p>
+                                Peneliti untuk menjelajahi topik dan arah riset
+                                terkait.
+                            </p>
                         </CardContent>
                     </Card>
                 </div>

@@ -1,7 +1,9 @@
 import { Link } from '@inertiajs/react';
 import {
+    Bookmark,
     BookMarked,
     Calendar,
+    Eye,
     GraduationCap,
     Hash,
     Tag,
@@ -19,13 +21,35 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { ThesisShowProps } from '@/features/thesis/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
+import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { cn } from '@/lib/utils';
 import thesisRoute from '@/routes/thesis';
 
 export default function ThesisDetailPage({
     thesis: { data: thesis },
 }: ThesisShowProps) {
+    const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
+    const isBookmarkedByUser = isBookmarked({
+        catalogType: 'thesis',
+        id: thesis.id,
+    });
+    const bookmarkRecord: CatalogBookmarkRecord = {
+        catalogType: 'thesis',
+        id: thesis.id,
+        href: thesisRoute.show.url(thesis.studentId),
+        title: thesis.title,
+        subtitle: thesis.authorName,
+        meta: `NIM: ${thesis.studentId}`,
+        year: thesis.year,
+        coverImageUrl: null,
+        kindLabel: 'Tesis',
+        statusLabel: null,
+    };
+
     return (
         <ResourceDetailPage
             title={thesis.title}
@@ -94,6 +118,43 @@ export default function ThesisDetailPage({
                                             </span>
                                         </>
                                     ) : null}
+                                    <span className="text-border">&bull;</span>
+                                    <span className="flex items-center gap-1.5">
+                                        <Eye className="size-3.5" />
+                                        {thesis.viewCount.toLocaleString('id-ID')}
+                                    </span>
+                                </div>
+
+                                <div className="mt-5 flex flex-wrap items-center gap-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className={cn(
+                                            'h-auto gap-2 rounded-full px-4 py-2 text-sm font-medium',
+                                            isBookmarkedByUser &&
+                                                'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
+                                        )}
+                                        aria-label={
+                                            isBookmarkedByUser
+                                                ? 'Hapus bookmark'
+                                                : 'Simpan bookmark'
+                                        }
+                                        aria-pressed={isBookmarkedByUser}
+                                        onClick={() =>
+                                            toggleBookmark(bookmarkRecord)
+                                        }
+                                    >
+                                        <Bookmark
+                                            className={
+                                                isBookmarkedByUser
+                                                    ? 'fill-current'
+                                                    : ''
+                                            }
+                                        />
+                                        {isBookmarkedByUser
+                                            ? 'Tersimpan'
+                                            : 'Simpan'}
+                                    </Button>
                                 </div>
                             </div>
                         </div>

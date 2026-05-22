@@ -1,5 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
-import { MoonIcon, Search, ShoppingCart, SunIcon } from 'lucide-react';
+import {
+    Bookmark,
+    MoonIcon,
+    Search,
+    ShoppingCart,
+    SunIcon,
+} from 'lucide-react';
 import { GlobalSearch } from '@/components/layouts/GlobalSearch';
 import { UserMenuContent } from '@/components/layouts/UserMenuContent';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +15,8 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookmarksDialog';
+import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { register } from '@/routes';
 import loans from '@/routes/loans';
 import type { Auth, LoanRequestCart } from '@/types';
@@ -35,6 +43,7 @@ export function HeaderActions({
     const openSearch = () =>
         window.dispatchEvent(new Event('open-global-search'));
     const isDark = resolvedAppearance === 'dark';
+    const { bookmarkedCount } = useCatalogBookmarks();
 
     return (
         <>
@@ -44,57 +53,81 @@ export function HeaderActions({
                 </div>
             )}
 
-            {!hideSearch && (
+            <div className="flex items-center md:gap-1">
+                {!hideSearch && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-xl xl:hidden"
+                        onClick={openSearch}
+                        aria-label="Cari buku"
+                    >
+                        <Search className="h-[18px] w-[18px]" />
+                    </Button>
+                )}
+
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-xl xl:hidden"
-                    onClick={openSearch}
-                    aria-label="Cari buku"
+                    className="h-9 w-9 rounded-xl"
+                    onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
+                    aria-label={isDark ? 'Mode terang' : 'Mode gelap'}
+                    title={isDark ? 'Mode terang' : 'Mode gelap'}
                 >
-                    <Search className="h-[18px] w-[18px]" />
+                    {isDark ? (
+                        <SunIcon className="h-[18px] w-[18px] text-primary" />
+                    ) : (
+                        <MoonIcon className="h-[18px] w-[18px] text-primary" />
+                    )}
+                    <span className="sr-only">Ubah tema</span>
                 </Button>
-            )}
 
-            <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-xl"
-                onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
-                aria-label={isDark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'}
-                title={isDark ? 'Mode terang' : 'Mode gelap'}
-            >
-                {isDark ? (
-                    <SunIcon className="h-[18px] w-[18px] text-primary" />
-                ) : (
-                    <MoonIcon className="h-[18px] w-[18px] text-primary" />
-                )}
-                <span className="sr-only">Ubah tema</span>
-            </Button>
+                <CatalogBookmarksDialog
+                    trigger={
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative h-9 w-9 rounded-xl"
+                        >
+                            <Bookmark className="h-[18px] w-[18px] text-primary" />
+                            <span className="sr-only">Bookmark</span>
+                            <Badge className="absolute -top-1.5 -right-1.5 flex min-w-5 items-center justify-center rounded-full px-1 py-0 text-[10px] leading-none shadow-sm">
+                                {bookmarkedCount}
+                            </Badge>
+                        </Button>
+                    }
+                />
 
-            {auth.user ? (
-                <>
+                {auth.user ? (
                     <Button
                         asChild
                         variant="ghost"
                         size="icon"
-                        className="relative h-9 w-9 rounded-xl"
+                        className="relative hidden h-9 w-9 rounded-xl md:inline-flex"
                     >
                         <Link
                             href={loans.request.url()}
-                            aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
-                            title="Keranjang peminjaman"
+                            aria-label={`Keranjang pinjam, ${loanRequestCart?.count ?? 0} buku`}
+                            title="Keranjang pinjam"
                         >
                             <ShoppingCart className="h-[18px] w-[18px] text-primary" />
-                            <span className="sr-only">
-                                Keranjang peminjaman
-                            </span>
+                            <span className="sr-only">Keranjang pinjam</span>
                             <Badge className="absolute -top-1.5 -right-1.5 flex min-w-5 items-center justify-center rounded-full px-1 py-0 text-[10px] leading-none shadow-sm">
                                 {loanRequestCart?.count ?? 0}
                             </Badge>
                         </Link>
                     </Button>
+                ) : canRegister ? (
+                    <Button
+                        asChild
+                        size="sm"
+                        className="rounded-xl text-sm shadow-md shadow-primary/15"
+                    >
+                        <Link href={register.url()}>Bergabung</Link>
+                    </Button>
+                ) : null}
 
+                {auth.user ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button
@@ -112,18 +145,8 @@ export function HeaderActions({
                             <UserMenuContent user={auth.user} />
                         </DropdownMenuContent>
                     </DropdownMenu>
-                </>
-            ) : canRegister ? (
-                <div className="hidden items-center sm:flex">
-                    <Button
-                        asChild
-                        size="sm"
-                        className="rounded-xl text-sm shadow-md shadow-primary/15"
-                    >
-                        <Link href={register.url()}>Bergabung</Link>
-                    </Button>
-                </div>
-            ) : null}
+                ) : null}
+            </div>
         </>
     );
 }

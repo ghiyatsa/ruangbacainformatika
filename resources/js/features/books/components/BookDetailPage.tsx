@@ -1,5 +1,6 @@
 import { Form, Link, usePage } from '@inertiajs/react';
 import {
+    Bookmark,
     BookOpen,
     Building2,
     Calendar,
@@ -9,7 +10,6 @@ import {
     Globe,
     Hash,
     Library,
-    QrCode,
     ShoppingCart,
     Star,
     XCircle,
@@ -30,6 +30,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { BookData, LoanRequestSummary } from '@/features/books/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
+import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 
 export interface BookDetailPageProps {
@@ -42,12 +45,33 @@ export default function BookDetailPage({
     loanRequest,
 }: BookDetailPageProps) {
     const user = usePage().props.auth?.user;
+    const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const requestSummary = loanRequest ?? {
         count: 0,
         maxBooks: 0,
         activeLoansCount: 0,
         containsBook: false,
         hasActiveQr: false,
+    };
+    const isBookmarkedByUser = isBookmarked({
+        catalogType: 'book',
+        id: book.id,
+    });
+    const bookmarkRecord: CatalogBookmarkRecord = {
+        catalogType: 'book',
+        id: book.id,
+        href: booksRoute.show.url(book.slug),
+        title: book.title,
+        subtitle: book.authors.join(', ') || 'Penulis tidak tersedia',
+        meta: book.pages ? `${book.pages} halaman` : null,
+        year: book.publishedYear ?? null,
+        coverImageUrl: book.coverImageUrl,
+        kindLabel: 'Buku',
+        statusLabel: !book.isBorrowable
+            ? 'Referensi'
+            : book.isAvailable
+              ? 'Siap dipinjam'
+              : 'Sedang kosong',
     };
     const availabilityColor = !book.isBorrowable
         ? 'text-amber-600 dark:text-amber-400'
@@ -58,7 +82,7 @@ export default function BookDetailPage({
     const availabilityLabel = !book.isBorrowable
         ? 'Hanya Referensi'
         : book.isAvailable
-          ? 'Tersedia untuk Dipinjam'
+          ? 'Tersedia'
           : 'Tidak Tersedia';
 
     const AvailabilityIcon =
@@ -137,9 +161,12 @@ export default function BookDetailPage({
                                         </Badge>
                                     ) : null}
 
-                                    {book.categories.map((category) => (
+                                    {book.categories.map((category, index) => (
                                         <Link
-                                            key={category.slug}
+                                            key={
+                                                category.slug ??
+                                                `${category.name}-${index}`
+                                            }
                                             href={booksRoute.index.url({
                                                 query: {
                                                     category: category.slug,
@@ -223,6 +250,68 @@ export default function BookDetailPage({
                                             kali dilihat
                                         </span>
                                     </div>
+
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className={cn(
+                                            'inline-flex h-auto items-center gap-2 rounded-full bg-background/70 px-4 py-2 text-sm font-medium backdrop-blur-sm',
+                                            isBookmarkedByUser &&
+                                                'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
+                                        )}
+                                        aria-label={
+                                            isBookmarkedByUser
+                                                ? 'Hapus bookmark'
+                                                : 'Simpan bookmark'
+                                        }
+                                        aria-pressed={isBookmarkedByUser}
+                                        onClick={() =>
+                                            toggleBookmark(bookmarkRecord)
+                                        }
+                                    >
+                                        <Bookmark
+                                            className={
+                                                isBookmarkedByUser
+                                                    ? 'fill-current'
+                                                    : ''
+                                            }
+                                        />
+                                        {isBookmarkedByUser
+                                            ? 'Tersimpan'
+                                            : 'Simpan'}
+                                    </Button>
+
+                                    {user &&
+                                    book.isBorrowable &&
+                                    book.isAvailable ? (
+                                        <Form
+                                            action={LoanRequestController.storeBook()}
+                                        >
+                                            {({ processing }) => (
+                                                <>
+                                                    <input
+                                                        type="hidden"
+                                                        name="book_id"
+                                                        value={book.id}
+                                                    />
+                                                    <Button
+                                                        type="submit"
+                                                        variant="outline"
+                                                        className="inline-flex h-auto items-center gap-2 rounded-full bg-background/70 px-4 py-2 text-sm font-medium backdrop-blur-sm"
+                                                        disabled={
+                                                            processing ||
+                                                            requestSummary.containsBook
+                                                        }
+                                                    >
+                                                        <ShoppingCart className="size-4" />
+                                                        {requestSummary.containsBook
+                                                            ? 'Di keranjang'
+                                                            : 'Pinjam'}
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </Form>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>
@@ -274,76 +363,6 @@ export default function BookDetailPage({
                             />
                         </div>
                     </div>
-
-                    {user ? (
-                        <div className="rounded-2xl border bg-card/80 p-5 shadow-sm backdrop-blur-sm">
-                            <div className="flex items-start gap-3">
-                                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                    <ShoppingCart className="size-4" />
-                                </div>
-                                <div className="min-w-0">
-                                    <h2 className="text-sm font-semibold text-foreground">
-                                        Keranjang Peminjaman
-                                    </h2>
-                                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                        {requestSummary.count} dari{' '}
-                                        {requestSummary.maxBooks} slot keranjang
-                                        terisi. Pinjaman aktif Anda saat ini:{' '}
-                                        {requestSummary.activeLoansCount} buku.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="mt-4 space-y-3">
-                                {book.isBorrowable && book.isAvailable ? (
-                                    <Form
-                                        {...LoanRequestController.storeBook.form()}
-                                    >
-                                        {({ processing }) => (
-                                            <>
-                                                <input
-                                                    type="hidden"
-                                                    name="book_id"
-                                                    value={book.id}
-                                                />
-                                                <Button
-                                                    type="submit"
-                                                    className="w-full"
-                                                    disabled={
-                                                        processing ||
-                                                        requestSummary.containsBook
-                                                    }
-                                                >
-                                                    <ShoppingCart className="size-4" />
-                                                    {requestSummary.containsBook
-                                                        ? 'Sudah Ada di Keranjang'
-                                                        : 'Tambah ke Keranjang Pinjam'}
-                                                </Button>
-                                            </>
-                                        )}
-                                    </Form>
-                                ) : null}
-
-                                <Button
-                                    asChild
-                                    variant="outline"
-                                    className="w-full"
-                                >
-                                    <Link href={LoanRequestController.show()}>
-                                        <QrCode className="size-4" />
-                                        Lihat QR Peminjaman
-                                    </Link>
-                                </Button>
-
-                                {requestSummary.hasActiveQr ? (
-                                    <p className="text-xs leading-5 text-muted-foreground">
-                                        QR aktif sudah tersedia di halaman
-                                        permintaan peminjaman Anda.
-                                    </p>
-                                ) : null}
-                            </div>
-                        </div>
-                    ) : null}
 
                     <CatalogReportCard
                         catalogType="book"

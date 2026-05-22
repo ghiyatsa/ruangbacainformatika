@@ -1,7 +1,7 @@
 import { Turnstile } from '@marsidev/react-turnstile';
 import type { TurnstileInstance } from '@marsidev/react-turnstile';
-import { AlertCircle, BookOpen, Loader2, Search } from 'lucide-react';
-import type { FormEvent } from 'react';
+import { AlertCircle, Loader2, Search } from 'lucide-react';
+import type { SubmitEvent } from 'react';
 import { useRef, useState } from 'react';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
@@ -36,7 +36,7 @@ export default function SimilarityPage({
     const resultsRef = useRef<HTMLDivElement>(null);
     const turnstileRef = useRef<TurnstileInstance | null>(null);
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
 
         const words = title
@@ -120,12 +120,6 @@ export default function SimilarityPage({
             maxWidth="7xl"
             header={
                 <LibraryPageHero
-                    badge={
-                        <>
-                            <BookOpen className="size-4 text-primary" />
-                            Layanan Perpustakaan
-                        </>
-                    }
                     title={
                         <>
                             Cek Kemiripan{' '}
@@ -134,7 +128,7 @@ export default function SimilarityPage({
                             </span>
                         </>
                     }
-                    description="Verifikasi keaslian judul penelitian Anda sebelum mengajukan proposal. Sistem kami membandingkan secara semantik dengan seluruh koleksi perpustakaan."
+                    description="Periksa kemiripan judul Anda sebelum pengajuan proposal."
                 />
             }
         >
@@ -144,11 +138,10 @@ export default function SimilarityPage({
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Search className="size-5 text-primary" />
-                            Pemeriksaan Judul
+                            Cek Judul
                         </CardTitle>
                         <CardDescription>
-                            Masukkan judul skripsi yang ingin Anda ajukan ke
-                            perpustakaan.
+                            Masukkan judul yang ingin diperiksa.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -158,7 +151,7 @@ export default function SimilarityPage({
                                 <div className="flex flex-col gap-3 sm:flex-row">
                                     <Input
                                         id="judul"
-                                        placeholder="Contoh: Implementasi Algoritma KNN pada Sistem Rekomendasi..."
+                                        placeholder="Contoh: Implementasi Algoritma KNN pada Sistem Rekomendasi"
                                         value={title}
                                         onChange={(e) =>
                                             setTitle(e.target.value)
@@ -185,7 +178,7 @@ export default function SimilarityPage({
                                 </div>
                                 <p className="text-xs text-muted-foreground">
                                     Minimal 5 kata. Hasil diurutkan berdasarkan
-                                    tingkat kemiripan.
+                                    kemiripan.
                                 </p>
                             </div>
 
@@ -230,8 +223,7 @@ export default function SimilarityPage({
                                     Cara Kerja
                                 </CardTitle>
                                 <CardDescription className="text-center">
-                                    Proses pemeriksaan dirancang ringkas dan
-                                    mudah dipahami.
+                                    Prosesnya singkat dan mudah dipahami.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -244,13 +236,19 @@ export default function SimilarityPage({
                                 <CardTitle>Catatan Layanan</CardTitle>
                                 <CardDescription>
                                     Gunakan judul yang paling mendekati rencana
-                                    final agar hasil lebih relevan.
+                                    final Anda.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm text-muted-foreground">
-                                <p>Hasil ini membantu tahap awal verifikasi judul.</p>
-                                <p>Keputusan akademik tetap mengikuti kebijakan program studi.</p>
-                                <p>Perbaikan kata kunci dapat memengaruhi tingkat kemiripan.</p>
+                                <p>Hasil ini membantu verifikasi awal.</p>
+                                <p>
+                                    Keputusan akhir mengikuti kebijakan program
+                                    studi.
+                                </p>
+                                <p>
+                                    Perubahan kata kunci dapat memengaruhi
+                                    hasil.
+                                </p>
                             </CardContent>
                         </Card>
                     </div>

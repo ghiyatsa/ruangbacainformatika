@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoanDraftBookRequest;
+use App\Http\Requests\LoanDraftQrRequest;
 use App\Models\Book;
 use App\Models\LoanDraft;
 use App\Models\LoanDraftItem;
@@ -44,7 +45,7 @@ class LoanRequestController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => "Buku {$book->title} ditambahkan ke keranjang peminjaman.",
+            'message' => "Buku {$book->title} ditambahkan ke keranjang.",
         ]);
 
         return redirect()->back();
@@ -58,15 +59,18 @@ class LoanRequestController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => "Buku {$book->title} dihapus dari keranjang peminjaman.",
+            'message' => "Buku {$book->title} dihapus dari keranjang.",
         ]);
 
         return redirect()->back();
     }
 
-    public function generateQr(Request $request): RedirectResponse
+    public function generateQr(LoanDraftQrRequest $request): RedirectResponse
     {
-        $checkout = $this->loanDraftService->generateQr($request->user());
+        $checkout = $this->loanDraftService->generateQr(
+            $request->user(),
+            $request->validatedBookIds(),
+        );
 
         session()->put('loan_request_qr', [
             'payload' => $checkout['payload'],
@@ -75,7 +79,7 @@ class LoanRequestController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => 'QR peminjaman berhasil dibuat. Silakan tunjukkan ke kiosk lobi sebelum masa berlakunya habis.',
+            'message' => 'QR berhasil dibuat.',
         ]);
 
         return redirect()->route('loans.request');
@@ -98,9 +102,10 @@ class LoanRequestController extends Controller
             'status' => $draft->status,
             'itemsCount' => $draft->items->count(),
             'expiresAt' => $draft->expires_at?->translatedFormat('d F Y H:i'),
+            'expiresAtIso' => $draft->expires_at?->toIso8601String(),
             'hasActiveQr' => $draft->hasActiveToken(),
             'qrCodeSvg' => $draft->hasActiveToken() && is_array($qr) ? ($qr['svg'] ?? null) : null,
-            'qrPayload' => $draft->hasActiveToken() && is_array($qr) ? ($qr['payload'] ?? null) : null,
+            'selectedBookIds' => array_map('intval', $draft->selected_book_ids ?? []),
             'items' => $draft->items
                 ->sortBy('id')
                 ->values()

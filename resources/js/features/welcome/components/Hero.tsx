@@ -101,7 +101,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                         <button
                             onClick={openSearch}
                             className="group relative w-full transition-all duration-200 hover:scale-[1.015] sm:max-w-sm"
-                            aria-label="Cari buku"
+                            aria-label="Cari koleksi"
                         >
                             <StarBorder
                                 as="div"
@@ -112,7 +112,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                 <div className="flex items-center gap-3 text-muted-foreground">
                                     <Search className="size-4 shrink-0 transition-colors group-hover:text-primary" />
                                     <span className="flex-1 text-left text-sm font-normal">
-                                        Cari buku, penulis, subjek...
+                                        Cari buku, penulis, atau topik
                                     </span>
                                     <div className="flex items-center gap-1.5">
                                         <Kbd>Ctrl K</Kbd>
@@ -128,7 +128,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                             className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:scale-[1.015] hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40"
                         >
                             <BookOpen className="size-4 transition-transform duration-200 group-hover:scale-110" />
-                            Jelajahi Katalog
+                            Lihat Katalog
                             <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                         </Link>
                     </div>

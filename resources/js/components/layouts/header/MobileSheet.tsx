@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, Menu, ShoppingCart } from 'lucide-react';
+import { Bookmark, ChevronDown, Menu, ShoppingCart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Collapsible,
@@ -13,6 +13,8 @@ import {
     SheetHeader,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookmarksDialog';
+import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { register } from '@/routes';
 import loans from '@/routes/loans';
 import type { Auth, LoanRequestCart } from '@/types';
@@ -37,6 +39,7 @@ export function MobileSheet({
     const { loanRequestCart } = usePage<{
         loanRequestCart: LoanRequestCart | null;
     }>().props;
+    const { bookmarkedCount } = useCatalogBookmarks();
     const defaultOpenSections = NAV_LINKS.filter(
         (item) =>
             item.children &&
@@ -59,15 +62,40 @@ export function MobileSheet({
 
             <SheetContent
                 side="right"
-                overlayClassName="bg-black/5 supports-backdrop-filter:backdrop-blur-none"
-                className="w-[min(92vw,24rem)] transform-gpu will-change-transform border-l border-border/60 bg-background p-0 shadow-xl [contain:layout_paint] data-closed:duration-150 data-open:duration-200"
+                showCloseButton={false}
+                overlayClassName="bg-black/5 supports-backdrop-filter:backdrop-blur"
+                className="m-2 w-[min(92vw,24rem)] transform-gpu rounded-xl border-l border-border/60 bg-background/80 p-0 shadow-xl backdrop-blur-xl will-change-transform [contain:layout_paint] data-open:duration-200 data-closed:duration-0"
             >
-                <SheetHeader className="gap-3 border-b border-border/60 px-5 py-4 text-left">
+                <SheetHeader className="flex h-18 flex-row items-center justify-between border-b border-border/60 px-4 text-left">
                     <AppLogo />
+                    <SheetClose asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-xl"
+                            aria-label="Tutup menu"
+                        >
+                            <X className="size-5" />
+                        </Button>
+                    </SheetClose>
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto px-3 py-4">
                     <nav className="space-y-2">
+                        <CatalogBookmarksDialog
+                            trigger={
+                                <button
+                                    type="button"
+                                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent/70"
+                                >
+                                    <Bookmark className="size-4 shrink-0 text-muted-foreground" />
+                                    <span>Bookmark</span>
+                                    <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+                                        {bookmarkedCount}
+                                    </span>
+                                </button>
+                            }
+                        />
                         {auth.user ? (
                             <SheetClose asChild>
                                 <Link
@@ -80,7 +108,7 @@ export function MobileSheet({
                                     ].join(' ')}
                                 >
                                     <ShoppingCart className="size-4 shrink-0 text-muted-foreground" />
-                                    <span>Keranjang Peminjaman</span>
+                                    <span>Keranjang Pinjam</span>
                                     <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
                                         {loanRequestCart?.count ?? 0}
                                     </span>
@@ -181,9 +209,7 @@ export function MobileSheet({
                     <div className="border-t border-border/60 p-4">
                         <Button asChild className="h-11 w-full rounded-xl">
                             <SheetClose asChild>
-                                <Link href={register.url()}>
-                                    Bergabung Sekarang
-                                </Link>
+                                <Link href={register.url()}>Daftar</Link>
                             </SheetClose>
                         </Button>
                     </div>

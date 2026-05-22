@@ -262,9 +262,8 @@ export function BookActionForm({
                                     {requiresMemberBeforeSearch &&
                                     memberIdentifierTrimmed === '' ? (
                                         <p className="rounded-2xl border border-dashed border-border/70 bg-muted/35 px-4 py-3 text-sm text-muted-foreground">
-                                            Isi Email atau NIM terlebih dahulu
-                                            untuk menampilkan daftar pinjaman
-                                            aktif.
+                                            Isi Email atau NIM untuk melihat
+                                            pinjaman aktif.
                                         </p>
                                     ) : null}
 
@@ -282,10 +281,9 @@ export function BookActionForm({
                                                     Buku dipilih
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {bookSearchMode ===
-                                                    'borrow'
-                                                        ? 'Periksa pilihan sebelum simpan.'
-                                                        : 'Pilih buku yang ingin dikembalikan.'}
+                                                    {bookSearchMode === 'borrow'
+                                                        ? 'Periksa pilihan Anda.'
+                                                        : 'Pilih buku yang akan dikembalikan.'}
                                                 </p>
                                             </div>
                                             <div className="rounded-full border border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-foreground">
@@ -309,9 +307,7 @@ export function BookActionForm({
                                                         <div className="flex items-start justify-between gap-2">
                                                             <div className="min-w-0 space-y-1">
                                                                 <p className="line-clamp-1 text-sm font-semibold text-foreground">
-                                                                    {
-                                                                        book.title
-                                                                    }
+                                                                    {book.title}
                                                                 </p>
                                                                 <p className="line-clamp-1 text-xs text-muted-foreground">
                                                                     {book.authors?.join(
@@ -355,8 +351,7 @@ export function BookActionForm({
 
                                             {selectedBooks.length === 0 ? (
                                                 <div className="rounded-xl border border-dashed border-border/70 bg-background/70 px-4 py-5 text-sm text-muted-foreground">
-                                                    Belum ada buku yang
-                                                    dipilih.
+                                                    Belum ada buku dipilih.
                                                 </div>
                                             ) : null}
                                         </div>
@@ -365,8 +360,8 @@ export function BookActionForm({
                                             {selectedBooks.length >=
                                             maxInputs ? (
                                                 <p className="text-sm text-muted-foreground">
-                                                    Batas maksimal {maxInputs}{' '}
-                                                    buku sudah tercapai.
+                                                    Batas {maxInputs} buku telah
+                                                    tercapai.
                                                 </p>
                                             ) : null}
 
@@ -378,7 +373,9 @@ export function BookActionForm({
                                                     processing || !isComplete
                                                 }
                                             >
-                                                {processing ? <Spinner /> : null}
+                                                {processing ? (
+                                                    <Spinner />
+                                                ) : null}
                                                 {submitLabel}
                                             </Button>
                                         </div>
@@ -430,9 +427,7 @@ export function BookActionForm({
                                                 placeholder="Scan atau ketik ISBN/ISSN 1"
                                                 value={firstIsbn}
                                                 onChange={(e) =>
-                                                    setFirstIsbn(
-                                                        e.target.value,
-                                                    )
+                                                    setFirstIsbn(e.target.value)
                                                 }
                                                 aria-invalid={Boolean(
                                                     errors['isbns.0'],
@@ -478,8 +473,8 @@ export function BookActionForm({
                                         <DialogTitle>Cari Buku</DialogTitle>
                                         <DialogDescription>
                                             {bookSearchMode === 'borrow'
-                                                ? 'Cari lalu pilih buku yang akan diproses.'
-                                                : 'Cari dari daftar pinjaman aktif member ini.'}
+                                                ? 'Cari dan pilih buku.'
+                                                : 'Cari dari pinjaman aktif member ini.'}
                                         </DialogDescription>
                                     </DialogHeader>
 
@@ -500,8 +495,7 @@ export function BookActionForm({
                                                 setSearchError(null);
 
                                                 if (
-                                                    bookSearchMode ===
-                                                    'borrow'
+                                                    bookSearchMode === 'borrow'
                                                 ) {
                                                     if (
                                                         nextQuery.trim() === ''
@@ -532,9 +526,8 @@ export function BookActionForm({
 
                                         {bookSearchMode === 'return' ? (
                                             <p className="text-sm text-muted-foreground">
-                                                Daftar pinjaman aktif langsung
-                                                ditampilkan. Gunakan filter bila
-                                                perlu.
+                                                Daftar pinjaman aktif
+                                                ditampilkan otomatis.
                                             </p>
                                         ) : null}
 
@@ -549,7 +542,8 @@ export function BookActionForm({
                                                 <div className="grid gap-2 p-3">
                                                     {bookSearchMode ===
                                                         'borrow' &&
-                                                    searchQuery.trim() === '' ? (
+                                                    searchQuery.trim() ===
+                                                        '' ? (
                                                         <p className="px-3 py-4 text-sm text-muted-foreground">
                                                             Mulai ketik untuk
                                                             mencari buku.
@@ -604,8 +598,8 @@ export function BookActionForm({
                                                         <p className="px-3 py-4 text-sm text-muted-foreground">
                                                             {bookSearchMode ===
                                                             'borrow'
-                                                                ? 'Tidak ada buku yang cocok atau tersedia.'
-                                                                : 'Tidak ada pinjaman aktif untuk member ini.'}
+                                                                ? 'Tidak ada buku yang sesuai.'
+                                                                : 'Tidak ada pinjaman aktif.'}
                                                         </p>
                                                     )}
                                                 </div>

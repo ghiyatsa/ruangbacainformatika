@@ -1,5 +1,8 @@
 import { createInertiaApp } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { createElement } from 'react';
+import type { Root } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -10,6 +13,11 @@ import AuthLayout from '@/layouts/AuthLayout';
 import SettingsLayout from '@/layouts/SettingsLayout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Ruang Baca';
+
+type RootElement = HTMLElement & {
+    __inertiaRoot?: Root;
+    __inertiaHydrated?: boolean;
+};
 
 function AppProviders({ children }: { children: ReactNode }) {
     useFlashToast();
@@ -41,8 +49,26 @@ createInertiaApp({
         }
     },
     strictMode: true,
-    withApp(app) {
-        return <AppProviders>{app}</AppProviders>;
+    setup({ el, App, props }) {
+        const rootElement = el as RootElement;
+        const app = createElement(App, props);
+        const wrappedApp = <AppProviders>{app}</AppProviders>;
+
+        if (
+            rootElement.hasAttribute('data-server-rendered') &&
+            !rootElement.__inertiaHydrated
+        ) {
+            hydrateRoot(rootElement, wrappedApp);
+            rootElement.__inertiaHydrated = true;
+
+            return;
+        }
+
+        if (!rootElement.__inertiaRoot) {
+            rootElement.__inertiaRoot = createRoot(rootElement);
+        }
+
+        rootElement.__inertiaRoot.render(wrappedApp);
     },
     progress: {
         color: '#4B5563',

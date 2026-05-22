@@ -8,7 +8,6 @@ import React, {
 } from 'react';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 
-
 export type VelocityScrollItem =
     | {
           node: React.ReactNode;
@@ -293,8 +292,6 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
         const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
             clamp: false,
         });
-
-
 
         const effectiveHoverSpeed = useMemo(() => {
             if (hoverSpeed !== undefined) {
@@ -602,62 +599,64 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                     </div>
                 ) : (
                     <>
-                {fadeOut && (
-                    <>
-                        {isVertical ? (
+                        {fadeOut && (
                             <>
-                                <div
-                                    aria-hidden
-                                    className={cx(
-                                        'pointer-events-none absolute inset-x-0 top-0 z-10',
-                                        'h-[clamp(24px,8%,120px)]',
-                                        'bg-[linear-gradient(to_bottom,var(--velocity-scroll-fadeColor,var(--velocity-scroll-fadeColorAuto))_0%,rgba(0,0,0,0)_100%)]',
-                                    )}
-                                />
-                                <div
-                                    aria-hidden
-                                    className={cx(
-                                        'pointer-events-none absolute inset-x-0 bottom-0 z-10',
-                                        'h-[clamp(24px,8%,120px)]',
-                                        'bg-[linear-gradient(to_top,var(--velocity-scroll-fadeColor,var(--velocity-scroll-fadeColorAuto))_0%,rgba(0,0,0,0)_100%)]',
-                                    )}
-                                />
-                            </>
-                        ) : (
-                            <>
-                                <div
-                                    aria-hidden
-                                    className={cx(
-                                        'pointer-events-none absolute inset-y-0 left-0 z-10',
-                                        'w-[clamp(24px,8%,120px)]',
-                                        'bg-[linear-gradient(to_right,var(--velocity-scroll-fadeColor,var(--velocity-scroll-fadeColorAuto))_0%,rgba(0,0,0,0)_100%)]',
-                                    )}
-                                />
-                                <div
-                                    aria-hidden
-                                    className={cx(
-                                        'pointer-events-none absolute inset-y-0 right-0 z-10',
-                                        'w-[clamp(24px,8%,120px)]',
-                                        'bg-[linear-gradient(to_left,var(--velocity-scroll-fadeColor,var(--velocity-scroll-fadeColorAuto))_0%,rgba(0,0,0,0)_100%)]',
-                                    )}
-                                />
+                                {isVertical ? (
+                                    <>
+                                        <div
+                                            aria-hidden
+                                            className={cx(
+                                                'pointer-events-none absolute inset-x-0 top-0 z-10',
+                                                'h-[clamp(24px,8%,120px)]',
+                                                'bg-[linear-gradient(to_bottom,var(--velocity-scroll-fadeColor,var(--velocity-scroll-fadeColorAuto))_0%,rgba(0,0,0,0)_100%)]',
+                                            )}
+                                        />
+                                        <div
+                                            aria-hidden
+                                            className={cx(
+                                                'pointer-events-none absolute inset-x-0 bottom-0 z-10',
+                                                'h-[clamp(24px,8%,120px)]',
+                                                'bg-[linear-gradient(to_top,var(--velocity-scroll-fadeColor,var(--velocity-scroll-fadeColorAuto))_0%,rgba(0,0,0,0)_100%)]',
+                                            )}
+                                        />
+                                    </>
+                                ) : (
+                                    <>
+                                        <div
+                                            aria-hidden
+                                            className={cx(
+                                                'pointer-events-none absolute inset-y-0 left-0 z-10',
+                                                'w-[clamp(24px,8%,120px)]',
+                                                'bg-[linear-gradient(to_right,var(--velocity-scroll-fadeColor,var(--velocity-scroll-fadeColorAuto))_0%,rgba(0,0,0,0)_100%)]',
+                                            )}
+                                        />
+                                        <div
+                                            aria-hidden
+                                            className={cx(
+                                                'pointer-events-none absolute inset-y-0 right-0 z-10',
+                                                'w-[clamp(24px,8%,120px)]',
+                                                'bg-[linear-gradient(to_left,var(--velocity-scroll-fadeColor,var(--velocity-scroll-fadeColorAuto))_0%,rgba(0,0,0,0)_100%)]',
+                                            )}
+                                        />
+                                    </>
+                                )}
                             </>
                         )}
-                    </>
-                )}
 
-                <div
-                    className={cx(
-                        'relative z-0 flex will-change-transform select-none',
-                        'motion-reduce:transform-none',
-                        isVertical ? 'h-max w-full flex-col' : 'w-max flex-row',
-                    )}
-                    ref={trackRef}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                >
-                    {itemLists}
-                </div>
+                        <div
+                            className={cx(
+                                'relative z-0 flex will-change-transform select-none',
+                                'motion-reduce:transform-none',
+                                isVertical
+                                    ? 'h-max w-full flex-col'
+                                    : 'w-max flex-row',
+                            )}
+                            ref={trackRef}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            {itemLists}
+                        </div>
                     </>
                 )}
             </div>

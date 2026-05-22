@@ -53,8 +53,10 @@ class SkripsiController extends Controller
 
     public function show(Skripsi $skripsi): Response
     {
+        $skripsi->increment('view_count');
+
         return Inertia::render('skripsi/show', [
-            'skripsi' => new SkripsiResource($skripsi),
+            'skripsi' => new SkripsiResource($skripsi->fresh()),
         ]);
     }
 }

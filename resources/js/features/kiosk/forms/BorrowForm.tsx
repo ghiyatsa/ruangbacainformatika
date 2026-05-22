@@ -18,7 +18,9 @@ import type { QrCameraScannerHandle } from '@/features/kiosk/components/QrCamera
 import { QrCameraScanner } from '@/features/kiosk/components/QrCameraScanner';
 import { BookActionForm } from './BookActionForm';
 
-function getQrErrorMessage(errors: Record<string, string | undefined>): string | null {
+function getQrErrorMessage(
+    errors: Record<string, string | undefined>,
+): string | null {
     const priorityKeys = [
         'payload',
         'book_ids',
@@ -35,9 +37,12 @@ function getQrErrorMessage(errors: Record<string, string | undefined>): string |
         }
     }
 
-    return Object.values(errors).find(
-        (message): message is string => typeof message === 'string' && message !== '',
-    ) ?? null;
+    return (
+        Object.values(errors).find(
+            (message): message is string =>
+                typeof message === 'string' && message !== '',
+        ) ?? null
+    );
 }
 
 export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
@@ -118,7 +123,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                             Scan QR
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                            Buka dialog scan untuk memproses QR dengan kamera.
+                            Buka pemindai untuk membaca QR anggota.
                         </p>
                     </div>
                 </div>
@@ -147,8 +152,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                     <DialogHeader>
                         <DialogTitle>Scan QR Anggota</DialogTitle>
                         <DialogDescription>
-                            Arahkan QR ke kamera. Token akan diproses otomatis
-                            saat terbaca.
+                            Arahkan QR ke kamera. Proses akan berjalan otomatis.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -163,8 +167,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                                 <Spinner />
                                 <AlertTitle>QR terbaca</AlertTitle>
                                 <AlertDescription>
-                                    Sedang memproses peminjaman buku. Dialog
-                                    akan tertutup otomatis jika berhasil.
+                                    Sedang memproses peminjaman.
                                 </AlertDescription>
                             </Alert>
                         ) : null}
@@ -180,12 +183,14 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                             </Alert>
                         ) : null}
 
-                        {hasDetectedQr && !qrForm.processing && !qrErrorMessage ? (
+                        {hasDetectedQr &&
+                        !qrForm.processing &&
+                        !qrErrorMessage ? (
                             <Alert>
                                 <AlertTitle>QR sudah terbaca</AlertTitle>
                                 <AlertDescription>
-                                    Menunggu proses berikutnya. Jika dialog
-                                    belum tertutup, silakan scan ulang.
+                                    Jika dialog belum tertutup, silakan scan
+                                    ulang.
                                 </AlertDescription>
                             </Alert>
                         ) : null}

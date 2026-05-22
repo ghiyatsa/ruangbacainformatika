@@ -67,9 +67,7 @@ export function PasswordSection({
                                 autoComplete="current-password"
                                 placeholder="Kata sandi saat ini"
                             />
-                            <InputError
-                                message={formErrors.current_password}
-                            />
+                            <InputError message={formErrors.current_password} />
                         </div>
 
                         <div className="grid gap-2">
@@ -104,9 +102,7 @@ export function PasswordSection({
                                 minLength={PASSWORD_MIN_LENGTH}
                                 value={passwordConfirmation}
                                 onChange={(event) =>
-                                    setPasswordConfirmation(
-                                        event.target.value,
-                                    )
+                                    setPasswordConfirmation(event.target.value)
                                 }
                             />
                             {passwordsDoNotMatch ? (

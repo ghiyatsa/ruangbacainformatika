@@ -20,10 +20,7 @@ export default function ProfilePage({
             <h1 className="sr-only">Pengaturan profil</h1>
 
             <div className="flex flex-col gap-10">
-                <ProfileSummary
-                    name={user.name}
-                    email={user.email}
-                />
+                <ProfileSummary name={user.name} email={user.email} />
 
                 <Separator />
 

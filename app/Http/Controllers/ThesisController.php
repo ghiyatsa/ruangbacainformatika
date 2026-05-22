@@ -53,8 +53,10 @@ class ThesisController extends Controller
 
     public function show(Thesis $thesis): Response
     {
+        $thesis->increment('view_count');
+
         return Inertia::render('thesis/show', [
-            'thesis' => new ThesisResource($thesis),
+            'thesis' => new ThesisResource($thesis->fresh()),
         ]);
     }
 }

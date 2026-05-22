@@ -7,7 +7,6 @@ import {
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 
-
 interface ShinyTextProps {
     text: string;
     disabled?: boolean;
@@ -45,8 +44,6 @@ const ShinyText: React.FC<ShinyTextProps> = ({
 
     const animationDuration = speed * 1000;
     const delayDuration = delay * 1000;
-
-
 
     useAnimationFrame((time) => {
         if (!hasMounted || disabled || isPaused) {

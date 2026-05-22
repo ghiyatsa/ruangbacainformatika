@@ -19,6 +19,11 @@ class Skripsi extends Model
         'year',
         'abstract',
         'keywords',
+        'view_count',
+    ];
+
+    protected $casts = [
+        'view_count' => 'integer',
     ];
 
     public function similaritySyncStatus(): HasOne

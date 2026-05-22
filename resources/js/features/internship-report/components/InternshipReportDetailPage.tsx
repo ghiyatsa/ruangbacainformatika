@@ -1,8 +1,10 @@
 import { Link } from '@inertiajs/react';
 import {
+    Bookmark,
     BookMarked,
     Calendar,
     ClipboardCheck,
+    Eye,
     Hash,
     Tag,
     User,
@@ -19,13 +21,35 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { InternshipReportShowProps } from '@/features/internship-report/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
+import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { cn } from '@/lib/utils';
 import internshipReportsRoute from '@/routes/internship-reports';
 
 export default function InternshipReportDetailPage({
     report: { data: report },
 }: InternshipReportShowProps) {
+    const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
+    const isBookmarkedByUser = isBookmarked({
+        catalogType: 'internship_report',
+        id: report.id,
+    });
+    const bookmarkRecord: CatalogBookmarkRecord = {
+        catalogType: 'internship_report',
+        id: report.id,
+        href: internshipReportsRoute.show.url(report.studentId),
+        title: report.title,
+        subtitle: report.authorName,
+        meta: `NIM: ${report.studentId}`,
+        year: report.year,
+        coverImageUrl: null,
+        kindLabel: 'Laporan KP',
+        statusLabel: null,
+    };
+
     return (
         <ResourceDetailPage
             title={report.title}
@@ -96,6 +120,43 @@ export default function InternshipReportDetailPage({
                                             </span>
                                         </>
                                     ) : null}
+                                    <span className="text-border">&bull;</span>
+                                    <span className="flex items-center gap-1.5">
+                                        <Eye className="size-3.5" />
+                                        {report.viewCount.toLocaleString('id-ID')}
+                                    </span>
+                                </div>
+
+                                <div className="mt-5 flex flex-wrap items-center gap-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className={cn(
+                                            'h-auto gap-2 rounded-full px-4 py-2 text-sm font-medium',
+                                            isBookmarkedByUser &&
+                                                'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
+                                        )}
+                                        aria-label={
+                                            isBookmarkedByUser
+                                                ? 'Hapus bookmark'
+                                                : 'Simpan bookmark'
+                                        }
+                                        aria-pressed={isBookmarkedByUser}
+                                        onClick={() =>
+                                            toggleBookmark(bookmarkRecord)
+                                        }
+                                    >
+                                        <Bookmark
+                                            className={
+                                                isBookmarkedByUser
+                                                    ? 'fill-current'
+                                                    : ''
+                                            }
+                                        />
+                                        {isBookmarkedByUser
+                                            ? 'Tersimpan'
+                                            : 'Simpan'}
+                                    </Button>
                                 </div>
                             </div>
                         </div>

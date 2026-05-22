@@ -25,7 +25,8 @@ const MENU_ICONS: Record<Exclude<KioskMenu, 'landing'>, LucideIcon> = {
 };
 
 export function ReadyStep(props: KioskProps) {
-    const selectedMenu = props.activeMenu === 'landing' ? null : props.activeMenu;
+    const selectedMenu =
+        props.activeMenu === 'landing' ? null : props.activeMenu;
     const activeItem = kioskMenuItems.find((item) => item.key === selectedMenu);
     const ActiveIcon = selectedMenu ? MENU_ICONS[selectedMenu] : null;
 

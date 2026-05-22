@@ -105,9 +105,9 @@ export function BrowserSessionsSection({
                                     Keluar dari Sesi Browser Lain
                                 </DialogTitle>
                                 <DialogDescription>
-                                    Masukkan kata sandi Anda untuk
-                                    mengonfirmasi bahwa Anda ingin keluar dari
-                                    sesi browser lain di semua perangkat.
+                                    Masukkan kata sandi Anda untuk mengonfirmasi
+                                    bahwa Anda ingin keluar dari sesi browser
+                                    lain di semua perangkat.
                                 </DialogDescription>
                             </DialogHeader>
                             <Form

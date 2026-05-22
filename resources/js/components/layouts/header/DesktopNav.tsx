@@ -65,7 +65,9 @@ export function DesktopNav({ isActive }: DesktopNavProps) {
                                         : 'text-muted-foreground hover:text-foreground',
                                 )}
                             >
-                                <Link href={item.href || '#'}>{item.label}</Link>
+                                <Link href={item.href || '#'}>
+                                    {item.label}
+                                </Link>
                             </NavigationMenuLink>
                         )}
                     </NavigationMenuItem>
@@ -89,7 +91,7 @@ const ListItem = React.forwardRef<
                     ref={ref as any}
                     href={props.href!}
                     className={cn(
-                        'flex select-none gap-3 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+                        'flex gap-3 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
                         active && 'bg-accent/50 text-accent-foreground',
                         className,
                     )}
@@ -98,7 +100,7 @@ const ListItem = React.forwardRef<
                         <Icon className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
                     )}
                     <div className="space-y-1">
-                        <div className="text-sm font-medium leading-none">
+                        <div className="text-sm leading-none font-medium">
                             {title}
                         </div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">

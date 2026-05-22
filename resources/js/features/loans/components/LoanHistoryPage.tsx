@@ -1,14 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import {
     AlertTriangle,
-    ArrowRight,
     BookOpen,
-    Calendar,
     CheckCircle2,
     Clock,
     History,
     Library,
-    RotateCcw,
 } from 'lucide-react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { ResourcePagination } from '@/components/catalog/ResourcePagination';
@@ -21,34 +18,35 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import type { PaginationData } from '@/types/pagination';
 
-interface LoanItem {
+interface LoanHistoryRow {
     id: number;
+    loanId: number;
     bookTitle: string;
     bookSlug: string;
     internalCode: string;
-    returnedAt: string;
-    isReturned: boolean;
-}
-
-interface Loan {
-    id: number;
-    status: string;
-    statusLabel: string;
     borrowedAt: string;
     dueAt: string;
     returnedAt: string;
+    status: string;
+    statusLabel: string;
     isOverdue: boolean;
-    items: LoanItem[];
-    itemsCount: number;
+    isReturned: boolean;
 }
 
 interface Props {
-    loans: PaginationData<Loan>;
+    loans: PaginationData<LoanHistoryRow>;
     stats: {
         total: number;
         active: number;
@@ -57,8 +55,8 @@ interface Props {
     };
 }
 
-function LoanStatusBadge({ loan }: { loan: Loan }) {
-    if (loan.status === 'returned') {
+function LoanStatusBadge({ loan }: { loan: LoanHistoryRow }) {
+    if (loan.isReturned) {
         return (
             <div className="flex items-center gap-2">
                 <Badge
@@ -68,14 +66,14 @@ function LoanStatusBadge({ loan }: { loan: Loan }) {
                     <CheckCircle2 className="size-3" />
                     {loan.statusLabel}
                 </Badge>
-                {loan.isOverdue && (
+                {loan.isOverdue ? (
                     <Badge
                         variant="destructive"
                         className="h-5 px-1.5 text-[10px] font-bold tracking-wider uppercase"
                     >
                         Terlambat
                     </Badge>
-                )}
+                ) : null}
             </div>
         );
     }
@@ -84,7 +82,7 @@ function LoanStatusBadge({ loan }: { loan: Loan }) {
         return (
             <Badge
                 variant="destructive"
-                className="animate-pulse gap-1.5 px-2.5 py-1 text-xs font-semibold"
+                className="gap-1.5 px-2.5 py-1 text-xs font-semibold"
             >
                 <AlertTriangle className="size-3" />
                 Terlambat
@@ -103,175 +101,6 @@ function LoanStatusBadge({ loan }: { loan: Loan }) {
     );
 }
 
-function LoanCard({ loan }: { loan: Loan }) {
-    const isReturned = loan.status === 'returned';
-    const isOverdue = loan.isOverdue;
-
-    return (
-        <Card
-            className={cn(
-                'overflow-hidden border transition-shadow duration-200 hover:shadow-md',
-                isOverdue && !isReturned
-                    ? 'border-destructive/30 bg-destructive/2 ring-1 ring-destructive/15'
-                    : 'border-border/60',
-            )}
-        >
-            {/* Card Header */}
-            <CardHeader className="bg-muted/20 px-6 py-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    {/* Date Info */}
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                                <Calendar className="size-3.5 text-primary" />
-                            </div>
-                            <div className="flex flex-col leading-tight">
-                                <span className="text-[10px] font-medium tracking-wider text-muted-foreground/60 uppercase">
-                                    Dipinjam
-                                </span>
-                                <span className="font-medium text-foreground">
-                                    {loan.borrowedAt}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div
-                                className={cn(
-                                    'flex size-7 shrink-0 items-center justify-center rounded-md',
-                                    isOverdue && !isReturned
-                                        ? 'bg-destructive/10'
-                                        : 'bg-amber-500/10',
-                                )}
-                            >
-                                <Clock
-                                    className={cn(
-                                        'size-3.5',
-                                        isOverdue && !isReturned
-                                            ? 'text-destructive'
-                                            : 'text-amber-600',
-                                    )}
-                                />
-                            </div>
-                            <div className="flex flex-col leading-tight">
-                                <span className="text-[10px] font-medium tracking-wider text-muted-foreground/60 uppercase">
-                                    Batas Kembali
-                                </span>
-                                <span
-                                    className={cn(
-                                        'font-medium',
-                                        isOverdue && !isReturned
-                                            ? 'text-destructive'
-                                            : 'text-foreground',
-                                    )}
-                                >
-                                    {loan.dueAt}
-                                </span>
-                            </div>
-                        </div>
-
-                        {isReturned && loan.returnedAt !== '-' && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-emerald-500/10">
-                                    <RotateCcw className="size-3.5 text-emerald-600" />
-                                </div>
-                                <div className="flex flex-col leading-tight">
-                                    <span className="text-[10px] font-medium tracking-wider text-muted-foreground/60 uppercase">
-                                        Dikembalikan
-                                    </span>
-                                    <span className="font-medium text-foreground">
-                                        {loan.returnedAt}
-                                    </span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Status Badge */}
-                    <div className="shrink-0">
-                        <LoanStatusBadge loan={loan} />
-                    </div>
-                </div>
-            </CardHeader>
-
-            {/* Book Items */}
-            <CardContent className="p-0">
-                <div className="divide-y divide-border/50">
-                    {loan.items.map((item, index) => (
-                        <div
-                            key={item.id}
-                            className="group flex items-center gap-4 px-6 py-4 transition-colors hover:bg-muted/20"
-                        >
-                            {/* Index + Book Icon */}
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-xs font-semibold text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
-                                {index + 1}
-                            </div>
-
-                            {/* Book Info */}
-                            <div className="min-w-0 flex-1">
-                                <Link
-                                    href={BookController.show.url(
-                                        item.bookSlug,
-                                    )}
-                                    className="inline-flex items-center gap-1.5 font-semibold text-foreground transition-colors hover:text-primary"
-                                >
-                                    <span className="line-clamp-1">
-                                        {item.bookTitle}
-                                    </span>
-                                    <ArrowRight className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
-                                </Link>
-                                <p className="mt-0.5 font-mono text-[11px] tracking-wider text-muted-foreground">
-                                    {item.internalCode}
-                                </p>
-                            </div>
-
-                            {/* Item Return Status */}
-                            <div className="shrink-0">
-                                {item.isReturned ? (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-400 dark:ring-emerald-800/60">
-                                        <CheckCircle2 className="size-3" />
-                                        Kembali
-                                    </span>
-                                ) : (
-                                    <span
-                                        className={cn(
-                                            'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1',
-                                            loan.isOverdue
-                                                ? 'bg-destructive/10 text-destructive ring-destructive/20'
-                                                : 'bg-blue-50 text-blue-700 ring-blue-200/80 dark:bg-blue-950/50 dark:text-blue-400 dark:ring-blue-800/60',
-                                        )}
-                                    >
-                                        {loan.isOverdue ? (
-                                            <AlertTriangle className="size-3" />
-                                        ) : (
-                                            <BookOpen className="size-3" />
-                                        )}
-                                        {loan.isOverdue
-                                            ? 'Terlambat'
-                                            : 'Dipinjam'}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {loan.itemsCount > 1 && (
-                    <div className="border-t border-border/40 bg-muted/10 px-6 py-2.5">
-                        <p className="text-xs text-muted-foreground">
-                            Total{' '}
-                            <span className="font-semibold text-foreground">
-                                {loan.itemsCount}
-                            </span>{' '}
-                            buku dalam peminjaman ini
-                        </p>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-    );
-}
-
 function StatsBar({ stats }: { stats: Props['stats'] }) {
     const { total, active, overdue, returned } = stats;
 
@@ -279,14 +108,14 @@ function StatsBar({ stats }: { stats: Props['stats'] }) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
                 {
-                    label: 'Total Peminjaman',
+                    label: 'Total Buku',
                     value: total,
                     icon: Library,
                     color: 'text-primary',
                     bg: 'bg-primary/8',
                 },
                 {
-                    label: 'Aktif',
+                    label: 'Buku Aktif',
                     value: active,
                     icon: BookOpen,
                     color: 'text-blue-600 dark:text-blue-400',
@@ -340,8 +169,7 @@ export default function LoanHistoryPage({ loans, stats }: Props) {
         <>
             <Head title="Riwayat Peminjaman" />
 
-            <div className="container mx-auto max-w-4xl py-8 pb-16">
-                {/* Page Header */}
+            <div className="container mx-auto max-w-6xl py-8 pb-16">
                 <div className="mb-8">
                     <div className="flex items-center gap-3">
                         <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20">
@@ -352,7 +180,8 @@ export default function LoanHistoryPage({ loans, stats }: Props) {
                                 Riwayat Peminjaman
                             </h1>
                             <p className="mt-0.5 text-sm text-muted-foreground">
-                                Daftar buku yang pernah dan sedang Anda pinjam
+                                Riwayat pinjam ditampilkan per buku agar tetap
+                                ringkas saat data bertambah.
                             </p>
                         </div>
                     </div>
@@ -360,28 +189,84 @@ export default function LoanHistoryPage({ loans, stats }: Props) {
 
                 {loans.data.length > 0 ? (
                     <div className="space-y-6">
-                        {/* Stats */}
                         <StatsBar stats={stats} />
 
-                        <Separator className="opacity-50" />
+                        <Card className="border-border/60">
+                            <CardHeader className="gap-1.5">
+                                <CardTitle>Daftar Peminjaman</CardTitle>
+                                <CardDescription>
+                                    Status aktif dihitung berdasarkan jumlah
+                                    buku yang belum dikembalikan.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Buku</TableHead>
+                                            <TableHead>Kode</TableHead>
+                                            <TableHead>Dipinjam</TableHead>
+                                            <TableHead>Jatuh Tempo</TableHead>
+                                            <TableHead>Dikembalikan</TableHead>
+                                            <TableHead>Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {loans.data.map((loan) => (
+                                            <TableRow key={loan.id}>
+                                                <TableCell className="align-top whitespace-normal">
+                                                    <div className="min-w-[240px] space-y-1">
+                                                        <Link
+                                                            href={BookController.show.url(
+                                                                loan.bookSlug,
+                                                            )}
+                                                            className="line-clamp-2 font-semibold text-foreground transition-colors hover:text-primary"
+                                                        >
+                                                            {loan.bookTitle}
+                                                        </Link>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Transaksi #
+                                                            {loan.loanId}
+                                                        </p>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="font-mono text-xs tracking-wider text-muted-foreground">
+                                                    {loan.internalCode}
+                                                </TableCell>
+                                                <TableCell>{loan.borrowedAt}</TableCell>
+                                                <TableCell
+                                                    className={cn(
+                                                        loan.isOverdue &&
+                                                            !loan.isReturned
+                                                            ? 'font-semibold text-destructive'
+                                                            : '',
+                                                    )}
+                                                >
+                                                    {loan.dueAt}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {loan.returnedAt}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <LoanStatusBadge
+                                                        loan={loan}
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
 
-                        {/* Loan Cards */}
-                        <div className="space-y-4">
-                            {loans.data.map((loan) => (
-                                <LoanCard key={loan.id} loan={loan} />
-                            ))}
-                        </div>
-
-                        {/* Pagination */}
-                        <div className="pt-4">
+                        <div className="pt-2">
                             <ResourcePagination
                                 data={loans}
-                                resourceName="peminjaman"
+                                resourceName="riwayat buku"
                             />
                         </div>
                     </div>
                 ) : (
-                    /* Empty State */
                     <Card className="flex h-72 flex-col items-center justify-center border-dashed text-center">
                         <CardTitle className="text-lg">
                             Belum ada riwayat peminjaman

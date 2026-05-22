@@ -60,11 +60,7 @@ export function SeoHead({
                 property="og:description"
                 content={metaDescription}
             />
-            <meta
-                head-key="og:image"
-                property="og:image"
-                content={metaImage}
-            />
+            <meta head-key="og:image" property="og:image" content={metaImage} />
 
             <meta
                 head-key="twitter:card"

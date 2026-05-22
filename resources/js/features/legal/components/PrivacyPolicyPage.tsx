@@ -17,12 +17,6 @@ export function PrivacyPolicyPage() {
             maxWidth="5xl"
             header={
                 <LibraryPageHero
-                    badge={
-                        <>
-                            <ShieldCheck className="size-4 text-primary" />
-                            Informasi Layanan
-                        </>
-                    }
                     title="Kebijakan Privasi"
                     description="Penjelasan singkat mengenai pengelolaan data pengguna di Ruang Baca Teknik Informatika."
                 />
@@ -98,7 +92,10 @@ export function PrivacyPolicyPage() {
                         <CardContent className="space-y-3 text-sm text-muted-foreground">
                             <p>Data digunakan secara proporsional.</p>
                             <p>Akses dibatasi untuk kebutuhan layanan.</p>
-                            <p>Informasi tidak dipublikasikan tanpa dasar yang sah.</p>
+                            <p>
+                                Informasi tidak dipublikasikan tanpa dasar yang
+                                sah.
+                            </p>
                         </CardContent>
                     </Card>
 
@@ -136,7 +133,10 @@ export function PrivacyPolicyPage() {
                         <CardContent className="space-y-3 text-sm text-muted-foreground">
                             <p>Data akun dan identitas pengguna.</p>
                             <p>Riwayat akses layanan dan peminjaman.</p>
-                            <p>Informasi yang dibutuhkan untuk operasional perpustakaan.</p>
+                            <p>
+                                Informasi yang dibutuhkan untuk operasional
+                                perpustakaan.
+                            </p>
                         </CardContent>
                     </Card>
                 </div>

@@ -9,13 +9,13 @@ use function Pest\Laravel\get;
 it('skripsi detail page renders correctly', function () {
     Queue::fake();
     $skripsi = Skripsi::factory()->create([
-
         'title' => 'Analisis Sistem Informasi Perpustakaan',
         'author_name' => 'Budi Santoso',
         'student_id' => '1234567890',
         'year' => 2024,
         'abstract' => 'Abstrak penelitian ini membahas sistem informasi perpustakaan.',
         'keywords' => 'sistem, informasi, perpustakaan',
+        'view_count' => 3,
     ]);
 
     get(route('skripsi.show', ['skripsi' => $skripsi->student_id]))
@@ -26,7 +26,10 @@ it('skripsi detail page renders correctly', function () {
             ->where('skripsi.data.authorName', 'Budi Santoso')
             ->where('skripsi.data.studentId', '1234567890')
             ->where('skripsi.data.year', 2024)
+            ->where('skripsi.data.viewCount', 4)
         );
+
+    expect($skripsi->fresh()->view_count)->toBe(4);
 });
 
 it('skripsi detail page returns 404 for unknown nim', function () {
@@ -37,7 +40,6 @@ it('skripsi detail page returns 404 for unknown nim', function () {
 it('skripsi detail page exposes keywords as array', function () {
     Queue::fake();
     $skripsi = Skripsi::factory()->create([
-
         'keywords' => 'machine learning, deep learning, neural network',
     ]);
 
@@ -59,4 +61,14 @@ it('skripsi detail page returns empty keywords array when none set', function ()
             ->component('skripsi/show')
             ->where('skripsi.data.keywords', [])
         );
+});
+
+it('skripsi detail page increments view count on each visit', function () {
+    Queue::fake();
+    $skripsi = Skripsi::factory()->create(['view_count' => 0]);
+
+    get(route('skripsi.show', ['skripsi' => $skripsi->student_id]));
+    get(route('skripsi.show', ['skripsi' => $skripsi->student_id]));
+
+    expect($skripsi->fresh()->view_count)->toBe(2);
 });

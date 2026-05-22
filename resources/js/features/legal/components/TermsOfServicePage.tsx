@@ -25,12 +25,6 @@ export function TermsOfServicePage() {
             maxWidth="5xl"
             header={
                 <LibraryPageHero
-                    badge={
-                        <>
-                            <Shield className="size-4 text-primary" />
-                            Informasi Layanan
-                        </>
-                    }
                     title="Syarat Layanan"
                     description="Ketentuan penggunaan Ruang Baca Teknik Informatika bagi sivitas akademika dan pengguna terkait."
                 />
@@ -91,14 +85,21 @@ export function TermsOfServicePage() {
 
                     <Card className="border-border/60 bg-card/90 shadow-sm">
                         <CardHeader>
-                            <CardTitle className="text-base">
-                                Catatan
-                            </CardTitle>
+                            <CardTitle className="text-base">Catatan</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm text-muted-foreground">
-                            <p>Layanan dapat diperbarui mengikuti kebutuhan institusi.</p>
-                            <p>Penggunaan fitur tertentu dapat dibatasi untuk alasan operasional.</p>
-                            <p>Kebijakan akademik tetap menjadi acuan utama dalam penggunaan layanan.</p>
+                            <p>
+                                Layanan dapat diperbarui mengikuti kebutuhan
+                                institusi.
+                            </p>
+                            <p>
+                                Penggunaan fitur tertentu dapat dibatasi untuk
+                                alasan operasional.
+                            </p>
+                            <p>
+                                Kebijakan akademik tetap menjadi acuan utama
+                                dalam penggunaan layanan.
+                            </p>
                         </CardContent>
                     </Card>
                 </div>

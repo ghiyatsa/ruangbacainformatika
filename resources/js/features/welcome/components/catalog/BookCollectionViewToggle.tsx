@@ -24,7 +24,9 @@ export default function BookCollectionViewToggle({
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
-                            variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                            variant={
+                                viewMode === 'grid' ? 'secondary' : 'ghost'
+                            }
                             size="icon"
                             className="size-8"
                             onClick={() => onChange('grid')}
@@ -38,7 +40,9 @@ export default function BookCollectionViewToggle({
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
-                            variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                            variant={
+                                viewMode === 'list' ? 'secondary' : 'ghost'
+                            }
                             size="icon"
                             className="size-8"
                             onClick={() => onChange('list')}

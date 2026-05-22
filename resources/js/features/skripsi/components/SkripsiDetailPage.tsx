@@ -1,5 +1,13 @@
 import { Link } from '@inertiajs/react';
-import { BookMarked, Calendar, Hash, Tag, User } from 'lucide-react';
+import {
+    Bookmark,
+    BookMarked,
+    Calendar,
+    Eye,
+    Hash,
+    Tag,
+    User,
+} from 'lucide-react';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
@@ -12,13 +20,35 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { SkripsiShowProps } from '@/features/skripsi/types';
+import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
+import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { cn } from '@/lib/utils';
 import skripsiRoute from '@/routes/skripsi';
 
 export default function SkripsiDetailPage({
     skripsi: { data: skripsi },
 }: SkripsiShowProps) {
+    const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
+    const isBookmarkedByUser = isBookmarked({
+        catalogType: 'skripsi',
+        id: skripsi.id,
+    });
+    const bookmarkRecord: CatalogBookmarkRecord = {
+        catalogType: 'skripsi',
+        id: skripsi.id,
+        href: skripsiRoute.show.url(skripsi.studentId),
+        title: skripsi.title,
+        subtitle: skripsi.authorName,
+        meta: `NIM: ${skripsi.studentId}`,
+        year: skripsi.year,
+        coverImageUrl: null,
+        kindLabel: 'Skripsi',
+        statusLabel: null,
+    };
+
     return (
         <ResourceDetailPage
             title={skripsi.title}
@@ -87,6 +117,43 @@ export default function SkripsiDetailPage({
                                             </span>
                                         </>
                                     ) : null}
+                                    <span className="text-border">&bull;</span>
+                                    <span className="flex items-center gap-1.5">
+                                        <Eye className="size-3.5" />
+                                        {skripsi.viewCount.toLocaleString('id-ID')}
+                                    </span>
+                                </div>
+
+                                <div className="mt-5 flex flex-wrap items-center gap-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className={cn(
+                                            'h-auto gap-2 rounded-full px-4 py-2 text-sm font-medium',
+                                            isBookmarkedByUser &&
+                                                'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
+                                        )}
+                                        aria-label={
+                                            isBookmarkedByUser
+                                                ? 'Hapus bookmark'
+                                                : 'Simpan bookmark'
+                                        }
+                                        aria-pressed={isBookmarkedByUser}
+                                        onClick={() =>
+                                            toggleBookmark(bookmarkRecord)
+                                        }
+                                    >
+                                        <Bookmark
+                                            className={
+                                                isBookmarkedByUser
+                                                    ? 'fill-current'
+                                                    : ''
+                                            }
+                                        />
+                                        {isBookmarkedByUser
+                                            ? 'Tersimpan'
+                                            : 'Simpan'}
+                                    </Button>
                                 </div>
                             </div>
                         </div>

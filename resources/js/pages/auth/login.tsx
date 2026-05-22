@@ -48,7 +48,7 @@ export default function Login({
                             )}
                         >
                             <GoogleIcon data-icon="inline-start" />
-                            Lanjutkan dengan Google
+                            Masuk dengan Google
                         </a>
                     </div>
                 ) : null}
@@ -65,7 +65,7 @@ export default function Login({
                             {canLoginWithGoogle ? (
                                 <div className="relative text-center text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     <span className="relative z-10 bg-card px-3">
-                                        Atau lanjutkan dengan email
+                                        Atau gunakan email
                                     </span>
                                     <div className="absolute inset-x-0 top-1/2 border-t border-border" />
                                 </div>
@@ -108,7 +108,7 @@ export default function Login({
                                         required
                                         tabIndex={2}
                                         autoComplete="current-password"
-                                        placeholder="Masukkan password"
+                                        placeholder="Password"
                                     />
                                     <InputError message={errors.password} />
                                 </div>
@@ -120,9 +120,7 @@ export default function Login({
                                         value="1"
                                         tabIndex={3}
                                     />
-                                    <Label htmlFor="remember">
-                                        Ingat saya
-                                    </Label>
+                                    <Label htmlFor="remember">Ingat saya</Label>
                                 </div>
 
                                 <Button
@@ -156,5 +154,5 @@ export default function Login({
 
 Login.layout = {
     title: 'Masuk ke akun Anda',
-    description: 'Masukkan email dan password Anda untuk melanjutkan',
+    description: 'Masuk dengan email dan password Anda',
 };
