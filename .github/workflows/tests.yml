@@ -65,6 +65,9 @@ jobs:
       - name: Run Code Style Checks
         run: composer lint:check
 
+      - name: Generate Wayfinder Routes
+        run: php artisan wayfinder:generate --with-form --no-interaction
+
       - name: Run Frontend Checks
         run: |
           npm run lint:check
