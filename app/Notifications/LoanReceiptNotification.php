@@ -22,7 +22,6 @@ class LoanReceiptNotification extends Notification implements ShouldQueue
         protected Loan $loan
     ) {
         $this->afterCommit();
-        $this->onQueue('mail');
     }
 
     /**

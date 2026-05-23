@@ -6,8 +6,8 @@
         "node": "24"
     },
     "scripts": {
-        "build": "vite build",
-        "build:ssr": "vite build && vite build --ssr",
+        "build": "PATH=/opt/plesk/php/8.3/bin:$PATH vite build",
+        "build:ssr": "PATH=/opt/plesk/php/8.3/bin:$PATH vite build && vite build --ssr",
         "dev": "vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",

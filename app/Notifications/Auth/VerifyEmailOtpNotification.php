@@ -22,7 +22,6 @@ class VerifyEmailOtpNotification extends Notification implements ShouldQueue
     public function __construct()
     {
         $this->afterCommit();
-        $this->onQueue('mail');
     }
 
     /**
