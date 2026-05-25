@@ -16,19 +16,19 @@ interface HeroProps {
 const STATS = [
     {
         key: 'booksCount' as const,
-        label: 'Judul Buku',
+        label: 'Judul',
         icon: BookText,
         suffix: '+',
     },
     {
         key: 'availableItemsCount' as const,
-        label: 'Eksemplar Tersedia',
+        label: 'Eksemplar',
         icon: BookOpen,
         suffix: '+',
     },
     {
         key: 'categoriesCount' as const,
-        label: 'Kategori Aktif',
+        label: 'Kategori',
         icon: Tags,
         suffix: '+',
     },
@@ -68,7 +68,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                         >
                             <div className="inline-flex items-center gap-2 text-sm font-medium">
                                 <ShinyText
-                                    text="Pusat Literasi Digital Teknik Informatika"
+                                    text="Program Studi Teknik Informatika"
                                     speed={2}
                                     delay={0}
                                     color="var(--color-foreground)"
@@ -84,35 +84,34 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                     </div>
 
                     <h1 className="max-w-4xl font-heading text-4xl leading-[1.08] font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                        Gerbang Pengetahuan{' '}
+                        Ruang Baca{' '}
                         <span className="relative inline-block">
                             <span className="bg-linear-to-r from-primary via-indigo-500 to-violet-500 bg-clip-text text-transparent">
                                 Informatika
                             </span>
-                        </span>{' '}
-                        Masa Depan.
+                        </span>
                     </h1>
 
                     <p className="max-w-lg text-base leading-relaxed text-muted-foreground sm:max-w-xl sm:text-lg">
                         {RUANG_BACA_DESCRIPTION}
                     </p>
 
-                    <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
+                    <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-stretch sm:justify-center">
                         <button
                             onClick={openSearch}
-                            className="group relative w-full transition-all duration-200 hover:scale-[1.015] sm:max-w-sm"
+                            className="group relative w-full transition-all duration-200 hover:scale-[1.015] sm:max-w-sm sm:self-stretch"
                             aria-label="Cari koleksi"
                         >
                             <StarBorder
                                 as="div"
                                 color="var(--color-primary)"
-                                contentClassName="rounded-2xl bg-background/60 px-4 py-3.5 backdrop-blur-sm"
-                                className="w-full rounded-2xl"
+                                contentClassName="flex h-full items-center rounded-2xl bg-background/60 px-4 py-3.5 backdrop-blur-sm"
+                                className="h-full w-full rounded-2xl"
                             >
                                 <div className="flex items-center gap-3 text-muted-foreground">
                                     <Search className="size-4 shrink-0 transition-colors group-hover:text-primary" />
                                     <span className="flex-1 text-left text-sm font-normal">
-                                        Cari buku, penulis, atau topik
+                                        Cari judul, penulis, atau topik
                                     </span>
                                     <div className="flex items-center gap-1.5">
                                         <Kbd>Ctrl K</Kbd>
@@ -125,7 +124,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                         <Link
                             href={books.index.url()}
                             prefetch
-                            className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:scale-[1.015] hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40"
+                            className="group inline-flex min-h-[58px] shrink-0 items-center justify-center gap-2 rounded-2xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:scale-[1.015] hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 sm:self-stretch"
                         >
                             <BookOpen className="size-4 transition-transform duration-200 group-hover:scale-110" />
                             Lihat Katalog

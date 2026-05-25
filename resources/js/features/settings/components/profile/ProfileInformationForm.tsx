@@ -1,4 +1,4 @@
-import { Form, Link } from '@inertiajs/react';
+import { Form } from '@inertiajs/react';
 import { AtSign, CheckCircle2, MapPin, Phone, User } from 'lucide-react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/common/InputError';
@@ -8,25 +8,22 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
 import { cn } from '@/lib/utils';
-import { send } from '@/routes/verification';
 import type { User as AuthUser } from '@/types/auth';
+import { useState } from 'react';
 
 export interface ProfileInformationFormProps {
     user: AuthUser;
-    mustVerifyEmail: boolean;
-    status?: string;
 }
 
-export function ProfileInformationForm({
-    user,
-    mustVerifyEmail,
-    status,
-}: ProfileInformationFormProps) {
+export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
+    const [isEditingWhatsapp, setIsEditingWhatsapp] = useState(false);
+    const hasVerifiedWhatsapp = Boolean(user.whatsapp_verified_at);
+
     return (
         <section className="flex flex-col gap-6">
             <SettingsSectionHeader
                 title="Informasi profil"
-                description="Perbarui informasi profil dan alamat email akun Anda."
+                description="Perbarui nama, WhatsApp, dan alamat akun Anda."
             />
 
             <Form
@@ -86,22 +83,47 @@ export function ProfileInformationForm({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label
-                                htmlFor="whatsapp"
-                                className="flex items-center gap-1.5"
-                            >
-                                <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                                Nomor WhatsApp
-                            </Label>
+                            <div className="flex items-center justify-between gap-3">
+                                <Label
+                                    htmlFor="whatsapp"
+                                    className="flex items-center gap-1.5"
+                                >
+                                    <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                                    Nomor WhatsApp
+                                </Label>
+                                {hasVerifiedWhatsapp && !isEditingWhatsapp ? (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setIsEditingWhatsapp(true)}
+                                    >
+                                        Ubah nomor
+                                    </Button>
+                                ) : null}
+                            </div>
                             <Input
                                 id="whatsapp"
                                 type="tel"
-                                className="w-full"
+                                className={cn(
+                                    'w-full',
+                                    hasVerifiedWhatsapp && !isEditingWhatsapp
+                                        ? 'bg-muted/50 text-muted-foreground'
+                                        : null,
+                                )}
                                 defaultValue={user.whatsapp ?? ''}
                                 name="whatsapp"
+                                readOnly={hasVerifiedWhatsapp && !isEditingWhatsapp}
                                 autoComplete="tel"
                                 placeholder="08123456789"
                             />
+                            <p className="text-xs text-muted-foreground">
+                                {hasVerifiedWhatsapp && !isEditingWhatsapp
+                                    ? 'Nomor WhatsApp sudah terverifikasi.'
+                                    : hasVerifiedWhatsapp
+                                      ? 'Nomor baru akan meminta verifikasi ulang sebelum layanan anggota aktif kembali.'
+                                      : 'Gunakan nomor WhatsApp yang aktif.'}
+                            </p>
                             <InputError message={errors.whatsapp} />
                         </div>
 
@@ -123,27 +145,6 @@ export function ProfileInformationForm({
                             />
                             <InputError message={errors.address} />
                         </div>
-
-                        {mustVerifyEmail && user.email_verified_at === null ? (
-                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800/40 dark:bg-amber-950/30">
-                                <p className="text-sm text-amber-700 dark:text-amber-400">
-                                    Alamat email Anda belum diverifikasi.{' '}
-                                    <Link
-                                        href={send()}
-                                        as="button"
-                                        className="font-medium underline underline-offset-4 transition-opacity hover:opacity-75"
-                                    >
-                                        Kirim ulang email verifikasi.
-                                    </Link>
-                                </p>
-                                {status === 'verification-link-sent' ? (
-                                    <p className="mt-1.5 text-sm font-medium text-green-600 dark:text-green-400">
-                                        Tautan verifikasi baru telah dikirim ke
-                                        email Anda.
-                                    </p>
-                                ) : null}
-                            </div>
-                        ) : null}
 
                         <div className="flex items-center gap-3 pt-1">
                             <Button

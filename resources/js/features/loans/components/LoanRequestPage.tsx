@@ -157,7 +157,7 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <ShoppingCart className="size-5 text-primary" />
-                                Keranjang Pinjam
+                                Keranjang Peminjaman
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">

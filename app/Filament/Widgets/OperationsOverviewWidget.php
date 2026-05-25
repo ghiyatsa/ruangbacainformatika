@@ -59,7 +59,6 @@ class OperationsOverviewWidget extends StatsOverviewWidget
 
         $pendingApproval = User::query()
             ->where('is_approved', false)
-            ->whereNotNull('email_verified_at')
             ->count();
 
         return [

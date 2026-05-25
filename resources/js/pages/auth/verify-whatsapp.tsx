@@ -1,0 +1,210 @@
+import { Form, Head, Link, usePage } from '@inertiajs/react';
+import WhatsAppVerificationController from '@/actions/App/Http/Controllers/Auth/WhatsAppVerificationController';
+import InputError from '@/components/common/InputError';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { logout } from '@/routes';
+import { CheckCircle2, Clock3, MessageCircleMore } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+interface VerificationProps {
+    maskedWhatsapp: string | null;
+    hasActiveChallenge: boolean;
+    expiresIn: number;
+    resendAvailableIn: number;
+    approvalMode: 'automatic' | 'manual';
+    approvalMessage: string;
+}
+
+function formatRemaining(seconds: number): string {
+    const safeSeconds = Math.max(0, seconds);
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainingSeconds = safeSeconds % 60;
+
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds
+        .toString()
+        .padStart(2, '0')}`;
+}
+
+export default function VerifyWhatsApp() {
+    const { verification, auth } = usePage<{
+        verification: VerificationProps;
+        auth: { user: { whatsapp: string | null } | null };
+    }>().props;
+    const [expiresIn, setExpiresIn] = useState(verification.expiresIn);
+    const [resendAvailableIn, setResendAvailableIn] = useState(
+        verification.resendAvailableIn,
+    );
+    const hasWhatsapp = Boolean(auth.user?.whatsapp);
+
+    useEffect(() => {
+        setExpiresIn(verification.expiresIn);
+        setResendAvailableIn(verification.resendAvailableIn);
+    }, [verification.expiresIn, verification.resendAvailableIn]);
+
+    useEffect(() => {
+        const interval = window.setInterval(() => {
+            setExpiresIn((current) => Math.max(0, current - 1));
+            setResendAvailableIn((current) => Math.max(0, current - 1));
+        }, 1000);
+
+        return () => window.clearInterval(interval);
+    }, []);
+
+    return (
+        <>
+            <Head title="Verifikasi WhatsApp" />
+
+            <div className="flex flex-col gap-6">
+                <Alert>
+                    <MessageCircleMore className="size-4" />
+                    <AlertTitle>Verifikasi WhatsApp</AlertTitle>
+                    <AlertDescription>
+                        {hasWhatsapp ? (
+                            <>
+                                Kode akan dikirim ke{' '}
+                                <span className="font-medium text-foreground">
+                                    {verification.maskedWhatsapp ?? 'nomor Anda'}
+                                </span>
+                                .
+                            </>
+                        ) : (
+                            <>Masukkan nomor WhatsApp aktif.</>
+                        )}
+                    </AlertDescription>
+                </Alert>
+
+                <div className="grid gap-4 rounded-2xl border border-border/70 bg-card/70 p-5">
+                    <div className="flex items-center justify-between gap-3">
+                        <div>
+                            <p className="text-sm font-medium text-foreground">
+                                Status OTP
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                {hasWhatsapp && verification.hasActiveChallenge
+                                    ? 'Kode aktif tersedia.'
+                                    : hasWhatsapp
+                                      ? 'Kirim kode baru bila diperlukan.'
+                                      : 'Simpan nomor lalu kirim kode.'}
+                            </p>
+                        </div>
+                        <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                            {expiresIn > 0 ? formatRemaining(expiresIn) : '00:00'}
+                        </div>
+                    </div>
+
+                    <Form
+                        action={WhatsAppVerificationController.send.url()}
+                        method="post"
+                        options={{ preserveScroll: true }}
+                        className="grid gap-4"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
+                                    <Input
+                                        id="whatsapp"
+                                        name="whatsapp"
+                                        type="tel"
+                                        defaultValue={auth.user?.whatsapp ?? ''}
+                                        autoComplete="tel"
+                                        inputMode="tel"
+                                        placeholder="08123456789"
+                                        required={!hasWhatsapp}
+                                    />
+                                    <InputError message={errors.whatsapp ?? errors.otp} />
+                                </div>
+
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <Button
+                                        type="submit"
+                                        variant="outline"
+                                        disabled={
+                                            processing ||
+                                            (hasWhatsapp && resendAvailableIn > 0)
+                                        }
+                                        className="w-full sm:w-auto"
+                                    >
+                                        {processing ? (
+                                            <Spinner />
+                                        ) : (
+                                            <Clock3 className="size-4" />
+                                        )}
+                                        {hasWhatsapp && resendAvailableIn > 0
+                                            ? `Kirim ulang dalam ${formatRemaining(resendAvailableIn)}`
+                                            : hasWhatsapp && verification.hasActiveChallenge
+                                              ? 'Kirim ulang kode'
+                                              : 'Kirim kode'}
+                                    </Button>
+
+                                    <div className="flex items-center text-sm text-muted-foreground">
+                                        {verification.approvalMessage}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                </div>
+
+                <Form
+                    action={WhatsAppVerificationController.verify.url()}
+                    method="post"
+                    options={{
+                        preserveScroll: true,
+                    }}
+                    className="flex flex-col gap-6"
+                >
+                    {({ processing, errors }) => (
+                        <>
+                            <div className="grid gap-2">
+                                <Label htmlFor="code">Kode OTP</Label>
+                                <Input
+                                    id="code"
+                                    name="code"
+                                    type="text"
+                                    inputMode="numeric"
+                                    autoComplete="one-time-code"
+                                    autoFocus
+                                    maxLength={6}
+                                    required
+                                    placeholder="Masukkan 6 digit kode"
+                                />
+                                <InputError message={errors.code ?? errors.otp} />
+                            </div>
+
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                size="lg"
+                                disabled={processing}
+                            >
+                                {processing ? <Spinner /> : <CheckCircle2 className="size-4" />}
+                                Verifikasi
+                            </Button>
+                        </>
+                    )}
+                </Form>
+
+                <div className="text-center">
+                    <Link
+                        href={logout().url}
+                        method="post"
+                        as="button"
+                        className="text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-primary"
+                    >
+                        Bukan akun Anda? Keluar
+                    </Link>
+                </div>
+            </div>
+        </>
+    );
+}
+
+VerifyWhatsApp.layout = {
+    title: 'Verifikasi WhatsApp',
+    description: 'Masukkan kode verifikasi.',
+};

@@ -7,8 +7,8 @@ interface EmptyCatalogStateProps {
 }
 
 export default function EmptyCatalogState({
-    title = 'Belum ada koleksi',
-    description = 'Koleksi akan tampil di sini.',
+    title = 'Belum ada data',
+    description = 'Konten akan tampil di sini.',
 }: EmptyCatalogStateProps) {
     return (
         <motion.div

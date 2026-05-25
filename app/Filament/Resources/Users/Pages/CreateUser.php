@@ -11,7 +11,7 @@ class CreateUser extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['auth_provider'] = 'local';
+        $data['auth_provider'] = 'google';
 
         return $data;
     }

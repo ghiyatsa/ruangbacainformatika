@@ -1,11 +1,10 @@
-import { Form, Link, usePage } from '@inertiajs/react';
+import { Form, usePage } from '@inertiajs/react';
 import { Clock3, Mail, MapPin, Phone } from 'lucide-react';
 import ContactMessageController from '@/actions/App/Http/Controllers/ContactMessageController';
 import InputError from '@/components/common/InputError';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { PublicInfoCard } from '@/components/layouts/PublicInfoCard';
-import { PublicPageSection } from '@/components/layouts/PublicPageSection';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -17,7 +16,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { about } from '@/routes';
 
 export function ContactPage() {
     const user = usePage().props.auth?.user;
@@ -48,8 +46,8 @@ export function ContactPage() {
                         <CardHeader className="border-b border-border/50 bg-muted/10">
                             <CardTitle>Kirim pesan</CardTitle>
                             <CardDescription>
-                                Sampaikan pertanyaan, masukan, atau kebutuhan
-                                bantuan terkait layanan Ruang Baca.
+                                Sampaikan pertanyaan atau kebutuhan bantuan
+                                terkait layanan Ruang Baca.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="pt-6">
@@ -125,7 +123,7 @@ export function ContactPage() {
                                                 id="contact_subject"
                                                 name="subject"
                                                 required
-                                                placeholder="Contoh: Bantuan akses akun"
+                                                placeholder="Contoh: Akses akun"
                                             />
                                             <InputError
                                                 message={errors.subject}
@@ -156,8 +154,8 @@ export function ContactPage() {
                                                 </p>
                                             ) : (
                                                 <p className="text-sm text-muted-foreground">
-                                                    Kami akan meninjau pesan
-                                                    Anda melalui kanal resmi
+                                                    Kami akan menindaklanjuti
+                                                    pesan Anda melalui kontak
                                                     yang tersedia.
                                                 </p>
                                             )}
@@ -203,34 +201,6 @@ export function ContactPage() {
                         </PublicInfoCard>
                     </div>
                 </div>
-
-                <PublicPageSection
-                    title="Butuh konteks lebih dulu?"
-                    description="Kenali dulu latar belakang dan tujuan Ruang Baca sebelum mengirimkan pertanyaan umum."
-                    action={
-                        <Button asChild variant="outline">
-                            <Link href={about.url()} prefetch>
-                                Lihat profil layanan
-                            </Link>
-                        </Button>
-                    }
-                >
-                    <div className="grid gap-5 md:grid-cols-3">
-                        <PublicInfoCard title="Akses akun" icon={Phone}>
-                            Sertakan identitas singkat dan kendala yang Anda
-                            alami agar tim lebih cepat membantu.
-                        </PublicInfoCard>
-                        <PublicInfoCard title="Koleksi" icon={Mail}>
-                            Gunakan subjek yang jelas jika pertanyaan Anda
-                            terkait buku, skripsi, tesis, atau laporan kerja
-                            praktik.
-                        </PublicInfoCard>
-                        <PublicInfoCard title="Layanan" icon={Clock3}>
-                            Pertanyaan operasional sebaiknya dikirim saat jam
-                            kerja agar respons lebih efisien.
-                        </PublicInfoCard>
-                    </div>
-                </PublicPageSection>
             </div>
         </PageLayout>
     );

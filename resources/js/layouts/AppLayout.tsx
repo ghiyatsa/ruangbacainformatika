@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+import GoogleOneTapPrompt from '@/components/auth/GoogleOneTapPrompt';
 import { AppContent } from '@/components/layouts/AppContent';
 import { AppShell } from '@/components/layouts/AppShell';
 import Footer from '@/components/layouts/footer';
@@ -14,6 +15,7 @@ export default function AppLayout({
 
     return (
         <AppShell variant="header">
+            <GoogleOneTapPrompt />
             <AppHeader hideSearch={hideSearch} />
             <AppContent variant={isWelcome ? 'full' : 'header'}>
                 {children}

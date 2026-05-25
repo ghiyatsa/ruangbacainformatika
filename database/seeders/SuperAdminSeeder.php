@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
@@ -22,7 +21,6 @@ class SuperAdminSeeder extends Seeder
 
         $name = (string) config('app.super_admin.name');
         $email = Str::lower((string) config('app.super_admin.email'));
-        $password = (string) config('app.super_admin.password');
         $whatsapp = (string) config('app.super_admin.whatsapp');
         $address = (string) config('app.super_admin.address');
 
@@ -30,8 +28,7 @@ class SuperAdminSeeder extends Seeder
             ['email' => $email],
             [
                 'name' => $name,
-                'password' => Hash::make($password),
-                'email_verified_at' => now(),
+                'auth_provider' => 'google',
                 'is_approved' => true,
                 'whatsapp' => filled($whatsapp) ? $whatsapp : null,
                 'address' => filled($address) ? $address : null,

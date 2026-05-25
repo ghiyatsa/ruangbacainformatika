@@ -21,7 +21,7 @@ export default function PopularBooks({
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader
                 title="Buku Populer"
-                subtitle="Koleksi yang paling sering dilihat."
+                subtitle="Judul yang paling sering dicari."
                 action={
                     <BookCollectionViewToggle
                         viewMode={viewMode}
@@ -93,7 +93,7 @@ export default function PopularBooks({
                 ) : (
                     <EmptyCatalogState
                         title="Belum ada buku populer"
-                        description="Data akan tampil di sini."
+                        description="Daftar judul akan tampil di sini."
                     />
                 )}
             </Deferred>

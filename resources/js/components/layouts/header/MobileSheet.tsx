@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sheet';
 import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookmarksDialog';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
-import { login, register } from '@/routes';
+import { google } from '@/routes/auth';
 import loans from '@/routes/loans';
 import { AppLogo } from './AppLogo';
 import { NAV_LINKS } from './constants';
@@ -34,7 +34,6 @@ export function MobileSheet({
     setMobileOpen,
     isActive,
     auth,
-    canRegister = true,
 }: MobileSheetProps) {
     const { loanRequestCart } = usePage<{
         loanRequestCart: LoanRequestCart | null;
@@ -96,7 +95,7 @@ export function MobileSheet({
                                 </button>
                             }
                         />
-                        {auth.user ? (
+                        {auth.user && auth.canBorrowBooks ? (
                             <SheetClose asChild>
                                 <Link
                                     href={loans.request.url()}
@@ -108,7 +107,7 @@ export function MobileSheet({
                                     ].join(' ')}
                                 >
                                     <ShoppingCart className="size-4 shrink-0 text-muted-foreground" />
-                                    <span>Keranjang Pinjam</span>
+                                    <span>Keranjang Peminjaman</span>
                                     <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
                                         {loanRequestCart?.count ?? 0}
                                     </span>
@@ -207,22 +206,11 @@ export function MobileSheet({
 
                 {!auth.user ? (
                     <div className="flex flex-col gap-2 border-t border-border/60 p-4">
-                        <Button
-                            asChild
-                            variant={canRegister ? 'outline' : 'default'}
-                            className="h-11 w-full rounded-xl"
-                        >
+                        <Button asChild className="h-11 w-full rounded-xl">
                             <SheetClose asChild>
-                                <Link href={login.url()}>Masuk</Link>
+                                <a href={google.url()}>Masuk</a>
                             </SheetClose>
                         </Button>
-                        {canRegister ? (
-                            <Button asChild className="h-11 w-full rounded-xl">
-                                <SheetClose asChild>
-                                    <Link href={register.url()}>Daftar</Link>
-                                </SheetClose>
-                            </Button>
-                        ) : null}
                     </div>
                 ) : null}
             </SheetContent>

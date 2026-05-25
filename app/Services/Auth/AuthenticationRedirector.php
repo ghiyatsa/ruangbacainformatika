@@ -16,6 +16,7 @@ class AuthenticationRedirector
         '/login',
         '/register',
         '/register/profile',
+        '/register/whatsapp',
         '/auth/google',
         '/auth/google/callback',
     ];
@@ -55,8 +56,8 @@ class AuthenticationRedirector
 
     protected function defaultPathFor(User $user): string
     {
-        if (! $user->hasVerifiedEmail()) {
-            return route('verification.notice', absolute: false);
+        if ($this->requiresWhatsAppVerification($user)) {
+            return route('register.whatsapp', absolute: false);
         }
 
         if ($this->requiresProfileCompletion($user)) {
@@ -75,9 +76,15 @@ class AuthenticationRedirector
         return ! $user->hasRequiredProfileDetails();
     }
 
+    public function requiresWhatsAppVerification(User $user): bool
+    {
+        return $user->requiresWhatsAppVerification();
+    }
+
     protected function mustUseDefaultPath(User $user): bool
     {
-        return ! $user->hasVerifiedEmail() || $this->requiresProfileCompletion($user);
+        return $this->requiresWhatsAppVerification($user)
+            || $this->requiresProfileCompletion($user);
     }
 
     protected function isDisallowedIntendedPath(User $user, string $intendedPath): bool

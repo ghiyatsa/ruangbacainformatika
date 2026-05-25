@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Models\User;
 use App\Support\CampusEmail;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 trait ProfileValidationRules
@@ -29,9 +30,31 @@ trait ProfileValidationRules
      *
      * @return array<int, ValidationRule|array<mixed>|string>
      */
-    protected function nameRules(): array
+    protected function nameRules(bool $required = true, int $max = 255): array
     {
-        return ['required', 'string', 'max:255'];
+        return [
+            $required ? 'required' : 'nullable',
+            'string',
+            'min:3',
+            "max:{$max}",
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! is_string($value) || $value === '') {
+                    return;
+                }
+
+                $normalized = Str::of($value)->squish()->toString();
+
+                if (! preg_match("/^[\\pL\\pM\\s'.-]+$/u", $normalized)) {
+                    $fail('Nama hanya boleh berisi huruf, spasi, titik, tanda petik, atau tanda hubung.');
+
+                    return;
+                }
+
+                if (preg_match_all('/\pL/u', $normalized) < 2) {
+                    $fail('Nama wajib diisi dengan benar.');
+                }
+            },
+        ];
     }
 
     /**
@@ -71,10 +94,44 @@ trait ProfileValidationRules
         return [
             $required ? 'required' : 'nullable',
             'string',
-            'digits_between:10,15',
+            'min:10',
+            'max:15',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! is_string($value) || $value === '') {
+                    return;
+                }
+
+                if (! preg_match('/^(?:08|628)[1-9][0-9]{7,11}$/', $value)) {
+                    $fail('Masukkan nomor WhatsApp yang valid, misalnya 08123456789.');
+                }
+            },
             $ignoreId === null
                 ? Rule::unique(User::class, 'whatsapp')
                 : Rule::unique(User::class, 'whatsapp')->ignore($ignoreId),
+        ];
+    }
+
+    /**
+     * Get the validation rules used to validate general phone numbers.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function phoneRules(bool $required = false): array
+    {
+        return [
+            $required ? 'required' : 'nullable',
+            'string',
+            'min:10',
+            'max:15',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! is_string($value) || $value === '') {
+                    return;
+                }
+
+                if (! preg_match('/^(?:08|628)[1-9][0-9]{7,11}$/', $value)) {
+                    $fail('Masukkan nomor telepon yang valid, misalnya 08123456789.');
+                }
+            },
         ];
     }
 
@@ -88,7 +145,106 @@ trait ProfileValidationRules
         return [
             $required ? 'required' : 'nullable',
             'string',
-            'max:1000',
+            'min:12',
+            'max:500',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! is_string($value) || $value === '') {
+                    return;
+                }
+
+                $normalized = Str::of($value)->squish()->toString();
+
+                if (! preg_match('/\pL/u', $normalized)) {
+                    $fail('Alamat wajib memuat keterangan yang jelas.');
+
+                    return;
+                }
+
+                if ($this->countMeaningfulSegments($normalized) < 2) {
+                    $fail('Alamat minimal terdiri dari dua bagian yang jelas.');
+                }
+            },
         ];
+    }
+
+    /**
+     * Get the validation rules used to validate institution names.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function institutionRules(bool $required = false): array
+    {
+        return [
+            $required ? 'required' : 'nullable',
+            'string',
+            'min:3',
+            'max:255',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! is_string($value) || $value === '') {
+                    return;
+                }
+
+                $normalized = Str::of($value)->squish()->toString();
+
+                if (! preg_match('/\pL/u', $normalized)) {
+                    $fail('Nama instansi wajib diisi dengan jelas.');
+                }
+            },
+        ];
+    }
+
+    /**
+     * Get the validation rules used to validate free-form text fields.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function meaningfulTextRules(
+        string $label,
+        bool $required = true,
+        int $min = 10,
+        int $max = 1000,
+        int $minWords = 2,
+    ): array {
+        return [
+            $required ? 'required' : 'nullable',
+            'string',
+            "min:{$min}",
+            "max:{$max}",
+            function (string $attribute, mixed $value, \Closure $fail) use ($label, $minWords): void {
+                if (! is_string($value) || $value === '') {
+                    return;
+                }
+
+                $normalized = Str::of($value)->squish()->toString();
+
+                if (! preg_match('/\pL/u', $normalized)) {
+                    $fail("{$label} wajib ditulis dengan jelas.");
+
+                    return;
+                }
+
+                if ($this->countMeaningfulSegments($normalized) < $minWords) {
+                    $fail("{$label} minimal terdiri dari {$minWords} kata.");
+                }
+            },
+        ];
+    }
+
+    protected function normalizePhoneNumber(?string $value): string
+    {
+        $digits = preg_replace('/\D+/', '', trim((string) $value)) ?? '';
+
+        if (Str::startsWith($digits, '8')) {
+            return '0'.$digits;
+        }
+
+        return $digits;
+    }
+
+    protected function countMeaningfulSegments(string $value): int
+    {
+        preg_match_all('/[\pL\pM0-9]+/u', $value, $matches);
+
+        return count($matches[0]);
     }
 }

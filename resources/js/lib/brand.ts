@@ -9,4 +9,4 @@ export const RUANG_BACA_SHORT_NAME = 'Ruang Baca';
 export const RUANG_BACA_AFFILIATION = `${PROGRAM_NAME} ${UNIVERSITY_NAME}`;
 
 export const RUANG_BACA_DESCRIPTION =
-    'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung riset, pembelajaran akademik, dan pengembangan literasi teknologi mahasiswa.';
+    'Katalog referensi akademik untuk mendukung pembelajaran, riset, dan penelusuran koleksi di lingkungan Teknik Informatika Universitas Malikussaleh.';

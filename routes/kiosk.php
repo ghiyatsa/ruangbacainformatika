@@ -25,6 +25,12 @@ Route::middleware('kiosk.network')->group(function () {
     Route::post('/kiosk/members', [KioskController::class, 'storeMember'])
         ->middleware('kiosk.pin')
         ->name('kiosk.members.store');
+    Route::get('/kiosk/members/status', [KioskController::class, 'memberRegistrationStatus'])
+        ->middleware('kiosk.pin')
+        ->name('kiosk.members.status');
+    Route::post('/kiosk/members/cancel', [KioskController::class, 'cancelMemberRegistration'])
+        ->middleware('kiosk.pin')
+        ->name('kiosk.members.cancel');
 
     Route::post('/kiosk/pin', [KioskController::class, 'verifyPin'])
         ->middleware('throttle:8,1')

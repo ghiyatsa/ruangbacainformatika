@@ -12,6 +12,7 @@ export default function RegisterProfile() {
     const { auth } = usePage().props;
     const user = auth.user!;
     const hasWhatsapp = Boolean(user.whatsapp);
+    const hasVerifiedWhatsapp = Boolean(auth.hasVerifiedWhatsApp);
 
     return (
         <>
@@ -28,6 +29,21 @@ export default function RegisterProfile() {
                 >
                     {({ processing, errors }) => (
                         <div className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Nama lengkap</Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    defaultValue={user.name}
+                                    autoFocus
+                                    required
+                                    autoComplete="name"
+                                    placeholder="Nama lengkap"
+                                />
+                                <InputError message={errors.name} />
+                            </div>
+
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email kampus</Label>
                                 <Input
@@ -47,8 +63,9 @@ export default function RegisterProfile() {
                                     name="whatsapp"
                                     type="tel"
                                     defaultValue={user.whatsapp ?? ''}
-                                    autoFocus={!hasWhatsapp}
                                     required
+                                    readOnly={hasVerifiedWhatsapp}
+                                    disabled={hasVerifiedWhatsapp}
                                     autoComplete="tel"
                                     placeholder="08123456789"
                                 />
@@ -64,13 +81,12 @@ export default function RegisterProfile() {
                                     required
                                     autoComplete="street-address"
                                     className="min-h-28 resize-y"
-                                    autoFocus={hasWhatsapp}
-                                    placeholder="Masukkan alamat lengkap Anda"
+                                    placeholder="Alamat lengkap"
                                 />
                                 <p className="text-sm text-muted-foreground">
                                     {hasWhatsapp
-                                        ? 'Nomor WhatsApp sudah tersimpan. Lengkapi alamat agar akun bisa digunakan untuk meminjam buku.'
-                                        : 'Nomor WhatsApp dan alamat wajib diisi sebelum akun bisa digunakan untuk meminjam buku.'}
+                                        ? 'Lengkapi alamat untuk melanjutkan.'
+                                        : 'Nama, WhatsApp, dan alamat wajib diisi.'}
                                 </p>
                                 <InputError message={errors.address} />
                             </div>
@@ -105,5 +121,5 @@ export default function RegisterProfile() {
 
 RegisterProfile.layout = {
     title: 'Lengkapi profil',
-    description: 'Satu langkah terakhir untuk melengkapi profil Anda.',
+    description: 'Lengkapi profil untuk melanjutkan.',
 };

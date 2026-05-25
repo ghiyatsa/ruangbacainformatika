@@ -177,7 +177,10 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
     const categories = Array.isArray(book.categories) ? book.categories : [];
     const authors = Array.isArray(book.authors) ? book.authors : [];
     const canAddToCart =
-        auth.user !== null && book.isBorrowable && book.isAvailable;
+        auth.user !== null &&
+        auth.canBorrowBooks === true &&
+        book.isBorrowable &&
+        book.isAvailable;
     const isBookmarkedByUser = isBookmarked({
         catalogType: 'book',
         id: book.id,

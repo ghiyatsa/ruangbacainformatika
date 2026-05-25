@@ -141,7 +141,7 @@ it('borrows selected books from kiosk using book ids', function () {
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHas(
             'inertia.flash_data.toast.message',
-            "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
+            "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke WhatsApp anggota.",
         );
 
     Notification::assertSentTo($member, LoanReceiptNotification::class);
@@ -195,7 +195,7 @@ it('stores kiosk borrowing even when receipt email dispatch fails', function () 
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHas(
             'inertia.flash_data.toast.message',
-            "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
+            "Peminjaman untuk {$member->name} berhasil disimpan. Bukti peminjaman akan dikirim ke WhatsApp anggota.",
         );
 
     expect($bookItem->fresh()->status)->toBe('borrowed');

@@ -41,3 +41,21 @@ it('contact form validates required fields', function () {
             'message',
         ]);
 });
+
+it('contact form rejects malformed contact details and unclear text', function () {
+    from(route('contact'))
+        ->post(route('contact.store'), [
+            'name' => '@@@@',
+            'email' => 'pengunjung@example.com',
+            'phone' => '12345',
+            'subject' => '.... ....',
+            'message' => '........ ........ ........',
+        ])
+        ->assertRedirect(route('contact'))
+        ->assertSessionHasErrors([
+            'name',
+            'phone',
+            'subject',
+            'message',
+        ]);
+});

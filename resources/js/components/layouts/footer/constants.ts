@@ -7,15 +7,7 @@ import {
     UserPlus,
     Wrench,
 } from 'lucide-react';
-import {
-    contact,
-    home,
-    login,
-    privacyPolicy,
-    register,
-    search,
-    termsOfService,
-} from '@/routes';
+import { contact, home, privacyPolicy, search, termsOfService } from '@/routes';
 import similarity from '@/routes/similarity';
 import type { Variants } from 'motion/react';
 
@@ -77,14 +69,17 @@ export const SERVICE_LINKS = [
         icon: Wrench,
         internal: true,
     },
-    { label: 'Masuk', href: () => login.url(), icon: LogIn, internal: true },
+];
+
+export const GUEST_SERVICE_LINKS = [
+    { label: 'Masuk', hrefKey: 'login', icon: LogIn, internal: true },
     {
         label: 'Daftar',
-        href: () => register.url(),
+        hrefKey: 'register',
         icon: UserPlus,
         internal: true,
     },
-];
+] as const;
 
 export const fadeUp: Variants = {
     hidden: { opacity: 0, y: 18 },

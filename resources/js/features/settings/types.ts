@@ -11,9 +11,5 @@ export type Session = {
 };
 
 export type SecurityPageProps = {
-    canManageTwoFactor?: boolean;
-    requiresConfirmation?: boolean;
-    twoFactorEnabled?: boolean;
-    twoFactorConfirmed?: boolean;
     sessions?: Session[];
 };

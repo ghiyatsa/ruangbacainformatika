@@ -19,8 +19,8 @@ it('sends reminders for loans due tomorrow', function () {
     ]);
 
     artisan('app:remind-return')
-        ->expectsOutput('Sending reminders for 1 loans...')
-        ->expectsOutput('Reminders sent successfully!')
+        ->expectsOutput('Sending WhatsApp reminders for 1 loans...')
+        ->expectsOutput('WhatsApp reminders sent successfully!')
         ->assertExitCode(0);
 
     Notification::assertSentTo(
@@ -44,7 +44,7 @@ it('does not send reminders for loans already reminded', function () {
     ]);
 
     artisan('app:remind-return')
-        ->expectsOutput('No books are due tomorrow.')
+        ->expectsOutput('No loans are due tomorrow.')
         ->assertExitCode(0);
 
     Notification::assertNothingSent();
@@ -70,7 +70,7 @@ it('does not send reminders for loans not due tomorrow', function () {
     ]);
 
     artisan('app:remind-return')
-        ->expectsOutput('No books are due tomorrow.')
+        ->expectsOutput('No loans are due tomorrow.')
         ->assertExitCode(0);
 
     Notification::assertNothingSent();

@@ -14,6 +14,23 @@ export interface KioskProps {
     loanMaxBooks: number;
     visitorTypeOptions: Record<string, string>;
     purposeOptions: Record<string, string>;
+    memberRegistrationClaim?: KioskMemberRegistrationClaim | null;
+}
+
+export interface KioskMemberRegistrationClaim {
+    id: number;
+    name: string;
+    email: string;
+    whatsapp: string;
+    address: string;
+    linkUrl: string;
+    qrSvg: string;
+    status: 'pending' | 'linked' | 'claimed' | 'expired';
+    expiresAt: string;
+    claimedAt: string | null;
+    lastErrorMessage: string | null;
+    lastErrorAt: string | null;
+    approvalPending: boolean;
 }
 
 export interface KioskBookSearchResult {

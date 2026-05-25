@@ -80,3 +80,19 @@ it('catalog report submission validates the message and catalog type', function 
             'message',
         ]);
 });
+
+it('catalog report rejects unclear reporter details', function () {
+    $book = Book::factory()->published()->create();
+
+    post(route('catalog-reports.store'), [
+        'catalog_type' => CatalogReport::CATALOG_TYPE_BOOK,
+        'catalog_id' => $book->id,
+        'reporter_name' => '***',
+        'reporter_email' => 'mahasiswa@example.com',
+        'message' => '.... .... .... ....',
+    ])
+        ->assertSessionHasErrors([
+            'reporter_name',
+            'message',
+        ]);
+});

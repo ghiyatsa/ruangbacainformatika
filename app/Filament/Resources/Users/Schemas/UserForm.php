@@ -25,16 +25,9 @@ class UserForm
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->disabled(fn ($record) => $record !== null)
-                    ->helperText(fn ($record): ?string => $record !== null ? 'Email tidak dapat diubah.' : null),
-                TextInput::make('password')
-                    ->label('Kata Sandi')
-                    ->password()
-                    ->revealable()
-                    ->required(fn ($record): bool => $record === null)
-                    ->minLength(8)
-                    ->maxLength(255)
-                    ->hidden(fn ($record): bool => $record !== null)
-                    ->helperText('Minimal 8 karakter.'),
+                    ->helperText(fn ($record): ?string => $record !== null
+                        ? 'Email tidak dapat diubah.'
+                        : 'Pengguna akan masuk dengan akun Google pada email ini.'),
                 Select::make('roles')
                     ->label('Peran')
                     ->multiple()
@@ -43,7 +36,7 @@ class UserForm
                     ->helperText('Pilih sesuai hak akses.'),
                 Toggle::make('is_approved')
                     ->label('Akun Disetujui')
-                    ->helperText('Aktifkan jika akun siap dipakai.')
+                    ->helperText('Aktifkan jika akun anggota sudah lolos pengecekan operator.')
                     ->onIcon('heroicon-m-check')
                     ->offIcon('heroicon-m-x-mark')
                     ->onColor('success')
@@ -53,6 +46,7 @@ class UserForm
                     ->tel()
                     ->nullable()
                     ->unique(ignoreRecord: true)
+                    ->disabled(fn ($record): bool => filled($record?->whatsapp_verified_at))
                     ->placeholder('0812xxxxxx'),
                 Textarea::make('address')
                     ->label('Alamat')

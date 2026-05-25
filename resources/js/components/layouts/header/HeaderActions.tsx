@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookmarksDialog';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
-import { register } from '@/routes';
+import { google } from '@/routes/auth';
 import loans from '@/routes/loans';
 import { UserAvatar } from './UserAvatar';
 import type { Auth, LoanRequestCart } from '@/types';
@@ -32,7 +32,6 @@ interface HeaderActionsProps {
 
 export function HeaderActions({
     auth,
-    canRegister = true,
     resolvedAppearance,
     updateAppearance,
     hideSearch,
@@ -99,33 +98,37 @@ export function HeaderActions({
                 />
 
                 {auth.user ? (
-                    <Button
-                        asChild
-                        variant="ghost"
-                        size="icon"
-                        className="relative hidden h-9 w-9 rounded-xl md:inline-flex"
-                    >
-                        <Link
-                            href={loans.request.url()}
-                            aria-label={`Keranjang pinjam, ${loanRequestCart?.count ?? 0} buku`}
-                            title="Keranjang pinjam"
+                    auth.canBorrowBooks ? (
+                        <Button
+                            asChild
+                            variant="ghost"
+                            size="icon"
+                            className="relative hidden h-9 w-9 rounded-xl md:inline-flex"
                         >
-                            <ShoppingCart className="h-[18px] w-[18px] text-primary" />
-                            <span className="sr-only">Keranjang pinjam</span>
-                            <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm">
-                                {loanRequestCart?.count ?? 0}
-                            </Badge>
-                        </Link>
-                    </Button>
-                ) : canRegister ? (
+                            <Link
+                                href={loans.request.url()}
+                                aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
+                                title="Keranjang peminjaman"
+                            >
+                                <ShoppingCart className="h-[18px] w-[18px] text-primary" />
+                                <span className="sr-only">
+                                    Keranjang peminjaman
+                                </span>
+                                <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm">
+                                    {loanRequestCart?.count ?? 0}
+                                </Badge>
+                            </Link>
+                        </Button>
+                    ) : null
+                ) : (
                     <Button
                         asChild
                         size="sm"
                         className="hidden rounded-xl text-sm shadow-md shadow-primary/15 md:inline-flex"
                     >
-                        <Link href={register.url()}>Daftar</Link>
+                        <a href={google.url()}>Masuk</a>
                     </Button>
-                ) : null}
+                )}
 
                 {auth.user ? (
                     <DropdownMenu>

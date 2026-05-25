@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import type { BookData, LoanRequestSummary } from '@/features/books/types';
 import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
+import type { Auth } from '@/types';
 
 export interface BookDetailPageProps {
     book: { data: BookData };
@@ -44,7 +45,8 @@ export default function BookDetailPage({
     book: { data: book },
     loanRequest,
 }: BookDetailPageProps) {
-    const user = usePage().props.auth?.user;
+    const { auth } = usePage<{ auth: Auth }>().props;
+    const user = auth.user;
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const requestSummary = loanRequest ?? {
         count: 0,
@@ -282,6 +284,7 @@ export default function BookDetailPage({
                                     </Button>
 
                                     {user &&
+                                    auth.canBorrowBooks &&
                                     book.isBorrowable &&
                                     book.isAvailable ? (
                                         <Form
@@ -313,6 +316,15 @@ export default function BookDetailPage({
                                         </Form>
                                     ) : null}
                                 </div>
+
+                                {user &&
+                                !auth.canBorrowBooks &&
+                                book.isBorrowable ? (
+                                    <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                                        {auth.borrowingAccessMessage ??
+                                            'Layanan peminjaman tersedia untuk mahasiswa Teknik Informatika yang terdaftar.'}
+                                    </p>
+                                ) : null}
                             </div>
                         </div>
                     </div>

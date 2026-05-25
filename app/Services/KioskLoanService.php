@@ -32,9 +32,9 @@ class KioskLoanService
     {
         $member = $this->resolveMember($memberIdentifier);
 
-        if (! $member || ! $member->hasRole('member')) {
+        if (! $member || ! $member->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'member_identifier' => 'Member tidak ditemukan atau belum terdaftar sebagai member.',
+                'member_identifier' => 'Anggota tidak ditemukan atau tidak memiliki akses peminjaman.',
             ]);
         }
 
@@ -107,7 +107,7 @@ class KioskLoanService
             return $loan->load('items.bookItem.book', 'user');
         });
 
-        // Jadwalkan pengiriman email tanpa mengganggu transaksi peminjaman.
+        // Pengiriman notifikasi tidak boleh menggagalkan transaksi peminjaman.
         try {
             $member->notify(new LoanReceiptNotification($loan));
         } catch (Throwable $exception) {
@@ -124,9 +124,9 @@ class KioskLoanService
     {
         $member = $this->findMemberByIdentifier($memberIdentifier);
 
-        if (! $member || ! $member->hasRole('member')) {
+        if (! $member || ! $member->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'member_identifier' => 'Member tidak ditemukan atau belum terdaftar sebagai member.',
+                'member_identifier' => 'Member tidak ditemukan atau tidak memiliki akses peminjaman.',
             ]);
         }
 
@@ -238,9 +238,9 @@ class KioskLoanService
     {
         $member = $this->findMemberByIdentifier($memberIdentifier);
 
-        if (! $member || ! $member->hasRole('member')) {
+        if (! $member || ! $member->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'member_identifier' => 'Member tidak ditemukan atau belum terdaftar sebagai member.',
+                'member_identifier' => 'Member tidak ditemukan atau tidak memiliki akses peminjaman.',
             ]);
         }
 
@@ -262,7 +262,7 @@ class KioskLoanService
 
                 if (! $loanItem) {
                     throw ValidationException::withMessages([
-                        "book_ids.{$index}" => 'Buku yang dipilih tidak tercatat sebagai pinjaman aktif untuk member ini.',
+                        "book_ids.{$index}" => 'Buku yang dipilih tidak tercatat sebagai pinjaman aktif untuk anggota ini.',
                     ]);
                 }
 

@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use Inertia\Testing\AssertableInertia;
 
 use function Pest\Laravel\actingAs;
 
@@ -16,6 +15,7 @@ it('profile page is displayed', function () {
 
 it('google users with incomplete profile are redirected to onboarding page', function () {
     $user = User::factory()->create([
+        'email' => '230170111@mhs.unimal.ac.id',
         'auth_provider' => 'google',
         'whatsapp' => null,
         'address' => null,
@@ -25,14 +25,13 @@ it('google users with incomplete profile are redirected to onboarding page', fun
     /** @var User $user */
     actingAs($user)
         ->get(route('register.profile'))
-        ->assertInertia(
-            fn (AssertableInertia $page) => $page
-                ->component('auth/register-profile'),
-        );
+        ->assertRedirect(route('register.whatsapp'));
 });
 
 it('profile information can be updated', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'email' => 'outside@example.com',
+    ]);
 
     /** @var User $user */
     actingAs($user)
@@ -53,8 +52,10 @@ it('profile information can be updated', function () {
     expect($user->email)->not->toBe('changed@example.com');
 });
 
-it('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
+it('profile update keeps non-editable account data intact', function () {
+    $user = User::factory()->create([
+        'email' => 'outside@example.com',
+    ]);
 
     /** @var User $user */
     actingAs($user)
@@ -66,12 +67,12 @@ it('email verification status is unchanged when the email address is unchanged',
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('settings.profile.edit'));
 
-    expect($user->refresh()->email_verified_at)->not->toBeNull();
+    expect($user->refresh()->email)->toBe($user->email);
 });
 
 it('users cannot update their email address from profile settings', function () {
     $user = User::factory()->create([
-        'email' => '230170001@mhs.unimal.ac.id',
+        'email' => 'outside@example.com',
     ]);
 
     /** @var User $user */
@@ -85,6 +86,45 @@ it('users cannot update their email address from profile settings', function () 
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('settings.profile.edit'));
 
-    expect($user->refresh()->email)->toBe('230170001@mhs.unimal.ac.id');
-    expect($user->email_verified_at)->not->toBeNull();
+    expect($user->refresh()->email)->toBe('outside@example.com');
+});
+
+it('profile update rejects invalid whatsapp and unclear address', function () {
+    $user = User::factory()->create();
+
+    /** @var User $user */
+    actingAs($user)
+        ->patch(route('settings.profile.update'), [
+            'name' => 'Test User',
+            'whatsapp' => '12345',
+            'address' => '???',
+        ])
+        ->assertSessionHasErrors([
+            'whatsapp',
+            'address',
+        ]);
+});
+
+it('changing a verified campus whatsapp number requires re-verification', function () {
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+        'address' => 'Jl. Merdeka No. 1',
+        'profile_completed_at' => now(),
+        'is_approved' => true,
+    ]);
+
+    /** @var User $user */
+    actingAs($user)
+        ->patch(route('settings.profile.update'), [
+            'name' => 'Test User',
+            'whatsapp' => '08123456780',
+            'address' => 'Jl. Merdeka No. 1',
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('register.whatsapp'));
+
+    expect($user->fresh()?->whatsapp)->toBe('08123456780');
+    expect($user->fresh()?->whatsapp_verified_at)->toBeNull();
 });

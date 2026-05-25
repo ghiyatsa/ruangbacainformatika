@@ -19,8 +19,17 @@ class LoanRequestController extends Controller
         protected LoanDraftService $loanDraftService,
     ) {}
 
-    public function show(Request $request): Response
+    public function show(Request $request): Response|RedirectResponse
     {
+        if (! $request->user()->canBorrowBooks()) {
+            Inertia::flash('toast', [
+                'type' => 'info',
+                'message' => 'Layanan peminjaman tersedia untuk mahasiswa Teknik Informatika yang terdaftar.',
+            ]);
+
+            return redirect()->route('home');
+        }
+
         $draft = $this->loanDraftService->getCurrentDraft($request->user());
         $summary = $this->loanDraftService->summary($request->user());
 

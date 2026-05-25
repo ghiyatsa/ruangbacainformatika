@@ -126,7 +126,6 @@ return [
     'super_admin' => [
         'name' => env('APP_SUPER_ADMIN_NAME', 'Super Admin'),
         'email' => env('APP_SUPER_ADMIN_EMAIL', 'admin@example.com'),
-        'password' => env('APP_SUPER_ADMIN_PASSWORD', 'password'),
         'whatsapp' => env('APP_SUPER_ADMIN_WHATSAPP', ''),
         'address' => env('APP_SUPER_ADMIN_ADDRESS', ''),
     ],

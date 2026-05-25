@@ -15,13 +15,13 @@ use App\Models\VisitLog;
 use App\Repositories\SettingRepository;
 use App\Services\KioskLoanService;
 use App\Services\KioskPinManager;
+use App\Services\MemberRegistrationClaimService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class KioskController extends Controller
 {
@@ -29,10 +29,13 @@ class KioskController extends Controller
         protected SettingRepository $settingRepository,
         protected KioskPinManager $kioskPinManager,
         protected KioskLoanService $kioskLoanService,
+        protected MemberRegistrationClaimService $memberRegistrationClaimService,
     ) {}
 
     public function show(Request $request): Response
     {
+        $memberRegistrationClaim = $this->resolveMemberRegistrationClaim($request);
+
         $siteSettings = $this->settingRepository->sectionValues('general', [
             'site_name' => config('app.name'),
             'site_tagline' => 'Sistem pendataan pengunjung',
@@ -58,6 +61,7 @@ class KioskController extends Controller
                 'loanMaxBooks' => max((int) $librarySettings['loan_max_books'], 1),
                 'visitorTypeOptions' => VisitLog::visitorTypeOptions(),
                 'purposeOptions' => VisitLog::purposeOptions(),
+                'memberRegistrationClaim' => $memberRegistrationClaim,
             ]);
         }
 
@@ -79,6 +83,7 @@ class KioskController extends Controller
             'loanMaxBooks' => max((int) $librarySettings['loan_max_books'], 1),
             'visitorTypeOptions' => VisitLog::visitorTypeOptions(),
             'purposeOptions' => VisitLog::purposeOptions(),
+            'memberRegistrationClaim' => $memberRegistrationClaim,
         ]);
     }
 
@@ -104,16 +109,85 @@ class KioskController extends Controller
         return redirect()->route('kiosk.index');
     }
 
-    public function storeMember(RegisterMemberRequest $request, CreatesNewUsers $creator): RedirectResponse
+    public function storeMember(RegisterMemberRequest $request): RedirectResponse
     {
-        $creator->create($request->validated());
+        $registration = $this->memberRegistrationClaimService->create($request->validated());
+
+        $request->session()->put(
+            'kiosk.member_registration_claim',
+            $this->memberRegistrationClaimService->present(
+                $registration['registration'],
+                $registration['link_url'],
+                $registration['qr_svg'],
+            ),
+        );
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => 'Pendaftaran member berhasil. Silakan gunakan akun Anda untuk layanan mandiri.',
+            'message' => 'QR siap digunakan. Scan dari ponsel untuk menautkan akun Google.',
         ]);
 
         return redirect()->route('kiosk.index', ['menu' => 'member']);
+    }
+
+    public function memberRegistrationStatus(Request $request): JsonResponse
+    {
+        return response()->json([
+            'memberRegistrationClaim' => $this->resolveMemberRegistrationClaim($request),
+        ]);
+    }
+
+    public function cancelMemberRegistration(Request $request): JsonResponse
+    {
+        $presentedClaim = $request->session()->get('kiosk.member_registration_claim');
+
+        if (is_array($presentedClaim)) {
+            $this->memberRegistrationClaimService->cancelPresentedClaim($presentedClaim);
+        }
+
+        $request->session()->forget('kiosk.member_registration_claim');
+
+        return response()->json([
+            'cancelled' => true,
+        ]);
+    }
+
+    /**
+     * @return array{
+     *     id: int,
+     *     name: string,
+     *     email: string,
+     *     whatsapp: string,
+     *     address: string,
+     *     linkUrl: string,
+     *     qrSvg: string,
+     *     status: string,
+     *     expiresAt: string,
+     *     claimedAt: string|null,
+     *     lastErrorMessage: string|null,
+     *     lastErrorAt: string|null,
+     *     approvalPending: bool
+     * }|null
+     */
+    protected function resolveMemberRegistrationClaim(Request $request): ?array
+    {
+        $presentedClaim = $request->session()->get('kiosk.member_registration_claim');
+
+        if (! is_array($presentedClaim)) {
+            return null;
+        }
+
+        $claim = $this->memberRegistrationClaimService->syncPresentedClaim($presentedClaim);
+
+        if ($claim === null) {
+            $request->session()->forget('kiosk.member_registration_claim');
+
+            return null;
+        }
+
+        $request->session()->put('kiosk.member_registration_claim', $claim);
+
+        return $claim;
     }
 
     public function store(SubmitVisitRequest $request): RedirectResponse
@@ -161,7 +235,7 @@ class KioskController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => "Peminjaman untuk {$loan->user->name} berhasil disimpan. Bukti peminjaman akan dikirim ke email anggota segera setelah layanan email tersedia.",
+            'message' => "Peminjaman untuk {$loan->user->name} berhasil disimpan. Bukti peminjaman akan dikirim ke WhatsApp anggota.",
         ]);
 
         return redirect()->route('kiosk.index', ['menu' => 'borrow']);
@@ -204,7 +278,7 @@ class KioskController extends Controller
             ? $this->kioskLoanService->findMemberByIdentifier($memberIdentifier)
             : null;
 
-        if (! $member || ! $member->hasRole('member')) {
+        if (! $member || ! $member->canBorrowBooks()) {
             return new EloquentCollection;
         }
 

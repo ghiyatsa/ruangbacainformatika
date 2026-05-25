@@ -4,11 +4,14 @@ namespace App\Filament\Resources\Users\Tables;
 
 use App\Models\User;
 use App\Support\LoanConsequenceService;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -48,7 +51,8 @@ class UsersTable
                 TextColumn::make('roles.name')
                     ->badge()
                     ->label('Peran')
-                    ->separator(', '),
+                    ->separator(', ')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('borrowing_access')
                     ->label('Status Pinjam')
                     ->state(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['label'])
@@ -56,9 +60,6 @@ class UsersTable
                     ->color(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['color'])
                     ->description(fn (User $record): ?string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['detail'])
                     ->wrap(),
-                IconColumn::make('is_approved')
-                    ->label('Disetujui')
-                    ->boolean(),
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime()
@@ -101,11 +102,55 @@ class UsersTable
                     ->query(fn (Builder $query): Builder => $query->borrowingRestricted()),
             ])
             ->recordActions([
+                Action::make('approve')
+                    ->label('Setujui')
+                    ->icon(Heroicon::OutlinedCheckCircle)
+                    ->color('success')
+                    ->hidden(fn (User $record): bool => $record->is_approved)
+                    ->requiresConfirmation()
+                    ->modalHeading('Setujui akun pengguna')
+                    ->modalDescription('Akun ini akan ditandai siap digunakan untuk layanan anggota.')
+                    ->action(function (User $record): void {
+                        $record->forceFill([
+                            'is_approved' => true,
+                        ])->save();
+
+                        Notification::make()
+                            ->success()
+                            ->title('Akun berhasil disetujui')
+                            ->send();
+                    }),
                 EditAction::make()
                     ->label('Ubah'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('approveSelected')
+                        ->label('Setujui Terpilih')
+                        ->icon(Heroicon::OutlinedCheckBadge)
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function ($records): void {
+                            $approvedCount = 0;
+
+                            foreach ($records as $record) {
+                                if (! $record instanceof User || $record->is_approved) {
+                                    continue;
+                                }
+
+                                $record->forceFill([
+                                    'is_approved' => true,
+                                ])->save();
+
+                                $approvedCount++;
+                            }
+
+                            Notification::make()
+                                ->success()
+                                ->title($approvedCount > 0 ? "{$approvedCount} akun disetujui" : 'Tidak ada akun yang perlu disetujui')
+                                ->send();
+                        }),
                     DeleteBulkAction::make()
                         ->label('Hapus Terpilih'),
                 ]),

@@ -1,0 +1,103 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\SendWhatsAppOtpRequest;
+use App\Http\Requests\Auth\VerifyWhatsAppOtpRequest;
+use App\Models\User;
+use App\Services\Auth\AuthenticationRedirector;
+use App\Services\WhatsAppOtpService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+use RuntimeException;
+
+class WhatsAppVerificationController extends Controller
+{
+    public function __construct(
+        protected AuthenticationRedirector $authenticationRedirector,
+        protected WhatsAppOtpService $whatsAppOtpService,
+    ) {}
+
+    public function show(Request $request): Response|RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if (! $user->requiresWhatsAppVerification()) {
+            return $user->hasRequiredProfileDetails()
+                ? to_route('settings.profile.edit')
+                : to_route('register.profile');
+        }
+
+        $verification = $this->whatsAppOtpService->status($user);
+
+        if (filled($user->whatsapp)) {
+            try {
+                $verification = $this->whatsAppOtpService->ensureChallenge($user);
+            } catch (RuntimeException $exception) {
+                report($exception);
+
+                Inertia::flash('toast', [
+                    'type' => 'error',
+                    'message' => 'Kode belum dapat dikirim. Coba lagi.',
+                ]);
+
+                $verification = $this->whatsAppOtpService->status($user);
+            }
+        }
+
+        return Inertia::render('auth/verify-whatsapp', [
+            'verification' => $verification,
+        ]);
+    }
+
+    public function send(SendWhatsAppOtpRequest $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($request->filled('whatsapp')) {
+            $user->forceFill([
+                'whatsapp' => $request->validated('whatsapp'),
+            ])->save();
+        }
+
+        $this->whatsAppOtpService->dispatch($user);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Kode berhasil dikirim.',
+        ]);
+
+        return back();
+    }
+
+    public function verify(VerifyWhatsAppOtpRequest $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $result = $this->whatsAppOtpService->verify(
+            $user,
+            (string) $request->validated('code'),
+        );
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => $result['approvalPending']
+                ? 'Verifikasi selesai. Akun menunggu persetujuan admin.'
+                : 'Verifikasi selesai.',
+        ]);
+
+        $freshUser = $user->fresh();
+
+        if ($freshUser instanceof User && ! $freshUser->hasRequiredProfileDetails()) {
+            return to_route('register.profile');
+        }
+
+        return $this->authenticationRedirector->redirectResponse($request, $freshUser);
+    }
+}

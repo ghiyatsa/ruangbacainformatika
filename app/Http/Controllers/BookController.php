@@ -32,7 +32,7 @@ class BookController extends Controller
 
         return Inertia::render('books/show', [
             'book' => new BookResource($book),
-            'loanRequest' => $request->user()
+            'loanRequest' => $request->user()?->canBorrowBooks()
                 ? $this->loanDraftService->summaryForBook($request->user(), $book)
                 : null,
         ]);

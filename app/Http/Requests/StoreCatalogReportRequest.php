@@ -2,13 +2,17 @@
 
 namespace App\Http\Requests;
 
+use App\Actions\Fortify\ProfileValidationRules;
 use App\Models\CatalogReport;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class StoreCatalogReportRequest extends FormRequest
 {
+    use ProfileValidationRules;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -27,10 +31,19 @@ class StoreCatalogReportRequest extends FormRequest
         return [
             'catalog_type' => ['required', 'string', Rule::in(array_keys(CatalogReport::catalogTypeOptions()))],
             'catalog_id' => ['required', 'integer', 'min:1'],
-            'reporter_name' => ['nullable', 'string', 'max:120'],
+            'reporter_name' => $this->nameRules(required: false, max: 120),
             'reporter_email' => ['nullable', 'email', 'max:255'],
-            'message' => ['required', 'string', 'min:10', 'max:2000'],
+            'message' => $this->meaningfulTextRules('Laporan', min: 10, max: 2000, minWords: 4),
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'reporter_name' => Str::of((string) $this->input('reporter_name'))->squish()->toString(),
+            'reporter_email' => Str::of((string) $this->input('reporter_email'))->trim()->lower()->toString(),
+            'message' => Str::of((string) $this->input('message'))->squish()->toString(),
+        ]);
     }
 
     /**

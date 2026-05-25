@@ -1,13 +1,12 @@
 <?php
 
 use App\Models\KioskDevice;
+use App\Models\MemberRegistrationClaim;
 use App\Models\Setting;
-use App\Models\User;
 use App\Models\VisitLog;
 use App\Services\KioskPinManager;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
-use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
@@ -187,16 +186,12 @@ it('kiosk member registration validates the required fields for borrowing readin
 
     post(route('kiosk.members.store'), [
         'name' => 'Member Kiosk',
-        'email' => '230170020@mhs.unimal.ac.id',
+        'email' => '230170001@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
     ])->assertSessionHasErrors(['address']);
 });
 
-it('kiosk member registration creates a usable member account', function () {
-    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
-
+it('kiosk member registration rejects invalid whatsapp and unclear address', function () {
     $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);
     $mock->shouldIgnoreMissing();
@@ -204,20 +199,234 @@ it('kiosk member registration creates a usable member account', function () {
 
     post(route('kiosk.members.store'), [
         'name' => 'Member Kiosk',
-        'email' => '230170021@mhs.unimal.ac.id',
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '12345',
+        'address' => '???',
+    ])->assertSessionHasErrors([
+        'whatsapp',
+        'address',
+    ]);
+});
+
+it('kiosk visit rejects malformed phone and identity details', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    post(route('kiosk.visits.store'), [
+        'name' => 'Pengunjung Demo',
+        'visitor_type' => VisitLog::VISITOR_TYPE_MAHASISWA,
+        'identity_number' => 'ID-ABC',
+        'phone' => '12345',
+        'purpose' => 'read',
+    ])->assertSessionHasErrors([
+        'identity_number',
+        'phone',
+    ]);
+});
+
+it('kiosk member registration creates an account-link token for google onboarding', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $response = post(route('kiosk.members.store'), [
+        'name' => 'Member Kiosk',
+        'email' => '230170001@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
-        'address' => 'Jl. Teuku Umar No. 12, Lhokseumawe',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
-    ])
-        ->assertRedirect(route('kiosk.index', ['menu' => 'member']))
-        ->assertSessionHas('inertia.flash_data.toast.message', 'Pendaftaran member berhasil. Silakan gunakan akun Anda untuk layanan mandiri.');
+        'address' => 'Jl. Kampus No. 1',
+    ]);
 
-    $user = User::query()->where('email', '230170021@mhs.unimal.ac.id')->firstOrFail();
+    expect($response->getStatusCode())->toBe(302)
+        ->and($response->headers->get('Location'))
+        ->toBe(route('kiosk.index', ['menu' => 'member']));
 
-    expect($user->address)->toBe('Jl. Teuku Umar No. 12, Lhokseumawe')
-        ->and($user->hasRole('member'))->toBeTrue()
-        ->and($user->hasRequiredProfileDetails())->toBeTrue();
+    expect(session('inertia.flash_data.toast'))->toBe([
+        'type' => 'success',
+        'message' => 'QR siap digunakan. Scan dari ponsel untuk menautkan akun Google.',
+    ]);
+
+    assertDatabaseHas('member_registration_claims', [
+        'name' => 'Member Kiosk',
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 1',
+        'status' => MemberRegistrationClaim::STATUS_PENDING,
+    ]);
+});
+
+it('kiosk shows the latest live status for the active member registration claim', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $claim = MemberRegistrationClaim::query()->create([
+        'name' => 'Member Kiosk',
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 1',
+        'token_hash' => hash('sha256', 'rb-link-status'),
+        'expires_at' => now()->addMinutes(30),
+        'last_error_message' => 'Gunakan akun Google dengan email UNIMAL yang sama seperti data registrasi.',
+        'last_error_at' => now(),
+    ]);
+
+    $presentedClaim = [
+        'id' => $claim->id,
+        'name' => $claim->name,
+        'email' => $claim->email,
+        'whatsapp' => $claim->whatsapp,
+        'address' => $claim->address,
+        'linkUrl' => 'https://ruangbaca.test/account-link/rb-link-status',
+        'qrSvg' => '<svg></svg>',
+        'status' => MemberRegistrationClaim::STATUS_PENDING,
+        'expiresAt' => $claim->expires_at->toIso8601String(),
+        'claimedAt' => null,
+        'lastErrorMessage' => null,
+        'lastErrorAt' => null,
+        'approvalPending' => false,
+    ];
+
+    $this->withSession([
+        'kiosk.member_registration_claim' => $presentedClaim,
+    ]);
+
+    get(route('kiosk.index', ['menu' => 'member']))
+        ->assertSuccessful()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('kiosk/index')
+                ->where('memberRegistrationClaim.id', $claim->id)
+                ->where('memberRegistrationClaim.status', MemberRegistrationClaim::STATUS_PENDING)
+                ->where('memberRegistrationClaim.lastErrorMessage', 'Gunakan akun Google dengan email UNIMAL yang sama seperti data registrasi.')
+                ->where('memberRegistrationClaim.approvalPending', false),
+        );
+});
+
+it('kiosk member registration status endpoint returns the latest stored state', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $claim = MemberRegistrationClaim::query()->create([
+        'name' => 'Member Kiosk',
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 1',
+        'token_hash' => hash('sha256', 'rb-link-status'),
+        'expires_at' => now()->addMinutes(30),
+        'status' => MemberRegistrationClaim::STATUS_CLAIMED,
+        'claimed_at' => now(),
+    ]);
+
+    $this->withSession([
+        'kiosk.member_registration_claim' => [
+            'id' => $claim->id,
+            'name' => $claim->name,
+            'email' => $claim->email,
+            'whatsapp' => $claim->whatsapp,
+            'address' => $claim->address,
+            'linkUrl' => 'https://ruangbaca.test/account-link/rb-link-status',
+            'qrSvg' => '<svg></svg>',
+            'status' => MemberRegistrationClaim::STATUS_PENDING,
+            'expiresAt' => $claim->expires_at->toIso8601String(),
+            'claimedAt' => null,
+            'lastErrorMessage' => null,
+            'lastErrorAt' => null,
+            'approvalPending' => false,
+        ],
+    ]);
+
+    get(route('kiosk.members.status'))
+        ->assertSuccessful()
+        ->assertJsonPath('memberRegistrationClaim.id', $claim->id)
+        ->assertJsonPath('memberRegistrationClaim.status', MemberRegistrationClaim::STATUS_CLAIMED);
+});
+
+it('kiosk member registration cancel endpoint expires pending registrations and clears the session', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $claim = MemberRegistrationClaim::query()->create([
+        'name' => 'Member Kiosk',
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 1',
+        'token_hash' => hash('sha256', 'rb-link-cancel'),
+        'expires_at' => now()->addMinutes(3),
+        'status' => MemberRegistrationClaim::STATUS_PENDING,
+    ]);
+
+    $this->withSession([
+        'kiosk.member_registration_claim' => [
+            'id' => $claim->id,
+            'name' => $claim->name,
+            'email' => $claim->email,
+            'whatsapp' => $claim->whatsapp,
+            'address' => $claim->address,
+            'linkUrl' => 'https://ruangbaca.test/account-link/rb-link-cancel',
+            'qrSvg' => '<svg></svg>',
+            'status' => MemberRegistrationClaim::STATUS_PENDING,
+            'expiresAt' => $claim->expires_at->toIso8601String(),
+            'claimedAt' => null,
+            'lastErrorMessage' => null,
+            'lastErrorAt' => null,
+            'approvalPending' => false,
+        ],
+    ]);
+
+    post(route('kiosk.members.cancel'))
+        ->assertSuccessful()
+        ->assertJsonPath('cancelled', true)
+        ->assertSessionMissing('kiosk.member_registration_claim');
+
+    expect($claim->fresh()?->status)->toBe(MemberRegistrationClaim::STATUS_EXPIRED);
+});
+
+it('kiosk member registration cancel endpoint clears expired registrations from the session', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $claim = MemberRegistrationClaim::query()->create([
+        'name' => 'Member Kiosk',
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 1',
+        'token_hash' => hash('sha256', 'rb-link-expired'),
+        'expires_at' => now()->subMinute(),
+        'status' => MemberRegistrationClaim::STATUS_EXPIRED,
+    ]);
+
+    $this->withSession([
+        'kiosk.member_registration_claim' => [
+            'id' => $claim->id,
+            'name' => $claim->name,
+            'email' => $claim->email,
+            'whatsapp' => $claim->whatsapp,
+            'address' => $claim->address,
+            'linkUrl' => 'https://ruangbaca.test/account-link/rb-link-expired',
+            'qrSvg' => '<svg></svg>',
+            'status' => MemberRegistrationClaim::STATUS_EXPIRED,
+            'expiresAt' => $claim->expires_at->toIso8601String(),
+            'claimedAt' => null,
+            'lastErrorMessage' => null,
+            'lastErrorAt' => null,
+            'approvalPending' => false,
+        ],
+    ]);
+
+    post(route('kiosk.members.cancel'))
+        ->assertSuccessful()
+        ->assertJsonPath('cancelled', true)
+        ->assertSessionMissing('kiosk.member_registration_claim');
 });
 
 it('kiosk visit submission flashes a sonner toast after saving', function () {

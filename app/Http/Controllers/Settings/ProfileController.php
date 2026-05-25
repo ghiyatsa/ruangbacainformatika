@@ -6,10 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileOnboardingRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use App\Models\User;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,10 +18,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
-        ]);
+        return Inertia::render('settings/profile');
     }
 
     public function complete(Request $request): Response|RedirectResponse
@@ -31,7 +26,15 @@ class ProfileController extends Controller
         /** @var User|null $user */
         $user = $request->user();
 
-        if (! $user instanceof User || $user->hasRequiredProfileDetails()) {
+        if (! $user instanceof User) {
+            return to_route('settings.profile.edit');
+        }
+
+        if ($user->requiresWhatsAppVerification()) {
+            return to_route('register.whatsapp');
+        }
+
+        if ($user->hasRequiredProfileDetails()) {
             return to_route('settings.profile.edit');
         }
 
@@ -45,12 +48,22 @@ class ProfileController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $originalWhatsapp = $user->whatsapp;
 
         $user->fill($request->validated());
         $user->save();
 
         if ($user->hasRequiredProfileDetails() && ! $user->hasCompletedProfile()) {
             $user->markProfileAsCompleted();
+        }
+
+        if ($originalWhatsapp !== $user->whatsapp && $user->requiresWhatsAppVerification()) {
+            Inertia::flash('toast', [
+                'type' => 'info',
+                'message' => 'Nomor WhatsApp diperbarui. Verifikasi ulang diperlukan.',
+            ]);
+
+            return to_route('register.whatsapp');
         }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
@@ -63,13 +76,12 @@ class ProfileController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        // Removal of Google auth requirement
-
-        if ($user->hasRequiredProfileDetails()) {
+        if ($user->hasRequiredProfileDetails() && ! $user->requiresWhatsAppVerification()) {
             return to_route('settings.profile.edit');
         }
 
         $user->forceFill([
+            'name' => $request->validated('name'),
             'whatsapp' => $request->validated('whatsapp'),
             'address' => $request->validated('address'),
         ]);
@@ -77,6 +89,8 @@ class ProfileController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Onboarding selesai.')]);
 
-        return to_route('settings.profile.edit');
+        return $user->canAccessAdminPanel()
+            ? to_route('filament.admin.pages.dashboard')
+            : to_route('settings.profile.edit');
     }
 }

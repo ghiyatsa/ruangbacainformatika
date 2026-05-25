@@ -9,7 +9,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('app:remind-return')]
-#[Description('Send email reminders for books due tomorrow')]
+#[Description('Send WhatsApp reminders for books due tomorrow')]
 class RemindReturnCommand extends Command
 {
     /**
@@ -29,12 +29,12 @@ class RemindReturnCommand extends Command
             ->get();
 
         if ($loans->isEmpty()) {
-            $this->info('No books are due tomorrow.');
+            $this->info('No loans are due tomorrow.');
 
             return self::SUCCESS;
         }
 
-        $this->info("Sending reminders for {$loans->count()} loans...");
+        $this->info("Sending WhatsApp reminders for {$loans->count()} loans...");
 
         foreach ($loans as $loan) {
             $loan->user->notify(new LoanReminderNotification($loan));
@@ -42,7 +42,7 @@ class RemindReturnCommand extends Command
             $loan->save();
         }
 
-        $this->info('Reminders sent successfully!');
+        $this->info('WhatsApp reminders sent successfully!');
 
         return self::SUCCESS;
     }

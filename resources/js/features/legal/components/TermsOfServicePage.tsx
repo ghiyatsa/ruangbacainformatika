@@ -28,7 +28,7 @@ export function TermsOfServicePage() {
             header={
                 <LibraryPageHero
                     title="Syarat Layanan"
-                    description="Ketentuan penggunaan Ruang Baca Teknik Informatika bagi sivitas akademika dan pengguna terkait."
+                    description="Ketentuan penggunaan Ruang Baca Teknik Informatika."
                 />
             }
         >
@@ -39,7 +39,7 @@ export function TermsOfServicePage() {
                             <CardTitle>Ketentuan penggunaan layanan</CardTitle>
                             <CardDescription>
                                 Layanan ini disediakan untuk mendukung
-                                pembelajaran, riset, dan administrasi akademik.
+                                pembelajaran, riset, dan kebutuhan akademik.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -63,22 +63,22 @@ export function TermsOfServicePage() {
                             icon={BookOpen}
                             tone="accent"
                         >
-                            Meliputi pencarian koleksi, akses informasi buku,
-                            karya ilmiah, layanan akun, dan fitur pendukung
+                            Meliputi pencarian koleksi, informasi buku, karya
+                            ilmiah, layanan akun, dan fitur pendukung
                             perpustakaan digital.
                         </PublicInfoCard>
 
                         <PublicInfoCard title="Tanggung jawab" icon={Shield}>
-                            Pengguna bertanggung jawab atas data akun, kepatuhan
-                            penggunaan layanan, dan interaksi yang dilakukan
-                            melalui sistem.
+                            Pengguna bertanggung jawab atas keamanan akun,
+                            kepatuhan penggunaan layanan, dan interaksi melalui
+                            sistem.
                         </PublicInfoCard>
                     </div>
                 </div>
 
                 <PublicPageSection
                     title="Catatan penting"
-                    description="Ketentuan ini mendampingi kebijakan akademik dan dapat menyesuaikan kebutuhan layanan seiring perkembangan sistem."
+                    description="Ketentuan ini mengikuti kebijakan akademik dan dapat diperbarui sesuai kebutuhan layanan."
                 >
                     <div className="grid gap-5 md:grid-cols-3">
                         <PublicInfoCard title="Pembaruan layanan">

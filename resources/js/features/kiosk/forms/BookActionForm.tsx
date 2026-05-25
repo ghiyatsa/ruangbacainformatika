@@ -17,7 +17,6 @@ import type {
     KioskBookSearchMode,
     KioskBookSearchResult,
 } from '@/features/kiosk/types';
-import type { RouteFormDefinition } from '@/wayfinder';
 
 export function BookActionForm({
     action,
@@ -28,7 +27,10 @@ export function BookActionForm({
     bookSearchMode = 'borrow',
     autoFocus = true,
 }: {
-    action: RouteFormDefinition<'post'>;
+    action: {
+        url: string;
+        method: 'get' | 'post' | 'put' | 'patch' | 'delete';
+    };
     submitLabel: string;
     description: string;
     maxInputs?: number;
@@ -159,6 +161,7 @@ export function BookActionForm({
             {...action}
             resetOnSuccess
             disableWhileProcessing
+            autoComplete="off"
             className="flex flex-col gap-4"
             onSuccess={() => {
                 setMemberIdentifier('');
@@ -180,6 +183,22 @@ export function BookActionForm({
 
                 return (
                     <>
+                        <input
+                            type="text"
+                            name="username"
+                            autoComplete="username"
+                            tabIndex={-1}
+                            className="hidden"
+                            aria-hidden="true"
+                        />
+                        <input
+                            type="password"
+                            name="password"
+                            autoComplete="current-password"
+                            tabIndex={-1}
+                            className="hidden"
+                            aria-hidden="true"
+                        />
                         {usesBookSearch ? (
                             <div className="grid gap-4">
                                 <FieldGroup className="grid gap-4 rounded-2xl border border-border/70 bg-card p-4">
@@ -191,10 +210,21 @@ export function BookActionForm({
                                             required
                                             className="min-w-0"
                                         >
+                                            <input
+                                                type="hidden"
+                                                name="member_identifier"
+                                                value={memberIdentifier}
+                                            />
                                             <Input
                                                 id="book-member"
-                                                name="member_identifier"
                                                 autoFocus={autoFocus}
+                                                autoComplete="new-password"
+                                                autoCapitalize="none"
+                                                autoCorrect="off"
+                                                spellCheck={false}
+                                                data-lpignore="true"
+                                                data-1p-ignore="true"
+                                                data-bwignore="true"
                                                 placeholder="email@mhs.unimal.ac.id atau NIM"
                                                 value={memberIdentifier}
                                                 onChange={(e) => {
@@ -391,10 +421,21 @@ export function BookActionForm({
                                         error={errors.member_identifier}
                                         required
                                     >
+                                        <input
+                                            type="hidden"
+                                            name="member_identifier"
+                                            value={memberIdentifier}
+                                        />
                                         <Input
                                             id="book-member"
-                                            name="member_identifier"
                                             autoFocus={autoFocus}
+                                            autoComplete="new-password"
+                                            autoCapitalize="none"
+                                            autoCorrect="off"
+                                            spellCheck={false}
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-bwignore="true"
                                             placeholder="email@mhs.unimal.ac.id atau NIM"
                                             value={memberIdentifier}
                                             onChange={(e) =>
@@ -420,10 +461,20 @@ export function BookActionForm({
                                         required
                                     >
                                         <div className="grid gap-3">
+                                            <input
+                                                type="hidden"
+                                                name="isbns.0"
+                                                value={firstIsbn}
+                                            />
                                             <Input
                                                 key={0}
                                                 id="book-isbn-0"
-                                                name="isbns.0"
+                                                autoComplete="new-password"
+                                                autoCorrect="off"
+                                                spellCheck={false}
+                                                data-lpignore="true"
+                                                data-1p-ignore="true"
+                                                data-bwignore="true"
                                                 placeholder="Scan atau ketik ISBN/ISSN 1"
                                                 value={firstIsbn}
                                                 onChange={(e) =>
@@ -440,6 +491,12 @@ export function BookActionForm({
                                                     key={i + 1}
                                                     id={`book-isbn-${i + 1}`}
                                                     name={`isbns.${i + 1}`}
+                                                    autoComplete="new-password"
+                                                    autoCorrect="off"
+                                                    spellCheck={false}
+                                                    data-lpignore="true"
+                                                    data-1p-ignore="true"
+                                                    data-bwignore="true"
                                                     placeholder={`Scan atau ketik ISBN/ISSN ${i + 2} (opsional)`}
                                                     aria-invalid={Boolean(
                                                         errors[
@@ -474,7 +531,7 @@ export function BookActionForm({
                                         <DialogDescription>
                                             {bookSearchMode === 'borrow'
                                                 ? 'Cari dan pilih buku.'
-                                                : 'Cari dari pinjaman aktif member ini.'}
+                                                : 'Cari dari pinjaman aktif anggota ini.'}
                                         </DialogDescription>
                                     </DialogHeader>
 
@@ -486,6 +543,12 @@ export function BookActionForm({
                                                     ? 'Cari judul, penulis, ISBN, atau ISSN'
                                                     : 'Filter judul, penulis, ISBN, atau ISSN'
                                             }
+                                            autoComplete="new-password"
+                                            autoCorrect="off"
+                                            spellCheck={false}
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-bwignore="true"
                                             value={searchQuery}
                                             onChange={(e) => {
                                                 const nextQuery =

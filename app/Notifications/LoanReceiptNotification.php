@@ -3,9 +3,10 @@
 namespace App\Notifications;
 
 use App\Models\Loan;
+use App\Notifications\Channels\WhatsAppChannel;
+use App\Notifications\Messages\WhatsAppMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Throwable;
 
@@ -25,41 +26,34 @@ class LoanReceiptNotification extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return [WhatsAppChannel::class];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
+    public function toWhatsApp(object $notifiable): WhatsAppMessage
     {
-        $mail = (new MailMessage)
-            ->subject('Bukti Peminjaman Buku - '.config('app.name'))
-            ->greeting('Halo, '.$notifiable->name.'!')
-            ->line('Peminjaman buku Anda telah berhasil diproses melalui perangkat kiosk.')
-            ->line('Berikut adalah daftar buku yang Anda pinjam:')
-            ->line('');
+        $lines = [
+            "Halo {$notifiable->name},",
+            'Peminjaman buku Anda berhasil diproses melalui kiosk.',
+            'Daftar buku:',
+        ];
 
         foreach ($this->loan->items as $item) {
             $title = $item->bookItem->book->title ?? 'Buku Tanpa Judul';
             $isbn = $item->bookItem->book->isbn ?? '-';
-            $mail->line("- **{$title}** (ISBN: {$isbn})");
+            $lines[] = "- {$title} (ISBN: {$isbn})";
         }
 
-        return $mail
-            ->line('')
-            ->line('**Batas Pengembalian:** '.$this->loan->due_at?->translatedFormat('d F Y'))
-            ->line('Pastikan untuk mengembalikan buku tepat waktu untuk menghindari denda atau penangguhan akun.')
-            ->action('Lihat Riwayat Peminjaman', url('/dashboard'))
-            ->line('Jika Anda merasa tidak melakukan peminjaman ini, silakan segera hubungi petugas perpustakaan untuk mengamankan akun Anda.')
-            ->line('Terima kasih telah menggunakan layanan Perpustakaan '.config('app.name').'!')
-            ->salutation('Salam, Tim Perpustakaan');
+        $lines[] = '';
+        $lines[] = 'Batas pengembalian: '.$this->loan->due_at?->translatedFormat('d F Y');
+        $lines[] = 'Silakan kembalikan tepat waktu untuk menghindari pembatasan akun.';
+        $lines[] = 'Riwayat pinjaman: '.url('/loans/history');
+        $lines[] = 'Salam, Tim Perpustakaan '.config('app.name');
+
+        return new WhatsAppMessage(implode("\n", $lines));
     }
 
     /**

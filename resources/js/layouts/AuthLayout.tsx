@@ -1,4 +1,3 @@
-import { usePage } from '@inertiajs/react';
 import { AppLogo } from '@/components/layouts/header/AppLogo';
 import {
     Card,
@@ -20,9 +19,7 @@ export default function AuthLayout({
     description?: string;
     children: ReactNode;
 }) {
-    const { component } = usePage();
-    const isCardLayout =
-        component === 'auth/login' || component === 'auth/register';
+    const isCardLayout = false;
 
     return (
         <div

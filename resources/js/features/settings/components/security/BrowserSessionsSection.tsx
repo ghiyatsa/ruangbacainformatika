@@ -1,22 +1,9 @@
-import { Form } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { CheckCircle2, Monitor, Smartphone } from 'lucide-react';
-import { useState } from 'react';
-import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
-import InputError from '@/components/common/InputError';
-import PasswordInput from '@/components/common/PasswordInput';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
 import { cn } from '@/lib/utils';
+import { logout } from '@/routes';
 import type { Session } from '@/features/settings/types';
 
 interface BrowserSessionsSectionProps {
@@ -26,8 +13,6 @@ interface BrowserSessionsSectionProps {
 export function BrowserSessionsSection({
     sessions,
 }: BrowserSessionsSectionProps) {
-    const [confirmingLogout, setConfirmingLogout] = useState(false);
-
     if (sessions.length === 0) {
         return null;
     }
@@ -36,14 +21,13 @@ export function BrowserSessionsSection({
         <section className="flex flex-col gap-6">
             <SettingsSectionHeader
                 title="Sesi browser"
-                description="Kelola dan keluarkan sesi aktif Anda di browser dan perangkat lain."
+                description="Lihat sesi aktif akun Anda di browser dan perangkat lain."
             />
 
             <div className="flex flex-col gap-4">
                 <p className="text-sm text-muted-foreground">
-                    Jika perlu, Anda dapat keluar dari semua sesi browser lain
-                    di semua perangkat. Jika Anda merasa akun Anda telah
-                    disusupi, sebaiknya perbarui kata sandi Anda juga.
+                    Daftar ini membantu Anda meninjau perangkat yang masih
+                    terhubung ke akun Anda.
                 </p>
 
                 <div className="flex flex-col gap-2">
@@ -89,68 +73,12 @@ export function BrowserSessionsSection({
                     ))}
                 </div>
 
-                <div className="mt-2">
-                    <Dialog
-                        open={confirmingLogout}
-                        onOpenChange={setConfirmingLogout}
-                    >
-                        <DialogTrigger asChild>
-                            <Button variant="outline">
-                                Keluar dari Sesi Browser Lain
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>
-                                    Keluar dari Sesi Browser Lain
-                                </DialogTitle>
-                                <DialogDescription>
-                                    Masukkan kata sandi Anda untuk mengonfirmasi
-                                    bahwa Anda ingin keluar dari sesi browser
-                                    lain di semua perangkat.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <Form
-                                action={SecurityController.destroy()}
-                                onSuccess={() => setConfirmingLogout(false)}
-                            >
-                                {({ errors: formErrors, processing }) => (
-                                    <div className="space-y-4">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="password_session">
-                                                Kata sandi
-                                            </Label>
-                                            <PasswordInput
-                                                id="password_session"
-                                                name="password"
-                                                placeholder="Masukkan kata sandi Anda"
-                                            />
-                                            <InputError
-                                                message={formErrors.password}
-                                            />
-                                        </div>
-                                        <DialogFooter>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    setConfirmingLogout(false)
-                                                }
-                                            >
-                                                Batal
-                                            </Button>
-                                            <Button
-                                                type="submit"
-                                                disabled={processing}
-                                            >
-                                                Keluar dari Sesi Browser Lain
-                                            </Button>
-                                        </DialogFooter>
-                                    </div>
-                                )}
-                            </Form>
-                        </DialogContent>
-                    </Dialog>
+                <div>
+                    <Button asChild variant="outline">
+                        <Link href={logout().url} method="post" as="button">
+                            Keluar dari perangkat ini
+                        </Link>
+                    </Button>
                 </div>
             </div>
         </section>

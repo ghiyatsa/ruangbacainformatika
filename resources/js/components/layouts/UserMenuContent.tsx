@@ -1,4 +1,4 @@
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { History, LogOut, Settings } from 'lucide-react';
 import { UserInfo } from '@/components/common/UserInfo';
 import {
@@ -11,13 +11,14 @@ import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import loans from '@/routes/loans';
 import settings from '@/routes/settings';
-import type { User } from '@/types';
+import type { Auth, User } from '@/types';
 
 type Props = {
     user: User;
 };
 
 export function UserMenuContent({ user }: Props) {
+    const { auth } = usePage<{ auth: Auth }>().props;
     const cleanup = useMobileNavigation();
 
     const handleLogout = () => {
@@ -34,17 +35,19 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                    <Link
-                        className="block w-full cursor-pointer"
-                        href={loans.history.url()}
-                        prefetch
-                        onClick={cleanup}
-                    >
-                        <History className="mr-2 h-4 w-4" />
-                        Riwayat Pinjam
-                    </Link>
-                </DropdownMenuItem>
+                {auth.canBorrowBooks ? (
+                    <DropdownMenuItem asChild>
+                        <Link
+                            className="block w-full cursor-pointer"
+                            href={loans.history.url()}
+                            prefetch
+                            onClick={cleanup}
+                        >
+                            <History className="mr-2 h-4 w-4" />
+                            Riwayat Peminjaman
+                        </Link>
+                    </DropdownMenuItem>
+                ) : null}
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"

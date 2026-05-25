@@ -20,7 +20,7 @@ export function PrivacyPolicyPage() {
             header={
                 <LibraryPageHero
                     title="Kebijakan Privasi"
-                    description="Penjelasan singkat mengenai pengelolaan data pengguna di Ruang Baca Teknik Informatika."
+                    description="Ringkasan pengelolaan data di Ruang Baca Teknik Informatika."
                 />
             }
         >
@@ -30,8 +30,8 @@ export function PrivacyPolicyPage() {
                         <CardHeader>
                             <CardTitle>Prinsip pengelolaan data</CardTitle>
                             <CardDescription>
-                                Kami mengelola data seperlunya untuk layanan
-                                akun, peminjaman, dan akses koleksi.
+                                Data digunakan seperlunya untuk akun, layanan
+                                peminjaman, dan operasional perpustakaan.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6 text-sm leading-7 text-muted-foreground">
@@ -40,10 +40,10 @@ export function PrivacyPolicyPage() {
                                     Data yang digunakan
                                 </h2>
                                 <p className="mt-2">
-                                    Data yang dapat kami gunakan meliputi
-                                    identitas akun, alamat email, nomor
-                                    WhatsApp, riwayat peminjaman, dan aktivitas
-                                    yang terkait dengan layanan perpustakaan.
+                                    Data yang dapat digunakan meliputi
+                                    identitas akun, email, nomor WhatsApp,
+                                    riwayat peminjaman, dan aktivitas yang
+                                    terkait dengan layanan perpustakaan.
                                 </p>
                             </section>
 
@@ -77,9 +77,9 @@ export function PrivacyPolicyPage() {
                                     Hak pengguna
                                 </h2>
                                 <p className="mt-2">
-                                    Pengguna dapat meminta pembaruan data profil
-                                    atau klarifikasi penggunaan data melalui
-                                    kontak resmi program studi.
+                                    Pengguna dapat meminta pembaruan data
+                                    profil atau klarifikasi penggunaan data
+                                    melalui kontak resmi program studi.
                                 </p>
                             </section>
                         </CardContent>
@@ -112,7 +112,7 @@ export function PrivacyPolicyPage() {
 
                 <PublicPageSection
                     title="Ruang lingkup perlindungan"
-                    description="Kebijakan privasi ini mencakup data yang diperlukan untuk identitas akun dan operasional layanan perpustakaan digital."
+                    description="Mencakup data yang diperlukan untuk identitas akun dan operasional layanan."
                 >
                     <div className="grid gap-5 md:grid-cols-3">
                         <PublicInfoCard title="Akun pengguna">

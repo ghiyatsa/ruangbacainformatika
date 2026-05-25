@@ -22,7 +22,7 @@ export default function PopularCategories({
         <div className="flex flex-col gap-6">
             <SectionHeader
                 title="Kategori Populer"
-                subtitle="Topik dengan koleksi yang paling banyak diminati."
+                subtitle="Topik yang paling sering ditelusuri."
             />
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -43,14 +43,14 @@ export default function PopularCategories({
                                 </h3>
                                 <p className="line-clamp-2 text-sm text-muted-foreground">
                                     {category.description ||
-                                        'Koleksi pilihan kategori ini.'}
+                                        'Daftar referensi pada kategori ini.'}
                                 </p>
                             </div>
                             <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
                         </div>
                         <p className="mt-4 text-sm font-semibold text-primary">
                             {category.booksCount.toLocaleString('id-ID')}{' '}
-                            koleksi
+                            judul
                         </p>
                     </Link>
                 ))}

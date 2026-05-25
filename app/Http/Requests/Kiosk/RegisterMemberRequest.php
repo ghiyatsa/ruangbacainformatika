@@ -2,12 +2,16 @@
 
 namespace App\Http\Requests\Kiosk;
 
+use App\Actions\Fortify\ProfileValidationRules;
+use App\Support\CampusEmail;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 
 class RegisterMemberRequest extends FormRequest
 {
+    use ProfileValidationRules;
+
     public function authorize(): bool
     {
         return true;
@@ -19,12 +23,22 @@ class RegisterMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'whatsapp' => ['required', 'string', 'min:10', 'max:15'],
-            'address' => ['required', 'string', 'max:1000'],
-            'password' => ['required', 'string'],
-            'password_confirmation' => ['required', 'same:password'],
+            'name' => $this->nameRules(),
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $message = app(CampusEmail::class)->borrowingEligibilityMessage(is_string($value) ? $value : null);
+
+                    if ($message !== null) {
+                        $fail($message);
+                    }
+                },
+            ],
+            'whatsapp' => $this->whatsappRules(required: true),
+            'address' => $this->addressRules(required: true),
         ];
     }
 
@@ -33,7 +47,7 @@ class RegisterMemberRequest extends FormRequest
         $this->merge([
             'name' => Str::of((string) $this->input('name'))->squish()->toString(),
             'email' => Str::of((string) $this->input('email'))->trim()->lower()->toString(),
-            'whatsapp' => Str::of((string) $this->input('whatsapp'))->replaceMatches('/\s+/', '')->toString(),
+            'whatsapp' => $this->normalizePhoneNumber((string) $this->input('whatsapp')),
             'address' => Str::of((string) $this->input('address'))->squish()->toString(),
         ]);
     }

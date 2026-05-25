@@ -16,25 +16,25 @@ export default function CatalogCtaGrid() {
     const catalogLinks = [
         {
             title: 'Katalog Buku',
-            description: 'Buku dan referensi utama.',
+            description: 'Referensi utama untuk perkuliahan dan riset.',
             href: booksRoute.index.url(),
             icon: BookOpen,
         },
         {
             title: 'Skripsi',
-            description: 'Arsip tugas akhir S1.',
+            description: 'Arsip tugas akhir sarjana.',
             href: skripsiRoute.index.url(),
             icon: GraduationCap,
         },
         {
             title: 'Tesis',
-            description: 'Karya ilmiah pascasarjana.',
+            description: 'Arsip karya ilmiah pascasarjana.',
             href: thesisRoute.index.url(),
             icon: Library,
         },
         {
             title: 'Laporan KP',
-            description: 'Arsip kerja praktik.',
+            description: 'Arsip laporan kerja praktik.',
             href: internshipReportsRoute.index.url(),
             icon: FileText,
         },
@@ -43,8 +43,8 @@ export default function CatalogCtaGrid() {
     return (
         <div className="flex flex-col gap-6">
             <SectionHeader
-                title="Jelajahi Katalog"
-                subtitle="Akses cepat ke seluruh jenis koleksi akademik."
+                title="Akses Katalog"
+                subtitle="Buka koleksi sesuai kebutuhan studi."
             />
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">

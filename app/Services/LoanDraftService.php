@@ -333,9 +333,9 @@ class LoanDraftService
     {
         $user->assignMemberRoleIfAvailable();
 
-        if (! $user->hasRole('member')) {
+        if (! $user->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'draft' => 'Hanya akun member yang dapat membuat permintaan peminjaman.',
+                'draft' => 'Layanan peminjaman tersedia untuk mahasiswa Teknik Informatika yang terdaftar.',
             ]);
         }
     }

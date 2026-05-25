@@ -60,7 +60,11 @@ it('super admin users can access the admin users resource', function () {
 
     actingAs($user)
         ->get('/admin/users')
-        ->assertOk();
+        ->assertOk()
+        ->assertSee('WhatsApp')
+        ->assertSee('Alamat')
+        ->assertSee('Setujui')
+        ->assertSee('Setujui Terpilih');
 });
 
 it('super admin users can render the general settings form', function () {
@@ -103,17 +107,35 @@ it('super admin users can render the kiosk settings actions', function () {
         ->assertSee('Kosongkan jika tidak diubah.');
 });
 
-it('super admin users can render the create user form with a password field', function () {
+it('super admin users can render the create user form for google accounts', function () {
     $user = makeSuperAdmin();
 
     actingAs($user)
         ->get('/admin/users/create')
         ->assertOk()
-        ->assertSee('Kata Sandi')
+        ->assertSee('Pengguna akan masuk dengan akun Google pada email ini.')
+        ->assertSee('WhatsApp')
+        ->assertSee('Alamat')
         ->assertSee('Peran')
-        ->assertSee('Minimal 8 karakter.')
         ->assertSee('Pilih sesuai hak akses.')
-        ->assertSee('Aktifkan jika akun siap dipakai.');
+        ->assertSee('Aktifkan jika akun anggota sudah lolos pengecekan operator.');
+});
+
+it('super admin users see verified whatsapp as locked on the edit user form', function () {
+    $admin = makeSuperAdmin();
+    $managedUser = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+    ]);
+
+    $response = actingAs($admin)
+        ->get("/admin/users/{$managedUser->getKey()}/edit")
+        ->assertOk();
+
+    $content = $response->getContent();
+
+    expect($content)->toContain('wire:model="data.whatsapp"')
+        ->and($content)->toMatch('/wire:model="data\\.whatsapp"[^>]*disabled|disabled[^>]*wire:model="data\\.whatsapp"/');
 });
 
 it('super admin users can render book relation helpers on the create book form', function () {
@@ -247,6 +269,24 @@ it('super admin users can see similarity sync overview on the admin dashboard', 
         ->assertSee('Perlu Tindak Lanjut')
         ->assertSee('Sedang Diproses')
         ->assertSee('Belum Dijadwalkan');
+});
+
+it('super admin users can see pending member approvals overview on the admin dashboard', function () {
+    $user = makeSuperAdmin();
+
+    User::factory()->create([
+        'auth_provider' => 'google',
+        'email' => 'pending@mhs.unimal.ac.id',
+        'is_approved' => false,
+    ]);
+
+    actingAs($user)
+        ->get('/admin')
+        ->assertOk()
+        ->assertSee('Review Anggota')
+        ->assertSee('Menunggu Review')
+        ->assertSee('Mahasiswa Pending')
+        ->assertSee('Disetujui Hari Ini');
 });
 
 it('filament resources expose consistent navigation metadata', function () {

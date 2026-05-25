@@ -4,7 +4,7 @@ import { BookActionForm } from './BookActionForm';
 export function ReturnForm({ loanMaxBooks }: { loanMaxBooks: number }) {
     return (
         <BookActionForm
-            action={KioskController.storeReturn.form()}
+            action={KioskController.storeReturn()}
             submitLabel="Kembalikan Buku"
             description="Cari pinjaman aktif lalu selesaikan pengembalian."
             maxInputs={loanMaxBooks}

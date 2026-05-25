@@ -24,8 +24,8 @@ export function AboutPage() {
 
     return (
         <PageLayout
-            title="Tentang Kami"
-            metaDescription="Kenali Ruang Baca Teknik Informatika Universitas Malikussaleh sebagai layanan perpustakaan digital untuk pembelajaran dan riset akademik."
+            title="Tentang Ruang Baca"
+            metaDescription="Profil Ruang Baca Teknik Informatika Universitas Malikussaleh."
             maxWidth="5xl"
             header={
                 <LibraryPageHero
@@ -37,14 +37,14 @@ export function AboutPage() {
                             </span>
                         </>
                     }
-                    description="Sistem Informasi Ruang Baca ini dirancang dan dikembangkan secara kolaboratif oleh 12 mahasiswa Program Studi Teknik Informatika Universitas Malikussaleh sebagai implementasi nyata proyek Kerja Praktik (KP)."
+                    description="Ruang Baca mendukung pembelajaran dan riset di Program Studi Teknik Informatika Universitas Malikussaleh."
                 />
             }
         >
             <div className="space-y-12">
                 <PublicPageSection
-                    title="Tim pengembang"
-                    description="Halaman ini menampilkan struktur tim penyusun yang membangun dan merawat pengalaman digital Ruang Baca."
+                    title="Tim Pengembang"
+                    description="Dikembangkan secara kolaboratif dan terus disempurnakan untuk mendukung layanan digital Ruang Baca."
                 >
                     <div className="overflow-hidden rounded-3xl border border-border/40 bg-card/50 shadow-sm backdrop-blur-xs">
                         <div className="relative aspect-video w-full bg-linear-to-b from-muted/50 to-muted/80 sm:aspect-21/9">

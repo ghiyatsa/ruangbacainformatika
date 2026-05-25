@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Services\Auth\AuthenticationRedirector;
 use App\Services\LoanDraftService;
+use App\Support\LoginViewData;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -57,17 +58,33 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
                 'canAccessAdminPanel' => $request->user()?->canAccessAdminPanel() ?? false,
+                'canBorrowBooks' => $request->user()?->canBorrowBooks() ?? false,
+                'hasVerifiedWhatsApp' => $request->user()?->hasVerifiedWhatsApp() ?? false,
+                'requiresWhatsAppVerification' => $request->user()?->requiresWhatsAppVerification() ?? false,
+                'borrowingAccessMessage' => $request->user() !== null && ! $request->user()->canBorrowBooks()
+                    ? ($request->user()->requiresWhatsAppVerification()
+                        ? 'Verifikasi WhatsApp diperlukan sebelum layanan anggota dapat digunakan.'
+                        : ($request->user()->requiresManualApproval()
+                            ? 'Akun kampus Anda sedang menunggu persetujuan admin.'
+                            : 'Layanan peminjaman tersedia untuk anggota yang telah disetujui.'))
+                    : null,
                 'homeUrl' => $request->user() === null
                     ? route('home', absolute: false)
                     : app(AuthenticationRedirector::class)->pathFor($request->user()),
             ],
-            'loanRequestCart' => $request->user()
+            'googleAuth' => [
+                'clientId' => filled(config('services.google.client_id'))
+                    ? config('services.google.client_id')
+                    : null,
+                'loginUrl' => route('auth.google', absolute: false),
+                'oneTapUrl' => route('auth.google.one-tap', absolute: false),
+                'enabled' => app(LoginViewData::class)->canLoginWithGoogle(),
+            ],
+            'loanRequestCart' => $request->user()?->canBorrowBooks()
                 ? $this->loanDraftService->summary($request->user())
                 : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'status' => $session?->get('status'),
-            'verification_resend_available_at' => $session?->get('verification_resend_available_at'),
-            'password_reset_resend_available_at' => $session?->get('password_reset_resend_available_at'),
         ];
     }
 }

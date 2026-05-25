@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use App\Notifications\Auth\VerifyEmailOtpNotification;
+use App\Support\CampusEmail;
 use App\Support\LoanConsequenceService;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -17,27 +16,26 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
     'name',
     'email',
-    'verified_user_agent_hash',
-    'password',
+    'google_id',
     'auth_provider',
     'whatsapp',
+    'whatsapp_verified_at',
     'address',
     'profile_completed_at',
     'is_approved',
 ])]
 
-#[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser, MustVerifyEmail
+#[Hidden(['remember_token'])]
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -47,9 +45,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'whatsapp_verified_at' => 'datetime',
             'profile_completed_at' => 'datetime',
-            'password' => 'hashed',
             'is_approved' => 'boolean',
         ];
     }
@@ -63,26 +60,15 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             if ($user->isDirty('email') && $user->getOriginal('email') !== null) {
                 $user->email = $user->getOriginal('email');
             }
+
+            if ($user->isDirty('whatsapp') && $user->usesCampusEmail()) {
+                $user->whatsapp_verified_at = null;
+            }
         });
-    }
 
-    public function isMahasiswa(): bool
-    {
-        return str_ends_with($this->email, '@mhs.unimal.ac.id');
-    }
-
-    public function nim(): string
-    {
-        if (! $this->isMahasiswa()) {
-            return '-';
-        }
-
-        return substr(Str::before($this->email, '@'), -9);
-    }
-
-    public function isDosen(): bool
-    {
-        return str_ends_with($this->email, '@unimal.ac.id');
+        static::saved(function (User $user): void {
+            $user->assignMemberRoleIfAvailable();
+        });
     }
 
     public function usesGoogleAuth(): bool
@@ -97,7 +83,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function shouldReceiveMemberRole(): bool
     {
-        return ! $this->hasAdministrativeRole() && ! $this->hasRole('member');
+        return ! $this->hasAdministrativeRole()
+            && ! $this->hasRole('member')
+            && $this->canReceiveMemberRole();
     }
 
     public function assignMemberRoleIfAvailable(): void
@@ -115,61 +103,51 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessAdminPanel(): bool
     {
-        return $this->hasVerifiedEmail() && $this->hasAdministrativeRole();
+        return $this->hasAdministrativeRole();
     }
 
-    public static function userAgentFingerprint(?string $userAgent): ?string
+    public function canReceiveMemberRole(): bool
     {
-        $normalizedUserAgent = Str::of((string) $userAgent)
-            ->trim()
-            ->squish()
-            ->toString();
-
-        if ($normalizedUserAgent === '') {
-            return null;
-        }
-
-        return hash('sha256', $normalizedUserAgent);
+        return $this->is_approved
+            && $this->hasVerifiedWhatsApp()
+            && $this->usesCampusEmail();
     }
 
-    public function shouldTrustCurrentUserAgent(?string $userAgent): bool
+    public function canBorrowBooks(): bool
     {
-        return $this->hasVerifiedEmail()
-            && blank($this->verified_user_agent_hash)
-            && filled(static::userAgentFingerprint($userAgent));
-    }
-
-    public function requiresEmailVerificationForUserAgent(?string $userAgent): bool
-    {
-        if (! $this->hasVerifiedEmail()) {
-            return false;
-        }
-
-        $fingerprint = static::userAgentFingerprint($userAgent);
-
-        if ($fingerprint === null || blank($this->verified_user_agent_hash)) {
-            return false;
-        }
-
-        return ! hash_equals((string) $this->verified_user_agent_hash, $fingerprint);
-    }
-
-    public function trustUserAgent(?string $userAgent): void
-    {
-        $fingerprint = static::userAgentFingerprint($userAgent);
-
-        if ($fingerprint === null) {
-            return;
-        }
-
-        $this->forceFill([
-            'verified_user_agent_hash' => $fingerprint,
-        ])->saveQuietly();
+        return $this->hasRole('member') && $this->canReceiveMemberRole();
     }
 
     public function hasRequiredProfileDetails(): bool
     {
         return filled($this->whatsapp) && filled($this->address);
+    }
+
+    public function usesCampusEmail(): bool
+    {
+        return app(CampusEmail::class)->isEligibleEmail($this->email);
+    }
+
+    public function hasVerifiedWhatsApp(): bool
+    {
+        return $this->whatsapp_verified_at !== null;
+    }
+
+    public function requiresWhatsAppVerification(): bool
+    {
+        return $this->usesCampusEmail() && ! $this->hasVerifiedWhatsApp();
+    }
+
+    public function requiresManualApproval(): bool
+    {
+        return $this->usesCampusEmail()
+            && $this->hasVerifiedWhatsApp()
+            && ! $this->is_approved;
+    }
+
+    public function routeNotificationForWhatsApp(): ?string
+    {
+        return filled($this->whatsapp) ? $this->whatsapp : null;
     }
 
     public function loans(): HasMany
@@ -261,10 +239,5 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         }
 
         return $this->canAccessAdminPanel();
-    }
-
-    public function sendEmailVerificationNotification(): void
-    {
-        $this->notify(new VerifyEmailOtpNotification);
     }
 }

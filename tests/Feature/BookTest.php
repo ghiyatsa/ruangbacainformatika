@@ -5,6 +5,7 @@ use App\Models\BookItem;
 use App\Models\LoanDraft;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -36,7 +37,11 @@ it('book detail page increments view count', function () {
 });
 
 it('book detail page shares loan request summary for authenticated users', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
     $user = User::factory()->create();
+    $user->assignRole('member');
+
     $book = Book::factory()->published()->create([
         'title' => 'Borrowable Book',
         'is_borrowable' => true,
@@ -63,6 +68,30 @@ it('book detail page shares loan request summary for authenticated users', funct
             ->where('loanRequest.count', 1)
             ->where('loanRequest.containsBook', true)
             ->where('loanRequestCart.count', 1)
+        );
+});
+
+it('book detail page hides loan request summary for authenticated users without borrowing access', function () {
+    $user = User::factory()->create([
+        'email' => 'outside@example.com',
+        'is_approved' => false,
+    ]);
+
+    $book = Book::factory()->published()->create([
+        'title' => 'Public Book',
+        'is_borrowable' => true,
+    ]);
+
+    /** @var User $user */
+    actingAs($user);
+
+    get(route('books.show', $book))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books/show')
+            ->where('auth.canBorrowBooks', false)
+            ->where('loanRequest', null)
+            ->where('loanRequestCart', null)
         );
 });
 

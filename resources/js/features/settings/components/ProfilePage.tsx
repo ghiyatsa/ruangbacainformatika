@@ -2,15 +2,9 @@ import { Head, usePage } from '@inertiajs/react';
 import { Separator } from '@/components/ui/separator';
 import { ProfileInformationForm } from '@/features/settings/components/profile/ProfileInformationForm';
 import { ProfileSummary } from '@/features/settings/components/profile/ProfileSummary';
-import type { ProfileInformationFormProps } from '@/features/settings/components/profile/ProfileInformationForm';
 import type { Auth } from '@/types';
 
-export type ProfilePageProps = Omit<ProfileInformationFormProps, 'user'>;
-
-export default function ProfilePage({
-    mustVerifyEmail,
-    status,
-}: ProfilePageProps) {
+export default function ProfilePage() {
     const { auth } = usePage<{ auth: Auth }>().props;
     const user = auth.user!;
 
@@ -24,11 +18,7 @@ export default function ProfilePage({
 
                 <Separator />
 
-                <ProfileInformationForm
-                    user={user}
-                    mustVerifyEmail={mustVerifyEmail}
-                    status={status}
-                />
+                <ProfileInformationForm user={user} />
             </div>
         </>
     );

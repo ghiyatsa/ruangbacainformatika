@@ -26,6 +26,8 @@ export function VisitForm({
     const [visitorType, setVisitorType] = useState('');
     const [identityNumber, setIdentityNumber] = useState('');
     const [institution, setInstitution] = useState('');
+    const [phone, setPhone] = useState('');
+    const [notes, setNotes] = useState('');
     const [purpose, setPurpose] = useState('');
 
     const isPublicVisitor = visitorType === 'umum';
@@ -44,10 +46,27 @@ export function VisitForm({
             method="post"
             resetOnSuccess
             disableWhileProcessing
+            autoComplete="off"
             className="flex flex-col gap-4"
         >
             {({ errors, processing }) => (
                 <>
+                    <input
+                        type="text"
+                        name="username"
+                        autoComplete="username"
+                        tabIndex={-1}
+                        className="hidden"
+                        aria-hidden="true"
+                    />
+                    <input
+                        type="password"
+                        name="password"
+                        autoComplete="current-password"
+                        tabIndex={-1}
+                        className="hidden"
+                        aria-hidden="true"
+                    />
                     <FieldGroup className="grid gap-4 sm:grid-cols-2">
                         <KioskField
                             label="Nama Lengkap"
@@ -55,10 +74,16 @@ export function VisitForm({
                             error={errors.name}
                             required
                         >
+                            <input type="hidden" name="name" value={name} />
                             <Input
                                 id="visit-name"
-                                name="name"
                                 autoFocus
+                                autoComplete="new-password"
+                                autoCorrect="off"
+                                spellCheck={false}
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
                                 placeholder="Nama lengkap"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
@@ -113,9 +138,19 @@ export function VisitForm({
                                 error={errors.identity_number}
                                 required
                             >
+                                <input
+                                    type="hidden"
+                                    name="identity_number"
+                                    value={identityNumber}
+                                />
                                 <Input
                                     id="visit-identity"
-                                    name="identity_number"
+                                    autoComplete="new-password"
+                                    autoCorrect="off"
+                                    spellCheck={false}
+                                    data-lpignore="true"
+                                    data-1p-ignore="true"
+                                    data-bwignore="true"
                                     placeholder="Nomor identitas"
                                     value={identityNumber}
                                     onChange={(e) =>
@@ -135,9 +170,19 @@ export function VisitForm({
                                 error={errors.institution}
                                 required
                             >
+                                <input
+                                    type="hidden"
+                                    name="institution"
+                                    value={institution}
+                                />
                                 <Input
                                     id="visit-institution"
-                                    name="institution"
+                                    autoComplete="new-password"
+                                    autoCorrect="off"
+                                    spellCheck={false}
+                                    data-lpignore="true"
+                                    data-1p-ignore="true"
+                                    data-bwignore="true"
                                     placeholder="Asal instansi"
                                     value={institution}
                                     onChange={(e) =>
@@ -153,12 +198,20 @@ export function VisitForm({
                             htmlFor="visit-phone"
                             error={errors.phone}
                         >
+                            <input type="hidden" name="phone" value={phone} />
                             <Input
                                 id="visit-phone"
-                                name="phone"
                                 type="tel"
                                 inputMode="numeric"
+                                autoComplete="new-password"
+                                autoCorrect="off"
+                                spellCheck={false}
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
                                 placeholder="08xxxxxxxxxx"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
                                 aria-invalid={Boolean(errors.phone)}
                             />
                         </KioskField>
@@ -205,11 +258,19 @@ export function VisitForm({
                             error={errors.notes}
                             className="sm:col-span-2"
                         >
+                            <input type="hidden" name="notes" value={notes} />
                             <textarea
                                 id="visit-notes"
-                                name="notes"
                                 rows={2}
+                                autoComplete="new-password"
+                                autoCorrect="off"
+                                spellCheck={false}
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
                                 placeholder="Keterangan tambahan"
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
                                 className="min-h-20 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
                                 aria-invalid={Boolean(errors.notes)}
                             />

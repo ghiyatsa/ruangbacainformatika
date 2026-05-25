@@ -138,7 +138,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
             </div>
 
             <BookActionForm
-                action={KioskController.borrow.form()}
+                action={KioskController.borrow()}
                 submitLabel="Pinjam Buku"
                 description={`Maksimal ${loanMaxBooks} buku per anggota.`}
                 maxInputs={loanMaxBooks}

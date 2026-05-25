@@ -87,7 +87,13 @@ export function ReadyStep(props: KioskProps) {
                                 purposeOptions={props.purposeOptions}
                             />
                         ) : null}
-                        {selectedMenu === 'member' ? <MemberForm /> : null}
+                        {selectedMenu === 'member' ? (
+                            <MemberForm
+                                memberRegistrationClaim={
+                                    props.memberRegistrationClaim
+                                }
+                            />
+                        ) : null}
                         {selectedMenu === 'borrow' ? (
                             <BorrowForm loanMaxBooks={props.loanMaxBooks} />
                         ) : null}

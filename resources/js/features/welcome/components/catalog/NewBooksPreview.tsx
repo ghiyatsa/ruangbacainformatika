@@ -28,7 +28,7 @@ export default function NewBooksPreview({
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader
                 title="Buku Terbaru"
-                subtitle="Koleksi terbaru yang baru ditambahkan ke katalog."
+                subtitle="Tambahan terbaru dalam katalog."
                 action={
                     <BookCollectionViewToggle
                         viewMode={viewMode}
@@ -105,15 +105,15 @@ export default function NewBooksPreview({
                     <Link href={booksRoute.index.url()}>
                         <BookOpen className="size-4" />
                         {totalBooks > 0
-                            ? `Lihat ${totalBooks.toLocaleString('id-ID')}+ Buku`
-                            : 'Lihat Semua Buku'}
+                            ? `Lihat ${totalBooks.toLocaleString('id-ID')}+ judul`
+                            : 'Lihat katalog buku'}
                         <ArrowRight className="size-4" />
                     </Link>
                 </Button>
                 {totalBooks > 0 && (
                     <p className="text-xs text-muted-foreground">
                         Menampilkan {previewBooks.length} dari{' '}
-                        {totalBooks.toLocaleString('id-ID')} koleksi
+                        {totalBooks.toLocaleString('id-ID')} judul
                     </p>
                 )}
             </div>
