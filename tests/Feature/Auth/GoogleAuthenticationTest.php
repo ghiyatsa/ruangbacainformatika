@@ -189,6 +189,41 @@ it('administrative users with complete profiles are redirected to admin after go
         ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
 });
 
+it('administrative users with complete profiles receive an inertia location response after google one tap login', function () {
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+        'is_approved' => true,
+        'profile_completed_at' => now(),
+    ])->assignRole('super_admin');
+
+    app()->instance(GoogleIdTokenVerifier::class, new class extends GoogleIdTokenVerifier
+    {
+        public function verify(string $credential): array
+        {
+            expect($credential)->toBe('one-tap-admin-token');
+
+            return [
+                'sub' => 'google-admin-123',
+                'email' => '230170001@mhs.unimal.ac.id',
+                'name' => 'Super Admin',
+            ];
+        }
+    });
+
+    post(route('auth.google.one-tap'), [
+        'credential' => 'one-tap-admin-token',
+    ], [
+        'X-Inertia' => 'true',
+        'X-Requested-With' => 'XMLHttpRequest',
+    ])
+        ->assertStatus(409)
+        ->assertHeader('X-Inertia-Location', route('filament.admin.pages.dashboard'));
+});
+
 it('public users with a valid external google email can still sign in', function () {
     $socialiteUser = (new SocialiteUser)->map([
         'id' => 'google-456',

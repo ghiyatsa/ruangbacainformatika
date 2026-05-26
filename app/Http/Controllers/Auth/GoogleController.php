@@ -9,6 +9,7 @@ use App\Services\GoogleIdTokenVerifier;
 use App\Services\MemberRegistrationClaimService;
 use App\Support\CampusEmail;
 use App\Support\GoogleAccountData;
+use GuzzleHttp\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -58,7 +60,7 @@ class GoogleController extends Controller
             $request->session()->put('auth.google.link_token', $linkToken);
         }
 
-        $redirectResponse = Socialite::driver('google')->redirect();
+        $redirectResponse = $this->googleProvider($request)->redirect();
 
         if ($request->inertia()) {
             return Inertia::location($redirectResponse->getTargetUrl());
@@ -81,7 +83,7 @@ class GoogleController extends Controller
                 return redirect()->route('home');
             }
 
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = $this->googleProvider(request())->user();
             $googleAccount = $this->resolveGoogleAccount(
                 $googleUser->getEmail(),
                 is_string($linkToken) ? $linkToken : null,
@@ -112,7 +114,7 @@ class GoogleController extends Controller
         }
     }
 
-    public function handleOneTap(Request $request): RedirectResponse
+    public function handleOneTap(Request $request): Response
     {
         $linkToken = $request->string('link_token')->trim()->toString();
 
@@ -139,11 +141,14 @@ class GoogleController extends Controller
                 return $googleAccount;
             }
 
-            return $this->authenticateGoogleIdentity(
-                googleId: $identity['sub'],
-                email: $googleAccount->email,
-                name: $identity['name'],
-                linkToken: $linkToken !== '' ? $linkToken : null,
+            return $this->toOneTapResponse(
+                $request,
+                $this->authenticateGoogleIdentity(
+                    googleId: $identity['sub'],
+                    email: $googleAccount->email,
+                    name: $identity['name'],
+                    linkToken: $linkToken !== '' ? $linkToken : null,
+                ),
             );
         } catch (ValidationException $exception) {
             return $this->redirectToEntryWithError(
@@ -250,5 +255,29 @@ class GoogleController extends Controller
         }
 
         return redirect()->route('home');
+    }
+
+    protected function toOneTapResponse(Request $request, RedirectResponse $response): Response
+    {
+        if (! $request->inertia()) {
+            return $response;
+        }
+
+        $targetPath = parse_url($response->getTargetUrl(), PHP_URL_PATH);
+
+        if (is_string($targetPath) && Str::startsWith($targetPath, '/admin')) {
+            return Inertia::location($response->getTargetUrl());
+        }
+
+        return $response;
+    }
+
+    protected function googleProvider(Request $request): Provider
+    {
+        return Socialite::driver('google')
+            ->setRequest($request)
+            ->setHttpClient(new Client([
+                'proxy' => null,
+            ]));
     }
 }

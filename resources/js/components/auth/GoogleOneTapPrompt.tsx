@@ -30,6 +30,7 @@ type SharedPageProps = {
 
 const SCRIPT_ID = 'google-identity-services';
 const DISABLED_COMPONENTS = new Set(['error-page']);
+let initializedClientId: string | null = null;
 
 export default function GoogleOneTapPrompt({
     linkToken,
@@ -74,22 +75,23 @@ export default function GoogleOneTapPrompt({
         let cancelled = false;
 
         const initializePrompt = () => {
-            if (
-                cancelled ||
-                initializedRef.current ||
-                !window.google?.accounts?.id
-            ) {
+            if (cancelled || initializedRef.current || !window.google?.accounts?.id) {
                 return;
             }
 
-            window.google.accounts.id.initialize({
-                client_id: clientId,
-                callback: handleCredential,
-                auto_select: false,
-                cancel_on_tap_outside: false,
-                context: 'signin',
-                use_fedcm_for_prompt: true,
-            });
+            if (initializedClientId !== clientId) {
+                window.google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: handleCredential,
+                    auto_select: false,
+                    cancel_on_tap_outside: false,
+                    context: 'signin',
+                    use_fedcm_for_prompt: true,
+                });
+
+                initializedClientId = clientId;
+            }
+
             window.google.accounts.id.prompt();
             initializedRef.current = true;
         };

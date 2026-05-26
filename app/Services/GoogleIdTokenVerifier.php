@@ -68,6 +68,9 @@ class GoogleIdTokenVerifier
         $keys = Cache::remember('google-id-token-keys', now()->addHour(), function (): array {
             $response = Http::acceptJson()
                 ->timeout(10)
+                ->withOptions([
+                    'proxy' => null,
+                ])
                 ->get('https://www.googleapis.com/oauth2/v3/certs')
                 ->throw();
 
