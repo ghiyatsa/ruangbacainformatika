@@ -2,7 +2,6 @@ import { Form, Link, usePage } from '@inertiajs/react';
 import {
     Bookmark,
     BookOpen,
-    Eye,
     ShoppingCart as LoanRequestIcon,
     Star,
 } from 'lucide-react';
@@ -254,9 +253,9 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                     )}
                 />
 
-                <div className="absolute inset-0 hidden bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 sm:block sm:group-hover:opacity-100" />
+                <div className="absolute inset-0 hidden bg-linear-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 sm:block sm:group-hover:opacity-100" />
 
-                <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5">
+                <div className="absolute top-2 left-2 z-20">
                     {book.isFeatured && (
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -269,14 +268,9 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                             </TooltipContent>
                         </Tooltip>
                     )}
+                </div>
 
-                    <div className="inline-flex h-7 items-center gap-1 rounded-full bg-black/55 px-2 text-[10px] font-semibold text-white shadow-sm backdrop-blur-sm">
-                        <Eye className="size-3" />
-                        <span className="sm:inline">
-                            {book.viewCount.toLocaleString('id-ID')}
-                        </span>
-                    </div>
-
+                <div className="absolute top-2 right-2 z-20 flex flex-col items-end gap-1">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
@@ -284,7 +278,7 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                                 size="icon-sm"
                                 variant="secondary"
                                 className={cn(
-                                    'rounded-full border border-white/20 bg-black/60 text-white shadow-sm backdrop-blur-sm hover:bg-black/75 hover:text-white',
+                                    'rounded-full border border-white/20 bg-black/55 text-white shadow-sm backdrop-blur-sm hover:bg-black/70 hover:text-white',
                                     isBookmarkedByUser &&
                                         'border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90',
                                 )}
@@ -308,9 +302,7 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                             {bookmarkLabel}
                         </TooltipContent>
                     </Tooltip>
-                </div>
 
-                <div className="absolute top-2 right-2 z-20 flex flex-col items-end gap-1">
                     {canAddToCart ? (
                         <Form
                             action={LoanRequestController.storeBook()}
@@ -362,7 +354,7 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                                                 size="icon-sm"
                                                 variant="secondary"
                                                 className={cn(
-                                                    'rounded-full border border-white/20 bg-black/60 text-white shadow-sm backdrop-blur-sm hover:bg-black/75 hover:text-white',
+                                                    'rounded-full border border-white/20 bg-black/55 text-white shadow-sm backdrop-blur-sm hover:bg-black/70 hover:text-white',
                                                     processing &&
                                                         'animate-pulse',
                                                 )}
@@ -400,14 +392,11 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                     ) : null}
                 </div>
 
-                {!isCompact ? (
-                    <div className="absolute right-0 bottom-0 left-0 hidden translate-y-full p-3 transition-transform duration-300 sm:block sm:group-hover:translate-y-0">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-gray-900 shadow-sm backdrop-blur-sm dark:bg-black/70 dark:text-white">
-                            <BookOpen className="size-3" />
-                            Lihat Detail
-                        </span>
+                <div className="absolute bottom-2 left-2 z-20">
+                    <div className="inline-flex h-7 items-center rounded-full bg-black/55 px-2.5 text-[10px] font-semibold text-white shadow-sm backdrop-blur-sm">
+                        {book.viewCount.toLocaleString('id-ID')} dilihat
                     </div>
-                ) : null}
+                </div>
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-4">

@@ -245,7 +245,30 @@
         }
     }
 
+    @keyframes bell-swing {
+        0%,
+        100% {
+            transform: rotate(0deg);
+        }
+        15% {
+            transform: rotate(14deg);
+        }
+        30% {
+            transform: rotate(-12deg);
+        }
+        45% {
+            transform: rotate(10deg);
+        }
+        60% {
+            transform: rotate(-8deg);
+        }
+        75% {
+            transform: rotate(5deg);
+        }
+    }
+
     --animate-star-movement-bottom: star-movement-bottom linear infinite
         alternate;
     --animate-star-movement-top: star-movement-top linear infinite alternate;
+    --animate-bell-swing: bell-swing 2.8s ease-in-out infinite;
 }

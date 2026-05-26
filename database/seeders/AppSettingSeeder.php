@@ -39,6 +39,11 @@ class AppSettingSeeder extends Seeder
                 'site_name' => config('app.name'),
                 'site_tagline' => 'Layanan perpustakaan yang rapi dan mudah diakses',
                 'support_whatsapp' => '',
+                'hero_notice_enabled' => '0',
+                'hero_notice_text' => '',
+                'hero_notice_url' => '',
+                'hero_notice_link_label' => '',
+                'hero_notice_tone' => 'info',
             ],
             'library' => [
                 'loan_max_books' => '3',

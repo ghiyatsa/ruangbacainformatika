@@ -4,6 +4,7 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Category;
+use App\Models\Setting;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
@@ -171,5 +172,39 @@ it('home page exposes zeroed stats when the catalog is empty', function () {
                 ->where('stats.booksCount', 0)
                 ->where('stats.featuredCount', 0)
                 ->where('stats.availableItemsCount', 0),
+        );
+});
+
+it('home page shares the hero notice from general settings', function () {
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'hero_notice_enabled'],
+        ['value' => '1'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'hero_notice_text'],
+        ['value' => 'Layanan perpustakaan tutup pada Jumat, 30 Mei 2026.'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'hero_notice_url'],
+        ['value' => 'https://example.com/pengumuman'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'hero_notice_link_label'],
+        ['value' => 'Baca pengumuman'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'hero_notice_tone'],
+        ['value' => 'warning'],
+    );
+
+    get(route('home'))
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('welcome')
+                ->where('site.notice.isActive', true)
+                ->where('site.notice.text', 'Layanan perpustakaan tutup pada Jumat, 30 Mei 2026.')
+                ->where('site.notice.url', 'https://example.com/pengumuman')
+                ->where('site.notice.linkLabel', 'Baca pengumuman')
+                ->where('site.notice.tone', 'warning'),
         );
 });

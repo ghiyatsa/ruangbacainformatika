@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { QrCode, ShoppingCart, Trash2 } from 'lucide-react';
+import { QrCode, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
@@ -152,14 +152,11 @@ export default function LoanRequestPage({ draft, stats }: Props) {
         <>
             <Head title="QR Peminjaman" />
 
-            <div className="container mx-auto max-w-5xl py-8 pb-16">
+            <div className="container mx-auto max-w-5xl px-4 py-8 pb-16 sm:px-6 lg:px-8">
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.9fr)]">
                     <Card className="border-border/70">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <ShoppingCart className="size-5 text-primary" />
-                                Keranjang Peminjaman
-                            </CardTitle>
+                            <CardTitle>Keranjang Peminjaman</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {isEmpty ? (
@@ -279,10 +276,7 @@ export default function LoanRequestPage({ draft, stats }: Props) {
 
                     <Card className="border-border/70">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <QrCode className="size-5 text-primary" />
-                                QR
-                            </CardTitle>
+                            <CardTitle>QR</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-5">
                             <div className="flex items-start justify-between gap-3">
@@ -324,7 +318,7 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                             />
 
                             <div className="mt-5 rounded-[1.75rem] border border-border/70 bg-card px-5 py-6 shadow-sm">
-                                {countdownLabel ? (
+                                {draft.qrCodeSvg && countdownLabel ? (
                                     <div className="mb-5 text-center">
                                         <p className="text-[11px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
                                             Berlaku dalam
@@ -340,16 +334,10 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                             {countdownLabel}
                                         </p>
                                     </div>
-                                ) : (
-                                    <div className="mb-5 text-center">
-                                        <p className="text-sm text-muted-foreground">
-                                            QR belum aktif
-                                        </p>
-                                    </div>
-                                )}
+                                ) : null}
 
                                 {draft.qrCodeSvg ? (
-                                    <div className="mx-auto w-max rounded-3xl border border-border/70 bg-white p-4 shadow-sm">
+                                    <div className="mx-auto w-max rounded-3xl bg-white p-4 shadow-sm">
                                         <div
                                             className="flex justify-center [&_svg]:mx-auto"
                                             dangerouslySetInnerHTML={{
@@ -358,7 +346,7 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                         />
                                     </div>
                                 ) : (
-                                    <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-5 py-12 text-center text-sm text-muted-foreground">
+                                    <div className="rounded-2xl bg-muted/20 px-5 py-12 text-center text-sm text-muted-foreground">
                                         QR siap dibuat.
                                     </div>
                                 )}

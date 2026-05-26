@@ -85,7 +85,7 @@ export default function CategoryMarquee({
 
     return (
         <section className="py-6 sm:py-8">
-            <div className="container mx-auto">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col overflow-hidden">
                     <VelocityScroll
                         items={row1}

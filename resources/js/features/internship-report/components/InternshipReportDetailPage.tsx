@@ -1,4 +1,3 @@
-import { Link } from '@inertiajs/react';
 import {
     Bookmark,
     BookMarked,
@@ -8,19 +7,12 @@ import {
     Tag,
     User,
 } from 'lucide-react';
+import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
@@ -71,31 +63,23 @@ export default function InternshipReportDetailPage(
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
 
                     <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-12 sm:pt-40 lg:px-8">
-                        <Breadcrumb className="mb-8">
-                            <BreadcrumbList>
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink asChild>
-                                        <Link href="/">Beranda</Link>
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbSeparator />
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink asChild>
-                                        <Link
-                                            href={internshipReportsRoute.index.url()}
-                                        >
-                                            Laporan KP
-                                        </Link>
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbSeparator />
-                                <BreadcrumbItem>
-                                    <BreadcrumbPage className="max-w-xs truncate">
-                                        {report.studentId}
-                                    </BreadcrumbPage>
-                                </BreadcrumbItem>
-                            </BreadcrumbList>
-                        </Breadcrumb>
+                        <div className="mb-8">
+                            <Breadcrumbs
+                                breadcrumbs={[
+                                    { title: 'Beranda', href: '/' },
+                                    {
+                                        title: 'Laporan KP',
+                                        href: internshipReportsRoute.index.url(),
+                                    },
+                                    {
+                                        title: report.studentId,
+                                        href: internshipReportsRoute.show.url(
+                                            report.studentId,
+                                        ),
+                                    },
+                                ]}
+                            />
+                        </div>
 
                         <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
                             <div className="flex flex-col justify-center">

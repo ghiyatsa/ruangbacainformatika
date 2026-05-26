@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
+use App\Repositories\SettingRepository;
 use App\Services\Auth\AuthenticationRedirector;
 use App\Services\LoanDraftService;
 use App\Support\LoginViewData;
@@ -13,6 +14,7 @@ class HandleInertiaRequests extends Middleware
 {
     public function __construct(
         protected LoanDraftService $loanDraftService,
+        protected SettingRepository $settingRepository,
     ) {}
 
     /**
@@ -45,6 +47,19 @@ class HandleInertiaRequests extends Middleware
     {
         $session = $request->hasSession() ? $request->session() : null;
         $user = $request->user();
+        $generalSettings = $this->settingRepository->sectionValues('general', [
+            'hero_notice_enabled' => '0',
+            'hero_notice_text' => '',
+            'hero_notice_url' => '',
+            'hero_notice_link_label' => '',
+            'hero_notice_tone' => 'info',
+        ]);
+        $heroNoticeText = trim((string) ($generalSettings['hero_notice_text'] ?? ''));
+        $heroNoticeUrl = trim((string) ($generalSettings['hero_notice_url'] ?? ''));
+        $heroNoticeLinkLabel = trim((string) ($generalSettings['hero_notice_link_label'] ?? ''));
+        $heroNoticeTone = in_array($generalSettings['hero_notice_tone'] ?? null, ['info', 'warning', 'success'], true)
+            ? $generalSettings['hero_notice_tone']
+            : 'info';
 
         return [
             ...parent::share($request),
@@ -56,6 +71,14 @@ class HandleInertiaRequests extends Middleware
                 'contactEmail' => 'informatika@unimal.ac.id',
                 'address' => 'Jl. Cot Tengku Nie, Reuleut, Aceh Utara 24355',
                 'ogImage' => asset('images/og-image.png'),
+                'notice' => [
+                    'isActive' => ($generalSettings['hero_notice_enabled'] ?? '0') === '1'
+                        && $heroNoticeText !== '',
+                    'text' => $heroNoticeText,
+                    'url' => $heroNoticeUrl !== '' ? $heroNoticeUrl : null,
+                    'linkLabel' => $heroNoticeLinkLabel !== '' ? $heroNoticeLinkLabel : null,
+                    'tone' => $heroNoticeTone,
+                ],
             ],
             'auth' => [
                 'user' => $this->serializeUser($user),

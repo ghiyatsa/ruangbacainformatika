@@ -1,9 +1,8 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { CheckCircle2, Clock3, MessageCircleMore } from 'lucide-react';
+import { CheckCircle2, Clock3 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import WhatsAppVerificationController from '@/actions/App/Http/Controllers/Auth/WhatsAppVerificationController';
 import InputError from '@/components/common/InputError';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -76,47 +75,8 @@ export default function VerifyWhatsApp() {
         <>
             <Head title="Verifikasi WhatsApp" />
 
-            <div className="flex flex-col gap-6">
-                <Alert>
-                    <MessageCircleMore className="size-4" />
-                    <AlertTitle>Verifikasi WhatsApp</AlertTitle>
-                    <AlertDescription>
-                        {hasWhatsapp ? (
-                            <>
-                                Kode akan dikirim ke{' '}
-                                <span className="font-medium text-foreground">
-                                    {verification.maskedWhatsapp ??
-                                        'nomor Anda'}
-                                </span>
-                                .
-                            </>
-                        ) : (
-                            <>Masukkan nomor WhatsApp aktif.</>
-                        )}
-                    </AlertDescription>
-                </Alert>
-
-                <div className="grid gap-4 rounded-2xl border border-border/70 bg-card/70 p-5">
-                    <div className="flex items-center justify-between gap-3">
-                        <div>
-                            <p className="text-sm font-medium text-foreground">
-                                Status OTP
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                {hasWhatsapp && verification.hasActiveChallenge
-                                    ? 'Kode aktif tersedia.'
-                                    : hasWhatsapp
-                                      ? 'Kirim kode baru bila diperlukan.'
-                                      : 'Simpan nomor lalu kirim kode.'}
-                            </p>
-                        </div>
-                        <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                            {expiresIn > 0
-                                ? formatRemaining(expiresIn)
-                                : '00:00'}
-                        </div>
-                    </div>
-
+            <div className="rounded-2xl border border-border/70 bg-card/70 p-5">
+                <div className="flex flex-col gap-6">
                     <Form
                         action={WhatsAppVerificationController.send.url()}
                         method="post"
@@ -168,61 +128,63 @@ export default function VerifyWhatsApp() {
                                               : 'Kirim kode'}
                                     </Button>
 
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                        {verification.approvalMessage}
+                                    <div className="text-sm font-medium text-muted-foreground tabular-nums">
+                                        {expiresIn > 0
+                                            ? formatRemaining(expiresIn)
+                                            : '00:00'}
                                     </div>
                                 </div>
                             </>
                         )}
                     </Form>
+
+                    <Form
+                        action={WhatsAppVerificationController.verify.url()}
+                        method="post"
+                        options={{
+                            preserveScroll: true,
+                        }}
+                        className="flex flex-col gap-6"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="code">Kode OTP</Label>
+                                    <Input
+                                        id="code"
+                                        name="code"
+                                        type="text"
+                                        inputMode="numeric"
+                                        autoComplete="one-time-code"
+                                        autoFocus
+                                        maxLength={6}
+                                        required
+                                        placeholder="Masukkan 6 digit kode"
+                                    />
+                                    <InputError
+                                        message={errors.code ?? errors.otp}
+                                    />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    className="w-full"
+                                    size="lg"
+                                    disabled={processing}
+                                >
+                                    {processing ? (
+                                        <Spinner />
+                                    ) : (
+                                        <CheckCircle2 className="size-4" />
+                                    )}
+                                    Verifikasi
+                                </Button>
+                            </>
+                        )}
+                    </Form>
                 </div>
 
-                <Form
-                    action={WhatsAppVerificationController.verify.url()}
-                    method="post"
-                    options={{
-                        preserveScroll: true,
-                    }}
-                    className="flex flex-col gap-6"
-                >
-                    {({ processing, errors }) => (
-                        <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="code">Kode OTP</Label>
-                                <Input
-                                    id="code"
-                                    name="code"
-                                    type="text"
-                                    inputMode="numeric"
-                                    autoComplete="one-time-code"
-                                    autoFocus
-                                    maxLength={6}
-                                    required
-                                    placeholder="Masukkan 6 digit kode"
-                                />
-                                <InputError
-                                    message={errors.code ?? errors.otp}
-                                />
-                            </div>
-
-                            <Button
-                                type="submit"
-                                className="w-full"
-                                size="lg"
-                                disabled={processing}
-                            >
-                                {processing ? (
-                                    <Spinner />
-                                ) : (
-                                    <CheckCircle2 className="size-4" />
-                                )}
-                                Verifikasi
-                            </Button>
-                        </>
-                    )}
-                </Form>
-
-                <div className="text-center">
+                <div className="mt-6 text-center">
                     <Link
                         href={logout().url}
                         method="post"

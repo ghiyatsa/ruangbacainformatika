@@ -12,6 +12,13 @@ declare module '@inertiajs/core' {
                 contactEmail: string;
                 address: string;
                 ogImage: string;
+                notice: {
+                    isActive: boolean;
+                    text: string;
+                    url: string | null;
+                    linkLabel: string | null;
+                    tone: 'info' | 'warning' | 'success';
+                };
             };
             auth: Auth;
             notifications: NotificationSummary;

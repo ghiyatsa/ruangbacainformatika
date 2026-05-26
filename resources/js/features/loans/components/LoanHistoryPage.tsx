@@ -4,7 +4,6 @@ import {
     BookOpen,
     CheckCircle2,
     Clock,
-    History,
     Library,
     QrCode,
 } from 'lucide-react';
@@ -301,21 +300,16 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
         <>
             <Head title="Riwayat Peminjaman" />
 
-            <div className="container mx-auto max-w-6xl py-8 pb-16">
+            <div className="container mx-auto max-w-6xl px-4 py-8 pb-16 sm:px-6 lg:px-8">
                 <div className="mb-8">
-                    <div className="flex items-center gap-3">
-                        <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                            <History className="size-5 text-primary" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight">
-                                Riwayat Peminjaman
-                            </h1>
-                            <p className="mt-0.5 text-sm text-muted-foreground">
-                                Riwayat pinjam ditampilkan per buku agar tetap
-                                ringkas saat data bertambah.
-                            </p>
-                        </div>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Riwayat Peminjaman
+                        </h1>
+                        <p className="mt-0.5 text-sm text-muted-foreground">
+                            Riwayat pinjam ditampilkan per buku agar tetap
+                            ringkas saat data bertambah.
+                        </p>
                     </div>
                 </div>
 
@@ -333,7 +327,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <Table>
+                                    <Table className="min-w-[760px]">
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead className="w-14">
@@ -440,10 +434,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
 
                         <Card className="border-border/70 xl:sticky xl:top-24 xl:h-fit">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <QrCode className="size-5 text-primary" />
-                                    QR Pengembalian
-                                </CardTitle>
+                                <CardTitle>QR Pengembalian</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-5">
                                 <div className="flex items-start justify-between gap-3">
@@ -514,7 +505,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                 ) : null}
 
                                 <div className="rounded-[1.75rem] border border-border/70 bg-card px-5 py-6 shadow-sm">
-                                    {countdownLabel ? (
+                                    {returnDraft.qrCodeSvg && countdownLabel ? (
                                         <div className="mb-5 text-center">
                                             <p className="text-[11px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
                                                 Berlaku dalam
@@ -530,16 +521,10 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                                 {countdownLabel}
                                             </p>
                                         </div>
-                                    ) : (
-                                        <div className="mb-5 text-center">
-                                            <p className="text-sm text-muted-foreground">
-                                                QR belum aktif
-                                            </p>
-                                        </div>
-                                    )}
+                                    ) : null}
 
                                     {returnDraft.qrCodeSvg ? (
-                                        <div className="mx-auto w-max rounded-3xl border border-border/70 bg-white p-4 shadow-sm">
+                                        <div className="mx-auto w-max rounded-3xl bg-white p-4 shadow-sm">
                                             <div
                                                 className="flex justify-center [&_svg]:mx-auto"
                                                 dangerouslySetInnerHTML={{
@@ -548,7 +533,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                             />
                                         </div>
                                     ) : (
-                                        <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-5 py-12 text-center text-sm text-muted-foreground">
+                                        <div className="rounded-2xl bg-muted/20 px-5 py-12 text-center text-sm text-muted-foreground">
                                             QR siap dibuat dari pilihan buku
                                             aktif.
                                         </div>
