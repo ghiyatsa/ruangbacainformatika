@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (! $this->supportsFullTextIndexes()) {
+            return;
+        }
+
         Schema::table('skripsis', function (Blueprint $table): void {
             $table->fullText(
                 ['title', 'author_name', 'abstract', 'keywords'],
@@ -38,6 +43,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! $this->supportsFullTextIndexes()) {
+            return;
+        }
+
         Schema::table('internship_reports', function (Blueprint $table): void {
             $table->dropFullText('internship_reports_search_fulltext');
         });
@@ -49,5 +58,10 @@ return new class extends Migration
         Schema::table('skripsis', function (Blueprint $table): void {
             $table->dropFullText('skripsis_search_fulltext');
         });
+    }
+
+    protected function supportsFullTextIndexes(): bool
+    {
+        return in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
     }
 };
