@@ -1,9 +1,15 @@
 <?php
 
 use App\Models\ContactMessage;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\from;
+use function Pest\Laravel\withoutMiddleware;
+
+beforeEach(function () {
+    withoutMiddleware(PreventRequestForgery::class);
+});
 
 it('visitors can submit the contact form', function () {
     from(route('contact'))

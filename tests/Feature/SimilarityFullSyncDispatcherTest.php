@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
 
 it('similarity full sync dispatcher queues the sync command when not running synchronously', function () {
-    config()->set('app.env', 'production');
+    app()['env'] = 'production';
     Queue::fake();
 
     $result = app(SimilarityFullSyncDispatcher::class)->dispatch();

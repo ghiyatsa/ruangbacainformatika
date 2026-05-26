@@ -4,10 +4,16 @@ use App\Models\Book;
 use App\Models\CatalogReport;
 use App\Models\Thesis;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\post;
+use function Pest\Laravel\withoutMiddleware;
+
+beforeEach(function () {
+    withoutMiddleware(PreventRequestForgery::class);
+});
 
 it('guest can submit a catalog report for a published book', function () {
     $book = Book::factory()->published()->create([

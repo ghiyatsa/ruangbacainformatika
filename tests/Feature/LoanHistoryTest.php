@@ -110,6 +110,8 @@ it('shows loan history stats and rows per borrowed book', function () {
             ->where('stats.active', 2)
             ->where('stats.overdue', 0)
             ->where('stats.returned', 1)
+            ->where('returnDraft.hasActiveQr', false)
+            ->where('returnDraft.selectedLoanItemIds', [])
             ->has('loans.data', 3)
             ->where('loans.data.0.bookTitle', 'Buku Sudah Kembali')
             ->where('loans.data.1.bookTitle', 'Buku Aktif Kedua')

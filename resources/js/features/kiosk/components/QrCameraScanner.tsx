@@ -258,12 +258,12 @@ export const QrCameraScanner = forwardRef<
                 </Button>
 
                 <p className="text-sm text-muted-foreground">
-                    Arahkan kamera ke QR anggota.
+                    Arahkan QR ke kamera.
                 </p>
             </div>
 
             <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted/25">
-                <div className="relative aspect-[16/9] max-h-64 bg-black">
+                <div className="relative aspect-video max-h-64 bg-black">
                     <video
                         id={previewId}
                         ref={videoRef}

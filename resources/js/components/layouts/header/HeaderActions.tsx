@@ -6,8 +6,8 @@ import {
     ShoppingCart,
     SunIcon,
 } from 'lucide-react';
-import { GlobalSearch } from '@/components/layouts/GlobalSearch';
-import { UserMenuContent } from '@/components/layouts/UserMenuContent';
+import { GlobalSearch } from '@/components/layouts/global-search/GlobalSearch';
+import { UserMenuContent } from './UserMenuContent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +24,6 @@ import type { Auth, LoanRequestCart } from '@/types';
 
 interface HeaderActionsProps {
     auth: Auth;
-    canRegister?: boolean;
     resolvedAppearance: 'light' | 'dark';
     updateAppearance: (appearance: 'light' | 'dark' | 'system') => void;
     hideSearch: boolean;
@@ -68,15 +67,15 @@ export function HeaderActions({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-xl"
+                    className="group h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
                     onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
                     aria-label={isDark ? 'Mode terang' : 'Mode gelap'}
                     title={isDark ? 'Mode terang' : 'Mode gelap'}
                 >
                     {isDark ? (
-                        <SunIcon className="h-[18px] w-[18px] text-primary" />
+                        <SunIcon className="h-[18px] w-[18px] text-primary transition-transform duration-500 group-hover:rotate-45" />
                     ) : (
-                        <MoonIcon className="h-[18px] w-[18px] text-primary" />
+                        <MoonIcon className="h-[18px] w-[18px] text-primary transition-transform duration-500 group-hover:-rotate-12" />
                     )}
                     <span className="sr-only">Ubah tema</span>
                 </Button>
@@ -86,13 +85,15 @@ export function HeaderActions({
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="relative h-9 w-9 rounded-xl"
+                            className="group relative h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
                         >
-                            <Bookmark className="h-4.5 w-4.5 text-primary" />
+                            <Bookmark className="h-4.5 w-4.5 text-primary transition-transform duration-300 group-hover:scale-110" />
                             <span className="sr-only">Bookmark</span>
-                            <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm">
-                                {bookmarkedCount}
-                            </Badge>
+                            {bookmarkedCount > 0 && (
+                                <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 animate-in items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm duration-200 zoom-in-50">
+                                    {bookmarkedCount}
+                                </Badge>
+                            )}
                         </Button>
                     }
                 />
@@ -103,20 +104,23 @@ export function HeaderActions({
                             asChild
                             variant="ghost"
                             size="icon"
-                            className="relative hidden h-9 w-9 rounded-xl md:inline-flex"
+                            className="group relative hidden h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 md:inline-flex"
                         >
                             <Link
                                 href={loans.request.url()}
                                 aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
                                 title="Keranjang peminjaman"
                             >
-                                <ShoppingCart className="h-[18px] w-[18px] text-primary" />
+                                <ShoppingCart className="h-[18px] w-[18px] text-primary transition-transform duration-300 group-hover:scale-110" />
                                 <span className="sr-only">
                                     Keranjang peminjaman
                                 </span>
-                                <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm">
-                                    {loanRequestCart?.count ?? 0}
-                                </Badge>
+                                {loanRequestCart &&
+                                    loanRequestCart.count > 0 && (
+                                        <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 animate-in items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm duration-200 zoom-in-50">
+                                            {loanRequestCart.count}
+                                        </Badge>
+                                    )}
                             </Link>
                         </Button>
                     ) : null

@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
-use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class GoogleController extends Controller
@@ -29,7 +29,7 @@ class GoogleController extends Controller
         protected MemberRegistrationClaimService $memberRegistrationClaimService,
     ) {}
 
-    public function redirectToGoogle(Request $request): SymfonyRedirectResponse|RedirectResponse
+    public function redirectToGoogle(Request $request): Response
     {
         if (! $this->isGoogleLoginConfigured()) {
             Inertia::flash('toast', [
@@ -58,8 +58,13 @@ class GoogleController extends Controller
             $request->session()->put('auth.google.link_token', $linkToken);
         }
 
-        return Socialite::driver('google')
-            ->redirect();
+        $redirectResponse = Socialite::driver('google')->redirect();
+
+        if ($request->inertia()) {
+            return Inertia::location($redirectResponse->getTargetUrl());
+        }
+
+        return $redirectResponse;
     }
 
     public function handleGoogleCallback(): RedirectResponse

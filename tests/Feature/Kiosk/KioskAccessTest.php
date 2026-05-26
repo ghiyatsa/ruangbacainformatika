@@ -3,8 +3,10 @@
 use App\Models\KioskDevice;
 use App\Models\MemberRegistrationClaim;
 use App\Models\Setting;
+use App\Models\User;
 use App\Models\VisitLog;
 use App\Services\KioskPinManager;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -14,8 +16,11 @@ use function Pest\Laravel\call;
 use function Pest\Laravel\get;
 use function Pest\Laravel\instance;
 use function Pest\Laravel\post;
+use function Pest\Laravel\withoutMiddleware;
 
 beforeEach(function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
     Setting::query()->create([
         'section' => 'kiosk',
         'key' => 'pin_hash',
@@ -206,6 +211,72 @@ it('kiosk member registration rejects invalid whatsapp and unclear address', fun
         'whatsapp',
         'address',
     ]);
+});
+
+it('kiosk member registration accepts eligible unimal staff email domains', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    post(route('kiosk.members.store'), [
+        'name' => 'Dosen Unimal',
+        'email' => 'dosen@unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus Bukit Indah',
+    ])
+        ->assertRedirect(route('kiosk.index', ['menu' => 'member']))
+        ->assertSessionHasNoErrors();
+
+    assertDatabaseHas('member_registration_claims', [
+        'name' => 'Dosen Unimal',
+        'email' => 'dosen@unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus Bukit Indah',
+        'status' => MemberRegistrationClaim::STATUS_PENDING,
+    ]);
+});
+
+it('kiosk member registration rejects email domains outside unimal', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    post(route('kiosk.members.store'), [
+        'name' => 'Member Kiosk',
+        'email' => 'member@example.com',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 1',
+    ])->assertSessionHasErrors([
+        'email' => 'Gunakan email UNIMAL dengan domain @mhs.unimal.ac.id atau @unimal.ac.id.',
+    ]);
+});
+
+it('kiosk member registration rejects duplicate email or whatsapp number', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    User::factory()->create([
+        'email' => 'existing@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+    ]);
+
+    post(route('kiosk.members.store'), [
+        'name' => 'Duplicated Kiosk Member',
+        'email' => 'existing@mhs.unimal.ac.id',
+        'whatsapp' => '08999999999', // Different phone to isolate email error, or same to test both
+        'address' => 'Jl. Kampus No. 1',
+    ])->assertSessionHasErrors(['email']);
+
+    post(route('kiosk.members.store'), [
+        'name' => 'Duplicated Kiosk Member',
+        'email' => 'other@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 1',
+    ])->assertSessionHasErrors(['whatsapp']);
 });
 
 it('kiosk visit rejects malformed phone and identity details', function () {
@@ -451,4 +522,41 @@ it('kiosk visit submission flashes a sonner toast after saving', function () {
         'identity_number' => '230170020',
         'purpose' => 'read',
     ]);
+});
+
+it('kiosk find member returns member details when found', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $user = User::factory()->create([
+        'name' => 'John Doe',
+        'email' => 'john.doe@mhs.unimal.ac.id',
+        'whatsapp' => '081234567890',
+    ]);
+
+    get(route('kiosk.members.find', ['identifier' => 'john.doe@mhs.unimal.ac.id']))
+        ->assertSuccessful()
+        ->assertJson([
+            'member' => [
+                'id' => $user->id,
+                'name' => 'John Doe',
+                'email' => 'john.doe@mhs.unimal.ac.id',
+                'whatsapp' => '081234567890',
+            ],
+        ]);
+});
+
+it('kiosk find member returns null when not found', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    get(route('kiosk.members.find', ['identifier' => 'unknown@example.com']))
+        ->assertSuccessful()
+        ->assertJson([
+            'member' => null,
+        ]);
 });

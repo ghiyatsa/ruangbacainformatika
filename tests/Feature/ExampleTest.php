@@ -5,7 +5,6 @@ use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Category;
 use Inertia\Testing\AssertableInertia as Assert;
-use Laravel\Fortify\Features;
 
 use function Pest\Laravel\get;
 
@@ -29,7 +28,6 @@ it('home page shows published books from the catalog', function () {
         ->assertInertia(
             fn (Assert $page) => $page
                 ->component('welcome')
-                ->where('canRegister', Features::enabled(Features::registration()))
                 ->where('stats.booksCount', 1)
                 ->where('stats.featuredCount', 1)
                 ->where('stats.availableItemsCount', 1)
@@ -53,7 +51,7 @@ it('home page does not expose search filtering', function () {
         ->assertInertia(
             fn (Assert $page) => $page
                 ->component('welcome')
-                ->where('filters.search', ''),
+                ->missing('filters'),
         );
 });
 

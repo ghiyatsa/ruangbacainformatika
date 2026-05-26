@@ -39,7 +39,9 @@ it('book detail page increments view count', function () {
 it('book detail page shares loan request summary for authenticated users', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'whatsapp_verified_at' => now(),
+    ]);
     $user->assignRole('member');
 
     $book = Book::factory()->published()->create([

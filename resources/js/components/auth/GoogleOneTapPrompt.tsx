@@ -42,19 +42,21 @@ export default function GoogleOneTapPrompt({
     const { component } = usePage();
     const initializedRef = useRef(false);
 
-    const handleCredential = useEffectEvent((response: { credential: string }) => {
-        router.post(
-            googleAuth.oneTapUrl,
-            {
-                credential: response.credential,
-                link_token: linkToken,
-            },
-            {
-                preserveScroll: true,
-                preserveState: true,
-            },
-        );
-    });
+    const handleCredential = useEffectEvent(
+        (response: { credential: string }) => {
+            router.post(
+                googleAuth.oneTapUrl,
+                {
+                    credential: response.credential,
+                    link_token: linkToken,
+                },
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                },
+            );
+        },
+    );
 
     useEffect(() => {
         const clientId = googleAuth.clientId;

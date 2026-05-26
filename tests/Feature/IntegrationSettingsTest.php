@@ -42,6 +42,7 @@ it('integration settings can persist similarity weights and warn for full resync
             'whatsapp_api_token' => '',
         ])
         ->call('save')
+        ->assertHasNoFormErrors()
         ->assertNotified('Pengaturan integrasi disimpan');
 
     expect(Setting::query()->where('section', 'integration')->where('key', 'similarity_weight_judul')->value('value'))->toBe('0.6')

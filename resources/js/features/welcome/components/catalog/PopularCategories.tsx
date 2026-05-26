@@ -49,8 +49,7 @@ export default function PopularCategories({
                             <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
                         </div>
                         <p className="mt-4 text-sm font-semibold text-primary">
-                            {category.booksCount.toLocaleString('id-ID')}{' '}
-                            judul
+                            {category.booksCount.toLocaleString('id-ID')} judul
                         </p>
                     </Link>
                 ))}

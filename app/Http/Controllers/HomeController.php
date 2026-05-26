@@ -8,7 +8,6 @@ use App\Services\CatalogService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Laravel\Fortify\Features;
 
 class HomeController extends Controller
 {
@@ -28,13 +27,9 @@ class HomeController extends Controller
             ->latest()
             ->orderByDesc('id')
             ->orderBy('title')
-            ->paginate(10);
+            ->paginate(12);
 
         return Inertia::render('welcome', [
-            'canRegister' => Features::enabled(Features::registration()),
-            'filters' => [
-                'search' => '',
-            ],
             'stats' => array_merge(
                 $this->catalogService->getStats(),
                 ['searchResultsCount' => $books->total()]

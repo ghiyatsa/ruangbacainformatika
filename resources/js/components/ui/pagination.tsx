@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Link, type InertiaLinkProps } from "@inertiajs/react"
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
@@ -35,100 +35,45 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 
 type PaginationLinkProps = {
   isActive?: boolean
-  disabled?: boolean
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
-  Omit<InertiaLinkProps, "size">
+  React.ComponentProps<"a">
 
 function PaginationLink({
   className,
   isActive,
-  disabled,
   size = "icon",
-  href,
-  // Inertia props to omit when disabled
-  as,
-  data,
-  method,
-  only,
-  headers,
-  preserveScroll,
-  preserveState,
-  replace,
-  queryStringArrayFormat,
-  async,
-  onBefore,
-  onStart,
-  onProgress,
-  onSuccess,
-  onError,
-  onCancel,
-  onFinish,
-  type,
   ...props
 }: PaginationLinkProps) {
-  const inertiaProps = {
-    as,
-    data,
-    method,
-    only,
-    headers,
-    preserveScroll,
-    preserveState,
-    replace,
-    queryStringArrayFormat,
-    async,
-    onBefore,
-    onStart,
-    onProgress,
-    onSuccess,
-    onError,
-    onCancel,
-    onFinish,
-  }
-
   return (
     <Button
       asChild
       variant={isActive ? "outline" : "ghost"}
       size={size}
       className={cn(className)}
-      disabled={disabled}
     >
-      {disabled ? (
-        <button
-          type="button"
-          aria-disabled
-          data-slot="pagination-link"
-          data-active={isActive}
-          {...props}
-        />
-      ) : (
-        <Link
-          href={href!}
-          aria-current={isActive ? "page" : undefined}
-          data-slot="pagination-link"
-          data-active={isActive}
-          {...inertiaProps}
-          {...props}
-        />
-      )}
+      <a
+        aria-current={isActive ? "page" : undefined}
+        data-slot="pagination-link"
+        data-active={isActive}
+        {...props}
+      />
     </Button>
   )
 }
 
 function PaginationPrevious({
   className,
-  text = "Sebelumnya",
+  text = "Previous",
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   return (
     <PaginationLink
-      aria-label="Halaman sebelumnya"
+      aria-label="Go to previous page"
       size="default"
       className={cn("pl-2!", className)}
       {...props}
     >
-      <ChevronLeftIcon className="size-4" />
+      <ChevronLeftIcon data-icon="inline-start" />
       <span className="hidden sm:block">{text}</span>
     </PaginationLink>
   )
@@ -136,18 +81,18 @@ function PaginationPrevious({
 
 function PaginationNext({
   className,
-  text = "Berikutnya",
+  text = "Next",
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   return (
     <PaginationLink
-      aria-label="Halaman berikutnya"
+      aria-label="Go to next page"
       size="default"
       className={cn("pr-2!", className)}
       {...props}
     >
       <span className="hidden sm:block">{text}</span>
-      <ChevronRightIcon className="size-4" />
+      <ChevronRightIcon data-icon="inline-end" />
     </PaginationLink>
   )
 }
@@ -166,7 +111,8 @@ function PaginationEllipsis({
       )}
       {...props}
     >
-      <MoreHorizontalIcon />
+      <MoreHorizontalIcon
+      />
       <span className="sr-only">More pages</span>
     </span>
   )

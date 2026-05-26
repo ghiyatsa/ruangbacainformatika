@@ -30,7 +30,6 @@ class SubmitVisitRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:30',
-                Rule::requiredIf(fn (): bool => $this->input('visitor_type') !== VisitLog::VISITOR_TYPE_UMUM),
                 function (string $attribute, mixed $value, \Closure $fail): void {
                     if (! is_string($value) || $value === '') {
                         return;
@@ -41,10 +40,7 @@ class SubmitVisitRequest extends FormRequest
                     }
                 },
             ],
-            'institution' => array_merge(
-                $this->institutionRules(),
-                [Rule::requiredIf(fn (): bool => $this->input('visitor_type') === VisitLog::VISITOR_TYPE_UMUM)],
-            ),
+            'institution' => $this->institutionRules(),
             'phone' => $this->phoneRules(),
             'purpose' => ['required', Rule::in(array_keys(VisitLog::purposeOptions()))],
             'notes' => $this->meaningfulTextRules('Catatan', required: false, min: 10, max: 1000),

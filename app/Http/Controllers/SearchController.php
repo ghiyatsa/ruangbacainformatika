@@ -34,26 +34,17 @@ class SearchController extends Controller
             ->get();
 
         $skripsis = Skripsi::query()
-            ->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('author_name', 'like', "%{$search}%");
-            })
+            ->search($search)
             ->limit(5)
             ->get();
 
         $internshipReports = InternshipReport::query()
-            ->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('author_name', 'like', "%{$search}%");
-            })
+            ->search($search)
             ->limit(5)
             ->get();
 
         $theses = Thesis::query()
-            ->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('author_name', 'like', "%{$search}%");
-            })
+            ->search($search)
             ->limit(5)
             ->get();
 

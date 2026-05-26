@@ -2,8 +2,8 @@ import { router } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import AnimatedList from '@/components/common/AnimatedList';
-import { GlobalSearchResultRow } from '@/components/layouts/global-search/GlobalSearchResultRow';
-import { GlobalSearchTrigger } from '@/components/layouts/global-search/GlobalSearchTrigger';
+import { GlobalSearchResultRow } from './GlobalSearchResultRow';
+import { GlobalSearchTrigger } from './GlobalSearchTrigger';
 import {
     CommandDialog,
     CommandEmpty,
@@ -20,7 +20,7 @@ import type {
     SearchListItem,
     SearchResponse,
     SearchResult,
-} from '@/components/layouts/global-search/types';
+} from './types';
 
 const EMPTY_RESULTS: SearchResponse = {
     books: [],

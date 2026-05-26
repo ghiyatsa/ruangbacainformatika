@@ -31,6 +31,7 @@ class SuperAdminSeeder extends Seeder
                 'auth_provider' => 'google',
                 'is_approved' => true,
                 'whatsapp' => filled($whatsapp) ? $whatsapp : null,
+                'whatsapp_verified_at' => now(),
                 'address' => filled($address) ? $address : null,
                 'profile_completed_at' => now(),
             ]

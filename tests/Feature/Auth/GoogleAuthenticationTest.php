@@ -3,6 +3,7 @@
 use App\Models\User;
 use App\Services\GoogleIdTokenVerifier;
 use Carbon\Carbon;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Inertia\Testing\AssertableInertia;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -13,8 +14,10 @@ use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
+use function Pest\Laravel\withoutMiddleware;
 
 beforeEach(function () {
+    withoutMiddleware(PreventRequestForgery::class);
     config()->set('services.google', [
         'client_id' => 'google-client-id',
         'client_secret' => 'google-client-secret',
@@ -38,6 +41,7 @@ it('eligible users can authenticate with google one tap', function () {
         'profile_completed_at' => null,
         'whatsapp' => null,
         'address' => null,
+        'is_approved' => false,
     ]);
 
     app()->instance(GoogleIdTokenVerifier::class, new class extends GoogleIdTokenVerifier
@@ -84,6 +88,7 @@ it('eligible users can authenticate with google', function () {
         'whatsapp' => null,
         'address' => null,
         'profile_completed_at' => null,
+        'is_approved' => false,
     ]);
 
     $socialiteUser = (new SocialiteUser)->map([
@@ -217,7 +222,7 @@ it('non teknik informatika student accounts can sign in but do not receive borro
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('register.profile', absolute: false));
+        ->assertRedirect(route('register.whatsapp', absolute: false));
 
     assertAuthenticated();
 
@@ -235,7 +240,8 @@ it('non teknik informatika student accounts can sign in but do not receive borro
 it('google users can access onboarding only once', function () {
     $user = User::factory()->create([
         'auth_provider' => 'google',
-        'whatsapp' => null,
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
         'address' => null,
         'profile_completed_at' => null,
     ]);
@@ -302,6 +308,7 @@ it('campus users without complete profiles are also redirected to whatsapp verif
 it('legacy users with whatsapp only can complete onboarding by adding an address', function () {
     $user = User::factory()->create([
         'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
         'address' => null,
         'profile_completed_at' => null,
     ]);

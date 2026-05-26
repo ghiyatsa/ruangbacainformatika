@@ -54,15 +54,18 @@ class Book extends Model
         'publisher_id',
     ];
 
-    protected $casts = [
-        'is_featured' => 'boolean',
-        'is_borrowable' => 'boolean',
-        'is_published' => 'boolean',
-        'cover_image_editor_state' => 'array',
-        'published_year' => 'integer',
-        'pages' => 'integer',
-        'view_count' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_featured' => 'boolean',
+            'is_borrowable' => 'boolean',
+            'is_published' => 'boolean',
+            'cover_image_editor_state' => 'array',
+            'published_year' => 'integer',
+            'pages' => 'integer',
+            'view_count' => 'integer',
+        ];
+    }
 
     protected function isbn(): Attribute
     {

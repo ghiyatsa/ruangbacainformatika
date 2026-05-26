@@ -96,7 +96,9 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                                         type="button"
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => setIsEditingWhatsapp(true)}
+                                        onClick={() =>
+                                            setIsEditingWhatsapp(true)
+                                        }
                                     >
                                         Ubah nomor
                                     </Button>
@@ -113,7 +115,9 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                                 )}
                                 defaultValue={user.whatsapp ?? ''}
                                 name="whatsapp"
-                                readOnly={hasVerifiedWhatsapp && !isEditingWhatsapp}
+                                readOnly={
+                                    hasVerifiedWhatsapp && !isEditingWhatsapp
+                                }
                                 autoComplete="tel"
                                 placeholder="08123456789"
                             />

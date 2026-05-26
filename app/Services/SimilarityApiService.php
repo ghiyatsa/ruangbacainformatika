@@ -74,17 +74,17 @@ class SimilarityApiService
         return $this->threshold ??= (float) $this->settings->get('integration', 'similarity_api_threshold', 0.5);
     }
 
-    private function getWeightJudul(): float
+    private function getTitleWeight(): float
     {
         return $this->weightJudul ??= (float) $this->settings->get('integration', 'similarity_weight_judul', 0.7);
     }
 
-    private function getWeightAbstrak(): float
+    private function getAbstractWeight(): float
     {
         return $this->weightAbstrak ??= (float) $this->settings->get('integration', 'similarity_weight_abstrak', 0.2);
     }
 
-    private function getWeightKataKunci(): float
+    private function getKeywordWeight(): float
     {
         return $this->weightKataKunci ??= (float) $this->settings->get('integration', 'similarity_weight_kata_kunci', 0.1);
     }
@@ -92,12 +92,12 @@ class SimilarityApiService
     /**
      * @return array<string, float>
      */
-    private function syncWeights(): array
+    private function getWeights(): array
     {
         return [
-            'bobot_judul' => $this->getWeightJudul(),
-            'bobot_abstrak' => $this->getWeightAbstrak(),
-            'bobot_kata_kunci' => $this->getWeightKataKunci(),
+            'bobot_judul' => $this->getTitleWeight(),
+            'bobot_abstrak' => $this->getAbstractWeight(),
+            'bobot_kata_kunci' => $this->getKeywordWeight(),
         ];
     }
 
@@ -107,7 +107,7 @@ class SimilarityApiService
      */
     private function withConfiguredWeights(array $data): array
     {
-        return $data + $this->syncWeights();
+        return $data + $this->getWeights();
     }
 
     private function getHfToken(): ?string

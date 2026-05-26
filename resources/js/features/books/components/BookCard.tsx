@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import {
@@ -254,7 +253,20 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                 <div className="absolute inset-0 hidden bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 sm:block sm:group-hover:opacity-100" />
 
                 <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5">
-                    <div className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold text-white shadow-sm backdrop-blur-sm">
+                    {book.isFeatured && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary text-primary-foreground shadow-sm backdrop-blur-sm">
+                                    <Star className="size-3 fill-current" />
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" sideOffset={8}>
+                                Buku Unggulan
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+
+                    <div className="inline-flex h-7 items-center gap-1 rounded-full bg-black/55 px-2 text-[10px] font-semibold text-white shadow-sm backdrop-blur-sm">
                         <Eye className="size-3" />
                         <span className="sm:inline">
                             {book.viewCount.toLocaleString('id-ID')}
@@ -382,19 +394,6 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                             )}
                         </Form>
                     ) : null}
-
-                    {book.isFeatured && (
-                        <Badge className="gap-1 bg-primary/90 px-1.5 text-[10px] shadow-sm backdrop-blur-sm sm:px-2.5">
-                            <Star className="size-2.5 fill-current" />
-                            <span
-                                className={cn(
-                                    isCompact ? 'hidden' : 'hidden sm:inline',
-                                )}
-                            >
-                                Unggulan
-                            </span>
-                        </Badge>
-                    )}
                 </div>
 
                 {!isCompact ? (

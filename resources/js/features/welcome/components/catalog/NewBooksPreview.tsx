@@ -1,15 +1,12 @@
 import { Deferred, Link } from '@inertiajs/react';
 import { ArrowRight, BookOpen } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import BookCard from '@/features/books/components/BookCard';
-import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import booksRoute from '@/routes/books';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
-import EmptyCatalogState from './EmptyCatalogState';
+import BookGrid from './BookGrid';
 import SectionHeader from './SectionHeader';
-import type { CatalogBook, WelcomeProps } from '@/features/welcome/types';
+import type { WelcomeProps } from '@/features/welcome/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 interface NewBooksPreviewProps {
@@ -40,64 +37,19 @@ export default function NewBooksPreview({
             <Deferred
                 data="books"
                 fallback={
-                    <div className="animate-in duration-500 fade-in">
-                        {viewMode === 'grid' ? (
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6">
-                                {Array.from({ length: 12 }).map((_, i) => (
-                                    <BookCardSkeleton key={i} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                                {Array.from({ length: 8 }).map((_, i) => (
-                                    <BookCardSkeleton
-                                        key={i}
-                                        variant="compact"
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <BookGrid
+                        books={[]}
+                        viewMode={viewMode}
+                        skeletonCount={12}
+                        isLoading={true}
+                    />
                 }
             >
-                {previewBooks.length > 0 ? (
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={viewMode}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 0.25 }}
-                        >
-                            {viewMode === 'grid' ? (
-                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6">
-                                    {previewBooks.map(
-                                        (book: CatalogBook, index: number) => (
-                                            <BookCard
-                                                key={book.id || `grid-${index}`}
-                                                book={book}
-                                            />
-                                        ),
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                                    {previewBooks.map(
-                                        (book: CatalogBook, index: number) => (
-                                            <BookCard
-                                                key={book.id || `list-${index}`}
-                                                book={book}
-                                                variant="compact"
-                                            />
-                                        ),
-                                    )}
-                                </div>
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-                ) : (
-                    <EmptyCatalogState />
-                )}
+                <BookGrid
+                    books={previewBooks}
+                    viewMode={viewMode}
+                    keyPrefix="new-books"
+                />
             </Deferred>
 
             <div className="flex flex-col items-center gap-2">

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\InternshipReportFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,23 @@ class InternshipReport extends Model
         'view_count',
     ];
 
-    protected $casts = [
-        'view_count' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'view_count' => 'integer',
+        ];
+    }
+
+    public function scopeSearch(Builder $query, string $search): Builder
+    {
+        if ($search === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($search): void {
+            $q->where('title', 'like', "%{$search}%")
+                ->orWhere('author_name', 'like', "%{$search}%")
+                ->orWhere('keywords', 'like', "%{$search}%");
+        });
+    }
 }

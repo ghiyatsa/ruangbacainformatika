@@ -26,7 +26,6 @@ interface MobileSheetProps {
     setMobileOpen: (open: boolean) => void;
     isActive: (href: string) => boolean;
     auth: Auth;
-    canRegister?: boolean;
 }
 
 export function MobileSheet({
@@ -89,9 +88,11 @@ export function MobileSheet({
                                 >
                                     <Bookmark className="size-4 shrink-0 text-muted-foreground" />
                                     <span>Bookmark</span>
-                                    <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
-                                        {bookmarkedCount}
-                                    </span>
+                                    {bookmarkedCount > 0 && (
+                                        <span className="ml-auto inline-flex min-w-6 animate-in items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground duration-200 zoom-in-50">
+                                            {bookmarkedCount}
+                                        </span>
+                                    )}
                                 </button>
                             }
                         />
@@ -108,9 +109,12 @@ export function MobileSheet({
                                 >
                                     <ShoppingCart className="size-4 shrink-0 text-muted-foreground" />
                                     <span>Keranjang Peminjaman</span>
-                                    <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
-                                        {loanRequestCart?.count ?? 0}
-                                    </span>
+                                    {loanRequestCart &&
+                                        loanRequestCart.count > 0 && (
+                                            <span className="ml-auto inline-flex min-w-6 animate-in items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground duration-200 zoom-in-50">
+                                                {loanRequestCart.count}
+                                            </span>
+                                        )}
                                 </Link>
                             </SheetClose>
                         ) : null}

@@ -42,6 +42,7 @@ it('kiosk settings rotate active sessions when the pin is updated', function () 
             'subtitle' => 'Gunakan PIN baru.',
         ])
         ->call('save')
+        ->assertHasNoFormErrors()
         ->assertNotified('Pengaturan kios disimpan');
 
     expect(Setting::query()->where('section', 'kiosk')->where('key', 'pin_hash')->exists())->toBeTrue()

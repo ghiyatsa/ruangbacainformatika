@@ -1,22 +1,30 @@
 <?php
 
 use App\Models\Skripsi;
+use App\Models\User;
 use App\Services\SimilarityApiService;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Queue;
 
-use function Pest\Laravel\get;
-use function Pest\Laravel\postJson;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\withoutMiddleware;
+
+beforeEach(function () {
+    withoutMiddleware(PreventRequestForgery::class);
+});
 
 it('similarity page is displayed', function () {
-    get(route('similarity.index'))
+    actingAs(User::factory()->create())
+        ->get(route('similarity.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page->component('similarity'));
 });
 
 it('similarity check requires at least five words', function () {
-    postJson(route('similarity.check'), [
-        'judul' => 'Sistem informasi akademik modern',
-    ])
+    actingAs(User::factory()->create())
+        ->postJson(route('similarity.check'), [
+            'judul' => 'Sistem informasi akademik modern',
+        ])
         ->assertStatus(422)
         ->assertJson([
             'message' => 'Judul terlalu singkat. Masukkan minimal 5 kata agar pengecekan lebih akurat.',
@@ -50,9 +58,10 @@ it('similarity check normalizes api results for frontend', function () {
 
     app()->instance(SimilarityApiService::class, $service);
 
-    postJson(route('similarity.check'), [
-        'judul' => 'Analisis sentimen media sosial untuk layanan akademik kampus',
-    ])
+    actingAs(User::factory()->create())
+        ->postJson(route('similarity.check'), [
+            'judul' => 'Analisis sentimen media sosial untuk layanan akademik kampus',
+        ])
         ->assertOk()
         ->assertJson([
             'total_found' => 1,
@@ -80,9 +89,10 @@ it('similarity check returns a neutral failure message when the service is unava
 
     app()->instance(SimilarityApiService::class, $service);
 
-    postJson(route('similarity.check'), [
-        'judul' => 'Analisis sentimen media sosial untuk layanan akademik kampus merdeka',
-    ])
+    actingAs(User::factory()->create())
+        ->postJson(route('similarity.check'), [
+            'judul' => 'Analisis sentimen media sosial untuk layanan akademik kampus merdeka',
+        ])
         ->assertStatus(500)
         ->assertJson([
             'message' => 'Gagal melakukan pemindaian kemiripan. Jika masalah berlanjut, silakan hubungi tim pengelola perpustakaan.',

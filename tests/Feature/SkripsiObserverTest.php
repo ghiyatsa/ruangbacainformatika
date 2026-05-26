@@ -6,6 +6,10 @@ use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use Illuminate\Support\Facades\Queue;
 
+beforeEach(function () {
+    config()->set('services.similarity_api.dispatch', 'queued');
+});
+
 it('creating a skripsi queues a similarity sync job', function () {
     Queue::fake();
 

@@ -11,7 +11,11 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+} from '@/components/ui/input-group';
 import { Spinner } from '@/components/ui/spinner';
 import { KioskField } from '@/features/kiosk/components/KioskField';
 import type { KioskProps } from '@/features/kiosk/types';
@@ -96,27 +100,36 @@ export function PinStep({
                                     error={errors.pin}
                                     required
                                 >
-                                    <input type="hidden" name="pin" value={pin} />
-                                    <Input
-                                        id="pin"
-                                        type="password"
-                                        inputMode="numeric"
-                                        autoComplete="new-password"
-                                        autoCorrect="off"
-                                        spellCheck={false}
-                                        data-lpignore="true"
-                                        data-1p-ignore="true"
-                                        data-bwignore="true"
-                                        autoFocus
-                                        maxLength={8}
-                                        placeholder="••••••"
-                                        className="h-12 text-center text-lg tracking-[0.35em]"
+                                    <input
+                                        type="hidden"
+                                        name="pin"
                                         value={pin}
-                                        onChange={(event) =>
-                                            setPin(event.target.value)
-                                        }
-                                        aria-invalid={Boolean(errors.pin)}
                                     />
+                                    <InputGroup className="h-12">
+                                        <InputGroupInput
+                                            id="pin"
+                                            type="password"
+                                            inputMode="numeric"
+                                            autoComplete="new-password"
+                                            autoCorrect="off"
+                                            spellCheck={false}
+                                            data-lpignore="true"
+                                            data-1p-ignore="true"
+                                            data-bwignore="true"
+                                            autoFocus
+                                            maxLength={8}
+                                            placeholder="••••••"
+                                            className="h-full text-center text-lg tracking-[0.35em]"
+                                            value={pin}
+                                            onChange={(event) =>
+                                                setPin(event.target.value)
+                                            }
+                                            aria-invalid={Boolean(errors.pin)}
+                                        />
+                                        <InputGroupAddon>
+                                            <KeyRound />
+                                        </InputGroupAddon>
+                                    </InputGroup>
                                 </KioskField>
 
                                 <Button

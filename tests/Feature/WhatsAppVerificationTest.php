@@ -3,13 +3,20 @@
 use App\Models\User;
 use App\Notifications\WhatsAppOtpNotification;
 use App\Services\WhatsAppGateway;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia;
+use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\withoutMiddleware;
 
 beforeEach(function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
     $gateway = mock(WhatsAppGateway::class);
     $gateway->shouldReceive('configured')->andReturn(true);
     app()->instance(WhatsAppGateway::class, $gateway);

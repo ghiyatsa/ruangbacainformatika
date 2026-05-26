@@ -45,14 +45,8 @@ export function ReadyStep(props: KioskProps) {
     return (
         <div className="flex h-[calc(100dvh-2rem)] min-h-0 w-full flex-col gap-4 py-10">
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-                <Card className="min-h-0 border-border/70">
-                    <CardHeader className="pb-4">
-                        <CardTitle>Pilih Layanan</CardTitle>
-                        <CardDescription>
-                            Semua layanan tersedia di halaman ini.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="min-h-0">
+                <Card className="flex min-h-0 flex-col border-border/70">
+                    <CardContent className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
                         <MenuGrid
                             activeMenu={selectedMenu}
                             onSelect={handleSelect}
@@ -60,8 +54,8 @@ export function ReadyStep(props: KioskProps) {
                     </CardContent>
                 </Card>
 
-                <Card className="min-h-0 border-border/70">
-                    <CardHeader className="pb-4">
+                <Card className="flex min-h-0 flex-col border-border/70">
+                    <CardHeader>
                         <div className="flex items-center gap-3">
                             {ActiveIcon ? (
                                 <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -80,7 +74,7 @@ export function ReadyStep(props: KioskProps) {
                         </div>
                     </CardHeader>
 
-                    <CardContent className="min-h-0 overflow-auto">
+                    <CardContent className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
                         {selectedMenu === 'visit' ? (
                             <VisitForm
                                 visitorTypeOptions={props.visitorTypeOptions}

@@ -50,8 +50,9 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            $settings = app(SettingRepository::class);
-            $enabled = $settings->get('integration', 'turnstile_enabled', false);
+            $enabled = cache()->remember('settings.integration.turnstile_enabled', now()->addMinutes(5), function (): mixed {
+                return app(SettingRepository::class)->get('integration', 'turnstile_enabled', false);
+            });
 
             config([
                 'services.turnstile.enabled' => filter_var($enabled, FILTER_VALIDATE_BOOLEAN),

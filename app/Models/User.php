@@ -128,6 +128,11 @@ class User extends Authenticatable implements FilamentUser
         return app(CampusEmail::class)->isEligibleEmail($this->email);
     }
 
+    public function nim(): string
+    {
+        return app(CampusEmail::class)->extractIdentityNumber($this->email);
+    }
+
     public function hasVerifiedWhatsApp(): bool
     {
         return $this->whatsapp_verified_at !== null;

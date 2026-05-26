@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('kiosk_devices', function (Blueprint $table): void {
             $table->id();
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->string('session_id')->unique();
             $table->string('device_token', 64)->unique();
             $table->string('ip_address', 45)->nullable();

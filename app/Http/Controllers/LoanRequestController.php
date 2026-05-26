@@ -104,6 +104,11 @@ class LoanRequestController extends Controller
             'items.book.publisher:id,name',
         ]);
 
+        // Pre-load available items count for all books in the draft to avoid N+1
+        $draft->items->each(function (LoanDraftItem $item): void {
+            $item->book->loadCount(['items as available_items_count' => fn ($query) => $query->available()]);
+        });
+
         $qr = session('loan_request_qr');
 
         return [
@@ -126,7 +131,7 @@ class LoanRequestController extends Controller
                     'authors' => $item->book->authors->pluck('name')->values()->all(),
                     'isbn' => $item->book->isbn,
                     'issn' => $item->book->issn,
-                    'availableItemsCount' => $item->book->items()->available()->count(),
+                    'availableItemsCount' => $item->book->available_items_count ?? 0,
                 ])
                 ->all(),
         ];

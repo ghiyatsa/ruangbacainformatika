@@ -1,35 +1,60 @@
 import {
+    BookOpen,
+    ClipboardCheck,
     FileCheck,
+    GraduationCap,
+    Info,
     LogIn,
     Mail,
-    Search,
-    Terminal,
     UserPlus,
-    Wrench,
 } from 'lucide-react';
-import { contact, home, privacyPolicy, search, termsOfService } from '@/routes';
-import similarity from '@/routes/similarity';
+import { about, contact, privacyPolicy, termsOfService } from '@/routes';
+import books from '@/routes/books';
+import internshipReports from '@/routes/internship-reports';
+import skripsi from '@/routes/skripsi';
+import thesis from '@/routes/thesis';
 import type { Variants } from 'motion/react';
 
-export const INFO_LINKS = [
+export const KOLEKSI_LINKS = [
     {
-        label: 'Universitas Malikussaleh',
-        href: 'https://www.unimal.ac.id',
-        external: true,
+        label: 'Buku',
+        href: () => books.index.url(),
+        icon: BookOpen,
+        internal: true,
     },
     {
-        label: 'Prodi Teknik Informatika',
-        href: 'https://informatika.unimal.ac.id',
-        external: true,
+        label: 'Skripsi',
+        href: () => skripsi.index.url(),
+        icon: GraduationCap,
+        internal: true,
     },
     {
-        label: 'Sistem Informasi Akademik',
-        href: 'https://sia.unimal.ac.id',
-        external: true,
+        label: 'Tesis',
+        href: () => thesis.index.url(),
+        icon: GraduationCap,
+        internal: true,
+    },
+    {
+        label: 'Laporan KP',
+        href: () => internshipReports.index.url(),
+        icon: ClipboardCheck,
+        internal: true,
     },
 ];
 
 export const LEGAL_LINKS = [
+    {
+        label: 'Tentang',
+        href: () => about.url(),
+        icon: Info,
+        internal: true,
+    },
+    {
+        label: 'Kontak',
+        href: () => contact.url(),
+        icon: Mail,
+        internal: true,
+    },
     {
         label: 'Kebijakan Privasi',
         href: () => privacyPolicy.url(),
@@ -40,33 +65,6 @@ export const LEGAL_LINKS = [
         label: 'Syarat Layanan',
         href: () => termsOfService.url(),
         icon: FileCheck,
-        internal: true,
-    },
-    {
-        label: 'Kontak',
-        href: () => contact.url(),
-        icon: Mail,
-        internal: true,
-    },
-];
-
-export const SERVICE_LINKS = [
-    {
-        label: 'Beranda',
-        href: () => home.url(),
-        icon: Terminal,
-        internal: true,
-    },
-    {
-        label: 'Cari Buku',
-        href: () => search.url(),
-        icon: Search,
-        internal: true,
-    },
-    {
-        label: 'Cek Kemiripan',
-        href: () => similarity.index.url(),
-        icon: Wrench,
         internal: true,
     },
 ];

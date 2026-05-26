@@ -8,9 +8,8 @@ import { MobileSheet } from './MobileSheet';
 import type { Auth } from '@/types';
 
 export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
-    const { auth, canRegister = true } = usePage<{
+    const { auth } = usePage<{
         auth: Auth;
-        canRegister?: boolean;
     }>().props;
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -48,7 +47,6 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                 <div className="flex shrink-0 items-center lg:gap-1">
                     <HeaderActions
                         auth={auth}
-                        canRegister={canRegister}
                         resolvedAppearance={resolvedAppearance}
                         updateAppearance={updateAppearance}
                         hideSearch={hideSearch}
@@ -59,7 +57,6 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                         setMobileOpen={setMobileOpen}
                         isActive={isActive}
                         auth={auth}
-                        canRegister={canRegister}
                     />
                 </div>
             </div>

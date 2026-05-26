@@ -18,5 +18,17 @@ class DatabaseSeeder extends Seeder
             ShieldSeeder::class,
             SuperAdminSeeder::class,
         ]);
+
+        if (app()->environment('local', 'development')) {
+            $this->call([
+                CategorySeeder::class,
+                AuthorSeeder::class,
+                PublisherSeeder::class,
+                BookSeeder::class,
+                SkripsiSeeder::class,
+                ThesisSeeder::class,
+                InternshipReportSeeder::class,
+            ]);
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { Globe, Mail } from 'lucide-react';
+import { Github, Globe, Instagram, Mail } from 'lucide-react';
 
 export function FooterBottom() {
     const year = new Date().getFullYear();
@@ -26,6 +26,24 @@ export function FooterBottom() {
                     className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
                 >
                     <Mail className="size-4" />
+                </a>
+                <a
+                    href="https://www.instagram.com/himatif_unimal"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram HIMATIF Universitas Malikussaleh"
+                    className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
+                >
+                    <Instagram className="size-4" />
+                </a>
+                <a
+                    href="https://github.com/aperiocode/ruangbacainformatika"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="GitHub Ruang Baca Teknik Informatika"
+                    className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-primary/10 hover:text-primary"
+                >
+                    <Github className="size-4" />
                 </a>
             </div>
         </div>

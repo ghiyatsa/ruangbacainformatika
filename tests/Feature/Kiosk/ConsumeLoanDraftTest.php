@@ -71,7 +71,9 @@ it('consumes a qr loan draft from kiosk and creates the final loan', function ()
     ensureMemberRole();
     Notification::fake();
 
-    $member = User::factory()->create();
+    $member = User::factory()->create([
+        'whatsapp_verified_at' => now(),
+    ]);
     /** @var User $member */
     $member->assignRole('member');
 
@@ -117,7 +119,9 @@ it('rejects expired qr loan drafts from kiosk', function () {
 
     ensureMemberRole();
 
-    $member = User::factory()->create();
+    $member = User::factory()->create([
+        'whatsapp_verified_at' => now(),
+    ]);
     /** @var User $member */
     $member->assignRole('member');
 
@@ -180,6 +184,7 @@ it('rejects qr loan draft consumption when member already reached the loan limit
 
     $member = User::factory()->create([
         'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
         'address' => 'Jl. Banda Aceh No. 10',
     ]);
     /** @var User $member */
@@ -258,6 +263,7 @@ it('rejects qr loan draft consumption while a late return cooldown is still acti
 
     $member = User::factory()->create([
         'whatsapp' => '081234567893',
+        'whatsapp_verified_at' => now(),
         'address' => 'Jl. Pendingin',
     ]);
     $member->assignRole('member');

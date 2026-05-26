@@ -1,9 +1,20 @@
 import { Form } from '@inertiajs/react';
+import {
+    UserIcon,
+    CreditCardIcon,
+    BuildingIcon,
+    PhoneIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+    InputGroupTextarea,
+} from '@/components/ui/input-group';
 import {
     Select,
     SelectContent,
@@ -36,9 +47,7 @@ export function VisitForm({
     const isComplete =
         name.trim() !== '' &&
         visitorType !== '' &&
-        purpose !== '' &&
-        (requiresIdentity ? identityNumber.trim() !== '' : true) &&
-        (isPublicVisitor ? institution.trim() !== '' : true);
+        purpose !== '';
 
     return (
         <Form
@@ -74,21 +83,26 @@ export function VisitForm({
                             error={errors.name}
                             required
                         >
-                            <input type="hidden" name="name" value={name} />
-                            <Input
-                                id="visit-name"
-                                autoFocus
-                                autoComplete="new-password"
-                                autoCorrect="off"
-                                spellCheck={false}
-                                data-lpignore="true"
-                                data-1p-ignore="true"
-                                data-bwignore="true"
-                                placeholder="Nama lengkap"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                aria-invalid={Boolean(errors.name)}
-                            />
+                            <InputGroup>
+                                <InputGroupInput
+                                    id="visit-name"
+                                    name="name"
+                                    autoFocus
+                                    autoComplete="new-password"
+                                    autoCorrect="off"
+                                    spellCheck={false}
+                                    data-lpignore="true"
+                                    data-1p-ignore="true"
+                                    data-bwignore="true"
+                                    placeholder="Nama lengkap"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    aria-invalid={Boolean(errors.name)}
+                                />
+                                <InputGroupAddon>
+                                    <UserIcon />
+                                </InputGroupAddon>
+                            </InputGroup>
                         </KioskField>
 
                         <KioskField
@@ -136,30 +150,30 @@ export function VisitForm({
                                 label="NIM / NIP"
                                 htmlFor="visit-identity"
                                 error={errors.identity_number}
-                                required
                             >
-                                <input
-                                    type="hidden"
-                                    name="identity_number"
-                                    value={identityNumber}
-                                />
-                                <Input
-                                    id="visit-identity"
-                                    autoComplete="new-password"
-                                    autoCorrect="off"
-                                    spellCheck={false}
-                                    data-lpignore="true"
-                                    data-1p-ignore="true"
-                                    data-bwignore="true"
-                                    placeholder="Nomor identitas"
-                                    value={identityNumber}
-                                    onChange={(e) =>
-                                        setIdentityNumber(e.target.value)
-                                    }
-                                    aria-invalid={Boolean(
-                                        errors.identity_number,
-                                    )}
-                                />
+                                <InputGroup>
+                                    <InputGroupInput
+                                        id="visit-identity"
+                                        name="identity_number"
+                                        autoComplete="new-password"
+                                        autoCorrect="off"
+                                        spellCheck={false}
+                                        data-lpignore="true"
+                                        data-1p-ignore="true"
+                                        data-bwignore="true"
+                                        placeholder="Nomor identitas"
+                                        value={identityNumber}
+                                        onChange={(e) =>
+                                            setIdentityNumber(e.target.value)
+                                        }
+                                        aria-invalid={Boolean(
+                                            errors.identity_number,
+                                        )}
+                                    />
+                                    <InputGroupAddon>
+                                        <CreditCardIcon />
+                                    </InputGroupAddon>
+                                </InputGroup>
                             </KioskField>
                         ) : null}
 
@@ -168,28 +182,30 @@ export function VisitForm({
                                 label="Instansi"
                                 htmlFor="visit-institution"
                                 error={errors.institution}
-                                required
                             >
-                                <input
-                                    type="hidden"
-                                    name="institution"
-                                    value={institution}
-                                />
-                                <Input
-                                    id="visit-institution"
-                                    autoComplete="new-password"
-                                    autoCorrect="off"
-                                    spellCheck={false}
-                                    data-lpignore="true"
-                                    data-1p-ignore="true"
-                                    data-bwignore="true"
-                                    placeholder="Asal instansi"
-                                    value={institution}
-                                    onChange={(e) =>
-                                        setInstitution(e.target.value)
-                                    }
-                                    aria-invalid={Boolean(errors.institution)}
-                                />
+                                <InputGroup>
+                                    <InputGroupInput
+                                        id="visit-institution"
+                                        name="institution"
+                                        autoComplete="new-password"
+                                        autoCorrect="off"
+                                        spellCheck={false}
+                                        data-lpignore="true"
+                                        data-1p-ignore="true"
+                                        data-bwignore="true"
+                                        placeholder="Asal instansi"
+                                        value={institution}
+                                        onChange={(e) =>
+                                            setInstitution(e.target.value)
+                                        }
+                                        aria-invalid={Boolean(
+                                            errors.institution,
+                                        )}
+                                    />
+                                    <InputGroupAddon>
+                                        <BuildingIcon />
+                                    </InputGroupAddon>
+                                </InputGroup>
                             </KioskField>
                         ) : null}
 
@@ -198,22 +214,27 @@ export function VisitForm({
                             htmlFor="visit-phone"
                             error={errors.phone}
                         >
-                            <input type="hidden" name="phone" value={phone} />
-                            <Input
-                                id="visit-phone"
-                                type="tel"
-                                inputMode="numeric"
-                                autoComplete="new-password"
-                                autoCorrect="off"
-                                spellCheck={false}
-                                data-lpignore="true"
-                                data-1p-ignore="true"
-                                data-bwignore="true"
-                                placeholder="08xxxxxxxxxx"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                aria-invalid={Boolean(errors.phone)}
-                            />
+                            <InputGroup>
+                                <InputGroupInput
+                                    id="visit-phone"
+                                    name="phone"
+                                    type="tel"
+                                    inputMode="numeric"
+                                    autoComplete="new-password"
+                                    autoCorrect="off"
+                                    spellCheck={false}
+                                    data-lpignore="true"
+                                    data-1p-ignore="true"
+                                    data-bwignore="true"
+                                    placeholder="08xxxxxxxxxx"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    aria-invalid={Boolean(errors.phone)}
+                                />
+                                <InputGroupAddon>
+                                    <PhoneIcon />
+                                </InputGroupAddon>
+                            </InputGroup>
                         </KioskField>
 
                         <KioskField
@@ -258,22 +279,24 @@ export function VisitForm({
                             error={errors.notes}
                             className="sm:col-span-2"
                         >
-                            <input type="hidden" name="notes" value={notes} />
-                            <textarea
-                                id="visit-notes"
-                                rows={2}
-                                autoComplete="new-password"
-                                autoCorrect="off"
-                                spellCheck={false}
-                                data-lpignore="true"
-                                data-1p-ignore="true"
-                                data-bwignore="true"
-                                placeholder="Keterangan tambahan"
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                className="min-h-20 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
-                                aria-invalid={Boolean(errors.notes)}
-                            />
+                            <InputGroup>
+                                <InputGroupTextarea
+                                    id="visit-notes"
+                                    name="notes"
+                                    rows={2}
+                                    autoComplete="new-password"
+                                    autoCorrect="off"
+                                    spellCheck={false}
+                                    data-lpignore="true"
+                                    data-1p-ignore="true"
+                                    data-bwignore="true"
+                                    placeholder="Keterangan tambahan"
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    className="min-h-20 resize-y"
+                                    aria-invalid={Boolean(errors.notes)}
+                                />
+                            </InputGroup>
                         </KioskField>
                     </FieldGroup>
 

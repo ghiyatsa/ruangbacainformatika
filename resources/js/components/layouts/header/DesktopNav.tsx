@@ -19,7 +19,7 @@ interface DesktopNavProps {
 
 export function DesktopNav({ isActive }: DesktopNavProps) {
     return (
-        <NavigationMenu className="hidden min-w-0 md:flex">
+        <NavigationMenu className="hidden min-w-0 md:flex" viewport={false}>
             <NavigationMenuList className="gap-0.5 lg:gap-1">
                 {NAV_LINKS.map((item) => (
                     <NavigationMenuItem key={item.label}>
@@ -37,8 +37,8 @@ export function DesktopNav({ isActive }: DesktopNavProps) {
                                 >
                                     {item.label}
                                 </NavigationMenuTrigger>
-                                <NavigationMenuContent>
-                                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                                <NavigationMenuContent className="left-1/2 -translate-x-1/2">
+                                    <ul className="flex w-max min-w-[200px] flex-col gap-1 p-2">
                                         {item.children.map((child) => (
                                             <ListItem
                                                 key={child.href}
@@ -46,9 +46,7 @@ export function DesktopNav({ isActive }: DesktopNavProps) {
                                                 href={child.href}
                                                 icon={child.icon}
                                                 active={isActive(child.href)}
-                                            >
-                                                {child.description}
-                                            </ListItem>
+                                            />
                                         ))}
                                     </ul>
                                 </NavigationMenuContent>
@@ -83,7 +81,7 @@ const ListItem = React.forwardRef<
         active?: boolean;
         icon?: LucideIcon;
     }
->(({ className, title, children, active, icon: Icon, ...props }, ref) => {
+>(({ className, title, active, icon: Icon, ...props }, ref) => {
     return (
         <li>
             <NavigationMenuLink asChild active={active}>
@@ -91,22 +89,17 @@ const ListItem = React.forwardRef<
                     ref={ref as any}
                     href={props.href!}
                     className={cn(
-                        'flex gap-3 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+                        'group flex items-center gap-3 rounded-lg p-2.5 leading-none no-underline transition-colors outline-none select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
                         active && 'bg-accent/50 text-accent-foreground',
                         className,
                     )}
                 >
                     {Icon && (
-                        <Icon className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+                        <Icon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
                     )}
-                    <div className="space-y-1">
-                        <div className="text-sm leading-none font-medium">
-                            {title}
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            {children}
-                        </p>
-                    </div>
+                    <span className="text-sm leading-none font-medium">
+                        {title}
+                    </span>
                 </Link>
             </NavigationMenuLink>
         </li>

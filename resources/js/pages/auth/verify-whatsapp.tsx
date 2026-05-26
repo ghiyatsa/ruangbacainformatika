@@ -67,7 +67,8 @@ export default function VerifyWhatsApp() {
                             <>
                                 Kode akan dikirim ke{' '}
                                 <span className="font-medium text-foreground">
-                                    {verification.maskedWhatsapp ?? 'nomor Anda'}
+                                    {verification.maskedWhatsapp ??
+                                        'nomor Anda'}
                                 </span>
                                 .
                             </>
@@ -92,7 +93,9 @@ export default function VerifyWhatsApp() {
                             </p>
                         </div>
                         <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                            {expiresIn > 0 ? formatRemaining(expiresIn) : '00:00'}
+                            {expiresIn > 0
+                                ? formatRemaining(expiresIn)
+                                : '00:00'}
                         </div>
                     </div>
 
@@ -105,7 +108,9 @@ export default function VerifyWhatsApp() {
                         {({ processing, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
+                                    <Label htmlFor="whatsapp">
+                                        Nomor WhatsApp
+                                    </Label>
                                     <Input
                                         id="whatsapp"
                                         name="whatsapp"
@@ -116,7 +121,9 @@ export default function VerifyWhatsApp() {
                                         placeholder="08123456789"
                                         required={!hasWhatsapp}
                                     />
-                                    <InputError message={errors.whatsapp ?? errors.otp} />
+                                    <InputError
+                                        message={errors.whatsapp ?? errors.otp}
+                                    />
                                 </div>
 
                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -125,7 +132,8 @@ export default function VerifyWhatsApp() {
                                         variant="outline"
                                         disabled={
                                             processing ||
-                                            (hasWhatsapp && resendAvailableIn > 0)
+                                            (hasWhatsapp &&
+                                                resendAvailableIn > 0)
                                         }
                                         className="w-full sm:w-auto"
                                     >
@@ -136,7 +144,8 @@ export default function VerifyWhatsApp() {
                                         )}
                                         {hasWhatsapp && resendAvailableIn > 0
                                             ? `Kirim ulang dalam ${formatRemaining(resendAvailableIn)}`
-                                            : hasWhatsapp && verification.hasActiveChallenge
+                                            : hasWhatsapp &&
+                                                verification.hasActiveChallenge
                                               ? 'Kirim ulang kode'
                                               : 'Kirim kode'}
                                     </Button>
@@ -173,7 +182,9 @@ export default function VerifyWhatsApp() {
                                     required
                                     placeholder="Masukkan 6 digit kode"
                                 />
-                                <InputError message={errors.code ?? errors.otp} />
+                                <InputError
+                                    message={errors.code ?? errors.otp}
+                                />
                             </div>
 
                             <Button
@@ -182,7 +193,11 @@ export default function VerifyWhatsApp() {
                                 size="lg"
                                 disabled={processing}
                             >
-                                {processing ? <Spinner /> : <CheckCircle2 className="size-4" />}
+                                {processing ? (
+                                    <Spinner />
+                                ) : (
+                                    <CheckCircle2 className="size-4" />
+                                )}
                                 Verifikasi
                             </Button>
                         </>

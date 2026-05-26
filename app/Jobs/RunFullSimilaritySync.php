@@ -3,11 +3,10 @@
 namespace App\Jobs;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Artisan;
 
-class RunFullSimilaritySync implements ShouldQueue, ShouldQueueAfterCommit
+class RunFullSimilaritySync implements ShouldQueue
 {
     use Queueable;
 

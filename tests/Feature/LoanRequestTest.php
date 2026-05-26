@@ -21,7 +21,9 @@ it('members can add books to a loan request and generate a qr draft', function (
 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
-    $member = User::factory()->create();
+    $member = User::factory()->create([
+        'whatsapp_verified_at' => now(),
+    ]);
     $member->assignRole('member');
 
     $publisher = Publisher::query()->create([
@@ -149,7 +151,8 @@ it('users can add books to cart before profile is complete but cannot generate q
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $member = User::factory()->create([
-        'whatsapp' => null,
+        'whatsapp' => '081234567890',
+        'whatsapp_verified_at' => now(),
         'address' => null,
     ]);
     $member->assignRole('member');
@@ -198,6 +201,7 @@ it('members can add more books to cart and generate qr for a subset within remai
 
     $member = User::factory()->create([
         'whatsapp' => '081234567890',
+        'whatsapp_verified_at' => now(),
         'address' => 'Jl. Kampus',
     ]);
     $member->assignRole('member');
@@ -263,6 +267,7 @@ it('members cannot generate qr for more books than the remaining quota', functio
 
     $member = User::factory()->create([
         'whatsapp' => '081234567890',
+        'whatsapp_verified_at' => now(),
         'address' => 'Jl. Kampus',
     ]);
     $member->assignRole('member');
@@ -319,6 +324,7 @@ it('members cannot generate a new qr while the current qr is still active', func
 
     $member = User::factory()->create([
         'whatsapp' => '081234567890',
+        'whatsapp_verified_at' => now(),
         'address' => 'Jl. Kampus',
     ]);
     $member->assignRole('member');
@@ -389,6 +395,7 @@ it('members cannot generate qr while borrowing access is suspended because of an
 
     $member = User::factory()->create([
         'whatsapp' => '081234567892',
+        'whatsapp_verified_at' => now(),
         'address' => 'Jl. Kampus Baru',
     ]);
     $member->assignRole('member');

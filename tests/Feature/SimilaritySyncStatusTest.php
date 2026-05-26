@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Queue;
 it('sync skripsi job marks status as synced after successful api upsert', function () {
     Queue::fake();
 
-    $skripsi = Skripsi::factory()->create();
+    $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
     $statusService = app(SimilaritySyncStatusService::class);
 
     $statusService->markQueued($skripsi);
@@ -36,7 +36,7 @@ it('sync skripsi job marks status as synced after successful api upsert', functi
 it('sync skripsi job marks status as failed after api error', function () {
     Queue::fake();
 
-    $skripsi = Skripsi::factory()->create();
+    $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
     $statusService = app(SimilaritySyncStatusService::class);
 
     $statusService->markQueued($skripsi);

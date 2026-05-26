@@ -8,6 +8,8 @@ class CampusEmail
 {
     public const TEKNIK_INFORMATIKA_PROGRAM_CODE = '170';
 
+    public const ELIGIBLE_EMAIL_MESSAGE = 'Gunakan email UNIMAL dengan domain @mhs.unimal.ac.id atau @unimal.ac.id.';
+
     public function normalize(string $email): string
     {
         return Str::lower(trim($email));
@@ -16,13 +18,13 @@ class CampusEmail
     public function validationMessage(?string $email): ?string
     {
         if ($email === null) {
-            return 'Gunakan email UNIMAL yang valid.';
+            return self::ELIGIBLE_EMAIL_MESSAGE;
         }
 
         $normalizedEmail = $this->normalize($email);
 
         if ($normalizedEmail === '' || ! $this->isEligibleEmail($normalizedEmail)) {
-            return 'Gunakan email UNIMAL yang valid.';
+            return self::ELIGIBLE_EMAIL_MESSAGE;
         }
 
         return null;
@@ -58,13 +60,13 @@ class CampusEmail
     public function borrowingEligibilityMessage(?string $email): ?string
     {
         if ($email === null) {
-            return 'Pendaftaran layanan peminjaman ditujukan untuk mahasiswa Teknik Informatika dengan email UNIMAL yang valid.';
+            return self::ELIGIBLE_EMAIL_MESSAGE;
         }
 
         $normalizedEmail = $this->normalize($email);
 
-        if (! $this->isTeknikInformatikaStudentEmail($normalizedEmail)) {
-            return 'Pendaftaran layanan peminjaman ditujukan untuk mahasiswa Teknik Informatika dengan email UNIMAL yang valid.';
+        if (! $this->isEligibleEmail($normalizedEmail)) {
+            return self::ELIGIBLE_EMAIL_MESSAGE;
         }
 
         return null;

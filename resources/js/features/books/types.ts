@@ -24,7 +24,6 @@ export interface BookCatalogFilters {
 }
 
 export interface BookCatalogPageProps {
-    canRegister?: boolean;
     filters: BookCatalogFilters;
     stats: BookCatalogStats;
     categories: CategoryItem[];

@@ -20,8 +20,8 @@ export const kioskMenuItems: KioskMenuItem[] = [
     },
     {
         key: 'member',
-        label: 'Tautkan Akun',
-        description: 'Siapkan akun layanan',
+        label: 'Anggota',
+        description: 'Registrasi Anggota',
         helper: 'Lengkapi data lalu tautkan akun Google.',
         icon: UserPlus,
     },

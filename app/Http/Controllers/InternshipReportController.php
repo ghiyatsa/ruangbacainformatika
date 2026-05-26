@@ -16,11 +16,7 @@ class InternshipReportController extends Controller
         $year = $request->integer('year');
 
         $reports = InternshipReport::query()
-            ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('author_name', 'like', "%{$search}%")
-                    ->orWhere('keywords', 'like', "%{$search}%");
-            }))
+            ->search($search)
             ->when($request->filled('year'), fn ($q) => $q->where('year', $year))
             ->orderByDesc('year')
             ->orderBy('title')

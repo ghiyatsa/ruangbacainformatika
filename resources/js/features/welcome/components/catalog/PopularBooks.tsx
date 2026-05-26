@@ -1,10 +1,7 @@
 import { Deferred } from '@inertiajs/react';
-import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
-import BookCard from '@/features/books/components/BookCard';
-import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
-import EmptyCatalogState from './EmptyCatalogState';
+import BookGrid from './BookGrid';
 import SectionHeader from './SectionHeader';
 import type { CatalogBook } from '@/features/welcome/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
@@ -33,69 +30,21 @@ export default function PopularBooks({
             <Deferred
                 data="popularBooks"
                 fallback={
-                    <div className="animate-in duration-500 fade-in">
-                        {viewMode === 'grid' ? (
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6">
-                                {Array.from({ length: 6 }).map((_, index) => (
-                                    <BookCardSkeleton key={index} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                                {Array.from({ length: 6 }).map((_, index) => (
-                                    <BookCardSkeleton
-                                        key={index}
-                                        variant="compact"
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <BookGrid
+                        books={[]}
+                        viewMode={viewMode}
+                        skeletonCount={6}
+                        isLoading={true}
+                    />
                 }
             >
-                {previewBooks.length > 0 ? (
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={viewMode}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 0.25 }}
-                        >
-                            {viewMode === 'grid' ? (
-                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6">
-                                    {previewBooks.map((book, index) => (
-                                        <BookCard
-                                            key={
-                                                book.id ||
-                                                `popular-grid-${index}`
-                                            }
-                                            book={book}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                                    {previewBooks.map((book, index) => (
-                                        <BookCard
-                                            key={
-                                                book.id ||
-                                                `popular-list-${index}`
-                                            }
-                                            book={book}
-                                            variant="compact"
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-                ) : (
-                    <EmptyCatalogState
-                        title="Belum ada buku populer"
-                        description="Daftar judul akan tampil di sini."
-                    />
-                )}
+                <BookGrid
+                    books={previewBooks}
+                    viewMode={viewMode}
+                    keyPrefix="popular-books"
+                    emptyTitle="Belum ada buku populer"
+                    emptyDescription="Daftar judul akan tampil di sini."
+                />
             </Deferred>
         </div>
     );

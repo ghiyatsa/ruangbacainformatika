@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CheckSimilarityRequest;
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
-use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 class SimilarityController extends Controller
 {
@@ -21,37 +20,24 @@ class SimilarityController extends Controller
         ]);
     }
 
-    public function check(Request $request, SimilarityApiService $api): JsonResponse
+    public function check(CheckSimilarityRequest $request, SimilarityApiService $api): JsonResponse
     {
-        $rules = [
-            'judul' => 'required|string|min:5',
-        ];
+        $title = $request->validatedJudul();
 
-        if (config('services.turnstile.enabled', false)) {
-            $rules['cf-turnstile-response'] = ['required', 'string', new Turnstile];
-        }
-
-        $validated = $request->validate($rules, [
-            'cf-turnstile-response.required' => 'Silakan selesaikan verifikasi keamanan.',
-            'cf-turnstile-response.turnstile' => 'Verifikasi keamanan gagal, silakan coba lagi.',
-        ]);
-
-        $judul = trim($validated['judul']);
-
-        if (str_word_count($judul) < 5) {
+        if (str_word_count($title) < 5) {
             return response()->json([
                 'message' => 'Judul terlalu singkat. Masukkan minimal 5 kata agar pengecekan lebih akurat.',
             ], 422);
         }
 
-        $cacheKey = 'similarity_check_'.md5(strtolower($judul));
+        $cacheKey = 'similarity_check_'.hash('sha256', mb_strtolower($title));
 
-        $hasil = Cache::get($cacheKey);
+        $result = Cache::get($cacheKey);
 
-        if ($hasil === null) {
-            $hasil = $api->checkSimilarity($judul);
+        if ($result === null) {
+            $result = $api->checkSimilarity($title);
 
-            if ($hasil === null) {
+            if ($result === null) {
                 if (! $api->isHealthy()) {
                     return response()->json([
                         'message' => 'Layanan pemindaian kemiripan sedang tidak tersedia atau sedang "Sleep". Silakan coba lagi dalam beberapa detik (tunggu sekitar 30-60 detik untuk bangun).',
@@ -63,8 +49,8 @@ class SimilarityController extends Controller
                 ], 500);
             }
 
-            if (! empty($hasil['results'])) {
-                $skripsiIds = collect($hasil['results'])
+            if (! empty($result['results'])) {
+                $skripsiIds = collect($result['results'])
                     ->pluck('id')
                     ->filter(fn ($id) => is_numeric($id))
                     ->map(fn ($id) => (int) $id)
@@ -75,7 +61,7 @@ class SimilarityController extends Controller
                     ->get(['id', 'title', 'author_name', 'student_id'])
                     ->keyBy('id');
 
-                $hasil['results'] = array_map(function ($item) use ($skripsis) {
+                $result['results'] = array_map(function ($item) use ($skripsis) {
                     $skripsiId = isset($item['id']) && is_numeric($item['id'])
                         ? (int) $item['id']
                         : null;
@@ -97,12 +83,12 @@ class SimilarityController extends Controller
                     }
 
                     return $item;
-                }, $hasil['results']);
+                }, $result['results']);
             }
 
-            Cache::put($cacheKey, $hasil, now()->addDay());
+            Cache::put($cacheKey, $result, now()->addDay());
         }
 
-        return response()->json($hasil);
+        return response()->json($result);
     }
 }

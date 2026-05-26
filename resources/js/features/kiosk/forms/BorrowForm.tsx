@@ -1,5 +1,4 @@
 import { useForm } from '@inertiajs/react';
-import { QrCode, ScanLine } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
@@ -113,30 +112,6 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4">
-                <div className="flex items-start gap-3">
-                    <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
-                        <ScanLine className="size-4" />
-                    </div>
-                    <div className="space-y-1">
-                        <h3 className="text-base font-semibold text-foreground">
-                            Scan QR
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                            Buka pemindai untuk membaca QR anggota.
-                        </p>
-                    </div>
-                </div>
-
-                <Button
-                    type="button"
-                    onClick={() => handleQrDialogChange(true)}
-                >
-                    <QrCode className="size-4" />
-                    Scan QR
-                </Button>
-            </div>
-
             <BookActionForm
                 action={KioskController.borrow()}
                 submitLabel="Pinjam Buku"
@@ -145,6 +120,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                 bookSearchUrl={KioskController.searchBooks.url()}
                 bookSearchMode="borrow"
                 autoFocus={false}
+                onScanQr={() => handleQrDialogChange(true)}
             />
 
             <Dialog open={isQrDialogOpen} onOpenChange={handleQrDialogChange}>

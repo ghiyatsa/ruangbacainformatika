@@ -256,6 +256,34 @@ class KioskController extends Controller
         return redirect()->route('kiosk.index', ['menu' => 'return']);
     }
 
+    public function findMember(Request $request): JsonResponse
+    {
+        $identifier = (string) $request->query('identifier', '');
+
+        if (blank($identifier)) {
+            return response()->json([
+                'member' => null,
+            ]);
+        }
+
+        $member = $this->kioskLoanService->findMemberByIdentifier($identifier);
+
+        if (! $member) {
+            return response()->json([
+                'member' => null,
+            ]);
+        }
+
+        return response()->json([
+            'member' => [
+                'id' => $member->id,
+                'name' => $member->name,
+                'email' => $member->email,
+                'whatsapp' => $member->whatsapp,
+            ],
+        ]);
+    }
+
     protected function searchBorrowableBooks(string $search): EloquentCollection
     {
         return Book::query()

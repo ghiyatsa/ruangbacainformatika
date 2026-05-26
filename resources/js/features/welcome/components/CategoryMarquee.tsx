@@ -34,6 +34,8 @@ const icons = [
     Terminal,
 ];
 
+type MarqueeCategory = NonNullable<CategoryMarqueeProps['categories']>[number];
+
 export default function CategoryMarquee({
     categories = [],
 }: CategoryMarqueeProps) {
@@ -41,7 +43,7 @@ export default function CategoryMarquee({
         return null;
     }
 
-    const renderCategoryCard = (category: any, index: number) => {
+    const renderCategoryCard = (category: MarqueeCategory, index: number) => {
         const Icon = icons[index % icons.length];
 
         return {

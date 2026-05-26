@@ -30,7 +30,7 @@ class KioskLoanService
      */
     public function borrow(string $memberIdentifier, array $bookIds): Loan
     {
-        $member = $this->resolveMember($memberIdentifier);
+        $member = $this->findMemberByIdentifier($memberIdentifier);
 
         if (! $member || ! $member->canBorrowBooks()) {
             throw ValidationException::withMessages([
@@ -118,6 +118,8 @@ class KioskLoanService
     }
 
     /**
+     * Kembalikan buku berdasarkan daftar ISBN.
+     *
      * @param  array<int, string>  $isbns
      */
     public function returnBooks(string $memberIdentifier, array $isbns): int
@@ -152,86 +154,16 @@ class KioskLoanService
                     ]);
                 }
 
-                $loanItem->forceFill([
-                    'returned_at' => now(),
-                ])->save();
-
-                $loanItem->bookItem->forceFill([
-                    'status' => 'available',
-                ])->save();
-
-                $loan = $loanItem->loan->fresh('items');
-
-                if ($loan && $loan->items->every(fn (LoanItem $item): bool => $item->isReturned())) {
-                    $loan->forceFill([
-                        'status' => Loan::STATUS_RETURNED,
-                        'returned_at' => now(),
-                    ])->save();
-                }
-
-                $returnedCount++;
+                $returnedCount += $this->processReturn($loanItem);
             }
 
             return $returnedCount;
         });
     }
 
-    public function loanMaxBooks(): int
-    {
-        return max((int) $this->settingRepository->get('library', 'loan_max_books', 3), 1);
-    }
-
-    public function loanDurationDays(): int
-    {
-        return max((int) $this->settingRepository->get('library', 'loan_duration_days', 5), 1);
-    }
-
-    public function borrowingRestrictionMessage(User $user): ?string
-    {
-        return $this->loanConsequenceService->borrowingRestrictionMessage($user);
-    }
-
-    protected function activeLoanCount(User $user): int
-    {
-        return LoanItem::query()
-            ->whereNull('returned_at', 'and', false)
-            ->whereHas('loan', fn ($query) => $query->whereBelongsTo($user))
-            ->count();
-    }
-
-    protected function resolveMember(string $memberIdentifier): ?User
-    {
-        return $this->findMemberByIdentifier($memberIdentifier);
-    }
-
-    public function findMemberByIdentifier(string $memberIdentifier): ?User
-    {
-        $normalizedIdentifier = str($memberIdentifier)->trim()->lower()->toString();
-
-        if (str($normalizedIdentifier)->contains('@')) {
-            return User::query()
-                ->where('email', $normalizedIdentifier)
-                ->first();
-        }
-
-        if (! preg_match('/^\d{9}$/', $normalizedIdentifier)) {
-            return null;
-        }
-
-        $matches = User::query()
-            ->where('email', 'like', '%'.$normalizedIdentifier.'@mhs.unimal.ac.id')
-            ->get()
-            ->filter(fn (User $user): bool => $this->campusEmail->extractIdentityNumber($user->email) === $normalizedIdentifier)
-            ->values();
-
-        if ($matches->count() !== 1) {
-            return null;
-        }
-
-        return $matches->first();
-    }
-
     /**
+     * Kembalikan buku berdasarkan daftar Book ID.
+     *
      * @param  array<int, int>  $bookIds
      */
     public function returnBooksByBookIds(string $memberIdentifier, array $bookIds): int
@@ -266,28 +198,153 @@ class KioskLoanService
                     ]);
                 }
 
-                $loanItem->forceFill([
-                    'returned_at' => now(),
-                ])->save();
-
-                $loanItem->bookItem->forceFill([
-                    'status' => 'available',
-                ])->save();
-
-                $loan = $loanItem->loan->fresh('items');
-
-                if ($loan && $loan->items->every(fn (LoanItem $item): bool => $item->isReturned())) {
-                    $loan->forceFill([
-                        'status' => Loan::STATUS_RETURNED,
-                        'returned_at' => now(),
-                    ])->save();
-                }
-
-                $returnedCount++;
+                $returnedCount += $this->processReturn($loanItem);
             }
 
             return $returnedCount;
         });
+    }
+
+    /**
+     * Kembalikan buku berdasarkan daftar Loan Item ID.
+     *
+     * @param  array<int, int>  $loanItemIds
+     */
+    public function returnBooksByLoanItemIds(string $memberIdentifier, array $loanItemIds): int
+    {
+        $member = $this->findMemberByIdentifier($memberIdentifier);
+
+        if (! $member || ! $member->canBorrowBooks()) {
+            throw ValidationException::withMessages([
+                'member_identifier' => 'Member tidak ditemukan atau tidak memiliki akses peminjaman.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($member, $loanItemIds): int {
+            $returnedCount = 0;
+
+            foreach ($loanItemIds as $index => $loanItemId) {
+                $loanItem = LoanItem::query()
+                    ->whereKey($loanItemId)
+                    ->whereNull('returned_at', 'and', false)
+                    ->whereHas('loan', function ($query) use ($member) {
+                        $query
+                            ->whereBelongsTo($member)
+                            ->where('status', Loan::STATUS_BORROWED);
+                    })
+                    ->with(['loan.items', 'bookItem', 'bookItem.book'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $loanItem) {
+                    throw ValidationException::withMessages([
+                        "loan_item_ids.{$index}" => 'Buku yang dipilih tidak lagi tercatat sebagai pinjaman aktif untuk anggota ini.',
+                    ]);
+                }
+
+                $returnedCount += $this->processReturn($loanItem);
+            }
+
+            return $returnedCount;
+        });
+    }
+
+    /**
+     * Proses pengembalian satu item peminjaman.
+     * Mengembalikan 1 jika berhasil.
+     */
+    protected function processReturn(LoanItem $loanItem): int
+    {
+        $loanItem->forceFill([
+            'returned_at' => now(),
+        ])->save();
+
+        $loanItem->bookItem->forceFill([
+            'status' => 'available',
+        ])->save();
+
+        $loan = $loanItem->loan->fresh('items');
+
+        if ($loan && $loan->items->every(fn (LoanItem $item): bool => $item->isReturned())) {
+            $loan->forceFill([
+                'status' => Loan::STATUS_RETURNED,
+                'returned_at' => now(),
+            ])->save();
+        }
+
+        return 1;
+    }
+
+    public function loanMaxBooks(): int
+    {
+        return max((int) $this->settingRepository->get('library', 'loan_max_books', 3), 1);
+    }
+
+    public function loanDurationDays(): int
+    {
+        return max((int) $this->settingRepository->get('library', 'loan_duration_days', 5), 1);
+    }
+
+    public function borrowingRestrictionMessage(User $user): ?string
+    {
+        return $this->loanConsequenceService->borrowingRestrictionMessage($user);
+    }
+
+    protected function activeLoanCount(User $user): int
+    {
+        return LoanItem::query()
+            ->whereNull('returned_at', 'and', false)
+            ->whereHas('loan', fn ($query) => $query->whereBelongsTo($user))
+            ->count();
+    }
+
+    public function findMemberByIdentifier(string $memberIdentifier): ?User
+    {
+        $normalizedIdentifier = str($memberIdentifier)->trim()->lower()->toString();
+
+        if (str($normalizedIdentifier)->contains('@')) {
+            return User::query()
+                ->where('email', $normalizedIdentifier)
+                ->first();
+        }
+
+        $phoneDigits = preg_replace('/\D+/', '', $normalizedIdentifier);
+        if ($phoneDigits !== '') {
+            $possibleNumbers = [];
+            if (str_starts_with($phoneDigits, '08')) {
+                $possibleNumbers = [$phoneDigits, '62'.substr($phoneDigits, 1)];
+            } elseif (str_starts_with($phoneDigits, '628')) {
+                $possibleNumbers = [$phoneDigits, '0'.substr($phoneDigits, 2)];
+            } elseif (str_starts_with($phoneDigits, '8')) {
+                $possibleNumbers = ['0'.$phoneDigits, '62'.$phoneDigits];
+            } else {
+                $possibleNumbers = [$phoneDigits];
+            }
+
+            $user = User::query()
+                ->whereIn('whatsapp', $possibleNumbers)
+                ->first();
+
+            if ($user) {
+                return $user;
+            }
+        }
+
+        if (! preg_match('/^\d{9}$/', $normalizedIdentifier)) {
+            return null;
+        }
+
+        $matches = User::query()
+            ->where('email', 'like', '%'.$normalizedIdentifier.'@mhs.unimal.ac.id')
+            ->get()
+            ->filter(fn (User $user): bool => $this->campusEmail->extractIdentityNumber($user->email) === $normalizedIdentifier)
+            ->values();
+
+        if ($matches->count() !== 1) {
+            return null;
+        }
+
+        return $matches->first();
     }
 
     protected function calculateDueAt(CarbonInterface $borrowedAt): Carbon

@@ -25,7 +25,7 @@ export function MenuGrid({
                             'flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-colors',
                             isActive
                                 ? 'border-primary/30 bg-primary/8 text-foreground'
-                                : 'border-border/70 bg-background hover:bg-muted/40',
+                                : 'bg-bg-muted/40 border-border/70 hover:border-primary/30 hover:bg-primary/8',
                         )}
                     >
                         <div className="flex min-w-0 items-center gap-3">
@@ -34,7 +34,7 @@ export function MenuGrid({
                                     'flex size-9 shrink-0 items-center justify-center rounded-lg',
                                     isActive
                                         ? 'bg-primary/12 text-primary'
-                                        : 'bg-muted text-muted-foreground',
+                                        : 'bg-primary/12 text-primary',
                                 )}
                             >
                                 <Icon className="size-4" />

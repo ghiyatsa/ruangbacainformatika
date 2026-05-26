@@ -9,6 +9,7 @@ use App\Http\Controllers\InternshipReportController;
 use App\Http\Controllers\LoanHistoryController;
 use App\Http\Controllers\LoanRequestController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ReturnDraftController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SimilarityController;
 use App\Http\Controllers\SkripsiController;
@@ -25,8 +26,6 @@ Route::get('/internship-reports', [InternshipReportController::class, 'index'])-
 Route::get('/internship-reports/{internshipReport:student_id}', [InternshipReportController::class, 'show'])->name('internship-reports.show');
 Route::get('/thesis', [ThesisController::class, 'index'])->name('thesis.index');
 Route::get('/thesis/{thesis:student_id}', [ThesisController::class, 'show'])->name('thesis.show');
-Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
-Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');
 
 Route::get('/search', SearchController::class)->name('search');
 
@@ -36,6 +35,8 @@ Route::post('/contact', [ContactMessageController::class, 'store'])->name('conta
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service');
 Route::middleware('auth')->group(function () {
+    Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
+    Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');
     Route::get('/loans/request', [LoanRequestController::class, 'show'])->name('loans.request');
     Route::post('/loans/request/books', [LoanRequestController::class, 'storeBook'])->name('loans.request.books.store');
     Route::delete('/loans/request/books/{book}', [LoanRequestController::class, 'destroyBook'])->name('loans.request.books.destroy');
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'profile.completed'])->group(function () {
     Route::get('/loans/history', LoanHistoryController::class)->name('loans.history');
+    Route::post('/loans/history/qr', [ReturnDraftController::class, 'generateQr'])->name('loans.history.qr');
 });
 
 require __DIR__.'/kiosk.php';

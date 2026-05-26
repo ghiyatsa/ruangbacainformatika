@@ -40,10 +40,10 @@ export function PrivacyPolicyPage() {
                                     Data yang digunakan
                                 </h2>
                                 <p className="mt-2">
-                                    Data yang dapat digunakan meliputi
-                                    identitas akun, email, nomor WhatsApp,
-                                    riwayat peminjaman, dan aktivitas yang
-                                    terkait dengan layanan perpustakaan.
+                                    Data yang dapat digunakan meliputi identitas
+                                    akun, email, nomor WhatsApp, riwayat
+                                    peminjaman, dan aktivitas yang terkait
+                                    dengan layanan perpustakaan.
                                 </p>
                             </section>
 
@@ -77,9 +77,9 @@ export function PrivacyPolicyPage() {
                                     Hak pengguna
                                 </h2>
                                 <p className="mt-2">
-                                    Pengguna dapat meminta pembaruan data
-                                    profil atau klarifikasi penggunaan data
-                                    melalui kontak resmi program studi.
+                                    Pengguna dapat meminta pembaruan data profil
+                                    atau klarifikasi penggunaan data melalui
+                                    kontak resmi program studi.
                                 </p>
                             </section>
                         </CardContent>

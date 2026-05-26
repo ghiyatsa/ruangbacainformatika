@@ -26,10 +26,6 @@ export type CatalogBook = {
 export type PaginatedBooks = PaginationData<CatalogBook>;
 
 export type WelcomeProps = {
-    canRegister?: boolean;
-    filters: {
-        search: string;
-    };
     stats: {
         booksCount: number;
         featuredCount: number;

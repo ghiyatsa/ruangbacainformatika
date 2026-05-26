@@ -10,6 +10,7 @@ use App\Notifications\LoanReceiptNotification;
 use App\Services\KioskLoanService;
 use App\Services\KioskPinManager;
 use Illuminate\Contracts\Notifications\Dispatcher;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -17,8 +18,11 @@ use Spatie\Permission\Models\Role;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\instance;
 use function Pest\Laravel\post;
+use function Pest\Laravel\withoutMiddleware;
 
 it('kiosk borrowing rejects partial member identifiers', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
     $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);
     $mock->shouldIgnoreMissing();
@@ -35,7 +39,8 @@ it('members must fill whatsapp and address before borrowing books', function () 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $member = User::factory()->create([
-        'whatsapp' => null,
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
         'address' => null,
     ]);
     $member->assignRole('member');
@@ -70,6 +75,7 @@ it('books marked as not borrowable cannot be borrowed', function () {
 
     $member = User::factory()->create([
         'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
     ]);
     $member->assignRole('member');
 
@@ -101,11 +107,14 @@ it('books marked as not borrowable cannot be borrowed', function () {
 });
 
 it('borrows selected books from kiosk using book ids', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
     Notification::fake();
 
     $member = User::factory()->create([
         'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
     ]);
     $member->assignRole('member');
 
@@ -150,10 +159,13 @@ it('borrows selected books from kiosk using book ids', function () {
 });
 
 it('stores kiosk borrowing even when receipt email dispatch fails', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $member = User::factory()->create([
         'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
     ]);
     $member->assignRole('member');
 
@@ -269,10 +281,13 @@ it('searches borrowable and available books for kiosk borrowing', function () {
 });
 
 it('returns selected books from kiosk using book ids', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $member = User::factory()->create([
         'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
     ]);
     $member->assignRole('member');
 
@@ -333,11 +348,13 @@ it('searches only active borrowed books for kiosk returns', function () {
 
     $member = User::factory()->create([
         'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
     ]);
     $member->assignRole('member');
 
     $otherMember = User::factory()->create([
         'whatsapp' => '08123456780',
+        'whatsapp_verified_at' => now(),
     ]);
     $otherMember->assignRole('member');
 
@@ -456,6 +473,7 @@ it('lists active borrowed books for kiosk returns without a search query', funct
 
     $member = User::factory()->create([
         'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
     ]);
     $member->assignRole('member');
 
@@ -527,4 +545,116 @@ it('lists active borrowed books for kiosk returns without a search query', funct
         'member_identifier' => $member->nim(),
     ]))->json('books'))->pluck('id')->sort()->values()->all())
         ->toBe(collect([$firstBook->id, $secondBook->id])->sort()->values()->all());
+});
+
+it('borrows and returns books using email as identifier', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    Notification::fake();
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Email Test',
+        'slug' => 'penerbit-email-test',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Email Test',
+        'slug' => 'buku-email-test',
+        'isbn' => '9786020000201',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $bookItem = BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-201',
+        'status' => 'available',
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    // Test borrowing with email
+    post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $member->email,
+        'book_ids' => [$book->id],
+    ])
+        ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']));
+
+    expect($bookItem->fresh()->status)->toBe('borrowed');
+
+    // Test returning with email
+    post(route('kiosk.loans.return'), [
+        'member_identifier' => $member->email,
+        'book_ids' => [$book->id],
+    ])
+        ->assertRedirect(route('kiosk.index', ['menu' => 'return']));
+
+    expect($bookItem->fresh()->status)->toBe('available');
+});
+
+it('borrows and returns books using phone number as identifier with different prefix formats', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    Notification::fake();
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Phone Test',
+        'slug' => 'penerbit-phone-test',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Phone Test',
+        'slug' => 'buku-phone-test',
+        'isbn' => '9786020000202',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $bookItem = BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-202',
+        'status' => 'available',
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    // Test borrowing with phone number containing spaces/dashes/+ prefix
+    post(route('kiosk.loans.borrow'), [
+        'member_identifier' => '+62 812-3456-789',
+        'book_ids' => [$book->id],
+    ])
+        ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']));
+
+    expect($bookItem->fresh()->status)->toBe('borrowed');
+
+    // Test returning with phone number starting with 08
+    post(route('kiosk.loans.return'), [
+        'member_identifier' => '08123456789',
+        'book_ids' => [$book->id],
+    ])
+        ->assertRedirect(route('kiosk.index', ['menu' => 'return']));
+
+    expect($bookItem->fresh()->status)->toBe('available');
 });

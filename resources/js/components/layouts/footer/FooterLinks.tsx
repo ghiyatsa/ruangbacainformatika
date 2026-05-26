@@ -1,63 +1,25 @@
-import { Link, usePage } from '@inertiajs/react';
-import { ExternalLink, FileCheck, GraduationCap, Wrench } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { BookOpen, FileCheck } from 'lucide-react';
 import { motion } from 'motion/react';
-import loans from '@/routes/loans';
-import { login, register } from '@/routes';
-import settings from '@/routes/settings';
-import type { Auth } from '@/types';
-import {
-    GUEST_SERVICE_LINKS,
-    INFO_LINKS,
-    LEGAL_LINKS,
-    SERVICE_LINKS,
-    fadeUp,
-} from './constants';
+import { fadeUp, KOLEKSI_LINKS, LEGAL_LINKS } from './constants';
 
 export function FooterLinks() {
-    const { auth } = usePage<{ auth: Auth }>().props;
-    const serviceLinks = [
-        ...SERVICE_LINKS,
-        ...(auth.user
-            ? [
-                  {
-                      label: auth.canBorrowBooks
-                          ? 'Riwayat Peminjaman'
-                          : 'Pengaturan',
-                      href: () =>
-                          auth.canBorrowBooks
-                              ? loans.history.url()
-                              : settings.profile.edit(),
-                      icon: auth.canBorrowBooks ? FileCheck : Wrench,
-                  },
-              ]
-            : GUEST_SERVICE_LINKS.map(({ label, hrefKey, icon }) => ({
-                  label,
-                  href: () =>
-                      hrefKey === 'login'
-                          ? login.url()
-                          : register.url(),
-                  icon,
-              }))),
-    ];
-
     return (
         <>
-            <div className="hidden lg:col-span-1 lg:block" />
-
             <motion.div
-                className="lg:col-span-2"
+                className="lg:col-span-2 lg:col-start-9"
                 custom={1}
                 variants={fadeUp}
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
-                >
-                    <h4 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
-                        <Wrench className="size-3.5 text-primary" />
-                        Layanan
-                    </h4>
+            >
+                <h4 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
+                    <BookOpen className="size-3.5 text-primary" />
+                    Koleksi
+                </h4>
                 <ul className="flex flex-col gap-2.5">
-                    {serviceLinks.map(({ label, href, icon: Icon }) => (
+                    {KOLEKSI_LINKS.map(({ label, href, icon: Icon }) => (
                         <li key={label}>
                             <Link
                                 href={href()}
@@ -66,37 +28,6 @@ export function FooterLinks() {
                                 <Icon className="size-3.5 shrink-0 opacity-50 transition-opacity group-hover:opacity-100" />
                                 {label}
                             </Link>
-                        </li>
-                    ))}
-                </ul>
-            </motion.div>
-
-            <motion.div
-                className="lg:col-span-3"
-                custom={3}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.3 }}
-            >
-                <h4 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
-                    <GraduationCap className="size-3.5 text-primary" />
-                    Institusi
-                </h4>
-                <ul className="flex flex-col gap-2.5">
-                    {INFO_LINKS.map(({ label, href, external }) => (
-                        <li key={label}>
-                            <a
-                                href={href}
-                                target={external ? '_blank' : undefined}
-                                rel={
-                                    external ? 'noopener noreferrer' : undefined
-                                }
-                                className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
-                            >
-                                <ExternalLink className="size-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90" />
-                                {label}
-                            </a>
                         </li>
                     ))}
                 </ul>
