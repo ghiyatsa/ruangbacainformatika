@@ -1,5 +1,5 @@
 import { Form, usePage } from '@inertiajs/react';
-import { Clock3, Mail, MapPin, Phone } from 'lucide-react';
+import { Clock3, Mail, MapPin } from 'lucide-react';
 import ContactMessageController from '@/actions/App/Http/Controllers/ContactMessageController';
 import InputError from '@/components/common/InputError';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';

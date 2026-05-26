@@ -7,7 +7,9 @@ use App\Models\BookItem;
 use App\Models\Loan;
 use App\Models\LoanItem;
 use App\Models\User;
+use App\Notifications\LoanReceiptDatabaseNotification;
 use App\Notifications\LoanReceiptNotification;
+use App\Notifications\LoanReturnNotification;
 use App\Repositories\SettingRepository;
 use App\Support\CampusEmail;
 use App\Support\LoanConsequenceService;
@@ -109,6 +111,7 @@ class KioskLoanService
 
         // Pengiriman notifikasi tidak boleh menggagalkan transaksi peminjaman.
         try {
+            $member->notify(new LoanReceiptDatabaseNotification($loan));
             $member->notify(new LoanReceiptNotification($loan));
         } catch (Throwable $exception) {
             report($exception);
@@ -132,8 +135,8 @@ class KioskLoanService
             ]);
         }
 
-        return DB::transaction(function () use ($member, $isbns): int {
-            $returnedCount = 0;
+        $result = DB::transaction(function () use ($member, $isbns): array {
+            $returnedBookTitles = [];
 
             foreach ($isbns as $index => $isbn) {
                 $loanItem = LoanItem::query()
@@ -144,7 +147,7 @@ class KioskLoanService
                             ->whereBelongsTo($member)
                             ->where('status', Loan::STATUS_BORROWED);
                     })
-                    ->with(['loan.items', 'bookItem'])
+                    ->with(['loan.items', 'bookItem.book'])
                     ->lockForUpdate()
                     ->first();
 
@@ -154,11 +157,18 @@ class KioskLoanService
                     ]);
                 }
 
-                $returnedCount += $this->processReturn($loanItem);
+                $returnedBookTitles[] = $this->processReturn($loanItem);
             }
 
-            return $returnedCount;
+            return [
+                'returned_count' => count($returnedBookTitles),
+                'returned_book_titles' => $returnedBookTitles,
+            ];
         });
+
+        $this->sendReturnNotification($member, $result['returned_book_titles']);
+
+        return $result['returned_count'];
     }
 
     /**
@@ -176,8 +186,8 @@ class KioskLoanService
             ]);
         }
 
-        return DB::transaction(function () use ($member, $bookIds): int {
-            $returnedCount = 0;
+        $result = DB::transaction(function () use ($member, $bookIds): array {
+            $returnedBookTitles = [];
 
             foreach ($bookIds as $index => $bookId) {
                 $loanItem = LoanItem::query()
@@ -198,11 +208,18 @@ class KioskLoanService
                     ]);
                 }
 
-                $returnedCount += $this->processReturn($loanItem);
+                $returnedBookTitles[] = $this->processReturn($loanItem);
             }
 
-            return $returnedCount;
+            return [
+                'returned_count' => count($returnedBookTitles),
+                'returned_book_titles' => $returnedBookTitles,
+            ];
         });
+
+        $this->sendReturnNotification($member, $result['returned_book_titles']);
+
+        return $result['returned_count'];
     }
 
     /**
@@ -220,8 +237,8 @@ class KioskLoanService
             ]);
         }
 
-        return DB::transaction(function () use ($member, $loanItemIds): int {
-            $returnedCount = 0;
+        $result = DB::transaction(function () use ($member, $loanItemIds): array {
+            $returnedBookTitles = [];
 
             foreach ($loanItemIds as $index => $loanItemId) {
                 $loanItem = LoanItem::query()
@@ -242,19 +259,30 @@ class KioskLoanService
                     ]);
                 }
 
-                $returnedCount += $this->processReturn($loanItem);
+                $returnedBookTitles[] = $this->processReturn($loanItem);
             }
 
-            return $returnedCount;
+            return [
+                'returned_count' => count($returnedBookTitles),
+                'returned_book_titles' => $returnedBookTitles,
+            ];
         });
+
+        $this->sendReturnNotification($member, $result['returned_book_titles']);
+
+        return $result['returned_count'];
     }
 
     /**
      * Proses pengembalian satu item peminjaman.
-     * Mengembalikan 1 jika berhasil.
+     * Mengembalikan judul buku yang berhasil dikembalikan.
      */
-    protected function processReturn(LoanItem $loanItem): int
+    protected function processReturn(LoanItem $loanItem): string
     {
+        $loanItem->loadMissing('bookItem.book', 'loan.items');
+
+        $bookTitle = $loanItem->bookItem->book->title ?? 'Buku Tanpa Judul';
+
         $loanItem->forceFill([
             'returned_at' => now(),
         ])->save();
@@ -272,7 +300,7 @@ class KioskLoanService
             ])->save();
         }
 
-        return 1;
+        return $bookTitle;
     }
 
     public function loanMaxBooks(): int
@@ -350,5 +378,21 @@ class KioskLoanService
     protected function calculateDueAt(CarbonInterface $borrowedAt): Carbon
     {
         return Carbon::parse($borrowedAt)->addWeekdays($this->loanDurationDays());
+    }
+
+    /**
+     * @param  list<string>  $returnedBookTitles
+     */
+    protected function sendReturnNotification(User $member, array $returnedBookTitles): void
+    {
+        if ($returnedBookTitles === []) {
+            return;
+        }
+
+        try {
+            $member->notify(new LoanReturnNotification($returnedBookTitles, now()->translatedFormat('d F Y H:i')));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 }

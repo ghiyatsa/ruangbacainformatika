@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Category;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class CatalogService
@@ -21,14 +20,20 @@ class CatalogService
      */
     public function getStats(): array
     {
+        $bookStats = Book::query()
+            ->published()
+            ->selectRaw('COUNT(*) as books_count')
+            ->selectRaw('SUM(CASE WHEN is_featured = 1 THEN 1 ELSE 0 END) as featured_count')
+            ->first();
+
         return [
-            'booksCount' => Book::query()->published()->count(),
-            'featuredCount' => Book::query()->published()->featured()->count(),
+            'booksCount' => (int) ($bookStats?->books_count ?? 0),
+            'featuredCount' => (int) ($bookStats?->featured_count ?? 0),
             'availableItemsCount' => BookItem::query()
                 ->available()
-                ->whereHas('book', fn (Builder $query): Builder => $query
-                    ->published()
-                    ->where('is_borrowable', true))
+                ->join('books', 'books.id', '=', 'book_items.book_id')
+                ->where('books.is_published', true)
+                ->where('books.is_borrowable', true)
                 ->count(),
         ];
     }
@@ -43,7 +48,7 @@ class CatalogService
         return Category::query()
             ->select(['id', 'name', 'slug', 'description'])
             ->withCount([
-                'books as books_count' => fn (Builder $query): Builder => $query->published(),
+                'books as books_count' => fn ($query) => $query->published(),
             ])
             ->orderBy('name')
             ->get()

@@ -39,7 +39,10 @@ class WhatsAppOtpNotification extends Notification
             'Jangan bagikan kode ini kepada siapa pun.',
         ];
 
-        return new WhatsAppMessage(implode("\n", $lines));
+        return new WhatsAppMessage(
+            implode("\n", $lines),
+            bypassPacing: true,
+        );
     }
 
     /**

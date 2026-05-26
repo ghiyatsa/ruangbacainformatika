@@ -22,6 +22,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
 import internshipReportRoute from '@/routes/internship-reports';
 import type { InternshipReportData } from '@/features/internship-report/types';
@@ -56,6 +57,9 @@ export default function InternshipReportCard({
         <div className="group relative h-full">
             <Link
                 href={internshipReportRoute.show.url(report.studentId)}
+                instant
+                component="internship-report/show"
+                pageProps={instantLoadingPageProps()}
                 className="absolute inset-0 z-10 rounded-xl focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
                 aria-label={`Lihat detail laporan KP ${report.title}`}
             />

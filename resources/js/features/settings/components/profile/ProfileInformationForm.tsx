@@ -1,5 +1,6 @@
 import { Form } from '@inertiajs/react';
 import { AtSign, CheckCircle2, MapPin, Phone, User } from 'lucide-react';
+import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
 import { cn } from '@/lib/utils';
 import type { User as AuthUser } from '@/types/auth';
-import { useState } from 'react';
 
 export interface ProfileInformationFormProps {
     user: AuthUser;

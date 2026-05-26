@@ -8,6 +8,7 @@ import {
     Library,
     QrCode,
 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import ReturnDraftController from '@/actions/App/Http/Controllers/ReturnDraftController';
 import { ResourcePagination } from '@/components/catalog/ResourcePagination';
@@ -29,11 +30,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
-import type { PaginationData } from '@/types/pagination';
 import type { FormEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import type { PaginationData } from '@/types/pagination';
 
 interface LoanHistoryRow {
     id: number;
@@ -226,6 +227,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
     }>({
         loan_item_ids: defaultSelectedLoanItemIds,
     });
+    const { clearErrors, setData } = qrForm;
     const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
     const expiresAtTimestamp = returnDraft.expiresAtIso
         ? new Date(returnDraft.expiresAtIso).getTime()
@@ -245,9 +247,9 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
         remainingSeconds > 0;
 
     useEffect(() => {
-        qrForm.setData('loan_item_ids', defaultSelectedLoanItemIds);
-        qrForm.clearErrors();
-    }, [defaultSelectedLoanItemIds, returnDraft.id]);
+        setData('loan_item_ids', defaultSelectedLoanItemIds);
+        clearErrors();
+    }, [clearErrors, defaultSelectedLoanItemIds, returnDraft.id, setData]);
 
     useEffect(() => {
         if (expiresAtTimestamp === null) {
@@ -384,6 +386,9 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                                                 href={BookController.show.url(
                                                                     loan.bookSlug,
                                                                 )}
+                                                                instant
+                                                                component="books/show"
+                                                                pageProps={instantLoadingPageProps()}
                                                                 className="line-clamp-2 font-semibold text-foreground transition-colors hover:text-primary"
                                                             >
                                                                 {loan.bookTitle}

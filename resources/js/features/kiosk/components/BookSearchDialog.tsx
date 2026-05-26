@@ -39,7 +39,6 @@ export function BookSearchDialog({
     memberIdentifier,
     onSelectBook,
     selectedBooks,
-    maxInputs,
     hasError = false,
 }: BookSearchDialogProps) {
     const [searchQuery, setSearchQuery] = useState('');
@@ -53,27 +52,32 @@ export function BookSearchDialog({
     const memberIdentifierTrimmed = memberIdentifier.trim();
     const requiresMemberBeforeSearch = bookSearchMode === 'return';
 
-    const canSearchBooks = bookSearchMode === 'return'
-        ? isOpen && memberIdentifierTrimmed !== ''
-        : deferredSearchQuery.length > 0;
+    const canSearchBooks =
+        bookSearchMode === 'return'
+            ? isOpen && memberIdentifierTrimmed !== ''
+            : deferredSearchQuery.length > 0;
 
-    // Reset search state on close or initialize return search on open
-    useEffect(() => {
-        if (!isOpen) {
+    const handleOpenChange = (open: boolean) => {
+        onOpenChange(open);
+
+        if (!open) {
             setSearchQuery('');
             setSearchResults([]);
             setIsSearching(false);
             setSearchError(null);
-        } else if (bookSearchMode === 'return' && memberIdentifierTrimmed !== '') {
-            setIsSearching(true);
-            setSearchError(null);
         }
-    }, [isOpen, bookSearchMode, memberIdentifierTrimmed]);
+    };
 
     // Fetch search results
     useEffect(() => {
         if (!canSearchBooks) {
-            return;
+            const resetSearchTimeout = window.setTimeout(() => {
+                setSearchResults([]);
+                setIsSearching(false);
+                setSearchError(null);
+            }, 0);
+
+            return () => window.clearTimeout(resetSearchTimeout);
         }
 
         const abortController = new AbortController();
@@ -87,6 +91,11 @@ export function BookSearchDialog({
                 memberIdentifierTrimmed,
             );
         }
+
+        const startSearchingTimeout = window.setTimeout(() => {
+            setIsSearching(true);
+            setSearchError(null);
+        }, 0);
 
         void fetch(searchUrl.toString(), {
             signal: abortController.signal,
@@ -119,7 +128,10 @@ export function BookSearchDialog({
                 }
             });
 
-        return () => abortController.abort();
+        return () => {
+            window.clearTimeout(startSearchingTimeout);
+            abortController.abort();
+        };
     }, [
         bookSearchMode,
         bookSearchUrl,
@@ -135,7 +147,7 @@ export function BookSearchDialog({
     );
 
     return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="max-w-4xl min-w-xl">
                 <DialogHeader>
                     <DialogTitle>Cari Buku</DialogTitle>
@@ -207,7 +219,8 @@ export function BookSearchDialog({
                     <div className="rounded-2xl border border-border/70 bg-muted/25">
                         <ScrollArea className="h-80 rounded-2xl bg-muted/25">
                             <div className="grid gap-2 p-3">
-                                {bookSearchMode === 'borrow' && searchQuery.trim() === '' ? (
+                                {bookSearchMode === 'borrow' &&
+                                searchQuery.trim() === '' ? (
                                     <p className="px-3 py-4 text-sm text-muted-foreground">
                                         Mulai ketik untuk mencari buku.
                                     </p>

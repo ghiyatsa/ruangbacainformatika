@@ -22,6 +22,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
 import thesisRoute from '@/routes/thesis';
 import type { ThesisData } from '@/features/thesis/types';
@@ -54,6 +55,9 @@ export default function ThesisCard({ thesis }: ThesisCardProps) {
         <div className="group relative h-full">
             <Link
                 href={thesisRoute.show.url(thesis.studentId)}
+                instant
+                component="thesis/show"
+                pageProps={instantLoadingPageProps()}
                 className="absolute inset-0 z-10 rounded-xl focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
                 aria-label={`Lihat detail tesis ${thesis.title}`}
             />

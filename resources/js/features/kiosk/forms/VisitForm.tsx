@@ -45,9 +45,7 @@ export function VisitForm({
     const requiresIdentity = visitorType !== '' && !isPublicVisitor;
 
     const isComplete =
-        name.trim() !== '' &&
-        visitorType !== '' &&
-        purpose !== '';
+        name.trim() !== '' && visitorType !== '' && purpose !== '';
 
     return (
         <Form

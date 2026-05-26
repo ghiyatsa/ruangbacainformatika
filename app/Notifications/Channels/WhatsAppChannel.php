@@ -32,6 +32,6 @@ class WhatsAppChannel
             return;
         }
 
-        $this->gateway->send($phoneNumber, $message->content);
+        $this->gateway->sendMessage($phoneNumber, $message);
     }
 }

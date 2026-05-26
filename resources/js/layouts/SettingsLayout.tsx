@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Monitor, ShieldCheck, User } from 'lucide-react';
+import { ShieldCheck, User } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
@@ -17,11 +17,6 @@ const sidebarNavItems: NavItem[] = [
         title: 'Keamanan',
         href: settings.security.edit(),
         icon: ShieldCheck,
-    },
-    {
-        title: 'Tampilan',
-        href: settings.appearance.edit(),
-        icon: Monitor,
     },
 ];
 

@@ -7,6 +7,7 @@ use App\Models\LoanItem;
 use App\Models\Publisher;
 use App\Models\User;
 use App\Notifications\LoanReceiptNotification;
+use App\Notifications\LoanReturnNotification;
 use App\Services\KioskLoanService;
 use App\Services\KioskPinManager;
 use Illuminate\Contracts\Notifications\Dispatcher;
@@ -284,6 +285,7 @@ it('returns selected books from kiosk using book ids', function () {
     withoutMiddleware(PreventRequestForgery::class);
 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    Notification::fake();
 
     $member = User::factory()->create([
         'whatsapp' => '08123456789',
@@ -337,6 +339,12 @@ it('returns selected books from kiosk using book ids', function () {
             'inertia.flash_data.toast.message',
             '1 buku berhasil dikembalikan.',
         );
+
+    Notification::assertSentTo(
+        $member,
+        LoanReturnNotification::class,
+        fn (LoanReturnNotification $notification): bool => $notification->toArray($member)['book_titles'] === [$book->title]
+    );
 
     expect($loanItem->fresh()->returned_at)->not->toBeNull()
         ->and($bookItem->fresh()->status)->toBe('available')

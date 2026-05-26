@@ -6,9 +6,16 @@ import {
     Info,
     LogIn,
     Mail,
+    Users,
     UserPlus,
 } from 'lucide-react';
-import { about, contact, privacyPolicy, termsOfService } from '@/routes';
+import {
+    about,
+    aboutTeam,
+    contact,
+    privacyPolicy,
+    termsOfService,
+} from '@/routes';
 import books from '@/routes/books';
 import internshipReports from '@/routes/internship-reports';
 import skripsi from '@/routes/skripsi';
@@ -47,6 +54,12 @@ export const LEGAL_LINKS = [
         label: 'Tentang',
         href: () => about.url(),
         icon: Info,
+        internal: true,
+    },
+    {
+        label: 'Tentang Tim',
+        href: () => aboutTeam.url(),
+        icon: Users,
         internal: true,
     },
     {

@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\LoanItemResource;
 use App\Models\Loan;
+use App\Models\LoanItem;
 use App\Models\ReturnDraft;
 use App\Models\ReturnDraftItem;
+use App\Models\User;
 use App\Services\ReturnDraftService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,22 +24,7 @@ class LoanHistoryController extends Controller
         $user = $request->user();
         $loanItemsQuery = $user->loanItems();
         $draft = $this->returnDraftService->getCurrentDraft($user);
-
-        $stats = [
-            'total' => $loanItemsQuery->count(),
-            'active' => (clone $loanItemsQuery)
-                ->whereNull('loan_items.returned_at')
-                ->count(),
-            'overdue' => (clone $loanItemsQuery)
-                ->whereNull('loan_items.returned_at')
-                ->whereHas('loan', fn (Builder $query): Builder => $query
-                    ->where('status', Loan::STATUS_BORROWED)
-                    ->where('due_at', '<', now()))
-                ->count(),
-            'returned' => (clone $loanItemsQuery)
-                ->whereNotNull('loan_items.returned_at')
-                ->count(),
-        ];
+        $stats = $this->loanItemStats($user);
 
         $loanItems = $loanItemsQuery
             ->with([
@@ -57,6 +43,31 @@ class LoanHistoryController extends Controller
             'stats' => $stats,
             'returnDraft' => $this->toReturnDraftPayload($draft),
         ]);
+    }
+
+    /**
+     * @return array{total: int, active: int, overdue: int, returned: int}
+     */
+    protected function loanItemStats(User $user): array
+    {
+        $stats = LoanItem::query()
+            ->join('loans', 'loans.id', '=', 'loan_items.loan_id')
+            ->where('loans.user_id', $user->id)
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN loan_items.returned_at IS NULL THEN 1 ELSE 0 END) as active')
+            ->selectRaw('SUM(CASE WHEN loan_items.returned_at IS NOT NULL THEN 1 ELSE 0 END) as returned')
+            ->selectRaw(
+                'SUM(CASE WHEN loan_items.returned_at IS NULL AND loans.status = ? AND loans.due_at < ? THEN 1 ELSE 0 END) as overdue',
+                [Loan::STATUS_BORROWED, now()]
+            )
+            ->first();
+
+        return [
+            'total' => (int) ($stats?->total ?? 0),
+            'active' => (int) ($stats?->active ?? 0),
+            'overdue' => (int) ($stats?->overdue ?? 0),
+            'returned' => (int) ($stats?->returned ?? 0),
+        ];
     }
 
     /**

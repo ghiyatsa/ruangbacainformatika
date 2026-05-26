@@ -6,5 +6,6 @@ class WhatsAppMessage
 {
     public function __construct(
         public string $content,
+        public bool $bypassPacing = false,
     ) {}
 }

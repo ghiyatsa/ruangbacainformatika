@@ -46,7 +46,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
     };
 
     return (
-        <section className="relative top-0 flex min-h-svh flex-col justify-center overflow-hidden pt-32 pb-12 sm:h-svh sm:pt-24 sm:pb-0">
+        <section className="relative top-0 -mt-13 flex min-h-svh flex-col justify-center overflow-hidden pt-[8.25rem] pb-12 sm:mt-0 sm:h-svh sm:pt-24 sm:pb-0">
             <div
                 className="pointer-events-none absolute inset-0 -z-10"
                 aria-hidden="true"
@@ -105,10 +105,10 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                             <StarBorder
                                 as="div"
                                 color="var(--color-primary)"
-                                contentClassName="flex h-full items-center rounded-2xl bg-background/60 px-4 py-3.5 backdrop-blur-sm"
+                                contentClassName="flex h-full w-full items-center rounded-2xl bg-background/60 px-4 py-3.5 backdrop-blur-sm"
                                 className="h-full w-full rounded-2xl"
                             >
-                                <div className="flex items-center gap-3 text-muted-foreground">
+                                <div className="flex w-full items-center justify-between gap-3 text-muted-foreground">
                                     <Search className="size-4 shrink-0 transition-colors group-hover:text-primary" />
                                     <span className="flex-1 text-left text-sm font-normal">
                                         Cari judul, penulis, atau topik

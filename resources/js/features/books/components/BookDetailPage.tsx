@@ -18,6 +18,7 @@ import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestCon
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
+import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import {
     Breadcrumb,
@@ -37,17 +38,29 @@ import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import type { Auth } from '@/types';
 
 export interface BookDetailPageProps {
-    book: { data: BookData };
+    book?: { data: BookData };
     loanRequest?: LoanRequestSummary | null;
+    loading?: boolean;
 }
 
-export default function BookDetailPage({
-    book: { data: book },
-    loanRequest,
-}: BookDetailPageProps) {
+export default function BookDetailPage(props: BookDetailPageProps) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const user = auth.user;
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
+
+    if (props.loading || !props.book?.data) {
+        return (
+            <ResourceDetailPageSkeleton
+                variant="book"
+                contentTitle="Sinopsis"
+            />
+        );
+    }
+
+    const {
+        book: { data: book },
+        loanRequest,
+    } = props;
     const requestSummary = loanRequest ?? {
         count: 0,
         maxBooks: 0,

@@ -47,6 +47,12 @@ return [
         'dispatch' => env('SIMILARITY_SYNC_DISPATCH', 'auto'),
     ],
 
+    'fonnte' => [
+        'url' => env('FONNTE_API_URL'),
+        'token' => env('FONNTE_API_TOKEN'),
+        'send_interval_seconds' => env('FONNTE_SEND_INTERVAL_SECONDS', 15),
+    ],
+
     'huggingface' => [
         'token' => env('HF_TOKEN'),
     ],

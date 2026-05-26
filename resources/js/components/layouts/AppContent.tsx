@@ -16,7 +16,7 @@ export function AppContent({ variant = 'sidebar', children, ...props }: Props) {
         <main
             className={cn(
                 'flex h-full w-full flex-1 flex-col',
-                variant === 'header' && 'w-full pt-20 sm:pt-28',
+                variant === 'header' && 'w-full md:pt-24',
                 props.className,
             )}
             {...props}

@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import type { CatalogBook } from '@/features/welcome/types';
 
 const SLIDE_DURATION = 5000;
@@ -186,6 +187,9 @@ export default function FeaturedSpotlight({
                         >
                             <Link
                                 href={BookController.show(book.slug)}
+                                instant
+                                component="books/show"
+                                pageProps={instantLoadingPageProps()}
                                 className="group/cover mx-auto w-36 shrink-0 sm:mx-0 sm:w-40 md:w-44"
                             >
                                 <div className="aspect-3/4 overflow-hidden rounded-xl border bg-background shadow-lg ring-1 ring-black/5 transition-transform duration-300 group-hover/cover:scale-[1.03] dark:ring-white/5">
@@ -209,6 +213,9 @@ export default function FeaturedSpotlight({
 
                                 <Link
                                     href={BookController.show(book.slug)}
+                                    instant
+                                    component="books/show"
+                                    pageProps={instantLoadingPageProps()}
                                     className="group/title"
                                 >
                                     <div className="min-h-[3.5rem]">

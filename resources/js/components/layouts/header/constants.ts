@@ -63,6 +63,10 @@ export const NAV_LINKS: NavItem[] = [
         ],
     },
     { label: 'Cek Kemiripan', href: similarity.index.url(), icon: ScanSearch },
-    { label: 'Tentang', href: about.url(), icon: Info },
+    {
+        label: 'Tentang',
+        href: about.url(),
+        icon: Info,
+    },
     { label: 'Kontak', href: contact.url(), icon: Mail },
 ];

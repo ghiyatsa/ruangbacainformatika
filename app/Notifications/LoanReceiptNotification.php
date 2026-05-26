@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Loan;
 use App\Notifications\Channels\WhatsAppChannel;
+use App\Notifications\Concerns\RateLimitsWhatsAppNotifications;
 use App\Notifications\Messages\WhatsAppMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,6 +14,7 @@ use Throwable;
 class LoanReceiptNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use RateLimitsWhatsAppNotifications;
 
     public int $tries = 12;
 

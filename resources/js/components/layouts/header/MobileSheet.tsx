@@ -1,5 +1,10 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Bookmark, ChevronDown, Menu, ShoppingCart, X } from 'lucide-react';
+import {
+    ChevronDown,
+    Menu,
+    ShoppingCart,
+    X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Collapsible,
@@ -13,8 +18,6 @@ import {
     SheetHeader,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookmarksDialog';
-import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { google } from '@/routes/auth';
 import loans from '@/routes/loans';
 import { AppLogo } from './AppLogo';
@@ -37,7 +40,6 @@ export function MobileSheet({
     const { loanRequestCart } = usePage<{
         loanRequestCart: LoanRequestCart | null;
     }>().props;
-    const { bookmarkedCount } = useCatalogBookmarks();
     const defaultOpenSections = NAV_LINKS.filter(
         (item) =>
             item.children &&
@@ -50,52 +52,36 @@ export function MobileSheet({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-xl md:hidden"
+                    className="h-8 w-8 rounded-lg md:hidden"
                     aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
                     aria-expanded={mobileOpen}
                 >
-                    <Menu className="size-5" />
+                    <Menu className="h-[18px] w-[18px]" />
                 </Button>
             </SheetTrigger>
 
             <SheetContent
                 side="right"
                 showCloseButton={false}
-                overlayClassName="bg-black/5 supports-backdrop-filter:backdrop-blur"
-                className="m-2 w-[min(92vw,24rem)] transform-gpu rounded-xl border-l border-border/60 bg-background/80 p-0 shadow-xl backdrop-blur-xl will-change-transform [contain:layout_paint] data-open:duration-200 data-closed:duration-0"
+                overlayClassName="bg-black/8 supports-backdrop-filter:backdrop-blur-sm"
+                className="h-svh w-[min(92vw,24rem)] max-w-[24rem] rounded-l-[1.15rem] transform-gpu gap-0 border-l border-border/60 bg-background/88 p-0 shadow-none backdrop-blur-md supports-backdrop-filter:bg-background/78 will-change-transform [contain:layout_paint] data-open:duration-200 data-closed:duration-0"
             >
-                <SheetHeader className="flex h-18 flex-row items-center justify-between border-b border-border/60 px-4 text-left">
-                    <AppLogo />
+                <SheetHeader className="flex h-13 flex-row items-center justify-between rounded-tl-[1.15rem] border-b border-border/60 bg-background/88 px-3 text-left backdrop-blur-md supports-backdrop-filter:bg-background/78 sm:h-16 sm:px-4">
+                    <AppLogo compact />
                     <SheetClose asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 rounded-xl"
+                            className="h-8 w-8 rounded-lg"
                             aria-label="Tutup menu"
                         >
-                            <X className="size-5" />
+                            <X className="h-[18px] w-[18px]" />
                         </Button>
                     </SheetClose>
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto px-3 py-4">
+                <div className="flex-1 overflow-y-auto px-3 pt-2 pb-4 sm:px-4">
                     <nav className="space-y-2">
-                        <CatalogBookmarksDialog
-                            trigger={
-                                <button
-                                    type="button"
-                                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent/70"
-                                >
-                                    <Bookmark className="size-4 shrink-0 text-muted-foreground" />
-                                    <span>Bookmark</span>
-                                    {bookmarkedCount > 0 && (
-                                        <span className="ml-auto inline-flex min-w-6 animate-in items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground duration-200 zoom-in-50">
-                                            {bookmarkedCount}
-                                        </span>
-                                    )}
-                                </button>
-                            }
-                        />
                         {auth.user && auth.canBorrowBooks ? (
                             <SheetClose asChild>
                                 <Link

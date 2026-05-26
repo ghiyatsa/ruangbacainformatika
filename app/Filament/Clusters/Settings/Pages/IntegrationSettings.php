@@ -277,11 +277,11 @@ class IntegrationSettings extends Page
     protected function defaultValues(): array
     {
         return [
-            'similarity_api_url' => 'http://localhost:8181',
-            'similarity_api_secret' => '',
-            'similarity_api_timeout' => 10,
-            'whatsapp_api_url' => '',
-            'whatsapp_api_token' => '',
+            'similarity_api_url' => (string) config('services.similarity_api.url', 'http://localhost:8181'),
+            'similarity_api_secret' => (string) config('services.similarity_api.secret', ''),
+            'similarity_api_timeout' => (int) config('services.similarity_api.timeout', 10),
+            'whatsapp_api_url' => (string) config('services.fonnte.url', ''),
+            'whatsapp_api_token' => (string) config('services.fonnte.token', ''),
             'turnstile_enabled' => false,
             'similarity_api_top_k' => 5,
             'similarity_api_threshold' => 0.5,

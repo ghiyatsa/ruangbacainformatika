@@ -1,4 +1,6 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { CheckCircle2, Clock3, MessageCircleMore } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import WhatsAppVerificationController from '@/actions/App/Http/Controllers/Auth/WhatsAppVerificationController';
 import InputError from '@/components/common/InputError';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -7,8 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
-import { CheckCircle2, Clock3, MessageCircleMore } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 interface VerificationProps {
     maskedWhatsapp: string | null;
@@ -34,21 +34,39 @@ export default function VerifyWhatsApp() {
         verification: VerificationProps;
         auth: { user: { whatsapp: string | null } | null };
     }>().props;
-    const [expiresIn, setExpiresIn] = useState(verification.expiresIn);
-    const [resendAvailableIn, setResendAvailableIn] = useState(
-        verification.resendAvailableIn,
-    );
+    const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
     const hasWhatsapp = Boolean(auth.user?.whatsapp);
+    const [countdownBase, setCountdownBase] = useState(() => ({
+        expiresIn: verification.expiresIn,
+        resendAvailableIn: verification.resendAvailableIn,
+        startedAt: currentTimestamp,
+    }));
 
     useEffect(() => {
-        setExpiresIn(verification.expiresIn);
-        setResendAvailableIn(verification.resendAvailableIn);
+        const resetCountdownTimeout = window.setTimeout(() => {
+            setCountdownBase({
+                expiresIn: verification.expiresIn,
+                resendAvailableIn: verification.resendAvailableIn,
+                startedAt: Date.now(),
+            });
+        }, 0);
+
+        return () => window.clearTimeout(resetCountdownTimeout);
     }, [verification.expiresIn, verification.resendAvailableIn]);
+
+    const elapsedSeconds = Math.max(
+        0,
+        Math.floor((currentTimestamp - countdownBase.startedAt) / 1000),
+    );
+    const expiresIn = Math.max(0, countdownBase.expiresIn - elapsedSeconds);
+    const resendAvailableIn = Math.max(
+        0,
+        countdownBase.resendAvailableIn - elapsedSeconds,
+    );
 
     useEffect(() => {
         const interval = window.setInterval(() => {
-            setExpiresIn((current) => Math.max(0, current - 1));
-            setResendAvailableIn((current) => Math.max(0, current - 1));
+            setCurrentTimestamp(Date.now());
         }, 1000);
 
         return () => window.clearInterval(interval);

@@ -2,8 +2,6 @@ import { router } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import AnimatedList from '@/components/common/AnimatedList';
-import { GlobalSearchResultRow } from './GlobalSearchResultRow';
-import { GlobalSearchTrigger } from './GlobalSearchTrigger';
 import {
     CommandDialog,
     CommandEmpty,
@@ -15,6 +13,8 @@ import booksRoute from '@/routes/books';
 import internshipReportsRoute from '@/routes/internship-reports';
 import skripsiRoute from '@/routes/skripsi';
 import thesisRoute from '@/routes/thesis';
+import { GlobalSearchResultRow } from './GlobalSearchResultRow';
+import { GlobalSearchTrigger } from './GlobalSearchTrigger';
 import type {
     SearchItemType,
     SearchListItem,
@@ -101,24 +101,50 @@ export function GlobalSearch() {
     const items = React.useMemo(() => flattenSearchResults(results), [results]);
     const hasResults = items.length > 0;
 
+    const openDialog = React.useCallback(() => {
+        setOpen(true);
+    }, []);
+
+    const closeDialog = React.useCallback(() => {
+        setOpen(false);
+        setQuery('');
+        setResults(EMPTY_RESULTS);
+        setIsLoading(false);
+    }, []);
+
     React.useEffect(() => {
         const down = (event: KeyboardEvent) => {
             if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
                 event.preventDefault();
-                setOpen((currentOpen) => !currentOpen);
+
+                if (open) {
+                    closeDialog();
+
+                    return;
+                }
+
+                openDialog();
             }
         };
 
-        const handleOpen = () => setOpen(true);
-
         document.addEventListener('keydown', down);
-        window.addEventListener('open-global-search', handleOpen);
+        window.addEventListener('open-global-search', openDialog);
 
         return () => {
             document.removeEventListener('keydown', down);
-            window.removeEventListener('open-global-search', handleOpen);
+            window.removeEventListener('open-global-search', openDialog);
         };
-    }, []);
+    }, [closeDialog, open, openDialog]);
+
+    const handleOpenChange = React.useCallback((nextOpen: boolean) => {
+        if (nextOpen) {
+            openDialog();
+
+            return;
+        }
+
+        closeDialog();
+    }, [closeDialog, openDialog]);
 
     const handleQueryChange = (value: string) => {
         setQuery(value);
@@ -138,22 +164,38 @@ export function GlobalSearch() {
             return;
         }
 
+        const abortController = new AbortController();
         const timeoutId = setTimeout(async () => {
             try {
                 const response = await fetch(
                     `${SEARCH_ENDPOINT}?q=${encodeURIComponent(query)}`,
+                    {
+                        signal: abortController.signal,
+                    },
                 );
                 const data = (await response.json()) as SearchResponse;
                 setResults(data || EMPTY_RESULTS);
             } catch (error) {
+                if (
+                    error instanceof DOMException &&
+                    error.name === 'AbortError'
+                ) {
+                    return;
+                }
+
                 console.error('Search failed:', error);
                 setResults(EMPTY_RESULTS);
             } finally {
-                setIsLoading(false);
+                if (!abortController.signal.aborted) {
+                    setIsLoading(false);
+                }
             }
         }, 300);
 
-        return () => clearTimeout(timeoutId);
+        return () => {
+            clearTimeout(timeoutId);
+            abortController.abort();
+        };
     }, [query]);
 
     const onSelect = React.useCallback(
@@ -166,11 +208,11 @@ export function GlobalSearch() {
 
     return (
         <>
-            <GlobalSearchTrigger onClick={() => setOpen(true)} />
+            <GlobalSearchTrigger onClick={openDialog} />
 
             <CommandDialog
                 open={open}
-                onOpenChange={setOpen}
+                onOpenChange={handleOpenChange}
                 className="top-24 p-2"
             >
                 <CommandInput

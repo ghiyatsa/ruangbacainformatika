@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { BookOpen, Eye, Star } from 'lucide-react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import type { CatalogBook } from '@/features/welcome/types';
 
 interface BookListItemProps {
@@ -28,6 +29,9 @@ export default function BookListItem({ book }: BookListItemProps) {
     return (
         <Link
             href={BookController.show(book.slug)}
+            instant
+            component="books/show"
+            pageProps={instantLoadingPageProps()}
             className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-muted/40 focus:bg-muted/40 focus:outline-none sm:gap-5 sm:px-5 sm:py-4"
         >
             <div className="relative h-18 w-12 shrink-0 overflow-hidden rounded-lg border bg-muted shadow-sm sm:h-20 sm:w-14">

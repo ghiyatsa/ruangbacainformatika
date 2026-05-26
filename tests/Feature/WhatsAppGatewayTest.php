@@ -7,6 +7,9 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
 it('sends whatsapp messages to fonnte with the expected authorization header', function () {
+    config()->set('services.fonnte.url', 'https://api.fonnte.com/send');
+    config()->set('services.fonnte.token', 'plain-token-value');
+
     Http::fake([
         'https://api.fonnte.com/send' => Http::response([
             'status' => true,
@@ -15,8 +18,8 @@ it('sends whatsapp messages to fonnte with the expected authorization header', f
     ]);
 
     $repository = mock(SettingRepository::class);
-    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url')->andReturn('https://api.fonnte.com/send');
-    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_token')->andReturn('plain-token-value');
+    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url', 'https://api.fonnte.com/send')->andReturn('https://api.fonnte.com/send');
+    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_token', 'plain-token-value')->andReturn('plain-token-value');
 
     $response = (new WhatsAppGateway($repository, app(HttpFactory::class)))->send(
         '08123456789',
@@ -35,6 +38,9 @@ it('sends whatsapp messages to fonnte with the expected authorization header', f
 });
 
 it('throws a runtime exception when fonnte rejects the message request', function () {
+    config()->set('services.fonnte.url', 'https://api.fonnte.com/send');
+    config()->set('services.fonnte.token', 'plain-token-value');
+
     Http::fake([
         'https://api.fonnte.com/send' => Http::response([
             'status' => false,
@@ -43,11 +49,38 @@ it('throws a runtime exception when fonnte rejects the message request', functio
     ]);
 
     $repository = mock(SettingRepository::class);
-    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url')->andReturn('https://api.fonnte.com/send');
-    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_token')->andReturn('plain-token-value');
+    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url', 'https://api.fonnte.com/send')->andReturn('https://api.fonnte.com/send');
+    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_token', 'plain-token-value')->andReturn('plain-token-value');
 
     expect(fn () => (new WhatsAppGateway($repository, app(HttpFactory::class)))->send(
         '08123456789',
         'Kode OTP Anda: 123456',
     ))->toThrow(RuntimeException::class, 'token invalid');
+});
+
+it('falls back to env-backed config when whatsapp integration settings are missing', function () {
+    config()->set('services.fonnte.url', 'https://api.fonnte.com/send');
+    config()->set('services.fonnte.token', 'env-token-value');
+
+    Http::fake([
+        'https://api.fonnte.com/send' => Http::response([
+            'status' => true,
+            'detail' => 'success! message in queue',
+        ], 200),
+    ]);
+
+    $repository = mock(SettingRepository::class);
+    $repository->shouldReceive('get')
+        ->with('integration', 'whatsapp_api_url', 'https://api.fonnte.com/send')
+        ->andReturn('https://api.fonnte.com/send');
+    $repository->shouldReceive('get')
+        ->with('integration', 'whatsapp_api_token', 'env-token-value')
+        ->andReturn('env-token-value');
+
+    $response = (new WhatsAppGateway($repository, app(HttpFactory::class)))->send(
+        '08123456789',
+        'Pesan dari env',
+    );
+
+    expect($response->successful())->toBeTrue();
 });

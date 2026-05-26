@@ -12,6 +12,11 @@ class PageController extends Controller
         return Inertia::render('about');
     }
 
+    public function aboutTeam(): Response
+    {
+        return Inertia::render('about-team');
+    }
+
     public function contact(): Response
     {
         return Inertia::render('contact');

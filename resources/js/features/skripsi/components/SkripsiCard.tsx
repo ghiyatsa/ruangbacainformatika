@@ -22,6 +22,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
 import skripsiRoute from '@/routes/skripsi';
 import type { SkripsiData } from '@/features/skripsi/types';
@@ -54,6 +55,9 @@ export default function SkripsiCard({ skripsi }: SkripsiCardProps) {
         <div className="group relative h-full">
             <Link
                 href={skripsiRoute.show.url(skripsi.studentId)}
+                instant
+                component="skripsi/show"
+                pageProps={instantLoadingPageProps()}
                 className="absolute inset-0 z-10 rounded-xl focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
                 aria-label={`Lihat detail skripsi ${skripsi.title}`}
             />

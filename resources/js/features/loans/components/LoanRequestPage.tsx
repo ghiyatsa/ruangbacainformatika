@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import type { FormEvent } from 'react';
 
 interface LoanRequestItem {
@@ -220,6 +221,9 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                                                     href={BookController.show(
                                                                         item.slug,
                                                                     )}
+                                                                    instant
+                                                                    component="books/show"
+                                                                    pageProps={instantLoadingPageProps()}
                                                                     className="line-clamp-2 text-base font-semibold text-foreground transition-colors hover:text-primary"
                                                                 >
                                                                     {item.title}

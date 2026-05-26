@@ -32,6 +32,8 @@ class AppSettingSeeder extends Seeder
      */
     protected function defaults(): array
     {
+        $similaritySecret = config('services.similarity_api.secret');
+
         return [
             'general' => [
                 'site_name' => config('app.name'),
@@ -50,14 +52,17 @@ class AppSettingSeeder extends Seeder
             'integration' => [
                 'turnstile_enabled' => '0',
                 'similarity_api_url' => (string) config('services.similarity_api.url', 'http://localhost:8181'),
+                'similarity_api_secret' => filled($similaritySecret)
+                    ? encrypt((string) $similaritySecret)
+                    : null,
                 'similarity_api_timeout' => (string) config('services.similarity_api.timeout', 10),
                 'similarity_api_top_k' => '5',
                 'similarity_api_threshold' => '0.5',
                 'similarity_weight_judul' => '0.7',
                 'similarity_weight_abstrak' => '0.2',
                 'similarity_weight_kata_kunci' => '0.1',
-                'whatsapp_api_url' => '',
-                'whatsapp_api_token' => '',
+                'whatsapp_api_url' => (string) config('services.fonnte.url', ''),
+                'whatsapp_api_token' => (string) config('services.fonnte.token', ''),
             ],
         ];
     }

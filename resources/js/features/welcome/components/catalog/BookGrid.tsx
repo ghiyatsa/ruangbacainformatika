@@ -2,8 +2,8 @@ import { AnimatePresence, motion } from 'motion/react';
 import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import EmptyCatalogState from './EmptyCatalogState';
-import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 import type { CatalogBook } from '@/features/welcome/types';
+import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 interface BookGridProps {
     books: CatalogBook[];

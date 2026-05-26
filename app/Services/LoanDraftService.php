@@ -293,10 +293,7 @@ class LoanDraftService
      */
     public function summaryForBook(User $user, Book $book): array
     {
-        $draft = $this->findCurrentDraft($user)?->loadMissing([
-            'items.book.authors:id,name',
-            'items.book.publisher:id,name',
-        ]);
+        $draft = $this->findCurrentDraft($user)?->loadMissing('items:id,loan_draft_id,book_id');
         $activeLoanCount = $this->activeLoanCount($user);
 
         return [
@@ -313,14 +310,14 @@ class LoanDraftService
      */
     public function summary(User $user): array
     {
-        $draft = $this->findCurrentDraft($user);
+        $draft = $this->findCurrentDraft($user)?->loadMissing('items:id,loan_draft_id,book_id');
 
         return [
-            'count' => $draft?->items()->count() ?? 0,
+            'count' => $draft?->items->count() ?? 0,
             'maxBooks' => $this->loanMaxBooks(),
             'activeLoansCount' => $this->activeLoanCount($user),
             'hasActiveQr' => $draft?->hasActiveToken() ?? false,
-            'bookIds' => $draft?->items()->pluck('book_id')->map(fn (mixed $bookId): int => (int) $bookId)->all() ?? [],
+            'bookIds' => $draft?->items->pluck('book_id')->map(fn (mixed $bookId): int => (int) $bookId)->all() ?? [],
         ];
     }
 

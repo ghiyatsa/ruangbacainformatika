@@ -1,13 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
-import {
-    Bookmark,
-    MoonIcon,
-    Search,
-    ShoppingCart,
-    SunIcon,
-} from 'lucide-react';
+import { MoonIcon, Search, ShoppingCart, SunIcon } from 'lucide-react';
 import { GlobalSearch } from '@/components/layouts/global-search/GlobalSearch';
-import { UserMenuContent } from './UserMenuContent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,12 +8,13 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CatalogBookmarksDialog } from '@/features/books/components/CatalogBookmarksDialog';
-import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { google } from '@/routes/auth';
 import loans from '@/routes/loans';
+import { BookmarksDropdown } from './BookmarksDropdown';
+import { NotificationsDropdown } from './NotificationsDropdown';
 import { UserAvatar } from './UserAvatar';
-import type { Auth, LoanRequestCart } from '@/types';
+import { UserMenuContent } from './UserMenuContent';
+import type { Auth, LoanRequestCart, NotificationSummary } from '@/types';
 
 interface HeaderActionsProps {
     auth: Auth;
@@ -35,13 +29,13 @@ export function HeaderActions({
     updateAppearance,
     hideSearch,
 }: HeaderActionsProps) {
-    const { loanRequestCart } = usePage<{
+    const { loanRequestCart, notifications } = usePage<{
         loanRequestCart: LoanRequestCart | null;
+        notifications: NotificationSummary;
     }>().props;
     const openSearch = () =>
         window.dispatchEvent(new Event('open-global-search'));
     const isDark = resolvedAppearance === 'dark';
-    const { bookmarkedCount } = useCatalogBookmarks();
 
     return (
         <>
@@ -51,7 +45,7 @@ export function HeaderActions({
                 </div>
             )}
 
-            <div className="flex items-center">
+            <div className="flex items-center gap-0.5 sm:gap-1">
                 {!hideSearch && (
                     <Button
                         variant="ghost"
@@ -67,7 +61,7 @@ export function HeaderActions({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="group h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
+                    className="group hidden h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 md:inline-flex"
                     onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
                     aria-label={isDark ? 'Mode terang' : 'Mode gelap'}
                     title={isDark ? 'Mode terang' : 'Mode gelap'}
@@ -80,50 +74,43 @@ export function HeaderActions({
                     <span className="sr-only">Ubah tema</span>
                 </Button>
 
-                <CatalogBookmarksDialog
-                    trigger={
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="group relative h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
-                        >
-                            <Bookmark className="h-4.5 w-4.5 text-primary transition-transform duration-300 group-hover:scale-110" />
-                            <span className="sr-only">Bookmark</span>
-                            {bookmarkedCount > 0 && (
-                                <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 animate-in items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm duration-200 zoom-in-50">
-                                    {bookmarkedCount}
-                                </Badge>
-                            )}
-                        </Button>
-                    }
-                />
+                <div className="inline-flex">
+                    <BookmarksDropdown />
+                </div>
 
                 {auth.user ? (
-                    auth.canBorrowBooks ? (
-                        <Button
-                            asChild
-                            variant="ghost"
-                            size="icon"
-                            className="group relative hidden h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 md:inline-flex"
-                        >
-                            <Link
-                                href={loans.request.url()}
-                                aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
-                                title="Keranjang peminjaman"
+                    <>
+                        <NotificationsDropdown
+                            key={notifications.unreadCount}
+                            initialUnreadCount={notifications.unreadCount}
+                        />
+
+                        {auth.canBorrowBooks ? (
+                            <Button
+                                asChild
+                                variant="ghost"
+                                size="icon"
+                                className="group relative hidden h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 md:inline-flex"
                             >
-                                <ShoppingCart className="h-[18px] w-[18px] text-primary transition-transform duration-300 group-hover:scale-110" />
-                                <span className="sr-only">
-                                    Keranjang peminjaman
-                                </span>
-                                {loanRequestCart &&
-                                    loanRequestCart.count > 0 && (
-                                        <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 animate-in items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm duration-200 zoom-in-50">
-                                            {loanRequestCart.count}
-                                        </Badge>
-                                    )}
-                            </Link>
-                        </Button>
-                    ) : null
+                                <Link
+                                    href={loans.request.url()}
+                                    aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
+                                    title="Keranjang peminjaman"
+                                >
+                                    <ShoppingCart className="h-[18px] w-[18px] text-primary transition-transform duration-300 group-hover:scale-110" />
+                                    <span className="sr-only">
+                                        Keranjang peminjaman
+                                    </span>
+                                    {loanRequestCart &&
+                                        loanRequestCart.count > 0 && (
+                                            <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 animate-in items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm duration-200 zoom-in-50">
+                                                {loanRequestCart.count}
+                                            </Badge>
+                                        )}
+                                </Link>
+                            </Button>
+                        ) : null}
+                    </>
                 ) : (
                     <Button
                         asChild
@@ -138,14 +125,14 @@ export function HeaderActions({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button
-                                className="flex h-9 w-9 items-center justify-center rounded-full ring-2 ring-transparent transition-all duration-200 hover:ring-primary/40 focus-visible:ring-primary/60 focus-visible:outline-none"
+                                className="flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-transparent transition-all duration-200 hover:ring-primary/40 focus-visible:ring-primary/60 focus-visible:outline-none sm:h-9 sm:w-9"
                                 aria-label="Menu pengguna"
                             >
                                 <UserAvatar name={auth.user.name} />
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
-                            className="w-56"
+                            className="w-64 p-1.5"
                             align="end"
                             forceMount
                         >

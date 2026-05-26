@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Database\Factories\SkripsiFactory;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class Skripsi extends Model
 {
@@ -36,11 +38,41 @@ class Skripsi extends Model
             return $query;
         }
 
-        return $query->where(function (Builder $q) use ($search): void {
-            $q->where('title', 'like', "%{$search}%")
+        return $this->applyAcademicSearch($query, $search);
+    }
+
+    protected function applyAcademicSearch(Builder $query, string $search): Builder
+    {
+        $connection = $query->getConnection();
+
+        return $query->where(function (Builder $searchQuery) use ($connection, $search): void {
+            if ($this->supportsFullText($connection)) {
+                $searchQuery->whereRaw(
+                    'MATCH(title, author_name, abstract, keywords) AGAINST (? IN BOOLEAN MODE)',
+                    [$this->toBooleanFullTextQuery($search)]
+                );
+            }
+
+            $searchQuery->orWhere('title', 'like', "%{$search}%")
                 ->orWhere('author_name', 'like', "%{$search}%")
-                ->orWhere('keywords', 'like', "%{$search}%");
+                ->orWhere('abstract', 'like', "%{$search}%")
+                ->orWhere('keywords', 'like', "%{$search}%")
+                ->orWhere('student_id', 'like', "%{$search}%");
         });
+    }
+
+    protected function supportsFullText(Connection $connection): bool
+    {
+        return in_array($connection->getDriverName(), ['mysql', 'mariadb'], true);
+    }
+
+    protected function toBooleanFullTextQuery(string $search): string
+    {
+        return Str::of($search)
+            ->explode(' ')
+            ->filter()
+            ->map(fn (string $term): string => sprintf('%s*', $term))
+            ->implode(' ');
     }
 
     public function similaritySyncStatus(): HasOne

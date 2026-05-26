@@ -1,5 +1,5 @@
-import { CheckCircle2, Clock3, QrCode, TriangleAlert } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { CheckCircle2, Clock3, TriangleAlert } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -27,7 +27,10 @@ const CLAIM_TIMEOUT_SECONDS = 3 * 60;
 const QR_SURFACE_COLOR = 'rgb(15, 23, 42)';
 const QR_MODULE_COLOR = 'rgb(255, 255, 255)';
 
-function getSecondsRemaining(expiresAt: string | null | undefined): number {
+function getSecondsRemaining(
+    expiresAt: string | null | undefined,
+    currentTimestamp = Date.now(),
+): number {
     if (!expiresAt) {
         return 0;
     }
@@ -38,7 +41,7 @@ function getSecondsRemaining(expiresAt: string | null | undefined): number {
         return 0;
     }
 
-    return Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 1000));
+    return Math.max(0, Math.ceil((expiresAtMs - currentTimestamp) / 1000));
 }
 
 function formatRemaining(seconds: number): string {
@@ -80,9 +83,7 @@ export function MemberRegistrationClaimDialog({
 }: MemberRegistrationClaimDialogProps) {
     const [activeRegistration, setActiveRegistration] =
         useState<KioskMemberRegistrationClaim>(initialRegistration);
-    const [secondsRemaining, setSecondsRemaining] = useState(() =>
-        getSecondsRemaining(initialRegistration.expiresAt),
-    );
+    const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
 
     const pollingIntervalRef = useRef<number | null>(null);
     const completionTimeoutRef = useRef<number | null>(null);
@@ -95,6 +96,9 @@ export function MemberRegistrationClaimDialog({
     const isClaimed = activeRegistration.status === 'claimed';
     const isExpired = activeRegistration.status === 'expired';
     const isKioskCompleted = isLinkedClaim || isClaimed;
+    const secondsRemaining = isPendingClaim
+        ? getSecondsRemaining(activeRegistration.expiresAt, currentTimestamp)
+        : 0;
 
     const countdownProgress = useMemo(() => {
         return Math.max(
@@ -121,56 +125,61 @@ export function MemberRegistrationClaimDialog({
         }
     };
 
-    const finalizeActiveRegistration = async (options: {
-        mode: 'cancel' | 'dismiss' | 'restart';
-    }): Promise<void> => {
-        if (options.mode === 'dismiss' && completionRequestRef.current) {
-            return;
-        }
-
-        if (options.mode === 'dismiss') {
-            completionRequestRef.current = true;
-        }
-
-        try {
-            const csrfToken = getCsrfToken();
-
-            await fetch(KioskController.cancelMemberRegistration.url(), {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
-                },
-            });
-        } finally {
-            clearCompletionTimeout();
-            handledCompletionClaimIdRef.current = null;
-            completionRequestRef.current = false;
-            setSecondsRemaining(0);
-            onOpenChange(false);
-
-            if (options.mode === 'cancel') {
-                onCancel();
-                toast.info('Proses dibatalkan.');
+    const finalizeActiveRegistration = useCallback(
+        async (options: {
+            mode: 'cancel' | 'dismiss' | 'restart';
+        }): Promise<void> => {
+            if (options.mode === 'dismiss' && completionRequestRef.current) {
+                return;
             }
 
             if (options.mode === 'dismiss') {
-                onLinked();
-                toast.success('Akun Google berhasil ditautkan.');
+                completionRequestRef.current = true;
             }
 
-            if (options.mode === 'restart') {
-                onRestart();
-                toast.info('QR kedaluwarsa. Membuat QR baru.');
+            try {
+                const csrfToken = getCsrfToken();
+
+                await fetch(KioskController.cancelMemberRegistration.url(), {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                    },
+                });
+            } finally {
+                clearCompletionTimeout();
+                handledCompletionClaimIdRef.current = null;
+                completionRequestRef.current = false;
+                onOpenChange(false);
+
+                if (options.mode === 'cancel') {
+                    onCancel();
+                    toast.info('Proses dibatalkan.');
+                }
+
+                if (options.mode === 'dismiss') {
+                    onLinked();
+                    toast.success('Akun Google berhasil ditautkan.');
+                }
+
+                if (options.mode === 'restart') {
+                    onRestart();
+                    toast.info('QR kedaluwarsa. Membuat QR baru.');
+                }
             }
-        }
-    };
+        },
+        [onCancel, onLinked, onOpenChange, onRestart],
+    );
 
     // Update state when initialRegistration changes from parent
     useEffect(() => {
-        setActiveRegistration(initialRegistration);
+        window.setTimeout(() => {
+            setActiveRegistration(initialRegistration);
+            setCurrentTimestamp(Date.now());
+        }, 0);
     }, [initialRegistration]);
 
     // Poll registration status
@@ -249,22 +258,12 @@ export function MemberRegistrationClaimDialog({
     // Countdown tick effect
     useEffect(() => {
         if (!isOpen || !isPendingClaim) {
-            setSecondsRemaining(
-                getSecondsRemaining(activeRegistration.expiresAt),
-            );
-
             return;
         }
 
-        const tick = () => {
-            setSecondsRemaining(
-                getSecondsRemaining(activeRegistration.expiresAt),
-            );
-        };
-
-        tick();
-
-        const interval = window.setInterval(tick, 1000);
+        const interval = window.setInterval(() => {
+            setCurrentTimestamp(Date.now());
+        }, 1000);
 
         return () => window.clearInterval(interval);
     }, [activeRegistration.expiresAt, isOpen, isPendingClaim]);
@@ -280,7 +279,6 @@ export function MemberRegistrationClaimDialog({
         }
 
         handledCompletionClaimIdRef.current = activeRegistration.id;
-        setSecondsRemaining(0);
         clearCompletionTimeout();
 
         completionTimeoutRef.current = window.setTimeout(() => {
@@ -292,7 +290,7 @@ export function MemberRegistrationClaimDialog({
         return () => {
             clearCompletionTimeout();
         };
-    }, [activeRegistration, isKioskCompleted]);
+    }, [activeRegistration, finalizeActiveRegistration, isKioskCompleted]);
 
     // Cleanup timers on unmount
     useEffect(() => {

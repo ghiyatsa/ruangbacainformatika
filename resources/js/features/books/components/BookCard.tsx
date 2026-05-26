@@ -16,6 +16,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import type { CatalogBook } from '@/features/welcome/types';
@@ -230,6 +231,9 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
         >
             <Link
                 href={booksRoute.show.url(book.slug)}
+                instant
+                component="books/show"
+                pageProps={instantLoadingPageProps()}
                 aria-label={`Lihat detail buku ${book.title}`}
                 className="absolute inset-0 z-10 rounded-2xl focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
             />

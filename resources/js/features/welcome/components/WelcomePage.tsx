@@ -17,10 +17,7 @@ export default function WelcomePage({
 
     return (
         <>
-            <SeoHead
-                title="Beranda"
-                description="Katalog buku dan arsip akademik Ruang Baca Teknik Informatika Universitas Malikussaleh."
-            />
+            <SeoHead description="Katalog buku dan arsip akademik Ruang Baca Teknik Informatika Universitas Malikussaleh." />
 
             {/* Pattern Overlay */}
             <div

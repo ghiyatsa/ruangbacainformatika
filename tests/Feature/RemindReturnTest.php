@@ -2,6 +2,7 @@
 
 use App\Models\Loan;
 use App\Models\User;
+use App\Notifications\LoanReminderDatabaseNotification;
 use App\Notifications\LoanReminderNotification;
 use Illuminate\Support\Facades\Notification;
 
@@ -19,13 +20,18 @@ it('sends reminders for loans due tomorrow', function () {
     ]);
 
     artisan('app:remind-return')
-        ->expectsOutput('Sending WhatsApp reminders for 1 loans...')
-        ->expectsOutput('WhatsApp reminders sent successfully!')
+        ->expectsOutput('Sending reminder notifications for 1 loans...')
+        ->expectsOutput('Reminder notifications sent successfully!')
         ->assertExitCode(0);
 
     Notification::assertSentTo(
         $user,
         LoanReminderNotification::class,
+        fn ($notification) => $notification->toArray($user)['loan_id'] === $loan->id
+    );
+    Notification::assertSentTo(
+        $user,
+        LoanReminderDatabaseNotification::class,
         fn ($notification) => $notification->toArray($user)['loan_id'] === $loan->id
     );
 

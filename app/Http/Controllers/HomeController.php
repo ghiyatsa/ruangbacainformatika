@@ -11,6 +11,27 @@ use Inertia\Response;
 
 class HomeController extends Controller
 {
+    /**
+     * @var array<int, string>
+     */
+    protected const BOOK_LIST_COLUMNS = [
+        'id',
+        'title',
+        'subtitle',
+        'slug',
+        'isbn',
+        'issn',
+        'description',
+        'cover_image',
+        'published_year',
+        'pages',
+        'language',
+        'is_featured',
+        'is_borrowable',
+        'view_count',
+        'publisher_id',
+    ];
+
     public function __construct(
         protected CatalogService $catalogService,
     ) {}
@@ -19,6 +40,7 @@ class HomeController extends Controller
     {
         $books = Book::query()
             ->published()
+            ->select(self::BOOK_LIST_COLUMNS)
             ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
             ->withCount([
                 'items',
@@ -54,6 +76,7 @@ class HomeController extends Controller
         $books = Book::query()
             ->published()
             ->featured()
+            ->select(self::BOOK_LIST_COLUMNS)
             ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
             ->withCount([
                 'items',
@@ -72,6 +95,7 @@ class HomeController extends Controller
     {
         $books = Book::query()
             ->published()
+            ->select(self::BOOK_LIST_COLUMNS)
             ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
             ->withCount([
                 'items',

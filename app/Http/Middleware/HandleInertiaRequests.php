@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Services\Auth\AuthenticationRedirector;
 use App\Services\LoanDraftService;
 use App\Support\LoginViewData;
@@ -43,6 +44,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $session = $request->hasSession() ? $request->session() : null;
+        $user = $request->user();
 
         return [
             ...parent::share($request),
@@ -56,21 +58,24 @@ class HandleInertiaRequests extends Middleware
                 'ogImage' => asset('images/og-image.png'),
             ],
             'auth' => [
-                'user' => $request->user(),
-                'canAccessAdminPanel' => $request->user()?->canAccessAdminPanel() ?? false,
-                'canBorrowBooks' => $request->user()?->canBorrowBooks() ?? false,
-                'hasVerifiedWhatsApp' => $request->user()?->hasVerifiedWhatsApp() ?? false,
-                'requiresWhatsAppVerification' => $request->user()?->requiresWhatsAppVerification() ?? false,
-                'borrowingAccessMessage' => $request->user() !== null && ! $request->user()->canBorrowBooks()
-                    ? ($request->user()->requiresWhatsAppVerification()
+                'user' => $this->serializeUser($user),
+                'canAccessAdminPanel' => $user?->canAccessAdminPanel() ?? false,
+                'canBorrowBooks' => $user?->canBorrowBooks() ?? false,
+                'hasVerifiedWhatsApp' => $user?->hasVerifiedWhatsApp() ?? false,
+                'requiresWhatsAppVerification' => $user?->requiresWhatsAppVerification() ?? false,
+                'borrowingAccessMessage' => $user !== null && ! $user->canBorrowBooks()
+                    ? ($user->requiresWhatsAppVerification()
                         ? 'Verifikasi WhatsApp diperlukan sebelum layanan anggota dapat digunakan.'
-                        : ($request->user()->requiresManualApproval()
+                        : ($user->requiresManualApproval()
                             ? 'Akun kampus Anda sedang menunggu persetujuan admin.'
                             : 'Layanan peminjaman tersedia untuk anggota yang telah disetujui.'))
                     : null,
-                'homeUrl' => $request->user() === null
+                'homeUrl' => $user === null
                     ? route('home', absolute: false)
-                    : app(AuthenticationRedirector::class)->pathFor($request->user()),
+                    : app(AuthenticationRedirector::class)->pathFor($user),
+            ],
+            'notifications' => fn (): array => [
+                'unreadCount' => $user?->unreadNotifications()->count() ?? 0,
             ],
             'googleAuth' => [
                 'clientId' => filled(config('services.google.client_id'))
@@ -80,11 +85,32 @@ class HandleInertiaRequests extends Middleware
                 'oneTapUrl' => route('auth.google.one-tap', absolute: false),
                 'enabled' => app(LoginViewData::class)->canLoginWithGoogle(),
             ],
-            'loanRequestCart' => $request->user()?->canBorrowBooks()
-                ? $this->loanDraftService->summary($request->user())
+            'loanRequestCart' => fn (): ?array => $user?->canBorrowBooks()
+                ? $this->loanDraftService->summary($user)
                 : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'status' => $session?->get('status'),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    protected function serializeUser(?User $user): ?array
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'whatsapp' => $user->whatsapp,
+            'whatsapp_verified_at' => $user->whatsapp_verified_at?->toIso8601String(),
+            'address' => $user->address,
+            'created_at' => $user->created_at?->toIso8601String(),
+            'updated_at' => $user->updated_at?->toIso8601String(),
         ];
     }
 }

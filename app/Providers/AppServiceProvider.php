@@ -7,9 +7,11 @@ use App\Observers\SkripsiObserver;
 use App\Repositories\SettingRepository;
 use App\Services\SimilarityApiService;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -38,8 +40,19 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureInertiaExceptionHandling();
         $this->configureTurnstile();
+        $this->configureWhatsAppRateLimiter();
 
         Skripsi::observe(SkripsiObserver::class);
+    }
+
+    protected function configureWhatsAppRateLimiter(): void
+    {
+        RateLimiter::for('whatsapp-notifications', function (object $job): Limit {
+            $intervalSeconds = max((int) config('services.fonnte.send_interval_seconds', 15), 1);
+            $maxPerMinute = max((int) floor(60 / $intervalSeconds), 1);
+
+            return Limit::perMinute($maxPerMinute)->by('global-whatsapp-notifications');
+        });
     }
 
     protected function configureTurnstile(): void

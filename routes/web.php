@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InternshipReportController;
 use App\Http\Controllers\LoanHistoryController;
 use App\Http\Controllers\LoanRequestController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ReturnDraftController;
 use App\Http\Controllers\SearchController;
@@ -30,6 +31,7 @@ Route::get('/thesis/{thesis:student_id}', [ThesisController::class, 'show'])->na
 Route::get('/search', SearchController::class)->name('search');
 
 Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/about/team', [PageController::class, 'aboutTeam'])->name('about-team');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::post('/contact', [ContactMessageController::class, 'store'])->name('contact.store');
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
@@ -37,6 +39,9 @@ Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name
 Route::middleware('auth')->group(function () {
     Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
     Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::get('/loans/request', [LoanRequestController::class, 'show'])->name('loans.request');
     Route::post('/loans/request/books', [LoanRequestController::class, 'storeBook'])->name('loans.request.books.store');
     Route::delete('/loans/request/books/{book}', [LoanRequestController::class, 'destroyBook'])->name('loans.request.books.destroy');

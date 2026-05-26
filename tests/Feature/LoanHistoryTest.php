@@ -106,6 +106,11 @@ it('shows loan history stats and rows per borrowed book', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('loans/history')
+            ->where('auth.user.id', $member->id)
+            ->where('auth.user.name', $member->name)
+            ->where('auth.user.email', $member->email)
+            ->where('auth.user.whatsapp', '081234567890')
+            ->missing('auth.user.remember_token')
             ->where('stats.total', 3)
             ->where('stats.active', 2)
             ->where('stats.overdue', 0)

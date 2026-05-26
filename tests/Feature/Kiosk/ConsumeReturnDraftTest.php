@@ -7,8 +7,10 @@ use App\Models\LoanItem;
 use App\Models\Publisher;
 use App\Models\ReturnDraft;
 use App\Models\User;
+use App\Notifications\LoanReturnNotification;
 use App\Services\KioskPinManager;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -33,6 +35,7 @@ function fakeVerifiedReturnKioskPin(): void
 
 it('consumes a qr return draft from kiosk and returns the selected books', function () {
     withoutMiddleware(PreventRequestForgery::class);
+    Notification::fake();
 
     ensureReturnMemberRole();
 
@@ -96,6 +99,12 @@ it('consumes a qr return draft from kiosk and returns the selected books', funct
         ->and($loanItem->fresh()?->returned_at)->not->toBeNull()
         ->and($bookItem->fresh()?->status)->toBe('available')
         ->and($loan->fresh()?->status)->toBe(Loan::STATUS_RETURNED);
+
+    Notification::assertSentTo(
+        $member,
+        LoanReturnNotification::class,
+        fn (LoanReturnNotification $notification): bool => $notification->toArray($member)['book_titles'] === [$book->title]
+    );
 });
 
 it('rejects expired qr return drafts from kiosk', function () {

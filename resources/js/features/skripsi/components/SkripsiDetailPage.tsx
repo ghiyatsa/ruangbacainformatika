@@ -11,6 +11,7 @@ import {
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
+import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import {
     Breadcrumb,
@@ -28,10 +29,18 @@ import skripsiRoute from '@/routes/skripsi';
 import type { SkripsiShowProps } from '@/features/skripsi/types';
 import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
-export default function SkripsiDetailPage({
-    skripsi: { data: skripsi },
-}: SkripsiShowProps) {
+export default function SkripsiDetailPage(
+    props: SkripsiShowProps & { loading?: boolean },
+) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
+
+    if (props.loading || !props.skripsi?.data) {
+        return <ResourceDetailPageSkeleton contentTitle="Abstrak" />;
+    }
+
+    const {
+        skripsi: { data: skripsi },
+    } = props;
     const isBookmarkedByUser = isBookmarked({
         catalogType: 'skripsi',
         id: skripsi.id,
@@ -87,10 +96,6 @@ export default function SkripsiDetailPage({
                         </Breadcrumb>
 
                         <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
-                            {/* <div className="flex size-24 shrink-0 items-center justify-center rounded-3xl border bg-linear-to-br from-primary/20 to-primary/5 shadow-lg shadow-primary/10">
-                                <GraduationCap className="size-12 text-primary" />
-                            </div> */}
-
                             <div className="flex flex-col justify-center">
                                 <h1 className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
                                     {skripsi.title}

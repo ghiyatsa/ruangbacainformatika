@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Loan;
+use App\Notifications\LoanReminderDatabaseNotification;
 use App\Notifications\LoanReminderNotification;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -34,15 +35,16 @@ class RemindReturnCommand extends Command
             return self::SUCCESS;
         }
 
-        $this->info("Sending WhatsApp reminders for {$loans->count()} loans...");
+        $this->info("Sending reminder notifications for {$loans->count()} loans...");
 
         foreach ($loans as $loan) {
+            $loan->user->notify(new LoanReminderDatabaseNotification($loan));
             $loan->user->notify(new LoanReminderNotification($loan));
             $loan->reminder_sent_at = now();
             $loan->save();
         }
 
-        $this->info('WhatsApp reminders sent successfully!');
+        $this->info('Reminder notifications sent successfully!');
 
         return self::SUCCESS;
     }

@@ -105,6 +105,37 @@ it('returns skripsis matching author name', function () {
     expect($response->json('skripsis'))->toHaveCount(1);
 });
 
+it('returns theses matching keyword search', function () {
+    Thesis::factory()->create([
+        'title' => 'Judul Tidak Relevan',
+        'keywords' => 'data mining, klasifikasi, optimasi',
+    ]);
+
+    $response = get(route('search', ['q' => 'optimasi']))
+        ->assertOk();
+
+    expect($response->json('theses'))->toHaveCount(1)
+        ->and($response->json('theses.0.title'))->toBe('Judul Tidak Relevan');
+});
+
+it('prioritizes academic title matches over keyword-only matches', function () {
+    Thesis::factory()->create([
+        'title' => 'Optimasi Sistem Informasi Akademik',
+        'keywords' => 'arsitektur enterprise',
+    ]);
+
+    Thesis::factory()->create([
+        'title' => 'Judul Pendukung',
+        'keywords' => 'optimasi, klasifikasi',
+    ]);
+
+    $response = get(route('search', ['q' => 'optimasi']))
+        ->assertOk();
+
+    expect($response->json('theses.0.title'))
+        ->toBe('Optimasi Sistem Informasi Akademik');
+});
+
 it('returns internship reports matching search query', function () {
     InternshipReport::factory()->create([
         'title' => 'Laporan Kerja Praktik Laravel Development',

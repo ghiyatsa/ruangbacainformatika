@@ -15,6 +15,16 @@ it('about page is displayed', function () {
         );
 });
 
+it('about team page is displayed', function () {
+    get(route('about-team'))
+        ->assertOk()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('about-team')
+                ->where('site.contactEmail', 'informatika@unimal.ac.id'),
+        );
+});
+
 it('contact page is displayed', function () {
     get(route('contact'))
         ->assertOk()

@@ -10,5 +10,4 @@ Route::middleware(['auth', 'profile.completed'])->group(function () {
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('settings.profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('settings.profile.update');
     Route::get('settings/security', [SecurityController::class, 'edit'])->name('settings.security.edit');
-    Route::inertia('settings/appearance', 'settings/appearance')->name('settings.appearance.edit');
 });
