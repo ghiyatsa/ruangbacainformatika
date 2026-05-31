@@ -18,7 +18,7 @@ class UserForm
                     ->label('Nama Lengkap')
                     ->required()
                     ->maxLength(255)
-                    ->placeholder('Masukkan nama lengkap pengguna'),
+                    ->placeholder('Nama lengkap pengguna'),
                 TextInput::make('email')
                     ->label('Email')
                     ->email()
@@ -27,16 +27,16 @@ class UserForm
                     ->disabled(fn ($record) => $record !== null)
                     ->helperText(fn ($record): ?string => $record !== null
                         ? 'Email tidak dapat diubah.'
-                        : 'Pengguna akan masuk dengan akun Google pada email ini.'),
+                        : 'Pengguna akan masuk dengan akun Google menggunakan email ini.'),
                 Select::make('roles')
                     ->label('Peran')
                     ->multiple()
                     ->relationship('roles', 'name')
                     ->preload()
-                    ->helperText('Pilih sesuai hak akses.'),
+                    ->helperText('Pilih peran sesuai akses yang dibutuhkan.'),
                 Toggle::make('is_approved')
                     ->label('Akun Disetujui')
-                    ->helperText('Aktifkan jika akun anggota sudah lolos pengecekan operator.')
+                    ->helperText('Aktifkan jika akun anggota sudah diperiksa dan siap digunakan.')
                     ->onIcon('heroicon-m-check')
                     ->offIcon('heroicon-m-x-mark')
                     ->onColor('success')
@@ -54,7 +54,7 @@ class UserForm
                     ->maxLength(1000)
                     ->rows(3)
                     ->columnSpanFull()
-                    ->placeholder('Masukkan alamat lengkap pengguna'),
+                    ->placeholder('Alamat lengkap pengguna'),
             ]);
     }
 }

@@ -13,7 +13,7 @@ class ViewCatalogReport extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make()->label('Tindak lanjuti'),
+            EditAction::make()->label('Tindak Lanjut'),
         ];
     }
 }

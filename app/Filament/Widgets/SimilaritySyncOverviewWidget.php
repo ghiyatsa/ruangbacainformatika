@@ -22,7 +22,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
 
     protected ?string $heading = 'Sinkronisasi Similarity';
 
-    protected ?string $description = 'Status sinkronisasi skripsi.';
+    protected ?string $description = 'Ringkasan sinkronisasi data skripsi.';
 
     /**
      * @param  array<string, mixed>  $filters
@@ -55,7 +55,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Sinkron Berhasil', $syncedCount)
-                ->description($totalSkripsi > 0 ? "{$totalSkripsi} total skripsi" : 'Belum ada data')
+                ->description($totalSkripsi > 0 ? "{$totalSkripsi} skripsi tercatat" : 'Belum ada data')
                 ->descriptionIcon(Heroicon::OutlinedCheckCircle, IconPosition::Before)
                 ->color('success')
                 ->icon(Heroicon::OutlinedCheckBadge)
@@ -63,7 +63,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
                     'similarity_status' => ['value' => SimilaritySyncStatus::STATUS_SYNCED],
                 ])),
             Stat::make('Perlu Tindak Lanjut', $failedCount)
-                ->description($failedCount > 0 ? 'Ada sinkronisasi gagal.' : 'Tidak ada error.')
+                ->description($failedCount > 0 ? 'Ada sinkronisasi yang gagal.' : 'Tidak ada kendala.')
                 ->descriptionIcon($failedCount > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle, IconPosition::Before)
                 ->color($failedCount > 0 ? 'danger' : 'success')
                 ->icon(Heroicon::OutlinedExclamationTriangle)
@@ -71,7 +71,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
                     'similarity_status' => ['value' => SimilaritySyncStatus::STATUS_FAILED],
                 ])),
             Stat::make('Sedang Diproses', $pendingCount)
-                ->description($pendingCount > 0 ? 'Antrean masih berjalan.' : 'Tidak ada antrean.')
+                ->description($pendingCount > 0 ? 'Masih ada proses berjalan.' : 'Tidak ada antrean.')
                 ->descriptionIcon($pendingCount > 0 ? Heroicon::OutlinedArrowPath : Heroicon::OutlinedPauseCircle, IconPosition::Before)
                 ->color($pendingCount > 0 ? 'warning' : 'gray')
                 ->icon(Heroicon::OutlinedArrowPath)
@@ -79,7 +79,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
                     'perlu_sync' => ['isActive' => true],
                 ])),
             Stat::make('Belum Dijadwalkan', $unscheduledCount)
-                ->description($unscheduledCount > 0 ? 'Masih ada yang belum dijadwalkan.' : 'Semua sudah terlacak.')
+                ->description($unscheduledCount > 0 ? 'Masih ada data yang belum dijadwalkan.' : 'Semua data sudah tercatat.')
                 ->descriptionIcon($unscheduledCount > 0 ? Heroicon::OutlinedClock : Heroicon::OutlinedCheckCircle, IconPosition::Before)
                 ->color($unscheduledCount > 0 ? 'info' : 'gray')
                 ->icon(Heroicon::OutlinedClock)

@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { QrCode, Trash2 } from 'lucide-react';
+import { Download, QrCode, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
+import { downloadSvgAsPng } from '@/lib/utils';
 import type { FormEvent } from 'react';
 
 interface LoanRequestItem {
@@ -337,13 +338,31 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                 ) : null}
 
                                 {draft.qrCodeSvg ? (
-                                    <div className="mx-auto w-max rounded-3xl bg-white p-4 shadow-sm">
-                                        <div
-                                            className="flex justify-center [&_svg]:mx-auto"
-                                            dangerouslySetInnerHTML={{
-                                                __html: draft.qrCodeSvg,
-                                            }}
-                                        />
+                                    <div className="space-y-4">
+                                        <div className="mx-auto w-max rounded-3xl border border-border/50 bg-white p-4 text-primary shadow-sm dark:bg-card dark:text-white">
+                                            <div
+                                                className="flex justify-center [&_svg]:mx-auto"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: draft.qrCodeSvg,
+                                                }}
+                                            />
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="mx-auto flex items-center gap-2"
+                                            onClick={() =>
+                                                downloadSvgAsPng(
+                                                    draft.qrCodeSvg!,
+                                                    `qr-peminjaman-${draft.id}.png`,
+                                                    'QR PEMINJAMAN',
+                                                )
+                                            }
+                                        >
+                                            <Download className="size-4" />
+                                            Unduh QR
+                                        </Button>
                                     </div>
                                 ) : (
                                     <div className="rounded-2xl bg-muted/20 px-5 py-12 text-center text-sm text-muted-foreground">

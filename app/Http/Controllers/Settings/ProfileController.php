@@ -21,6 +21,13 @@ class ProfileController extends Controller
         return Inertia::render('settings/profile');
     }
 
+    public function initiateWhatsAppChange(Request $request): RedirectResponse
+    {
+        $request->session()->put('allow_whatsapp_change', true);
+
+        return to_route('register.whatsapp');
+    }
+
     public function complete(Request $request): Response|RedirectResponse
     {
         /** @var User|null $user */

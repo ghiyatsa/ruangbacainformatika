@@ -24,7 +24,7 @@ class CatalogReportForm
                         Textarea::make('admin_notes')
                             ->label('Catatan admin')
                             ->rows(6)
-                            ->placeholder('Tambahkan ringkasan verifikasi atau tindak lanjut admin.')
+                            ->placeholder('Tambahkan ringkasan hasil pengecekan atau tindak lanjut.')
                             ->columnSpanFull(),
                     ])
                     ->columns(1),

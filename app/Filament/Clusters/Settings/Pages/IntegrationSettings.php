@@ -21,11 +21,11 @@ use Illuminate\Support\Str;
 
 class IntegrationSettings extends Page
 {
-    protected static ?string $navigationLabel = 'Integrasi API';
+    protected static ?string $navigationLabel = 'Integrasi';
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $title = 'Pengaturan Integrasi API';
+    protected static ?string $title = 'Pengaturan Integrasi';
 
     protected static ?string $slug = 'integrasi';
 
@@ -62,14 +62,14 @@ class IntegrationSettings extends Page
                     ->schema([
                         Toggle::make('turnstile_enabled')
                             ->label('Aktifkan Turnstile')
-                            ->helperText('Aktifkan verifikasi tambahan.')
+                            ->helperText('Aktifkan jika formulir publik perlu perlindungan tambahan.')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
                             ->offColor('danger'),
                     ]),
                 Section::make('API Kemiripan Skripsi')
-                    ->description('Pengaturan layanan untuk memeriksa kemiripan judul karya ilmiah. Ubah bobot mewajibkan sync ulang penuh.')
+                    ->description('Pengaturan layanan untuk memeriksa kemiripan judul karya ilmiah. Jika bobot berubah, lakukan sinkron ulang penuh.')
                     ->schema([
                         TextInput::make('similarity_api_url')
                             ->label('URL Endpoint API')
@@ -87,7 +87,7 @@ class IntegrationSettings extends Page
                                     ->tooltip('Buat secret baru')
                                     ->requiresConfirmation()
                                     ->modalHeading('Buat Secret API Baru')
-                                    ->modalDescription('Secret lama akan diganti setelah disimpan.')
+                                    ->modalDescription('Secret lama akan diganti setelah pengaturan disimpan.')
                                     ->modalSubmitActionLabel('Buat Secret')
                                     ->action(function (Set $set) {
                                         $secret = Str::random(32);
@@ -110,7 +110,7 @@ class IntegrationSettings extends Page
                             ->default(10),
                         TextInput::make('similarity_api_top_k')
                             ->label('Top K (Jumlah Hasil)')
-                            ->helperText('Jumlah hasil yang ditampilkan.')
+                            ->helperText('Jumlah hasil yang ditampilkan ke admin atau pengguna.')
                             ->numeric()
                             ->required()
                             ->minValue(1)
@@ -118,7 +118,7 @@ class IntegrationSettings extends Page
                             ->default(5),
                         TextInput::make('similarity_api_threshold')
                             ->label('Threshold (Ambang Batas)')
-                            ->helperText('Semakin tinggi, semakin ketat.')
+                            ->helperText('Semakin tinggi nilainya, semakin ketat hasil yang ditampilkan.')
                             ->numeric()
                             ->required()
                             ->minValue(0)
@@ -136,7 +136,7 @@ class IntegrationSettings extends Page
                             ->default(0.7),
                         TextInput::make('similarity_weight_abstrak')
                             ->label('Bobot Abstrak')
-                            ->helperText('Perubahan bobot perlu sync ulang semua data.')
+                            ->helperText('Jika bobot berubah, sinkronkan ulang semua data.')
                             ->numeric()
                             ->required()
                             ->minValue(0)
@@ -155,7 +155,7 @@ class IntegrationSettings extends Page
                     ->columns(2),
 
                 Section::make('Notifikasi WhatsApp')
-                    ->description('Pengaturan gateway WhatsApp untuk pengiriman notifikasi otomatis kepada peminjam.')
+                    ->description('Pengaturan gateway WhatsApp untuk mengirim notifikasi otomatis kepada peminjam.')
                     ->schema([
                         TextInput::make('whatsapp_api_url')
                             ->label('URL Endpoint WhatsApp API')
@@ -171,26 +171,26 @@ class IntegrationSettings extends Page
                 ->footer([
                     Actions::make([
                         Action::make('resyncAllSkripsi')
-                            ->label('Sync Ulang Semua Skripsi')
+                            ->label('Sinkronkan Ulang Semua Skripsi')
                             ->icon(Heroicon::OutlinedArrowPath)
                             ->color('warning')
                             ->requiresConfirmation()
-                            ->modalHeading('Sync Ulang Semua Skripsi')
-                            ->modalDescription('Gunakan setelah bobot similarity berubah agar seluruh embedding diperbarui.')
-                            ->modalSubmitActionLabel('Mulai Sync Ulang')
+                            ->modalHeading('Sinkronkan Ulang Semua Skripsi')
+                            ->modalDescription('Gunakan setelah bobot similarity berubah agar seluruh data diperbarui.')
+                            ->modalSubmitActionLabel('Mulai Sinkron Ulang')
                             ->action(function (): void {
                                 $result = app(SimilarityFullSyncDispatcher::class)->dispatch();
 
                                 Notification::make()
                                     ->{$result['success'] ? 'success' : 'danger'}()
                                     ->title($result['success']
-                                        ? ($result['mode'] === 'sync' ? 'Sync penuh selesai' : 'Sync penuh dijadwalkan')
-                                        : 'Sync penuh gagal')
+                                        ? ($result['mode'] === 'sync' ? 'Sinkron penuh selesai' : 'Sinkron penuh dijadwalkan')
+                                        : 'Sinkron penuh gagal')
                                     ->body($result['success']
                                         ? ($result['mode'] === 'sync'
                                             ? 'Seluruh skripsi sudah diproses.'
-                                            : 'Pastikan worker queue aktif sampai selesai.')
-                                        : 'Periksa koneksi Similarity API lalu coba lagi.')
+                                            : 'Pastikan worker queue tetap aktif sampai proses selesai.')
+                                        : 'Periksa koneksi Similarity API, lalu coba lagi.')
                                     ->persistent($result['mode'] === 'queued')
                                     ->send();
                             }),
@@ -251,7 +251,7 @@ class IntegrationSettings extends Page
             Notification::make()
                 ->warning()
                 ->title('Bobot berubah')
-                ->body('Jalankan sync ulang semua skripsi.')
+                ->body('Sinkronkan ulang semua skripsi agar data tetap konsisten.')
                 ->persistent()
                 ->send();
         }

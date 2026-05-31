@@ -13,7 +13,7 @@ class TodayVisitorsWidget extends StatsOverviewWidget
 
     protected ?string $heading = 'Kunjungan Hari Ini';
 
-    protected ?string $description = 'Ringkasan pengunjung hari ini.';
+    protected ?string $description = 'Ringkasan kunjungan hari ini.';
 
     protected int|string|array $columnSpan = 'full';
 
@@ -49,18 +49,18 @@ class TodayVisitorsWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Total Hari Ini', $total)
-                ->description("Terbanyak: {$topPurposeLabel}")
+                ->description("Tujuan terbanyak: {$topPurposeLabel}")
                 ->descriptionIcon(Heroicon::OutlinedMapPin)
                 ->color('primary')
                 ->icon(Heroicon::OutlinedUserGroup),
 
             Stat::make('Mahasiswa', $mahasiswa)
-                ->description("{$dosen} dosen")
+                ->description("{$dosen} dosen hari ini")
                 ->descriptionIcon(Heroicon::OutlinedAcademicCap)
                 ->color('info')
                 ->icon(Heroicon::OutlinedAcademicCap),
 
-            Stat::make('Staf & Umum', $staff + $umum)
+            Stat::make('Staf dan Umum', $staff + $umum)
                 ->description("{$staff} staf, {$umum} umum")
                 ->descriptionIcon(Heroicon::OutlinedBriefcase)
                 ->color('warning')
@@ -69,7 +69,7 @@ class TodayVisitorsWidget extends StatsOverviewWidget
             Stat::make('Minggu Ini', VisitLog::query()
                 ->whereBetween('visited_at', [$weekStart, $weekEnd])
                 ->count())
-                ->description('Total pekan ini')
+                ->description('Total kunjungan pekan ini')
                 ->descriptionIcon(Heroicon::OutlinedCalendarDays)
                 ->color('success')
                 ->icon(Heroicon::OutlinedCalendarDays),

@@ -5,11 +5,13 @@ import {
     ChevronDown,
     CheckCircle2,
     Clock,
+    Download,
     Library,
     QrCode,
     Search,
     X,
 } from 'lucide-react';
+import { downloadSvgAsPng } from '@/lib/utils';
 import { useEffect, useMemo, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import ReturnDraftController from '@/actions/App/Http/Controllers/ReturnDraftController';
@@ -958,13 +960,31 @@ export default function LoanHistoryPage({
                                     ) : null}
 
                                     {returnDraft.qrCodeSvg ? (
-                                        <div className="mx-auto w-max rounded-3xl bg-white p-4 shadow-sm">
-                                            <div
-                                                className="flex justify-center [&_svg]:mx-auto"
-                                                dangerouslySetInnerHTML={{
-                                                    __html: returnDraft.qrCodeSvg,
-                                                }}
-                                            />
+                                        <div className="space-y-4">
+                                            <div className="mx-auto w-max rounded-3xl border border-border/50 bg-white p-4 shadow-sm dark:bg-card text-primary dark:text-white">
+                                                <div
+                                                    className="flex justify-center [&_svg]:mx-auto"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: returnDraft.qrCodeSvg,
+                                                    }}
+                                                />
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                className="mx-auto flex items-center gap-2"
+                                                onClick={() =>
+                                                    downloadSvgAsPng(
+                                                        returnDraft.qrCodeSvg!,
+                                                        `qr-pengembalian-${returnDraft.id ?? 'draft'}.png`,
+                                                        'QR PENGEMBALIAN',
+                                                    )
+                                                }
+                                            >
+                                                <Download className="size-4" />
+                                                Unduh QR
+                                            </Button>
                                         </div>
                                     ) : (
                                         <div className="rounded-2xl bg-muted/20 px-5 py-12 text-center text-sm text-muted-foreground">

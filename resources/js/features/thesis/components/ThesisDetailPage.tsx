@@ -49,6 +49,14 @@ export default function ThesisDetailPage(
         kindLabel: 'Tesis',
         statusLabel: null,
     };
+    const seoKeywords = [
+        thesis.title,
+        thesis.authorName,
+        thesis.studentId,
+        ...(thesis.keywords ?? []),
+        'tesis informatika',
+        'ruang baca informatika',
+    ].filter((value): value is string => Boolean(value));
 
     return (
         <ResourceDetailPage
@@ -58,6 +66,7 @@ export default function ThesisDetailPage(
                     ? thesis.abstract.slice(0, 160)
                     : `${thesis.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
             }
+            keywords={seoKeywords}
             hero={
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />

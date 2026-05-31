@@ -1,4 +1,12 @@
-export function UserAvatar({ name }: { name: string }) {
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+export function UserAvatar({
+    name,
+    avatar,
+}: {
+    name: string;
+    avatar?: string | null;
+}) {
     const initials = name
         .split(' ')
         .map((n) => n[0])
@@ -7,8 +15,11 @@ export function UserAvatar({ name }: { name: string }) {
         .toUpperCase();
 
     return (
-        <span className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-sm">
-            {initials}
-        </span>
+        <Avatar className="size-8 shadow-sm">
+            <AvatarImage src={avatar ?? undefined} alt={name} />
+            <AvatarFallback className="bg-primary text-xs font-bold text-primary-foreground">
+                {initials}
+            </AvatarFallback>
+        </Avatar>
     );
 }

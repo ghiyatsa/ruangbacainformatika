@@ -83,5 +83,5 @@ it('integration settings page shows the full skripsi resync action', function ()
     actingAs($user);
 
     Livewire::test(IntegrationSettings::class)
-        ->assertSee('Sync Ulang Semua Skripsi');
+        ->assertSee('Sinkronkan Ulang Semua Skripsi');
 });

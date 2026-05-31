@@ -54,7 +54,7 @@ class UsersTable
                     ->separator(', ')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('borrowing_access')
-                    ->label('Status Pinjam')
+                    ->label('Status Peminjaman')
                     ->state(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['label'])
                     ->badge()
                     ->color(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['color'])
@@ -108,6 +108,28 @@ class UsersTable
                     ->label('Hanya akun dibatasi')
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->borrowingRestricted()),
+                Filter::make('manual_approval')
+                    ->label('Perlu persetujuan admin')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->pendingMemberApproval()),
+                Filter::make('registered_today')
+                    ->label('Daftar hari ini')
+                    ->toggle()
+                    ->query(function (Builder $query): Builder {
+                        [$startOfDay, $endOfDay] = AppTimezone::dayRange();
+
+                        return $query->whereBetween('created_at', [$startOfDay, $endOfDay]);
+                    }),
+                Filter::make('approved_today')
+                    ->label('Disetujui hari ini')
+                    ->toggle()
+                    ->query(function (Builder $query): Builder {
+                        [$startOfDay, $endOfDay] = AppTimezone::dayRange();
+
+                        return $query
+                            ->where('is_approved', true)
+                            ->whereBetween('updated_at', [$startOfDay, $endOfDay]);
+                    }),
             ])
             ->recordActions([
                 Action::make('approve')

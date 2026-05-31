@@ -5,6 +5,8 @@ import type { ReactNode } from 'react';
 interface ResourceDetailPageProps {
     title: string;
     description?: string;
+    image?: string;
+    keywords?: string | string[];
     hero: ReactNode;
     sidebar: ReactNode;
     children: ReactNode;
@@ -13,13 +15,21 @@ interface ResourceDetailPageProps {
 export function ResourceDetailPage({
     title,
     description,
+    image,
+    keywords,
     hero,
     sidebar,
     children,
 }: ResourceDetailPageProps) {
     return (
         <>
-            <SeoHead title={title} description={description} type="article" />
+            <SeoHead
+                title={title}
+                description={description}
+                image={image}
+                keywords={keywords}
+                type="article"
+            />
             <BackgroundPattern />
 
             <div className="relative z-10 flex flex-col">

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Support\AppTimezone;
 use Filament\Support\Icons\Heroicon;
@@ -12,30 +13,35 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
 {
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Review Anggota';
+    protected ?string $heading = 'Persetujuan Anggota';
 
-    protected ?string $description = 'Pantau antrean akun hasil klaim kiosk.';
+    protected ?string $description = 'Pantau akun anggota yang menunggu persetujuan.';
 
     protected int|string|array $columnSpan = 'full';
 
     protected static bool $isLazy = false;
+
+    /**
+     * @param  array<string, mixed>  $filters
+     */
+    protected function usersUrl(array $filters = []): string
+    {
+        return UserResource::getUrl('index', [
+            'tableFilters' => $filters,
+        ]);
+    }
 
     protected function getStats(): array
     {
         [$todayStart, $todayEnd] = AppTimezone::dayRange();
 
         $pendingTotal = User::query()
-            ->where('is_approved', false)
+            ->pendingMemberApproval()
             ->count();
 
-        $pendingGoogleMembers = User::query()
-            ->where('is_approved', false)
-            ->where('auth_provider', 'google')
-            ->count();
-
-        $pendingStudents = User::query()
-            ->where('is_approved', false)
-            ->where('email', 'like', '%@mhs.unimal.ac.id')
+        $pendingRegisteredToday = User::query()
+            ->pendingMemberApproval()
+            ->whereBetween('created_at', [$todayStart, $todayEnd])
             ->count();
 
         $approvedToday = User::query()
@@ -44,23 +50,34 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
             ->count();
 
         return [
-            Stat::make('Menunggu Review', $pendingTotal)
-                ->description($pendingGoogleMembers > 0 ? "{$pendingGoogleMembers} hasil klaim Google" : 'Belum ada antrean baru')
-                ->descriptionIcon($pendingGoogleMembers > 0 ? Heroicon::OutlinedClock : Heroicon::OutlinedCheckCircle)
+            Stat::make('Menunggu Persetujuan', $pendingTotal)
+                ->description($pendingTotal > 0 ? 'Akun menunggu peninjauan admin' : 'Belum ada antrean baru')
+                ->descriptionIcon($pendingTotal > 0 ? Heroicon::OutlinedClock : Heroicon::OutlinedCheckCircle)
                 ->color($pendingTotal > 0 ? 'warning' : 'success')
-                ->icon(Heroicon::OutlinedUserPlus),
+                ->icon(Heroicon::OutlinedUserPlus)
+                ->url($this->usersUrl([
+                    'is_approved' => ['value' => '0'],
+                    'manual_approval' => ['isActive' => true],
+                ])),
 
-            Stat::make('Mahasiswa Pending', $pendingStudents)
-                ->description('Prioritaskan akun mahasiswa yang masih menunggu review')
+            Stat::make('Daftar Hari Ini', $pendingRegisteredToday)
+                ->description($pendingRegisteredToday > 0 ? 'Pendaftaran baru yang masih menunggu persetujuan' : 'Belum ada pendaftaran baru')
                 ->descriptionIcon(Heroicon::OutlinedAcademicCap)
-                ->color($pendingStudents > 0 ? 'info' : 'gray')
-                ->icon(Heroicon::OutlinedAcademicCap),
+                ->color($pendingRegisteredToday > 0 ? 'info' : 'gray')
+                ->icon(Heroicon::OutlinedAcademicCap)
+                ->url($this->usersUrl([
+                    'manual_approval' => ['isActive' => true],
+                    'registered_today' => ['isActive' => true],
+                ])),
 
             Stat::make('Disetujui Hari Ini', $approvedToday)
-                ->description($approvedToday > 0 ? 'Ada progres review' : 'Belum ada approval hari ini')
+                ->description($approvedToday > 0 ? 'Persetujuan bertambah hari ini' : 'Belum ada persetujuan hari ini')
                 ->descriptionIcon(Heroicon::OutlinedCheckBadge)
                 ->color($approvedToday > 0 ? 'success' : 'gray')
-                ->icon(Heroicon::OutlinedCheckBadge),
+                ->icon(Heroicon::OutlinedCheckBadge)
+                ->url($this->usersUrl([
+                    'approved_today' => ['isActive' => true],
+                ])),
         ];
     }
 }

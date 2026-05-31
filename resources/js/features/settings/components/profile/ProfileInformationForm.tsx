@@ -1,9 +1,10 @@
-import { Form } from '@inertiajs/react';
+import { Form, Link } from '@inertiajs/react';
 import { AtSign, CheckCircle2, MapPin, Phone, User } from 'lucide-react';
 import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
+import settings from '@/routes/settings';
 import {
     InputGroup,
     InputGroupAddon,
@@ -87,14 +88,17 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                                 </Label>
                                 {hasVerifiedWhatsapp && !isEditingWhatsapp ? (
                                     <Button
-                                        type="button"
                                         variant="outline"
                                         size="sm"
-                                        onClick={() =>
-                                            setIsEditingWhatsapp(true)
-                                        }
+                                        asChild
                                     >
-                                        Ubah nomor
+                                        <Link
+                                            href={settings.profile.changeWhatsapp().url}
+                                            method="post"
+                                            as="button"
+                                        >
+                                            Ubah nomor
+                                        </Link>
                                     </Button>
                                 ) : null}
                             </div>

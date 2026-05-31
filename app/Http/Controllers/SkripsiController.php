@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\SkripsiResource;
 use App\Models\Skripsi;
+use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class SkripsiController extends Controller
 {
+    public function __construct(
+        protected PageMeta $pageMeta,
+    ) {}
+
     public function index(Request $request): Response
     {
         $search = $request->string('search')->trim()->toString();
@@ -53,6 +58,18 @@ class SkripsiController extends Controller
 
         return Inertia::render('skripsi/show', [
             'skripsi' => new SkripsiResource($skripsi->fresh()),
+        ])->withViewData([
+            'meta' => $this->pageMeta->forAcademicDocument(
+                title: $skripsi->title,
+                authorName: $skripsi->author_name,
+                studentId: $skripsi->student_id,
+                abstract: $skripsi->abstract,
+                keywords: $skripsi->keywords
+                    ? array_map('trim', explode(',', $skripsi->keywords))
+                    : [],
+                catalogLabel: 'skripsi',
+                canonicalUrl: route('skripsi.show', $skripsi),
+            ),
         ]);
     }
 }

@@ -53,9 +53,9 @@ class CategoriesTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
-                        ->label('Ubah Kategori'),
+                        ->label('Ubah'),
                     DeleteAction::make()
-                        ->label('Hapus Kategori')
+                        ->label('Hapus')
                         ->before(function (DeleteAction $action, Category $record): void {
                             if (! $reason = $record->deletionBlockedReason()) {
                                 return;
@@ -75,7 +75,7 @@ class CategoriesTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Hapus Kategori')
+                        ->label('Hapus Terpilih')
                         ->before(function (DeleteBulkAction $action, Collection $records): void {
                             /** @var Category|null $blockedRecord */
                             $blockedRecord = $records->first(fn (Category $record): bool => $record->deletionBlockedReason() !== null);

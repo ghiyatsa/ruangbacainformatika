@@ -101,6 +101,13 @@ export default function BookDetailPage(props: BookDetailPageProps) {
         : book.isAvailable
           ? 'bg-emerald-500/10 border-emerald-500/20'
           : 'bg-red-500/10 border-red-500/20';
+    const seoKeywords = [
+        book.title,
+        ...book.authors,
+        ...book.categories.map((category) => category.name),
+        'katalog buku',
+        'ruang baca informatika',
+    ].filter((value): value is string => Boolean(value));
 
     return (
         <ResourceDetailPage
@@ -110,6 +117,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                     ? book.description.slice(0, 160)
                     : `${book.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
             }
+            image={book.coverImageUrl}
+            keywords={seoKeywords}
             hero={
                 <div className="relative -mt-20 overflow-hidden sm:-mt-28">
                     <div

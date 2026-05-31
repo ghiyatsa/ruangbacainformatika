@@ -25,13 +25,13 @@ class SkripsiInfolist
                                     ->label('Judul')
                                     ->columnSpanFull(),
                                 TextEntry::make('author_name')
-                                    ->label('Nama mahasiswa'),
+                                    ->label('Nama Mahasiswa'),
                                 TextEntry::make('student_id')
                                     ->label('NIM'),
                                 TextEntry::make('year')
                                     ->label('Tahun'),
                                 TextEntry::make('keywords')
-                                    ->label('Kata kunci')
+                                    ->label('Kata Kunci')
                                     ->placeholder('-')
                                     ->columnSpanFull(),
                                 TextEntry::make('abstract')
@@ -78,7 +78,7 @@ class SkripsiInfolist
                                     ->placeholder('-'),
                                 TextEntry::make('similaritySyncStatus.last_error')
                                     ->label('Error terakhir')
-                                    ->placeholder('Belum ada error.')
+                                    ->placeholder('Belum ada error')
                                     ->columnSpanFull(),
                             ]),
                     ])

@@ -11,8 +11,8 @@ it('uses polished labels for catalog feedback resources', function () {
 });
 
 it('uses polished labels for correspondence resources', function () {
-    expect(ContactMessageResource::getNavigationLabel())->toBe('Korespondensi')
-        ->and(ContactMessageResource::getModelLabel())->toBe('Korespondensi')
-        ->and(ContactMessageResource::getPluralModelLabel())->toBe('Korespondensi')
-        ->and(ContactMessageResource::getNavigationBadgeTooltip())->toBe('Korespondensi baru');
+    expect(ContactMessageResource::getNavigationLabel())->toBe('Pesan Kontak')
+        ->and(ContactMessageResource::getModelLabel())->toBe('Pesan Kontak')
+        ->and(ContactMessageResource::getPluralModelLabel())->toBe('Pesan Kontak')
+        ->and(ContactMessageResource::getNavigationBadgeTooltip())->toBe('Pesan kontak baru');
 });

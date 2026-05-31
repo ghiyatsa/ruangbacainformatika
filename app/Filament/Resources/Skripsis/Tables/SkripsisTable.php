@@ -54,7 +54,7 @@ class SkripsisTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('similarity_sync_status')
-                    ->label('Sync Similarity')
+                    ->label('Status Similarity')
                     ->state(fn (Skripsi $record): string => $record->similaritySyncStatusLabel())
                     ->badge()
                     ->color(fn (Skripsi $record): string => $record->similaritySyncStatusColor()),
@@ -142,7 +142,7 @@ class SkripsisTable
 
                         Notification::make()
                             ->success()
-                            ->title('Sync dijadwalkan')
+                            ->title('Sinkron dijadwalkan')
                             ->send();
                     }),
             ])

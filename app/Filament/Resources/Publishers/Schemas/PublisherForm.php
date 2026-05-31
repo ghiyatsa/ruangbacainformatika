@@ -29,7 +29,7 @@ class PublisherForm
         return $schema
             ->components([
                 Section::make('Informasi Dasar')
-                    ->description('Data penerbit')
+                    ->description('Informasi dasar penerbit.')
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
@@ -48,7 +48,7 @@ class PublisherForm
                     ->columns(2),
 
                 Section::make('Deskripsi')
-                    ->description('Informasi tentang penerbit')
+                    ->description('Informasi tambahan tentang penerbit.')
                     ->schema([
                         static::descriptionField(),
                     ]),

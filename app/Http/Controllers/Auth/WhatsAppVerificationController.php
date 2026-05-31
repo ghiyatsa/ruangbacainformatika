@@ -10,6 +10,7 @@ use App\Services\Auth\AuthenticationRedirector;
 use App\Services\WhatsAppOtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
@@ -26,7 +27,11 @@ class WhatsAppVerificationController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        if (! $user->requiresWhatsAppVerification()) {
+        if (! $user->usesCampusEmail()) {
+            return to_route('settings.profile.edit');
+        }
+
+        if (! $user->requiresWhatsAppVerification() && $request->session()->get('allow_whatsapp_change') !== true) {
             return $user->hasRequiredProfileDetails()
                 ? to_route('settings.profile.edit')
                 : to_route('register.profile');
@@ -34,7 +39,7 @@ class WhatsAppVerificationController extends Controller
 
         $verification = $this->whatsAppOtpService->status($user);
 
-        if (filled($user->whatsapp)) {
+        if (filled($user->whatsapp) && $user->requiresWhatsAppVerification()) {
             try {
                 $verification = $this->whatsAppOtpService->ensureChallenge($user);
             } catch (RuntimeException $exception) {
@@ -60,8 +65,16 @@ class WhatsAppVerificationController extends Controller
         $user = $request->user();
 
         if ($request->filled('whatsapp')) {
+            $newWhatsapp = $request->validated('whatsapp');
+
+            if ($user->hasVerifiedWhatsApp() && $user->whatsapp === $newWhatsapp) {
+                throw ValidationException::withMessages([
+                    'whatsapp' => 'Nomor WhatsApp baru harus berbeda dengan nomor saat ini.',
+                ]);
+            }
+
             $user->forceFill([
-                'whatsapp' => $request->validated('whatsapp'),
+                'whatsapp' => $newWhatsapp,
             ])->save();
         }
 
@@ -84,6 +97,8 @@ class WhatsAppVerificationController extends Controller
             $user,
             (string) $request->validated('code'),
         );
+
+        $request->session()->forget('allow_whatsapp_change');
 
         Inertia::flash('toast', [
             'type' => 'success',

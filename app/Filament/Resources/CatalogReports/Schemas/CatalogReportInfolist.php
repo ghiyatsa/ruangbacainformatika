@@ -19,12 +19,12 @@ class CatalogReportInfolist
                         Section::make('Ringkasan Laporan')
                             ->schema([
                                 TextEntry::make('catalog_type')
-                                    ->label('Jenis katalog')
+                                    ->label('Jenis Katalog')
                                     ->formatStateUsing(fn (CatalogReport $record): string => $record->catalogTypeLabel())
                                     ->badge()
                                     ->color('gray'),
                                 TextEntry::make('catalog_title')
-                                    ->label('Judul data')
+                                    ->label('Judul')
                                     ->url(fn (CatalogReport $record): ?string => $record->publicUrl(), shouldOpenInNewTab: true),
                                 TextEntry::make('catalog_url')
                                     ->label('URL')
@@ -41,9 +41,9 @@ class CatalogReportInfolist
                         Section::make('Pelapor & Tindak Lanjut')
                             ->schema([
                                 TextEntry::make('reporter_display_name')
-                                    ->label('Nama pelapor'),
+                                    ->label('Nama Pelapor'),
                                 TextEntry::make('reporter_email')
-                                    ->label('Email pelapor')
+                                    ->label('Email Pelapor')
                                     ->placeholder('-'),
                                 TextEntry::make('user.email')
                                     ->label('Email akun')
@@ -59,7 +59,7 @@ class CatalogReportInfolist
                                     ->placeholder('-'),
                                 TextEntry::make('admin_notes')
                                     ->label('Catatan admin')
-                                    ->placeholder('Belum ada catatan admin.')
+                                    ->placeholder('Belum ada catatan admin')
                                     ->columnSpanFull(),
                             ])
                             ->columnSpan(1),

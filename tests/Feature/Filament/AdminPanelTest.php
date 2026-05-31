@@ -54,7 +54,11 @@ it('super admin users can access the admin dashboard', function () {
 
     actingAs($user)
         ->get('/admin')
-        ->assertOk();
+        ->assertOk()
+        ->assertSee('Ringkasan')
+        ->assertSee('Aktivitas')
+        ->assertSee('Pesan')
+        ->assertSee('Server');
 });
 
 it('super admin users can access the admin users resource', function () {
@@ -84,7 +88,7 @@ it('super admin users can render the general settings form', function () {
         ->assertSee('Open Graph Image')
         ->assertSee('Favicon PNG')
         ->assertSee('WhatsApp Bantuan')
-        ->assertSee('Nomor kontak bantuan.')
+        ->assertSee('Nomor yang ditampilkan sebagai kontak bantuan.')
         ->assertSee('Simpan');
 });
 
@@ -96,8 +100,8 @@ it('super admin users can render the library settings form', function () {
         ->assertOk()
         ->assertSee('Maksimal Buku Dipinjam')
         ->assertSee('Durasi Peminjaman (Hari Kerja)')
-        ->assertSee('Batas pinjaman aktif per anggota.')
-        ->assertSee('Dihitung dalam hari kerja.')
+        ->assertSee('Jumlah pinjaman aktif maksimal per anggota.')
+        ->assertSee('Durasi dihitung dalam hari kerja.')
         ->assertSee('Simpan');
 });
 
@@ -111,7 +115,7 @@ it('super admin users can render the kiosk settings actions', function () {
         ->assertSee('Reset Sesi Perangkat')
         ->assertSee('Perangkat Aktif')
         ->assertSee('PIN Kios')
-        ->assertSee('Kosongkan jika tidak diubah.');
+        ->assertSee('Biarkan kosong jika PIN tidak diubah.');
 });
 
 it('super admin users can render the create user form for google accounts', function () {
@@ -120,12 +124,12 @@ it('super admin users can render the create user form for google accounts', func
     actingAs($user)
         ->get('/admin/users/create')
         ->assertOk()
-        ->assertSee('Pengguna akan masuk dengan akun Google pada email ini.')
+        ->assertSee('Pengguna akan masuk dengan akun Google menggunakan email ini.')
         ->assertSee('WhatsApp')
         ->assertSee('Alamat')
         ->assertSee('Peran')
-        ->assertSee('Pilih sesuai hak akses.')
-        ->assertSee('Aktifkan jika akun anggota sudah lolos pengecekan operator.');
+        ->assertSee('Pilih peran sesuai akses yang dibutuhkan.')
+        ->assertSee('Aktifkan jika akun anggota sudah diperiksa dan siap digunakan.');
 });
 
 it('super admin users see verified whatsapp as locked on the edit user form', function () {
@@ -151,12 +155,12 @@ it('super admin users can render book relation helpers on the create book form',
     actingAs($user)
         ->get('/admin/books/create')
         ->assertOk()
-        ->assertSee('Pilih atau tambah penerbit.')
-        ->assertSee('Pilih atau tambah penulis.')
-        ->assertSee('Pilih atau tambah kategori.')
-        ->assertSee('Gunakan angka saja.')
+        ->assertSee('Pilih penerbit yang sudah ada atau tambah baru.')
+        ->assertSee('Pilih penulis yang sudah ada atau tambah baru.')
+        ->assertSee('Pilih kategori yang sudah ada atau tambah baru.')
+        ->assertSee('Isi angka tanpa spasi atau tanda lain.')
         ->assertSee('Gunakan 4 digit tahun.')
-        ->assertSee('JPG, PNG, atau WEBP. Maksimal 2 MB.');
+        ->assertSee('Gunakan JPG, PNG, atau WEBP dengan ukuran maksimal 2 MB.');
 });
 
 it('super admin users can render concise table filter and bulk action labels', function () {
@@ -178,7 +182,7 @@ it('super admin users can render concise table filter and bulk action labels', f
         ->get('/admin/loans')
         ->assertOk()
         ->assertSee('Hanya pinjaman aktif')
-        ->assertSee('Hanya lewat jatuh tempo');
+        ->assertSee('Hanya terlambat');
 
     actingAs($user)
         ->get('/admin/visit-logs')
@@ -274,7 +278,7 @@ it('super admin users can monitor similarity sync status from skripsi admin page
     actingAs($user)
         ->get('/admin/skripsis')
         ->assertOk()
-        ->assertSee('Sync Similarity')
+        ->assertSee('Status Similarity')
         ->assertSee('Gagal')
         ->assertSee('Perlu diproses')
         ->assertSee('Belum dijadwalkan')
@@ -322,16 +326,16 @@ it('super admin users can see pending member approvals overview on the admin das
 
     User::factory()->create([
         'auth_provider' => 'google',
-        'email' => 'pending@mhs.unimal.ac.id',
+        'email' => 'pending@unimal.ac.id',
         'is_approved' => false,
     ]);
 
     actingAs($user)
         ->get('/admin')
         ->assertOk()
-        ->assertSee('Review Anggota')
-        ->assertSee('Menunggu Review')
-        ->assertSee('Mahasiswa Pending')
+        ->assertSee('Persetujuan Anggota')
+        ->assertSee('Menunggu Persetujuan')
+        ->assertSee('Daftar Hari Ini')
         ->assertSee('Disetujui Hari Ini');
 });
 
@@ -342,7 +346,7 @@ it('filament resources expose consistent navigation metadata', function () {
         ->and(LoanResource::getNavigationBadgeColor())->toBe('warning')
         ->and(LoanResource::getNavigationBadgeTooltip())->toBe('Total pinjaman aktif')
         ->and(ContactMessageResource::getNavigationBadgeColor())->toBe('warning')
-        ->and(ContactMessageResource::getNavigationBadgeTooltip())->toBe('Korespondensi baru')
+        ->and(ContactMessageResource::getNavigationBadgeTooltip())->toBe('Pesan kontak baru')
         ->and(VisitLogResource::getNavigationBadgeColor())->toBe('primary')
         ->and(VisitLogResource::getNavigationBadgeTooltip())->toBe('Kunjungan hari ini')
         ->and(AuthorResource::getNavigationBadgeColor())->toBe('gray')
@@ -385,14 +389,14 @@ it('super admin users can render concise empty state copy on book management res
     actingAs($user)
         ->get('/admin/contact-messages')
         ->assertOk()
-        ->assertSee('Belum ada korespondensi')
+        ->assertSee('Belum ada pesan masuk')
         ->assertSee('Pesan dari halaman kontak akan tampil di sini.');
 
     actingAs($user)
         ->get('/admin/catalog-reports')
         ->assertOk()
-        ->assertSee('Belum ada umpan balik katalog')
-        ->assertSee('Masukan dari halaman detail katalog akan tampil di sini.');
+        ->assertSee('Belum ada laporan katalog')
+        ->assertSee('Laporan dari halaman detail katalog akan tampil di sini.');
 
     actingAs($user)
         ->get('/admin/books')
@@ -451,8 +455,23 @@ it('super admin users can see the contact messages widget on the dashboard', fun
     $user = makeSuperAdmin();
 
     actingAs($user)
-        ->get('/admin')
+        ->get('/admin?tab=messages')
         ->assertOk()
-        ->assertSee('Korespondensi Baru')
-        ->assertSee('Pesan dari halaman kontak muncul di sini.');
+        ->assertSee('Pesan Kontak Terbaru')
+        ->assertSee('Pesan dari halaman kontak akan tampil di sini.');
+});
+
+it('super admin users can see the server info widget on the dashboard', function () {
+    $user = makeSuperAdmin();
+
+    actingAs($user)
+        ->get('/admin?tab=system')
+        ->assertOk()
+        ->assertSee('Informasi Server')
+        ->assertSee('Mode Aplikasi')
+        ->assertSee('Runtime')
+        ->assertSee('Driver Layanan')
+        ->assertSee('Penyimpanan')
+        ->assertSee('Waktu Server')
+        ->assertDontSee('Pesan Kontak Terbaru');
 });

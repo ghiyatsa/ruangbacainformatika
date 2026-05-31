@@ -23,7 +23,7 @@ class LibrarySettings extends Page
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $title = 'Pengaturan Operasional Perpustakaan';
+    protected static ?string $title = 'Pengaturan Peminjaman';
 
     protected static ?string $slug = 'library';
 
@@ -52,7 +52,7 @@ class LibrarySettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Aturan Peminjaman')
-                    ->description('Aturan dasar peminjaman yang dipakai pada layanan mandiri dan proses administrasi.')
+                    ->description('Aturan dasar peminjaman untuk layanan mandiri dan pengelolaan admin.')
                     ->schema([
                         TextInput::make('loan_max_books')
                             ->label('Maksimal Buku Dipinjam')
@@ -60,22 +60,22 @@ class LibrarySettings extends Page
                             ->required()
                             ->minValue(1)
                             ->maxValue(10)
-                            ->helperText('Batas pinjaman aktif per anggota.'),
+                            ->helperText('Jumlah pinjaman aktif maksimal per anggota.'),
                         TextInput::make('loan_duration_days')
                             ->label('Durasi Peminjaman (Hari Kerja)')
                             ->numeric()
                             ->required()
                             ->minValue(1)
                             ->maxValue(30)
-                            ->helperText('Dihitung dalam hari kerja.'),
+                            ->helperText('Durasi dihitung dalam hari kerja.'),
                     ])
                     ->columns(2),
-                Section::make('Konsekuensi Keterlambatan')
-                    ->description('Pembatasan ini diterapkan sebagai pengganti denda agar anggota terdorong mengembalikan buku tepat waktu.')
+                Section::make('Pembatasan Keterlambatan')
+                    ->description('Pembatasan ini dipakai sebagai pengganti denda agar buku dikembalikan tepat waktu.')
                     ->schema([
                         Toggle::make('late_return_suspension_enabled')
                             ->label('Aktifkan pembatasan peminjaman')
-                            ->helperText('Saat aktif, anggota yang terlambat akan dibatasi untuk meminjam kembali.')
+                            ->helperText('Saat aktif, anggota yang terlambat tidak bisa meminjam lagi untuk sementara.')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
@@ -89,7 +89,7 @@ class LibrarySettings extends Page
                             ->maxValue(30)
                             ->default(1)
                             ->visible(fn (Get $get): bool => (bool) $get('late_return_suspension_enabled'))
-                            ->helperText('Contoh: isi 1 jika pembatasan mulai berlaku setelah telat 1 hari.'),
+                            ->helperText('Isi 1 jika pembatasan mulai berlaku setelah telat 1 hari.'),
                         TextInput::make('late_return_cooldown_days')
                             ->label('Masa Pembatasan Setelah Pengembalian (Hari)')
                             ->numeric()
@@ -98,7 +98,7 @@ class LibrarySettings extends Page
                             ->maxValue(30)
                             ->default(3)
                             ->visible(fn (Get $get): bool => (bool) $get('late_return_suspension_enabled'))
-                            ->helperText('Isi 0 untuk hanya memblokir selama buku masih terlambat belum dikembalikan.'),
+                            ->helperText('Isi 0 jika pembatasan hanya berlaku selama buku belum dikembalikan.'),
                     ])
                     ->columns(3),
             ])
@@ -128,7 +128,7 @@ class LibrarySettings extends Page
 
         Notification::make()
             ->success()
-            ->title('Pengaturan perpustakaan disimpan')
+            ->title('Pengaturan peminjaman berhasil disimpan')
             ->send();
 
         $this->form->fill($this->settingRepository()->sectionValues('library', $this->defaultValues()));

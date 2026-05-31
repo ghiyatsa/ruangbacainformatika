@@ -47,7 +47,7 @@ it('general settings can persist site metadata and branding fields', function ()
         ->set('data.hero_notice_tone', 'warning')
         ->call('save')
         ->assertHasNoFormErrors()
-        ->assertNotified('Pengaturan umum disimpan');
+        ->assertNotified('Pengaturan umum berhasil disimpan');
 
     expect(Setting::query()->where('section', 'general')->where('key', 'site_name')->value('value'))->toBe('Ruang Baca Informatika')
         ->and(Setting::query()->where('section', 'general')->where('key', 'site_description')->value('value'))->toBe('Katalog digital untuk buku, skripsi, tesis, dan laporan kerja praktik.')

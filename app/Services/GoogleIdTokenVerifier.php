@@ -15,7 +15,7 @@ use Throwable;
 class GoogleIdTokenVerifier
 {
     /**
-     * @return array{sub: string, email: string, name: string|null}
+     * @return array{sub: string, email: string, name: string|null, avatar: string|null}
      */
     public function verify(string $credential): array
     {
@@ -56,6 +56,7 @@ class GoogleIdTokenVerifier
             'sub' => $subject,
             'email' => $email,
             'name' => Arr::get($decoded, 'name'),
+            'avatar' => Arr::get($decoded, 'picture'),
         ];
     }
 

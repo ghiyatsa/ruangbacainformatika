@@ -59,9 +59,9 @@ class AuthorsTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
-                        ->label('Ubah Penulis'),
+                        ->label('Ubah'),
                     DeleteAction::make()
-                        ->label('Hapus Penulis')
+                        ->label('Hapus')
                         ->before(function (DeleteAction $action, Author $record): void {
                             if (! $reason = $record->deletionBlockedReason()) {
                                 return;
@@ -81,7 +81,7 @@ class AuthorsTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Hapus Penulis')
+                        ->label('Hapus Terpilih')
                         ->before(function (DeleteBulkAction $action, Collection $records): void {
                             /** @var Author|null $blockedRecord */
                             $blockedRecord = $records->first(fn (Author $record): bool => $record->deletionBlockedReason() !== null);

@@ -54,15 +54,15 @@ class ContactMessagesTable
             ])
             ->recordActions([
                 ViewAction::make()->label('Lihat'),
-                EditAction::make()->label('Tindak lanjuti'),
+                EditAction::make()->label('Tindak Lanjut'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->label('Hapus terpilih'),
+                    DeleteBulkAction::make()->label('Hapus Terpilih'),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('Belum ada korespondensi')
+            ->emptyStateHeading('Belum ada pesan masuk')
             ->emptyStateDescription('Pesan dari halaman kontak akan tampil di sini.');
     }
 }

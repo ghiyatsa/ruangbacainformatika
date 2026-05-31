@@ -24,7 +24,7 @@ class ContactMessageForm
                         Textarea::make('admin_notes')
                             ->label('Catatan admin')
                             ->rows(6)
-                            ->placeholder('Tambahkan ringkasan balasan atau tindak lanjut admin.')
+                            ->placeholder('Tambahkan ringkasan balasan atau tindak lanjut.')
                             ->columnSpanFull(),
                     ])
                     ->columns(1),

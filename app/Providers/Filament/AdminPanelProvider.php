@@ -15,7 +15,6 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -40,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Indigo,
             ])
+            ->favicon('favicon.svg')
             ->unsavedChangesAlerts()
             ->databaseTransactions()
             ->databaseNotifications()
@@ -47,9 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->pages([
-                Dashboard::class,
-            ])
+            ->pages([])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 OperationsOverviewWidget::class,
@@ -73,14 +71,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentLogViewer::make()
-                    ->authorize(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false)
+                    ->authorize(fn(): bool => Auth::user()?->hasRole('super_admin') ?? false)
                     ->navigationGroup('Sistem')
                     ->navigationLabel('Log Sistem')
                     ->navigationSort(90),
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Hak Akses')
                     ->navigationGroup('Manajemen Pengguna')
-                    ->navigationBadge(fn (): string => (string) Role::count())
+                    ->navigationBadge(fn(): string => (string) Role::count())
                     ->navigationBadgeTooltip('Total peran')
                     ->navigationBadgeColor('warning')
                     ->gridColumns([

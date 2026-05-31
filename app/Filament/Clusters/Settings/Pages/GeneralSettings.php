@@ -55,19 +55,19 @@ class GeneralSettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Identitas Situs')
-                    ->description('Informasi utama yang tampil pada layanan perpustakaan.')
+                    ->description('Informasi utama yang tampil di halaman publik.')
                     ->schema([
                         TextInput::make('site_name')
                             ->label('Nama Situs')
                             ->required()
                             ->maxLength(255)
-                            ->placeholder('Ruang Baca'),
+                            ->placeholder('Ruang Baca Teknik Informatika'),
                         TextInput::make('site_tagline')
                             ->label('Tagline')
                             ->maxLength(255)
-                            ->placeholder('Layanan perpustakaan yang rapi dan mudah diakses'),
+                            ->placeholder('Layanan buku dan arsip yang mudah diakses'),
                         TextInput::make('department')
-                            ->label('Nama Instansi / Prodi')
+                            ->label('Nama Instansi / Program Studi')
                             ->required()
                             ->maxLength(255)
                             ->placeholder('Program Studi Teknik Informatika Universitas Malikussaleh'),
@@ -82,7 +82,7 @@ class GeneralSettings extends Page
                             ->tel()
                             ->maxLength(255)
                             ->placeholder('0812xxxxxx')
-                            ->helperText('Nomor kontak bantuan.'),
+                            ->helperText('Nomor yang ditampilkan sebagai kontak bantuan.'),
                         Textarea::make('address')
                             ->label('Alamat')
                             ->rows(3)
@@ -92,14 +92,14 @@ class GeneralSettings extends Page
                     ])
                     ->columns(2),
                 Section::make('SEO & Metadata')
-                    ->description('Nilai default ini dipakai pada meta description, Open Graph, dan informasi SEO halaman publik.')
+                    ->description('Nilai default ini dipakai untuk deskripsi halaman, preview tautan, dan metadata publik.')
                     ->schema([
                         Textarea::make('site_description')
                             ->label('Deskripsi Situs')
                             ->required()
                             ->rows(4)
                             ->maxLength(500)
-                            ->placeholder('Perpustakaan digital resmi...'),
+                            ->placeholder('Ruang baca digital untuk buku dan arsip akademik.'),
                         Textarea::make('site_keywords')
                             ->label('Kata Kunci SEO')
                             ->rows(4)
@@ -107,7 +107,7 @@ class GeneralSettings extends Page
                             ->placeholder('perpustakaan digital, teknik informatika, unimal, katalog buku')
                             ->helperText('Pisahkan dengan koma bila mengisi lebih dari satu kata kunci.'),
                         Select::make('seo_robots')
-                            ->label('Aturan Indexing')
+                            ->label('Aturan Index')
                             ->options([
                                 'index,follow' => 'Index, Follow',
                                 'noindex,follow' => 'No Index, Follow',
@@ -117,7 +117,7 @@ class GeneralSettings extends Page
                             ->default('index,follow')
                             ->native(false),
                         ColorPicker::make('theme_color')
-                            ->label('Theme Color')
+                            ->label('Warna Tema')
                             ->required()
                             ->default('#ffffff')
                             ->regex('/^#[0-9A-Fa-f]{6}$/')
@@ -125,7 +125,7 @@ class GeneralSettings extends Page
                     ])
                     ->columns(2),
                 Section::make('Branding & Icon')
-                    ->description('Unggah aset visual utama yang dipakai untuk logo, favicon, dan preview tautan.')
+                    ->description('Unggah aset visual utama untuk logo, favicon, dan preview tautan.')
                     ->schema([
                         FileUpload::make('site_logo_path')
                             ->label('Logo Situs')
@@ -176,11 +176,11 @@ class GeneralSettings extends Page
                     ])
                     ->columns(2),
                 Section::make('Notifikasi Global')
-                    ->description('Informasi singkat yang bisa ditampilkan pada hero halaman beranda.')
+                    ->description('Informasi singkat yang tampil di bagian atas halaman beranda.')
                     ->schema([
                         Toggle::make('hero_notice_enabled')
                             ->label('Tampilkan notifikasi')
-                            ->helperText('Aktifkan untuk menampilkan info singkat di atas badge hero.')
+                            ->helperText('Aktifkan untuk menampilkan pesan singkat di beranda.')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
@@ -189,7 +189,7 @@ class GeneralSettings extends Page
                             ->label('Teks notifikasi')
                             ->rows(3)
                             ->maxLength(255)
-                            ->placeholder('Contoh: Layanan perpustakaan tutup sementara pada hari libur nasional.'),
+                            ->placeholder('Contoh: Layanan ruang baca tutup sementara pada hari libur nasional.'),
                         TextInput::make('hero_notice_url')
                             ->label('URL tujuan')
                             ->url()
@@ -263,7 +263,7 @@ class GeneralSettings extends Page
 
         Notification::make()
             ->success()
-            ->title('Pengaturan umum disimpan')
+            ->title('Pengaturan umum berhasil disimpan')
             ->send();
 
         $this->form->fill($this->formValues());

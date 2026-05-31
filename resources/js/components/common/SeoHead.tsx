@@ -29,6 +29,7 @@ interface SeoHeadProps {
     image?: string;
     type?: 'website' | 'article';
     robots?: string;
+    keywords?: string | string[];
 }
 
 function normalizeUrl(baseUrl: string, currentPath: string): string {
@@ -45,7 +46,8 @@ export function SeoHead({
     description,
     image,
     type = 'website',
-    robots = 'index,follow',
+    robots,
+    keywords,
 }: SeoHeadProps) {
     const page = usePage<SiteProps>();
     const canonicalUrl = normalizeUrl(page.props.site.url, page.url);
@@ -53,6 +55,9 @@ export function SeoHead({
     const metaImage = image ?? page.props.site.ogImage;
     const metaTitle = title ? `${title} - ${page.props.name}` : page.props.name;
     const metaRobots = robots ?? page.props.site.robots;
+    const metaKeywords = Array.isArray(keywords)
+        ? keywords.filter(Boolean).join(', ')
+        : keywords ?? page.props.site.keywords;
 
     return (
         <Head title={title}>
@@ -62,6 +67,13 @@ export function SeoHead({
                 content={metaDescription}
             />
             <meta head-key="robots" name="robots" content={metaRobots} />
+            {metaKeywords ? (
+                <meta
+                    head-key="keywords"
+                    name="keywords"
+                    content={metaKeywords}
+                />
+            ) : null}
             <link head-key="canonical" rel="canonical" href={canonicalUrl} />
 
             <meta head-key="og:type" property="og:type" content={type} />
@@ -73,6 +85,21 @@ export function SeoHead({
                 content={metaDescription}
             />
             <meta head-key="og:image" property="og:image" content={metaImage} />
+            <meta
+                head-key="og:image:type"
+                property="og:image:type"
+                content="image/png"
+            />
+            <meta
+                head-key="og:image:width"
+                property="og:image:width"
+                content="1200"
+            />
+            <meta
+                head-key="og:image:height"
+                property="og:image:height"
+                content="630"
+            />
 
             <meta
                 head-key="twitter:card"

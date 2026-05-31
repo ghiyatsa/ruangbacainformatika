@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\CampusEmail;
 use App\Support\LoanConsequenceService;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -23,6 +24,7 @@ use Spatie\Permission\Traits\HasRoles;
     'name',
     'email',
     'google_id',
+    'avatar_url',
     'auth_provider',
     'whatsapp',
     'whatsapp_verified_at',
@@ -32,7 +34,7 @@ use Spatie\Permission\Traits\HasRoles;
 ])]
 
 #[Hidden(['remember_token'])]
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
@@ -74,6 +76,11 @@ class User extends Authenticatable implements FilamentUser
     public function usesGoogleAuth(): bool
     {
         return $this->auth_provider === 'google';
+    }
+
+    public function avatarUrl(): ?string
+    {
+        return filled($this->avatar_url) ? $this->avatar_url : null;
     }
 
     public function hasAdministrativeRole(): bool
@@ -148,6 +155,14 @@ class User extends Authenticatable implements FilamentUser
         return $this->usesCampusEmail()
             && $this->hasVerifiedWhatsApp()
             && ! $this->is_approved;
+    }
+
+    public function scopePendingMemberApproval(Builder $query): Builder
+    {
+        return $query
+            ->where('is_approved', false)
+            ->where('email', 'like', '%@unimal.ac.id')
+            ->where('email', 'not like', '%@mhs.unimal.ac.id');
     }
 
     public function routeNotificationForWhatsApp(): ?string
@@ -244,5 +259,10 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return $this->canAccessAdminPanel();
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatarUrl();
     }
 }

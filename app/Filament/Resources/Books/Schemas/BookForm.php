@@ -31,7 +31,7 @@ class BookForm
         return $schema
             ->components([
                 Section::make('Informasi Dasar')
-                    ->description('Isi informasi utama buku sesuai data yang paling resmi dan mudah diverifikasi.')
+                    ->description('Isi informasi utama buku berdasarkan data yang paling jelas dan mudah dicek.')
                     ->schema([
                         TextInput::make('title')
                             ->label('Judul Buku')
@@ -40,8 +40,8 @@ class BookForm
                             ->maxLength(255)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
-                            ->placeholder('Masukkan judul buku')
-                            ->helperText('Gunakan judul utama buku.'),
+                            ->placeholder('Judul buku')
+                            ->helperText('Gunakan judul utama yang tertera pada buku.'),
 
                         TextInput::make('slug')
                             ->label('Slug')
@@ -54,8 +54,8 @@ class BookForm
                         TextInput::make('subtitle')
                             ->label('Subjudul')
                             ->maxLength(255)
-                            ->placeholder('Masukkan subjudul buku (jika ada)')
-                            ->helperText('Isi jika ada subjudul resmi.')
+                            ->placeholder('Subjudul buku jika ada')
+                            ->helperText('Isi jika buku memiliki subjudul resmi.')
                             ->columnSpanFull(),
 
                         Textarea::make('description')
@@ -71,7 +71,7 @@ class BookForm
                             ->minLength(10)
                             ->maxLength(13)
                             ->placeholder('9786020000001')
-                            ->helperText('Gunakan angka saja.')
+                            ->helperText('Isi angka tanpa spasi atau tanda lain.')
                             ->rule('regex:/^[0-9]+$/')
                             ->validationMessages([
                                 'regex' => 'ISBN hanya boleh berisi angka.',
@@ -82,7 +82,7 @@ class BookForm
                             ->unique('books', 'issn', ignoreRecord: true)
                             ->maxLength(20)
                             ->placeholder('1234-5678')
-                            ->helperText('Isi jika tersedia.')
+                            ->helperText('Isi jika tersedia pada buku.')
                             ->rule('regex:/^[0-9\\-\\s]+$/')
                             ->validationMessages([
                                 'regex' => 'ISSN hanya boleh berisi angka, spasi, dan tanda hubung.',
@@ -90,14 +90,14 @@ class BookForm
 
                         TextInput::make('ddc_code')
                             ->label('Kode DDC')
-                            ->helperText('Isi jika tersedia.')
+                            ->helperText('Isi jika kode DDC sudah tersedia.')
                             ->maxLength(20)
                             ->placeholder('000-999'),
                     ])
                     ->columns(2),
 
                 Section::make('Detail Publikasi')
-                    ->description('Lengkapi data penerbitan agar katalog lebih rapi dan mudah ditelusuri.')
+                    ->description('Lengkapi data penerbitan agar katalog lebih rapi dan mudah dicari.')
                     ->schema([
                         Select::make('publisher_id')
                             ->label('Penerbit')
@@ -105,7 +105,7 @@ class BookForm
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->helperText('Pilih atau tambah penerbit.')
+                            ->helperText('Pilih penerbit yang sudah ada atau tambah baru.')
                             ->createOptionForm(PublisherForm::optionFormSchema())
                             ->createOptionUsing(fn (array $data): int => static::createPublisher($data))
                             ->createOptionModalHeading('Tambah Penerbit')
@@ -125,7 +125,7 @@ class BookForm
                             ->label('Edisi')
                             ->maxLength(255)
                             ->placeholder('Edisi 1, Edisi Revisi, dan sebagainya')
-                            ->helperText('Isi jika ada keterangan edisi.'),
+                            ->helperText('Isi jika ada keterangan edisi pada buku.'),
 
                         TextInput::make('published_year')
                             ->label('Tahun Terbit')
@@ -142,19 +142,19 @@ class BookForm
                             ->integer()
                             ->minValue(1)
                             ->placeholder('250')
-                            ->helperText('Isi total halaman utama.'),
+                            ->helperText('Isi jumlah halaman utama buku.'),
 
                         TextInput::make('language')
                             ->label('Bahasa')
                             ->default('Indonesia')
                             ->maxLength(30)
                             ->placeholder('Indonesia')
-                            ->helperText('Contoh: Indonesia, Inggris.'),
+                            ->helperText('Contoh: Indonesia atau Inggris.'),
                     ])
                     ->columns(2),
 
                 Section::make('Konten & Media')
-                    ->description('Unggah sampul agar buku lebih mudah dikenali pada panel admin dan katalog.')
+                    ->description('Unggah sampul agar buku lebih mudah dikenali di panel admin dan katalog.')
                     ->schema([
 
                         FileUpload::make('cover_image')
@@ -177,7 +177,7 @@ class BookForm
                             ->imageAspectRatio('3:4')
                             ->automaticallyCropImagesToAspectRatio()
                             ->maxSize(2048)
-                            ->helperText('JPG, PNG, atau WEBP. Maksimal 2 MB.')
+                            ->helperText('Gunakan JPG, PNG, atau WEBP dengan ukuran maksimal 2 MB.')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                     ])
                     ->columns(1),
@@ -191,7 +191,7 @@ class BookForm
                             ->multiple()
                             ->searchable()
                             ->preload()
-                            ->helperText('Pilih atau tambah penulis.')
+                            ->helperText('Pilih penulis yang sudah ada atau tambah baru.')
                             ->createOptionForm(AuthorForm::optionFormSchema())
                             ->createOptionUsing(fn (array $data): int => static::createAuthor($data))
                             ->createOptionModalHeading('Tambah Penulis')
@@ -205,7 +205,7 @@ class BookForm
                             ->multiple()
                             ->searchable()
                             ->preload()
-                            ->helperText('Pilih atau tambah kategori.')
+                            ->helperText('Pilih kategori yang sudah ada atau tambah baru.')
                             ->createOptionForm(CategoryForm::optionFormSchema())
                             ->createOptionUsing(fn (array $data): int => static::createCategory($data))
                             ->createOptionModalHeading('Tambah Kategori')
@@ -233,7 +233,7 @@ class BookForm
                         Placeholder::make('view_count')
                             ->label('Jumlah Dilihat')
                             ->content(fn ($record): string => number_format((int) ($record?->view_count ?? 0)))
-                            ->helperText('Diperbarui otomatis oleh sistem.'),
+                            ->helperText('Nilai ini diperbarui otomatis oleh sistem.'),
                     ]),
             ]);
     }

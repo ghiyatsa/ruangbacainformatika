@@ -3,6 +3,7 @@
 use App\Models\User;
 use App\Services\GoogleIdTokenVerifier;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Inertia\Testing\AssertableInertia;
 use Laravel\Socialite\Facades\Socialite;
@@ -54,6 +55,7 @@ it('eligible users can authenticate with google one tap', function () {
                 'sub' => 'google-one-tap-123',
                 'email' => '230170007@mhs.unimal.ac.id',
                 'name' => 'Mahasiswa One Tap',
+                'avatar' => 'https://lh3.googleusercontent.com/one-tap-avatar',
             ];
         }
     });
@@ -67,8 +69,9 @@ it('eligible users can authenticate with google one tap', function () {
     assertDatabaseHas('users', [
         'email' => '230170007@mhs.unimal.ac.id',
         'google_id' => 'google-one-tap-123',
+        'avatar_url' => 'https://lh3.googleusercontent.com/one-tap-avatar',
         'auth_provider' => 'google',
-        'is_approved' => false,
+        'is_approved' => true,
     ]);
     expect(User::query()->where('email', '230170007@mhs.unimal.ac.id')->firstOrFail()->hasRole('member'))->toBeFalse();
 });
@@ -95,6 +98,7 @@ it('eligible users can authenticate with google', function () {
         'id' => 'google-123',
         'name' => 'Mahasiswa TI',
         'email' => '230170001@mhs.unimal.ac.id',
+        'avatar' => 'https://lh3.googleusercontent.com/google-123',
     ]);
 
     Socialite::fake('google', $socialiteUser);
@@ -108,8 +112,9 @@ it('eligible users can authenticate with google', function () {
         'email' => '230170001@mhs.unimal.ac.id',
         'name' => 'Mahasiswa TI',
         'google_id' => 'google-123',
+        'avatar_url' => 'https://lh3.googleusercontent.com/google-123',
         'auth_provider' => 'google',
-        'is_approved' => false,
+        'is_approved' => true,
     ]);
 
     $user = User::query()->where('email', '230170001@mhs.unimal.ac.id')->firstOrFail();
@@ -139,7 +144,7 @@ it('unknown users can create a new account through direct google login', functio
         'email' => '230170999@mhs.unimal.ac.id',
         'google_id' => 'google-999',
         'name' => 'Mahasiswa Baru',
-        'is_approved' => false,
+        'is_approved' => true,
     ]);
 
     expect(User::query()->where('email', '230170999@mhs.unimal.ac.id')->firstOrFail()->hasRole('member'))->toBeFalse();
@@ -245,7 +250,7 @@ it('public users with a valid external google email can still sign in', function
     ]);
 });
 
-it('non teknik informatika student accounts can sign in but do not receive borrowing access', function () {
+it('non teknik informatika student accounts are also auto approved but still need whatsapp verification', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $socialiteUser = (new SocialiteUser)->map([
@@ -263,7 +268,7 @@ it('non teknik informatika student accounts can sign in but do not receive borro
 
     assertDatabaseHas('users', [
         'email' => '230160001@mhs.unimal.ac.id',
-        'is_approved' => false,
+        'is_approved' => true,
     ]);
 
     $user = User::query()->where('email', '230160001@mhs.unimal.ac.id')->firstOrFail();
@@ -394,4 +399,16 @@ it('onboarding rejects invalid whatsapp and unclear address', function () {
             'whatsapp',
             'address',
         ]);
+});
+
+it('enforces unique google ids at the database level', function () {
+    User::factory()->create([
+        'email' => '230170111@mhs.unimal.ac.id',
+        'google_id' => 'google-unique-123',
+    ]);
+
+    expect(fn () => User::factory()->create([
+        'email' => '230170112@mhs.unimal.ac.id',
+        'google_id' => 'google-unique-123',
+    ]))->toThrow(QueryException::class);
 });

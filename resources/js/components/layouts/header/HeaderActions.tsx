@@ -128,7 +128,10 @@ export function HeaderActions({
                                 className="flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-transparent transition-all duration-200 hover:ring-primary/40 focus-visible:ring-primary/60 focus-visible:outline-none sm:h-9 sm:w-9"
                                 aria-label="Menu pengguna"
                             >
-                                <UserAvatar name={auth.user.name} />
+                                <UserAvatar
+                                    name={auth.user.name}
+                                    avatar={auth.user.avatar as string | null | undefined}
+                                />
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent

@@ -97,6 +97,7 @@ class GoogleController extends Controller
                 googleId: $googleUser->getId(),
                 email: $googleAccount->email,
                 name: $googleUser->getName(),
+                avatarUrl: $googleUser->getAvatar(),
                 linkToken: is_string($linkToken) ? $linkToken : null,
             );
         } catch (ValidationException $exception) {
@@ -147,6 +148,7 @@ class GoogleController extends Controller
                     googleId: $identity['sub'],
                     email: $googleAccount->email,
                     name: $identity['name'],
+                    avatarUrl: $identity['avatar'] ?? null,
                     linkToken: $linkToken !== '' ? $linkToken : null,
                 ),
             );
@@ -169,6 +171,7 @@ class GoogleController extends Controller
         string $googleId,
         string $email,
         ?string $name,
+        ?string $avatarUrl = null,
         ?string $linkToken = null,
     ): RedirectResponse {
         $existingUser = User::query()
@@ -199,8 +202,9 @@ class GoogleController extends Controller
             [
                 'name' => $name ?: $existingUser?->name ?: Str::before($email, '@'),
                 'google_id' => $googleId,
+                'avatar_url' => filter_var($avatarUrl, FILTER_VALIDATE_URL) ? $avatarUrl : $existingUser?->avatarUrl(),
                 'auth_provider' => 'google',
-                'is_approved' => $existingUser?->is_approved ?? false,
+                'is_approved' => $existingUser?->is_approved || $this->campusEmail->shouldAutoApprove($email),
             ],
         );
 
@@ -232,7 +236,7 @@ class GoogleController extends Controller
 
         return new GoogleAccountData(
             email: $normalizedEmail,
-            isApproved: $this->campusEmail->isTeknikInformatikaStudentEmail($normalizedEmail),
+            isApproved: $this->campusEmail->shouldAutoApprove($normalizedEmail),
         );
     }
 

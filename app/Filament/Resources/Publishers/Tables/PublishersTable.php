@@ -59,9 +59,9 @@ class PublishersTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
-                        ->label('Ubah Penerbit'),
+                        ->label('Ubah'),
                     DeleteAction::make()
-                        ->label('Hapus Penerbit')
+                        ->label('Hapus')
                         ->before(function (DeleteAction $action, Publisher $record): void {
                             if (! $reason = $record->deletionBlockedReason()) {
                                 return;
@@ -81,7 +81,7 @@ class PublishersTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Hapus Penerbit')
+                        ->label('Hapus Terpilih')
                         ->before(function (DeleteBulkAction $action, Collection $records): void {
                             /** @var Publisher|null $blockedRecord */
                             $blockedRecord = $records->first(fn (Publisher $record): bool => $record->deletionBlockedReason() !== null);

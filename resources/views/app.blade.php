@@ -5,12 +5,23 @@
     @class(['dark' => ($appearance ?? 'system') == 'dark'])
 >
     <head>
+        @php
+            $pageMeta = $meta ?? [];
+            $metaTitle = $pageMeta['title'] ?? ($siteMeta['title'] ?? config('app.name', 'Ruang Baca Informatika'));
+            $metaDescription = $pageMeta['description'] ?? ($siteMeta['description'] ?? 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.');
+            $metaKeywords = $pageMeta['keywords'] ?? ($siteMeta['keywords'] ?? null);
+            $metaRobots = $pageMeta['robots'] ?? ($siteMeta['robots'] ?? 'index,follow');
+            $canonicalUrl = $pageMeta['canonicalUrl'] ?? url()->current();
+            $metaOgType = $pageMeta['type'] ?? 'website';
+            $metaOgImage = $pageMeta['ogImage'] ?? ($siteMeta['ogImage'] ?? asset('images/og-image.png'));
+        @endphp
+
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
-        <script>
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             (function() {
                 const appearance = '{{ $appearance ?? "system" }}';
 
@@ -25,7 +36,7 @@
         </script>
 
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
-        <style>
+        <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             html {
                 background-color: oklch(1 0 0);
             }
@@ -51,26 +62,29 @@
         @vite(['resources/css/app.css', 'resources/js/app.tsx'])
 
         <x-inertia::head>
-            <title>{{ $siteMeta['title'] ?? config('app.name', 'Ruang Baca Informatika') }}</title>
-            <meta data-inertia="description" name="description" content="{{ $siteMeta['description'] ?? 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.' }}">
-            <meta data-inertia="robots" name="robots" content="{{ $siteMeta['robots'] ?? 'index,follow' }}">
-            @if (filled($siteMeta['keywords'] ?? null))
-                <meta data-inertia="keywords" name="keywords" content="{{ $siteMeta['keywords'] }}">
+            <title>{{ $metaTitle }}</title>
+            <meta data-inertia="description" name="description" content="{{ $metaDescription }}">
+            <meta data-inertia="robots" name="robots" content="{{ $metaRobots }}">
+            @if (filled($metaKeywords))
+                <meta data-inertia="keywords" name="keywords" content="{{ $metaKeywords }}">
             @endif
-            <link data-inertia="canonical" rel="canonical" href="{{ url()->current() }}">
+            <link data-inertia="canonical" rel="canonical" href="{{ $canonicalUrl }}">
 
             <!-- Open Graph / Facebook -->
-            <meta data-inertia="og:type" property="og:type" content="website">
-            <meta data-inertia="og:url" property="og:url" content="{{ url()->current() }}">
-            <meta data-inertia="og:title" property="og:title" content="{{ $siteMeta['title'] ?? config('app.name', 'Ruang Baca Informatika') }}">
-            <meta data-inertia="og:description" property="og:description" content="{{ $siteMeta['description'] ?? 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.' }}">
-            <meta data-inertia="og:image" property="og:image" content="{{ $siteMeta['ogImage'] ?? asset('images/og-image.png') }}">
+            <meta data-inertia="og:type" property="og:type" content="{{ $metaOgType }}">
+            <meta data-inertia="og:url" property="og:url" content="{{ $canonicalUrl }}">
+            <meta data-inertia="og:title" property="og:title" content="{{ $metaTitle }}">
+            <meta data-inertia="og:description" property="og:description" content="{{ $metaDescription }}">
+            <meta data-inertia="og:image" property="og:image" content="{{ $metaOgImage }}">
+            <meta data-inertia="og:image:type" property="og:image:type" content="image/png">
+            <meta data-inertia="og:image:width" property="og:image:width" content="1200">
+            <meta data-inertia="og:image:height" property="og:image:height" content="630">
 
             <!-- Twitter -->
             <meta data-inertia="twitter:card" property="twitter:card" content="summary_large_image">
-            <meta data-inertia="twitter:title" property="twitter:title" content="{{ $siteMeta['title'] ?? config('app.name', 'Ruang Baca Informatika') }}">
-            <meta data-inertia="twitter:description" property="twitter:description" content="{{ $siteMeta['description'] ?? 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.' }}">
-            <meta data-inertia="twitter:image" property="twitter:image" content="{{ $siteMeta['ogImage'] ?? asset('images/og-image.png') }}">
+            <meta data-inertia="twitter:title" property="twitter:title" content="{{ $metaTitle }}">
+            <meta data-inertia="twitter:description" property="twitter:description" content="{{ $metaDescription }}">
+            <meta data-inertia="twitter:image" property="twitter:image" content="{{ $metaOgImage }}">
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

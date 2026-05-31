@@ -25,11 +25,6 @@ export function BrowserSessionsSection({
             />
 
             <div className="flex flex-col gap-4">
-                <p className="text-sm text-muted-foreground">
-                    Daftar ini membantu Anda meninjau perangkat yang masih
-                    terhubung ke akun Anda.
-                </p>
-
                 <div className="flex flex-col gap-2">
                     {sessions.map((session) => (
                         <div

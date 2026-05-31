@@ -49,6 +49,14 @@ export default function SkripsiDetailPage(
         kindLabel: 'Skripsi',
         statusLabel: null,
     };
+    const seoKeywords = [
+        skripsi.title,
+        skripsi.authorName,
+        skripsi.studentId,
+        ...(skripsi.keywords ?? []),
+        'skripsi informatika',
+        'ruang baca informatika',
+    ].filter((value): value is string => Boolean(value));
 
     return (
         <ResourceDetailPage
@@ -58,6 +66,7 @@ export default function SkripsiDetailPage(
                     ? skripsi.abstract.slice(0, 160)
                     : `${skripsi.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
             }
+            keywords={seoKeywords}
             hero={
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />

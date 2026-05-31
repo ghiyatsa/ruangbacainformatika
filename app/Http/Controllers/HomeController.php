@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
 use App\Services\CatalogService;
+use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -34,6 +35,7 @@ class HomeController extends Controller
 
     public function __construct(
         protected CatalogService $catalogService,
+        protected PageMeta $pageMeta,
     ) {}
 
     public function __invoke(Request $request): Response
@@ -65,6 +67,8 @@ class HomeController extends Controller
 
                 return $paginated;
             }),
+        ])->withViewData([
+            'meta' => $this->pageMeta->forWelcome(),
         ]);
     }
 

@@ -54,7 +54,7 @@ class CatalogReportsTable
             ])
             ->filters([
                 SelectFilter::make('catalog_type')
-                    ->label('Jenis katalog')
+                    ->label('Jenis Katalog')
                     ->options(CatalogReport::catalogTypeOptions()),
                 SelectFilter::make('status')
                     ->label('Status')
@@ -62,15 +62,15 @@ class CatalogReportsTable
             ])
             ->recordActions([
                 ViewAction::make()->label('Lihat'),
-                EditAction::make()->label('Tindak lanjuti'),
+                EditAction::make()->label('Tindak Lanjut'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->label('Hapus terpilih'),
+                    DeleteBulkAction::make()->label('Hapus Terpilih'),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('Belum ada umpan balik katalog')
-            ->emptyStateDescription('Masukan dari halaman detail katalog akan tampil di sini.');
+            ->emptyStateHeading('Belum ada laporan katalog')
+            ->emptyStateDescription('Laporan dari halaman detail katalog akan tampil di sini.');
     }
 }

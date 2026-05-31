@@ -88,7 +88,7 @@ class LoansTable
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->whereHas('loans', fn ($q) => $q->where('status', Loan::STATUS_BORROWED))),
                 Filter::make('overdue_borrowers')
-                    ->label('Hanya lewat jatuh tempo')
+                    ->label('Hanya terlambat')
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->whereHas('loans', fn ($q) => $q
                         ->where('status', Loan::STATUS_BORROWED)
@@ -101,7 +101,7 @@ class LoansTable
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->label('Lihat Detail'),
+                    ->label('Lihat'),
             ])
             ->toolbarActions([])
             ->defaultSort('name', 'asc');

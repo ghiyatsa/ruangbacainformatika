@@ -48,7 +48,7 @@ class ContactMessageInfolist
                                     ->placeholder('-'),
                                 TextEntry::make('admin_notes')
                                     ->label('Catatan admin')
-                                    ->placeholder('Belum ada catatan admin.')
+                                    ->placeholder('Belum ada catatan admin')
                                     ->columnSpanFull(),
                             ])
                             ->columnSpan(1),

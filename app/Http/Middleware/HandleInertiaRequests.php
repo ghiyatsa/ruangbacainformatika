@@ -101,6 +101,7 @@ class HandleInertiaRequests extends Middleware
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'avatar' => $user->avatarUrl(),
             'whatsapp' => $user->whatsapp,
             'whatsapp_verified_at' => $user->whatsapp_verified_at?->toIso8601String(),
             'address' => $user->address,

@@ -1,10 +1,14 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { CheckCircle2, Clock3 } from 'lucide-react';
+import { CheckCircle2, Clock3, KeyRound, Phone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import WhatsAppVerificationController from '@/actions/App/Http/Controllers/Auth/WhatsAppVerificationController';
 import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+} from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
@@ -31,9 +35,13 @@ function formatRemaining(seconds: number): string {
 export default function VerifyWhatsApp() {
     const { verification, auth } = usePage<{
         verification: VerificationProps;
-        auth: { user: { whatsapp: string | null } | null };
+        auth: {
+            user: { whatsapp: string | null } | null;
+            hasVerifiedWhatsApp: boolean;
+        };
     }>().props;
     const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
+    const [whatsappVal, setWhatsappVal] = useState(auth.user?.whatsapp ?? '');
     const hasWhatsapp = Boolean(auth.user?.whatsapp);
     const [countdownBase, setCountdownBase] = useState(() => ({
         expiresIn: verification.expiresIn,
@@ -89,50 +97,52 @@ export default function VerifyWhatsApp() {
                                     <Label htmlFor="whatsapp">
                                         Nomor WhatsApp
                                     </Label>
-                                    <Input
-                                        id="whatsapp"
-                                        name="whatsapp"
-                                        type="tel"
-                                        defaultValue={auth.user?.whatsapp ?? ''}
-                                        autoComplete="tel"
-                                        inputMode="tel"
-                                        placeholder="08123456789"
-                                        required={!hasWhatsapp}
-                                    />
+                                    <div className="flex gap-2">
+                                        <InputGroup className="flex-1">
+                                            <InputGroupInput
+                                                id="whatsapp"
+                                                name="whatsapp"
+                                                type="tel"
+                                                value={whatsappVal}
+                                                onChange={(e) => setWhatsappVal(e.target.value)}
+                                                autoComplete="tel"
+                                                inputMode="tel"
+                                                placeholder="08123456789"
+                                                required={!hasWhatsapp}
+                                            />
+                                            <InputGroupAddon>
+                                                <Phone className="size-4" />
+                                            </InputGroupAddon>
+                                        </InputGroup>
+                                        <Button
+                                            type="submit"
+                                            variant="outline"
+                                            disabled={
+                                                processing ||
+                                                (hasWhatsapp &&
+                                                    resendAvailableIn > 0) ||
+                                                (auth.hasVerifiedWhatsApp &&
+                                                    whatsappVal ===
+                                                        auth.user?.whatsapp)
+                                            }
+                                            className="shrink-0 min-w-[110px] tabular-nums"
+                                        >
+                                            {processing ? (
+                                                <Spinner />
+                                            ) : resendAvailableIn > 0 ? (
+                                                <Clock3 className="size-4" />
+                                            ) : null}
+                                            {resendAvailableIn > 0
+                                                ? formatRemaining(resendAvailableIn)
+                                                : hasWhatsapp &&
+                                                    verification.hasActiveChallenge
+                                                  ? 'Kirim Ulang'
+                                                  : 'Kirim Kode'}
+                                        </Button>
+                                    </div>
                                     <InputError
                                         message={errors.whatsapp ?? errors.otp}
                                     />
-                                </div>
-
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                    <Button
-                                        type="submit"
-                                        variant="outline"
-                                        disabled={
-                                            processing ||
-                                            (hasWhatsapp &&
-                                                resendAvailableIn > 0)
-                                        }
-                                        className="w-full sm:w-auto"
-                                    >
-                                        {processing ? (
-                                            <Spinner />
-                                        ) : (
-                                            <Clock3 className="size-4" />
-                                        )}
-                                        {hasWhatsapp && resendAvailableIn > 0
-                                            ? `Kirim ulang dalam ${formatRemaining(resendAvailableIn)}`
-                                            : hasWhatsapp &&
-                                                verification.hasActiveChallenge
-                                              ? 'Kirim ulang kode verifikasi'
-                                              : 'Kirim kode verifikasi'}
-                                    </Button>
-
-                                    <div className="text-sm font-medium text-muted-foreground tabular-nums">
-                                        {expiresIn > 0
-                                            ? formatRemaining(expiresIn)
-                                            : '00:00'}
-                                    </div>
                                 </div>
                             </>
                         )}
@@ -150,17 +160,22 @@ export default function VerifyWhatsApp() {
                             <>
                                 <div className="grid gap-2">
                                     <Label htmlFor="code">Kode OTP</Label>
-                                    <Input
-                                        id="code"
-                                        name="code"
-                                        type="text"
-                                        inputMode="numeric"
-                                        autoComplete="one-time-code"
-                                        autoFocus
-                                        maxLength={6}
-                                        required
-                                        placeholder="Masukkan 6 digit kode"
-                                    />
+                                    <InputGroup>
+                                        <InputGroupInput
+                                            id="code"
+                                            name="code"
+                                            type="text"
+                                            inputMode="numeric"
+                                            autoComplete="one-time-code"
+                                            autoFocus
+                                            maxLength={6}
+                                            required
+                                            placeholder="Masukkan 6 digit kode"
+                                        />
+                                        <InputGroupAddon>
+                                            <KeyRound className="size-4" />
+                                        </InputGroupAddon>
+                                    </InputGroup>
                                     <InputError
                                         message={errors.code ?? errors.otp}
                                     />

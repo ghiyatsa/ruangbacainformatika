@@ -90,7 +90,10 @@ class WhatsAppOtpService
             'expires_at' => $now->copy()->addSeconds(self::OTP_TTL_SECONDS)->timestamp,
         ], $now->copy()->addSeconds(self::OTP_TTL_SECONDS));
 
-        RateLimiter::hit($this->cooldownKey($user), self::RESEND_COOLDOWN_SECONDS);
+        $attempts = RateLimiter::attempts($this->hourlySendKey($user));
+        $cooldownSeconds = self::RESEND_COOLDOWN_SECONDS * ($attempts + 1);
+
+        RateLimiter::hit($this->cooldownKey($user), $cooldownSeconds);
         RateLimiter::hit($this->hourlySendKey($user), 3600);
 
         $user->notify(new WhatsAppOtpNotification($code));

@@ -30,7 +30,7 @@ class LoanInfolist
                             ->badge()
                             ->color('warning'),
                         TextEntry::make('borrowing_access')
-                            ->label('Status Peminjaman')
+                            ->label('Status Pinjam')
                             ->state(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['label'])
                             ->badge()
                             ->color(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['color']),

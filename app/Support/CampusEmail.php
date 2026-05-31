@@ -74,7 +74,7 @@ class CampusEmail
 
     public function shouldAutoApprove(string $email): bool
     {
-        return $this->isTeknikInformatikaStudentEmail($this->normalize($email));
+        return $this->isMahasiswaEmail($this->normalize($email));
     }
 
     public function extractIdentityNumber(string $email): string

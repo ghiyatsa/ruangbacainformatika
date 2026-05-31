@@ -16,7 +16,7 @@ class ContactMessagesTableWidget extends BaseTableWidget
 
     protected static ?int $sort = 4;
 
-    protected static ?string $heading = 'Korespondensi Baru';
+    protected static ?string $heading = 'Pesan Kontak Terbaru';
 
     protected int|string|array $columnSpan = 'full';
 
@@ -55,8 +55,8 @@ class ContactMessagesTableWidget extends BaseTableWidget
                     ->url(fn (ContactMessage $record): string => ContactMessageResource::getUrl('view', ['record' => $record])),
             ])
             ->emptyStateIcon(Heroicon::OutlinedEnvelope)
-            ->emptyStateHeading('Belum ada korespondensi')
-            ->emptyStateDescription('Pesan dari halaman kontak muncul di sini.')
+            ->emptyStateHeading('Belum ada pesan masuk')
+            ->emptyStateDescription('Pesan dari halaman kontak akan tampil di sini.')
             ->paginated([5, 10]);
     }
 }

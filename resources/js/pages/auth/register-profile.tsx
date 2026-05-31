@@ -1,11 +1,16 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { AtSign, MapPin, Phone, User } from 'lucide-react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+    InputGroupTextarea,
+} from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { Textarea } from '@/components/ui/textarea';
 import { logout } from '@/routes';
 
 export default function RegisterProfile() {
@@ -31,58 +36,90 @@ export default function RegisterProfile() {
                         <div className="grid gap-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Nama lengkap</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    type="text"
-                                    defaultValue={user.name}
-                                    autoFocus
-                                    required
-                                    autoComplete="name"
-                                    placeholder="Nama lengkap Anda"
-                                />
+                                <InputGroup>
+                                    <InputGroupInput
+                                        id="name"
+                                        name="name"
+                                        type="text"
+                                        defaultValue={user.name}
+                                        autoFocus
+                                        required
+                                        autoComplete="name"
+                                        placeholder="Nama lengkap Anda"
+                                    />
+                                    <InputGroupAddon>
+                                        <User className="size-4" />
+                                    </InputGroupAddon>
+                                </InputGroup>
                                 <InputError message={errors.name} />
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email kampus</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    value={user.email}
-                                    readOnly
-                                    disabled
-                                    autoComplete="username"
-                                />
+                                <InputGroup className="bg-muted/50">
+                                    <InputGroupInput
+                                        id="email"
+                                        type="email"
+                                        className="cursor-not-allowed text-muted-foreground"
+                                        value={user.email}
+                                        readOnly
+                                        disabled
+                                        autoComplete="username"
+                                    />
+                                    <InputGroupAddon>
+                                        <AtSign className="size-4" />
+                                    </InputGroupAddon>
+                                </InputGroup>
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
-                                <Input
-                                    id="whatsapp"
-                                    name="whatsapp"
-                                    type="tel"
-                                    defaultValue={user.whatsapp ?? ''}
-                                    required
-                                    readOnly={hasVerifiedWhatsapp}
-                                    disabled={hasVerifiedWhatsapp}
-                                    autoComplete="tel"
-                                    placeholder="08xxxxxxxxxx"
-                                />
+                                <InputGroup
+                                    className={
+                                        hasVerifiedWhatsapp
+                                            ? 'bg-muted/50'
+                                            : undefined
+                                    }
+                                >
+                                    <InputGroupInput
+                                        id="whatsapp"
+                                        name="whatsapp"
+                                        type="tel"
+                                        className={
+                                            hasVerifiedWhatsapp
+                                                ? 'text-muted-foreground'
+                                                : undefined
+                                        }
+                                        defaultValue={user.whatsapp ?? ''}
+                                        required
+                                        readOnly={hasVerifiedWhatsapp}
+                                        disabled={hasVerifiedWhatsapp}
+                                        autoComplete="tel"
+                                        placeholder="08xxxxxxxxxx"
+                                    />
+                                    <InputGroupAddon>
+                                        <Phone className="size-4" />
+                                    </InputGroupAddon>
+                                </InputGroup>
                                 <InputError message={errors.whatsapp} />
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="address">Alamat</Label>
-                                <Textarea
-                                    id="address"
-                                    name="address"
-                                    defaultValue={user.address ?? ''}
-                                    required
-                                    autoComplete="street-address"
-                                    className="min-h-28 resize-y"
-                                    placeholder="Alamat tempat tinggal"
-                                />
+                                <InputGroup>
+                                    <InputGroupTextarea
+                                        id="address"
+                                        name="address"
+                                        defaultValue={user.address ?? ''}
+                                        required
+                                        autoComplete="street-address"
+                                        className="min-h-28 resize-y"
+                                        placeholder="Alamat tempat tinggal"
+                                    />
+                                    <InputGroupAddon className="self-start pt-2.5">
+                                        <MapPin className="size-4" />
+                                    </InputGroupAddon>
+                                </InputGroup>
                                 <p className="text-sm text-muted-foreground">
                                     {hasWhatsapp
                                         ? 'Lengkapi alamat untuk melanjutkan.'

@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\InternshipReportResource;
 use App\Models\InternshipReport;
+use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class InternshipReportController extends Controller
 {
+    public function __construct(
+        protected PageMeta $pageMeta,
+    ) {}
+
     public function index(Request $request): Response
     {
         $search = $request->string('search')->trim()->toString();
@@ -53,6 +58,18 @@ class InternshipReportController extends Controller
 
         return Inertia::render('internship-report/show', [
             'report' => new InternshipReportResource($internshipReport->fresh()),
+        ])->withViewData([
+            'meta' => $this->pageMeta->forAcademicDocument(
+                title: $internshipReport->title,
+                authorName: $internshipReport->author_name,
+                studentId: $internshipReport->student_id,
+                abstract: $internshipReport->abstract,
+                keywords: $internshipReport->keywords
+                    ? array_map('trim', explode(',', $internshipReport->keywords))
+                    : [],
+                catalogLabel: 'laporan kerja praktik',
+                canonicalUrl: route('internship-reports.show', $internshipReport),
+            ),
         ]);
     }
 }
