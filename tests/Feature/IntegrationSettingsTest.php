@@ -47,7 +47,34 @@ it('integration settings can persist similarity weights and warn for full resync
 
     expect(Setting::query()->where('section', 'integration')->where('key', 'similarity_weight_judul')->value('value'))->toBe('0.6')
         ->and(Setting::query()->where('section', 'integration')->where('key', 'similarity_weight_abstrak')->value('value'))->toBe('0.25')
-        ->and(Setting::query()->where('section', 'integration')->where('key', 'similarity_weight_kata_kunci')->value('value'))->toBe('0.15');
+        ->and(Setting::query()->where('section', 'integration')->where('key', 'similarity_weight_kata_kunci')->value('value'))->toBe('0.15')
+        ->and(decrypt(Setting::query()->where('section', 'integration')->where('key', 'similarity_api_secret')->value('value')))->toBe('sync-secret-1234567890');
+});
+
+it('integration settings encrypts the whatsapp token before persisting it', function () {
+    $user = makeIntegrationSuperAdmin();
+
+    actingAs($user);
+
+    Livewire::test(IntegrationSettings::class)
+        ->fillForm([
+            'turnstile_enabled' => false,
+            'similarity_api_url' => 'https://similarity.test',
+            'similarity_api_secret' => 'sync-secret-1234567890',
+            'similarity_api_timeout' => 15,
+            'similarity_api_top_k' => 7,
+            'similarity_api_threshold' => 0.55,
+            'similarity_weight_judul' => 0.6,
+            'similarity_weight_abstrak' => 0.25,
+            'similarity_weight_kata_kunci' => 0.15,
+            'whatsapp_api_url' => 'https://api.fonnte.com/send',
+            'whatsapp_api_token' => 'encrypted-whatsapp-token',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(decrypt(Setting::query()->where('section', 'integration')->where('key', 'whatsapp_api_token')->value('value')))
+        ->toBe('encrypted-whatsapp-token');
 });
 
 it('integration settings page shows the full skripsi resync action', function () {

@@ -1,11 +1,5 @@
 import { LayoutGrid, LayoutList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 export type BookCollectionViewMode = 'grid' | 'list';
 
@@ -19,41 +13,31 @@ export default function BookCollectionViewToggle({
     onChange,
 }: BookCollectionViewToggleProps) {
     return (
-        <TooltipProvider>
-            <div className="hidden items-center gap-1 rounded-lg border bg-muted/50 p-1 sm:flex">
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant={
-                                viewMode === 'grid' ? 'secondary' : 'ghost'
-                            }
-                            size="icon"
-                            className="size-8"
-                            onClick={() => onChange('grid')}
-                            aria-label="Tampilan grid"
-                        >
-                            <LayoutGrid className="size-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Tampilan Grid</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant={
-                                viewMode === 'list' ? 'secondary' : 'ghost'
-                            }
-                            size="icon"
-                            className="size-8"
-                            onClick={() => onChange('list')}
-                            aria-label="Tampilan daftar"
-                        >
-                            <LayoutList className="size-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Tampilan Daftar</TooltipContent>
-                </Tooltip>
-            </div>
-        </TooltipProvider>
+        <div className="inline-flex items-center gap-1 rounded-xl border bg-muted/50 p-1">
+            <Button
+                type="button"
+                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-9 rounded-lg px-3"
+                onClick={() => onChange('grid')}
+                aria-label="Tampilan grid"
+                title="Tampilan grid"
+            >
+                <LayoutGrid className="size-4" />
+                <span className="text-xs sm:hidden">Grid</span>
+            </Button>
+            <Button
+                type="button"
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-9 rounded-lg px-3"
+                onClick={() => onChange('list')}
+                aria-label="Tampilan daftar"
+                title="Tampilan daftar"
+            >
+                <LayoutList className="size-4" />
+                <span className="text-xs sm:hidden">List</span>
+            </Button>
+        </div>
     );
 }

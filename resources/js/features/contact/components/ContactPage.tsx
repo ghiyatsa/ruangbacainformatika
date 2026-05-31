@@ -1,21 +1,25 @@
 import { Form, usePage } from '@inertiajs/react';
-import { Clock3, Mail, MapPin } from 'lucide-react';
+import { Mail, User, Phone, Tag, MessageSquare } from 'lucide-react';
 import ContactMessageController from '@/actions/App/Http/Controllers/ContactMessageController';
 import InputError from '@/components/common/InputError';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
-import { PublicInfoCard } from '@/components/layouts/PublicInfoCard';
 import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+    InputGroupTextarea,
+} from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 export function ContactPage() {
     const user = usePage().props.auth?.user;
@@ -23,7 +27,7 @@ export function ContactPage() {
     return (
         <PageLayout
             title="Hubungi Kami"
-            metaDescription="Hubungi Ruang Baca Teknik Informatika Universitas Malikussaleh untuk pertanyaan layanan, koleksi, dan akses akun."
+            metaDescription="Hubungi Ruang Baca Teknik Informatika Universitas Malikussaleh untuk pertanyaan buku, layanan, dan akses akun."
             maxWidth="5xl"
             header={
                 <LibraryPageHero
@@ -35,47 +39,48 @@ export function ContactPage() {
                             </span>
                         </>
                     }
-                    description="Kontak resmi Ruang Baca Teknik Informatika Universitas Malikussaleh."
+                    description="Informasi kontak Ruang Baca Teknik Informatika Universitas Malikussaleh."
                     contentClassName="max-w-3xl"
                 />
             }
         >
             <div className="space-y-10">
                 <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-                    <Card className="overflow-hidden border-border/60 bg-card/95 shadow-sm">
+                    <Card className="h-fit overflow-hidden border-border/60 bg-card/95 py-0! pt-6! pb-0 shadow-sm">
                         <CardHeader className="border-b border-border/50 bg-muted/10">
                             <CardTitle>Kirim pesan</CardTitle>
                             <CardDescription>
                                 Sampaikan pertanyaan atau kebutuhan bantuan
-                                terkait layanan Ruang Baca.
+                                terkait Ruang Baca.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="pt-6">
-                            <Form
-                                action={ContactMessageController.store()}
-                                resetOnSuccess
-                                className="space-y-5"
-                            >
-                                {({
-                                    processing,
-                                    errors,
-                                    recentlySuccessful,
-                                }) => (
-                                    <>
+                        <Form
+                            action={ContactMessageController.store()}
+                            resetOnSuccess
+                            className="flex flex-col"
+                        >
+                            {({ processing, errors, recentlySuccessful }) => (
+                                <>
+                                    <CardContent className="space-y-5 pt-0">
                                         <div className="grid gap-5 sm:grid-cols-2">
                                             <div className="grid gap-2">
                                                 <Label htmlFor="contact_name">
                                                     Nama
                                                 </Label>
-                                                <Input
-                                                    id="contact_name"
-                                                    name="name"
-                                                    required
-                                                    defaultValue={
-                                                        user?.name ?? ''
-                                                    }
-                                                    placeholder="Nama lengkap"
-                                                />
+                                                <InputGroup>
+                                                    <InputGroupInput
+                                                        id="contact_name"
+                                                        name="name"
+                                                        required
+                                                        defaultValue={
+                                                            user?.name ?? ''
+                                                        }
+                                                        placeholder="Nama lengkap Anda"
+                                                    />
+                                                    <InputGroupAddon>
+                                                        <User className="size-4" />
+                                                    </InputGroupAddon>
+                                                </InputGroup>
                                                 <InputError
                                                     message={errors.name}
                                                 />
@@ -85,16 +90,21 @@ export function ContactPage() {
                                                 <Label htmlFor="contact_email">
                                                     Email
                                                 </Label>
-                                                <Input
-                                                    id="contact_email"
-                                                    type="email"
-                                                    name="email"
-                                                    required
-                                                    defaultValue={
-                                                        user?.email ?? ''
-                                                    }
-                                                    placeholder="nama@email.ac.id"
-                                                />
+                                                <InputGroup>
+                                                    <InputGroupInput
+                                                        id="contact_email"
+                                                        type="email"
+                                                        name="email"
+                                                        required
+                                                        defaultValue={
+                                                            user?.email ?? ''
+                                                        }
+                                                        placeholder="alamat@email.ac.id"
+                                                    />
+                                                    <InputGroupAddon>
+                                                        <Mail className="size-4" />
+                                                    </InputGroupAddon>
+                                                </InputGroup>
                                                 <InputError
                                                     message={errors.email}
                                                 />
@@ -105,11 +115,16 @@ export function ContactPage() {
                                             <Label htmlFor="contact_phone">
                                                 Nomor telepon
                                             </Label>
-                                            <Input
-                                                id="contact_phone"
-                                                name="phone"
-                                                placeholder="Opsional"
-                                            />
+                                            <InputGroup>
+                                                <InputGroupInput
+                                                    id="contact_phone"
+                                                    name="phone"
+                                                    placeholder="Opsional"
+                                                />
+                                                <InputGroupAddon>
+                                                    <Phone className="size-4" />
+                                                </InputGroupAddon>
+                                            </InputGroup>
                                             <InputError
                                                 message={errors.phone}
                                             />
@@ -119,12 +134,17 @@ export function ContactPage() {
                                             <Label htmlFor="contact_subject">
                                                 Subjek
                                             </Label>
-                                            <Input
-                                                id="contact_subject"
-                                                name="subject"
-                                                required
-                                                placeholder="Contoh: Akses akun"
-                                            />
+                                            <InputGroup>
+                                                <InputGroupInput
+                                                    id="contact_subject"
+                                                    name="subject"
+                                                    required
+                                                    placeholder="Contoh: Permohonan akses akun"
+                                                />
+                                                <InputGroupAddon>
+                                                    <Tag className="size-4" />
+                                                </InputGroupAddon>
+                                            </InputGroup>
                                             <InputError
                                                 message={errors.subject}
                                             />
@@ -134,71 +154,82 @@ export function ContactPage() {
                                             <Label htmlFor="contact_message">
                                                 Pesan
                                             </Label>
-                                            <Textarea
-                                                id="contact_message"
-                                                name="message"
-                                                required
-                                                rows={7}
-                                                minLength={20}
-                                                placeholder="Tuliskan kebutuhan atau pertanyaan Anda."
-                                            />
+                                            <InputGroup>
+                                                <InputGroupTextarea
+                                                    id="contact_message"
+                                                    name="message"
+                                                    required
+                                                    rows={7}
+                                                    minLength={20}
+                                                    placeholder="Tuliskan pertanyaan atau kebutuhan Anda."
+                                                />
+                                                <InputGroupAddon className="self-start pt-2.5">
+                                                    <MessageSquare className="size-4" />
+                                                </InputGroupAddon>
+                                            </InputGroup>
                                             <InputError
                                                 message={errors.message}
                                             />
                                         </div>
-
-                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                            {recentlySuccessful ? (
+                                    </CardContent>
+                                    <CardFooter className="flex flex-col gap-3 border-t border-border/50 bg-muted/5 pt-6 pb-6 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="flex-1">
+                                            {recentlySuccessful && (
                                                 <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                                                    Pesan berhasil dikirim.
-                                                </p>
-                                            ) : (
-                                                <p className="text-sm text-muted-foreground">
-                                                    Kami akan menindaklanjuti
-                                                    pesan Anda melalui kontak
-                                                    yang tersedia.
+                                                    Pesan telah terkirim.
                                                 </p>
                                             )}
-
-                                            <Button
-                                                type="submit"
-                                                disabled={processing}
-                                            >
-                                                {processing
-                                                    ? 'Mengirim...'
-                                                    : 'Kirim pesan'}
-                                            </Button>
                                         </div>
-                                    </>
-                                )}
-                            </Form>
-                        </CardContent>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            {processing
+                                                ? 'Mengirim...'
+                                                : 'Kirim pesan'}
+                                        </Button>
+                                    </CardFooter>
+                                </>
+                            )}
+                        </Form>
                     </Card>
 
-                    <div className="space-y-5">
-                        <PublicInfoCard
-                            title="Alamat layanan"
-                            icon={MapPin}
-                            tone="accent"
-                        >
-                            Kampus Bukit Indah
-                            <br />
-                            Program Studi Teknik Informatika
-                            <br />
-                            Universitas Malikussaleh
-                            <br />
-                            Lhokseumawe, Aceh
-                        </PublicInfoCard>
+                    <div className="space-y-4">
+                        <div className="rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-card to-card p-6 shadow-sm shadow-primary/5 backdrop-blur-sm">
+                            <h3 className="mb-3 text-base font-semibold text-foreground">
+                                Alamat layanan
+                            </h3>
+                            <p className="text-sm leading-relaxed text-muted-foreground">
+                                Kampus Bukit Indah
+                                <br />
+                                Program Studi Teknik Informatika
+                                <br />
+                                Universitas Malikussaleh
+                                <br />
+                                Lhokseumawe, Aceh
+                            </p>
+                        </div>
 
-                        <PublicInfoCard title="Email resmi" icon={Mail}>
-                            info.tif@unimal.ac.id
-                            <br />
-                            ruangbaca.tif@unimal.ac.id
-                        </PublicInfoCard>
+                        <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm backdrop-blur-sm">
+                            <h3 className="mb-3 text-base font-semibold text-foreground">
+                                Email resmi
+                            </h3>
+                            <p className="text-sm leading-relaxed text-muted-foreground">
+                                informatika@unimal.ac.id
+                                <br />
+                                ruangbacainformatika@unimal.ac.id
+                            </p>
+                        </div>
 
-                        <PublicInfoCard title="Jam layanan" icon={Clock3}>
-                            Hari kerja pada jam operasional program studi.
-                        </PublicInfoCard>
+                        <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm backdrop-blur-sm">
+                            <h3 className="mb-3 text-base font-semibold text-foreground">
+                                Jam layanan
+                            </h3>
+                            <p className="text-sm leading-relaxed text-muted-foreground">
+                                Hari kerja sesuai jam layanan Program Studi
+                                Teknik Informatika.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

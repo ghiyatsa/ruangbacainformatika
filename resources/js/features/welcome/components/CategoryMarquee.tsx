@@ -65,7 +65,7 @@ export default function CategoryMarquee({
                         </h3>
                         <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                             {category.description ||
-                                'Buku pilihan dalam kategori ini.'}
+                                'Daftar buku dalam kategori ini.'}
                         </p>
                     </Link>
                 </div>
@@ -87,6 +87,7 @@ export default function CategoryMarquee({
         <section className="py-6 sm:py-8">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col overflow-hidden">
+                    <h2 className="sr-only">Kategori buku unggulan</h2>
                     <VelocityScroll
                         items={row1}
                         speed={30}

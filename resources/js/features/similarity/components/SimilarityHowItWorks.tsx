@@ -11,19 +11,19 @@ import {
 const STEPS = [
     {
         title: 'Input Judul Skripsi',
-        desc: 'Ketikkan draf judul skripsi lengkap yang ingin Anda ajukan.',
+        desc: 'Ketik judul skripsi yang ingin Anda periksa.',
         icon: FileText,
         color: 'text-primary bg-primary/10 border-primary/20',
     },
     {
         title: 'Pemindaian Semantik',
-        desc: 'Sistem membandingkan kemiripan makna judul terhadap ribuan skripsi yang terindeks.',
+        desc: 'Sistem membandingkan judul Anda dengan data skripsi yang tersedia.',
         icon: Search,
         color: 'text-primary bg-primary/10 border-primary/20',
     },
     {
         title: 'Evaluasi & Tindak Lanjut',
-        desc: 'Tinjau skor kemiripan dan sesuaikan judul Anda jika diperlukan sebelum proposal diajukan.',
+        desc: 'Tinjau hasilnya, lalu sesuaikan judul jika diperlukan.',
         icon: CheckCircle,
         color: 'text-primary bg-primary/10 border-primary/20',
     },
@@ -32,17 +32,17 @@ const STEPS = [
 const TIPS = [
     {
         title: 'Gunakan Teknik Parafrase',
-        desc: 'Ubah susunan kalimat atau gunakan sinonim kata tanpa mengubah esensi dan makna penelitian Anda.',
+        desc: 'Ubah susunan kalimat atau pilih kata lain tanpa mengubah makna utamanya.',
         icon: Shuffle,
     },
     {
         title: 'Tentukan Studi Kasus Spesifik',
-        desc: 'Batasi cakupan objek penelitian Anda pada instansi, lokasi, atau dataset khusus yang belum pernah diteliti.',
+        desc: 'Perjelas objek penelitian, misalnya lokasi, instansi, atau data yang digunakan.',
         icon: Target,
     },
     {
         title: 'Terapkan Variasi/Kombinasi Metode',
-        desc: 'Gunakan metode atau kombinasi algoritma yang berbeda untuk membedakannya dari skripsi pendahulu.',
+        desc: 'Gunakan metode yang berbeda agar judul Anda lebih jelas dan tidak terlalu mirip.',
         icon: Layers,
     },
 ];
@@ -86,7 +86,7 @@ export function SimilarityHowItWorks() {
             <div className="space-y-4 rounded-2xl border border-primary/15 bg-primary/5 p-6">
                 <h4 className="flex items-center gap-2 text-sm font-bold text-primary">
                     <Lightbulb className="size-4 animate-pulse text-primary" />
-                    Tips Menghindari Tingkat Kemiripan Tinggi (Plagiasi)
+                    Tips Mengurangi Kemiripan Judul
                 </h4>
 
                 <div className="grid gap-5 pt-1 sm:grid-cols-3">

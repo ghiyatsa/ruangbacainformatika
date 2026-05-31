@@ -39,7 +39,7 @@ export default function ThesisCatalogPage({
     return (
         <CatalogPage
             title="Katalog Tesis"
-            metaDescription="Lihat koleksi tesis Teknik Informatika Universitas Malikussaleh untuk kebutuhan studi lanjut dan pengayaan riset."
+            metaDescription="Lihat daftar tesis Teknik Informatika Universitas Malikussaleh."
             resourceName="tesis"
             breadcrumbLabel="Katalog Tesis"
             totalCount={total}

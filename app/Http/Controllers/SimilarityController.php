@@ -7,6 +7,7 @@ use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,6 +24,11 @@ class SimilarityController extends Controller
     public function check(CheckSimilarityRequest $request, SimilarityApiService $api): JsonResponse
     {
         $title = $request->validatedJudul();
+
+        Log::info('Similarity check requested', [
+            'user_id' => $request->user()?->id,
+            'title_words' => str_word_count($title),
+        ]);
 
         if (str_word_count($title) < 5) {
             return response()->json([
@@ -51,34 +57,76 @@ class SimilarityController extends Controller
 
             if (! empty($result['results'])) {
                 $skripsiIds = collect($result['results'])
-                    ->pluck('id')
-                    ->filter(fn ($id) => is_numeric($id))
-                    ->map(fn ($id) => (int) $id)
+                    ->map(fn (array $item): ?int => match (true) {
+                        isset($item['id']) && is_numeric($item['id']) => (int) $item['id'],
+                        isset($item['skripsi_id']) && is_numeric($item['skripsi_id']) => (int) $item['skripsi_id'],
+                        default => null,
+                    })
+                    ->filter()
                     ->values()
                     ->all();
 
-                $skripsis = Skripsi::whereIn('id', $skripsiIds)
+                $studentIds = collect($result['results'])
+                    ->pluck('nim')
+                    ->filter(fn ($nim) => is_string($nim) && filled($nim))
+                    ->values()
+                    ->all();
+
+                $skripsisById = Skripsi::whereIn('id', $skripsiIds)
                     ->get(['id', 'title', 'author_name', 'student_id'])
                     ->keyBy('id');
 
-                $result['results'] = array_map(function ($item) use ($skripsis) {
-                    $skripsiId = isset($item['id']) && is_numeric($item['id'])
-                        ? (int) $item['id']
+                $skripsisByStudentId = Skripsi::whereIn('student_id', $studentIds)
+                    ->get(['id', 'title', 'author_name', 'student_id'])
+                    ->keyBy('student_id');
+
+                $result['results'] = array_map(function ($item) use ($skripsisById, $skripsisByStudentId) {
+                    $skripsiId = match (true) {
+                        isset($item['id']) && is_numeric($item['id']) => (int) $item['id'],
+                        isset($item['skripsi_id']) && is_numeric($item['skripsi_id']) => (int) $item['skripsi_id'],
+                        default => null,
+                    };
+
+                    $studentId = isset($item['nim']) && is_string($item['nim'])
+                        ? $item['nim']
+                        : (isset($item['student_id']) && is_string($item['student_id'])
+                            ? $item['student_id']
+                            : null);
+
+                    $skripsi = $skripsiId !== null
+                        ? $skripsisById->get($skripsiId)
                         : null;
-                    $skripsi = $skripsiId !== null ? $skripsis->get($skripsiId) : null;
 
-                    $item['skripsi_id'] = $skripsiId;
-                    $item['judul'] = $skripsi?->title ?? 'Data skripsi tidak ditemukan';
-                    $item['nama_mahasiswa'] = $skripsi?->author_name ?? 'Tidak diketahui';
-                    $item['student_id'] = $skripsi?->student_id;
-
-                    // Normalize similarity_persen to float if it's a string like "98.1%"
-                    if (is_string($item['similarity_persen'])) {
-                        $item['similarity_persen'] = (float) str_replace('%', '', $item['similarity_persen']);
+                    if ($skripsi === null && $studentId !== null) {
+                        $skripsi = $skripsisByStudentId->get($studentId);
                     }
 
-                    // Ensure level is uppercase for frontend mapping
-                    if (isset($item['level'])) {
+                    $similarityPercent = $item['similarity_persen']
+                        ?? $item['similarity_percent']
+                        ?? null;
+
+                    if ($similarityPercent === null && isset($item['similarity_score']) && is_numeric($item['similarity_score'])) {
+                        $similarityPercent = round(((float) $item['similarity_score']) * 100, 1);
+                    }
+
+                    if (is_string($similarityPercent)) {
+                        $similarityPercent = (float) str_replace('%', '', $similarityPercent);
+                    }
+
+                    if (is_numeric($similarityPercent)) {
+                        $similarityPercent = round((float) $similarityPercent, 1);
+                    } else {
+                        $similarityPercent = 0.0;
+                    }
+
+                    $item['skripsi_id'] = $skripsi?->id ?? $skripsiId;
+                    $item['judul'] = $skripsi?->title ?? ($item['judul'] ?? $item['title'] ?? 'Data skripsi tidak ditemukan');
+                    $item['nama_mahasiswa'] = $skripsi?->author_name ?? ($item['nama_mahasiswa'] ?? $item['author_name'] ?? 'Tidak diketahui');
+                    $item['student_id'] = $skripsi?->student_id ?? $studentId;
+                    $item['similarity_persen'] = $similarityPercent;
+                    $item['is_local_record_found'] = $skripsi !== null;
+
+                    if (isset($item['level']) && is_string($item['level'])) {
                         $item['level'] = strtoupper($item['level']);
                     }
 

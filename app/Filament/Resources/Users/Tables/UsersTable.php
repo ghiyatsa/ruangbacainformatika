@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Tables;
 
 use App\Models\User;
+use App\Support\AppTimezone;
 use App\Support\LoanConsequenceService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -17,7 +18,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 
 class UsersTable
 {
@@ -89,11 +89,19 @@ class UsersTable
                         return $query
                             ->when(
                                 filled($data['registered_from'] ?? null),
-                                fn (Builder $query): Builder => $query->where('created_at', '>=', Carbon::parse($data['registered_from'])->startOfDay()),
+                                function (Builder $query) use ($data): Builder {
+                                    [$startOfDay] = AppTimezone::dayRange($data['registered_from'] ?? null);
+
+                                    return $query->where('created_at', '>=', $startOfDay);
+                                },
                             )
                             ->when(
                                 filled($data['registered_until'] ?? null),
-                                fn (Builder $query): Builder => $query->where('created_at', '<=', Carbon::parse($data['registered_until'])->endOfDay()),
+                                function (Builder $query) use ($data): Builder {
+                                    [, $endOfDay] = AppTimezone::dayRange($data['registered_until'] ?? null);
+
+                                    return $query->where('created_at', '<=', $endOfDay);
+                                },
                             );
                     }),
                 Filter::make('restricted_borrowers')

@@ -19,12 +19,13 @@ class TodayVisitorsWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $today = today();
+        [$todayStart, $todayEnd] = VisitLog::adminDayRange();
+        [$weekStart, $weekEnd] = VisitLog::adminWeekRange();
 
-        $total = VisitLog::query()->whereDate('visited_at', $today)->count();
+        $total = VisitLog::query()->whereBetween('visited_at', [$todayStart, $todayEnd])->count();
 
         $byType = VisitLog::query()
-            ->whereDate('visited_at', $today)
+            ->whereBetween('visited_at', [$todayStart, $todayEnd])
             ->selectRaw('visitor_type, COUNT(*) as total')
             ->groupBy('visitor_type')
             ->pluck('total', 'visitor_type');
@@ -35,7 +36,7 @@ class TodayVisitorsWidget extends StatsOverviewWidget
         $umum = (int) ($byType[VisitLog::VISITOR_TYPE_UMUM] ?? 0);
 
         $byPurpose = VisitLog::query()
-            ->whereDate('visited_at', $today)
+            ->whereBetween('visited_at', [$todayStart, $todayEnd])
             ->selectRaw('purpose, COUNT(*) as total')
             ->groupBy('purpose')
             ->orderByDesc('total')
@@ -66,7 +67,7 @@ class TodayVisitorsWidget extends StatsOverviewWidget
                 ->icon(Heroicon::OutlinedBriefcase),
 
             Stat::make('Minggu Ini', VisitLog::query()
-                ->whereBetween('visited_at', [now()->startOfWeek(), now()->endOfWeek()])
+                ->whereBetween('visited_at', [$weekStart, $weekEnd])
                 ->count())
                 ->description('Total pekan ini')
                 ->descriptionIcon(Heroicon::OutlinedCalendarDays)

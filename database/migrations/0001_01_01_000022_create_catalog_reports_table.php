@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('catalog_reports', function (Blueprint $table): void {
@@ -28,27 +25,10 @@ return new class extends Migration
 
             $table->index(['catalog_type', 'created_at']);
         });
-
-        Schema::create('contact_messages', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name', 120);
-            $table->string('email');
-            $table->string('phone', 30)->nullable();
-            $table->string('subject', 160);
-            $table->text('message');
-            $table->string('status', 20)->default('new')->index();
-            $table->text('admin_notes')->nullable();
-            $table->timestamp('reviewed_at')->nullable();
-            $table->timestamps();
-        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('contact_messages');
         Schema::dropIfExists('catalog_reports');
     }
 };

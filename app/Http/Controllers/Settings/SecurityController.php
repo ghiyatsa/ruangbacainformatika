@@ -36,7 +36,7 @@ class SecurityController extends Controller
             ->get())->map(function ($session) use ($request) {
                 return [
                     'id' => $session->id,
-                    'ip_address' => $session->ip_address,
+                    'ip_address' => $session->ip_address ?: 'IP tidak tersedia',
                     'is_current_device' => $session->id === $request->session()->getId(),
                     'agent' => $this->parseAgent($session->user_agent),
                     'last_active' => Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
@@ -47,9 +47,9 @@ class SecurityController extends Controller
     /**
      * Simple User Agent parser.
      */
-    protected function parseAgent(string $userAgent): array
+    protected function parseAgent(?string $userAgent): array
     {
-        $userAgent = strtolower($userAgent);
+        $userAgent = strtolower($userAgent ?? '');
 
         $platform = 'Unknown';
         if (str_contains($userAgent, 'windows')) {

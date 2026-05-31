@@ -124,8 +124,8 @@ export default function VerifyWhatsApp() {
                                             ? `Kirim ulang dalam ${formatRemaining(resendAvailableIn)}`
                                             : hasWhatsapp &&
                                                 verification.hasActiveChallenge
-                                              ? 'Kirim ulang kode'
-                                              : 'Kirim kode'}
+                                              ? 'Kirim ulang kode verifikasi'
+                                              : 'Kirim kode verifikasi'}
                                     </Button>
 
                                     <div className="text-sm font-medium text-muted-foreground tabular-nums">
@@ -201,5 +201,5 @@ export default function VerifyWhatsApp() {
 
 VerifyWhatsApp.layout = {
     title: 'Verifikasi WhatsApp',
-    description: 'Masukkan kode verifikasi.',
+    description: 'Masukkan kode yang dikirim ke WhatsApp Anda.',
 };

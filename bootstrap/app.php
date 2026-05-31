@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureKioskNetworkIsAllowed;
 use App\Http\Middleware\EnsureKioskPinIsValid;
 use App\Http\Middleware\EnsureProfileIsCompleted;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
+            AddSecurityHeaders::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 

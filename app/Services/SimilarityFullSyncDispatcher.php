@@ -7,11 +7,17 @@ use Illuminate\Support\Facades\Artisan;
 
 class SimilarityFullSyncDispatcher
 {
+    public function __construct(
+        private readonly SimilaritySyncStatusService $statusService,
+    ) {}
+
     /**
      * @return array{mode: 'sync'|'queued', success: bool}
      */
     public function dispatch(int $chunk = 100): array
     {
+        $this->statusService->markAllQueuedForFullSync();
+
         $command = sprintf('skripsi:sync --chunk=%d --reset', $chunk);
 
         if ($this->shouldRunSynchronously()) {

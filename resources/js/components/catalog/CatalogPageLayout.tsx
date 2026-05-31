@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle, Search, Star, X } from 'lucide-react';
+import { Calendar, CheckCircle, Library, Search, Star, X } from 'lucide-react';
 import { ResourceCatalogHeader } from '@/components/catalog/ResourceCatalogHeader';
 import { ResourcePagination } from '@/components/catalog/ResourcePagination';
 import { PageLayout } from '@/components/layouts/PageLayout';
@@ -18,6 +18,9 @@ interface CatalogPageLayoutProps<T> {
     header?: ReactNode; // Optional override
     children: ReactNode;
     filters?: CatalogActiveFilters;
+    filterLabels?: {
+        category?: string;
+    };
     onClearFilters?: () => void;
     onRemoveFilter?: (key: string) => void;
     paginationVisibility?: 'all' | 'desktop-only';
@@ -37,6 +40,7 @@ export function CatalogPageLayout<T>({
     header,
     children,
     filters,
+    filterLabels,
     onClearFilters,
     onRemoveFilter,
     paginationVisibility = 'all',
@@ -44,6 +48,7 @@ export function CatalogPageLayout<T>({
     const hasActiveFilters =
         filters &&
         (filters.search ||
+            filters.category ||
             filters.year ||
             filters.featured ||
             filters.availability);
@@ -84,6 +89,32 @@ export function CatalogPageLayout<T>({
                                         type="button"
                                         aria-label="Hapus filter pencarian"
                                         onClick={() => onRemoveFilter('search')}
+                                        className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
+                                    >
+                                        <X className="size-3" />
+                                    </button>
+                                )}
+                            </Badge>
+                        )}
+
+                        {/* Year Badge */}
+                        {filters.category && (
+                            <Badge
+                                variant="secondary"
+                                className="gap-1.5 py-1.5 pr-2 pl-2.5"
+                            >
+                                <Library className="size-3 text-muted-foreground" />
+                                <span className="text-muted-foreground">
+                                    Kategori:
+                                </span>
+                                {filterLabels?.category ?? filters.category}
+                                {onRemoveFilter && (
+                                    <button
+                                        type="button"
+                                        aria-label="Hapus filter kategori"
+                                        onClick={() =>
+                                            onRemoveFilter('category')
+                                        }
                                         className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
                                     >
                                         <X className="size-3" />

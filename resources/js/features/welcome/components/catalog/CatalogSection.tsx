@@ -31,7 +31,7 @@ export default function CatalogSection({
                         <div className="flex flex-col gap-6">
                             <SectionHeader
                                 title="Buku Unggulan"
-                                subtitle="Pilihan bacaan untuk kuliah dan riset."
+                                subtitle="Pilihan buku unggulan dari ruang baca."
                             />
 
                             <FeaturedSpotlight featuredBooks={featuredBooks} />

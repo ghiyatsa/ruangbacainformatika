@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Loans\Tables;
 use App\Filament\Resources\Loans\LoanResource;
 use App\Models\Loan;
 use App\Models\User;
+use App\Support\AppTimezone;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
@@ -67,10 +68,18 @@ class LoansTable
                             'loans',
                             fn (Builder $q): Builder => $q->when(
                                 filled($data['borrowed_from'] ?? null),
-                                fn (Builder $sq): Builder => $sq->whereDate('borrowed_at', '>=', $data['borrowed_from'])
+                                function (Builder $sq) use ($data): Builder {
+                                    [$startOfDay] = AppTimezone::dayRange($data['borrowed_from'] ?? null);
+
+                                    return $sq->where('borrowed_at', '>=', $startOfDay);
+                                }
                             )->when(
                                 filled($data['borrowed_until'] ?? null),
-                                fn (Builder $sq): Builder => $sq->whereDate('borrowed_at', '<=', $data['borrowed_until'])
+                                function (Builder $sq) use ($data): Builder {
+                                    [, $endOfDay] = AppTimezone::dayRange($data['borrowed_until'] ?? null);
+
+                                    return $sq->where('borrowed_at', '<=', $endOfDay);
+                                }
                             )
                         )
                     ),

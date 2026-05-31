@@ -1,8 +1,7 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, Users } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
 import { PageLayout } from '@/components/layouts/PageLayout';
-import { PublicPageSection } from '@/components/layouts/PublicPageSection';
 import { Button } from '@/components/ui/button';
 import { contact } from '@/routes';
 
@@ -10,61 +9,80 @@ export function AboutTeamPage() {
     return (
         <PageLayout
             title="Tentang Tim"
-            metaDescription="Profil tim pengembang Ruang Baca Teknik Informatika Universitas Malikussaleh."
-            maxWidth="5xl"
+            metaDescription="Foto bersama tim pengelola dan pengembang Ruang Baca Teknik Informatika Universitas Malikussaleh."
+            maxWidth="4xl"
             header={
                 <LibraryPageHero
+                    eyebrow="Tim Pengelola"
                     title={
                         <>
-                            Tim{' '}
+                            Tim &{' '}
                             <span className="bg-linear-to-r from-primary to-primary/75 bg-clip-text text-transparent">
-                                Pengembang
+                                Pengelola
                             </span>
                         </>
                     }
-                    description="Halaman khusus yang menampilkan tim pengembang Ruang Baca secara lebih rapi, terpisah dari profil layanan utama."
+                    description="Tim yang mengelola layanan dan pengembangan Ruang Baca Teknik Informatika."
                     contentClassName="max-w-4xl"
+                    align="center"
                 />
             }
         >
             <div className="space-y-12">
-                <PublicPageSection
-                    eyebrow="Kolaborasi pengembangan"
-                    title="Orang-orang di balik Ruang Baca"
-                    description="Tim ini berkolaborasi untuk membangun pengalaman digital yang lebih tertata, mudah diakses, dan sesuai kebutuhan lingkungan akademik."
-                >
-                    <div className="overflow-hidden rounded-[2rem] border border-border/50 bg-card/80 shadow-sm backdrop-blur-xs">
-                        <div className="relative flex min-h-64 items-center justify-center bg-linear-to-br from-primary/8 via-muted/20 to-primary/12 px-6 py-10">
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.28),transparent_45%)]" />
-                            <div className="relative z-10 flex max-w-2xl flex-col items-center text-center">
-                                <div className="flex size-16 items-center justify-center rounded-3xl border border-primary/15 bg-background/85 shadow-sm backdrop-blur-xs">
-                                    <Users className="size-7 text-primary" />
-                                </div>
-                                <h3 className="mt-5 text-2xl font-semibold tracking-tight text-foreground">
-                                    Tim Pengembang Ruang Baca
-                                </h3>
-                            </div>
+                {/* Team Photo Container */}
+                <div className="group relative overflow-hidden rounded-[2rem] border border-border/80 bg-card p-3 shadow-xl transition-all duration-300 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5">
+                    <div className="relative aspect-video overflow-hidden rounded-[1.7rem] bg-muted">
+                        <img
+                            src="/images/team_photo.png"
+                            alt="Foto Bersama Tim Ruang Baca"
+                            className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                        />
+                        {/* Overlay caption */}
+                        <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-6 pt-12 text-white">
+                            <p className="text-sm font-semibold tracking-wide uppercase opacity-90 sm:text-base">
+                                Tim Pengelola & Pengembang
+                            </p>
+                            <p className="mt-1 text-xs opacity-75 sm:text-sm">
+                                Ruang Baca Teknik Informatika Universitas
+                                Malikussaleh
+                            </p>
                         </div>
                     </div>
-                </PublicPageSection>
+                </div>
 
-                <section className="rounded-[2rem] border border-border/50 bg-muted/15 px-6 py-8 shadow-xs">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <div className="space-y-2">
-                            <h2 className="text-xl font-semibold text-foreground">
-                                Ingin terhubung dengan pengelola layanan?
+                {/* Call to Action (CTA) Section */}
+                <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-linear-to-br from-card via-card to-primary/5 p-8 shadow-sm sm:p-10">
+                    <div className="absolute -right-12 -bottom-12 -z-10 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
+                    <div className="absolute -top-12 -left-12 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-2xl" />
+
+                    <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                        <div className="space-y-3">
+                            <div className="inline-flex items-center gap-2 text-primary">
+                                <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+                                    <Mail className="size-4" />
+                                </div>
+                                <span className="text-xs font-bold tracking-[0.12em] uppercase">
+                                    Hubungi Kami
+                                </span>
+                            </div>
+                            <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                                Ada pertanyaan atau butuh bantuan layanan?
                             </h2>
-                            <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
-                                Untuk kebutuhan koordinasi, masukan, atau
-                                pertanyaan layanan, gunakan halaman kontak resmi
-                                Ruang Baca.
+                            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                                Untuk usulan buku, masukan layanan, atau
+                                pertanyaan umum, tim kami siap membantu melalui
+                                halaman kontak.
                             </p>
                         </div>
 
-                        <Button asChild className="rounded-full px-5">
+                        <Button
+                            asChild
+                            size="lg"
+                            className="group rounded-full px-6 shadow-md transition-all duration-200 hover:shadow-lg"
+                        >
                             <Link href={contact.url()}>
                                 Hubungi Kami
-                                <ArrowRight className="size-4" />
+                                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
                             </Link>
                         </Button>
                     </div>

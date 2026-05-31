@@ -115,14 +115,16 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                             </span>
                                         </span>
 
-                                        <div className="min-w-0 flex-1 space-y-1 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-2 sm:gap-y-1 sm:space-y-0 lg:justify-start">
+                                        <div className="min-w-0 flex-1 space-y-1 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:space-y-0 sm:gap-x-2 sm:gap-y-1 lg:justify-start">
                                             <span className="block min-w-0 font-medium text-pretty">
                                                 <ShinyText
                                                     text={notice.text}
                                                     speed={2}
                                                     delay={0}
                                                     color="var(--color-foreground)"
-                                                    shineColor={noticeStyle.shineColor}
+                                                    shineColor={
+                                                        noticeStyle.shineColor
+                                                    }
                                                     spread={120}
                                                     direction="left"
                                                     yoyo={false}
@@ -137,36 +139,13 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                                     className={`inline-flex shrink-0 justify-center font-semibold transition-colors ${noticeStyle.link}`}
                                                 >
                                                     {notice.linkLabel ??
-                                                        'Lihat detail'}
+                                                        'Baca selengkapnya'}
                                                 </a>
                                             )}
                                         </div>
                                     </div>
                                 </div>
                             )}
-
-                            <StarBorder
-                                as="div"
-                                className="rounded-full"
-                                contentClassName="rounded-full bg-muted/60 px-4 py-1.5 backdrop-blur-sm"
-                                color="var(--color-primary)"
-                                speed="4s"
-                            >
-                                <div className="inline-flex items-center gap-2 text-sm font-medium">
-                                    <ShinyText
-                                        text="Program Studi Teknik Informatika"
-                                        speed={2}
-                                        delay={0}
-                                        color="var(--color-foreground)"
-                                        shineColor="var(--color-primary)"
-                                        spread={120}
-                                        direction="left"
-                                        yoyo={false}
-                                        pauseOnHover={false}
-                                        disabled={false}
-                                    />
-                                </div>
-                            </StarBorder>
                         </div>
 
                         <h1 className="max-w-4xl font-heading text-5xl leading-[1.02] font-bold tracking-tight text-balance sm:text-5xl md:text-6xl lg:max-w-3xl lg:text-7xl">
@@ -186,7 +165,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                             <button
                                 onClick={openSearch}
                                 className="group relative w-full transition-all duration-200 hover:scale-[1.015] sm:max-w-sm sm:self-stretch"
-                                aria-label="Cari koleksi"
+                                aria-label="Cari buku"
                             >
                                 <StarBorder
                                     as="div"
@@ -197,7 +176,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                     <div className="flex w-full items-center justify-between gap-3 text-muted-foreground">
                                         <Search className="size-4 shrink-0 transition-colors group-hover:text-primary" />
                                         <span className="flex-1 text-left text-sm font-normal">
-                                            Cari judul, penulis, atau topik
+                                            Telusuri judul, penulis, atau subjek
                                         </span>
                                         <div className="flex items-center gap-1.5">
                                             <Kbd>Ctrl K</Kbd>
@@ -213,7 +192,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                 className="group inline-flex min-h-[58px] shrink-0 items-center justify-center gap-2 rounded-2xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:scale-[1.015] hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 sm:self-stretch"
                             >
                                 <BookOpen className="size-4 transition-transform duration-200 group-hover:scale-110" />
-                                Lihat Katalog
+                                Jelajahi Katalog
                                 <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                             </Link>
                         </div>

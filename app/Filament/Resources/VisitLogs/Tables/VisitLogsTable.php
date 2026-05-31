@@ -4,6 +4,7 @@ namespace App\Filament\Resources\VisitLogs\Tables;
 
 use App\Filament\Exports\VisitLogExporter;
 use App\Models\VisitLog;
+use Carbon\CarbonInterface;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
@@ -27,7 +28,9 @@ class VisitLogsTable
             ->columns([
                 TextColumn::make('visited_at')
                     ->label('Waktu Kunjungan')
-                    ->dateTime('d M Y H:i')
+                    ->formatStateUsing(
+                        fn (?CarbonInterface $state): string => $state?->copy()->setTimezone(VisitLog::adminTimezone())->translatedFormat('d M Y H:i') ?? '-',
+                    )
                     ->sortable(),
                 TextColumn::make('name')
                     ->label('Nama')
@@ -77,7 +80,11 @@ class VisitLogsTable
                     }),
                 Filter::make('today')
                     ->label('Hari ini')
-                    ->query(fn (Builder $query): Builder => $query->whereDate('visited_at', today())),
+                    ->query(function (Builder $query): Builder {
+                        [$startOfDay, $endOfDay] = VisitLog::adminDayRange();
+
+                        return $query->whereBetween('visited_at', [$startOfDay, $endOfDay]);
+                    }),
             ])
             ->recordActions([
                 ActionGroup::make([

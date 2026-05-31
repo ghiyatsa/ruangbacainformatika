@@ -5,9 +5,7 @@ import {
     Trash2,
     Check,
     ShieldAlert,
-    BookOpen,
     Info,
-    Search,
 } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
@@ -20,9 +18,9 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { SimilarityHowItWorks } from '@/features/similarity/components/SimilarityHowItWorks';
 import { SimilarityResultsSection } from '@/features/similarity/components/SimilarityResultsSection';
 import similarityRoute from '@/routes/similarity';
@@ -114,12 +112,16 @@ export default function SimilarityPage({
         setScanStep(0);
 
         try {
+            const csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
             const response = await fetch(similarityRoute.check.url(), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
+                    ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
                 },
                 body: JSON.stringify({
                     judul: title,
@@ -127,15 +129,22 @@ export default function SimilarityPage({
                 }),
             });
 
-            const data = (await response.json()) as
-                | SimilarityResult
-                | { message?: string };
+            const contentType = response.headers.get('content-type') ?? '';
+            const data = contentType.includes('application/json')
+                ? ((await response.json()) as
+                      | SimilarityResult
+                      | { message?: string })
+                : null;
 
             if (!response.ok) {
                 throw new Error(
-                    'message' in data && data.message
+                    data && 'message' in data && data.message
                         ? data.message
-                        : 'Terjadi kesalahan saat memeriksa kemiripan.',
+                        : response.status === 419
+                          ? 'Sesi keamanan sudah kedaluwarsa. Muat ulang halaman lalu coba lagi.'
+                          : response.status === 401
+                            ? 'Sesi Anda tidak aktif. Silakan masuk kembali.'
+                            : 'Terjadi kesalahan saat memeriksa kemiripan.',
                 );
             }
 
@@ -172,7 +181,7 @@ export default function SimilarityPage({
     return (
         <PageLayout
             title="Cek Kemiripan Judul"
-            metaDescription="Periksa kemiripan judul skripsi dengan koleksi Ruang Baca Teknik Informatika sebelum pengajuan proposal."
+            metaDescription="Periksa kemiripan judul skripsi sebelum diajukan."
             maxWidth="7xl"
             header={
                 <LibraryPageHero
@@ -184,7 +193,7 @@ export default function SimilarityPage({
                             </span>
                         </span>
                     }
-                    description="Pemeriksaan awal tingkat kemiripan judul skripsi Anda dengan koleksi repositori untuk meminimalkan penolakan proposal."
+                    description="Pemeriksaan awal untuk membantu meninjau kemiripan judul skripsi Anda."
                 />
             }
         >
@@ -193,17 +202,10 @@ export default function SimilarityPage({
                 <Card className="relative overflow-hidden border-border/60 bg-card/95 shadow-md backdrop-blur-xs transition-all duration-300 hover:shadow-lg">
                     <div className="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-primary via-primary/85 to-primary/60" />
 
-                    <CardContent className="p-6 sm:p-8">
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <Label
-                                        htmlFor="judul"
-                                        className="flex items-center gap-1.5 text-sm font-semibold text-foreground"
-                                    >
-                                        <BookOpen className="size-4 text-primary" />
-                                        Draf Judul Skripsi
-                                    </Label>
+                                <div className="flex justify-end">
                                     {title && (
                                         <button
                                             type="button"
@@ -217,20 +219,25 @@ export default function SimilarityPage({
                                     )}
                                 </div>
 
-                                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-stretch">
-                                    <div className="relative flex-1">
-                                        <Input
+                                <div className="flex flex-col gap-3">
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="judul"
+                                            className="sr-only"
+                                        >
+                                            Draf judul skripsi
+                                        </Label>
+                                        <Textarea
                                             id="judul"
                                             placeholder="Contoh: Klasifikasi Sentimen Ulasan Kuliah Menggunakan Algoritma..."
                                             value={title}
                                             onChange={(e) =>
                                                 setTitle(e.target.value)
                                             }
-                                            className="min-h-12 border-border/70 bg-transparent pr-10 text-sm shadow-none transition-all focus-visible:border-primary focus-visible:ring-primary sm:text-base"
+                                            className="min-h-32 resize-y border-border/70 bg-transparent px-4 py-3 text-sm leading-6 shadow-none transition-all focus-visible:border-primary focus-visible:ring-primary sm:text-base"
                                             disabled={loading}
                                             autoComplete="off"
                                         />
-                                        <Search className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-muted-foreground/50" />
                                     </div>
                                     <Button
                                         id="btn-cek-kemiripan"
@@ -322,7 +329,7 @@ export default function SimilarityPage({
                             </div>
 
                             {turnstileEnabled && turnstileSiteKey && (
-                                <div className="flex justify-center rounded-2xl border border-dashed border-border/70 bg-muted/10 px-4 py-5">
+                                <div className="flex justify-center px-1 py-2 sm:py-3">
                                     <Turnstile
                                         ref={turnstileRef}
                                         siteKey={turnstileSiteKey}
@@ -363,9 +370,9 @@ export default function SimilarityPage({
                                     Menganalisis Judul Skripsi...
                                 </h3>
                                 <p className="mx-auto max-w-md text-sm text-muted-foreground">
-                                    Sistem sedang memproses draf judul Anda dan
-                                    membandingkannya dengan ribuan skripsi yang
-                                    terindeks.
+                                    Sistem sedang memeriksa judul Anda dan
+                                    membandingkannya dengan data skripsi yang
+                                    tersedia.
                                 </p>
                             </div>
 
@@ -411,7 +418,6 @@ export default function SimilarityPage({
                     <div ref={resultsRef} className="scroll-mt-24 space-y-4">
                         <div className="flex items-center justify-between px-1">
                             <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
-                                <Sparkles className="size-4 text-primary" />
                                 Hasil Analisis Kemiripan
                             </h2>
                             <span className="text-xs text-muted-foreground">
@@ -429,17 +435,15 @@ export default function SimilarityPage({
                 {/* Initial Info state */}
                 {!result && !loading ? (
                     <Card className="overflow-hidden border-border/60 bg-card/90 shadow-sm">
-                        <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
+                        <CardHeader className="border-b border-border/50 bg-muted/10">
                             <CardTitle className="flex items-center gap-2 text-lg">
-                                <BookOpen className="size-4.5 text-primary" />
                                 Alur Pemeriksaan Judul
                             </CardTitle>
                             <CardDescription>
-                                Ketahui bagaimana sistem menguji orisinalitas
-                                judul skripsi Anda.
+                                Lihat cara sistem memeriksa judul skripsi Anda.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="pt-6">
+                        <CardContent>
                             <SimilarityHowItWorks />
                         </CardContent>
                     </Card>

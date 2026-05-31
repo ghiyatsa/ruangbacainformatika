@@ -84,3 +84,36 @@ it('falls back to env-backed config when whatsapp integration settings are missi
 
     expect($response->successful())->toBeTrue();
 });
+
+it('decrypts encrypted whatsapp integration tokens before sending messages', function () {
+    config()->set('services.fonnte.url', 'https://api.fonnte.com/send');
+    config()->set('services.fonnte.token', 'env-token-value');
+
+    Http::fake([
+        'https://api.fonnte.com/send' => Http::response([
+            'status' => true,
+            'detail' => 'success! message in queue',
+        ], 200),
+    ]);
+
+    $encryptedToken = encrypt('stored-encrypted-token');
+
+    $repository = mock(SettingRepository::class);
+    $repository->shouldReceive('get')
+        ->with('integration', 'whatsapp_api_url', 'https://api.fonnte.com/send')
+        ->andReturn('https://api.fonnte.com/send');
+    $repository->shouldReceive('get')
+        ->with('integration', 'whatsapp_api_token', 'env-token-value')
+        ->andReturn($encryptedToken);
+
+    $response = (new WhatsAppGateway($repository, app(HttpFactory::class)))->send(
+        '08123456789',
+        'Pesan terenkripsi',
+    );
+
+    expect($response->successful())->toBeTrue();
+
+    Http::assertSent(function (Request $request): bool {
+        return $request->hasHeader('Authorization', 'stored-encrypted-token');
+    });
+});

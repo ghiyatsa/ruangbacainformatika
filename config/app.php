@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\AppTimezone;
+
 return [
 
     /*
@@ -66,6 +68,8 @@ return [
     */
 
     'timezone' => 'UTC',
+
+    'schedule_timezone' => AppTimezone::displayTimezone(),
 
     /*
     |--------------------------------------------------------------------------

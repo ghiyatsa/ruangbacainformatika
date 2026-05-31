@@ -7,10 +7,10 @@ use App\Models\BookItem;
 use App\Models\Loan;
 use App\Models\User;
 use App\Models\VisitLog;
+use App\Support\AppTimezone;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Carbon;
 
 class OperationsOverviewWidget extends StatsOverviewWidget
 {
@@ -24,6 +24,11 @@ class OperationsOverviewWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        [$todayStart, $todayEnd] = VisitLog::adminDayRange();
+        [$yesterdayStart, $yesterdayEnd] = VisitLog::adminDayRange(
+            now(VisitLog::adminTimezone())->subDay(),
+        );
+
         $activeLoans = Loan::query()
             ->where('status', Loan::STATUS_BORROWED)
             ->count();
@@ -34,11 +39,11 @@ class OperationsOverviewWidget extends StatsOverviewWidget
             ->count();
 
         $todayVisitors = VisitLog::query()
-            ->whereDate('visited_at', today())
+            ->whereBetween('visited_at', [$todayStart, $todayEnd])
             ->count();
 
         $yesterdayVisitors = VisitLog::query()
-            ->whereDate('visited_at', Carbon::yesterday())
+            ->whereBetween('visited_at', [$yesterdayStart, $yesterdayEnd])
             ->count();
 
         $visitorDiff = $todayVisitors - $yesterdayVisitors;
@@ -51,10 +56,10 @@ class OperationsOverviewWidget extends StatsOverviewWidget
         $totalBooks = Book::query()->count();
         $availableItems = BookItem::query()->where('status', 'available')->count();
         $totalItems = BookItem::query()->count();
+        [$monthStart, $monthEnd] = AppTimezone::monthRange();
 
         $newMembersThisMonth = User::query()
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+            ->whereBetween('created_at', [$monthStart, $monthEnd])
             ->count();
 
         $pendingApproval = User::query()

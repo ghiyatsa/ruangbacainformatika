@@ -1,11 +1,14 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     AlertTriangle,
     BookOpen,
+    ChevronDown,
     CheckCircle2,
     Clock,
     Library,
     QrCode,
+    Search,
+    X,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
@@ -21,6 +24,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -32,6 +42,7 @@ import {
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
+import loansRoute from '@/routes/loans';
 import type { FormEvent } from 'react';
 import type { PaginationData } from '@/types/pagination';
 
@@ -52,6 +63,10 @@ interface LoanHistoryRow {
 
 interface Props {
     loans: PaginationData<LoanHistoryRow>;
+    filters: {
+        filter: LoanFilter;
+        search: string;
+    };
     stats: {
         total: number;
         active: number;
@@ -76,6 +91,8 @@ interface Props {
         }>;
     };
 }
+
+type LoanFilter = 'all' | 'overdue' | 'active' | 'returned';
 
 function formatCountdown(totalSeconds: number): string {
     if (totalSeconds <= 0) {
@@ -143,6 +160,192 @@ function LoanStatusBadge({ loan }: { loan: LoanHistoryRow }) {
     );
 }
 
+function LoanHistoryMobileCard({
+    loan,
+    isSelected,
+    onToggleSelection,
+}: {
+    loan: LoanHistoryRow;
+    isSelected: boolean;
+    onToggleSelection: (checked: boolean) => void;
+}) {
+    return (
+        <div className="rounded-2xl border border-border/60 bg-card/80 p-4 shadow-none">
+            <div className="flex items-start gap-3">
+                <div className="pt-0.5">
+                    {!loan.isReturned ? (
+                        <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) =>
+                                onToggleSelection(checked === true)
+                            }
+                            aria-label={`Pilih ${loan.bookTitle}`}
+                        />
+                    ) : (
+                        <div className="flex size-4 items-center justify-center text-xs text-muted-foreground">
+                            -
+                        </div>
+                    )}
+                </div>
+
+                <div className="min-w-0 flex-1 space-y-3">
+                    <div className="space-y-2">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0 space-y-1">
+                                <Link
+                                    href={BookController.show.url(
+                                        loan.bookSlug,
+                                    )}
+                                    instant
+                                    component="books/show"
+                                    pageProps={instantLoadingPageProps()}
+                                    className="line-clamp-2 font-semibold text-foreground transition-colors hover:text-primary"
+                                >
+                                    {loan.bookTitle}
+                                </Link>
+                                <p className="text-xs text-muted-foreground">
+                                    Transaksi #{loan.loanId}
+                                </p>
+                            </div>
+
+                            <div className="shrink-0">
+                                <LoanStatusBadge loan={loan} />
+                            </div>
+                        </div>
+
+                        <div className="rounded-xl bg-muted/30 p-3">
+                            <p className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">
+                                Kode Buku
+                            </p>
+                            <p className="mt-1 text-sm font-medium text-foreground">
+                                {loan.internalCode}
+                            </p>
+                        </div>
+                    </div>
+
+                    <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+                        <div className="space-y-1 rounded-xl border border-border/50 p-3">
+                            <dt className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+                                Dipinjam
+                            </dt>
+                            <dd className="text-foreground">{loan.borrowedAt}</dd>
+                        </div>
+                        <div className="space-y-1 rounded-xl border border-border/50 p-3">
+                            <dt className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+                                Jatuh Tempo
+                            </dt>
+                            <dd
+                                className={cn(
+                                    'text-foreground',
+                                    loan.isOverdue && !loan.isReturned
+                                        ? 'font-semibold text-destructive'
+                                        : '',
+                                )}
+                            >
+                                {loan.dueAt}
+                            </dd>
+                        </div>
+                        <div className="space-y-1 rounded-xl border border-border/50 p-3">
+                            <dt className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+                                Dikembalikan
+                            </dt>
+                            <dd className="text-foreground">{loan.returnedAt}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function LoanHistoryDesktopTable({
+    loans,
+    selectedLoanItemIds,
+    onToggleSelection,
+}: {
+    loans: LoanHistoryRow[];
+    selectedLoanItemIds: number[];
+    onToggleSelection: (loanItemId: number, checked: boolean) => void;
+}) {
+    return (
+        <Table className="min-w-[760px]">
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="w-14">Pilih</TableHead>
+                    <TableHead>Buku</TableHead>
+                    <TableHead>Kode</TableHead>
+                    <TableHead>Dipinjam</TableHead>
+                    <TableHead>Jatuh Tempo</TableHead>
+                    <TableHead>Dikembalikan</TableHead>
+                    <TableHead>Status</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {loans.map((loan) => (
+                    <TableRow key={loan.id}>
+                        <TableCell className="align-top">
+                            {!loan.isReturned ? (
+                                <Checkbox
+                                    checked={selectedLoanItemIds.includes(
+                                        loan.id,
+                                    )}
+                                    onCheckedChange={(checked) =>
+                                        onToggleSelection(
+                                            loan.id,
+                                            checked === true,
+                                        )
+                                    }
+                                    aria-label={`Pilih ${loan.bookTitle}`}
+                                    className="mt-1"
+                                />
+                            ) : (
+                                <span className="text-xs text-muted-foreground">
+                                    -
+                                </span>
+                            )}
+                        </TableCell>
+                        <TableCell className="align-top whitespace-normal">
+                            <div className="min-w-[240px] space-y-1">
+                                <Link
+                                    href={BookController.show.url(
+                                        loan.bookSlug,
+                                    )}
+                                    instant
+                                    component="books/show"
+                                    pageProps={instantLoadingPageProps()}
+                                    className="line-clamp-2 font-semibold text-foreground transition-colors hover:text-primary"
+                                >
+                                    {loan.bookTitle}
+                                </Link>
+                                <p className="text-xs text-muted-foreground">
+                                    Transaksi #{loan.loanId}
+                                </p>
+                            </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs tracking-wider text-muted-foreground">
+                            {loan.internalCode}
+                        </TableCell>
+                        <TableCell>{loan.borrowedAt}</TableCell>
+                        <TableCell
+                            className={cn(
+                                loan.isOverdue && !loan.isReturned
+                                    ? 'font-semibold text-destructive'
+                                    : '',
+                            )}
+                        >
+                            {loan.dueAt}
+                        </TableCell>
+                        <TableCell>{loan.returnedAt}</TableCell>
+                        <TableCell>
+                            <LoanStatusBadge loan={loan} />
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    );
+}
+
 function StatsBar({ stats }: { stats: Props['stats'] }) {
     const { total, active, overdue, returned } = stats;
 
@@ -206,7 +409,18 @@ function StatsBar({ stats }: { stats: Props['stats'] }) {
     );
 }
 
-export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
+export default function LoanHistoryPage({
+    loans,
+    filters,
+    stats,
+    returnDraft,
+}: Props) {
+    const [showReturnedLoans, setShowReturnedLoans] = useState(
+        () =>
+            filters.filter === 'returned' ||
+            (stats.active === 0 && stats.overdue === 0),
+    );
+    const [searchQuery, setSearchQuery] = useState(filters.search);
     const activeLoanItemIds = useMemo(
         () =>
             loans.data
@@ -262,6 +476,51 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
         return () => window.clearInterval(interval);
     }, [expiresAtTimestamp]);
 
+    const groupedLoans = useMemo(
+        () => ({
+            overdue: loans.data.filter(
+                (loan) => loan.isOverdue && !loan.isReturned,
+            ),
+            active: loans.data.filter(
+                (loan) => !loan.isOverdue && !loan.isReturned,
+            ),
+            returned: loans.data.filter((loan) => loan.isReturned),
+        }),
+        [loans.data],
+    );
+    const filterCounts = useMemo(
+        () => ({
+            all: stats.total,
+            overdue: stats.overdue,
+            active: Math.max(stats.active - stats.overdue, 0),
+            returned: stats.returned,
+        }),
+        [stats.active, stats.overdue, stats.returned, stats.total],
+    );
+    const visibleLoansCount = loans.total;
+    const activeFilterChips = [
+        filters.filter !== 'all'
+            ? {
+                  key: 'filter',
+                  label:
+                      filters.filter === 'overdue'
+                          ? 'Terlambat'
+                          : filters.filter === 'active'
+                            ? 'Dipinjam'
+                            : 'Selesai',
+                  onRemove: () => applyHistoryFilters('all', searchQuery),
+              }
+            : null,
+        filters.search !== ''
+            ? {
+                  key: 'search',
+                  label: `"${filters.search}"`,
+                  onRemove: () =>
+                      applyHistoryFilters(filters.filter, ''),
+              }
+            : null,
+    ].filter((chip): chip is NonNullable<typeof chip> => chip !== null);
+
     const selectedLoanItemIds = qrForm.data.loan_item_ids;
     const selectedItemsCount = selectedLoanItemIds.length;
 
@@ -296,6 +555,63 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
         });
     };
 
+    const applyHistoryFilters = (
+        nextFilter: LoanFilter,
+        nextSearch: string,
+    ): void => {
+        router.get(
+            loansRoute.history.url(),
+            {
+                filter: nextFilter === 'all' ? '' : nextFilter,
+                search: nextSearch.trim(),
+            },
+            {
+                preserveScroll: true,
+                preserveState: false,
+                replace: true,
+            },
+        );
+    };
+
+    useEffect(() => {
+        const normalizedSearch = searchQuery.trim();
+
+        if (normalizedSearch === filters.search) {
+            return;
+        }
+
+        const timeout = window.setTimeout(() => {
+            applyHistoryFilters(filters.filter, normalizedSearch);
+        }, 300);
+
+        return () => window.clearTimeout(timeout);
+    }, [filters.filter, filters.search, searchQuery]);
+
+    const renderLoanCollection = (items: LoanHistoryRow[]) => (
+        <>
+            <div className="space-y-3 md:hidden">
+                {items.map((loan) => (
+                    <LoanHistoryMobileCard
+                        key={loan.id}
+                        loan={loan}
+                        isSelected={selectedLoanItemIds.includes(loan.id)}
+                        onToggleSelection={(checked) =>
+                            toggleLoanSelection(loan.id, checked)
+                        }
+                    />
+                ))}
+            </div>
+
+            <div className="hidden md:block">
+                <LoanHistoryDesktopTable
+                    loans={items}
+                    selectedLoanItemIds={selectedLoanItemIds}
+                    onToggleSelection={toggleLoanSelection}
+                />
+            </div>
+        </>
+    );
+
     return (
         <>
             <Head title="Riwayat Peminjaman" />
@@ -322,105 +638,225 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                 <CardHeader className="gap-1.5">
                                     <CardTitle>Daftar Peminjaman</CardTitle>
                                     <CardDescription>
-                                        Pilih buku yang masih aktif untuk
-                                        dibuatkan QR pengembalian.
+                                        Yang aktif tampil lebih dulu.
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent>
-                                    <Table className="min-w-[760px]">
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-14">
-                                                    Pilih
-                                                </TableHead>
-                                                <TableHead>Buku</TableHead>
-                                                <TableHead>Kode</TableHead>
-                                                <TableHead>Dipinjam</TableHead>
-                                                <TableHead>
-                                                    Jatuh Tempo
-                                                </TableHead>
-                                                <TableHead>
-                                                    Dikembalikan
-                                                </TableHead>
-                                                <TableHead>Status</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {loans.data.map((loan) => (
-                                                <TableRow key={loan.id}>
-                                                    <TableCell className="align-top">
-                                                        {!loan.isReturned ? (
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selectedLoanItemIds.includes(
-                                                                    loan.id,
-                                                                )}
-                                                                onChange={(
-                                                                    event,
-                                                                ) =>
-                                                                    toggleLoanSelection(
-                                                                        loan.id,
-                                                                        event
-                                                                            .target
-                                                                            .checked,
-                                                                    )
-                                                                }
-                                                                aria-label={`Pilih ${loan.bookTitle}`}
-                                                                className="mt-1 size-4 rounded border-input text-primary focus:ring-primary"
-                                                            />
-                                                        ) : (
-                                                            <span className="text-xs text-muted-foreground">
-                                                                -
-                                                            </span>
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell className="align-top whitespace-normal">
-                                                        <div className="min-w-[240px] space-y-1">
-                                                            <Link
-                                                                href={BookController.show.url(
-                                                                    loan.bookSlug,
-                                                                )}
-                                                                instant
-                                                                component="books/show"
-                                                                pageProps={instantLoadingPageProps()}
-                                                                className="line-clamp-2 font-semibold text-foreground transition-colors hover:text-primary"
-                                                            >
-                                                                {loan.bookTitle}
-                                                            </Link>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                Transaksi #
-                                                                {loan.loanId}
-                                                            </p>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="font-mono text-xs tracking-wider text-muted-foreground">
-                                                        {loan.internalCode}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {loan.borrowedAt}
-                                                    </TableCell>
-                                                    <TableCell
-                                                        className={cn(
-                                                            loan.isOverdue &&
-                                                                !loan.isReturned
-                                                                ? 'font-semibold text-destructive'
-                                                                : '',
-                                                        )}
-                                                    >
-                                                        {loan.dueAt}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {loan.returnedAt}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <LoanStatusBadge
-                                                            loan={loan}
-                                                        />
-                                                    </TableCell>
-                                                </TableRow>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/10 p-4">
+                                        <div className="flex flex-wrap gap-2">
+                                            {[
+                                                {
+                                                    key: 'all' as const,
+                                                    label: 'Semua',
+                                                },
+                                                {
+                                                    key: 'overdue' as const,
+                                                    label: 'Terlambat',
+                                                },
+                                                {
+                                                    key: 'active' as const,
+                                                    label: 'Masih dipinjam',
+                                                },
+                                                {
+                                                    key: 'returned' as const,
+                                                    label: 'Selesai',
+                                                },
+                                            ].map((filter) => (
+                                                <Button
+                                                    key={filter.key}
+                                                    type="button"
+                                                    variant={
+                                                        filters.filter ===
+                                                        filter.key
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
+                                                    size="sm"
+                                                    className="h-8 rounded-full px-3"
+                                                    onClick={() =>
+                                                        applyHistoryFilters(
+                                                            filter.key,
+                                                            searchQuery,
+                                                        )
+                                                    }
+                                                >
+                                                    {filter.label}
+                                                    <span className="text-xs opacity-80">
+                                                        {
+                                                            filterCounts[
+                                                                filter.key
+                                                            ]
+                                                        }
+                                                    </span>
+                                                </Button>
                                             ))}
-                                        </TableBody>
-                                    </Table>
+                                        </div>
+
+                                        <div className="relative">
+                                            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                            <Input
+                                                value={searchQuery}
+                                                onChange={(event) =>
+                                                    setSearchQuery(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="Cari judul, kode, atau transaksi"
+                                                className="pl-9"
+                                            />
+                                        </div>
+
+                                        {activeFilterChips.length > 0 ? (
+                                            <div className="flex flex-wrap gap-2">
+                                                {activeFilterChips.map((chip) => (
+                                                    <Button
+                                                        key={chip.key}
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8 gap-1 rounded-full px-3 text-xs"
+                                                        onClick={chip.onRemove}
+                                                    >
+                                                        {chip.label}
+                                                        <X className="size-3.5" />
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        ) : null}
+
+                                        <p className="text-sm text-muted-foreground">
+                                            {' '}
+                                            {visibleLoansCount.toLocaleString(
+                                                'id-ID',
+                                            )}{' '}
+                                            hasil
+                                        </p>
+                                    </div>
+
+                                    {visibleLoansCount === 0 ? (
+                                        <div className="rounded-2xl border border-dashed border-border/70 bg-muted/10 px-5 py-10 text-center">
+                                            <p className="text-sm font-medium text-foreground">
+                                                Tidak ada hasil
+                                            </p>
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                Ubah filter atau kata kunci.
+                                            </p>
+                                        </div>
+                                    ) : null}
+
+                                    {groupedLoans.overdue.length > 0 ? (
+                                        <section className="space-y-3">
+                                            <div className="flex flex-col gap-2 rounded-2xl border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="space-y-1">
+                                                    <h3 className="text-sm font-semibold text-foreground">
+                                                        Terlambat
+                                                    </h3>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Perlu segera
+                                                        dikembalikan.
+                                                    </p>
+                                                </div>
+                                                <Badge
+                                                    variant="destructive"
+                                                    className="w-fit"
+                                                >
+                                                    {groupedLoans.overdue.length}{' '}
+                                                    buku
+                                                </Badge>
+                                            </div>
+
+                                            {renderLoanCollection(groupedLoans.overdue)}
+                                        </section>
+                                    ) : null}
+
+                                    {groupedLoans.active.length > 0 ? (
+                                        <section className="space-y-3">
+                                            <div className="flex flex-col gap-2 rounded-2xl border border-blue-200/60 bg-blue-50/60 p-4 dark:border-blue-900/60 dark:bg-blue-950/20 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="space-y-1">
+                                                    <h3 className="text-sm font-semibold text-foreground">
+                                                        Masih dipinjam
+                                                    </h3>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Pilih buku untuk QR
+                                                        pengembalian.
+                                                    </p>
+                                                </div>
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="w-fit"
+                                                >
+                                                    {groupedLoans.active.length}{' '}
+                                                    buku
+                                                </Badge>
+                                            </div>
+
+                                            {renderLoanCollection(groupedLoans.active)}
+                                        </section>
+                                    ) : null}
+
+                                    {groupedLoans.returned.length > 0 ? (
+                                        <Collapsible
+                                            open={
+                                                filters.filter === 'returned'
+                                                    ? true
+                                                    : showReturnedLoans
+                                            }
+                                            onOpenChange={setShowReturnedLoans}
+                                            className="rounded-2xl border border-border/60"
+                                        >
+                                            <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="space-y-1">
+                                                    <h3 className="text-sm font-semibold text-foreground">
+                                                        Selesai
+                                                    </h3>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Riwayat yang sudah
+                                                        selesai.
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="w-fit"
+                                                    >
+                                                        {groupedLoans.returned.length}{' '}
+                                                        buku
+                                                    </Badge>
+                                                    <CollapsibleTrigger asChild>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="gap-2"
+                                                        >
+                                                            {(filters.filter ===
+                                                            'returned'
+                                                                ? true
+                                                                : showReturnedLoans)
+                                                                ? 'Tutup'
+                                                                : 'Buka'}
+                                                            <ChevronDown
+                                                                className={cn(
+                                                                    'size-4 transition-transform',
+                                                                    (filters.filter ===
+                                                                    'returned'
+                                                                        ? true
+                                                                        : showReturnedLoans)
+                                                                        ? 'rotate-180'
+                                                                        : '',
+                                                                )}
+                                                            />
+                                                        </Button>
+                                                    </CollapsibleTrigger>
+                                                </div>
+                                            </div>
+
+                                            <CollapsibleContent className="border-t border-border/60 p-4 pt-4">
+                                                {renderLoanCollection(groupedLoans.returned)}
+                                            </CollapsibleContent>
+                                        </Collapsible>
+                                    ) : null}
                                 </CardContent>
                             </Card>
 
@@ -443,13 +879,12 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                             Pilihan
                                         </p>
                                         <p className="mt-2 text-sm font-medium text-foreground">
-                                            {selectedItemsCount} buku aktif
-                                            dipilih
+                                            {selectedItemsCount} buku dipilih
                                         </p>
                                     </div>
 
                                     <Badge variant="secondary">
-                                        Aktif {stats.active}
+                                        {stats.active} aktif
                                     </Badge>
                                 </div>
 
@@ -482,7 +917,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                 {returnDraft.items.length > 0 ? (
                                     <div className="rounded-2xl border border-border/60 bg-muted/15 p-4">
                                         <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                            Termuat di QR
+                                            Di QR
                                         </p>
                                         <div className="mt-3 space-y-3">
                                             {returnDraft.items.map((item) => (
@@ -494,8 +929,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                                         {item.bookTitle}
                                                     </p>
                                                     <p className="text-xs text-muted-foreground">
-                                                        {item.internalCode} •
-                                                        Dipinjam{' '}
+                                                        {item.internalCode} ·{' '}
                                                         {item.borrowedAt}
                                                     </p>
                                                 </div>
@@ -534,8 +968,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                         </div>
                                     ) : (
                                         <div className="rounded-2xl bg-muted/20 px-5 py-12 text-center text-sm text-muted-foreground">
-                                            QR siap dibuat dari pilihan buku
-                                            aktif.
+                                            QR belum dibuat.
                                         </div>
                                     )}
                                 </div>
@@ -565,7 +998,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                                         }
                                     >
                                         <QrCode className="size-4" />
-                                        Buat QR Pengembalian
+                                        Buat QR
                                     </Button>
                                 </form>
                             </CardContent>
@@ -574,11 +1007,10 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                 ) : (
                     <Card className="flex h-72 flex-col items-center justify-center border-dashed text-center">
                         <CardTitle className="text-lg">
-                            Belum ada riwayat peminjaman
+                            Belum ada riwayat
                         </CardTitle>
                         <CardDescription className="mt-2 max-w-xs">
-                            Anda belum pernah meminjam buku di perpustakaan ini.
-                            Kunjungi katalog untuk menemukan buku menarik.
+                            Anda belum pernah meminjam buku.
                         </CardDescription>
                         <Button
                             asChild
@@ -587,7 +1019,7 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
                         >
                             <Link href={booksRoute.index.url()}>
                                 <BookOpen className="size-4" />
-                                Jelajahi Katalog
+                                Buka Katalog
                             </Link>
                         </Button>
                     </Card>
@@ -596,3 +1028,5 @@ export default function LoanHistoryPage({ loans, stats, returnDraft }: Props) {
         </>
     );
 }
+
+

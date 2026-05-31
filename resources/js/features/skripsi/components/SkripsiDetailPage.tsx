@@ -56,7 +56,7 @@ export default function SkripsiDetailPage(
             description={
                 skripsi.abstract
                     ? skripsi.abstract.slice(0, 160)
-                    : `Detail skripsi ${skripsi.title} di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+                    : `${skripsi.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
             }
             hero={
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">

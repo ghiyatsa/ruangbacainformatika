@@ -32,8 +32,10 @@ class VisitLogResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
+        [$startOfDay, $endOfDay] = VisitLog::adminDayRange();
+
         return (string) static::getModel()::query()
-            ->whereDate('visited_at', today())
+            ->whereBetween('visited_at', [$startOfDay, $endOfDay])
             ->count();
     }
 

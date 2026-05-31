@@ -43,13 +43,7 @@ class IntegrationSettings extends Page
     {
         $values = $this->settingRepository()->sectionValues('integration', $this->defaultValues());
 
-        // Decrypt secret fields
-        if (filled($values['similarity_api_secret'] ?? null)) {
-            try {
-                $values['similarity_api_secret'] = decrypt($values['similarity_api_secret']);
-            } catch (\Exception) {
-            }
-        }
+        $values = $this->decryptSecretFields($values);
 
         $this->form->fill($values);
     }
@@ -230,13 +224,16 @@ class IntegrationSettings extends Page
         $similaritySecret = filled($data['similarity_api_secret'] ?? null)
             ? encrypt($data['similarity_api_secret'])
             : null;
+        $whatsAppToken = filled($data['whatsapp_api_token'] ?? null)
+            ? encrypt($data['whatsapp_api_token'])
+            : null;
 
         $this->settingRepository()->putMany('integration', [
             'similarity_api_url' => $data['similarity_api_url'] ?? null,
             'similarity_api_secret' => $similaritySecret,
             'similarity_api_timeout' => $data['similarity_api_timeout'] ?? 10,
             'whatsapp_api_url' => $data['whatsapp_api_url'] ?? null,
-            'whatsapp_api_token' => $data['whatsapp_api_token'] ?? null,
+            'whatsapp_api_token' => $whatsAppToken,
             'turnstile_enabled' => $data['turnstile_enabled'] ?? false,
             'similarity_api_top_k' => $data['similarity_api_top_k'] ?? 5,
             'similarity_api_threshold' => $data['similarity_api_threshold'] ?? 0.5,
@@ -260,13 +257,9 @@ class IntegrationSettings extends Page
         }
 
         // Re-fill form with decrypted value so UI stays consistent
-        $values = $this->settingRepository()->sectionValues('integration', $this->defaultValues());
-        if (filled($values['similarity_api_secret'] ?? null)) {
-            try {
-                $values['similarity_api_secret'] = decrypt($values['similarity_api_secret']);
-            } catch (\Exception) {
-            }
-        }
+        $values = $this->decryptSecretFields(
+            $this->settingRepository()->sectionValues('integration', $this->defaultValues()),
+        );
 
         $this->form->fill($values);
     }
@@ -307,5 +300,25 @@ class IntegrationSettings extends Page
     protected function settingRepository(): SettingRepository
     {
         return app(SettingRepository::class);
+    }
+
+    /**
+     * @param  array<string, mixed>  $values
+     * @return array<string, mixed>
+     */
+    protected function decryptSecretFields(array $values): array
+    {
+        foreach (['similarity_api_secret', 'whatsapp_api_token'] as $key) {
+            if (! filled($values[$key] ?? null)) {
+                continue;
+            }
+
+            try {
+                $values[$key] = decrypt($values[$key]);
+            } catch (\Exception) {
+            }
+        }
+
+        return $values;
     }
 }

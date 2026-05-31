@@ -39,7 +39,7 @@ export default function RegisterProfile() {
                                     autoFocus
                                     required
                                     autoComplete="name"
-                                    placeholder="Nama lengkap"
+                                    placeholder="Nama lengkap Anda"
                                 />
                                 <InputError message={errors.name} />
                             </div>
@@ -67,7 +67,7 @@ export default function RegisterProfile() {
                                     readOnly={hasVerifiedWhatsapp}
                                     disabled={hasVerifiedWhatsapp}
                                     autoComplete="tel"
-                                    placeholder="08123456789"
+                                    placeholder="08xxxxxxxxxx"
                                 />
                                 <InputError message={errors.whatsapp} />
                             </div>
@@ -81,12 +81,12 @@ export default function RegisterProfile() {
                                     required
                                     autoComplete="street-address"
                                     className="min-h-28 resize-y"
-                                    placeholder="Alamat lengkap"
+                                    placeholder="Alamat tempat tinggal"
                                 />
                                 <p className="text-sm text-muted-foreground">
                                     {hasWhatsapp
                                         ? 'Lengkapi alamat untuk melanjutkan.'
-                                        : 'Nama, WhatsApp, dan alamat wajib diisi.'}
+                                        : 'Lengkapi nama, nomor WhatsApp, dan alamat untuk melanjutkan.'}
                                 </p>
                                 <InputError message={errors.address} />
                             </div>
@@ -121,5 +121,5 @@ export default function RegisterProfile() {
 
 RegisterProfile.layout = {
     title: 'Lengkapi profil',
-    description: 'Lengkapi profil untuk melanjutkan.',
+    description: 'Lengkapi data akun untuk melanjutkan.',
 };

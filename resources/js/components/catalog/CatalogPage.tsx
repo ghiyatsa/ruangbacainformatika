@@ -12,6 +12,9 @@ interface CatalogPageProps<T> {
     totalCount: number;
     paginationData?: PaginationData<T>;
     filters?: CatalogActiveFilters;
+    filterLabels?: {
+        category?: string;
+    };
     onClearFilters?: () => void;
     onRemoveFilter?: (key: string) => void;
     filtersPanel?: ReactNode;
@@ -29,6 +32,7 @@ export function CatalogPage<T>({
     totalCount,
     paginationData,
     filters,
+    filterLabels,
     onClearFilters,
     onRemoveFilter,
     filtersPanel,
@@ -55,6 +59,7 @@ export function CatalogPage<T>({
             totalCount={totalCount}
             paginationData={paginationData}
             filters={filters}
+            filterLabels={filterLabels}
             onClearFilters={onClearFilters}
             onRemoveFilter={onRemoveFilter}
             paginationVisibility={paginationVisibility}

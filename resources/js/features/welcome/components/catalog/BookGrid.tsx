@@ -1,8 +1,10 @@
+import { usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'motion/react';
 import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import EmptyCatalogState from './EmptyCatalogState';
 import type { CatalogBook } from '@/features/welcome/types';
+import type { Auth, LoanRequestCart } from '@/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 interface BookGridProps {
@@ -28,6 +30,11 @@ export default function BookGrid({
     emptyDescription,
     keyPrefix = 'book',
 }: BookGridProps) {
+    const { auth, loanRequestCart } = usePage<{
+        auth: Auth;
+        loanRequestCart: LoanRequestCart | null;
+    }>().props;
+
     if (isLoading) {
         return (
             <div className="animate-in duration-500 fade-in">
@@ -72,6 +79,8 @@ export default function BookGrid({
                             <BookCard
                                 key={book.id || `${keyPrefix}-grid-${index}`}
                                 book={book}
+                                auth={auth}
+                                loanRequestCart={loanRequestCart}
                             />
                         ))}
                     </div>
@@ -82,6 +91,8 @@ export default function BookGrid({
                                 key={book.id || `${keyPrefix}-list-${index}`}
                                 book={book}
                                 variant="compact"
+                                auth={auth}
+                                loanRequestCart={loanRequestCart}
                             />
                         ))}
                     </div>

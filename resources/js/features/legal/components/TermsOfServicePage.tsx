@@ -12,10 +12,10 @@ import {
 } from '@/components/ui/card';
 
 const terms = [
-    'Gunakan akun dan layanan sesuai keperluan akademik yang sah.',
+    'Gunakan akun dan layanan sesuai kebutuhan yang sah.',
     'Jaga kerahasiaan akses akun dan hindari penggunaan oleh pihak lain.',
-    'Hormati ketentuan peminjaman, pengembalian, dan penggunaan koleksi.',
-    'Dilarang menyalahgunakan sistem, data, atau fasilitas pencarian.',
+    'Hormati ketentuan peminjaman, pengembalian, dan penggunaan buku.',
+    'Dilarang menyalahgunakan layanan, data, atau fasilitas pencarian.',
     'Konten dan layanan dapat disesuaikan mengikuti kebijakan program studi.',
 ];
 
@@ -23,12 +23,12 @@ export function TermsOfServicePage() {
     return (
         <PageLayout
             title="Syarat Layanan"
-            metaDescription="Baca syarat layanan Ruang Baca Teknik Informatika Universitas Malikussaleh, termasuk penggunaan akun, koleksi, dan ketentuan operasional perpustakaan."
+            metaDescription="Baca syarat penggunaan layanan Ruang Baca Teknik Informatika Universitas Malikussaleh."
             maxWidth="5xl"
             header={
                 <LibraryPageHero
                     title="Syarat Layanan"
-                    description="Ketentuan penggunaan Ruang Baca Teknik Informatika."
+                    description="Ketentuan penggunaan layanan Ruang Baca Teknik Informatika."
                 />
             }
         >
@@ -39,7 +39,7 @@ export function TermsOfServicePage() {
                             <CardTitle>Ketentuan penggunaan layanan</CardTitle>
                             <CardDescription>
                                 Layanan ini disediakan untuk mendukung
-                                pembelajaran, riset, dan kebutuhan akademik.
+                                kegiatan belajar dan penggunaan ruang baca.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -63,36 +63,34 @@ export function TermsOfServicePage() {
                             icon={BookOpen}
                             tone="accent"
                         >
-                            Meliputi pencarian koleksi, informasi buku, karya
-                            ilmiah, layanan akun, dan fitur pendukung
-                            perpustakaan digital.
+                            Meliputi pencarian buku, karya ilmiah, layanan
+                            akun, dan fitur pendukung ruang baca.
                         </PublicInfoCard>
 
                         <PublicInfoCard title="Tanggung jawab" icon={Shield}>
                             Pengguna bertanggung jawab atas keamanan akun,
-                            kepatuhan penggunaan layanan, dan interaksi melalui
-                            sistem.
+                            kepatuhan penggunaan layanan, dan aktivitas melalui
+                            akun.
                         </PublicInfoCard>
                     </div>
                 </div>
 
                 <PublicPageSection
                     title="Catatan penting"
-                    description="Ketentuan ini mengikuti kebijakan akademik dan dapat diperbarui sesuai kebutuhan layanan."
+                    description="Ketentuan ini mengikuti kebijakan program studi dan dapat diperbarui sesuai kebutuhan layanan."
                 >
                     <div className="grid gap-5 md:grid-cols-3">
                         <PublicInfoCard title="Pembaruan layanan">
                             Layanan dapat diperbarui mengikuti kebutuhan
-                            institusi dan penyempurnaan sistem.
+                            institusi dan penyempurnaan layanan.
                         </PublicInfoCard>
                         <PublicInfoCard title="Batasan fitur">
                             Penggunaan fitur tertentu dapat dibatasi untuk
-                            alasan keamanan, operasional, atau kepatuhan
-                            internal.
+                            alasan keamanan, layanan, atau kepatuhan internal.
                         </PublicInfoCard>
                         <PublicInfoCard title="Acuan utama">
                             Kebijakan akademik program studi tetap menjadi
-                            rujukan utama dalam penggunaan Ruang Baca.
+                            acuan utama dalam penggunaan Ruang Baca.
                         </PublicInfoCard>
                     </div>
                 </PublicPageSection>

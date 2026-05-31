@@ -1,9 +1,8 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { createElement } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
+import { LazyToaster } from '@/components/app/LazyToaster';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import AppLayout from '@/layouts/AppLayout';
@@ -12,7 +11,9 @@ import SettingsLayout from '@/layouts/SettingsLayout';
 import type { ReactNode } from 'react';
 import type { Root } from 'react-dom/client';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Ruang Baca';
+const rootDataset = document.documentElement.dataset;
+const appName =
+    rootDataset.appName || import.meta.env.VITE_APP_NAME || 'Ruang Baca';
 
 type RootElement = HTMLElement & {
     __inertiaRoot?: Root;
@@ -24,10 +25,8 @@ function AppProviders({ children }: { children: ReactNode }) {
 
     return (
         <ErrorBoundary>
-            <TooltipProvider>
-                {children}
-                <Toaster />
-            </TooltipProvider>
+            {children}
+            <LazyToaster />
         </ErrorBoundary>
     );
 }

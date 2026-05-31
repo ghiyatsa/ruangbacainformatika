@@ -3,10 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
-use App\Repositories\SettingRepository;
 use App\Services\Auth\AuthenticationRedirector;
 use App\Services\LoanDraftService;
 use App\Support\LoginViewData;
+use App\Support\SiteSettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -14,7 +14,7 @@ class HandleInertiaRequests extends Middleware
 {
     public function __construct(
         protected LoanDraftService $loanDraftService,
-        protected SettingRepository $settingRepository,
+        protected SiteSettings $siteSettings,
     ) {}
 
     /**
@@ -47,39 +47,11 @@ class HandleInertiaRequests extends Middleware
     {
         $session = $request->hasSession() ? $request->session() : null;
         $user = $request->user();
-        $generalSettings = $this->settingRepository->sectionValues('general', [
-            'hero_notice_enabled' => '0',
-            'hero_notice_text' => '',
-            'hero_notice_url' => '',
-            'hero_notice_link_label' => '',
-            'hero_notice_tone' => 'info',
-        ]);
-        $heroNoticeText = trim((string) ($generalSettings['hero_notice_text'] ?? ''));
-        $heroNoticeUrl = trim((string) ($generalSettings['hero_notice_url'] ?? ''));
-        $heroNoticeLinkLabel = trim((string) ($generalSettings['hero_notice_link_label'] ?? ''));
-        $heroNoticeTone = in_array($generalSettings['hero_notice_tone'] ?? null, ['info', 'warning', 'success'], true)
-            ? $generalSettings['hero_notice_tone']
-            : 'info';
+        $siteData = $this->siteSettings->shared();
 
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
-            'site' => [
-                'url' => rtrim((string) config('app.url'), '/'),
-                'description' => 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.',
-                'department' => 'Program Studi Teknik Informatika Universitas Malikussaleh',
-                'contactEmail' => 'informatika@unimal.ac.id',
-                'address' => 'Jl. Cot Tengku Nie, Reuleut, Aceh Utara 24355',
-                'ogImage' => asset('images/og-image.png'),
-                'notice' => [
-                    'isActive' => ($generalSettings['hero_notice_enabled'] ?? '0') === '1'
-                        && $heroNoticeText !== '',
-                    'text' => $heroNoticeText,
-                    'url' => $heroNoticeUrl !== '' ? $heroNoticeUrl : null,
-                    'linkLabel' => $heroNoticeLinkLabel !== '' ? $heroNoticeLinkLabel : null,
-                    'tone' => $heroNoticeTone,
-                ],
-            ],
+            ...$siteData,
             'auth' => [
                 'user' => $this->serializeUser($user),
                 'canAccessAdminPanel' => $user?->canAccessAdminPanel() ?? false,

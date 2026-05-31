@@ -37,7 +37,7 @@ export function DesktopNav({ isActive }: DesktopNavProps) {
                                 >
                                     {item.label}
                                 </NavigationMenuTrigger>
-                                <NavigationMenuContent className="left-1/2 -translate-x-1/2">
+                                <NavigationMenuContent className="left-0">
                                     <ul className="flex w-max min-w-[200px] flex-col gap-1 p-2">
                                         {item.children.map((child) => (
                                             <ListItem

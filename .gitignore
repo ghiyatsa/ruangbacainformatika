@@ -27,3 +27,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+testsprite_tests\tmp\config.json

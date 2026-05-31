@@ -6,6 +6,7 @@ use App\Models\Loan;
 use App\Notifications\Channels\WhatsAppChannel;
 use App\Notifications\Concerns\RateLimitsWhatsAppNotifications;
 use App\Notifications\Messages\WhatsAppMessage;
+use App\Support\AppTimezone;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -44,7 +45,7 @@ class LoanReminderNotification extends Notification implements ShouldQueue
         }
 
         $lines[] = '';
-        $lines[] = 'Batas pengembalian: '.$this->loan->due_at?->translatedFormat('d F Y');
+        $lines[] = 'Batas pengembalian: '.AppTimezone::format($this->loan->due_at, 'd F Y');
         $lines[] = 'Riwayat pinjaman: '.url('/loans/history');
         $lines[] = 'Salam, Tim Perpustakaan '.config('app.name');
 

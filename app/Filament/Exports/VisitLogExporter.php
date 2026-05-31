@@ -3,6 +3,7 @@
 namespace App\Filament\Exports;
 
 use App\Models\VisitLog;
+use Carbon\CarbonInterface;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
@@ -41,7 +42,9 @@ class VisitLogExporter extends Exporter
                 ->formatStateUsing(fn (?string $state): string => static::sanitizeForSpreadsheet($state)),
             ExportColumn::make('visited_at')
                 ->label('Waktu Kunjungan')
-                ->formatStateUsing(fn ($state): string => $state?->translatedFormat('d M Y H:i') ?? '-'),
+                ->formatStateUsing(
+                    fn (?CarbonInterface $state): string => $state?->copy()->setTimezone(VisitLog::adminTimezone())->translatedFormat('d M Y H:i') ?? '-',
+                ),
         ];
     }
 

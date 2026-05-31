@@ -1,19 +1,14 @@
-import { Form, Link, usePage } from '@inertiajs/react';
+import { Form, Link } from '@inertiajs/react';
 import {
     Bookmark,
     BookOpen,
     ShoppingCart as LoanRequestIcon,
     Star,
 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
@@ -54,17 +49,13 @@ function CoverImage({
     );
 }
 
-function estimateCategoryBadgeWidth(name: string): number {
-    return Math.min(Math.max(name.length * 6.4 + 18, 38), 180);
-}
-
 function CategoryBadges({
     categories,
+    maxVisible = 2,
 }: {
     categories: NonNullable<CatalogBook['categories']>;
+    maxVisible?: number;
 }) {
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const [containerWidth, setContainerWidth] = useState<number | null>(null);
     const orderedCategories = useMemo(
         () =>
             [...categories].sort(
@@ -74,72 +65,14 @@ function CategoryBadges({
             ),
         [categories],
     );
-
-    useEffect(() => {
-        const container = containerRef.current;
-
-        if (!container) {
-            return;
-        }
-
-        const observer = new ResizeObserver(([entry]) => {
-            const nextWidth = entry?.contentRect.width;
-
-            if (nextWidth) {
-                setContainerWidth(nextWidth);
-            }
-        });
-
-        observer.observe(container);
-
-        return () => observer.disconnect();
-    }, []);
-
-    const visibleCount = useMemo(() => {
-        if (orderedCategories.length === 0) {
-            return 0;
-        }
-
-        if (!containerWidth) {
-            return orderedCategories.length;
-        }
-
-        const gapWidth = 4;
-        const counterWidth = 32;
-        let usedWidth = 0;
-        let count = 0;
-
-        for (const category of orderedCategories) {
-            const nextWidth =
-                estimateCategoryBadgeWidth(category.name) +
-                (count > 0 ? gapWidth : 0);
-            const hasHiddenAfterThis = count + 1 < orderedCategories.length;
-            const reservedWidth = hasHiddenAfterThis
-                ? counterWidth + gapWidth
-                : 0;
-
-            if (usedWidth + nextWidth + reservedWidth > containerWidth) {
-                break;
-            }
-
-            usedWidth += nextWidth;
-            count += 1;
-        }
-
-        return Math.max(count, 1);
-    }, [containerWidth, orderedCategories]);
-
-    const visibleCategories = orderedCategories.slice(0, visibleCount);
-    const hiddenCategories = orderedCategories.slice(visibleCount);
+    const visibleCategories = orderedCategories.slice(0, maxVisible);
+    const hiddenCategories = orderedCategories.slice(maxVisible);
     const hiddenCategoryNames = hiddenCategories
         .map((category) => category.name)
         .join(', ');
 
     return (
-        <div
-            ref={containerRef}
-            className="flex min-h-4 min-w-0 items-center gap-1"
-        >
+        <div className="flex min-h-4 min-w-0 items-center gap-1">
             {visibleCategories.map((category, index) => (
                 <span
                     key={category.slug ?? `${category.name}-${index}`}
@@ -164,17 +97,16 @@ function CategoryBadges({
 interface BookCardProps {
     book: CatalogBook;
     variant?: 'grid' | 'compact';
+    auth: Auth;
+    loanRequestCart: LoanRequestCart | null;
 }
 
-export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
-    const { auth, loanRequestCart } = usePage<{
-        auth: Auth;
-        loanRequestCart: LoanRequestCart | null;
-    }>().props;
+function BookCard({ book, variant = 'grid', auth, loanRequestCart }: BookCardProps) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const isCompact = variant === 'compact';
     const categories = Array.isArray(book.categories) ? book.categories : [];
     const authors = Array.isArray(book.authors) ? book.authors : [];
+    const authorsLabel = authors.join(', ') || 'Penulis tidak tersedia';
     const canAddToCart =
         auth.user !== null &&
         auth.canBorrowBooks === true &&
@@ -197,7 +129,7 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
         id: book.id,
         href: booksRoute.show.url(book.slug),
         title: book.title,
-        subtitle: authors.join(', ') || 'Penulis tidak tersedia',
+        subtitle: authorsLabel,
         meta: book.pages ? `${book.pages} halaman` : null,
         year: book.publishedYear ?? null,
         coverImageUrl: book.coverImageUrl,
@@ -224,7 +156,7 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
     return (
         <div
             className={cn(
-                'group relative flex h-full overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 dark:hover:shadow-primary/10',
+                'group relative flex h-full overflow-hidden rounded-2xl border bg-card transition-all duration-300',
                 !isCompact && 'sm:flex-col',
             )}
         >
@@ -257,51 +189,42 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
 
                 <div className="absolute top-2 left-2 z-20">
                     {book.isFeatured && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary text-primary-foreground shadow-sm backdrop-blur-sm">
-                                    <Star className="size-3 fill-current" />
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" sideOffset={8}>
-                                Buku Unggulan
-                            </TooltipContent>
-                        </Tooltip>
+                        <div
+                            title="Buku unggulan"
+                            aria-label="Buku unggulan"
+                            className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary text-primary-foreground shadow-sm"
+                        >
+                            <Star className="size-3 fill-current" />
+                        </div>
                     )}
                 </div>
 
                 <div className="absolute top-2 right-2 z-20 flex flex-col items-end gap-1">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                type="button"
-                                size="icon-sm"
-                                variant="secondary"
-                                className={cn(
-                                    'rounded-full border border-white/20 bg-black/55 text-white shadow-sm backdrop-blur-sm hover:bg-black/70 hover:text-white',
-                                    isBookmarkedByUser &&
-                                        'border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90',
-                                )}
-                                aria-label={bookmarkLabel}
-                                aria-pressed={isBookmarkedByUser}
-                                onClick={(event) => {
-                                    event.preventDefault();
-                                    event.stopPropagation();
-                                    toggleBookmark(bookmarkRecord);
-                                }}
-                            >
-                                <Bookmark
-                                    className={cn(
-                                        'size-3.5 transition-transform duration-200 group-hover:scale-110',
-                                        isBookmarkedByUser && 'fill-current',
-                                    )}
-                                />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" sideOffset={8}>
-                            {bookmarkLabel}
-                        </TooltipContent>
-                    </Tooltip>
+                    <Button
+                        type="button"
+                        size="icon-sm"
+                        variant="secondary"
+                        title={bookmarkLabel}
+                        className={cn(
+                            'rounded-full border border-white/20 bg-black/55 text-white shadow-sm hover:bg-black/70 hover:text-white',
+                            isBookmarkedByUser &&
+                                'border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90',
+                        )}
+                        aria-label={bookmarkLabel}
+                        aria-pressed={isBookmarkedByUser}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            toggleBookmark(bookmarkRecord);
+                        }}
+                    >
+                        <Bookmark
+                            className={cn(
+                                'size-3.5 transition-transform duration-200 group-hover:scale-110',
+                                isBookmarkedByUser && 'fill-current',
+                            )}
+                        />
+                    </Button>
 
                     {canAddToCart ? (
                         <Form
@@ -347,45 +270,32 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                                         name="book_id"
                                         value={book.id}
                                     />
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                type="submit"
-                                                size="icon-sm"
-                                                variant="secondary"
-                                                className={cn(
-                                                    'rounded-full border border-white/20 bg-black/55 text-white shadow-sm backdrop-blur-sm hover:bg-black/70 hover:text-white',
-                                                    processing &&
-                                                        'animate-pulse',
-                                                )}
-                                                disabled={
-                                                    processing ||
-                                                    isAlreadyInLoanRequest
-                                                }
-                                                aria-label={
-                                                    addToLoanRequestLabel
-                                                }
-                                            >
-                                                {processing ? (
-                                                    <>
-                                                        <Spinner className="size-3.5" />
-                                                        <span className="sr-only">
-                                                            Menambahkan ke
-                                                            keranjang pinjam
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    <LoanRequestIcon className="size-3.5 transition-transform duration-200 group-hover:scale-110" />
-                                                )}
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent
-                                            side="top"
-                                            sideOffset={8}
-                                        >
-                                            {addToLoanRequestLabel}
-                                        </TooltipContent>
-                                    </Tooltip>
+                                    <Button
+                                        type="submit"
+                                        size="icon-sm"
+                                        variant="secondary"
+                                        title={addToLoanRequestLabel}
+                                        className={cn(
+                                            'rounded-full border border-white/20 bg-black/55 text-white shadow-sm hover:bg-black/70 hover:text-white',
+                                            processing && 'animate-pulse',
+                                        )}
+                                        disabled={
+                                            processing || isAlreadyInLoanRequest
+                                        }
+                                        aria-label={addToLoanRequestLabel}
+                                    >
+                                        {processing ? (
+                                            <>
+                                                <Spinner className="size-3.5" />
+                                                <span className="sr-only">
+                                                    Menambahkan ke keranjang
+                                                    pinjam
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <LoanRequestIcon className="size-3.5 transition-transform duration-200 group-hover:scale-110" />
+                                        )}
+                                    </Button>
                                 </>
                             )}
                         </Form>
@@ -393,14 +303,17 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
                 </div>
 
                 <div className="absolute bottom-2 left-2 z-20">
-                    <div className="inline-flex h-7 items-center rounded-full bg-black/55 px-2.5 text-[10px] font-semibold text-white shadow-sm backdrop-blur-sm">
+                    <div className="inline-flex h-7 items-center rounded-full bg-black/55 px-2.5 text-[10px] font-semibold text-white shadow-sm">
                         {book.viewCount.toLocaleString('id-ID')} dilihat
                     </div>
                 </div>
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-4">
-                <CategoryBadges categories={categories} />
+                <CategoryBadges
+                    categories={categories}
+                    maxVisible={isCompact ? 3 : 2}
+                />
 
                 <div className="min-h-[2.5rem]">
                     <h3 className="line-clamp-2 text-sm leading-snug font-bold transition-colors group-hover:text-primary sm:text-sm">
@@ -426,7 +339,7 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
 
                 <div className="min-h-4">
                     <p className="line-clamp-1 text-xs text-muted-foreground">
-                        {authors.join(', ') || 'Penulis tidak tersedia'}
+                        {authorsLabel}
                     </p>
                 </div>
 
@@ -454,3 +367,5 @@ export default function BookCard({ book, variant = 'grid' }: BookCardProps) {
         </div>
     );
 }
+
+export default memo(BookCard);

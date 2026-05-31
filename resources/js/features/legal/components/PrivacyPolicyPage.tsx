@@ -15,12 +15,12 @@ export function PrivacyPolicyPage() {
     return (
         <PageLayout
             title="Kebijakan Privasi"
-            metaDescription="Pelajari cara Ruang Baca Teknik Informatika Universitas Malikussaleh mengelola data akun, aktivitas layanan, dan perlindungan informasi pengguna."
+            metaDescription="Pelajari cara Ruang Baca Teknik Informatika Universitas Malikussaleh menggunakan dan menjaga data pengguna."
             maxWidth="5xl"
             header={
                 <LibraryPageHero
                     title="Kebijakan Privasi"
-                    description="Ringkasan pengelolaan data di Ruang Baca Teknik Informatika."
+                    description="Ringkasan penggunaan dan perlindungan data pengguna di Ruang Baca Teknik Informatika."
                 />
             }
         >
@@ -30,8 +30,8 @@ export function PrivacyPolicyPage() {
                         <CardHeader>
                             <CardTitle>Prinsip pengelolaan data</CardTitle>
                             <CardDescription>
-                                Data digunakan seperlunya untuk akun, layanan
-                                peminjaman, dan operasional perpustakaan.
+                                Data digunakan seperlunya untuk akun,
+                                peminjaman, dan kebutuhan layanan ruang baca.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6 text-sm leading-7 text-muted-foreground">
@@ -42,8 +42,8 @@ export function PrivacyPolicyPage() {
                                 <p className="mt-2">
                                     Data yang dapat digunakan meliputi identitas
                                     akun, email, nomor WhatsApp, riwayat
-                                    peminjaman, dan aktivitas yang terkait
-                                    dengan layanan perpustakaan.
+                                    peminjaman, serta aktivitas yang terkait
+                                    dengan penggunaan layanan ruang baca.
                                 </p>
                             </section>
 
@@ -54,8 +54,8 @@ export function PrivacyPolicyPage() {
                                 <p className="mt-2">
                                     Data digunakan untuk autentikasi akun,
                                     proses peminjaman dan pengembalian,
-                                    notifikasi layanan, pengelolaan koleksi,
-                                    serta peningkatan mutu layanan perpustakaan.
+                                    notifikasi layanan, pengelolaan buku, serta
+                                    peningkatan mutu layanan.
                                 </p>
                             </section>
 
@@ -65,10 +65,8 @@ export function PrivacyPolicyPage() {
                                 </h2>
                                 <p className="mt-2">
                                     Kami berupaya menjaga keamanan data melalui
-                                    kontrol akses sistem, pencatatan aktivitas
-                                    layanan, dan pembatasan penggunaan hanya
-                                    untuk kepentingan akademik dan operasional
-                                    yang sah.
+                                    pembatasan akses, pencatatan aktivitas
+                                    layanan, dan penggunaan yang seperlunya.
                                 </p>
                             </section>
 
@@ -79,7 +77,7 @@ export function PrivacyPolicyPage() {
                                 <p className="mt-2">
                                     Pengguna dapat meminta pembaruan data profil
                                     atau klarifikasi penggunaan data melalui
-                                    kontak resmi program studi.
+                                    kontak resmi yang disediakan program studi.
                                 </p>
                             </section>
                         </CardContent>
@@ -112,7 +110,7 @@ export function PrivacyPolicyPage() {
 
                 <PublicPageSection
                     title="Ruang lingkup perlindungan"
-                    description="Mencakup data yang diperlukan untuk identitas akun dan operasional layanan."
+                    description="Mencakup data yang diperlukan untuk identitas akun dan kebutuhan layanan."
                 >
                     <div className="grid gap-5 md:grid-cols-3">
                         <PublicInfoCard title="Akun pengguna">
@@ -122,7 +120,7 @@ export function PrivacyPolicyPage() {
                         </PublicInfoCard>
                         <PublicInfoCard title="Riwayat layanan">
                             Aktivitas peminjaman dan penggunaan fitur dapat
-                            dicatat untuk kebutuhan operasional serta evaluasi
+                            dicatat untuk kebutuhan layanan serta evaluasi
                             layanan.
                         </PublicInfoCard>
                         <PublicInfoCard title="Komunikasi resmi">

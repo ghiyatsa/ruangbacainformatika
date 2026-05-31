@@ -429,7 +429,11 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
         }, [effectiveHoverSpeed]);
 
         const renderScrollItem = useCallback(
-            (item: VelocityScrollItem, key: React.Key) => {
+            (
+                item: VelocityScrollItem,
+                key: React.Key,
+                isHiddenCopy = false,
+            ) => {
                 if (renderItem) {
                     return (
                         <li
@@ -501,6 +505,7 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                         )}
                         href={(item as any).href}
                         aria-label={itemAriaLabel || 'item link'}
+                        tabIndex={isHiddenCopy ? -1 : undefined}
                         target="_blank"
                         rel="noreferrer noopener"
                     >
@@ -540,10 +545,15 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                         key={`copy-${copyIndex}`}
                         role="list"
                         aria-hidden={copyIndex > 0}
+                        inert={copyIndex > 0}
                         ref={copyIndex === 0 ? seqRef : undefined}
                     >
                         {items.map((item, itemIndex) =>
-                            renderScrollItem(item, `${copyIndex}-${itemIndex}`),
+                            renderScrollItem(
+                                item,
+                                `${copyIndex}-${itemIndex}`,
+                                copyIndex > 0,
+                            ),
                         )}
                     </ul>
                 )),

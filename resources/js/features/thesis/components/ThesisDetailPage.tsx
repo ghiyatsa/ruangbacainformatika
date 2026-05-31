@@ -56,7 +56,7 @@ export default function ThesisDetailPage(
             description={
                 thesis.abstract
                     ? thesis.abstract.slice(0, 160)
-                    : `Detail tesis ${thesis.title} di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+                    : `${thesis.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
             }
             hero={
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">

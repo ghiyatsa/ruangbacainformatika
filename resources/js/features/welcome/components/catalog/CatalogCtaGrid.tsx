@@ -16,25 +16,25 @@ export default function CatalogCtaGrid() {
     const catalogLinks = [
         {
             title: 'Katalog Buku',
-            description: 'Referensi utama untuk perkuliahan dan riset.',
+            description: 'Daftar buku yang tersedia di ruang baca.',
             href: booksRoute.index.url(),
             icon: BookOpen,
         },
         {
             title: 'Skripsi',
-            description: 'Arsip tugas akhir sarjana.',
+            description: 'Arsip karya ilmiah jenjang sarjana.',
             href: skripsiRoute.index.url(),
             icon: GraduationCap,
         },
         {
             title: 'Tesis',
-            description: 'Arsip karya ilmiah pascasarjana.',
+            description: 'Arsip karya ilmiah jenjang magister.',
             href: thesisRoute.index.url(),
             icon: Library,
         },
         {
             title: 'Laporan KP',
-            description: 'Arsip laporan kerja praktik.',
+            description: 'Dokumentasi laporan kerja praktik mahasiswa.',
             href: internshipReportsRoute.index.url(),
             icon: FileText,
         },
@@ -43,8 +43,8 @@ export default function CatalogCtaGrid() {
     return (
         <div className="flex flex-col gap-6">
             <SectionHeader
-                title="Akses Katalog"
-                subtitle="Buka koleksi sesuai kebutuhan studi."
+                title="Jelajahi Koleksi"
+                subtitle="Pilih jenis koleksi yang ingin Anda telusuri."
             />
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -55,7 +55,7 @@ export default function CatalogCtaGrid() {
                         <Link
                             key={item.title}
                             href={item.href}
-                            className="group flex min-h-40 flex-col justify-between rounded-xl border bg-background p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                            className="group flex min-h-40 flex-col justify-between rounded-xl border bg-background p-5 transition-all duration-300 hover:border-primary/30"
                         >
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-primary">

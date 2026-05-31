@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use AchyutN\FilamentLogViewer\FilamentLogViewer;
 use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
@@ -23,6 +24,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Spatie\Permission\Models\Role;
 
@@ -70,6 +72,11 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
+                FilamentLogViewer::make()
+                    ->authorize(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false)
+                    ->navigationGroup('Sistem')
+                    ->navigationLabel('Log Sistem')
+                    ->navigationSort(90),
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Hak Akses')
                     ->navigationGroup('Manajemen Pengguna')

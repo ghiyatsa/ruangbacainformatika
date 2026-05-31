@@ -30,6 +30,11 @@ class SyncSkripsiCommand extends Command
 
         $chunk = (int) $this->option('chunk');
         $reset = (bool) $this->option('reset');
+
+        if ($reset) {
+            $this->statusService->markAllQueuedForFullSync();
+        }
+
         $total = Skripsi::count();
         $mode = $reset ? 'reset + rebuild' : 'upsert bertahap';
 

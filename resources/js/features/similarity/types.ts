@@ -1,13 +1,14 @@
-import { AlertCircle, CheckCircle2, TriangleAlert } from 'lucide-react';
+import { AlertCircle, CheckCircle2, TriangleAlert, Info } from 'lucide-react';
 import type { ElementType } from 'react';
 
 export interface SimilarityItem {
-    skripsi_id: number;
+    skripsi_id?: number | null;
     student_id?: string;
     judul: string;
     nama_mahasiswa: string;
     similarity_persen: number;
     level: string;
+    is_local_record_found?: boolean;
 }
 
 export interface SimilarityResult {
@@ -21,6 +22,7 @@ export interface LevelConfig {
     bg: string;
     badgeClass: string;
     trackClass: string;
+    strokeColor: string;
     icon: ElementType<{ className?: string }>;
 }
 
@@ -34,8 +36,9 @@ export function getLevelConfig(level: string): LevelConfig {
                 color: 'text-rose-600 dark:text-rose-400',
                 bg: 'bg-rose-500',
                 badgeClass:
-                    'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800',
-                trackClass: 'bg-rose-100 dark:bg-rose-950/30',
+                    'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50',
+                trackClass: 'bg-rose-50 dark:bg-rose-950/20',
+                strokeColor: '#f43f5e',
                 icon: TriangleAlert,
             };
         case 'TINGGI':
@@ -44,19 +47,21 @@ export function getLevelConfig(level: string): LevelConfig {
                 color: 'text-orange-600 dark:text-orange-400',
                 bg: 'bg-orange-500',
                 badgeClass:
-                    'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800',
+                    'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900/50',
                 trackClass: 'bg-orange-100 dark:bg-orange-950/30',
+                strokeColor: '#f97316',
                 icon: AlertCircle,
             };
         case 'SEDANG':
             return {
                 label: 'Sedang',
-                color: 'text-amber-600 dark:text-amber-400',
-                bg: 'bg-amber-500',
+                color: 'text-yellow-600 dark:text-yellow-400',
+                bg: 'bg-yellow-400',
                 badgeClass:
-                    'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800',
-                trackClass: 'bg-amber-100 dark:bg-amber-950/30',
-                icon: AlertCircle,
+                    'bg-yellow-50 text-yellow-700 border-yellow-300 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-900/50',
+                trackClass: 'bg-yellow-50 dark:bg-yellow-950/30',
+                strokeColor: '#eab308',
+                icon: Info,
             };
         case 'RENDAH':
             return {
@@ -66,6 +71,7 @@ export function getLevelConfig(level: string): LevelConfig {
                 badgeClass:
                     'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800',
                 trackClass: 'bg-emerald-100 dark:bg-emerald-950/30',
+                strokeColor: '#10b981',
                 icon: CheckCircle2,
             };
         case 'SANGAT RENDAH':
@@ -76,6 +82,7 @@ export function getLevelConfig(level: string): LevelConfig {
                 badgeClass:
                     'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800',
                 trackClass: 'bg-blue-100 dark:bg-blue-950/30',
+                strokeColor: '#3b82f6',
                 icon: CheckCircle2,
             };
         default:
@@ -85,6 +92,7 @@ export function getLevelConfig(level: string): LevelConfig {
                 bg: 'bg-muted',
                 badgeClass: 'bg-muted text-muted-foreground border-muted',
                 trackClass: 'bg-muted/30',
+                strokeColor: '#6b7280',
                 icon: AlertCircle,
             };
     }

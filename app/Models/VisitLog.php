@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\AppTimezone;
+use Carbon\CarbonInterface;
 use Database\Factories\VisitLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +14,8 @@ class VisitLog extends Model
 {
     /** @use HasFactory<VisitLogFactory> */
     use HasFactory;
+
+    public const ADMIN_TIMEZONE = 'Asia/Jakarta';
 
     public const VISITOR_TYPE_MAHASISWA = 'mahasiswa';
 
@@ -60,17 +64,52 @@ class VisitLog extends Model
         ];
     }
 
+    public static function adminTimezone(): string
+    {
+        return AppTimezone::displayTimezone();
+    }
+
+    public function visitedAtForAdmin(): ?CarbonInterface
+    {
+        return AppTimezone::toDisplay($this->visited_at);
+    }
+
+    /**
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    public static function adminDayRange(\DateTimeInterface|string|null $date = null): array
+    {
+        return AppTimezone::dayRange($date);
+    }
+
+    /**
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    public static function adminWeekRange(?\DateTimeInterface $date = null): array
+    {
+        $week = $date instanceof \DateTimeInterface
+            ? Carbon::instance($date)->setTimezone(self::adminTimezone())
+            : AppTimezone::now();
+
+        return [
+            $week->copy()->startOfWeek()->utc(),
+            $week->copy()->endOfWeek()->utc(),
+        ];
+    }
+
     public function scopeVisitedBetween(Builder $query, ?string $from, ?string $until): Builder
     {
         return $query
-            ->when(
-                filled($from),
-                fn (Builder $query): Builder => $query->where('visited_at', '>=', Carbon::parse($from)->startOfDay()),
-            )
-            ->when(
-                filled($until),
-                fn (Builder $query): Builder => $query->where('visited_at', '<=', Carbon::parse($until)->endOfDay()),
-            );
+            ->when(filled($from), function (Builder $query) use ($from): Builder {
+                [$startOfDay] = self::adminDayRange($from);
+
+                return $query->where('visited_at', '>=', $startOfDay);
+            })
+            ->when(filled($until), function (Builder $query) use ($until): Builder {
+                [, $endOfDay] = self::adminDayRange($until);
+
+                return $query->where('visited_at', '<=', $endOfDay);
+            });
     }
 
     /**
@@ -78,12 +117,15 @@ class VisitLog extends Model
      */
     public static function reportingSummary(): array
     {
+        [$todayStart, $todayEnd] = self::adminDayRange();
+        [$weekStart, $weekEnd] = self::adminWeekRange();
+
         $todayCount = static::query()
-            ->whereDate('visited_at', today())
+            ->whereBetween('visited_at', [$todayStart, $todayEnd])
             ->count();
 
         $thisWeekCount = static::query()
-            ->whereBetween('visited_at', [now()->startOfWeek(), now()->endOfWeek()])
+            ->whereBetween('visited_at', [$weekStart, $weekEnd])
             ->count();
 
         $mostCommonPurpose = static::query()

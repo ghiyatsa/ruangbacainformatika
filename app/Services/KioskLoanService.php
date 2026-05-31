@@ -11,6 +11,7 @@ use App\Notifications\LoanReceiptDatabaseNotification;
 use App\Notifications\LoanReceiptNotification;
 use App\Notifications\LoanReturnNotification;
 use App\Repositories\SettingRepository;
+use App\Support\AppTimezone;
 use App\Support\CampusEmail;
 use App\Support\LoanConsequenceService;
 use Carbon\CarbonInterface;
@@ -390,7 +391,7 @@ class KioskLoanService
         }
 
         try {
-            $member->notify(new LoanReturnNotification($returnedBookTitles, now()->translatedFormat('d F Y H:i')));
+            $member->notify(new LoanReturnNotification($returnedBookTitles, AppTimezone::format(now(), 'd F Y H:i')));
         } catch (Throwable $exception) {
             report($exception);
         }

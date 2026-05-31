@@ -4,9 +4,13 @@ import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+    InputGroupTextarea,
+} from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
 import { cn } from '@/lib/utils';
 import type { User as AuthUser } from '@/types/auth';
@@ -36,47 +40,41 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                 {({ processing, errors, recentlySuccessful }) => (
                     <div className="flex flex-col gap-5">
                         <div className="grid gap-2">
-                            <Label
-                                htmlFor="name"
-                                className="flex items-center gap-1.5"
-                            >
-                                <User className="h-3.5 w-3.5 text-muted-foreground" />
-                                Nama lengkap
-                            </Label>
-                            <Input
-                                id="name"
-                                className="w-full"
-                                defaultValue={user.name}
-                                name="name"
-                                required
-                                autoComplete="name"
-                                placeholder="Nama lengkap Anda"
-                            />
+                            <Label htmlFor="name">Nama lengkap</Label>
+                            <InputGroup>
+                                <InputGroupInput
+                                    id="name"
+                                    defaultValue={user.name}
+                                    name="name"
+                                    required
+                                    autoComplete="name"
+                                    placeholder="Nama lengkap Anda"
+                                />
+                                <InputGroupAddon>
+                                    <User className="size-4" />
+                                </InputGroupAddon>
+                            </InputGroup>
                             <InputError message={errors.name} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label
-                                htmlFor="email"
-                                className="flex items-center gap-1.5"
-                            >
-                                <AtSign className="h-3.5 w-3.5 text-muted-foreground" />
-                                Alamat email
-                            </Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                className={cn(
-                                    'w-full',
-                                    'cursor-not-allowed bg-muted/50 text-muted-foreground',
-                                )}
-                                value={user.email}
-                                autoComplete="username"
-                                placeholder="Alamat email"
-                                readOnly
-                                disabled
-                                suppressHydrationWarning
-                            />
+                            <Label htmlFor="email">Alamat email</Label>
+                            <InputGroup className="bg-muted/50">
+                                <InputGroupInput
+                                    id="email"
+                                    type="email"
+                                    className="cursor-not-allowed text-muted-foreground"
+                                    value={user.email}
+                                    autoComplete="username"
+                                    placeholder="Alamat email"
+                                    readOnly
+                                    disabled
+                                    suppressHydrationWarning
+                                />
+                                <InputGroupAddon>
+                                    <AtSign className="size-4" />
+                                </InputGroupAddon>
+                            </InputGroup>
                             <p className="text-xs text-muted-foreground">
                                 Email tidak dapat diubah.
                             </p>
@@ -84,11 +82,7 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
 
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between gap-3">
-                                <Label
-                                    htmlFor="whatsapp"
-                                    className="flex items-center gap-1.5"
-                                >
-                                    <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                                <Label htmlFor="whatsapp">
                                     Nomor WhatsApp
                                 </Label>
                                 {hasVerifiedWhatsapp && !isEditingWhatsapp ? (
@@ -104,23 +98,35 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                                     </Button>
                                 ) : null}
                             </div>
-                            <Input
-                                id="whatsapp"
-                                type="tel"
+                            <InputGroup
                                 className={cn(
-                                    'w-full',
                                     hasVerifiedWhatsapp && !isEditingWhatsapp
-                                        ? 'bg-muted/50 text-muted-foreground'
+                                        ? 'bg-muted/50'
                                         : null,
                                 )}
-                                defaultValue={user.whatsapp ?? ''}
-                                name="whatsapp"
-                                readOnly={
-                                    hasVerifiedWhatsapp && !isEditingWhatsapp
-                                }
-                                autoComplete="tel"
-                                placeholder="08123456789"
-                            />
+                            >
+                                <InputGroupInput
+                                    id="whatsapp"
+                                    type="tel"
+                                    className={cn(
+                                        hasVerifiedWhatsapp &&
+                                            !isEditingWhatsapp
+                                            ? 'text-muted-foreground'
+                                            : null,
+                                    )}
+                                    defaultValue={user.whatsapp ?? ''}
+                                    name="whatsapp"
+                                    readOnly={
+                                        hasVerifiedWhatsapp &&
+                                        !isEditingWhatsapp
+                                    }
+                                    autoComplete="tel"
+                                    placeholder="08123456789"
+                                />
+                                <InputGroupAddon>
+                                    <Phone className="size-4" />
+                                </InputGroupAddon>
+                            </InputGroup>
                             <p className="text-xs text-muted-foreground">
                                 {hasVerifiedWhatsapp && !isEditingWhatsapp
                                     ? 'Nomor WhatsApp sudah terverifikasi.'
@@ -132,21 +138,20 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label
-                                htmlFor="address"
-                                className="flex items-center gap-1.5"
-                            >
-                                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                                Alamat
-                            </Label>
-                            <Textarea
-                                id="address"
-                                className="min-h-28 w-full resize-y"
-                                defaultValue={user.address ?? ''}
-                                name="address"
-                                autoComplete="street-address"
-                                placeholder="Alamat lengkap Anda"
-                            />
+                            <Label htmlFor="address">Alamat</Label>
+                            <InputGroup>
+                                <InputGroupTextarea
+                                    id="address"
+                                    className="min-h-28 w-full resize-y"
+                                    defaultValue={user.address ?? ''}
+                                    name="address"
+                                    autoComplete="street-address"
+                                    placeholder="Alamat lengkap Anda"
+                                />
+                                <InputGroupAddon className="self-start pt-2.5">
+                                    <MapPin className="size-4" />
+                                </InputGroupAddon>
+                            </InputGroup>
                             <InputError message={errors.address} />
                         </div>
 

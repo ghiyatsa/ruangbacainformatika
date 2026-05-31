@@ -1,6 +1,5 @@
 import { router } from '@inertiajs/react';
 import { useEffect } from 'react';
-import { toast } from 'sonner';
 import type { FlashToast } from '@/types/ui';
 
 const RECENT_TOAST_WINDOW_MS = 750;
@@ -35,8 +34,10 @@ export function useFlashToast(): void {
                 displayedAt: now,
             };
 
-            toast[data.type](data.message, {
-                id: signature,
+            void import('sonner').then(({ toast }) => {
+                toast[data.type](data.message, {
+                    id: signature,
+                });
             });
         });
     }, []);

@@ -5,6 +5,7 @@ use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
 use App\Services\SimilaritySyncStatusService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Queue;
 
 it('sync skripsi job marks status as synced after successful api upsert', function () {
@@ -61,4 +62,37 @@ it('sync skripsi job marks status as failed after api error', function () {
     expect($status->status)->toBe(SimilaritySyncStatus::STATUS_FAILED)
         ->and($status->attempts)->toBe(1)
         ->and($status->last_error)->toContain('Gagal menyinkronkan skripsi');
+});
+
+it('can reset all similarity statuses to pending for a full resync', function () {
+    $skripsis = Skripsi::withoutEvents(fn (): Collection => Skripsi::factory()->count(3)->create());
+    $statusService = app(SimilaritySyncStatusService::class);
+
+    SimilaritySyncStatus::query()->updateOrCreate(
+        ['source_skripsi_id' => $skripsis[0]->id],
+        [
+            'status' => SimilaritySyncStatus::STATUS_SYNCED,
+            'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+            'attempts' => 4,
+            'last_synced_at' => now(),
+        ],
+    );
+
+    SimilaritySyncStatus::query()->updateOrCreate(
+        ['source_skripsi_id' => $skripsis[1]->id],
+        [
+            'status' => SimilaritySyncStatus::STATUS_FAILED,
+            'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+            'attempts' => 2,
+            'last_attempt_at' => now(),
+            'last_error' => 'API timeout',
+        ],
+    );
+
+    $statusService->markAllQueuedForFullSync();
+
+    expect(SimilaritySyncStatus::query()->count())->toBe(3)
+        ->and(SimilaritySyncStatus::query()->where('status', SimilaritySyncStatus::STATUS_PENDING)->count())->toBe(3)
+        ->and(SimilaritySyncStatus::query()->whereNotNull('last_synced_at')->count())->toBe(0)
+        ->and(SimilaritySyncStatus::query()->whereNotNull('last_error')->count())->toBe(0);
 });

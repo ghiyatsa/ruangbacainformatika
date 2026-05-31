@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import booksRoute from '@/routes/books';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
+import DeferredCatalogRescue from './DeferredCatalogRescue';
 import SectionHeader from './SectionHeader';
 import type { WelcomeProps } from '@/features/welcome/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
@@ -25,7 +26,7 @@ export default function NewBooksPreview({
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader
                 title="Buku Terbaru"
-                subtitle="Tambahan terbaru dalam katalog."
+                subtitle="Buku terbaru di ruang baca."
                 action={
                     <BookCollectionViewToggle
                         viewMode={viewMode}
@@ -44,6 +45,14 @@ export default function NewBooksPreview({
                         isLoading={true}
                     />
                 }
+                rescue={({ reloading }) => (
+                    <DeferredCatalogRescue
+                        dataKey="books"
+                        title="Daftar buku terbaru belum tersedia"
+                        description="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
+                        reloading={reloading}
+                    />
+                )}
             >
                 <BookGrid
                     books={previewBooks}
@@ -57,8 +66,8 @@ export default function NewBooksPreview({
                     <Link href={booksRoute.index.url()}>
                         <BookOpen className="size-4" />
                         {totalBooks > 0
-                            ? `Lihat ${totalBooks.toLocaleString('id-ID')}+ judul`
-                            : 'Lihat katalog buku'}
+                            ? `Buka ${totalBooks.toLocaleString('id-ID')}+ judul`
+                            : 'Buka katalog buku'}
                         <ArrowRight className="size-4" />
                     </Link>
                 </Button>

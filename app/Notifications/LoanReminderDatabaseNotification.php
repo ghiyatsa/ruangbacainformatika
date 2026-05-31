@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Loan;
+use App\Support\AppTimezone;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -46,7 +47,7 @@ class LoanReminderDatabaseNotification extends Notification
             'title' => 'Batas pengembalian hampir tiba',
             'message' => sprintf(
                 'Pinjaman Anda jatuh tempo pada %s. Pastikan buku dikembalikan tepat waktu.',
-                $this->loan->due_at?->translatedFormat('d F Y') ?? '-',
+                AppTimezone::format($this->loan->due_at, 'd F Y'),
             ),
             'action_label' => 'Buka riwayat',
             'action_url' => route('loans.history', absolute: false),

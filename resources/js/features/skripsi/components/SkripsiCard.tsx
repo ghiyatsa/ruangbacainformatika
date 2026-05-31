@@ -16,11 +16,6 @@ import {
     CardFooter,
     CardHeader,
 } from '@/components/ui/card';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
@@ -61,7 +56,7 @@ export default function SkripsiCard({ skripsi }: SkripsiCardProps) {
                 className="absolute inset-0 z-10 rounded-xl focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none"
                 aria-label={`Lihat detail skripsi ${skripsi.title}`}
             />
-            <Card className="relative flex h-full flex-col overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 dark:hover:shadow-primary/10">
+            <Card className="relative flex h-full flex-col overflow-hidden transition-all duration-300 hover:border-primary/30">
                 <CardHeader className="gap-3">
                     <div className="flex items-start justify-between gap-3">
                         <Badge
@@ -79,44 +74,38 @@ export default function SkripsiCard({ skripsi }: SkripsiCardProps) {
                                     {skripsi.year}
                                 </span>
                             )}
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        type="button"
-                                        size="icon-sm"
-                                        variant="outline"
-                                        className={cn(
-                                            'relative z-20 shrink-0 rounded-full border-border/60 bg-background/90 shadow-sm backdrop-blur-sm hover:border-primary/30 hover:bg-primary/5',
-                                            isBookmarkedByUser &&
-                                                'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
-                                        )}
-                                        aria-label={
-                                            isBookmarkedByUser
-                                                ? 'Hapus bookmark'
-                                                : 'Simpan bookmark'
-                                        }
-                                        aria-pressed={isBookmarkedByUser}
-                                        onClick={(event) => {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                            toggleBookmark(bookmarkRecord);
-                                        }}
-                                    >
-                                        <Bookmark
-                                            className={
-                                                isBookmarkedByUser
-                                                    ? 'fill-current'
-                                                    : ''
-                                            }
-                                        />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" sideOffset={8}>
-                                    {isBookmarkedByUser
+                            <Button
+                                type="button"
+                                size="icon-sm"
+                                variant="outline"
+                                className={cn(
+                                    'relative z-20 shrink-0 rounded-full border-border/60 bg-background/90 shadow-sm backdrop-blur-sm hover:border-primary/30 hover:bg-primary/5',
+                                    isBookmarkedByUser &&
+                                        'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
+                                )}
+                                aria-label={
+                                    isBookmarkedByUser
                                         ? 'Hapus bookmark'
-                                        : 'Simpan bookmark'}
-                                </TooltipContent>
-                            </Tooltip>
+                                        : 'Simpan bookmark'
+                                }
+                                title={
+                                    isBookmarkedByUser
+                                        ? 'Hapus bookmark'
+                                        : 'Simpan bookmark'
+                                }
+                                aria-pressed={isBookmarkedByUser}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    toggleBookmark(bookmarkRecord);
+                                }}
+                            >
+                                <Bookmark
+                                    className={
+                                        isBookmarkedByUser ? 'fill-current' : ''
+                                    }
+                                />
+                            </Button>
                         </div>
                     </div>
 

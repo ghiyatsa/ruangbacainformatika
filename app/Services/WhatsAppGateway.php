@@ -87,7 +87,16 @@ class WhatsAppGateway
             config('services.fonnte.token'),
         );
 
-        return is_string($token) && $token !== '' ? $token : null;
+        if (! is_string($token) || $token === '') {
+            return null;
+        }
+
+        try {
+            $token = decrypt($token);
+        } catch (\Exception) {
+        }
+
+        return $token !== '' ? $token : null;
     }
 
     /**

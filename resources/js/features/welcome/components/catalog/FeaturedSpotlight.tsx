@@ -12,6 +12,7 @@ import BookController from '@/actions/App/Http/Controllers/BookController';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
+import DeferredCatalogRescue from './DeferredCatalogRescue';
 import type { CatalogBook } from '@/features/welcome/types';
 
 const SLIDE_DURATION = 5000;
@@ -112,15 +113,12 @@ export default function FeaturedSpotlight({
 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
-    const [progress, setProgress] = useState(0);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const count = featuredBooks?.length ?? 0;
 
     const goTo = useCallback((index: number) => {
         setCurrentIndex(index);
-        setProgress(0);
     }, []);
 
     const goNext = useCallback(() => {
@@ -144,25 +142,16 @@ export default function FeaturedSpotlight({
             return;
         }
 
-        progressRef.current = setInterval(() => {
-            setProgress((p) => Math.min(p + 50 / SLIDE_DURATION, 1));
-        }, 50);
-
         intervalRef.current = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % count);
-            setProgress(0);
         }, SLIDE_DURATION);
 
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
             }
-
-            if (progressRef.current) {
-                clearInterval(progressRef.current);
-            }
         };
-    }, [count, isPaused, currentIndex]);
+    }, [count, isPaused]);
 
     const book = featuredBooks?.[currentIndex] || null;
 
@@ -172,6 +161,14 @@ export default function FeaturedSpotlight({
             <Deferred
                 data="featuredBooks"
                 fallback={<FeaturedSpotlightSkeleton />}
+                rescue={({ reloading }) => (
+                    <DeferredCatalogRescue
+                        dataKey="featuredBooks"
+                        title="Sorotan buku belum tersedia"
+                        description="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
+                        reloading={reloading}
+                    />
+                )}
             >
                 <AnimatePresence mode="wait">
                     {book && (
@@ -273,46 +270,27 @@ export default function FeaturedSpotlight({
 
             {count > 1 && (
                 <div className="flex items-center justify-between border-t border-primary/10 px-5 py-3 sm:px-8">
-                    <div className="flex items-center gap-2">
-                        {featuredBooks?.map((_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => goTo(i)}
-                                className="group relative h-1.5 overflow-hidden rounded-full transition-all duration-300"
-                                style={{
-                                    width: i === currentIndex ? 28 : 6,
-                                    backgroundColor:
-                                        i === currentIndex
-                                            ? 'hsl(var(--primary) / 0.2)'
-                                            : 'hsl(var(--primary) / 0.2)',
-                                }}
-                                aria-label={`Buku sorotan ${i + 1}`}
-                            >
-                                {i === currentIndex ? (
-                                    <motion.div
-                                        className="absolute inset-y-0 left-0 rounded-full bg-primary"
-                                        style={{ width: `${progress * 100}%` }}
-                                    />
-                                ) : (
-                                    <div className="absolute inset-0 rounded-full bg-primary/20 transition-colors group-hover:bg-primary/40" />
-                                )}
-                            </button>
-                        ))}
+                    <div className="text-xs font-medium tabular-nums text-muted-foreground">
+                        {currentIndex + 1}/{count}
                     </div>
                     <div className="flex items-center gap-1">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="size-7 rounded-full"
+                            className="size-11 rounded-full"
                             onClick={goPrev}
+                            aria-label="Buku sorotan sebelumnya"
+                            title="Buku sorotan sebelumnya"
                         >
                             <ChevronLeft className="size-4" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="size-7 rounded-full"
+                            className="size-11 rounded-full"
                             onClick={goNext}
+                            aria-label="Buku sorotan berikutnya"
+                            title="Buku sorotan berikutnya"
                         >
                             <ChevronRight className="size-4" />
                         </Button>

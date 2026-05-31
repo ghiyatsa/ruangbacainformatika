@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Loans\RelationManagers;
 
 use App\Filament\Resources\Loans\Pages\ViewLoan;
+use App\Support\AppTimezone;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -101,10 +102,18 @@ class ItemsRelationManager extends RelationManager
                     ->query(
                         fn (Builder $query, array $data): Builder => $query->when(
                             $data['from'],
-                            fn (Builder $query, $date): Builder => $query->whereHas('loan', fn ($q) => $q->whereDate('borrowed_at', '>=', $date)),
+                            function (Builder $query, $date): Builder {
+                                [$startOfDay] = AppTimezone::dayRange($date);
+
+                                return $query->whereHas('loan', fn ($q) => $q->where('borrowed_at', '>=', $startOfDay));
+                            },
                         )->when(
                             $data['until'],
-                            fn (Builder $query, $date): Builder => $query->whereHas('loan', fn ($q) => $q->whereDate('borrowed_at', '<=', $date)),
+                            function (Builder $query, $date): Builder {
+                                [, $endOfDay] = AppTimezone::dayRange($date);
+
+                                return $query->whereHas('loan', fn ($q) => $q->where('borrowed_at', '<=', $endOfDay));
+                            },
                         ),
                     ),
             ])

@@ -16,6 +16,9 @@ export default function BookCatalogPage({
     books,
 }: BookCatalogPageProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
+    const activeCategoryLabel =
+        categories.find((category) => category.slug === filters.category)?.name ??
+        undefined;
 
     function clearAllFilters(): void {
         router.get(
@@ -30,6 +33,8 @@ export default function BookCatalogPage({
 
         if (key === 'search') {
             next.search = '';
+        } else if (key === 'category') {
+            next.category = '';
         } else if (key === 'year') {
             next.year = null;
         } else if (key === 'featured') {
@@ -47,12 +52,13 @@ export default function BookCatalogPage({
     return (
         <CatalogPage
             title="Katalog Buku"
-            metaDescription="Jelajahi katalog buku Ruang Baca Teknik Informatika Universitas Malikussaleh untuk referensi kuliah, riset, dan pembelajaran."
+            metaDescription="Lihat daftar buku Ruang Baca Teknik Informatika Universitas Malikussaleh."
             resourceName="judul buku"
             breadcrumbLabel="Katalog Buku"
             totalCount={stats.booksCount ?? 0}
             paginationData={books}
             filters={filters}
+            filterLabels={{ category: activeCategoryLabel }}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
             paginationVisibility="desktop-only"

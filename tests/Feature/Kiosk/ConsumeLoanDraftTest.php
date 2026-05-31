@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\LoanReceiptNotification;
 use App\Services\KioskPinManager;
+use App\Support\AppTimezone;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
@@ -311,7 +312,7 @@ it('rejects qr loan draft consumption while a late return cooldown is still acti
         ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHasErrors([
-            'member_identifier' => 'Akun ini sedang dibatasi karena pengembalian buku terlambat. Peminjaman dapat dilakukan kembali mulai '.now()->subDay()->addDays(3)->translatedFormat('d F Y H:i').'.',
+            'member_identifier' => 'Akun ini sedang dibatasi karena pengembalian buku terlambat. Peminjaman dapat dilakukan kembali mulai '.AppTimezone::format(now()->subDay()->addDays(3), 'd F Y H:i').'.',
         ]);
 
     $draft->refresh();

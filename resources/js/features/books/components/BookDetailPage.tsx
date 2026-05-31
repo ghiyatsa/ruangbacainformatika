@@ -88,7 +88,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
           : 'text-red-600 dark:text-red-400';
 
     const availabilityLabel = !book.isBorrowable
-        ? 'Hanya Referensi'
+        ? 'Baca di tempat'
         : book.isAvailable
           ? 'Tersedia'
           : 'Tidak Tersedia';
@@ -108,7 +108,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             description={
                 book.description
                     ? book.description.slice(0, 160)
-                    : `Detail buku ${book.title} di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+                    : `${book.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
             }
             hero={
                 <div className="relative -mt-20 overflow-hidden sm:-mt-28">
@@ -225,8 +225,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                     <strong className="text-foreground">
                                                         {book.itemsCount}
                                                     </strong>{' '}
-                                                    eksemplar tersedia di
-                                                    perpustakaan
+                                                    eksemplar tersedia di ruang
+                                                    baca
                                                 </>
                                             )}
                                         </span>
@@ -333,7 +333,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                     <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
                         <div className="p-5">
                             <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                Informasi Buku
+                                Data Buku
                             </h2>
                         </div>
                         <Separator />
@@ -348,7 +348,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                             {book.publishedYear ? (
                                 <ResourceDetailItem
                                     icon={<Calendar className="size-4" />}
-                                    label="Tahun Terbit"
+                                    label="Tahun"
                                     value={String(book.publishedYear)}
                                 />
                             ) : null}
@@ -362,7 +362,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                             {book.pages ? (
                                 <ResourceDetailItem
                                     icon={<FileText className="size-4" />}
-                                    label="Jumlah Halaman"
+                                    label="Halaman"
                                     value={`${book.pages} halaman`}
                                 />
                             ) : null}

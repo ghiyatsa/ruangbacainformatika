@@ -9,4 +9,4 @@ export const RUANG_BACA_SHORT_NAME = 'Ruang Baca';
 export const RUANG_BACA_AFFILIATION = `${PROGRAM_NAME} ${UNIVERSITY_NAME}`;
 
 export const RUANG_BACA_DESCRIPTION =
-    'Katalog referensi akademik untuk mendukung pembelajaran, riset, dan penelusuran koleksi di lingkungan Teknik Informatika Universitas Malikussaleh.';
+    'Layanan pencarian buku dan arsip akademik di lingkungan Teknik Informatika Universitas Malikussaleh.';

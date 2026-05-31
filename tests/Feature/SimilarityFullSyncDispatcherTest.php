@@ -1,13 +1,39 @@
 <?php
 
 use App\Jobs\RunFullSimilaritySync;
+use App\Models\SimilaritySyncStatus;
+use App\Models\Skripsi;
 use App\Services\SimilarityFullSyncDispatcher;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
 
 it('similarity full sync dispatcher queues the sync command when not running synchronously', function () {
     app()['env'] = 'production';
     Queue::fake();
+
+    $skripsis = Skripsi::withoutEvents(fn (): Collection => Skripsi::factory()->count(3)->create());
+
+    SimilaritySyncStatus::query()->updateOrCreate(
+        ['source_skripsi_id' => $skripsis[0]->id],
+        [
+            'status' => SimilaritySyncStatus::STATUS_SYNCED,
+            'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+            'attempts' => 2,
+            'last_synced_at' => now(),
+            'last_error' => null,
+        ],
+    );
+    SimilaritySyncStatus::query()->updateOrCreate(
+        ['source_skripsi_id' => $skripsis[1]->id],
+        [
+            'status' => SimilaritySyncStatus::STATUS_FAILED,
+            'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+            'attempts' => 1,
+            'last_attempt_at' => now(),
+            'last_error' => 'Timeout',
+        ],
+    );
 
     $result = app(SimilarityFullSyncDispatcher::class)->dispatch();
 
@@ -18,7 +44,11 @@ it('similarity full sync dispatcher queues the sync command when not running syn
     expect($result)->toBe([
         'mode' => 'queued',
         'success' => true,
-    ]);
+    ])
+        ->and(SimilaritySyncStatus::query()->count())->toBe(3)
+        ->and(SimilaritySyncStatus::query()->where('status', SimilaritySyncStatus::STATUS_PENDING)->count())->toBe(3)
+        ->and(SimilaritySyncStatus::query()->whereNotNull('last_synced_at')->count())->toBe(0)
+        ->and(SimilaritySyncStatus::query()->whereNotNull('last_error')->count())->toBe(0);
 });
 
 it('full similarity sync job runs the reset command', function () {

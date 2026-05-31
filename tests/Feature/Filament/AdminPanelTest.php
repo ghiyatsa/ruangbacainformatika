@@ -14,6 +14,8 @@ use App\Models\Book;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Models\User;
+use App\Models\VisitLog;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
 use Spatie\Permission\Models\Role;
 
@@ -76,6 +78,11 @@ it('super admin users can render the general settings form', function () {
         ->assertSee('Pengaturan Umum')
         ->assertSee('Nama Situs')
         ->assertSee('Tagline')
+        ->assertSee('Deskripsi Situs')
+        ->assertSee('Kata Kunci SEO')
+        ->assertSee('Logo Situs')
+        ->assertSee('Open Graph Image')
+        ->assertSee('Favicon PNG')
         ->assertSee('WhatsApp Bantuan')
         ->assertSee('Nomor kontak bantuan.')
         ->assertSee('Simpan');
@@ -179,6 +186,45 @@ it('super admin users can render concise table filter and bulk action labels', f
         ->assertSee('Kunjungan')
         ->assertSee('Data kunjungan akan tampil di sini.')
         ->assertSee('Ekspor');
+});
+
+it('super admin users see visit times in admin timezone', function () {
+    $user = makeSuperAdmin();
+
+    VisitLog::query()->create([
+        'name' => 'Pengunjung Zona Waktu',
+        'visitor_type' => VisitLog::VISITOR_TYPE_MAHASISWA,
+        'purpose' => 'read',
+        'visited_at' => Carbon::parse('2026-05-28 17:30:00', 'UTC'),
+    ]);
+
+    actingAs($user)
+        ->get('/admin/visit-logs')
+        ->assertOk()
+        ->assertSee('00:30')
+        ->assertDontSee('17:30');
+});
+
+it('visit log navigation badge counts visits using the admin timezone day boundary', function () {
+    VisitLog::query()->create([
+        'name' => 'Pengunjung Awal Hari',
+        'visitor_type' => VisitLog::VISITOR_TYPE_MAHASISWA,
+        'purpose' => 'read',
+        'visited_at' => Carbon::parse('2026-05-28 17:30:00', 'UTC'),
+    ]);
+
+    VisitLog::query()->create([
+        'name' => 'Pengunjung Hari Sebelumnya',
+        'visitor_type' => VisitLog::VISITOR_TYPE_MAHASISWA,
+        'purpose' => 'read',
+        'visited_at' => Carbon::parse('2026-05-28 16:30:00', 'UTC'),
+    ]);
+
+    Carbon::setTestNow(Carbon::parse('2026-05-29 00:45:00', 'Asia/Jakarta'));
+
+    expect(VisitLogResource::getNavigationBadge())->toBe('1');
+
+    Carbon::setTestNow();
 });
 
 it('super admin users can render consistent resource headings', function () {
@@ -328,6 +374,7 @@ it('super admin users can access key admin resources', function (string $path) {
     '/admin/publishers',
     '/admin/loans',
     '/admin/visit-logs',
+    '/admin/logs',
     '/admin/settings/kiosk',
     '/admin/settings/general-settings',
 ]);

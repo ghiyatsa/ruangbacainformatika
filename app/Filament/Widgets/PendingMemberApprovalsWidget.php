@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\User;
+use App\Support\AppTimezone;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -21,6 +22,8 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        [$todayStart, $todayEnd] = AppTimezone::dayRange();
+
         $pendingTotal = User::query()
             ->where('is_approved', false)
             ->count();
@@ -37,7 +40,7 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
 
         $approvedToday = User::query()
             ->where('is_approved', true)
-            ->whereDate('updated_at', today())
+            ->whereBetween('updated_at', [$todayStart, $todayEnd])
             ->count();
 
         return [

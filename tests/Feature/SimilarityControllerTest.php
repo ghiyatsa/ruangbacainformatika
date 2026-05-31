@@ -5,6 +5,7 @@ use App\Models\User;
 use App\Services\SimilarityApiService;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Queue;
+use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\withoutMiddleware;
@@ -17,7 +18,12 @@ it('similarity page is displayed', function () {
     actingAs(User::factory()->create())
         ->get(route('similarity.index'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('similarity'));
+        ->assertSee('name="csrf-token"', false)
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('similarity')
+            ->has('turnstileEnabled')
+            ->has('turnstileSiteKey')
+        );
 });
 
 it('similarity check requires at least five words', function () {
@@ -73,6 +79,57 @@ it('similarity check normalizes api results for frontend', function () {
                     'student_id' => '2301700099',
                     'similarity_persen' => 98.1,
                     'level' => 'SANGAT TINGGI',
+                    'is_local_record_found' => true,
+                ],
+            ],
+        ]);
+});
+
+it('similarity check can match local skripsi from alternate api identifiers', function () {
+    Queue::fake();
+
+    $skripsi = Skripsi::factory()->create([
+        'id' => 120,
+        'title' => 'Deteksi Objek Jalan Raya Berbasis YOLO',
+        'author_name' => 'Rizki Maulana',
+        'student_id' => '2301700120',
+    ]);
+
+    $service = Mockery::mock(SimilarityApiService::class);
+    $service->shouldReceive('checkSimilarity')
+        ->once()
+        ->andReturn([
+            'total_found' => 1,
+            'results' => [
+                [
+                    'skripsi_id' => $skripsi->id,
+                    'nim' => $skripsi->student_id,
+                    'title' => 'Judul dari API yang tidak dipakai karena data lokal tersedia',
+                    'author_name' => 'Nama API',
+                    'similarity_score' => 0.873,
+                    'level' => 'tinggi',
+                ],
+            ],
+        ]);
+
+    app()->instance(SimilarityApiService::class, $service);
+
+    actingAs(User::factory()->create())
+        ->postJson(route('similarity.check'), [
+            'judul' => 'Deteksi objek kendaraan jalan raya berbasis deep learning realtime',
+        ])
+        ->assertOk()
+        ->assertJson([
+            'total_found' => 1,
+            'results' => [
+                [
+                    'skripsi_id' => 120,
+                    'judul' => 'Deteksi Objek Jalan Raya Berbasis YOLO',
+                    'nama_mahasiswa' => 'Rizki Maulana',
+                    'student_id' => '2301700120',
+                    'similarity_persen' => 87.3,
+                    'level' => 'TINGGI',
+                    'is_local_record_found' => true,
                 ],
             ],
         ]);

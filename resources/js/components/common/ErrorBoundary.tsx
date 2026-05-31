@@ -29,17 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
     public render() {
         if (this.state.hasError) {
             return (
-                <Suspense
-                    fallback={
-                        <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10 text-foreground">
-                            <div className="rounded-2xl border border-border/60 bg-card/85 px-6 py-5 text-center shadow-sm">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    Memuat halaman error...
-                                </p>
-                            </div>
-                        </main>
-                    }
-                >
+                <Suspense fallback={null}>
                     <ErrorPage status={500} />
                 </Suspense>
             );

@@ -97,8 +97,8 @@ export function MobileProgressivePagination<T>({
                     {isAutoLoadEnabled ? (
                         <div className="flex w-full flex-col items-center gap-2">
                             <p className="text-xs text-muted-foreground">
-                                Scroll ke bawah, data berikutnya akan dimuat
-                                otomatis.
+                                Lanjutkan scroll untuk menampilkan hasil
+                                berikutnya secara otomatis.
                             </p>
                             <div
                                 ref={autoLoadTriggerRef}
@@ -108,7 +108,7 @@ export function MobileProgressivePagination<T>({
                             {isLoadingMore ? (
                                 <div className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
                                     <LoaderCircle className="size-4 animate-spin" />
-                                    Memuat {resourceLabel} berikutnya...
+                                    Memuat hasil berikutnya...
                                 </div>
                             ) : null}
                         </div>
@@ -123,18 +123,18 @@ export function MobileProgressivePagination<T>({
                             {isLoadingMore ? (
                                 <>
                                     <LoaderCircle className="size-4 animate-spin" />
-                                    Memuat {resourceLabel} berikutnya...
+                                    Memuat hasil berikutnya...
                                 </>
                             ) : (
-                                'Muat lebih banyak'
+                                'Tampilkan lebih banyak'
                             )}
                         </Button>
                     )}
                 </div>
             ) : (
                 <div className="rounded-2xl border border-dashed bg-muted/20 px-4 py-4 text-center text-sm text-muted-foreground">
-                    Semua {resourceLabel} yang cocok dengan filter ini sudah
-                    dimuat.
+                    Seluruh {resourceLabel} yang sesuai dengan filter ini sudah
+                    ditampilkan.
                 </div>
             )}
         </div>

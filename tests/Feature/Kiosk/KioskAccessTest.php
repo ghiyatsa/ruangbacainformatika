@@ -524,6 +524,33 @@ it('kiosk visit submission flashes a sonner toast after saving', function () {
     ]);
 });
 
+it('kiosk stores public visitor institution and phone details', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    post(route('kiosk.visits.store'), [
+        'name' => 'Tamu Instansi',
+        'visitor_type' => VisitLog::VISITOR_TYPE_UMUM,
+        'institution' => 'Dinas Arsip Daerah',
+        'phone' => '081234567890',
+        'purpose' => 'reference',
+        'notes' => 'Koordinasi referensi arsip daerah.',
+    ])
+        ->assertRedirect(route('kiosk.index', ['menu' => 'visit']))
+        ->assertSessionHasNoErrors();
+
+    assertDatabaseHas('visit_logs', [
+        'name' => 'Tamu Instansi',
+        'visitor_type' => VisitLog::VISITOR_TYPE_UMUM,
+        'institution' => 'Dinas Arsip Daerah',
+        'phone' => '081234567890',
+        'purpose' => 'reference',
+        'notes' => 'Koordinasi referensi arsip daerah.',
+    ]);
+});
+
 it('kiosk find member returns member details when found', function () {
     $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);

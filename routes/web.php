@@ -33,7 +33,9 @@ Route::get('/search', SearchController::class)->name('search');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/about/team', [PageController::class, 'aboutTeam'])->name('about-team');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
-Route::post('/contact', [ContactMessageController::class, 'store'])->name('contact.store');
+Route::post('/contact', [ContactMessageController::class, 'store'])
+    ->middleware('throttle:contact-messages')
+    ->name('contact.store');
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service');
 Route::middleware('auth')->group(function () {

@@ -8,6 +8,7 @@ use App\Models\Book;
 use App\Models\LoanDraft;
 use App\Models\LoanDraftItem;
 use App\Services\LoanDraftService;
+use App\Support\AppTimezone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -115,7 +116,7 @@ class LoanRequestController extends Controller
             'id' => $draft->id,
             'status' => $draft->status,
             'itemsCount' => $draft->items->count(),
-            'expiresAt' => $draft->expires_at?->translatedFormat('d F Y H:i'),
+            'expiresAt' => AppTimezone::format($draft->expires_at, 'd F Y H:i'),
             'expiresAtIso' => $draft->expires_at?->toIso8601String(),
             'hasActiveQr' => $draft->hasActiveToken(),
             'qrCodeSvg' => $draft->hasActiveToken() && is_array($qr) ? ($qr['svg'] ?? null) : null,

@@ -46,7 +46,7 @@ class VisitLogForm
                             ->required(),
                         Placeholder::make('visited_at')
                             ->label('Waktu Kunjungan')
-                            ->content(fn ($record) => $record?->visited_at?->translatedFormat('d M Y H:i') ?? '-'),
+                            ->content(fn ($record) => $record?->visitedAtForAdmin()?->translatedFormat('d M Y H:i') ?? '-'),
                         Textarea::make('notes')
                             ->label('Catatan')
                             ->rows(4)

@@ -140,6 +140,6 @@ class LoanConsequenceService
         }
 
         return 'Akun ini sedang dibatasi karena pengembalian buku terlambat. Peminjaman dapat dilakukan kembali mulai '
-            .$availableAt->translatedFormat('d F Y H:i').'.';
+            .AppTimezone::format($availableAt, 'd F Y H:i').'.';
     }
 }

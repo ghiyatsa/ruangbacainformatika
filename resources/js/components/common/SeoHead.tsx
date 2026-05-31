@@ -4,11 +4,22 @@ type SiteProps = {
     name: string;
     site: {
         url: string;
+        name: string;
         description: string;
         department: string;
         contactEmail: string;
+        supportWhatsapp: string | null;
         address: string;
+        keywords: string | null;
+        robots: string;
+        themeColor: string;
+        logo: string | null;
         ogImage: string;
+        icons: {
+            favicon: string;
+            faviconSvg: string;
+            appleTouchIcon: string;
+        };
     };
 };
 
@@ -41,6 +52,7 @@ export function SeoHead({
     const metaDescription = description ?? page.props.site.description;
     const metaImage = image ?? page.props.site.ogImage;
     const metaTitle = title ? `${title} - ${page.props.name}` : page.props.name;
+    const metaRobots = robots ?? page.props.site.robots;
 
     return (
         <Head title={title}>
@@ -49,7 +61,7 @@ export function SeoHead({
                 name="description"
                 content={metaDescription}
             />
-            <meta head-key="robots" name="robots" content={robots} />
+            <meta head-key="robots" name="robots" content={metaRobots} />
             <link head-key="canonical" rel="canonical" href={canonicalUrl} />
 
             <meta head-key="og:type" property="og:type" content={type} />
