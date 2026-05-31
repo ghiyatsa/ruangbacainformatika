@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Settings\Pages;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Models\KioskDevice;
 use App\Repositories\SettingRepository;
+use App\Services\ActivityLogService;
 use App\Services\KioskPinManager;
 use App\Support\KioskNetworkGuard;
 use BackedEnum;
@@ -138,17 +139,30 @@ class KioskSettings extends Page implements HasTable
     {
         $data = $this->form->getState();
         $pinWasUpdated = filled($data['pin'] ?? null);
+        $existingValues = Arr::only(
+            $this->settingRepository()->sectionValues('kiosk', $this->defaultValues()),
+            ['title', 'subtitle', 'allowed_networks'],
+        );
+        $savedValues = [
+            'title' => $data['title'] ?? null,
+            'subtitle' => $data['subtitle'] ?? null,
+            'allowed_networks' => collect($this->kioskNetworkGuard()->normalizeNetworks($data['allowed_networks'] ?? ''))->implode(PHP_EOL),
+        ];
 
         if ($pinWasUpdated) {
             $this->settingRepository()->put('kiosk', 'pin_hash', Hash::make((string) $data['pin']));
             $this->kioskPinManager()->rotateSessions();
         }
 
-        $this->settingRepository()->putMany('kiosk', [
-            'title' => $data['title'] ?? null,
-            'subtitle' => $data['subtitle'] ?? null,
-            'allowed_networks' => collect($this->kioskNetworkGuard()->normalizeNetworks($data['allowed_networks'] ?? ''))->implode(PHP_EOL),
-        ]);
+        $this->settingRepository()->putMany('kiosk', $savedValues);
+        app(ActivityLogService::class)->logSettingsUpdate(
+            'kiosk',
+            'Pengaturan kios',
+            $existingValues,
+            $savedValues,
+            [],
+            ['pin_updated' => $pinWasUpdated],
+        );
 
         Notification::make()
             ->success()
@@ -174,7 +188,13 @@ class KioskSettings extends Page implements HasTable
 
     public function rotateSessions(): void
     {
-        $this->kioskPinManager()->rotateSessions();
+        $sessionVersion = $this->kioskPinManager()->rotateSessions();
+        app(ActivityLogService::class)->log(
+            'kiosk.sessions.rotated',
+            'Semua sesi kios direset',
+            'Kios',
+            ['session_version' => $sessionVersion],
+        );
 
         Notification::make()
             ->success()
@@ -234,7 +254,23 @@ class KioskSettings extends Page implements HasTable
                     ->modalHeading('Keluarkan Perangkat')
                     ->modalDescription('Perangkat ini harus memasukkan PIN lagi sebelum bisa digunakan.')
                     ->modalSubmitActionLabel('Keluarkan')
-                    ->action(fn (Action $action) => $action->getRecord()->delete()),
+                    ->action(function (Action $action): void {
+                        /** @var KioskDevice $device */
+                        $device = $action->getRecord();
+
+                        app(ActivityLogService::class)->log(
+                            'kiosk.device.revoked',
+                            'Perangkat kios dikeluarkan',
+                            $device->name ?: 'Perangkat kios',
+                            [
+                                'device_id' => $device->getKey(),
+                                'name' => $device->name,
+                                'ip_address' => $device->ip_address,
+                            ],
+                        );
+
+                        $device->delete();
+                    }),
             ])
             ->emptyStateHeading('Tidak ada perangkat aktif')
             ->emptyStateDescription('Perangkat yang sedang aktif akan tampil di sini.');

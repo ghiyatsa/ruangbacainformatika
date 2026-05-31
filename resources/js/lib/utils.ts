@@ -13,6 +13,7 @@ export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
 
 export function downloadSvgAsPng(svgString: string, filename: string, title?: string) {
     let processedSvg = svgString;
+
     if (!processedSvg.includes('xmlns=')) {
         processedSvg = processedSvg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
     }
@@ -35,6 +36,7 @@ export function downloadSvgAsPng(svgString: string, filename: string, title?: st
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
+
         if (ctx) {
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, width, height);
@@ -66,6 +68,7 @@ export function downloadSvgAsPng(svgString: string, filename: string, title?: st
             downloadLink.click();
             document.body.removeChild(downloadLink);
         }
+
         URL.revokeObjectURL(blobUrl);
     };
     img.src = blobUrl;

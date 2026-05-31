@@ -1,10 +1,9 @@
 import { Form, Link } from '@inertiajs/react';
 import { AtSign, CheckCircle2, MapPin, Phone, User } from 'lucide-react';
-import { useState } from 'react';
+
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/common/InputError';
 import { Button } from '@/components/ui/button';
-import settings from '@/routes/settings';
 import {
     InputGroup,
     InputGroupAddon,
@@ -14,6 +13,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { SettingsSectionHeader } from '@/features/settings/components/shared/SettingsSectionHeader';
 import { cn } from '@/lib/utils';
+import settings from '@/routes/settings';
 import type { User as AuthUser } from '@/types/auth';
 
 export interface ProfileInformationFormProps {
@@ -21,7 +21,7 @@ export interface ProfileInformationFormProps {
 }
 
 export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
-    const [isEditingWhatsapp, setIsEditingWhatsapp] = useState(false);
+    const isEditingWhatsapp = false;
     const hasVerifiedWhatsapp = Boolean(user.whatsapp_verified_at);
 
     return (

@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Clusters\Settings\Pages\GeneralSettings;
+use App\Models\ActivityLog;
 use App\Models\Setting;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -57,6 +58,30 @@ it('general settings can persist site metadata and branding fields', function ()
         ->and(Setting::query()->where('section', 'general')->where('key', 'theme_color')->value('value'))->toBe('#123ABC')
         ->and(Setting::query()->where('section', 'general')->where('key', 'hero_notice_enabled')->value('value'))->toBe('1')
         ->and(Setting::query()->where('section', 'general')->where('key', 'hero_notice_tone')->value('value'))->toBe('warning');
+});
+
+it('general settings writes an activity log entry for changed values', function () {
+    $user = makeGeneralSettingsSuperAdmin();
+
+    actingAs($user);
+
+    Livewire::test(GeneralSettings::class)
+        ->set('data.site_name', 'Ruang Baca Informatika')
+        ->set('data.department', 'Teknik Informatika Universitas Malikussaleh')
+        ->set('data.contact_email', 'halo@ruangbaca.test')
+        ->set('data.site_description', 'Katalog digital untuk buku dan karya ilmiah.')
+        ->set('data.seo_robots', 'index,follow')
+        ->set('data.theme_color', '#0F172A')
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $log = ActivityLog::query()->latest('id')->firstOrFail();
+
+    expect($log->action)->toBe('settings.general.updated')
+        ->and($log->description)->toBe('Pengaturan umum diperbarui')
+        ->and($log->subject_label)->toBe('Pengaturan umum')
+        ->and($log->properties['changes'])->toBeArray()
+        ->and($log->properties['changes'])->not->toBeEmpty();
 });
 
 it('public pages use the stored site metadata and icon links', function () {
@@ -122,14 +147,17 @@ it('public pages use the stored site metadata and icon links', function () {
                 ->where('site.keywords', 'metadata,test,seo')
                 ->where('site.robots', 'noindex,nofollow')
                 ->where('site.themeColor', '#0F172A')
-                ->where('site.ogImage', url('/storage/site-assets/custom-og.png'))
+                ->where('site.ogImage', route('og.site'))
+                ->where('site.ogImageType', 'image/svg+xml')
+                ->where('site.ogImageWidth', 1200)
+                ->where('site.ogImageHeight', 600)
                 ->where('site.icons.favicon', url('/storage/site-assets/custom-favicon.png'))
                 ->where('site.icons.faviconSvg', url('/storage/site-assets/custom-favicon.svg'))
                 ->where('site.icons.appleTouchIcon', url('/storage/site-assets/custom-apple-touch.png')),
         )
         ->assertSee('name="theme-color" content="#0F172A"', false)
         ->assertSee('name="keywords" content="metadata,test,seo"', false)
-        ->assertSee('property="og:image" content="'.url('/storage/site-assets/custom-og.png').'"', false)
+        ->assertSee('property="og:image" content="'.route('og.site').'"', false)
         ->assertSee('href="'.url('/storage/site-assets/custom-favicon.png').'"', false)
         ->assertSee('href="'.url('/storage/site-assets/custom-favicon.svg').'"', false)
         ->assertSee('href="'.url('/storage/site-assets/custom-apple-touch.png').'"', false);

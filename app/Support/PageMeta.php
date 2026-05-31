@@ -3,12 +3,14 @@
 namespace App\Support;
 
 use App\Models\Book;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class PageMeta
 {
     public function __construct(
         protected SiteSettings $siteSettings,
+        protected OpenGraphImage $openGraphImage,
     ) {}
 
     /**
@@ -23,7 +25,7 @@ class PageMeta
             'robots' => $this->siteRobots(),
             'canonicalUrl' => url('/'),
             'type' => 'website',
-            'ogImage' => $this->siteOgImage(),
+            ...$this->openGraphImage->defaultMeta(),
         ];
     }
 
@@ -51,9 +53,7 @@ class PageMeta
             'robots' => $this->siteRobots(),
             'canonicalUrl' => route('books.show', $book),
             'type' => 'article',
-            'ogImage' => $book->cover_image
-                ? asset('storage/'.$book->cover_image)
-                : $this->siteOgImage(),
+            ...$this->openGraphImage->bookMeta($book),
         ];
     }
 
@@ -69,6 +69,8 @@ class PageMeta
         array $keywords,
         string $catalogLabel,
         string $canonicalUrl,
+        string $ogRouteName,
+        Model $document,
     ): array {
         $metaKeywords = collect([
             $title,
@@ -90,7 +92,7 @@ class PageMeta
             'robots' => $this->siteRobots(),
             'canonicalUrl' => $canonicalUrl,
             'type' => 'article',
-            'ogImage' => $this->siteOgImage(),
+            ...$this->openGraphImage->academicDocumentMeta($ogRouteName, $document),
         ];
     }
 
@@ -114,11 +116,6 @@ class PageMeta
     protected function siteRobots(): string
     {
         return strval($this->siteMeta()['robots'] ?? 'index,follow');
-    }
-
-    protected function siteOgImage(): string
-    {
-        return strval($this->siteMeta()['ogImage'] ?? asset('images/og-image.png'));
     }
 
     protected function excerpt(string $content): string

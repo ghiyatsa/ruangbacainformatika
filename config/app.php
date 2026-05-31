@@ -134,4 +134,17 @@ return [
         'address' => env('APP_SUPER_ADMIN_ADDRESS', ''),
     ],
 
+    'seed_defaults' => [
+        'global_notice' => [
+            'enabled' => (bool) env('APP_GLOBAL_NOTICE_ENABLED', false),
+            'text' => env('APP_GLOBAL_NOTICE_TEXT', ''),
+            'url' => env('APP_GLOBAL_NOTICE_URL', ''),
+            'link_label' => env('APP_GLOBAL_NOTICE_LINK_LABEL', ''),
+            'tone' => env('APP_GLOBAL_NOTICE_TONE', 'info'),
+        ],
+        'kiosk' => [
+            'pin' => env('KIOSK_DEFAULT_PIN', ''),
+        ],
+    ],
+
 ];

@@ -69,6 +69,8 @@ class ThesisController extends Controller
                     : [],
                 catalogLabel: 'tesis',
                 canonicalUrl: route('thesis.show', $thesis),
+                ogRouteName: 'og.thesis.show',
+                document: $thesis,
             ),
         ]);
     }

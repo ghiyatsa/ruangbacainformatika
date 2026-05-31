@@ -69,6 +69,8 @@ class SkripsiController extends Controller
                     : [],
                 catalogLabel: 'skripsi',
                 canonicalUrl: route('skripsi.show', $skripsi),
+                ogRouteName: 'og.skripsi.show',
+                document: $skripsi,
             ),
         ]);
     }

@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Repositories\SettingRepository;
+use App\Services\ActivityLogService;
 use App\Support\SiteSettings;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -229,10 +230,7 @@ class GeneralSettings extends Page
     {
         $data = $this->form->getState();
         $existingValues = $this->siteSettings()->values();
-
-        $this->deleteReplacedUploads($existingValues, $data);
-
-        $this->settingRepository()->putMany('general', [
+        $savedValues = [
             'site_name' => $data['site_name'] ?? null,
             'site_tagline' => $data['site_tagline'] ?? null,
             'site_description' => $data['site_description'] ?? null,
@@ -259,7 +257,12 @@ class GeneralSettings extends Page
             'hero_notice_tone' => in_array($data['hero_notice_tone'] ?? null, ['info', 'warning', 'success'], true)
                 ? $data['hero_notice_tone']
                 : 'info',
-        ]);
+        ];
+
+        $this->deleteReplacedUploads($existingValues, $data);
+
+        $this->settingRepository()->putMany('general', $savedValues);
+        app(ActivityLogService::class)->logSettingsUpdate('general', 'Pengaturan umum', $existingValues, $savedValues);
 
         Notification::make()
             ->success()

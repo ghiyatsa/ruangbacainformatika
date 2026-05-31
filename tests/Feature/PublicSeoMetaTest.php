@@ -33,6 +33,10 @@ it('renders configured seo meta on the welcome page', function () {
         ->assertSee('name="robots" content="noindex,nofollow"', false)
         ->assertSee('name="keywords" content="seo, katalog, ruang baca"', false)
         ->assertSee('property="og:title" content="Ruang Baca Custom"', false)
+        ->assertSee('property="og:image" content="'.route('og.site').'"', false)
+        ->assertSee('property="og:image:type" content="image/svg+xml"', false)
+        ->assertSee('property="og:image:width" content="1200"', false)
+        ->assertSee('property="og:image:height" content="600"', false)
         ->assertSee('property="og:url" content="'.url('/').'"', false)
         ->assertSee('rel="canonical" href="'.url('/').'"', false);
 });
@@ -49,10 +53,10 @@ it('renders catalog-specific seo meta on the book detail page', function () {
         ->assertSee('name="description" content="Panduan lengkap membangun aplikasi web modern dengan fokus pada performa, keamanan, dan pengalaman pengguna yang baik."', false)
         ->assertSee('name="keywords" content="Pemrograman Web Lanjut, katalog buku, ruang baca informatika"', false)
         ->assertSee('property="og:title" content="Pemrograman Web Lanjut - Ruang Baca Custom"', false)
-        ->assertSee('property="og:image" content="'.asset('images/og-image.png').'"', false)
-        ->assertSee('property="og:image:type" content="image/png"', false)
+        ->assertSee('property="og:image" content="'.route('og.books.show', $book).'"', false)
+        ->assertSee('property="og:image:type" content="image/svg+xml"', false)
         ->assertSee('property="og:image:width" content="1200"', false)
-        ->assertSee('property="og:image:height" content="630"', false)
+        ->assertSee('property="og:image:height" content="600"', false)
         ->assertSee('rel="canonical" href="'.route('books.show', $book).'"', false);
 });
 
@@ -72,6 +76,8 @@ it('renders catalog-specific seo meta on the skripsi detail page', function () {
         ->assertSee('name="description" content="Penelitian ini membahas sistem rekomendasi koleksi perpustakaan berbasis perilaku peminjaman pengguna dan kemiripan topik."', false)
         ->assertSee('name="keywords" content="Sistem Rekomendasi Perpustakaan, Nadia Putri, 2301700999, sistem rekomendasi, perpustakaan, text mining, skripsi informatika, ruang baca informatika"', false)
         ->assertSee('property="og:title" content="Sistem Rekomendasi Perpustakaan - Ruang Baca Custom"', false)
+        ->assertSee('property="og:image" content="'.route('og.skripsi.show', $skripsi).'"', false)
+        ->assertSee('property="og:image:type" content="image/svg+xml"', false)
         ->assertSee('rel="canonical" href="'.route('skripsi.show', $skripsi).'"', false)
         ->assertSee('name="robots" content="noindex,nofollow"', false);
 });

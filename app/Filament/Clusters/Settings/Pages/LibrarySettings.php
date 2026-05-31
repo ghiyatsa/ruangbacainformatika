@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Repositories\SettingRepository;
+use App\Services\ActivityLogService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -117,14 +118,17 @@ class LibrarySettings extends Page
     public function save(): void
     {
         $data = $this->form->getState();
-
-        $this->settingRepository()->putMany('library', [
+        $existingValues = $this->settingRepository()->sectionValues('library', $this->defaultValues());
+        $savedValues = [
             'loan_max_books' => $data['loan_max_books'] ?? 3,
             'loan_duration_days' => $data['loan_duration_days'] ?? 5,
             'late_return_suspension_enabled' => ! empty($data['late_return_suspension_enabled']) ? '1' : '0',
             'late_return_suspend_after_days' => $data['late_return_suspend_after_days'] ?? 1,
             'late_return_cooldown_days' => $data['late_return_cooldown_days'] ?? 3,
-        ]);
+        ];
+
+        $this->settingRepository()->putMany('library', $savedValues);
+        app(ActivityLogService::class)->logSettingsUpdate('library', 'Pengaturan peminjaman', $existingValues, $savedValues);
 
         Notification::make()
             ->success()

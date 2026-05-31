@@ -12,6 +12,9 @@ declare module '@inertiajs/core' {
                 contactEmail: string;
                 address: string;
                 ogImage: string;
+                ogImageType: string;
+                ogImageWidth: number;
+                ogImageHeight: number;
                 notice: {
                     isActive: boolean;
                     text: string;

@@ -69,6 +69,8 @@ class InternshipReportController extends Controller
                     : [],
                 catalogLabel: 'laporan kerja praktik',
                 canonicalUrl: route('internship-reports.show', $internshipReport),
+                ogRouteName: 'og.internship-reports.show',
+                document: $internshipReport,
             ),
         ]);
     }

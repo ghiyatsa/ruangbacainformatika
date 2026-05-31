@@ -14,11 +14,36 @@ import type { Root } from 'react-dom/client';
 const rootDataset = document.documentElement.dataset;
 const appName =
     rootDataset.appName || import.meta.env.VITE_APP_NAME || 'Ruang Baca';
+const cspNonce =
+    document
+        .querySelector<HTMLMetaElement>('meta[name="csp-nonce"]')
+        ?.content.trim() || undefined;
 
 type RootElement = HTMLElement & {
     __inertiaRoot?: Root;
     __inertiaHydrated?: boolean;
 };
+
+function applyStyleNonce(nonce?: string) {
+    if (!nonce || typeof document === 'undefined') {
+        return;
+    }
+
+    const originalCreateElement = document.createElement.bind(document);
+
+    document.createElement = function patchedCreateElement(
+        tagName: string,
+        options?: ElementCreationOptions,
+    ) {
+        const element = originalCreateElement(tagName, options);
+
+        if (tagName.toLowerCase() === 'style' && element instanceof HTMLStyleElement) {
+            element.nonce = nonce;
+        }
+
+        return element;
+    };
+}
 
 function AppProviders({ children }: { children: ReactNode }) {
     useFlashToast();
@@ -31,7 +56,10 @@ function AppProviders({ children }: { children: ReactNode }) {
     );
 }
 
+applyStyleNonce(cspNonce);
+
 createInertiaApp({
+    nonce: cspNonce,
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {

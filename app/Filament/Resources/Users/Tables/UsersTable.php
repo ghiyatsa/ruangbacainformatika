@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Tables;
 
 use App\Models\User;
+use App\Services\ActivityLogService;
 use App\Support\AppTimezone;
 use App\Support\LoanConsequenceService;
 use Filament\Actions\Action;
@@ -144,6 +145,15 @@ class UsersTable
                         $record->forceFill([
                             'is_approved' => true,
                         ])->save();
+                        app(ActivityLogService::class)->log(
+                            'users.approved',
+                            'Akun pengguna disetujui',
+                            $record,
+                            [
+                                'email' => $record->email,
+                                'roles' => $record->roles()->pluck('name')->all(),
+                            ],
+                        );
 
                         Notification::make()
                             ->success()
@@ -172,6 +182,16 @@ class UsersTable
                                 $record->forceFill([
                                     'is_approved' => true,
                                 ])->save();
+                                app(ActivityLogService::class)->log(
+                                    'users.approved',
+                                    'Akun pengguna disetujui',
+                                    $record,
+                                    [
+                                        'email' => $record->email,
+                                        'roles' => $record->roles()->pluck('name')->all(),
+                                        'via' => 'bulk_action',
+                                    ],
+                                );
 
                                 $approvedCount++;
                             }

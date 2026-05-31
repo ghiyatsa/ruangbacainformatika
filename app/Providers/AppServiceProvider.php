@@ -2,9 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\Category;
+use App\Models\InternshipReport;
+use App\Models\Publisher;
 use App\Models\Skripsi;
+use App\Models\Thesis;
+use App\Observers\CatalogActivityObserver;
 use App\Observers\SkripsiObserver;
 use App\Repositories\SettingRepository;
+use App\Services\ActivityLogService;
 use App\Services\SimilarityApiService;
 use App\Support\AppTimezone;
 use App\Support\SiteSettings;
@@ -30,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->scoped(ActivityLogService::class);
         $this->app->scoped(SimilarityApiService::class);
         $this->app->scoped(SiteSettings::class);
     }
@@ -50,7 +59,14 @@ class AppServiceProvider extends ServiceProvider
         $this->configureContactRateLimiter();
         $this->composeRootView();
 
+        Author::observe(CatalogActivityObserver::class);
+        Book::observe(CatalogActivityObserver::class);
+        Category::observe(CatalogActivityObserver::class);
+        InternshipReport::observe(CatalogActivityObserver::class);
+        Publisher::observe(CatalogActivityObserver::class);
+        Skripsi::observe(CatalogActivityObserver::class);
         Skripsi::observe(SkripsiObserver::class);
+        Thesis::observe(CatalogActivityObserver::class);
     }
 
     protected function configureWhatsAppRateLimiter(): void

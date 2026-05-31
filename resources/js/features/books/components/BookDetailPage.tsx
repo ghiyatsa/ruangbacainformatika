@@ -17,6 +17,7 @@ import {
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
+import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
@@ -149,7 +150,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                             />
                         </div>
 
-                        <div className="grid items-center gap-10 md:grid-cols-12 md:gap-12">
+                        <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
                                 <div className="group relative overflow-hidden rounded-2xl border border-white/10">
                                     <img
@@ -259,7 +260,9 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                             kali dilihat
                                         </span>
                                     </div>
+                                </div>
 
+                                <div className="mt-5 flex flex-wrap items-center gap-3">
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -289,6 +292,16 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                             ? 'Tersimpan'
                                             : 'Simpan'}
                                     </Button>
+
+                                    <CatalogShareButton
+                                        title={book.title}
+                                        subtitle={
+                                            book.authors.join(', ') ||
+                                            'Penulis tidak tersedia'
+                                        }
+                                        kindLabel="Buku"
+                                        className="bg-background/70 backdrop-blur-sm"
+                                    />
 
                                     {user &&
                                     auth.canBorrowBooks &&

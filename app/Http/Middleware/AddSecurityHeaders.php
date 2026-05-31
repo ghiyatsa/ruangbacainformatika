@@ -52,6 +52,12 @@ class AddSecurityHeaders
             array_push($connectSources, 'http://127.0.0.1:5173', 'http://localhost:5173', 'ws://127.0.0.1:5173', 'ws://localhost:5173');
         }
 
+        $fontSources = ["'self'", 'data:', 'https://fonts.bunny.net'];
+
+        if (app()->isLocal()) {
+            array_push($fontSources, 'http://127.0.0.1:5173', 'http://localhost:5173');
+        }
+
         $directives = [
             "default-src 'self'",
             "base-uri 'self'",
@@ -59,7 +65,7 @@ class AddSecurityHeaders
             "frame-ancestors 'self'",
             "form-action 'self' https://accounts.google.com",
             "img-src 'self' data: https:",
-            "font-src 'self' data: https://fonts.bunny.net",
+            'font-src '.implode(' ', $fontSources),
             'style-src '.implode(' ', $styleSources),
             'script-src '.implode(' ', $scriptSources),
             'connect-src '.implode(' ', $connectSources),

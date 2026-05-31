@@ -9,6 +9,7 @@ use App\Http\Controllers\InternshipReportController;
 use App\Http\Controllers\LoanHistoryController;
 use App\Http\Controllers\LoanRequestController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OpenGraphImageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ReturnDraftController;
 use App\Http\Controllers\SearchController;
@@ -18,6 +19,11 @@ use App\Http\Controllers\ThesisController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/og/site', [OpenGraphImageController::class, 'site'])->name('og.site');
+Route::get('/og/books/{book:slug}', [OpenGraphImageController::class, 'book'])->name('og.books.show');
+Route::get('/og/skripsi/{skripsi:student_id}', [OpenGraphImageController::class, 'skripsi'])->name('og.skripsi.show');
+Route::get('/og/internship-reports/{internshipReport:student_id}', [OpenGraphImageController::class, 'internshipReport'])->name('og.internship-reports.show');
+Route::get('/og/thesis/{thesis:student_id}', [OpenGraphImageController::class, 'thesis'])->name('og.thesis.show');
 Route::get('/books', CatalogController::class)->name('books.index');
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
 Route::post('/catalog-reports', [CatalogReportController::class, 'store'])->name('catalog-reports.store');
@@ -38,6 +44,7 @@ Route::post('/contact', [ContactMessageController::class, 'store'])
     ->name('contact.store');
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service');
+Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
 Route::middleware('auth')->group(function () {
     Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
     Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');

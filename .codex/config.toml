@@ -11,22 +11,3 @@ type = "stdio"
 [mcp_servers.laravel-boost]
 command = "php"
 args = ["artisan", "boost:mcp"]
-
-[mcp_servers.pagespeed-insights]
-command = "npx"
-args = [
-  "-y",
-  "-p",
-  "pino-pretty",
-  "-p",
-  "pagespeed-insights-mcp",
-  "pagespeed-insights-mcp"
-]
-env = { GOOGLE_API_KEY = "GOOGLE_API_KEY" }
-
-[mcp_servers.TestSprite]
-command = "npx"
-args = [
-  "@testsprite/testsprite-mcp@latest"
-]
-env = {API_KEY= "sk-user-uBhdVCuSlS2l8CGVCuD7-Bk2q5yH_KCs2r2Gf_TU33_-LLP0rer1BOCNzrmyWPfZdJdtAJ6UCGCNOj4eGWvzUgecRslLELvgz7Az4-PFAmpkgu4X7bTiMlp5NkbhDzTjqDg"}

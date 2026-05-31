@@ -13,12 +13,16 @@
             $metaRobots = $pageMeta['robots'] ?? ($siteMeta['robots'] ?? 'index,follow');
             $canonicalUrl = $pageMeta['canonicalUrl'] ?? url()->current();
             $metaOgType = $pageMeta['type'] ?? 'website';
-            $metaOgImage = $pageMeta['ogImage'] ?? ($siteMeta['ogImage'] ?? asset('images/og-image.png'));
+            $metaOgImage = $pageMeta['ogImage'] ?? ($siteMeta['ogImage'] ?? route('og.site'));
+            $metaOgImageType = $pageMeta['ogImageType'] ?? ($siteMeta['ogImageType'] ?? 'image/png');
+            $metaOgImageWidth = $pageMeta['ogImageWidth'] ?? ($siteMeta['ogImageWidth'] ?? 1200);
+            $metaOgImageHeight = $pageMeta['ogImageHeight'] ?? ($siteMeta['ogImageHeight'] ?? 630);
         @endphp
 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="csp-nonce" content="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
@@ -55,8 +59,7 @@
         <link rel="icon" type="image/png" sizes="512x512" href="{{ $siteMeta['favicon'] ?? asset('android-chrome-512x512.png') }}">
         <meta name="theme-color" content="{{ $siteMeta['themeColor'] ?? '#ffffff' }}">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+
 
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx'])
@@ -76,9 +79,9 @@
             <meta data-inertia="og:title" property="og:title" content="{{ $metaTitle }}">
             <meta data-inertia="og:description" property="og:description" content="{{ $metaDescription }}">
             <meta data-inertia="og:image" property="og:image" content="{{ $metaOgImage }}">
-            <meta data-inertia="og:image:type" property="og:image:type" content="image/png">
-            <meta data-inertia="og:image:width" property="og:image:width" content="1200">
-            <meta data-inertia="og:image:height" property="og:image:height" content="630">
+            <meta data-inertia="og:image:type" property="og:image:type" content="{{ $metaOgImageType }}">
+            <meta data-inertia="og:image:width" property="og:image:width" content="{{ $metaOgImageWidth }}">
+            <meta data-inertia="og:image:height" property="og:image:height" content="{{ $metaOgImageHeight }}">
 
             <!-- Twitter -->
             <meta data-inertia="twitter:card" property="twitter:card" content="summary_large_image">

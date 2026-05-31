@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
+import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
@@ -156,6 +157,12 @@ export default function InternshipReportDetailPage(
                                             ? 'Tersimpan'
                                             : 'Simpan'}
                                     </Button>
+
+                                    <CatalogShareButton
+                                        title={report.title}
+                                        subtitle={report.authorName}
+                                        kindLabel="Laporan KP"
+                                    />
                                 </div>
                             </div>
                         </div>

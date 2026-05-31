@@ -28,7 +28,7 @@ export function FooterBottom() {
                     <Mail className="size-4" />
                 </a>
                 <a
-                    href="https://www.instagram.com/himatif_unimal"
+                    href="https://www.instagram.com/himatifunimal"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram HIMATIF Universitas Malikussaleh"
@@ -37,7 +37,7 @@ export function FooterBottom() {
                     <Instagram className="size-4" />
                 </a>
                 <a
-                    href="https://github.com/aperiocode/ruangbacainformatika"
+                    href="https://github.com/ghiyatsa/ruangbacainformatika"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="GitHub Ruang Baca Teknik Informatika"

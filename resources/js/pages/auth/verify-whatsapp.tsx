@@ -65,7 +65,7 @@ export default function VerifyWhatsApp() {
         0,
         Math.floor((currentTimestamp - countdownBase.startedAt) / 1000),
     );
-    const expiresIn = Math.max(0, countdownBase.expiresIn - elapsedSeconds);
+
     const resendAvailableIn = Math.max(
         0,
         countdownBase.resendAvailableIn - elapsedSeconds,

@@ -1,3 +1,67 @@
+## Repo Notes
+
+### Project Summary
+
+`ruangbaca` adalah aplikasi perpustakaan dan layanan mandiri untuk Ruang Baca Informatika. Sistem ini mencakup katalog publik, katalog karya ilmiah, login Google, onboarding profil, verifikasi WhatsApp, peminjaman dan pengembalian berbasis draft QR, kiosk, serta panel admin Filament.
+
+### Core Stack
+
+- Laravel 13
+- PHP 8.3
+- Inertia.js v3 + React 19 + TypeScript
+- Tailwind CSS v4
+- Filament v5
+- Fortify + Socialite
+- MySQL
+- Pest v4
+- Vite v8
+
+### Key Commands
+
+- setup awal: `composer setup`
+- development penuh: `composer run dev`
+- backend only: `php artisan serve`
+- frontend dev only: `npm run dev`
+- build production asset: `npm run build`
+- PHP test suite: `php artisan test --compact`
+- type check frontend: `npm run types:check`
+- lint frontend: `npm run lint:check`
+- format PHP: `vendor/bin/pint --dirty --format agent`
+
+### Important Business Rules
+
+- autentikasi utama memakai Google, bukan login password lokal biasa
+- akses pinjam tidak otomatis aktif hanya karena user berhasil login
+- hak pinjam aktif jika user memenuhi seluruh syarat bisnis: email eligible, profil lengkap, WhatsApp terverifikasi, approval yang sesuai, dan role `member`
+- admin atau staff boleh mengakses panel admin, tetapi tidak otomatis mengikuti flow member
+- kiosk dapat dibatasi PIN dan allowlist IP/subnet
+- alur borrow dan return memakai draft QR yang dikonsumsi di kiosk atau petugas
+
+### High-Impact Files
+
+- route publik dan layanan: `routes/web.php`, `routes/auth.php`, `routes/settings.php`, `routes/kiosk.php`
+- shared auth props: `app/Http/Middleware/HandleInertiaRequests.php`
+- redirect auth: `app/Services/Auth/AuthenticationRedirector.php`
+- login Google: `app/Http/Controllers/Auth/GoogleController.php`
+- verifikasi WhatsApp: `app/Http/Controllers/Auth/WhatsAppVerificationController.php`, `app/Services/WhatsAppOtpService.php`
+- loan flow: `app/Services/LoanDraftService.php`, `app/Http/Controllers/LoanRequestController.php`, `app/Http/Controllers/LoanHistoryController.php`
+- kiosk flow: `app/Http/Controllers/KioskController.php`, `app/Services/MemberRegistrationClaimService.php`
+- admin panel: `app/Providers/Filament/AdminPanelProvider.php`, `app/Filament/Pages`, `app/Filament/Resources`
+
+### Documentation In Repo
+
+- contributor-facing overview: `README.md`
+- product spec untuk pengujian: `TESTSPRITE_PRODUCT_SPEC.md`
+- local TestSprite summary: `testsprite_tests/tmp/code_summary.yaml`
+
+### Working Preferences For This Repo
+
+- prioritaskan solusi repo-specific, bukan saran Laravel generik
+- saat menyentuh flow auth, kiosk, loan, atau approval member, cek guard dan redirect end-to-end
+- saat user melaporkan UI publik bermasalah, cek mobile layout, hierarchy, dan state auth di header
+- bila perubahan menyentuh PHP, jalankan `vendor/bin/pint --dirty --format agent`
+- bila perubahan menyentuh TypeScript atau React, minimal jalankan `npm run types:check`
+
 <laravel-boost-guidelines>
 === foundation rules ===
 

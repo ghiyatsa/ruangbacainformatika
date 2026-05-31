@@ -13,21 +13,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RoleSeeder::class,
-            AppSettingSeeder::class,
-            ShieldSeeder::class,
-            SuperAdminSeeder::class,
+            ProductionSeeder::class,
         ]);
 
         if (app()->environment('local', 'development')) {
             $this->call([
-                CategorySeeder::class,
-                AuthorSeeder::class,
-                PublisherSeeder::class,
-                BookSeeder::class,
-                SkripsiSeeder::class,
-                ThesisSeeder::class,
-                InternshipReportSeeder::class,
+                LocalDevelopmentSeeder::class,
             ]);
         }
     }

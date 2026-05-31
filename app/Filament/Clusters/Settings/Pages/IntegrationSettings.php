@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Repositories\SettingRepository;
+use App\Services\ActivityLogService;
 use App\Services\SimilarityFullSyncDispatcher;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -180,6 +181,12 @@ class IntegrationSettings extends Page
                             ->modalSubmitActionLabel('Mulai Sinkron Ulang')
                             ->action(function (): void {
                                 $result = app(SimilarityFullSyncDispatcher::class)->dispatch();
+                                app(ActivityLogService::class)->log(
+                                    'integration.skripsi_resync.triggered',
+                                    'Sinkron ulang semua skripsi dipicu',
+                                    'Integrasi',
+                                    $result,
+                                );
 
                                 Notification::make()
                                     ->{$result['success'] ? 'success' : 'danger'}()
@@ -207,6 +214,9 @@ class IntegrationSettings extends Page
     {
         $data = $this->form->getState();
         $weightsChanged = $this->weightsHaveChanged($data);
+        $existingValues = $this->decryptSecretFields(
+            $this->settingRepository()->sectionValues('integration', $this->defaultValues()),
+        );
 
         if (((float) ($data['similarity_weight_judul'] ?? 0)
             + (float) ($data['similarity_weight_abstrak'] ?? 0)
@@ -228,7 +238,7 @@ class IntegrationSettings extends Page
             ? encrypt($data['whatsapp_api_token'])
             : null;
 
-        $this->settingRepository()->putMany('integration', [
+        $savedValues = [
             'similarity_api_url' => $data['similarity_api_url'] ?? null,
             'similarity_api_secret' => $similaritySecret,
             'similarity_api_timeout' => $data['similarity_api_timeout'] ?? 10,
@@ -240,7 +250,21 @@ class IntegrationSettings extends Page
             'similarity_weight_judul' => $data['similarity_weight_judul'] ?? 0.7,
             'similarity_weight_abstrak' => $data['similarity_weight_abstrak'] ?? 0.2,
             'similarity_weight_kata_kunci' => $data['similarity_weight_kata_kunci'] ?? 0.1,
-        ]);
+        ];
+
+        $this->settingRepository()->putMany('integration', $savedValues);
+        app(ActivityLogService::class)->logSettingsUpdate(
+            'integration',
+            'Pengaturan integrasi',
+            $existingValues,
+            [
+                ...$savedValues,
+                'similarity_api_secret' => $data['similarity_api_secret'] ?? null,
+                'whatsapp_api_token' => $data['whatsapp_api_token'] ?? null,
+            ],
+            ['similarity_api_secret', 'whatsapp_api_token'],
+            ['weights_changed' => $weightsChanged],
+        );
 
         Notification::make()
             ->success()

@@ -15,6 +15,9 @@ type SiteProps = {
         themeColor: string;
         logo: string | null;
         ogImage: string;
+        ogImageType: string;
+        ogImageWidth: number;
+        ogImageHeight: number;
         icons: {
             favicon: string;
             faviconSvg: string;
@@ -55,6 +58,9 @@ export function SeoHead({
     const metaImage = image ?? page.props.site.ogImage;
     const metaTitle = title ? `${title} - ${page.props.name}` : page.props.name;
     const metaRobots = robots ?? page.props.site.robots;
+    const metaImageType = page.props.site.ogImageType;
+    const metaImageWidth = String(page.props.site.ogImageWidth);
+    const metaImageHeight = String(page.props.site.ogImageHeight);
     const metaKeywords = Array.isArray(keywords)
         ? keywords.filter(Boolean).join(', ')
         : keywords ?? page.props.site.keywords;
@@ -88,17 +94,17 @@ export function SeoHead({
             <meta
                 head-key="og:image:type"
                 property="og:image:type"
-                content="image/png"
+                content={metaImageType}
             />
             <meta
                 head-key="og:image:width"
                 property="og:image:width"
-                content="1200"
+                content={metaImageWidth}
             />
             <meta
                 head-key="og:image:height"
                 property="og:image:height"
-                content="630"
+                content={metaImageHeight}
             />
 
             <meta

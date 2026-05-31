@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Setting;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class AppSettingSeeder extends Seeder
 {
@@ -33,23 +34,28 @@ class AppSettingSeeder extends Seeder
     protected function defaults(): array
     {
         $similaritySecret = config('services.similarity_api.secret');
+        $globalNotice = config('app.seed_defaults.global_notice', []);
+        $kioskDefaultPin = trim((string) config('app.seed_defaults.kiosk.pin', ''));
 
         return [
             'general' => [
                 'site_name' => config('app.name'),
                 'site_tagline' => 'Layanan perpustakaan yang rapi dan mudah diakses',
                 'support_whatsapp' => '',
-                'hero_notice_enabled' => '0',
-                'hero_notice_text' => '',
-                'hero_notice_url' => '',
-                'hero_notice_link_label' => '',
-                'hero_notice_tone' => 'info',
+                'hero_notice_enabled' => ! empty($globalNotice['enabled']) ? '1' : '0',
+                'hero_notice_text' => is_string($globalNotice['text'] ?? null) ? trim($globalNotice['text']) : '',
+                'hero_notice_url' => is_string($globalNotice['url'] ?? null) ? trim($globalNotice['url']) : '',
+                'hero_notice_link_label' => is_string($globalNotice['link_label'] ?? null) ? trim($globalNotice['link_label']) : '',
+                'hero_notice_tone' => in_array($globalNotice['tone'] ?? null, ['info', 'warning', 'success'], true)
+                    ? (string) $globalNotice['tone']
+                    : 'info',
             ],
             'library' => [
                 'loan_max_books' => '3',
                 'loan_duration_days' => '5',
             ],
             'kiosk' => [
+                'pin_hash' => $kioskDefaultPin !== '' ? Hash::make($kioskDefaultPin) : '',
                 'title' => 'Pendataan Pengunjung Perpustakaan',
                 'subtitle' => 'Silakan masukkan PIN untuk mengaktifkan perangkat kios.',
                 'session_version' => '1',

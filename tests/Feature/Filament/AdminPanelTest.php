@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use App\Filament\Resources\Authors\AuthorResource;
 use App\Filament\Resources\Books\BookResource;
 use App\Filament\Resources\CatalogReports\CatalogReportResource;
@@ -347,6 +348,7 @@ it('filament resources expose consistent navigation metadata', function () {
         ->and(LoanResource::getNavigationBadgeTooltip())->toBe('Total pinjaman aktif')
         ->and(ContactMessageResource::getNavigationBadgeColor())->toBe('warning')
         ->and(ContactMessageResource::getNavigationBadgeTooltip())->toBe('Pesan kontak baru')
+        ->and(ActivityLogResource::canCreate())->toBeFalse()
         ->and(VisitLogResource::getNavigationBadgeColor())->toBe('primary')
         ->and(VisitLogResource::getNavigationBadgeTooltip())->toBe('Kunjungan hari ini')
         ->and(AuthorResource::getNavigationBadgeColor())->toBe('gray')
@@ -379,6 +381,7 @@ it('super admin users can access key admin resources', function (string $path) {
     '/admin/loans',
     '/admin/visit-logs',
     '/admin/logs',
+    '/admin/activity-logs',
     '/admin/settings/kiosk',
     '/admin/settings/general-settings',
 ]);

@@ -11,7 +11,6 @@ import {
     Search,
     X,
 } from 'lucide-react';
-import { downloadSvgAsPng } from '@/lib/utils';
 import { useEffect, useMemo, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import ReturnDraftController from '@/actions/App/Http/Controllers/ReturnDraftController';
@@ -42,6 +41,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
+import { downloadSvgAsPng } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import loansRoute from '@/routes/loans';

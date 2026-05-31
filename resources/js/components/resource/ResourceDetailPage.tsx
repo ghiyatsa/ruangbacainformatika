@@ -38,11 +38,11 @@ export function ResourceDetailPage({
                 <div className="py-10">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
                         <div className="grid gap-8 md:grid-cols-12 md:gap-10">
-                            <aside className="md:col-span-4 lg:col-span-3">
+                            <aside className="order-2 md:order-1 md:col-span-4 lg:col-span-3">
                                 {sidebar}
                             </aside>
 
-                            <div className="md:col-span-8 lg:col-span-9">
+                            <div className="order-1 md:order-2 md:col-span-8 lg:col-span-9">
                                 {children}
                             </div>
                         </div>
