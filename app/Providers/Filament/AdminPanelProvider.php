@@ -71,14 +71,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentLogViewer::make()
-                    ->authorize(fn(): bool => Auth::user()?->hasRole('super_admin') ?? false)
+                    ->authorize(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false)
                     ->navigationGroup('Sistem')
                     ->navigationLabel('Log Sistem')
                     ->navigationSort(90),
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Hak Akses')
                     ->navigationGroup('Manajemen Pengguna')
-                    ->navigationBadge(fn(): string => (string) Role::count())
+                    ->navigationBadge(fn (): string => (string) Role::count())
                     ->navigationBadgeTooltip('Total peran')
                     ->navigationBadgeColor('warning')
                     ->gridColumns([
