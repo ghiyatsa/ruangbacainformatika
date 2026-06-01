@@ -84,32 +84,123 @@ class OpenGraphImage
         string $label,
         string $title,
         string $author,
+        int $views = 0,
     ): string {
         $settings = $this->siteSettings->values();
 
-        return $this->renderPng(function (GdImage $image) use ($label, $title, $author, $settings): void {
+        return $this->renderPng(function (GdImage $image) use ($label, $title, $author, $views, $settings): void {
             $colors = $this->palette($image, $settings['theme_color']);
 
-            imagefilledrectangle($image, 0, 0, self::WIDTH, self::HEIGHT, $colors['slate50']);
-            imagefilledrectangle($image, 0, self::HEIGHT - 16, self::WIDTH, self::HEIGHT, $colors['theme']);
+            // White background
+            imagefilledrectangle($image, 0, 0, self::WIDTH, self::HEIGHT, $colors['white']);
 
-            $this->drawRoundedRectangle($image, 72, 72, 1128, 528, 36, $colors['white'], $colors['slate200']);
-            $this->drawRoundedRectangle($image, 96, 96, 266, 134, 19, $colors['slate200']);
-            $this->drawCenteredTextLine($image, $label, 181, 120, 18, $colors['slate700'], true);
+            // Bottom colorful stripe (mimics GitHub's multi-color footer bar)
+            $stripeHeight = 20;
+            $stripeY = self::HEIGHT - $stripeHeight;
+            $thirdWidth = (int) floor(self::WIDTH / 3);
+            imagefilledrectangle($image, 0, $stripeY, $thirdWidth - 4, self::HEIGHT, $colors['theme']);
+            imagefilledrectangle($image, $thirdWidth, $stripeY, $thirdWidth * 2 - 4, self::HEIGHT, $colors['slate600']);
+            imagefilledrectangle($image, $thirdWidth * 2, $stripeY, self::WIDTH, self::HEIGHT, $colors['theme']);
 
-            $titleLines = $this->wrapText($title, 28, 3);
+            // Content margins
+            $paddingX = 80;
+            $paddingY = 80;
+            $logoBoxSize = 180;
+            $logoBoxLeft = self::WIDTH - $paddingX - $logoBoxSize;
+            $logoBoxTop = $paddingY;
+
+            // Logo area: rounded square top-right (like GitHub avatar)
+            $this->drawRoundedRectangle(
+                $image,
+                $logoBoxLeft, $logoBoxTop,
+                $logoBoxLeft + $logoBoxSize, $logoBoxTop + $logoBoxSize,
+                24, $colors['slate50'], $colors['slate200']
+            );
+            $this->drawLogo($image, $logoBoxLeft, $logoBoxTop, $logoBoxSize, $logoBoxSize, $colors);
+
+            // Label pill top-left
+            $labelPillW = 220;
+            $labelPillH = 38;
+            $this->drawRoundedRectangle(
+                $image,
+                $paddingX, $paddingY,
+                $paddingX + $labelPillW, $paddingY + $labelPillH,
+                10, $colors['slate200']
+            );
+            $this->drawCenteredTextLine(
+                $image, $label,
+                $paddingX + (int) floor($labelPillW / 2),
+                $paddingY + 26,
+                16, $colors['slate700'], false
+            );
+
+            // Title: large bold, constrained to area left of logo
+            // Gap of 40px between title right edge and logo left edge
+            $titleMaxWidth = $logoBoxLeft - $paddingX - 40;
+            $titleLines = $this->wrapTextToPixelWidth($title, $titleMaxWidth, 3, 52, true);
+            $titleY = $paddingY + $labelPillH + 52;
             foreach ($titleLines as $index => $line) {
-                $this->drawTextLine($image, $line, 96, 198 + ($index * 64), 48, $colors['slate900'], true);
+                $this->drawTextLine($image, $line, $paddingX, $titleY + ($index * 72), 52, $colors['slate900'], true);
             }
 
-            $authorLines = $this->wrapText($author, 38, 2);
-            foreach ($authorLines as $index => $line) {
-                $this->drawTextLine($image, $line, 96, 430 + ($index * 34), 26, $colors['slate600']);
+            // Separator line above bottom row
+            $separatorY = self::HEIGHT - $stripeHeight - 90;
+            imageline($image, $paddingX, $separatorY, self::WIDTH - $paddingX, $separatorY, $colors['slate200']);
+
+            // Bottom row stats (GitHub-style)
+            $bottomTextY = $separatorY + 56;
+            $cursor = $paddingX;
+            $statGap = 52;
+            $iconR = 11;
+
+            // --- Eye icon (views) ---
+            $eyeCX = $cursor + $iconR;
+            $eyeCY = $bottomTextY - $iconR;
+            // outer ellipse (eye shape)
+            imageellipse($image, $eyeCX, $eyeCY, $iconR * 2, (int) round($iconR * 1.2), $colors['slate400']);
+            // pupil
+            imagefilledellipse($image, $eyeCX, $eyeCY, (int) round($iconR * 0.72), (int) round($iconR * 0.72), $colors['slate400']);
+            $cursor += $iconR * 2 + 10;
+
+            // views count
+            $viewsLabel = number_format($views).' dilihat';
+            $this->drawTextLine($image, $viewsLabel, $cursor, $bottomTextY, 26, $colors['slate600']);
+
+            // measure views text width to position next stat
+            $fontPath = $this->fontPath(false);
+            if ($fontPath !== null) {
+                $box = imagettfbbox(26, 0, $fontPath, $viewsLabel);
+                if (is_array($box)) {
+                    $cursor += (int) abs($box[4] - $box[0]) + $statGap;
+                }
+            } else {
+                $cursor += 200;
             }
 
-            $this->drawTextLine($image, $settings['site_name'], 96, 520, 22, $colors['slate400'], true);
-            $this->drawRoundedRectangle($image, 904, 96, 1104, 376, 28, $colors['slate50'], $colors['slate200']);
-            $this->drawLogo($image, 904, 136, 200, 200, $colors);
+            // --- Person icon (author) ---
+            $personCX = $cursor + $iconR;
+            $personCY = $bottomTextY - $iconR - 2;
+            // head
+            imagefilledellipse($image, $personCX, $personCY, $iconR, $iconR, $colors['slate400']);
+            // body arc
+            imagearc($image, $personCX, $personCY + $iconR, (int) round($iconR * 1.6), $iconR, 180, 360, $colors['slate400']);
+            $cursor += $iconR * 2 + 10;
+
+            // author name (truncated)
+            $this->drawTextLine($image, $author, $cursor, $bottomTextY, 26, $colors['slate600']);
+
+            // Site name right-aligned
+            $siteName = $settings['site_name'];
+            $boldFontPath = $this->fontPath(true);
+            $siteX = self::WIDTH - $paddingX;
+            if ($boldFontPath !== null) {
+                $box = imagettfbbox(22, 0, $boldFontPath, $siteName);
+                if (is_array($box)) {
+                    $siteTextW = (int) abs($box[4] - $box[0]);
+                    $siteX = self::WIDTH - $paddingX - $siteTextW;
+                }
+            }
+            $this->drawTextLine($image, $siteName, $siteX, $bottomTextY, 22, $colors['slate400'], true);
         });
     }
 
@@ -417,8 +508,7 @@ class OpenGraphImage
             ->filter()
             ->take(2)
             ->map(fn (string $part): string => Str::upper(Str::substr($part, 0, 1)))
-            ->implode('')
-            ->value();
+            ->implode('');
     }
 
     protected function resolveSiteLogoImage(): ?GdImage
@@ -523,5 +613,91 @@ class OpenGraphImage
         }
 
         return $lines;
+    }
+
+    /**
+     * Wrap text to fit within a maximum pixel width using TTF font metrics.
+     * Falls back to character-based wrapping when no font is available.
+     *
+     * @return array<int, string>
+     */
+    protected function wrapTextToPixelWidth(
+        string $text,
+        int $maxPixelWidth,
+        int $maxLines,
+        int $fontSize,
+        bool $bold = false,
+    ): array {
+        $fontPath = $this->fontPath($bold);
+
+        if ($fontPath === null) {
+            // Fallback: rough estimate of ~14px per char at size 52
+            $charsPerLine = max(10, (int) floor($maxPixelWidth / 14));
+
+            return $this->wrapText($text, $charsPerLine, $maxLines);
+        }
+
+        $normalized = Str::of($text)->squish()->value();
+
+        if ($normalized === '') {
+            return ['-'];
+        }
+
+        $words = preg_split('/\s+/u', $normalized) ?: [];
+        $lines = [];
+        $currentLine = '';
+        $consumedWords = 0;
+
+        foreach ($words as $word) {
+            $candidate = $currentLine === '' ? $word : "{$currentLine} {$word}";
+            $box = imagettfbbox($fontSize, 0, $fontPath, $candidate);
+            $candidateWidth = is_array($box) ? (int) abs($box[4] - $box[0]) : PHP_INT_MAX;
+
+            if ($candidateWidth <= $maxPixelWidth) {
+                $currentLine = $candidate;
+                $consumedWords++;
+
+                continue;
+            }
+
+            if ($currentLine !== '') {
+                $lines[] = $currentLine;
+            }
+
+            $currentLine = $word;
+            $consumedWords++;
+
+            if (count($lines) === $maxLines - 1) {
+                break;
+            }
+        }
+
+        if ($currentLine !== '' && count($lines) < $maxLines) {
+            $lines[] = $currentLine;
+        }
+
+        // Append any remaining words as truncated ellipsis on the last line
+        $remainingWords = array_slice($words, $consumedWords);
+
+        if ($remainingWords !== [] && $lines !== []) {
+            $lastIndex = array_key_last($lines);
+            $full = $lines[$lastIndex].' '.implode(' ', $remainingWords);
+
+            // Truncate character by character until it fits with '…'
+            while (Str::length($full) > 1) {
+                $truncated = Str::of($full)->limit(Str::length($full) - 1, '…')->value();
+                $box = imagettfbbox($fontSize, 0, $fontPath, $truncated);
+                $w = is_array($box) ? (int) abs($box[4] - $box[0]) : PHP_INT_MAX;
+
+                if ($w <= $maxPixelWidth) {
+                    $lines[$lastIndex] = $truncated;
+                    break;
+                }
+
+                $full = Str::substr($full, 0, Str::length($full) - 1);
+            }
+        }
+
+        return $lines ?: ['-'];
     }
 }

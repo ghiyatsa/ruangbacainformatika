@@ -28,6 +28,7 @@ class OpenGraphImageController extends Controller
             label: 'Katalog Buku',
             title: $book->title,
             author: $book->authors->pluck('name')->filter()->implode(', ') ?: 'Ruang Baca Informatika',
+            views: $book->view_count,
         ));
     }
 
@@ -37,6 +38,7 @@ class OpenGraphImageController extends Controller
             label: 'Skripsi',
             title: $skripsi->title,
             author: $skripsi->author_name,
+            views: $skripsi->view_count,
         ));
     }
 
@@ -46,6 +48,7 @@ class OpenGraphImageController extends Controller
             label: 'Tesis',
             title: $thesis->title,
             author: $thesis->author_name,
+            views: $thesis->view_count,
         ));
     }
 
@@ -55,6 +58,7 @@ class OpenGraphImageController extends Controller
             label: 'Laporan Kerja Praktik',
             title: $internshipReport->title,
             author: $internshipReport->author_name,
+            views: $internshipReport->view_count,
         ));
     }
 
