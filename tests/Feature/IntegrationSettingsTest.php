@@ -3,6 +3,7 @@
 use App\Filament\Clusters\Settings\Pages\IntegrationSettings;
 use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
@@ -84,4 +85,31 @@ it('integration settings page shows the full skripsi resync action', function ()
 
     Livewire::test(IntegrationSettings::class)
         ->assertSee('Sinkronkan Ulang Semua Skripsi');
+});
+
+it('integration settings clears cached turnstile status after saving', function () {
+    $user = makeIntegrationSuperAdmin();
+
+    actingAs($user);
+
+    Cache::put('settings.integration.turnstile_enabled', true, now()->addMinutes(5));
+
+    Livewire::test(IntegrationSettings::class)
+        ->fillForm([
+            'turnstile_enabled' => false,
+            'similarity_api_url' => 'https://similarity.test',
+            'similarity_api_secret' => 'sync-secret-1234567890',
+            'similarity_api_timeout' => 15,
+            'similarity_api_top_k' => 7,
+            'similarity_api_threshold' => 0.55,
+            'similarity_weight_judul' => 0.6,
+            'similarity_weight_abstrak' => 0.25,
+            'similarity_weight_kata_kunci' => 0.15,
+            'whatsapp_api_url' => '',
+            'whatsapp_api_token' => '',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(Cache::has('settings.integration.turnstile_enabled'))->toBeFalse();
 });

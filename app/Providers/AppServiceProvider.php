@@ -100,12 +100,12 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            $enabled = cache()->remember('settings.integration.turnstile_enabled', now()->addMinutes(5), function (): mixed {
-                return app(SettingRepository::class)->get('integration', 'turnstile_enabled', false);
-            });
+            $enabled = app(SettingRepository::class)->get('integration', 'turnstile_enabled', false);
+            $hasCredentials = filled(config('services.turnstile.key'))
+                && filled(config('services.turnstile.secret'));
 
             config([
-                'services.turnstile.enabled' => filter_var($enabled, FILTER_VALIDATE_BOOLEAN),
+                'services.turnstile.enabled' => filter_var($enabled, FILTER_VALIDATE_BOOLEAN) && $hasCredentials,
             ]);
         } catch (\Exception) {
             // Silence errors during initial setup or if table doesn't exist

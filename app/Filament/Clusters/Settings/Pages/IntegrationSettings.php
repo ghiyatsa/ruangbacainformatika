@@ -64,7 +64,7 @@ class IntegrationSettings extends Page
                     ->schema([
                         Toggle::make('turnstile_enabled')
                             ->label('Aktifkan Turnstile')
-                            ->helperText('Aktifkan jika formulir publik perlu perlindungan tambahan.')
+                            ->helperText('Aktifkan jika formulir publik perlu perlindungan tambahan. Pastikan TURNSTILE_SITE_KEY dan TURNSTILE_SECRET_KEY sudah terpasang.')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
@@ -258,6 +258,8 @@ class IntegrationSettings extends Page
         ];
 
         $this->settingRepository()->putMany('integration', $savedValues);
+        cache()->forget('settings.integration.turnstile_enabled');
+
         app(ActivityLogService::class)->logSettingsUpdate(
             'integration',
             'Pengaturan integrasi',

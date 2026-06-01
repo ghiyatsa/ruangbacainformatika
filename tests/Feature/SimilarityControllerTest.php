@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Setting;
 use App\Models\Skripsi;
 use App\Models\User;
 use App\Services\SimilarityApiService;
@@ -26,6 +27,24 @@ it('similarity page is displayed', function () {
         );
 });
 
+it('similarity page keeps turnstile disabled when credentials are missing', function () {
+    config()->set('services.turnstile.key', null);
+    config()->set('services.turnstile.secret', null);
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'integration', 'key' => 'turnstile_enabled'],
+        ['value' => '1'],
+    );
+
+    actingAs(User::factory()->create())
+        ->get(route('similarity.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('turnstileEnabled', false)
+            ->where('turnstileSiteKey', null)
+        );
+});
+
 it('similarity check requires at least five words', function () {
     actingAs(User::factory()->create())
         ->postJson(route('similarity.check'), [
@@ -34,6 +53,36 @@ it('similarity check requires at least five words', function () {
         ->assertStatus(422)
         ->assertJson([
             'message' => 'Judul terlalu singkat. Masukkan minimal 5 kata agar pengecekan lebih akurat.',
+        ]);
+});
+
+it('similarity check does not require turnstile verification when credentials are missing', function () {
+    config()->set('services.turnstile.key', null);
+    config()->set('services.turnstile.secret', null);
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'integration', 'key' => 'turnstile_enabled'],
+        ['value' => '1'],
+    );
+
+    $service = Mockery::mock(SimilarityApiService::class);
+    $service->shouldReceive('checkSimilarity')
+        ->once()
+        ->andReturn([
+            'total_found' => 0,
+            'results' => [],
+        ]);
+
+    app()->instance(SimilarityApiService::class, $service);
+
+    actingAs(User::factory()->create())
+        ->postJson(route('similarity.check'), [
+            'judul' => 'Analisis sentimen media sosial untuk layanan akademik kampus',
+        ])
+        ->assertOk()
+        ->assertJson([
+            'total_found' => 0,
+            'results' => [],
         ]);
 });
 
