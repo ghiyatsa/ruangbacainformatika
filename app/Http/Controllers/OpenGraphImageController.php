@@ -17,14 +17,14 @@ class OpenGraphImageController extends Controller
 
     public function site(): Response
     {
-        return $this->svgResponse($this->openGraphImage->renderSite());
+        return $this->imageResponse($this->openGraphImage->renderSite());
     }
 
     public function book(Book $book): Response
     {
         $book->loadMissing('authors:id,name');
 
-        return $this->svgResponse($this->openGraphImage->renderCatalogDetail(
+        return $this->imageResponse($this->openGraphImage->renderCatalogDetail(
             label: 'Katalog Buku',
             title: $book->title,
             author: $book->authors->pluck('name')->filter()->implode(', ') ?: 'Ruang Baca Informatika',
@@ -33,7 +33,7 @@ class OpenGraphImageController extends Controller
 
     public function skripsi(Skripsi $skripsi): Response
     {
-        return $this->svgResponse($this->openGraphImage->renderCatalogDetail(
+        return $this->imageResponse($this->openGraphImage->renderCatalogDetail(
             label: 'Skripsi',
             title: $skripsi->title,
             author: $skripsi->author_name,
@@ -42,7 +42,7 @@ class OpenGraphImageController extends Controller
 
     public function thesis(Thesis $thesis): Response
     {
-        return $this->svgResponse($this->openGraphImage->renderCatalogDetail(
+        return $this->imageResponse($this->openGraphImage->renderCatalogDetail(
             label: 'Tesis',
             title: $thesis->title,
             author: $thesis->author_name,
@@ -51,16 +51,16 @@ class OpenGraphImageController extends Controller
 
     public function internshipReport(InternshipReport $internshipReport): Response
     {
-        return $this->svgResponse($this->openGraphImage->renderCatalogDetail(
+        return $this->imageResponse($this->openGraphImage->renderCatalogDetail(
             label: 'Laporan Kerja Praktik',
             title: $internshipReport->title,
             author: $internshipReport->author_name,
         ));
     }
 
-    protected function svgResponse(string $svg): Response
+    protected function imageResponse(string $content): Response
     {
-        return response($svg, 200, [
+        return response($content, 200, [
             'Content-Type' => OpenGraphImage::MIME_TYPE,
             'Cache-Control' => 'public, max-age=3600',
         ]);

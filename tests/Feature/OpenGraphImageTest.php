@@ -3,9 +3,29 @@
 use App\Models\Book;
 use App\Models\Setting;
 use App\Models\Skripsi;
+use App\Support\OpenGraphImage;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\get;
+
+function assertPngOpenGraphResponse(TestResponse $response): void
+{
+    $response->assertOk()
+        ->assertHeader('Content-Type', OpenGraphImage::MIME_TYPE);
+
+    $binary = $response->getContent();
+
+    expect(substr($binary, 0, 8))->toBe("\x89PNG\x0D\x0A\x1A\x0A");
+
+    $image = imagecreatefromstring($binary);
+
+    expect($image)->toBeInstanceOf(GdImage::class)
+        ->and(imagesx($image))->toBe(OpenGraphImage::WIDTH)
+        ->and(imagesy($image))->toBe(OpenGraphImage::HEIGHT);
+
+    imagedestroy($image);
+}
 
 it('renders the site open graph image with the configured logo-driven identity', function () {
     Setting::query()->updateOrCreate(
@@ -17,12 +37,7 @@ it('renders the site open graph image with the configured logo-driven identity',
         ['value' => 'Portal koleksi dan layanan digital'],
     );
 
-    get(route('og.site'))
-        ->assertOk()
-        ->assertHeader('Content-Type', 'image/svg+xml')
-        ->assertSee('Ruang Baca Custom', false)
-        ->assertSee('Portal koleksi dan layanan digital', false)
-        ->assertSee('viewBox="0 0 1200 600"', false);
+    assertPngOpenGraphResponse(get(route('og.site')));
 });
 
 it('renders a catalog detail open graph image with title author and logo', function () {
@@ -32,15 +47,7 @@ it('renders a catalog detail open graph image with title author and logo', funct
     ]);
     $book->authors()->create(['name' => 'Robert Martin', 'slug' => 'robert-martin']);
 
-    get(route('og.books.show', $book))
-        ->assertOk()
-        ->assertHeader('Content-Type', 'image/svg+xml')
-        ->assertSee('Katalog Buku', false)
-        ->assertSee('Clean Code untuk', false)
-        ->assertSee('Pengembangan Sistem', false)
-        ->assertSee('Perpustakaan', false)
-        ->assertSee('Robert Martin', false)
-        ->assertSee('Ruang Baca Informatika', false);
+    assertPngOpenGraphResponse(get(route('og.books.show', $book)));
 });
 
 it('renders an academic document open graph image without requiring a cover', function () {
@@ -52,10 +59,5 @@ it('renders an academic document open graph image without requiring a cover', fu
         'student_id' => '2301700999',
     ]);
 
-    get(route('og.skripsi.show', $skripsi))
-        ->assertOk()
-        ->assertHeader('Content-Type', 'image/svg+xml')
-        ->assertSee('Skripsi', false)
-        ->assertSee('Sistem Rekomendasi', false)
-        ->assertSee('Nadia Putri', false);
+    assertPngOpenGraphResponse(get(route('og.skripsi.show', $skripsi)));
 });

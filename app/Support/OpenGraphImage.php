@@ -3,14 +3,15 @@
 namespace App\Support;
 
 use App\Models\Book;
+use GdImage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class OpenGraphImage
 {
-    public const MIME_TYPE = 'image/svg+xml';
+    public const MIME_TYPE = 'image/png';
 
     public const WIDTH = 1200;
 
@@ -63,12 +64,18 @@ class OpenGraphImage
     {
         $settings = $this->siteSettings->values();
 
-        return view('og.site', [
-            'title' => $settings['site_name'],
-            'subtitle' => $settings['site_tagline'],
-            'themeColor' => $settings['theme_color'],
-            'logoMarkup' => new HtmlString($this->siteLogoMarkup()),
-        ])->render();
+        return $this->renderPng(function (GdImage $image) use ($settings): void {
+            $colors = $this->palette($image, $settings['theme_color']);
+
+            imagefilledrectangle($image, 0, 0, self::WIDTH, self::HEIGHT, $colors['slate50']);
+            imagefilledrectangle($image, 0, self::HEIGHT - 16, self::WIDTH, self::HEIGHT, $colors['theme']);
+
+            $this->drawRoundedRectangle($image, 72, 72, 1128, 528, 36, $colors['white'], $colors['slate200']);
+            $this->drawLogoCard($image, 96, 96, 152, 152, $colors);
+
+            $this->drawTextLine($image, $settings['site_name'], 96, 250, 64, $colors['slate900'], true);
+            $this->drawTextLine($image, $settings['site_tagline'], 96, 338, 28, $colors['slate600']);
+        });
     }
 
     public function renderCatalogDetail(
@@ -76,90 +83,318 @@ class OpenGraphImage
         string $title,
         string $author,
     ): string {
-        return view('og.catalog-detail', [
-            'label' => $label,
-            'titleLines' => $this->wrapText($title, 28, 3),
-            'authorLines' => $this->wrapText($author, 38, 2),
-            'themeColor' => $this->siteSettings->values()['theme_color'],
-            'siteName' => $this->siteSettings->values()['site_name'],
-            'logoMarkup' => new HtmlString($this->siteLogoMarkup(200, 200)),
-        ])->render();
+        $settings = $this->siteSettings->values();
+
+        return $this->renderPng(function (GdImage $image) use ($label, $title, $author, $settings): void {
+            $colors = $this->palette($image, $settings['theme_color']);
+
+            imagefilledrectangle($image, 0, 0, self::WIDTH, self::HEIGHT, $colors['slate50']);
+            imagefilledrectangle($image, 0, self::HEIGHT - 16, self::WIDTH, self::HEIGHT, $colors['theme']);
+
+            $this->drawRoundedRectangle($image, 72, 72, 1128, 528, 36, $colors['white'], $colors['slate200']);
+            $this->drawRoundedRectangle($image, 96, 96, 266, 134, 19, $colors['slate200']);
+            $this->drawCenteredTextLine($image, $label, 181, 120, 18, $colors['slate700'], true);
+
+            $titleLines = $this->wrapText($title, 28, 3);
+            foreach ($titleLines as $index => $line) {
+                $this->drawTextLine($image, $line, 96, 198 + ($index * 64), 48, $colors['slate900'], true);
+            }
+
+            $authorLines = $this->wrapText($author, 38, 2);
+            foreach ($authorLines as $index => $line) {
+                $this->drawTextLine($image, $line, 96, 430 + ($index * 34), 26, $colors['slate600']);
+            }
+
+            $this->drawTextLine($image, $settings['site_name'], 96, 520, 22, $colors['slate400'], true);
+            $this->drawRoundedRectangle($image, 904, 96, 1104, 376, 28, $colors['slate50'], $colors['slate200']);
+            $this->drawLogo($image, 904, 136, 200, 200, $colors);
+        });
     }
 
-    protected function siteLogoMarkup(int $width = 152, int $height = 152): string
+    protected function renderPng(callable $render): string
     {
-        $logoDataUri = $this->resolveSiteLogoDataUri();
+        $image = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
+        $binary = null;
 
-        if ($logoDataUri !== null) {
-            return <<<SVG
-<image href="{$logoDataUri}" x="0" y="0" width="{$width}" height="{$height}" preserveAspectRatio="xMidYMid meet" />
-SVG;
+        if (! $image instanceof GdImage) {
+            throw new RuntimeException('Failed to initialize the open graph image canvas.');
         }
 
-        $initials = e(Str::of($this->siteSettings->values()['site_name'])
+        imageantialias($image, true);
+        imagesavealpha($image, true);
+        imagealphablending($image, true);
+
+        try {
+            $render($image);
+
+            ob_start();
+            imagepng($image);
+            $binary = ob_get_clean();
+        } finally {
+            imagedestroy($image);
+        }
+
+        if (! is_string($binary)) {
+            throw new RuntimeException('Failed to encode the open graph image.');
+        }
+
+        return $binary;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    protected function palette(GdImage $image, string $themeColor): array
+    {
+        return [
+            'theme' => $this->allocateColor($image, $themeColor),
+            'white' => $this->allocateColor($image, '#FFFFFF'),
+            'slate50' => $this->allocateColor($image, '#F8FAFC'),
+            'slate200' => $this->allocateColor($image, '#E2E8F0'),
+            'slate400' => $this->allocateColor($image, '#94A3B8'),
+            'slate600' => $this->allocateColor($image, '#475569'),
+            'slate700' => $this->allocateColor($image, '#334155'),
+            'slate900' => $this->allocateColor($image, '#0F172A'),
+        ];
+    }
+
+    protected function allocateColor(GdImage $image, string $hex): int
+    {
+        $normalized = ltrim($hex, '#');
+        $red = hexdec(substr($normalized, 0, 2));
+        $green = hexdec(substr($normalized, 2, 2));
+        $blue = hexdec(substr($normalized, 4, 2));
+
+        return imagecolorallocate($image, $red, $green, $blue);
+    }
+
+    protected function drawRoundedRectangle(
+        GdImage $image,
+        int $left,
+        int $top,
+        int $right,
+        int $bottom,
+        int $radius,
+        int $fillColor,
+        ?int $borderColor = null,
+    ): void {
+        imagefilledrectangle($image, $left + $radius, $top, $right - $radius, $bottom, $fillColor);
+        imagefilledrectangle($image, $left, $top + $radius, $right, $bottom - $radius, $fillColor);
+        imagefilledellipse($image, $left + $radius, $top + $radius, $radius * 2, $radius * 2, $fillColor);
+        imagefilledellipse($image, $right - $radius, $top + $radius, $radius * 2, $radius * 2, $fillColor);
+        imagefilledellipse($image, $left + $radius, $bottom - $radius, $radius * 2, $radius * 2, $fillColor);
+        imagefilledellipse($image, $right - $radius, $bottom - $radius, $radius * 2, $radius * 2, $fillColor);
+
+        if ($borderColor === null) {
+            return;
+        }
+
+        imageline($image, $left + $radius, $top, $right - $radius, $top, $borderColor);
+        imageline($image, $left + $radius, $bottom, $right - $radius, $bottom, $borderColor);
+        imageline($image, $left, $top + $radius, $left, $bottom - $radius, $borderColor);
+        imageline($image, $right, $top + $radius, $right, $bottom - $radius, $borderColor);
+        imagearc($image, $left + $radius, $top + $radius, $radius * 2, $radius * 2, 180, 270, $borderColor);
+        imagearc($image, $right - $radius, $top + $radius, $radius * 2, $radius * 2, 270, 360, $borderColor);
+        imagearc($image, $left + $radius, $bottom - $radius, $radius * 2, $radius * 2, 90, 180, $borderColor);
+        imagearc($image, $right - $radius, $bottom - $radius, $radius * 2, $radius * 2, 0, 90, $borderColor);
+    }
+
+    /**
+     * @param  array<string, int>  $colors
+     */
+    protected function drawLogoCard(GdImage $image, int $x, int $y, int $width, int $height, array $colors): void
+    {
+        $this->drawRoundedRectangle($image, $x, $y, $x + $width, $y + $height, 32, $colors['white']);
+        $this->drawLogo($image, $x, $y, $width, $height, $colors);
+    }
+
+    /**
+     * @param  array<string, int>  $colors
+     */
+    protected function drawLogo(GdImage $image, int $x, int $y, int $width, int $height, array $colors): void
+    {
+        $logo = $this->resolveSiteLogoImage();
+
+        if ($logo instanceof GdImage) {
+            $this->copyCenteredImage($image, $logo, $x, $y, $width, $height);
+            imagedestroy($logo);
+
+            return;
+        }
+
+        $this->drawRoundedRectangle($image, $x, $y, $x + $width, $y + $height, 32, $colors['slate200']);
+        $this->drawCenteredTextLine($image, $this->siteInitials(), $x + (int) floor($width / 2), $y + (int) floor($height * 0.61), 52, $colors['slate900'], true);
+    }
+
+    protected function copyCenteredImage(
+        GdImage $destination,
+        GdImage $source,
+        int $x,
+        int $y,
+        int $width,
+        int $height,
+    ): void {
+        $sourceWidth = imagesx($source);
+        $sourceHeight = imagesy($source);
+
+        if ($sourceWidth < 1 || $sourceHeight < 1) {
+            return;
+        }
+
+        $scale = min($width / $sourceWidth, $height / $sourceHeight);
+        $targetWidth = max(1, (int) round($sourceWidth * $scale));
+        $targetHeight = max(1, (int) round($sourceHeight * $scale));
+        $targetX = $x + (int) floor(($width - $targetWidth) / 2);
+        $targetY = $y + (int) floor(($height - $targetHeight) / 2);
+
+        imagecopyresampled($destination, $source, $targetX, $targetY, 0, 0, $targetWidth, $targetHeight, $sourceWidth, $sourceHeight);
+    }
+
+    protected function drawTextLine(
+        GdImage $image,
+        string $text,
+        int $x,
+        int $baselineY,
+        int $size,
+        int $color,
+        bool $bold = false,
+    ): void {
+        $fontPath = $this->fontPath($bold);
+
+        if ($fontPath !== null) {
+            imagettftext($image, $size, 0, $x, $baselineY, $color, $fontPath, $text);
+
+            return;
+        }
+
+        imagestring($image, 5, $x, max(0, $baselineY - 20), Str::limit($text, 80), $color);
+    }
+
+    protected function drawCenteredTextLine(
+        GdImage $image,
+        string $text,
+        int $centerX,
+        int $baselineY,
+        int $size,
+        int $color,
+        bool $bold = false,
+    ): void {
+        $fontPath = $this->fontPath($bold);
+
+        if ($fontPath !== null) {
+            $box = imagettfbbox($size, 0, $fontPath, $text);
+
+            if (is_array($box)) {
+                $width = (int) abs($box[4] - $box[0]);
+                $this->drawTextLine($image, $text, $centerX - (int) floor($width / 2), $baselineY, $size, $color, $bold);
+
+                return;
+            }
+        }
+
+        $fallbackX = $centerX - (int) floor((imagefontwidth(5) * strlen($text)) / 2);
+        imagestring($image, 5, max(0, $fallbackX), max(0, $baselineY - 20), Str::limit($text, 40), $color);
+    }
+
+    protected function fontPath(bool $bold = false): ?string
+    {
+        static $regular = null;
+        static $strong = null;
+
+        if ($bold) {
+            if ($strong === null) {
+                $strong = $this->findFirstExistingPath([
+                    resource_path('fonts/Inter-Bold.ttf'),
+                    public_path('fonts/Inter-Bold.ttf'),
+                    'C:\\Windows\\Fonts\\arialbd.ttf',
+                    'C:\\Windows\\Fonts\\segoeuib.ttf',
+                    '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+                    '/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf',
+                ]);
+            }
+
+            return $strong;
+        }
+
+        if ($regular === null) {
+            $regular = $this->findFirstExistingPath([
+                resource_path('fonts/Inter-Regular.ttf'),
+                public_path('fonts/Inter-Regular.ttf'),
+                'C:\\Windows\\Fonts\\arial.ttf',
+                'C:\\Windows\\Fonts\\segoeui.ttf',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+                '/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf',
+            ]);
+        }
+
+        return $regular;
+    }
+
+    /**
+     * @param  array<int, string>  $paths
+     */
+    protected function findFirstExistingPath(array $paths): ?string
+    {
+        foreach ($paths as $path) {
+            if (is_string($path) && is_file($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    protected function siteInitials(): string
+    {
+        return Str::of($this->siteSettings->values()['site_name'])
             ->explode(' ')
             ->filter()
             ->take(2)
             ->map(fn (string $part): string => Str::upper(Str::substr($part, 0, 1)))
-            ->implode(''));
-        $widthHalf = $width / 2;
-        $heightText = (int) floor($height * 0.61);
-
-        return <<<SVG
-<rect x="0" y="0" width="{$width}" height="{$height}" rx="32" fill="#E2E8F0" />
-<text x="{$widthHalf}" y="{$heightText}" text-anchor="middle" font-size="52" font-weight="700" fill="#0F172A">{$initials}</text>
-SVG;
+            ->implode('')
+            ->value();
     }
 
-    protected function resolveSiteLogoDataUri(): ?string
+    protected function resolveSiteLogoImage(): ?GdImage
     {
         $settings = $this->siteSettings->values();
 
         foreach ([
             $settings['site_logo_path'],
             $settings['og_image_path'],
-            $settings['favicon_svg_path'],
             $settings['favicon_path'],
         ] as $path) {
-            if (! filled($path)) {
+            if (! filled($path) || ! Storage::disk('public')->exists($path)) {
                 continue;
             }
 
-            $dataUri = $this->publicDiskDataUri($path);
+            $image = $this->imageFromFile(Storage::disk('public')->path($path));
 
-            if ($dataUri !== null) {
-                return $dataUri;
+            if ($image instanceof GdImage) {
+                return $image;
             }
         }
 
-        return $this->publicAssetDataUri('images/ruangbaca.svg')
-            ?? $this->publicAssetDataUri('favicon.svg')
-            ?? $this->publicAssetDataUri('favicon-32x32.png');
-    }
+        foreach ([
+            public_path('images/ruangbaca.png'),
+            public_path('favicon-32x32.png'),
+            public_path('apple-touch-icon.png'),
+        ] as $path) {
+            if (! is_file($path)) {
+                continue;
+            }
 
-    protected function publicDiskDataUri(string $path): ?string
-    {
-        if (! Storage::disk('public')->exists($path)) {
-            return null;
+            $image = $this->imageFromFile($path);
+
+            if ($image instanceof GdImage) {
+                return $image;
+            }
         }
 
-        $absolutePath = Storage::disk('public')->path($path);
-
-        return $this->fileToDataUri($absolutePath);
+        return null;
     }
 
-    protected function publicAssetDataUri(string $relativePath): ?string
-    {
-        $absolutePath = public_path($relativePath);
-
-        if (! is_file($absolutePath)) {
-            return null;
-        }
-
-        return $this->fileToDataUri($absolutePath);
-    }
-
-    protected function fileToDataUri(string $absolutePath): ?string
+    protected function imageFromFile(string $absolutePath): ?GdImage
     {
         $contents = @file_get_contents($absolutePath);
 
@@ -167,9 +402,9 @@ SVG;
             return null;
         }
 
-        $mimeType = mime_content_type($absolutePath) ?: 'application/octet-stream';
+        $image = @imagecreatefromstring($contents);
 
-        return 'data:'.$mimeType.';base64,'.base64_encode($contents);
+        return $image instanceof GdImage ? $image : null;
     }
 
     /**

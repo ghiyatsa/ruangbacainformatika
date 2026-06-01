@@ -148,7 +148,7 @@ it('public pages use the stored site metadata and icon links', function () {
                 ->where('site.robots', 'noindex,nofollow')
                 ->where('site.themeColor', '#0F172A')
                 ->where('site.ogImage', route('og.site'))
-                ->where('site.ogImageType', 'image/svg+xml')
+                ->where('site.ogImageType', 'image/png')
                 ->where('site.ogImageWidth', 1200)
                 ->where('site.ogImageHeight', 600)
                 ->where('site.icons.favicon', url('/storage/site-assets/custom-favicon.png'))
