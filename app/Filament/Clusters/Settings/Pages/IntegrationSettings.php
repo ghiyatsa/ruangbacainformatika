@@ -178,10 +178,10 @@ class IntegrationSettings extends Page
                             ->color('warning')
                             ->requiresConfirmation()
                             ->modalHeading('Sinkronkan Ulang Semua Skripsi')
-                            ->modalDescription('Gunakan setelah bobot similarity berubah agar seluruh data diperbarui.')
+                            ->modalDescription('Gunakan setelah bobot similarity berubah agar seluruh embedding similarity di-reset dan dibangun ulang.')
                             ->modalSubmitActionLabel('Mulai Sinkron Ulang')
                             ->action(function (): void {
-                                $result = app(SimilarityFullSyncDispatcher::class)->dispatch();
+                                $result = app(SimilarityFullSyncDispatcher::class)->dispatch(forceSync: true);
 
                                 try {
                                     app(ActivityLogService::class)->log(
@@ -200,7 +200,7 @@ class IntegrationSettings extends Page
                                         : 'Sinkron penuh gagal')
                                     ->body($result['success']
                                         ? ($result['mode'] === 'sync'
-                                            ? 'Seluruh skripsi sudah diproses.'
+                                            ? 'Seluruh skripsi sudah diproses dan embedding similarity sudah dibangun ulang.'
                                             : 'Pastikan worker queue tetap aktif sampai proses selesai.')
                                         : ($result['error_message'] ?? 'Periksa koneksi Similarity API, lalu coba lagi.'))
                                     ->persistent($result['mode'] === 'queued')

@@ -64,6 +64,34 @@ it('full similarity sync job runs the reset command', function () {
         ->with('skripsi:sync --chunk=250 --reset');
 });
 
+it('similarity full sync dispatcher can force a synchronous full rebuild', function () {
+    Artisan::shouldReceive('call')
+        ->once()
+        ->with('skripsi:sync --chunk=100 --reset')
+        ->andReturn(0);
+
+    $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+
+    SimilaritySyncStatus::query()->updateOrCreate(
+        ['source_skripsi_id' => $skripsi->id],
+        [
+            'status' => SimilaritySyncStatus::STATUS_FAILED,
+            'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+            'attempts' => 1,
+            'last_error' => 'Timeout',
+        ],
+    );
+
+    $result = app(SimilarityFullSyncDispatcher::class)->dispatch(forceSync: true);
+
+    expect($result)->toBe([
+        'mode' => 'sync',
+        'success' => true,
+        'error_message' => null,
+    ])
+        ->and(SimilaritySyncStatus::query()->where('status', SimilaritySyncStatus::STATUS_PENDING)->count())->toBe(1);
+});
+
 it('similarity full sync dispatcher returns a safe failure result when reset preparation throws', function () {
     $dispatcher = new SimilarityFullSyncDispatcher(new class extends SimilaritySyncStatusService
     {

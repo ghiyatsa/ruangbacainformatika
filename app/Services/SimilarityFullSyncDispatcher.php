@@ -15,12 +15,13 @@ class SimilarityFullSyncDispatcher
     /**
      * @return array{mode: 'sync'|'queued', success: bool, error_message?: string|null}
      */
-    public function dispatch(int $chunk = 100): array
+    public function dispatch(int $chunk = 100, bool $forceSync = false): array
     {
         try {
             $command = sprintf('skripsi:sync --chunk=%d --reset', $chunk);
 
-            if ($this->shouldRunSynchronously()) {
+            if ($forceSync || $this->shouldRunSynchronously()) {
+                $this->statusService->markAllQueuedForFullSync();
                 $exitCode = Artisan::call($command);
 
                 return [
@@ -53,7 +54,6 @@ class SimilarityFullSyncDispatcher
     {
         return app()->isLocal()
             && (! app()->runningUnitTests())
-            && app()->runningInConsole()
             && (config('queue.default') !== 'sync');
     }
 }
