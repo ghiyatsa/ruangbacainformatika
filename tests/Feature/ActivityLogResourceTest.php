@@ -33,7 +33,7 @@ it('super admin users can access the activity log resource', function () {
     actingAs($user)
         ->get('/admin/activity-logs')
         ->assertOk()
-        ->assertSee('Aktivitas Admin')
+        ->assertSee('Log Aktivitas')
         ->assertSee('Kode')
         ->assertSee('Pengaturan umum diperbarui');
 });
