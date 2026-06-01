@@ -8,10 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 class ActivityLogService
 {
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    protected function newActivityLog(array $attributes): ActivityLog
+    {
+        return new ActivityLog($attributes);
+    }
+
     /**
      * @param  array<string, mixed>  $properties
      */
@@ -33,7 +43,7 @@ class ActivityLogService
             return null;
         }
 
-        $activityLog = new ActivityLog([
+        $activityLog = $this->newActivityLog([
             'action' => $action,
             'description' => $description,
             'subject_label' => $this->subjectLabel($subject),
@@ -50,7 +60,19 @@ class ActivityLogService
             $activityLog->subject()->associate($subject);
         }
 
-        $activityLog->save();
+        try {
+            $activityLog->save();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            Log::warning('Activity log gagal disimpan.', [
+                'action' => $action,
+                'description' => $description,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return null;
+        }
 
         return $activityLog;
     }

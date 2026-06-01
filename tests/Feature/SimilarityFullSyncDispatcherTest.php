@@ -4,6 +4,7 @@ use App\Jobs\RunFullSimilaritySync;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Services\SimilarityFullSyncDispatcher;
+use App\Services\SimilaritySyncStatusService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
@@ -44,6 +45,7 @@ it('similarity full sync dispatcher queues the sync command when not running syn
     expect($result)->toBe([
         'mode' => 'queued',
         'success' => true,
+        'error_message' => null,
     ])
         ->and(SimilaritySyncStatus::query()->count())->toBe(3)
         ->and(SimilaritySyncStatus::query()->where('status', SimilaritySyncStatus::STATUS_PENDING)->count())->toBe(3)
@@ -60,4 +62,22 @@ it('full similarity sync job runs the reset command', function () {
     Artisan::shouldHaveReceived('call')
         ->once()
         ->with('skripsi:sync --chunk=250 --reset');
+});
+
+it('similarity full sync dispatcher returns a safe failure result when reset preparation throws', function () {
+    $dispatcher = new SimilarityFullSyncDispatcher(new class extends SimilaritySyncStatusService
+    {
+        public function markAllQueuedForFullSync(): void
+        {
+            throw new RuntimeException('Forced dispatcher failure');
+        }
+    });
+
+    $result = $dispatcher->dispatch();
+
+    expect($result)->toBe([
+        'mode' => 'sync',
+        'success' => false,
+        'error_message' => 'Forced dispatcher failure',
+    ]);
 });

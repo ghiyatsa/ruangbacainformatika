@@ -19,6 +19,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
+use Throwable;
 
 class IntegrationSettings extends Page
 {
@@ -181,12 +182,16 @@ class IntegrationSettings extends Page
                             ->modalSubmitActionLabel('Mulai Sinkron Ulang')
                             ->action(function (): void {
                                 $result = app(SimilarityFullSyncDispatcher::class)->dispatch();
-                                app(ActivityLogService::class)->log(
-                                    'integration.skripsi_resync.triggered',
-                                    'Sinkron ulang semua skripsi dipicu',
-                                    'Integrasi',
-                                    $result,
-                                );
+
+                                try {
+                                    app(ActivityLogService::class)->log(
+                                        'integration.skripsi_resync.triggered',
+                                        'Sinkron ulang semua skripsi dipicu',
+                                        'Integrasi',
+                                        $result,
+                                    );
+                                } catch (Throwable) {
+                                }
 
                                 Notification::make()
                                     ->{$result['success'] ? 'success' : 'danger'}()
@@ -197,7 +202,7 @@ class IntegrationSettings extends Page
                                         ? ($result['mode'] === 'sync'
                                             ? 'Seluruh skripsi sudah diproses.'
                                             : 'Pastikan worker queue tetap aktif sampai proses selesai.')
-                                        : 'Periksa koneksi Similarity API, lalu coba lagi.')
+                                        : ($result['error_message'] ?? 'Periksa koneksi Similarity API, lalu coba lagi.'))
                                     ->persistent($result['mode'] === 'queued')
                                     ->send();
                             }),

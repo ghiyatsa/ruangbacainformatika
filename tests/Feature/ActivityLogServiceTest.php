@@ -3,6 +3,7 @@
 use App\Models\ActivityLog;
 use App\Models\User;
 use App\Services\ActivityLogService;
+use Illuminate\Support\Facades\Log;
 
 use function Pest\Laravel\actingAs;
 
@@ -50,4 +51,32 @@ it('redacts hidden values when logging setting changes', function () {
         ->and($log->properties['changes']['similarity_api_secret']['after'])->toBe('[REDACTED]')
         ->and($log->properties['changes']['turnstile_enabled']['before'])->toBeFalse()
         ->and($log->properties['changes']['turnstile_enabled']['after'])->toBeTrue();
+});
+
+it('fails gracefully when activity log persistence throws an exception', function () {
+    $admin = User::factory()->create();
+
+    actingAs($admin);
+    Log::spy();
+
+    $service = new class extends ActivityLogService
+    {
+        protected function newActivityLog(array $attributes): ActivityLog
+        {
+            return new class($attributes) extends ActivityLog
+            {
+                public function save(array $options = []): bool
+                {
+                    throw new RuntimeException('Storage unavailable');
+                }
+            };
+        }
+    };
+
+    $result = $service->log('settings.integration.updated', 'Pengaturan integrasi diperbarui');
+
+    expect($result)->toBeNull();
+
+    Log::shouldHaveReceived('warning')
+        ->once();
 });

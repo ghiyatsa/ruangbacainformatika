@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Jobs\RunFullSimilaritySync;
 use Illuminate\Support\Facades\Artisan;
+use Throwable;
 
 class SimilarityFullSyncDispatcher
 {
@@ -12,33 +13,47 @@ class SimilarityFullSyncDispatcher
     ) {}
 
     /**
-     * @return array{mode: 'sync'|'queued', success: bool}
+     * @return array{mode: 'sync'|'queued', success: bool, error_message?: string|null}
      */
     public function dispatch(int $chunk = 100): array
     {
-        $this->statusService->markAllQueuedForFullSync();
+        try {
+            $command = sprintf('skripsi:sync --chunk=%d --reset', $chunk);
 
-        $command = sprintf('skripsi:sync --chunk=%d --reset', $chunk);
+            if ($this->shouldRunSynchronously()) {
+                $exitCode = Artisan::call($command);
 
-        if ($this->shouldRunSynchronously()) {
-            $exitCode = Artisan::call($command);
+                return [
+                    'mode' => 'sync',
+                    'success' => $exitCode === 0,
+                    'error_message' => $exitCode === 0 ? null : 'Sinkronisasi penuh berhenti sebelum semua data selesai diproses.',
+                ];
+            }
+
+            $this->statusService->markAllQueuedForFullSync();
+            RunFullSimilaritySync::dispatch($chunk);
+
+            return [
+                'mode' => 'queued',
+                'success' => true,
+                'error_message' => null,
+            ];
+        } catch (Throwable $exception) {
+            report($exception);
 
             return [
                 'mode' => 'sync',
-                'success' => $exitCode === 0,
+                'success' => false,
+                'error_message' => $exception->getMessage(),
             ];
         }
-
-        RunFullSimilaritySync::dispatch($chunk);
-
-        return [
-            'mode' => 'queued',
-            'success' => true,
-        ];
     }
 
     private function shouldRunSynchronously(): bool
     {
-        return app()->isLocal() && (! app()->runningUnitTests()) && (config('queue.default') !== 'sync');
+        return app()->isLocal()
+            && (! app()->runningUnitTests())
+            && app()->runningInConsole()
+            && (config('queue.default') !== 'sync');
     }
 }
