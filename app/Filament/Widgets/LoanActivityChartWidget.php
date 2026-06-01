@@ -27,16 +27,16 @@ class LoanActivityChartWidget extends ChartWidget
 
         $loanData = $days->map(
             fn (\DateTimeInterface $day): int => Loan::query()
-                ->whereDate('borrowed_at', $day)
-                ->count()
+                ->whereDate('borrowed_at', '=', $day, 'and')
+                ->count('*')
         );
 
         $visitorData = $days->map(function (\DateTimeInterface $day): int {
             [$startOfDay, $endOfDay] = VisitLog::adminDayRange($day);
 
             return VisitLog::query()
-                ->whereBetween('visited_at', [$startOfDay, $endOfDay])
-                ->count();
+                ->whereBetween('visited_at', [$startOfDay, $endOfDay], 'and')
+                ->count('*');
         });
 
         $labels = $days->map(fn (\DateTimeInterface $day): string => Carbon::instance($day)->translatedFormat('D, d M'));

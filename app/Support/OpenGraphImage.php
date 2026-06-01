@@ -222,7 +222,7 @@ class OpenGraphImage
                 ->values();
 
             if ($authorsList->count() > 1) {
-                $authorDisplay = $authorsList->first().' + '.($authorsList->count() - 1).' lainnya';
+                $authorDisplay = $authorsList->first().' + '.($authorsList->count() - 1);
             } else {
                 $authorDisplay = $authorsList->first() ?: 'Ruang Baca Informatika';
             }
