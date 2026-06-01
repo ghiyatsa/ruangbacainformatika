@@ -37,7 +37,7 @@ class RemoveSkripsiFromSimilarity implements ShouldQueue, ShouldQueueAfterCommit
             throw new RuntimeException("Gagal menghapus skripsi {$this->skripsiId} dari Similarity API.");
         }
 
-        $statusService->markSynced($this->skripsiId, SimilaritySyncStatus::OPERATION_DELETE);
+        $statusService->deleteStatus($this->skripsiId);
     }
 
     public function failed(?Throwable $exception): void

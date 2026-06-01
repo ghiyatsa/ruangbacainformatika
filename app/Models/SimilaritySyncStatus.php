@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\SimilaritySyncStatusFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,6 +57,11 @@ class SimilaritySyncStatus extends Model
     public function skripsi(): BelongsTo
     {
         return $this->belongsTo(Skripsi::class, 'source_skripsi_id', 'id');
+    }
+
+    public function scopeForExistingSkripsi(Builder $query): Builder
+    {
+        return $query->whereHas('skripsi');
     }
 
     public function statusLabel(): string

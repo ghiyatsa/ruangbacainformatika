@@ -96,3 +96,29 @@ it('can reset all similarity statuses to pending for a full resync', function ()
         ->and(SimilaritySyncStatus::query()->whereNotNull('last_synced_at')->count())->toBe(0)
         ->and(SimilaritySyncStatus::query()->whereNotNull('last_error')->count())->toBe(0);
 });
+
+it('removes orphan similarity statuses during a full resync reset', function () {
+    $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+    $statusService = app(SimilaritySyncStatusService::class);
+
+    SimilaritySyncStatus::query()->create([
+        'source_skripsi_id' => $skripsi->id,
+        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+        'attempts' => 2,
+        'last_error' => 'Masih terkait',
+    ]);
+
+    SimilaritySyncStatus::query()->create([
+        'source_skripsi_id' => 999999,
+        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_DELETE,
+        'attempts' => 1,
+        'last_error' => 'Yatim',
+    ]);
+
+    $statusService->markAllQueuedForFullSync();
+
+    expect(SimilaritySyncStatus::query()->pluck('source_skripsi_id')->all())->toBe([$skripsi->id])
+        ->and(SimilaritySyncStatus::query()->value('status'))->toBe(SimilaritySyncStatus::STATUS_PENDING);
+});

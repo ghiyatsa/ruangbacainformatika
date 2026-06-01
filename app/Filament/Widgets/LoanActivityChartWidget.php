@@ -25,9 +25,10 @@ class LoanActivityChartWidget extends ChartWidget
             fn (int $daysAgo): \DateTimeInterface => now(VisitLog::adminTimezone())->subDays($daysAgo)->startOfDay(),
         );
 
-        $loanData = $days->map(fn (\DateTimeInterface $day): int => Loan::query()
-            ->whereDate('borrowed_at', $day)
-            ->count()
+        $loanData = $days->map(
+            fn (\DateTimeInterface $day): int => Loan::query()
+                ->whereDate('borrowed_at', $day)
+                ->count()
         );
 
         $visitorData = $days->map(function (\DateTimeInterface $day): int {

@@ -47,6 +47,7 @@ class SkripsiResource extends Resource
     public static function getNavigationBadgeTooltip(): ?string
     {
         $failedCount = SimilaritySyncStatus::query()
+            ->forExistingSkripsi()
             ->where('status', SimilaritySyncStatus::STATUS_FAILED)
             ->count();
 

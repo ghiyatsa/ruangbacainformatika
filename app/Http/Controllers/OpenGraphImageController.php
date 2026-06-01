@@ -25,7 +25,7 @@ class OpenGraphImageController extends Controller
         $book->loadMissing('authors:id,name');
 
         return $this->imageResponse($this->openGraphImage->renderCatalogDetail(
-            label: 'Katalog Buku',
+            label: 'Buku',
             title: $book->title,
             author: $book->authors->pluck('name')->filter()->implode(', ') ?: 'Ruang Baca Informatika',
             views: $book->view_count,

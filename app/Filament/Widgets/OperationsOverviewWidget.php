@@ -16,10 +16,6 @@ class OperationsOverviewWidget extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
 
-    protected ?string $heading = 'Ringkasan Operasional';
-
-    protected ?string $description = 'Ringkasan utama untuk hari ini.';
-
     protected int|string|array $columnSpan = 'full';
 
     protected function getStats(): array

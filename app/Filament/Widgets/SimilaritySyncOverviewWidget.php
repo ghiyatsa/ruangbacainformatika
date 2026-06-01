@@ -20,10 +20,6 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    protected ?string $heading = 'Sinkronisasi Similarity';
-
-    protected ?string $description = 'Ringkasan sinkronisasi data skripsi.';
-
     /**
      * @param  array<string, mixed>  $filters
      */
@@ -38,12 +34,15 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
     {
         $totalSkripsi = Skripsi::query()->count();
         $syncedCount = SimilaritySyncStatus::query()
+            ->forExistingSkripsi()
             ->where('status', SimilaritySyncStatus::STATUS_SYNCED)
             ->count();
         $failedCount = SimilaritySyncStatus::query()
+            ->forExistingSkripsi()
             ->where('status', SimilaritySyncStatus::STATUS_FAILED)
             ->count();
         $pendingCount = SimilaritySyncStatus::query()
+            ->forExistingSkripsi()
             ->whereIn('status', [
                 SimilaritySyncStatus::STATUS_PENDING,
                 SimilaritySyncStatus::STATUS_SYNCING,

@@ -1,6 +1,9 @@
 <?php
 
 use App\Filament\Resources\Users\Widgets\RestrictedBorrowersOverviewWidget;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
@@ -9,6 +12,8 @@ use App\Filament\Widgets\PendingMemberApprovalsWidget;
 use App\Filament\Widgets\ServerInfoWidget;
 use App\Filament\Widgets\SimilaritySyncOverviewWidget;
 use App\Filament\Widgets\TodayVisitorsWidget;
+use App\Models\SimilaritySyncStatus;
+use App\Models\Skripsi;
 
 use function Livewire\invade;
 
@@ -24,23 +29,23 @@ function widgetProperty(string $className, string $property): mixed
 }
 
 it('uses concise headings across filament widgets', function () {
-    expect(widgetProperty(OperationsOverviewWidget::class, 'heading'))->toBe('Ringkasan Operasional')
-        ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'heading'))->toBe('Sinkronisasi Similarity')
+    expect(widgetProperty(OperationsOverviewWidget::class, 'heading'))->toBeNull()
+        ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'heading'))->toBeNull()
         ->and(widgetProperty(LoanActivityChartWidget::class, 'heading'))->toBe('Aktivitas Mingguan')
-        ->and(widgetProperty(TodayVisitorsWidget::class, 'heading'))->toBe('Kunjungan Hari Ini')
-        ->and(widgetProperty(ContactMessagesTableWidget::class, 'heading'))->toBe('Pesan Kontak Terbaru')
-        ->and(widgetProperty(OverdueLoanTableWidget::class, 'heading'))->toBe('Pinjaman Terlambat')
-        ->and(widgetProperty(ServerInfoWidget::class, 'heading'))->toBe('Informasi Server')
-        ->and(widgetProperty(RestrictedBorrowersOverviewWidget::class, 'heading'))->toBe('Akses Peminjaman Anggota');
+        ->and(widgetProperty(TodayVisitorsWidget::class, 'heading'))->toBeNull()
+        ->and(widgetProperty(ContactMessagesTableWidget::class, 'heading'))->toBeNull()
+        ->and(widgetProperty(OverdueLoanTableWidget::class, 'heading'))->toBeNull()
+        ->and(widgetProperty(ServerInfoWidget::class, 'heading'))->toBeNull()
+        ->and(widgetProperty(RestrictedBorrowersOverviewWidget::class, 'heading'))->toBeNull();
 });
 
 it('uses concise descriptions on overview widgets', function () {
-    expect(widgetProperty(OperationsOverviewWidget::class, 'description'))->toBe('Ringkasan utama untuk hari ini.')
-        ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'description'))->toBe('Ringkasan sinkronisasi data skripsi.')
+    expect(widgetProperty(OperationsOverviewWidget::class, 'description'))->toBeNull()
+        ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(LoanActivityChartWidget::class, 'description'))->toBe('Tren peminjaman dan kunjungan 7 hari terakhir.')
-        ->and(widgetProperty(TodayVisitorsWidget::class, 'description'))->toBe('Ringkasan kunjungan hari ini.')
-        ->and(widgetProperty(ServerInfoWidget::class, 'description'))->toBe('Pantau runtime dan konfigurasi dasar panel admin.')
-        ->and(widgetProperty(RestrictedBorrowersOverviewWidget::class, 'description'))->toBe('Pantau anggota yang sedang dibatasi atau masih dalam masa jeda keterlambatan.');
+        ->and(widgetProperty(TodayVisitorsWidget::class, 'description'))->toBeNull()
+        ->and(widgetProperty(ServerInfoWidget::class, 'description'))->toBeNull()
+        ->and(widgetProperty(RestrictedBorrowersOverviewWidget::class, 'description'))->toBeNull();
 });
 
 it('links pending member approval stats to filtered user tables', function () {
@@ -75,4 +80,30 @@ it('separates operational member growth from approval queue copy', function () {
         ->and($operationsStats[3]->getDescription())->not->toContain('menunggu persetujuan')
         ->and($approvalStats[0]->getDescription())->not->toContain('Google')
         ->and($approvalStats[1]->getDescription())->not->toContain('Google');
+});
+
+it('counts similarity overview stats from active skripsi records only', function () {
+    $activeSkripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+
+    SimilaritySyncStatus::query()->create([
+        'source_skripsi_id' => $activeSkripsi->id,
+        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+        'attempts' => 1,
+        'last_error' => 'Masih aktif',
+    ]);
+
+    SimilaritySyncStatus::query()->create([
+        'source_skripsi_id' => 999999,
+        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_DELETE,
+        'attempts' => 1,
+        'last_error' => 'Orphan',
+    ]);
+
+    $stats = invade(app(SimilaritySyncOverviewWidget::class))->getStats();
+
+    expect($stats[1]->getLabel())->toBe('Perlu Tindak Lanjut')
+        ->and($stats[1]->getValue())->toBe(1)
+        ->and($stats[3]->getValue())->toBe(0);
 });

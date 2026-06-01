@@ -12,10 +12,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RestrictedBorrowersOverviewWidget extends StatsOverviewWidget
 {
-    protected ?string $heading = 'Akses Peminjaman Anggota';
-
-    protected ?string $description = 'Pantau anggota yang sedang dibatasi atau masih dalam masa jeda keterlambatan.';
-
     protected int|string|array $columnSpan = 'full';
 
     protected static bool $isLazy = false;

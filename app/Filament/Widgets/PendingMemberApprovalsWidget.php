@@ -13,10 +13,6 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
 {
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Persetujuan Anggota';
-
-    protected ?string $description = 'Pantau akun anggota yang menunggu persetujuan.';
-
     protected int|string|array $columnSpan = 'full';
 
     protected static bool $isLazy = false;

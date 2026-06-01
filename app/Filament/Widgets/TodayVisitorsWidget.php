@@ -11,10 +11,6 @@ class TodayVisitorsWidget extends StatsOverviewWidget
 {
     protected static ?int $sort = 4;
 
-    protected ?string $heading = 'Kunjungan Hari Ini';
-
-    protected ?string $description = 'Ringkasan kunjungan hari ini.';
-
     protected int|string|array $columnSpan = 'full';
 
     protected function getStats(): array

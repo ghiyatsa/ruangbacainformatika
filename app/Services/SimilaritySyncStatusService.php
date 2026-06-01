@@ -7,6 +7,13 @@ use App\Models\Skripsi;
 
 class SimilaritySyncStatusService
 {
+    public function deleteStatus(int $skripsiId): void
+    {
+        SimilaritySyncStatus::query()
+            ->where('source_skripsi_id', $skripsiId)
+            ->delete();
+    }
+
     public function markQueued(Skripsi $skripsi, string $operation = SimilaritySyncStatus::OPERATION_UPSERT): SimilaritySyncStatus
     {
         return SimilaritySyncStatus::query()->updateOrCreate(
@@ -81,13 +88,19 @@ class SimilaritySyncStatusService
     {
         $timestamp = now();
 
-        SimilaritySyncStatus::query()->update([
-            'status' => SimilaritySyncStatus::STATUS_PENDING,
-            'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
-            'last_synced_at' => null,
-            'last_error' => null,
-            'updated_at' => $timestamp,
-        ]);
+        SimilaritySyncStatus::query()
+            ->whereDoesntHave('skripsi')
+            ->delete();
+
+        SimilaritySyncStatus::query()
+            ->forExistingSkripsi()
+            ->update([
+                'status' => SimilaritySyncStatus::STATUS_PENDING,
+                'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+                'last_synced_at' => null,
+                'last_error' => null,
+                'updated_at' => $timestamp,
+            ]);
 
         Skripsi::query()
             ->select('id')

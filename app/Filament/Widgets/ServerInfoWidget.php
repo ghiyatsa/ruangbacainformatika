@@ -13,10 +13,6 @@ class ServerInfoWidget extends StatsOverviewWidget
 
     protected static ?int $sort = 10;
 
-    protected ?string $heading = 'Informasi Server';
-
-    protected ?string $description = 'Pantau runtime dan konfigurasi dasar panel admin.';
-
     protected int|string|array $columnSpan = 'full';
 
     protected function getStats(): array

@@ -16,8 +16,6 @@ class ContactMessagesTableWidget extends BaseTableWidget
 
     protected static ?int $sort = 4;
 
-    protected static ?string $heading = 'Pesan Kontak Terbaru';
-
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table

@@ -15,8 +15,6 @@ class OverdueLoanTableWidget extends BaseTableWidget
 {
     protected static ?int $sort = 3;
 
-    protected static ?string $heading = 'Pinjaman Terlambat';
-
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table

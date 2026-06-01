@@ -112,35 +112,64 @@ class OpenGraphImage
             // Logo area: rounded square top-right (like GitHub avatar)
             $this->drawRoundedRectangle(
                 $image,
-                $logoBoxLeft, $logoBoxTop,
-                $logoBoxLeft + $logoBoxSize, $logoBoxTop + $logoBoxSize,
-                24, $colors['slate50'], $colors['slate200']
+                $logoBoxLeft,
+                $logoBoxTop,
+                $logoBoxLeft + $logoBoxSize,
+                $logoBoxTop + $logoBoxSize,
+                24,
+                $colors['slate50'],
+                $colors['slate200']
             );
             $this->drawLogo($image, $logoBoxLeft, $logoBoxTop, $logoBoxSize, $logoBoxSize, $colors);
 
             // Label pill top-left
-            $labelPillW = 220;
+            $labelFontPath = $this->fontPath(false);
+            $labelPillW = 220; // default fallback
+            if ($labelFontPath !== null) {
+                $box = imagettfbbox(16, 0, $labelFontPath, $label);
+                if (is_array($box)) {
+                    $labelPillW = (int) abs($box[4] - $box[0]) + 48;
+                }
+            }
             $labelPillH = 38;
             $this->drawRoundedRectangle(
                 $image,
-                $paddingX, $paddingY,
-                $paddingX + $labelPillW, $paddingY + $labelPillH,
-                10, $colors['slate200']
+                $paddingX,
+                $paddingY,
+                $paddingX + $labelPillW,
+                $paddingY + $labelPillH,
+                10,
+                $colors['slate200']
             );
             $this->drawCenteredTextLine(
-                $image, $label,
+                $image,
+                $label,
                 $paddingX + (int) floor($labelPillW / 2),
                 $paddingY + 26,
-                16, $colors['slate700'], false
+                16,
+                $colors['slate700'],
+                false
             );
 
             // Title: large bold, constrained to area left of logo
             // Gap of 40px between title right edge and logo left edge
             $titleMaxWidth = $logoBoxLeft - $paddingX - 40;
-            $titleLines = $this->wrapTextToPixelWidth($title, $titleMaxWidth, 3, 52, true);
+
+            // Determine optimal font size starting from 40 down to 24
+            $fontSize = 40;
+            $titleLines = [];
+            for ($size = 40; $size >= 24; $size -= 4) {
+                $fontSize = $size;
+                $titleLines = $this->wrapTextToPixelWidthNoTruncate($title, $titleMaxWidth, $fontSize, true);
+                if (count($titleLines) <= 3) {
+                    break;
+                }
+            }
+
             $titleY = $paddingY + $labelPillH + 52;
+            $lineHeight = (int) round($fontSize * 1.35);
             foreach ($titleLines as $index => $line) {
-                $this->drawTextLine($image, $line, $paddingX, $titleY + ($index * 72), 52, $colors['slate900'], true);
+                $this->drawTextLine($image, $line, $paddingX, $titleY + ($index * $lineHeight), $fontSize, $colors['slate900'], true);
             }
 
             // Separator line above bottom row
@@ -186,8 +215,20 @@ class OpenGraphImage
             imagearc($image, $personCX, $personCY + $iconR, (int) round($iconR * 1.6), $iconR, 180, 360, $colors['slate400']);
             $cursor += $iconR * 2 + 10;
 
+            // Parse author list: only show 1 author and a count of others if multiple
+            $authorsList = collect(explode(',', $author))
+                ->map(fn ($name) => trim($name))
+                ->filter()
+                ->values();
+
+            if ($authorsList->count() > 1) {
+                $authorDisplay = $authorsList->first().' + '.($authorsList->count() - 1).' lainnya';
+            } else {
+                $authorDisplay = $authorsList->first() ?: 'Ruang Baca Informatika';
+            }
+
             // author name (truncated)
-            $this->drawTextLine($image, $author, $cursor, $bottomTextY, 26, $colors['slate600']);
+            $this->drawTextLine($image, Str::limit($authorDisplay, 50), $cursor, $bottomTextY, 26, $colors['slate600']);
 
             // Site name right-aligned
             $siteName = $settings['site_name'];
@@ -515,11 +556,13 @@ class OpenGraphImage
     {
         $settings = $this->siteSettings->values();
 
-        foreach ([
-            $settings['site_logo_path'],
-            $settings['og_image_path'],
-            $settings['favicon_path'],
-        ] as $path) {
+        foreach (
+            [
+                $settings['site_logo_path'],
+                $settings['og_image_path'],
+                $settings['favicon_path'],
+            ] as $path
+        ) {
             if (! filled($path) || ! Storage::disk('public')->exists($path)) {
                 continue;
             }
@@ -531,11 +574,13 @@ class OpenGraphImage
             }
         }
 
-        foreach ([
-            public_path('images/ruangbaca.png'),
-            public_path('favicon-32x32.png'),
-            public_path('apple-touch-icon.png'),
-        ] as $path) {
+        foreach (
+            [
+                public_path('images/ruangbaca.svg'),
+                public_path('favicon-32x32.png'),
+                public_path('apple-touch-icon.png'),
+            ] as $path
+        ) {
             if (! is_file($path)) {
                 continue;
             }
@@ -699,5 +744,68 @@ class OpenGraphImage
         }
 
         return $lines ?: ['-'];
+    }
+
+    /**
+     * Wrap text to fit within a maximum pixel width without truncating.
+     *
+     * @return array<int, string>
+     */
+    protected function wrapTextToPixelWidthNoTruncate(
+        string $text,
+        int $maxPixelWidth,
+        int $fontSize,
+        bool $bold = false,
+    ): array {
+        $fontPath = $this->fontPath($bold);
+
+        if ($fontPath === null) {
+            $charsPerLine = max(10, (int) floor($maxPixelWidth / 10));
+
+            return $this->wrapTextNoTruncate($text, $charsPerLine);
+        }
+
+        $normalized = Str::of($text)->squish()->value();
+
+        if ($normalized === '') {
+            return ['-'];
+        }
+
+        $words = preg_split('/\s+/u', $normalized) ?: [];
+        $lines = [];
+        $currentLine = '';
+
+        foreach ($words as $word) {
+            $candidate = $currentLine === '' ? $word : "{$currentLine} {$word}";
+            $box = imagettfbbox($fontSize, 0, $fontPath, $candidate);
+            $candidateWidth = is_array($box) ? (int) abs($box[4] - $box[0]) : PHP_INT_MAX;
+
+            if ($candidateWidth <= $maxPixelWidth) {
+                $currentLine = $candidate;
+            } else {
+                if ($currentLine !== '') {
+                    $lines[] = $currentLine;
+                }
+                $currentLine = $word;
+            }
+        }
+
+        if ($currentLine !== '') {
+            $lines[] = $currentLine;
+        }
+
+        return $lines;
+    }
+
+    /**
+     * Wrap text by character length fallback without truncating.
+     *
+     * @return array<int, string>
+     */
+    protected function wrapTextNoTruncate(string $text, int $charsPerLine): array
+    {
+        $wrapped = wordwrap($text, $charsPerLine, "\n", true);
+
+        return explode("\n", $wrapped);
     }
 }
