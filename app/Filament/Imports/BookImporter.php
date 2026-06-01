@@ -12,7 +12,6 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Number;
-use Illuminate\Support\Str;
 
 class BookImporter extends Importer
 {
@@ -25,57 +24,80 @@ class BookImporter extends Importer
                 ->label('Judul')
                 ->requiredMapping()
                 ->rules(['required', 'max:255'])
-                ->fillRecordUsing(function ($record, $state) {
-                    $record->title = $state;
-                    $record->slug = Str::slug($state);
-                }),
+                ->helperText('Wajib diisi. Gunakan judul utama buku.')
+                ->castStateUsing(fn ($state): string => static::normalizeRequiredString($state))
+                ->fillRecordUsing(fn ($record, $state) => $record->title = $state),
             ImportColumn::make('subtitle')
                 ->label('Subjudul')
-                ->rules(['nullable', 'max:255']),
+                ->helperText('Opsional. Kosongkan jika buku tidak memiliki subjudul.')
+                ->rules(['nullable', 'max:255'])
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
             ImportColumn::make('isbn')
                 ->label('ISBN')
                 ->rules(['nullable', 'max:20'])
+                ->helperText('Boleh dengan atau tanpa tanda hubung. Sistem akan menyimpan angka saja.')
                 ->fillRecordUsing(function ($record, $state) {
                     $record->isbn = preg_replace('/\D+/', '', trim((string) $state));
                 }),
             ImportColumn::make('authors')
                 ->label('Penulis')
+                ->helperText('Pisahkan beberapa penulis dengan tanda |')
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state))
                 ->fillRecordUsing(function ($record, $state) {}),
 
             ImportColumn::make('categories')
                 ->label('Kategori')
+                ->helperText('Pisahkan beberapa kategori dengan tanda |')
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state))
                 ->fillRecordUsing(function ($record, $state) {}),
 
             ImportColumn::make('ddc_code')
-                ->label('Nomor DDC'),
+                ->label('Nomor DDC')
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
 
-            ImportColumn::make('description'),
+            ImportColumn::make('description')
+                ->label('Deskripsi')
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
 
-            ImportColumn::make('edition'),
+            ImportColumn::make('edition')
+                ->label('Edisi')
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
             ImportColumn::make('published_year')
-                ->label('Tahun Terbit'),
+                ->label('Tahun Terbit')
+                ->numeric()
+                ->rules(['nullable', 'integer', 'min:1000', 'max:2100']),
             ImportColumn::make('pages')
                 ->label('Jumlah Halaman')
-                ->numeric(),
+                ->numeric()
+                ->rules(['nullable', 'integer', 'min:1']),
             ImportColumn::make('stock')
                 ->label('Stok')
                 ->numeric()
+                ->helperText('Jika lebih besar dari stok saat ini, sistem akan menambah eksemplar yang kurang.')
                 ->rules(['nullable', 'integer', 'min:0'])
+                ->fillRecordUsing(function ($record, $state) {}),
+            ImportColumn::make('rack')
+                ->label('Lokasi Rak')
+                ->helperText('Dipakai untuk mengisi lokasi rak eksemplar, misalnya R-01-A.')
+                ->rules(['nullable', 'max:255'])
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state))
                 ->fillRecordUsing(function ($record, $state) {}),
             ImportColumn::make('publisher')
                 ->label('Penerbit')
                 ->requiredMapping()
+                ->helperText('Wajib diisi. Nama penerbit akan dibuat otomatis jika belum ada.')
+                ->castStateUsing(fn ($state): string => static::normalizeRequiredString($state))
                 ->fillRecordUsing(function ($record, $state) {
                     $publisher = Publisher::firstOrCreate(
-                        ['name' => trim($state)],
-                        ['slug' => Str::slug($state)]
+                        ['name' => $state],
+                        ['slug' => Publisher::generateSlug($state)]
                     );
 
                     $record->publisher_id = $publisher->id;
                 }),
             ImportColumn::make('language')
                 ->label('Bahasa')
-                ->castStateUsing(fn (string $state) => $state ?: 'Indonesia'),
+                ->castStateUsing(fn ($state): string => static::normalizeOptionalString($state) ?? 'Indonesia'),
 
             ImportColumn::make('is_featured')
                 ->boolean()
@@ -91,44 +113,27 @@ class BookImporter extends Importer
     {
         /** @var Book $book */
         $book = $this->record;
+        $shelfLocation = static::normalizeOptionalString($this->data['rack'] ?? null);
 
-        $authorState = $this->data['authors'] ?? null;
-        if (filled($authorState)) {
-            $names = explode('|', $authorState);
-            $ids = [];
-            foreach ($names as $name) {
-                $cleanName = trim($name);
-                if (filled($cleanName)) {
-                    $author = Author::firstOrCreate(
-                        ['name' => $cleanName],
-                        ['slug' => Str::slug($cleanName)]
-                    );
-                    $ids[] = $author->id;
-                }
-            }
-            $book->authors()->sync($ids);
+        $authorIds = $this->resolveAuthorIds($this->data['authors'] ?? null);
+
+        if ($authorIds !== []) {
+            $book->authors()->sync($authorIds);
         }
 
-        $categoryState = $this->data['categories'] ?? null;
-        if (filled($categoryState)) {
-            $names = explode('|', $categoryState);
-            $ids = [];
-            foreach ($names as $name) {
-                $cleanName = trim($name);
-                if (filled($cleanName)) {
-                    $category = Category::firstOrCreate(
-                        ['name' => $cleanName],
-                        ['slug' => Str::slug($cleanName)]
-                    );
-                    $ids[] = $category->id;
-                }
-            }
-            $book->categories()->sync($ids);
+        $categoryIds = $this->resolveCategoryIds($this->data['categories'] ?? null);
+
+        if ($categoryIds !== []) {
+            $book->categories()->sync($categoryIds);
         }
 
         $stockState = $this->data['stock'] ?? null;
         if (filled($stockState)) {
-            app(BookItemBatchCreator::class)->ensureStock($book, (int) $stockState);
+            app(BookItemBatchCreator::class)->ensureStock($book, (int) $stockState, $shelfLocation);
+        }
+
+        if ($shelfLocation !== null) {
+            app(BookItemBatchCreator::class)->fillMissingShelfLocations($book, $shelfLocation);
         }
     }
 
@@ -145,6 +150,19 @@ class BookImporter extends Importer
         ]);
     }
 
+    public function getValidationMessages(): array
+    {
+        return [
+            'title.required' => 'Kolom judul wajib diisi.',
+            'publisher.required' => 'Kolom penerbit wajib diisi.',
+            'stock.integer' => 'Kolom stok harus berupa angka bulat.',
+            'stock.min' => 'Kolom stok tidak boleh kurang dari 0.',
+            'pages.integer' => 'Kolom jumlah halaman harus berupa angka bulat.',
+            'pages.min' => 'Kolom jumlah halaman minimal 1.',
+            'published_year.integer' => 'Kolom tahun terbit harus berupa angka bulat.',
+        ];
+    }
+
     public static function getCompletedNotificationBody(Import $import): string
     {
         $body = 'Impor buku selesai dan '.Number::format($import->successful_rows).' '.str('baris')->plural($import->successful_rows).' berhasil diimpor.';
@@ -154,5 +172,66 @@ class BookImporter extends Importer
         }
 
         return $body;
+    }
+
+    /**
+     * @return array<int>
+     */
+    protected function resolveAuthorIds(mixed $state): array
+    {
+        return collect($this->splitList($state))
+            ->map(function (string $name): int {
+                $author = Author::firstOrCreate(
+                    ['name' => $name],
+                    ['slug' => Author::generateSlug($name)]
+                );
+
+                return $author->getKey();
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int>
+     */
+    protected function resolveCategoryIds(mixed $state): array
+    {
+        return collect($this->splitList($state))
+            ->map(function (string $name): int {
+                $category = Category::firstOrCreate(
+                    ['name' => $name],
+                    ['slug' => Category::generateSlug($name)]
+                );
+
+                return $category->getKey();
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function splitList(mixed $state): array
+    {
+        return collect(explode('|', (string) $state))
+            ->map(fn (string $value): string => trim($value))
+            ->filter(fn (string $value): bool => $value !== '')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    protected static function normalizeOptionalString(mixed $value): ?string
+    {
+        $normalized = trim((string) $value);
+
+        return $normalized !== '' ? $normalized : null;
+    }
+
+    protected static function normalizeRequiredString(mixed $value): string
+    {
+        return trim((string) $value);
     }
 }

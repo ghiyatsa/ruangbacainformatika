@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Book;
 use App\Models\Publisher;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Book>
@@ -18,7 +17,7 @@ class BookFactory extends Factory
 
         return [
             'title' => ucwords($title),
-            'slug' => Str::slug($title),
+            'slug' => Book::generateSlug($title),
             'isbn' => fake()->unique()->numerify('978########'),
             'issn' => fake()->optional()->numerify('####-####'),
             'description' => fake()->paragraph(),

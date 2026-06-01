@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Publisher extends Model
 {
+    use GeneratesSlug;
     use HasFactory;
 
     protected $fillable = [
@@ -16,6 +18,16 @@ class Publisher extends Model
         'city',
         'description',
     ];
+
+    protected static function slugSourceAttribute(): string
+    {
+        return 'name';
+    }
+
+    protected static function slugFallbackValue(): string
+    {
+        return 'penerbit';
+    }
 
     public function books(): HasMany
     {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesSlug;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Book extends Model
 {
+    use GeneratesSlug;
     use HasFactory;
 
     protected static function booted(): void
@@ -74,6 +76,16 @@ class Book extends Model
                 ? preg_replace('/\D+/', '', $value)
                 : null,
         );
+    }
+
+    protected static function slugSourceAttribute(): string
+    {
+        return 'title';
+    }
+
+    protected static function slugFallbackValue(): string
+    {
+        return 'buku';
     }
 
     public function publisher(): BelongsTo

@@ -8,7 +8,6 @@ use App\Models\BookItem;
 use App\Models\Category;
 use App\Models\Publisher;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class BookSeeder extends Seeder
 {
@@ -101,14 +100,14 @@ class BookSeeder extends Seeder
         foreach ($booksData as $data) {
             $publisher = Publisher::query()->firstOrCreate(
                 ['name' => $data['publisher_name']],
-                ['slug' => Str::slug($data['publisher_name'])]
+                ['slug' => Publisher::generateSlug($data['publisher_name'])]
             );
 
             $book = Book::query()->firstOrCreate(
                 ['isbn' => $data['isbn']],
                 [
                     'title' => $data['title'],
-                    'slug' => Str::slug($data['title']),
+                    'slug' => Book::generateSlug($data['title']),
                     'description' => $data['description'],
                     'published_year' => $data['published_year'],
                     'pages' => $data['pages'],
@@ -126,7 +125,7 @@ class BookSeeder extends Seeder
             foreach ($data['author_names'] as $authorName) {
                 $author = Author::query()->firstOrCreate(
                     ['name' => $authorName],
-                    ['slug' => Str::slug($authorName)]
+                    ['slug' => Author::generateSlug($authorName)]
                 );
                 $authorIds[] = $author->id;
             }
@@ -136,7 +135,7 @@ class BookSeeder extends Seeder
             $categoryIds = [];
             foreach ($data['category_names'] as $categoryName) {
                 $category = Category::query()->firstOrCreate(
-                    ['slug' => Str::slug($categoryName)],
+                    ['slug' => Category::generateSlug($categoryName)],
                     ['name' => $categoryName]
                 );
                 $categoryIds[] = $category->id;

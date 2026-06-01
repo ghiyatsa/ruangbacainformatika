@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Publisher;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class PublisherSeeder extends Seeder
 {
@@ -27,7 +26,7 @@ class PublisherSeeder extends Seeder
         foreach ($publishers as $publisherName) {
             Publisher::query()->firstOrCreate(
                 ['name' => $publisherName],
-                ['slug' => Str::slug($publisherName)]
+                ['slug' => Publisher::generateSlug($publisherName)]
             );
         }
     }

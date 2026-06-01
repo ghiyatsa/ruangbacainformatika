@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Category;
 use App\Models\Setting;
 use App\Models\User;
 use Database\Seeders\ProductionSeeder;
@@ -15,8 +14,6 @@ it('seeds production-safe bootstrap data without creating a placeholder super ad
         ->toBe(['member', 'staff', 'super_admin'])
         ->and(Setting::query()->where('section', 'general')->where('key', 'site_name')->exists())
         ->toBeTrue()
-        ->and(Category::query()->count())
-        ->toBe(7)
         ->and(User::query()->exists())
         ->toBeFalse();
 });

@@ -16,7 +16,6 @@ class ProductionSeeder extends Seeder
             RoleSeeder::class,
             AppSettingSeeder::class,
             ShieldSeeder::class,
-            CategorySeeder::class,
         ]);
 
         if (! $this->shouldSeedSuperAdmin()) {

@@ -113,6 +113,13 @@ class KioskPinManager
             ->update(['last_active_at' => now()]);
     }
 
+    public function currentDevice(Request $request): ?KioskDevice
+    {
+        return KioskDevice::query()
+            ->where('session_id', $request->session()->getId())
+            ->first();
+    }
+
     public function forget(Request $request): void
     {
         KioskDevice::query()->where('session_id', $request->session()->getId())->delete();

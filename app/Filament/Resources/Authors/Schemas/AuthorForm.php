@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Authors\Schemas;
 
+use App\Models\Author;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 
 class AuthorForm
 {
@@ -33,7 +33,7 @@ class AuthorForm
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Author::generateSlugPreview($state))),
 
                         TextInput::make('slug')
                             ->label('Slug')

@@ -524,6 +524,34 @@ it('kiosk visit submission flashes a sonner toast after saving', function () {
     ]);
 });
 
+it('kiosk visit stores the active kiosk device when available', function () {
+    $device = KioskDevice::query()->create([
+        'session_id' => session()->getId(),
+        'device_token' => 'visit-device-token',
+        'ip_address' => '127.0.0.1',
+        'network_scope' => '127.0.0.0/24',
+        'last_active_at' => now(),
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldReceive('currentDevice')->andReturn($device);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    post(route('kiosk.visits.store'), [
+        'name' => 'Pengunjung Perangkat',
+        'visitor_type' => VisitLog::VISITOR_TYPE_STAFF,
+        'purpose' => 'administration',
+        'notes' => 'Mencatat kunjungan dari perangkat kiosk aktif.',
+    ])->assertRedirect(route('kiosk.index', ['menu' => 'visit']));
+
+    assertDatabaseHas('visit_logs', [
+        'name' => 'Pengunjung Perangkat',
+        'kiosk_device_id' => $device->id,
+    ]);
+});
+
 it('kiosk stores public visitor institution and phone details', function () {
     $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);

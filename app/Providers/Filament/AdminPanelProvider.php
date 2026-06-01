@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Indigo,
             ])
-            ->favicon('favicon.svg')
+            ->favicon(asset('favicon.svg'))
             ->unsavedChangesAlerts()
             ->databaseTransactions()
             ->databaseNotifications()

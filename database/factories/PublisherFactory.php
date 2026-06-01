@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Publisher;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Publisher>
@@ -17,7 +16,7 @@ class PublisherFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => Publisher::generateSlug($name),
         ];
     }
 }

@@ -6,6 +6,7 @@ use App\Filament\Resources\Authors\Schemas\AuthorForm;
 use App\Filament\Resources\Categories\Schemas\CategoryForm;
 use App\Filament\Resources\Publishers\Schemas\PublisherForm;
 use App\Models\Author;
+use App\Models\Book;
 use App\Models\Category;
 use App\Models\Publisher;
 use App\Services\BookCoverImageService;
@@ -21,7 +22,6 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class BookForm
@@ -39,7 +39,7 @@ class BookForm
                             ->minLength(3)
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Book::generateSlugPreview($state)))
                             ->placeholder('Judul buku')
                             ->helperText('Gunakan judul utama yang tertera pada buku.'),
 
@@ -242,7 +242,7 @@ class BookForm
     {
         $publisher = Publisher::query()->create([
             'name' => $data['name'],
-            'slug' => static::generateUniqueSlug($data['name'], Publisher::class),
+            'slug' => Publisher::generateUniqueSlug($data['name']),
             'city' => $data['city'] ?? null,
             'description' => $data['description'] ?? null,
         ]);
@@ -257,7 +257,7 @@ class BookForm
 
         $publisher?->update([
             'name' => $data['name'],
-            'slug' => static::generateUniqueSlug($data['name'], Publisher::class, $publisher?->getKey()),
+            'slug' => Publisher::generateUniqueSlug($data['name'], $publisher?->getKey()),
             'city' => $data['city'] ?? null,
             'description' => $data['description'] ?? null,
         ]);
@@ -267,7 +267,7 @@ class BookForm
     {
         $author = Author::query()->create([
             'name' => $data['name'],
-            'slug' => static::generateUniqueSlug($data['name'], Author::class),
+            'slug' => Author::generateUniqueSlug($data['name']),
             'email' => $data['email'] ?? null,
             'bio' => $data['bio'] ?? null,
         ]);
@@ -279,36 +279,10 @@ class BookForm
     {
         $category = Category::query()->create([
             'name' => $data['name'],
-            'slug' => static::generateUniqueSlug($data['name'], Category::class),
+            'slug' => Category::generateUniqueSlug($data['name']),
             'description' => $data['description'] ?? null,
         ]);
 
         return $category->getKey();
-    }
-
-    protected static function generateUniqueSlug(string $value, string $modelClass, ?int $ignoreId = null): string
-    {
-        $baseSlug = Str::slug($value);
-        $baseSlug = $baseSlug !== '' ? $baseSlug : 'item';
-        $slug = $baseSlug;
-        $suffix = 2;
-
-        while (static::slugExists($modelClass, $slug, $ignoreId)) {
-            $slug = "{$baseSlug}-{$suffix}";
-            $suffix++;
-        }
-
-        return $slug;
-    }
-
-    protected static function slugExists(string $modelClass, string $slug, ?int $ignoreId = null): bool
-    {
-        $query = $modelClass::query()->where('slug', $slug);
-
-        if ($ignoreId !== null) {
-            $query->whereKeyNot($ignoreId);
-        }
-
-        return $query->exists();
     }
 }

@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Users\Tables;
 use App\Models\User;
 use App\Services\ActivityLogService;
 use App\Support\AppTimezone;
-use App\Support\LoanConsequenceService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -54,13 +53,6 @@ class UsersTable
                     ->label('Peran')
                     ->separator(', ')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('borrowing_access')
-                    ->label('Status Peminjaman')
-                    ->state(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['label'])
-                    ->badge()
-                    ->color(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['color'])
-                    ->description(fn (User $record): ?string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['detail'])
-                    ->wrap(),
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime()
@@ -109,6 +101,14 @@ class UsersTable
                     ->label('Hanya akun dibatasi')
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->borrowingRestricted()),
+                Filter::make('active_overdue_borrowers')
+                    ->label('Terlambat aktif')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->activeOverdueBorrowers()),
+                Filter::make('late_return_cooldown')
+                    ->label('Masa jeda keterlambatan')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->lateReturnCooldown()),
                 Filter::make('manual_approval')
                     ->label('Perlu persetujuan admin')
                     ->toggle()

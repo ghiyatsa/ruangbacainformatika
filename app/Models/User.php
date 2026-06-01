@@ -183,33 +183,58 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             return $query->whereRaw('1 = 0');
         }
 
+        return $query->where(function (Builder $restrictedQuery): void {
+            $restrictedQuery->activeOverdueBorrowers();
+            $restrictedQuery->orWhere(fn (Builder $cooldownQuery): Builder => $cooldownQuery->lateReturnCooldown());
+        });
+    }
+
+    public function scopeActiveOverdueBorrowers(Builder $query): Builder
+    {
+        $loanConsequenceService = app(LoanConsequenceService::class);
+
+        if (! $loanConsequenceService->lateReturnSuspensionEnabled()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $thresholdDays = $loanConsequenceService->lateReturnSuspendAfterDays();
+
+        return $query->whereHas('loans', function (Builder $loanQuery) use ($thresholdDays): void {
+            $loanQuery
+                ->where('status', Loan::STATUS_BORROWED)
+                ->whereNotNull('due_at')
+                ->where('due_at', '<=', now()->subDays($thresholdDays));
+        });
+    }
+
+    public function scopeLateReturnCooldown(Builder $query): Builder
+    {
+        $loanConsequenceService = app(LoanConsequenceService::class);
+
+        if (! $loanConsequenceService->lateReturnSuspensionEnabled()) {
+            return $query->whereRaw('1 = 0');
+        }
+
         $thresholdDays = $loanConsequenceService->lateReturnSuspendAfterDays();
         $cooldownDays = $loanConsequenceService->lateReturnCooldownDays();
 
-        return $query->where(function (Builder $restrictedQuery) use ($cooldownDays, $thresholdDays): void {
-            $restrictedQuery->whereHas('loans', function (Builder $loanQuery) use ($thresholdDays): void {
-                $loanQuery
-                    ->where('status', Loan::STATUS_BORROWED)
-                    ->whereNotNull('due_at')
-                    ->where('due_at', '<=', now()->subDays($thresholdDays));
-            });
+        if ($cooldownDays < 1) {
+            return $query->whereRaw('1 = 0');
+        }
 
-            if ($cooldownDays > 0) {
-                $restrictedQuery->orWhereHas('loans', function (Builder $loanQuery) use ($cooldownDays, $thresholdDays): void {
-                    $loanQuery
-                        ->where('status', Loan::STATUS_RETURNED)
-                        ->whereNotNull('due_at')
-                        ->whereNotNull('returned_at')
-                        ->where('returned_at', '>', now()->subDays($cooldownDays));
+        return $query->whereHas('loans', function (Builder $loanQuery) use ($cooldownDays, $thresholdDays): void {
+            $loanQuery
+                ->where('status', Loan::STATUS_RETURNED)
+                ->whereNotNull('due_at')
+                ->whereNotNull('returned_at')
+                ->where('returned_at', '>', now()->subDays($cooldownDays));
 
-                    $connection = $loanQuery->getConnection();
+            $connection = $loanQuery->getConnection();
 
-                    if ($connection instanceof Connection && $connection->getDriverName() === 'sqlite') {
-                        $loanQuery->whereRaw('julianday(returned_at) - julianday(due_at) >= ?', [$thresholdDays]);
-                    } else {
-                        $loanQuery->whereRaw('TIMESTAMPDIFF(DAY, due_at, returned_at) >= ?', [$thresholdDays]);
-                    }
-                });
+            if ($connection instanceof Connection && $connection->getDriverName() === 'sqlite') {
+                $loanQuery->whereRaw('julianday(returned_at) - julianday(due_at) >= ?', [$thresholdDays]);
+            } else {
+                $loanQuery->whereRaw('TIMESTAMPDIFF(DAY, due_at, returned_at) >= ?', [$thresholdDays]);
             }
         });
     }

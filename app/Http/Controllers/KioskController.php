@@ -192,8 +192,11 @@ class KioskController extends Controller
 
     public function store(SubmitVisitRequest $request): RedirectResponse
     {
+        $kioskDevice = $this->kioskPinManager->currentDevice($request);
+
         VisitLog::create([
             ...$request->validated(),
+            'kiosk_device_id' => $kioskDevice?->getKey(),
             'visited_at' => now(),
         ]);
 
