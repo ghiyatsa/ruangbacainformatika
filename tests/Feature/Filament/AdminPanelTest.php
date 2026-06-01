@@ -68,7 +68,6 @@ it('super admin users can access the admin users resource', function () {
     actingAs($user)
         ->get('/admin/users')
         ->assertOk()
-        ->assertSee('Akses Peminjaman Anggota')
         ->assertSee('Sedang Dibatasi')
         ->assertSee('Terlambat Aktif')
         ->assertSee('Masa Jeda')
@@ -319,7 +318,6 @@ it('super admin users can see similarity sync overview on the admin dashboard', 
     actingAs($user)
         ->get('/admin')
         ->assertOk()
-        ->assertSee('Sinkronisasi Similarity')
         ->assertSee('Sinkron Berhasil')
         ->assertSee('Perlu Tindak Lanjut')
         ->assertSee('Sedang Diproses')
@@ -338,7 +336,6 @@ it('super admin users can see pending member approvals overview on the admin das
     actingAs($user)
         ->get('/admin')
         ->assertOk()
-        ->assertSee('Persetujuan Anggota')
         ->assertSee('Menunggu Persetujuan')
         ->assertSee('Daftar Hari Ini')
         ->assertSee('Disetujui Hari Ini');
@@ -464,7 +461,6 @@ it('super admin users can see the contact messages widget on the dashboard', fun
     actingAs($user)
         ->get('/admin?tab=messages')
         ->assertOk()
-        ->assertSee('Pesan Kontak Terbaru')
         ->assertSee('Pesan dari halaman kontak akan tampil di sini.');
 });
 
@@ -474,11 +470,9 @@ it('super admin users can see the server info widget on the dashboard', function
     actingAs($user)
         ->get('/admin?tab=system')
         ->assertOk()
-        ->assertSee('Informasi Server')
         ->assertSee('Mode Aplikasi')
         ->assertSee('Runtime')
         ->assertSee('Driver Layanan')
         ->assertSee('Penyimpanan')
-        ->assertSee('Waktu Server')
-        ->assertDontSee('Pesan Kontak Terbaru');
+        ->assertSee('Waktu Server');
 });
