@@ -545,7 +545,6 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                         key={`copy-${copyIndex}`}
                         role="list"
                         aria-hidden={copyIndex > 0}
-                        inert={copyIndex > 0}
                         ref={copyIndex === 0 ? seqRef : undefined}
                     >
                         {items.map((item, itemIndex) =>

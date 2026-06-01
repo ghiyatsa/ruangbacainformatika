@@ -74,10 +74,10 @@ class CatalogService
     {
         return Category::query()
             ->select(['id', 'name', 'slug', 'description'])
+            ->whereHas('books', fn ($query) => $query->published())
             ->withCount([
                 'books as books_count' => fn ($query) => $query->published(),
             ])
-            ->having('books_count', '>', 0)
             ->orderByDesc('books_count')
             ->orderBy('name')
             ->limit($limit)
