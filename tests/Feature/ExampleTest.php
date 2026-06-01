@@ -32,6 +32,7 @@ it('home page shows published books from the catalog', function () {
                 ->where('stats.booksCount', 1)
                 ->where('stats.featuredCount', 1)
                 ->where('stats.availableItemsCount', 1)
+                ->where('stats.activeCategoriesCount', 1)
                 ->loadDeferredProps(
                     fn (Assert $reload) => $reload
                         ->has('featuredBooks', 1)
@@ -125,11 +126,18 @@ it('home page exposes popular categories and most viewed books', function () {
             fn (Assert $page) => $page
                 ->component('welcome')
                 ->has('categories', 2)
+                ->missing('marqueeCategories')
+                ->where('stats.activeCategoriesCount', 2)
                 ->where('categories.0.name', 'Jaringan Komputer')
                 ->where('categories.0.booksCount', 1)
                 ->where('categories.1.name', 'Kecerdasan Buatan')
                 ->where('categories.1.description', 'Pembelajaran mesin dan sistem cerdas.')
                 ->where('categories.1.booksCount', 1)
+                ->loadDeferredProps('marquee', fn (Assert $reload) => $reload
+                    ->has('marqueeCategories', 2)
+                    ->where('marqueeCategories.0.name', 'Jaringan Komputer')
+                    ->where('marqueeCategories.1.name', 'Kecerdasan Buatan')
+                )
                 ->loadDeferredProps(
                     fn (Assert $reload) => $reload
                         ->has('popularBooks', 2)
@@ -154,6 +162,7 @@ it('home page excludes non-borrowable books from available counts', function () 
             fn (Assert $page) => $page
                 ->component('welcome')
                 ->where('stats.availableItemsCount', 0)
+                ->where('stats.activeCategoriesCount', 0)
                 ->loadDeferredProps(
                     fn (Assert $reload) => $reload
                         ->has('featuredBooks', 1)
@@ -171,7 +180,35 @@ it('home page exposes zeroed stats when the catalog is empty', function () {
                 ->component('welcome')
                 ->where('stats.booksCount', 0)
                 ->where('stats.featuredCount', 0)
-                ->where('stats.availableItemsCount', 0),
+                ->where('stats.availableItemsCount', 0)
+                ->where('stats.activeCategoriesCount', 0),
+        );
+});
+
+it('home page limits category highlights and defers marquee categories', function () {
+    foreach (range(1, 30) as $number) {
+        $category = Category::factory()->create([
+            'name' => sprintf('Kategori %02d', $number),
+            'slug' => sprintf('kategori-%02d', $number),
+        ]);
+
+        $book = Book::factory()
+            ->published()
+            ->create(['title' => sprintf('Buku %02d', $number)]);
+
+        $book->categories()->attach($category);
+    }
+
+    get(route('home'))
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('welcome')
+                ->where('stats.activeCategoriesCount', 30)
+                ->has('categories', 12)
+                ->missing('marqueeCategories')
+                ->loadDeferredProps('marquee', fn (Assert $reload) => $reload
+                    ->has('marqueeCategories', 24)
+                ),
         );
 });
 

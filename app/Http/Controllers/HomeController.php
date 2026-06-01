@@ -58,7 +58,11 @@ class HomeController extends Controller
                 $this->catalogService->getStats(),
                 ['searchResultsCount' => $books->total()]
             ),
-            'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
+            'categories' => $this->catalogService->getHighlightCategories(12)->all(),
+            'marqueeCategories' => Inertia::defer(
+                fn () => $this->catalogService->getHighlightCategories(24)->all(),
+                'marquee'
+            ),
             'featuredBooks' => Inertia::defer(fn () => $this->featuredBooks()),
             'popularBooks' => Inertia::defer(fn () => $this->popularBooks()),
             'books' => Inertia::defer(function () use ($books) {

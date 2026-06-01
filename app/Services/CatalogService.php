@@ -15,7 +15,8 @@ class CatalogService
      * @return array{
      *     booksCount: int,
      *     featuredCount: int,
-     *     availableItemsCount: int
+     *     availableItemsCount: int,
+     *     activeCategoriesCount: int
      * }
      */
     public function getStats(): array
@@ -35,6 +36,9 @@ class CatalogService
                 ->where('books.is_published', true)
                 ->where('books.is_borrowable', true)
                 ->count(),
+            'activeCategoriesCount' => Category::query()
+                ->whereHas('books', fn ($query) => $query->published())
+                ->count(),
         ];
     }
 
@@ -51,6 +55,32 @@ class CatalogService
                 'books as books_count' => fn ($query) => $query->published(),
             ])
             ->orderBy('name')
+            ->get()
+            ->map(fn (Category $category) => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'description' => $category->description,
+                'booksCount' => (int) ($category->books_count ?? 0),
+            ]);
+    }
+
+    /**
+     * Get a lightweight category set for highlight surfaces.
+     *
+     * @return Collection<int, array{id: int, name: string, slug: string, description: string|null, booksCount: int}>
+     */
+    public function getHighlightCategories(int $limit = 12): Collection
+    {
+        return Category::query()
+            ->select(['id', 'name', 'slug', 'description'])
+            ->withCount([
+                'books as books_count' => fn ($query) => $query->published(),
+            ])
+            ->having('books_count', '>', 0)
+            ->orderByDesc('books_count')
+            ->orderBy('name')
+            ->limit($limit)
             ->get()
             ->map(fn (Category $category) => [
                 'id' => $category->id,

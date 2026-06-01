@@ -1,8 +1,32 @@
+import { WhenVisible } from '@inertiajs/react';
 import { SeoHead } from '@/components/common/SeoHead';
+import { Skeleton } from '@/components/ui/skeleton';
 import CatalogSection from '@/features/welcome/components/catalog/CatalogSection';
 import CategoryMarquee from '@/features/welcome/components/CategoryMarquee';
 import Hero from '@/features/welcome/components/Hero';
 import type { WelcomeProps } from '@/features/welcome/types';
+
+function CategoryMarqueeSkeleton() {
+    return (
+        <section className="py-6 sm:py-8">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 6 }, (_, index) => (
+                        <div
+                            key={`category-marquee-skeleton-${index}`}
+                            className="rounded-2xl border bg-background p-4 sm:p-6"
+                        >
+                            <Skeleton className="mb-4 size-12 rounded-xl" />
+                            <Skeleton className="mb-2 h-5 w-2/3" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="mt-2 h-4 w-4/5" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
 
 export default function WelcomePage({
     stats,
@@ -10,11 +34,8 @@ export default function WelcomePage({
     popularBooks,
     books,
     categories,
+    marqueeCategories,
 }: WelcomeProps) {
-    const activeCategoriesCount = categories.filter(
-        (category) => category.booksCount > 0,
-    ).length;
-
     return (
         <>
             <SeoHead description="Daftar buku dan arsip akademik Ruang Baca Teknik Informatika Universitas Malikussaleh." />
@@ -30,9 +51,18 @@ export default function WelcomePage({
             />
 
             <div className="relative z-10">
-                <Hero stats={stats} categoriesCount={activeCategoriesCount} />
+                <Hero
+                    stats={stats}
+                    categoriesCount={stats.activeCategoriesCount}
+                />
 
-                <CategoryMarquee categories={categories} />
+                <WhenVisible
+                    data="marqueeCategories"
+                    buffer={250}
+                    fallback={<CategoryMarqueeSkeleton />}
+                >
+                    <CategoryMarquee categories={marqueeCategories} />
+                </WhenVisible>
 
                 <CatalogSection
                     stats={stats}

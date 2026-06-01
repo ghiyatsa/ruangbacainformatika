@@ -30,9 +30,17 @@ export type WelcomeProps = {
         booksCount: number;
         featuredCount: number;
         availableItemsCount: number;
+        activeCategoriesCount: number;
         searchResultsCount: number;
     };
     categories: {
+        id: number;
+        name: string;
+        slug: string;
+        description: string | null;
+        booksCount: number;
+    }[];
+    marqueeCategories?: {
         id: number;
         name: string;
         slug: string;
