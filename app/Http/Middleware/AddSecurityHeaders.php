@@ -42,9 +42,24 @@ class AddSecurityHeaders
     protected function buildContentSecurityPolicy(Request $request): string
     {
         $nonce = Vite::cspNonce();
-        $scriptSources = ["'self'", "'nonce-{$nonce}'", 'https://accounts.google.com/gsi/client', 'https://accounts.google.com'];
-        $styleSources = ["'self'", "'unsafe-inline'", 'https://fonts.bunny.net', "'nonce-{$nonce}'"];
-        $connectSources = ["'self'", 'https://accounts.google.com', 'https://www.googleapis.com'];
+        $scriptSources = [
+            "'self'",
+            "'nonce-{$nonce}'",
+            'https://accounts.google.com/gsi/client',
+            'https://accounts.google.com',
+            'https://challenges.cloudflare.com',
+        ];
+        $styleSources = [
+            "'self'",
+            "'unsafe-inline'",
+            'https://fonts.bunny.net',
+        ];
+        $connectSources = [
+            "'self'",
+            'https://accounts.google.com',
+            'https://www.googleapis.com',
+            'https://challenges.cloudflare.com',
+        ];
 
         if (app()->isLocal()) {
             array_push($scriptSources, 'http://127.0.0.1:5173', 'http://localhost:5173');
@@ -69,7 +84,7 @@ class AddSecurityHeaders
             'style-src '.implode(' ', $styleSources),
             'script-src '.implode(' ', $scriptSources),
             'connect-src '.implode(' ', $connectSources),
-            "frame-src 'self' https://accounts.google.com",
+            "frame-src 'self' https://accounts.google.com https://challenges.cloudflare.com",
         ];
 
         if ($request->isSecure()) {
