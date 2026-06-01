@@ -52,7 +52,7 @@ export function MobileSheet({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-lg md:hidden"
+                    className="-ml-2 h-8 w-8 rounded-lg md:hidden"
                     aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
                     aria-expanded={mobileOpen}
                 >
@@ -61,23 +61,23 @@ export function MobileSheet({
             </SheetTrigger>
 
             <SheetContent
-                side="right"
+                side="left"
                 showCloseButton={false}
                 overlayClassName="bg-black/8 supports-backdrop-filter:backdrop-blur-sm"
-                className="h-svh w-[min(92vw,24rem)] max-w-[24rem] rounded-l-[1.15rem] transform-gpu gap-0 border-l border-border/60 bg-background/88 p-0 shadow-none backdrop-blur-md supports-backdrop-filter:bg-background/78 will-change-transform [contain:layout_paint] data-open:duration-200 data-closed:duration-0"
+                className="h-svh w-[min(92vw,24rem)] max-w-[24rem] rounded-r-[1.15rem] transform-gpu gap-0 border-r border-border/60 bg-background/88 p-0 shadow-none backdrop-blur-md supports-backdrop-filter:bg-background/78 will-change-transform [contain:layout_paint] data-open:duration-200 data-closed:duration-0"
             >
-                <SheetHeader className="flex h-13 flex-row items-center justify-between rounded-tl-[1.15rem] border-b border-border/60 bg-background/88 px-3 text-left backdrop-blur-md supports-backdrop-filter:bg-background/78 sm:h-16 sm:px-4">
-                    <AppLogo compact />
+                <SheetHeader className="flex h-16 flex-row items-center gap-0.5 rounded-tr-[1.15rem] border-b border-border/60 bg-background/88 px-3 text-left backdrop-blur-md supports-backdrop-filter:bg-background/78 sm:px-4">
                     <SheetClose asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-lg"
+                            className="-ml-1 h-8 w-8 rounded-lg"
                             aria-label="Tutup menu"
                         >
                             <X className="h-[18px] w-[18px]" />
                         </Button>
                     </SheetClose>
+                    <AppLogo compact />
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto px-3 pt-2 pb-4 sm:px-4">
@@ -116,7 +116,7 @@ export function MobileSheet({
                                         defaultOpen={defaultOpenSections.includes(
                                             item.label,
                                         )}
-                                        className="rounded-2xl border border-border/50 bg-muted/20"
+                                        className="rounded-2xl border border-border/80 bg-muted/60 dark:border-border/50 dark:bg-muted/20"
                                     >
                                         <CollapsibleTrigger asChild>
                                             <button

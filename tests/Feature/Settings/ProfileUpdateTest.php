@@ -19,6 +19,20 @@ it('profile page is displayed', function () {
         ->assertOk();
 });
 
+it('external users with incomplete profiles can still access profile settings', function () {
+    $user = User::factory()->create([
+        'email' => 'outside@example.com',
+        'whatsapp' => null,
+        'address' => null,
+        'profile_completed_at' => null,
+    ]);
+
+    /** @var User $user */
+    actingAs($user)
+        ->get(route('settings.profile.edit'))
+        ->assertOk();
+});
+
 it('google users with incomplete profile are redirected to onboarding page', function () {
     $user = User::factory()->create([
         'email' => '230170111@mhs.unimal.ac.id',

@@ -109,7 +109,7 @@ class WhatsAppVerificationController extends Controller
 
         $freshUser = $user->fresh();
 
-        if ($freshUser instanceof User && ! $freshUser->hasRequiredProfileDetails()) {
+        if ($freshUser instanceof User && $this->authenticationRedirector->requiresProfileCompletion($freshUser)) {
             return to_route('register.profile');
         }
 

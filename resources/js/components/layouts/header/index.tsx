@@ -131,9 +131,15 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                 </div>
             )}
 
-            <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/88 shadow-sm shadow-black/5 backdrop-blur-md supports-backdrop-filter:bg-background/78 md:fixed md:top-4 md:left-0 md:border-b-0 md:bg-transparent md:shadow-none md:backdrop-blur-none">
-                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 bg-background/88 px-4 transition-all duration-300 sm:px-5 md:rounded-[1.15rem] md:border md:border-border/60 md:bg-background/88 md:shadow-lg md:shadow-black/5 md:backdrop-blur-md md:supports-backdrop-filter:bg-background/78 lg:gap-4 xl:gap-6 dark:md:border-white/10 dark:md:shadow-black/20">
-                    <div className="min-w-0 flex-1 items-center gap-4 md:flex lg:gap-5">
+            <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 shadow-sm shadow-black/5 backdrop-blur-md supports-backdrop-filter:bg-background/70 md:fixed md:top-4 md:left-0 md:border-b-0 md:bg-transparent md:shadow-none md:backdrop-blur-none">
+                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 bg-transparent px-4 transition-all duration-300 sm:px-5 md:rounded-[1.15rem] md:border md:border-border/60 md:bg-background/88 md:shadow-lg md:shadow-black/5 md:backdrop-blur-md md:supports-backdrop-filter:bg-background/78 lg:gap-4 xl:gap-6 dark:md:border-white/10 dark:md:shadow-black/20">
+                    <div className="flex min-w-0 flex-1 items-center gap-0.5 md:gap-4 lg:gap-5">
+                        <MobileSheet
+                            mobileOpen={mobileOpen}
+                            setMobileOpen={setMobileOpen}
+                            isActive={isActive}
+                            auth={auth}
+                        />
                         <AppLogo compact />
                         <DesktopNav isActive={isActive} />
                     </div>
@@ -144,13 +150,6 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                             resolvedAppearance={resolvedAppearance}
                             updateAppearance={updateAppearance}
                             hideSearch={hideSearch}
-                        />
-
-                        <MobileSheet
-                            mobileOpen={mobileOpen}
-                            setMobileOpen={setMobileOpen}
-                            isActive={isActive}
-                            auth={auth}
                         />
                     </div>
                 </div>

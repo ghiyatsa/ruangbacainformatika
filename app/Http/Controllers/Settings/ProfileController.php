@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileOnboardingRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use App\Models\User;
+use App\Services\Auth\AuthenticationRedirector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,6 +14,10 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected AuthenticationRedirector $authenticationRedirector,
+    ) {}
+
     /**
      * Show the user's profile settings page.
      */
@@ -43,6 +48,12 @@ class ProfileController extends Controller
 
         if ($user->hasRequiredProfileDetails()) {
             return to_route('settings.profile.edit');
+        }
+
+        if (! $this->authenticationRedirector->requiresProfileCompletion($user)) {
+            return $user->canAccessAdminPanel()
+                ? to_route('filament.admin.pages.dashboard')
+                : to_route('home');
         }
 
         return Inertia::render('auth/register-profile');
@@ -82,6 +93,12 @@ class ProfileController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+
+        if (! $this->authenticationRedirector->requiresProfileCompletion($user)) {
+            return $user->canAccessAdminPanel()
+                ? to_route('filament.admin.pages.dashboard')
+                : to_route('home');
+        }
 
         if ($user->hasRequiredProfileDetails() && ! $user->requiresWhatsAppVerification()) {
             return to_route('settings.profile.edit');

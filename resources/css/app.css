@@ -271,3 +271,10 @@
     --animate-star-movement-top: star-movement-top linear infinite alternate;
     --animate-bell-swing: bell-swing 2.8s ease-in-out infinite;
 }
+
+/* Google One Tap Mobile Position Override */
+@media (max-width: 767px) {
+    #credential_picker_container {
+        bottom: 80px !important;
+    }
+}

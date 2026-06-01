@@ -239,7 +239,7 @@ it('public users with a valid external google email can still sign in', function
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('register.profile', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 
     assertAuthenticated();
 
@@ -279,6 +279,7 @@ it('non teknik informatika student accounts are also auto approved but still nee
 
 it('google users can access onboarding only once', function () {
     $user = User::factory()->create([
+        'email' => '230170888@mhs.unimal.ac.id',
         'auth_provider' => 'google',
         'whatsapp' => '08123456789',
         'whatsapp_verified_at' => now(),

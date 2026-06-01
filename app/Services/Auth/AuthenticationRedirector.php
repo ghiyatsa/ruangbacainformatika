@@ -73,7 +73,7 @@ class AuthenticationRedirector
 
     public function requiresProfileCompletion(User $user): bool
     {
-        return ! $user->hasRequiredProfileDetails();
+        return $user->usesCampusEmail() && ! $user->hasRequiredProfileDetails();
     }
 
     public function requiresWhatsAppVerification(User $user): bool

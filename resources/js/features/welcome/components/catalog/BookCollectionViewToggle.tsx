@@ -13,7 +13,7 @@ export default function BookCollectionViewToggle({
     onChange,
 }: BookCollectionViewToggleProps) {
     return (
-        <div className="inline-flex items-center gap-1 rounded-xl border bg-muted/50 p-1">
+        <div className="hidden sm:inline-flex items-center gap-1 rounded-xl border bg-muted/50 p-1">
             <Button
                 type="button"
                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}

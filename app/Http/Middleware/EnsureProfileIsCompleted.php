@@ -2,12 +2,18 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
+use App\Services\Auth\AuthenticationRedirector;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureProfileIsCompleted
 {
+    public function __construct(
+        protected AuthenticationRedirector $authenticationRedirector,
+    ) {}
+
     /**
      * Handle an incoming request.
      *
@@ -19,7 +25,9 @@ class EnsureProfileIsCompleted
             return $next($request);
         }
 
-        if ($request->user() && ! $request->user()->hasRequiredProfileDetails()) {
+        $user = $request->user();
+
+        if ($user instanceof User && $this->authenticationRedirector->requiresProfileCompletion($user)) {
             return $request->expectsJson()
                 ? abort(403, 'Your profile is incomplete.')
                 : redirect()->route('register.profile');

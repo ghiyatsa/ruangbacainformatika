@@ -68,7 +68,7 @@ export function BookCatalogFilters({
                         val && onViewModeChange(val as ViewMode)
                     }
                     variant="outline"
-                    className="gap-1"
+                    className="hidden sm:flex gap-1"
                     spacing={1}
                 >
                     <ToggleGroupItem
@@ -91,7 +91,7 @@ export function BookCatalogFilters({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-                <div className="flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
+                <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-none">
                     <span className="hidden text-xs font-medium text-muted-foreground sm:inline-block">
                         Kategori:
                     </span>
@@ -99,7 +99,7 @@ export function BookCatalogFilters({
                         value={filters.category || 'all'}
                         onValueChange={(val) => applyFilters({ category: val })}
                     >
-                        <SelectTrigger className="h-10 min-w-0 flex-1 rounded-lg shadow-xs sm:w-[220px] sm:flex-none">
+                        <SelectTrigger className="h-10 w-full rounded-lg shadow-xs sm:w-[220px] sm:flex-none">
                             <SelectValue placeholder="Pilih Kategori" />
                         </SelectTrigger>
                         <SelectContent>

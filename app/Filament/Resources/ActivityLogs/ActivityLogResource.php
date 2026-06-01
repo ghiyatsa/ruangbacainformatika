@@ -25,13 +25,13 @@ class ActivityLogResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Operasional';
 
-    protected static ?string $navigationLabel = 'Aktivitas Admin';
+    protected static ?string $navigationLabel = 'Log Aktivitas';
 
     protected static ?int $navigationSort = 5;
 
-    protected static ?string $modelLabel = 'Aktivitas Admin';
+    protected static ?string $modelLabel = 'Log Aktivitas';
 
-    protected static ?string $pluralModelLabel = 'Aktivitas Admin';
+    protected static ?string $pluralModelLabel = 'Log Aktivitas';
 
     protected static ?string $recordTitleAttribute = 'description';
 
