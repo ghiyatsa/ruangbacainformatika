@@ -31,6 +31,20 @@ class RemoveSkripsiFromSimilarity implements ShouldQueue, ShouldQueueAfterCommit
 
     public function handle(SimilarityApiService $api, SimilaritySyncStatusService $statusService): void
     {
+        $status = SimilaritySyncStatus::query()
+            ->where('source_skripsi_id', $this->skripsiId)
+            ->first();
+
+        if ($status?->status !== SimilaritySyncStatus::STATUS_SYNCED) {
+            $isIndexed = $api->hasIndexedId($this->skripsiId);
+
+            if ($isIndexed === false) {
+                $statusService->deleteStatus($this->skripsiId);
+
+                return;
+            }
+        }
+
         $statusService->markProcessing($this->skripsiId, SimilaritySyncStatus::OPERATION_DELETE);
 
         if (! $api->delete($this->skripsiId)) {

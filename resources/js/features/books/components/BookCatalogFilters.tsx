@@ -36,7 +36,8 @@ export function BookCatalogFilters({
     viewMode,
     onViewModeChange,
 }: BookCatalogFiltersProps) {
-    const totalResults = stats.searchResultsCount?.toLocaleString('id-ID') ?? '0';
+    const totalResults =
+        stats.searchResultsCount?.toLocaleString('id-ID') ?? '0';
 
     function applyFilters(overrides: Partial<FilterTypes>): void {
         const next = { ...filters, ...overrides };
@@ -56,7 +57,9 @@ export function BookCatalogFilters({
                 <div className="inline-flex items-center gap-2 rounded-xl border bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground">
                     <Library className="size-3.5" />
                     <span>
-                        <strong className="text-foreground">{totalResults}</strong>{' '}
+                        <strong className="text-foreground">
+                            {totalResults}
+                        </strong>{' '}
                         hasil
                     </span>
                 </div>
@@ -68,7 +71,7 @@ export function BookCatalogFilters({
                         val && onViewModeChange(val as ViewMode)
                     }
                     variant="outline"
-                    className="hidden sm:flex gap-1"
+                    className="hidden gap-1 sm:flex"
                     spacing={1}
                 >
                     <ToggleGroupItem
@@ -99,7 +102,10 @@ export function BookCatalogFilters({
                         value={filters.category || 'all'}
                         onValueChange={(val) => applyFilters({ category: val })}
                     >
-                        <SelectTrigger className="h-10 w-full rounded-lg shadow-xs sm:w-[220px] sm:flex-none">
+                        <SelectTrigger
+                            aria-label="Filter kategori buku"
+                            className="h-10 w-full rounded-lg shadow-xs sm:w-[220px] sm:flex-none"
+                        >
                             <SelectValue placeholder="Pilih Kategori" />
                         </SelectTrigger>
                         <SelectContent>
@@ -130,7 +136,10 @@ export function BookCatalogFilters({
                             })
                         }
                     >
-                        <SelectTrigger className="h-10 w-28 rounded-lg shadow-xs sm:w-32">
+                        <SelectTrigger
+                            aria-label="Filter tahun buku"
+                            className="h-10 w-28 rounded-lg shadow-xs sm:w-32"
+                        >
                             <SelectValue placeholder="Tahun" />
                         </SelectTrigger>
                         <SelectContent>

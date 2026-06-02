@@ -36,7 +36,7 @@ it('renders configured seo meta on the welcome page', function () {
         ->assertSee('property="og:image" content="'.route('og.site').'"', false)
         ->assertSee('property="og:image:type" content="image/png"', false)
         ->assertSee('property="og:image:width" content="1200"', false)
-        ->assertSee('property="og:image:height" content="600"', false)
+        ->assertSee('property="og:image:height" content="1200"', false)
         ->assertSee('property="og:url" content="'.url('/').'"', false)
         ->assertSee('rel="canonical" href="'.url('/').'"', false);
 });

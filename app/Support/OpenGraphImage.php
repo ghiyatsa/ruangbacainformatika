@@ -15,9 +15,13 @@ class OpenGraphImage
 
     public const MIME_TYPE = 'image/png';
 
-    public const WIDTH = 1200;
+    public const SITE_WIDTH = 1200;
 
-    public const HEIGHT = 600;
+    public const SITE_HEIGHT = 1200;
+
+    public const DETAIL_WIDTH = 1200;
+
+    public const DETAIL_HEIGHT = 600;
 
     public function __construct(
         protected SiteSettings $siteSettings,
@@ -31,8 +35,8 @@ class OpenGraphImage
         return [
             'ogImage' => route('og.site'),
             'ogImageType' => self::MIME_TYPE,
-            'ogImageWidth' => self::WIDTH,
-            'ogImageHeight' => self::HEIGHT,
+            'ogImageWidth' => self::SITE_WIDTH,
+            'ogImageHeight' => self::SITE_HEIGHT,
         ];
     }
 
@@ -44,8 +48,8 @@ class OpenGraphImage
         return [
             'ogImage' => route('og.books.show', $book),
             'ogImageType' => self::MIME_TYPE,
-            'ogImageWidth' => self::WIDTH,
-            'ogImageHeight' => self::HEIGHT,
+            'ogImageWidth' => self::DETAIL_WIDTH,
+            'ogImageHeight' => self::DETAIL_HEIGHT,
         ];
     }
 
@@ -57,8 +61,8 @@ class OpenGraphImage
         return [
             'ogImage' => route($routeName, $document),
             'ogImageType' => self::MIME_TYPE,
-            'ogImageWidth' => self::WIDTH,
-            'ogImageHeight' => self::HEIGHT,
+            'ogImageWidth' => self::DETAIL_WIDTH,
+            'ogImageHeight' => self::DETAIL_HEIGHT,
         ];
     }
 
@@ -66,17 +70,37 @@ class OpenGraphImage
     {
         $settings = $this->siteSettings->values();
 
-        return $this->renderPng(function (GdImage $image) use ($settings): void {
+        return $this->renderPng(self::SITE_WIDTH, self::SITE_HEIGHT, function (GdImage $image) use ($settings): void {
             $colors = $this->palette($image, $settings['theme_color']);
+            $canvasSize = self::SITE_WIDTH;
+            $cardInset = 100;
+            $cardRadius = 52;
+            $logoInset = 220;
 
-            imagefilledrectangle($image, 0, 0, self::WIDTH, self::HEIGHT, $colors['slate50']);
-            imagefilledrectangle($image, 0, self::HEIGHT - 16, self::WIDTH, self::HEIGHT, $colors['theme']);
+            imagefilledrectangle($image, 0, 0, $canvasSize, $canvasSize, $colors['white']);
 
-            $this->drawRoundedRectangle($image, 72, 72, 1128, 528, 36, $colors['white'], $colors['slate200']);
-            $this->drawLogoCard($image, 96, 96, 152, 152, $colors);
+            imagefilledrectangle($image, 0, 0, $canvasSize, 24, $colors['theme']);
+            imagefilledrectangle($image, 0, $canvasSize - 24, $canvasSize, $canvasSize, $colors['theme']);
 
-            $this->drawTextLine($image, $settings['site_name'], 96, 250, 64, $colors['slate900'], true);
-            $this->drawTextLine($image, $settings['site_tagline'], 96, 338, 28, $colors['slate600']);
+            $this->drawRoundedRectangle(
+                $image,
+                $cardInset,
+                $cardInset,
+                $canvasSize - $cardInset,
+                $canvasSize - $cardInset,
+                $cardRadius,
+                $colors['slate50'],
+                $colors['slate200']
+            );
+
+            $this->drawLogoCard(
+                $image,
+                $logoInset,
+                $logoInset,
+                $canvasSize - ($logoInset * 2),
+                $canvasSize - ($logoInset * 2),
+                $colors
+            );
         });
     }
 
@@ -88,25 +112,27 @@ class OpenGraphImage
     ): string {
         $settings = $this->siteSettings->values();
 
-        return $this->renderPng(function (GdImage $image) use ($label, $title, $author, $views, $settings): void {
+        return $this->renderPng(self::DETAIL_WIDTH, self::DETAIL_HEIGHT, function (GdImage $image) use ($label, $title, $author, $views, $settings): void {
             $colors = $this->palette($image, $settings['theme_color']);
+            $width = self::DETAIL_WIDTH;
+            $height = self::DETAIL_HEIGHT;
 
             // White background
-            imagefilledrectangle($image, 0, 0, self::WIDTH, self::HEIGHT, $colors['white']);
+            imagefilledrectangle($image, 0, 0, $width, $height, $colors['white']);
 
             // Bottom colorful stripe (mimics GitHub's multi-color footer bar)
             $stripeHeight = 20;
-            $stripeY = self::HEIGHT - $stripeHeight;
-            $thirdWidth = (int) floor(self::WIDTH / 3);
-            imagefilledrectangle($image, 0, $stripeY, $thirdWidth - 4, self::HEIGHT, $colors['theme']);
-            imagefilledrectangle($image, $thirdWidth, $stripeY, $thirdWidth * 2 - 4, self::HEIGHT, $colors['slate600']);
-            imagefilledrectangle($image, $thirdWidth * 2, $stripeY, self::WIDTH, self::HEIGHT, $colors['theme']);
+            $stripeY = $height - $stripeHeight;
+            $thirdWidth = (int) floor($width / 3);
+            imagefilledrectangle($image, 0, $stripeY, $thirdWidth - 4, $height, $colors['theme']);
+            imagefilledrectangle($image, $thirdWidth, $stripeY, $thirdWidth * 2 - 4, $height, $colors['slate600']);
+            imagefilledrectangle($image, $thirdWidth * 2, $stripeY, $width, $height, $colors['theme']);
 
             // Content margins
             $paddingX = 80;
             $paddingY = 80;
             $logoBoxSize = 180;
-            $logoBoxLeft = self::WIDTH - $paddingX - $logoBoxSize;
+            $logoBoxLeft = $width - $paddingX - $logoBoxSize;
             $logoBoxTop = $paddingY;
 
             // Logo area: rounded square top-right (like GitHub avatar)
@@ -173,8 +199,8 @@ class OpenGraphImage
             }
 
             // Separator line above bottom row
-            $separatorY = self::HEIGHT - $stripeHeight - 90;
-            imageline($image, $paddingX, $separatorY, self::WIDTH - $paddingX, $separatorY, $colors['slate200']);
+            $separatorY = $height - $stripeHeight - 90;
+            imageline($image, $paddingX, $separatorY, $width - $paddingX, $separatorY, $colors['slate200']);
 
             // Bottom row stats (GitHub-style)
             $bottomTextY = $separatorY + 56;
@@ -233,21 +259,21 @@ class OpenGraphImage
             // Site name right-aligned
             $siteName = $settings['site_name'];
             $boldFontPath = $this->fontPath(true);
-            $siteX = self::WIDTH - $paddingX;
+            $siteX = $width - $paddingX;
             if ($boldFontPath !== null) {
                 $box = imagettfbbox(22, 0, $boldFontPath, $siteName);
                 if (is_array($box)) {
                     $siteTextW = (int) abs($box[4] - $box[0]);
-                    $siteX = self::WIDTH - $paddingX - $siteTextW;
+                    $siteX = $width - $paddingX - $siteTextW;
                 }
             }
             $this->drawTextLine($image, $siteName, $siteX, $bottomTextY, 22, $colors['slate400'], true);
         });
     }
 
-    protected function renderPng(callable $render): string
+    protected function renderPng(int $width, int $height, callable $render): string
     {
-        $image = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
+        $image = imagecreatetruecolor($width, $height);
         $binary = null;
 
         if (! $image instanceof GdImage) {
@@ -559,8 +585,8 @@ class OpenGraphImage
         foreach (
             [
                 $settings['site_logo_path'],
-                $settings['og_image_path'],
                 $settings['favicon_path'],
+                $settings['apple_touch_icon_path'],
             ] as $path
         ) {
             if (! filled($path) || ! Storage::disk('public')->exists($path)) {

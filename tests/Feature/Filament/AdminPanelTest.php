@@ -164,7 +164,7 @@ it('super admin users can render book relation helpers on the create book form',
         ->assertSee('Pilih kategori yang sudah ada atau tambah baru.')
         ->assertSee('Isi angka tanpa spasi atau tanda lain.')
         ->assertSee('Gunakan 4 digit tahun.')
-        ->assertSee('Gunakan JPG, PNG, atau WEBP dengan ukuran maksimal 2 MB.');
+        ->assertSee('Gunakan JPG, PNG, atau WEBP maksimal 2 MB.');
 });
 
 it('super admin users can render concise table filter and bulk action labels', function () {

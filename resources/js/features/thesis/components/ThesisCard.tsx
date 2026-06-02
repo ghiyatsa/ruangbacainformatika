@@ -110,9 +110,9 @@ export default function ThesisCard({ thesis }: ThesisCardProps) {
                     </div>
 
                     <div className="min-h-[3.75rem]">
-                        <h3 className="line-clamp-3 text-sm leading-snug font-bold transition-colors group-hover:text-primary">
+                        <p className="line-clamp-3 text-sm leading-snug font-bold transition-colors group-hover:text-primary">
                             {thesis.title}
-                        </h3>
+                        </p>
                     </div>
                 </CardHeader>
 

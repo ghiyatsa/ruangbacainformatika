@@ -41,15 +41,18 @@ export function GlobalSearch() {
         };
     }, [closeDialog, open, openDialog]);
 
-    const handleOpenChange = React.useCallback((nextOpen: boolean) => {
-        if (nextOpen) {
-            openDialog();
+    const handleOpenChange = React.useCallback(
+        (nextOpen: boolean) => {
+            if (nextOpen) {
+                openDialog();
 
-            return;
-        }
+                return;
+            }
 
-        closeDialog();
-    }, [closeDialog, openDialog]);
+            closeDialog();
+        },
+        [closeDialog, openDialog],
+    );
 
     return (
         <>

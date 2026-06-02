@@ -1,3 +1,4 @@
+import { Deferred } from '@inertiajs/react';
 import {
     Bookmark,
     BookMarked,
@@ -10,12 +11,16 @@ import {
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
+import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
+import { RelatedCatalogSectionSkeleton } from '@/components/resource/RelatedCatalogSectionSkeleton';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import ThesisCard from '@/features/thesis/components/ThesisCard';
+import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import thesisRoute from '@/routes/thesis';
@@ -72,8 +77,8 @@ export default function ThesisDetailPage(
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
 
-                    <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-12 sm:pt-40 lg:px-8">
-                        <div className="mb-8">
+                    <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-12 sm:pt-30 lg:px-8">
+                        <div className="mb-6">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -229,6 +234,36 @@ export default function ThesisDetailPage(
                         catalogTitle={thesis.title}
                     />
                 </div>
+            }
+            footer={
+                <Deferred
+                    data="relatedTheses"
+                    fallback={<RelatedCatalogSectionSkeleton />}
+                    rescue={({ reloading }) => (
+                        <DeferredCatalogRescue
+                            dataKey="relatedTheses"
+                            title="Daftar tesis lain belum sempat dimuat"
+                            description="Muat lagi sebentar kalau kamu ingin melihat tesis lain yang arahnya masih serupa."
+                            reloading={reloading}
+                        />
+                    )}
+                >
+                    {props.relatedTheses && props.relatedTheses.length > 0 ? (
+                        <RelatedCatalogSection
+                            title="Tesis lain yang searah"
+                            description="Kalau kamu sedang mendalami bahasan yang mirip, daftar ini bisa jadi titik lanjut yang pas."
+                        >
+                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                {props.relatedTheses.map((relatedThesis) => (
+                                    <ThesisCard
+                                        key={relatedThesis.id}
+                                        thesis={relatedThesis}
+                                    />
+                                ))}
+                            </div>
+                        </RelatedCatalogSection>
+                    ) : null}
+                </Deferred>
             }
         >
             <section>

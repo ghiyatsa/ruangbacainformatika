@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\DispatchSimilaritySyncAfterSkripsiImport;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
@@ -17,11 +18,13 @@ use App\Services\SimilarityApiService;
 use App\Support\AppTimezone;
 use App\Support\SiteSettings;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Imports\Events\ImportCompleted;
 use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -67,6 +70,11 @@ class AppServiceProvider extends ServiceProvider
         Skripsi::observe(CatalogActivityObserver::class);
         Skripsi::observe(SkripsiObserver::class);
         Thesis::observe(CatalogActivityObserver::class);
+
+        Event::listen(
+            ImportCompleted::class,
+            DispatchSimilaritySyncAfterSkripsiImport::class,
+        );
     }
 
     protected function configureWhatsAppRateLimiter(): void

@@ -196,3 +196,90 @@ it('similarity api service can request a full reset before bulk upsert', functio
         'https://similarity.test/api/v1/sync/jobs/job-reset',
     ]);
 });
+
+it('similarity api service can fetch indexed skripsi ids for reconciliation', function () {
+    Setting::query()->create([
+        'section' => 'integration',
+        'key' => 'similarity_api_url',
+        'value' => 'https://similarity.test',
+    ]);
+
+    Setting::query()->create([
+        'section' => 'integration',
+        'key' => 'similarity_api_secret',
+        'value' => encrypt('sync-secret'),
+    ]);
+
+    Http::fake([
+        'https://similarity.test/api/v1/sync/indexed-ids?limit=500&offset=0' => Http::response([
+            'ids' => [10, 11, 12],
+            'total_indexed' => 477,
+            'next_offset' => 500,
+        ], 200),
+    ]);
+
+    $result = app(SimilarityApiService::class)->indexedIds();
+
+    expect($result)->toBe([
+        'ids' => [10, 11, 12],
+        'total_indexed' => 477,
+        'next_offset' => 500,
+    ]);
+});
+
+it('similarity api service can confirm when a skripsi id exists in the index', function () {
+    Setting::query()->create([
+        'section' => 'integration',
+        'key' => 'similarity_api_url',
+        'value' => 'https://similarity.test',
+    ]);
+
+    Setting::query()->create([
+        'section' => 'integration',
+        'key' => 'similarity_api_secret',
+        'value' => encrypt('sync-secret'),
+    ]);
+
+    Http::fake([
+        'https://similarity.test/api/v1/sync/indexed-ids?limit=500&offset=0' => Http::response([
+            'ids' => [10, 11, 12],
+            'total_indexed' => 477,
+            'next_offset' => 500,
+        ], 200),
+        'https://similarity.test/api/v1/sync/indexed-ids?limit=500&offset=500' => Http::response([
+            'ids' => [13, 14, 15],
+            'total_indexed' => 477,
+            'next_offset' => null,
+        ], 200),
+    ]);
+
+    $result = app(SimilarityApiService::class)->hasIndexedId(14);
+
+    expect($result)->toBeTrue();
+});
+
+it('similarity api service returns false when a skripsi id is not indexed', function () {
+    Setting::query()->create([
+        'section' => 'integration',
+        'key' => 'similarity_api_url',
+        'value' => 'https://similarity.test',
+    ]);
+
+    Setting::query()->create([
+        'section' => 'integration',
+        'key' => 'similarity_api_secret',
+        'value' => encrypt('sync-secret'),
+    ]);
+
+    Http::fake([
+        'https://similarity.test/api/v1/sync/indexed-ids?limit=500&offset=0' => Http::response([
+            'ids' => [10, 11, 12],
+            'total_indexed' => 3,
+            'next_offset' => null,
+        ], 200),
+    ]);
+
+    $result = app(SimilarityApiService::class)->hasIndexedId(99);
+
+    expect($result)->toBeFalse();
+});

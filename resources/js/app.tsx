@@ -37,7 +37,10 @@ function applyStyleNonce(nonce?: string) {
     ) {
         const element = originalCreateElement(tagName, options);
 
-        if (tagName.toLowerCase() === 'style' && element instanceof HTMLStyleElement) {
+        if (
+            tagName.toLowerCase() === 'style' &&
+            element instanceof HTMLStyleElement
+        ) {
             element.nonce = nonce;
         }
 

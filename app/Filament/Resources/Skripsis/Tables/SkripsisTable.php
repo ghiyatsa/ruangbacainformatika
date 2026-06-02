@@ -149,7 +149,7 @@ class SkripsisTable
             ->toolbarActions([
                 ImportAction::make('importSkripsi')
                     ->importer(SkripsiImporter::class)
-                    ->chunkSize(50)
+                    ->chunkSize(25)
                     ->label('Impor')
                     ->icon(Heroicon::OutlinedDocumentArrowDown)
                     ->color('info'),

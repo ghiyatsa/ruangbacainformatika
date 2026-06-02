@@ -76,8 +76,8 @@ class SiteSettings
                 'logo' => $this->publicDiskUrl($settings['site_logo_path']),
                 'ogImage' => route('og.site'),
                 'ogImageType' => OpenGraphImage::MIME_TYPE,
-                'ogImageWidth' => OpenGraphImage::WIDTH,
-                'ogImageHeight' => OpenGraphImage::HEIGHT,
+                'ogImageWidth' => OpenGraphImage::SITE_WIDTH,
+                'ogImageHeight' => OpenGraphImage::SITE_HEIGHT,
                 'icons' => [
                     'favicon' => $this->publicDiskUrl($settings['favicon_path']) ?? asset('favicon-32x32.png'),
                     'faviconSvg' => $this->publicDiskUrl($settings['favicon_svg_path']) ?? asset('favicon.svg'),

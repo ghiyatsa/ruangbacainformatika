@@ -91,9 +91,9 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                 className="pointer-events-none absolute inset-0 -z-10"
                 aria-hidden="true"
             >
-                <div className="absolute top-[42%] left-1/2 hidden h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[100px] dark:bg-primary/15 sm:block" />
-                <div className="absolute -top-12 right-0 h-48 w-48 rounded-full bg-indigo-400/8 blur-[52px] dark:bg-indigo-500/12 sm:-top-20 sm:h-[400px] sm:w-[400px] sm:blur-[80px]" />
-                <div className="absolute bottom-0 left-0 h-40 w-56 rounded-full bg-primary/5 blur-[44px] dark:bg-primary/8 sm:h-[300px] sm:w-[500px] sm:blur-[80px]" />
+                <div className="absolute top-[42%] left-1/2 hidden h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[100px] sm:block dark:bg-primary/15" />
+                <div className="absolute -top-12 right-0 h-48 w-48 rounded-full bg-indigo-400/8 blur-[52px] sm:-top-20 sm:h-[400px] sm:w-[400px] sm:blur-[80px] dark:bg-indigo-500/12" />
+                <div className="absolute bottom-0 left-0 h-40 w-56 rounded-full bg-primary/5 blur-[44px] sm:h-[300px] sm:w-[500px] sm:blur-[80px] dark:bg-primary/8" />
             </div>
 
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -218,9 +218,9 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                     <div className="flex items-baseline gap-0.5">
                                         {isMobile ? (
                                             <span className="text-2xl font-bold text-foreground tabular-nums sm:text-3xl">
-                                                {statsValues[key].toLocaleString(
-                                                    'id-ID',
-                                                )}
+                                                {statsValues[
+                                                    key
+                                                ].toLocaleString('id-ID')}
                                             </span>
                                         ) : (
                                             <CountUp

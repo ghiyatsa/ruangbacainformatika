@@ -40,6 +40,9 @@ class BooksTable
                     ->label('Sampul')
                     ->alignCenter()
                     ->defaultImageUrl(app(BookCoverImageService::class)->getDefaultCoverUrl())
+                    ->extraImgAttributes([
+                        'class' => 'object-contain bg-white p-1',
+                    ])
                     ->disk('public'),
 
                 TextColumn::make('title')

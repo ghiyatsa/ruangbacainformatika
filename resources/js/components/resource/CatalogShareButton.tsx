@@ -62,10 +62,7 @@ export function CatalogShareButton({
 
             toast.error('Tautan belum bisa dibagikan di perangkat ini.');
         } catch (error) {
-            if (
-                error instanceof DOMException &&
-                error.name === 'AbortError'
-            ) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
                 return;
             }
 

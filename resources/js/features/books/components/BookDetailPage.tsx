@@ -1,4 +1,4 @@
-import { Form, Link, usePage } from '@inertiajs/react';
+import { Deferred, Form, Link, usePage } from '@inertiajs/react';
 import {
     Bookmark,
     BookOpen,
@@ -18,27 +18,35 @@ import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestCon
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
+import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
+import { RelatedCatalogSectionSkeleton } from '@/components/resource/RelatedCatalogSectionSkeleton';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import BookCard from '@/features/books/components/BookCard';
+import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import type { BookData, LoanRequestSummary } from '@/features/books/types';
 import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
-import type { Auth } from '@/types';
+import type { Auth, LoanRequestCart } from '@/types';
 
 export interface BookDetailPageProps {
     book?: { data: BookData };
     loanRequest?: LoanRequestSummary | null;
+    relatedBooks?: BookData[];
     loading?: boolean;
 }
 
 export default function BookDetailPage(props: BookDetailPageProps) {
-    const { auth } = usePage<{ auth: Auth }>().props;
+    const { auth, loanRequestCart } = usePage<{
+        auth: Auth;
+        loanRequestCart: LoanRequestCart | null;
+    }>().props;
     const user = auth.user;
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
 
@@ -120,21 +128,22 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             }
             image={book.coverImageUrl}
             keywords={seoKeywords}
+            showBackground={false}
+            deferSecondaryContent
+            contentClassName="pt-2 pb-10 sm:pt-3"
             hero={
                 <div className="relative -mt-20 overflow-hidden sm:-mt-28">
                     <div
-                        className="absolute inset-0 scale-110 blur-2xl"
-                        style={{
-                            backgroundImage: `url(${book.coverImageUrl})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            opacity: 0.15,
-                        }}
-                    />
+                        className="pointer-events-none absolute inset-0"
+                        aria-hidden="true"
+                    >
+                        <div className="absolute top-[8%] left-[10%] h-40 w-40 rounded-full bg-primary/12 blur-3xl" />
+                        <div className="absolute right-[8%] bottom-[12%] h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+                    </div>
                     <div className="absolute inset-0 bg-linear-to-b from-background/30 via-background/60 to-background" />
 
-                    <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-12 sm:pt-40 lg:px-8">
-                        <div className="mb-8">
+                    <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-6 sm:pt-30 sm:pb-8 lg:px-8">
+                        <div className="mb-6">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -152,13 +161,15 @@ export default function BookDetailPage(props: BookDetailPageProps) {
 
                         <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
-                                <div className="group relative overflow-hidden rounded-2xl border border-white/10">
+                                <div className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]">
                                     <img
                                         src={book.coverImageUrl}
                                         alt={`Cover buku ${book.title}`}
-                                        className="aspect-3/4 w-full object-cover"
+                                        fetchPriority="high"
+                                        decoding="async"
+                                        sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
+                                        className="max-h-[28rem] w-auto max-w-full object-contain"
                                     />
-                                    <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent" />
                                 </div>
                             </div>
 
@@ -336,7 +347,6 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                         </Form>
                                     ) : null}
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -395,6 +405,39 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                         catalogTitle={book.title}
                     />
                 </div>
+            }
+            footer={
+                <Deferred
+                    data="relatedBooks"
+                    fallback={<RelatedCatalogSectionSkeleton variant="book" />}
+                    rescue={({ reloading }) => (
+                        <DeferredCatalogRescue
+                            dataKey="relatedBooks"
+                            title="Daftar buku lain belum sempat dimuat"
+                            description="Coba muat lagi sebentar. Kalau berhasil, beberapa judul yang masih dekat dengan buku ini akan muncul di sini."
+                            reloading={reloading}
+                        />
+                    )}
+                >
+                    {props.relatedBooks && props.relatedBooks.length > 0 ? (
+                        <RelatedCatalogSection
+                            title="Buku lain yang mungkin cocok"
+                            description="Kalau topik atau kategorinya terasa pas, beberapa judul ini bisa jadi bacaan berikutnya."
+                        >
+                            <div className="grid gap-4 lg:grid-cols-2">
+                                {props.relatedBooks.map((relatedBook) => (
+                                    <BookCard
+                                        key={relatedBook.id}
+                                        book={relatedBook}
+                                        variant="compact"
+                                        auth={auth}
+                                        loanRequestCart={loanRequestCart}
+                                    />
+                                ))}
+                            </div>
+                        </RelatedCatalogSection>
+                    ) : null}
+                </Deferred>
             }
         >
             <section>

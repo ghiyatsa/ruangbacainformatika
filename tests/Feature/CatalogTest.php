@@ -144,9 +144,9 @@ it('catalog page returns the requested pagination page', function () {
                 ->where('stats.searchResultsCount', 25)
                 ->loadDeferredProps(fn (Assert $reload) => $reload
                     ->where('books.current_page', 2)
-                    ->where('books.next_page_url', null)
-                    ->has('books.data', 1)
-                    ->where('books.data.0.title', 'Book 25')
+                    ->whereNot('books.next_page_url', null)
+                    ->has('books.data', 12)
+                    ->where('books.data.0.title', 'Book 13')
                 ),
         );
 });

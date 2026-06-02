@@ -77,6 +77,61 @@ it('successful similarity deletion removes the orphan status record', function (
     $skripsi->delete();
 
     $api = Mockery::mock(SimilarityApiService::class);
+    $api->shouldReceive('hasIndexedId')
+        ->once()
+        ->with($skripsi->id)
+        ->andReturn(true);
+    $api->shouldReceive('delete')
+        ->once()
+        ->with($skripsi->id)
+        ->andReturn(true);
+
+    $job = new RemoveSkripsiFromSimilarity($skripsi->id);
+    $job->handle($api, $statusService);
+
+    expect(SimilaritySyncStatus::query()
+        ->where('source_skripsi_id', $skripsi->id)
+        ->exists())->toBeFalse();
+});
+
+it('skips delete api call when an unsynced skripsi is not present in the index', function () {
+    Queue::fake();
+
+    $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+    $statusService = app(SimilaritySyncStatusService::class);
+
+    $statusService->markQueued($skripsi, SimilaritySyncStatus::OPERATION_DELETE);
+    $skripsi->delete();
+
+    $api = Mockery::mock(SimilarityApiService::class);
+    $api->shouldReceive('hasIndexedId')
+        ->once()
+        ->with($skripsi->id)
+        ->andReturn(false);
+    $api->shouldNotReceive('delete');
+
+    $job = new RemoveSkripsiFromSimilarity($skripsi->id);
+    $job->handle($api, $statusService);
+
+    expect(SimilaritySyncStatus::query()
+        ->where('source_skripsi_id', $skripsi->id)
+        ->exists())->toBeFalse();
+});
+
+it('still deletes from api when an unsynced skripsi is confirmed in the index', function () {
+    Queue::fake();
+
+    $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+    $statusService = app(SimilaritySyncStatusService::class);
+
+    $statusService->markQueued($skripsi, SimilaritySyncStatus::OPERATION_DELETE);
+    $skripsi->delete();
+
+    $api = Mockery::mock(SimilarityApiService::class);
+    $api->shouldReceive('hasIndexedId')
+        ->once()
+        ->with($skripsi->id)
+        ->andReturn(true);
     $api->shouldReceive('delete')
         ->once()
         ->with($skripsi->id)

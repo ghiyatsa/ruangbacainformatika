@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\BookResource;
+use App\Http\Resources\BookCatalogResource;
 use App\Models\Book;
 use App\Services\CatalogService;
 use Illuminate\Http\Request;
@@ -17,19 +17,14 @@ class CatalogController extends Controller
     protected const BOOK_LIST_COLUMNS = [
         'id',
         'title',
-        'subtitle',
         'slug',
-        'isbn',
-        'issn',
         'description',
         'cover_image',
         'published_year',
         'pages',
-        'language',
         'is_featured',
         'is_borrowable',
         'view_count',
-        'publisher_id',
     ];
 
     public function __construct(
@@ -56,7 +51,7 @@ class CatalogController extends Controller
             ->when($featured, fn ($q) => $q->featured())
             ->onlyAvailable($availability)
             ->select(self::BOOK_LIST_COLUMNS)
-            ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
+            ->with(['authors:id,name', 'categories:id,name,slug'])
             ->withCount([
                 'items',
                 'items as available_items_count' => fn ($query) => $query->available(),
@@ -88,11 +83,11 @@ class CatalogController extends Controller
             'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
             'books' => Inertia::defer(function () use ($booksQuery) {
                 $books = (clone $booksQuery)
-                    ->paginate(24)
+                    ->paginate(12)
                     ->withQueryString();
 
                 $paginated = $books->toArray();
-                $paginated['data'] = BookResource::collection($books->getCollection())->resolve();
+                $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
 
                 return $paginated;
             })->merge()->append('data'),

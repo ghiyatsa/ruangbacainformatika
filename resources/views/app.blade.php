@@ -16,7 +16,7 @@
             $metaOgImage = $pageMeta['ogImage'] ?? ($siteMeta['ogImage'] ?? route('og.site'));
             $metaOgImageType = $pageMeta['ogImageType'] ?? ($siteMeta['ogImageType'] ?? 'image/png');
             $metaOgImageWidth = $pageMeta['ogImageWidth'] ?? ($siteMeta['ogImageWidth'] ?? 1200);
-            $metaOgImageHeight = $pageMeta['ogImageHeight'] ?? ($siteMeta['ogImageHeight'] ?? 630);
+            $metaOgImageHeight = $pageMeta['ogImageHeight'] ?? ($siteMeta['ogImageHeight'] ?? 1200);
         @endphp
 
         <meta charset="utf-8">

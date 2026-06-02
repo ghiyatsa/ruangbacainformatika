@@ -83,17 +83,14 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
 
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between gap-3">
-                                <Label htmlFor="whatsapp">
-                                    Nomor WhatsApp
-                                </Label>
+                                <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
                                 {hasVerifiedWhatsapp && !isEditingWhatsapp ? (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        asChild
-                                    >
+                                    <Button variant="outline" size="sm" asChild>
                                         <Link
-                                            href={settings.profile.changeWhatsapp().url}
+                                            href={
+                                                settings.profile.changeWhatsapp()
+                                                    .url
+                                            }
                                             method="post"
                                             as="button"
                                         >

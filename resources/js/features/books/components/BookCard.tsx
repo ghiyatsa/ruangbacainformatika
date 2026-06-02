@@ -101,7 +101,12 @@ interface BookCardProps {
     loanRequestCart: LoanRequestCart | null;
 }
 
-function BookCard({ book, variant = 'grid', auth, loanRequestCart }: BookCardProps) {
+function BookCard({
+    book,
+    variant = 'grid',
+    auth,
+    loanRequestCart,
+}: BookCardProps) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const isCompact = variant === 'compact';
     const categories = Array.isArray(book.categories) ? book.categories : [];
@@ -318,9 +323,9 @@ function BookCard({ book, variant = 'grid', auth, loanRequestCart }: BookCardPro
                 />
 
                 <div className="min-h-[2.5rem]">
-                    <h3 className="line-clamp-2 text-sm leading-snug font-bold transition-colors group-hover:text-primary sm:text-sm">
+                    <p className="line-clamp-2 text-sm leading-snug font-bold transition-colors group-hover:text-primary sm:text-sm">
                         {book.title}
-                    </h3>
+                    </p>
                 </div>
 
                 <div

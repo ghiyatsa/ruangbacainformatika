@@ -162,6 +162,7 @@ class BookForm
                             ->image()
                             ->directory('books/covers')
                             ->disk('public')
+                            ->imagePreviewHeight('320')
                             ->saveUploadedFileUsing(
                                 fn (TemporaryUploadedFile $file, Get $get): string => app(BookCoverImageService::class)->storeFromUploadedFile($file, baseName: $get('slug') ?: $get('title')),
                             )
@@ -171,13 +172,8 @@ class BookForm
                                 }
                             })
                             ->imageEditor()
-                            ->imageEditorAspectRatioOptions([
-                                '3:4',
-                            ])
-                            ->imageAspectRatio('3:4')
-                            ->automaticallyCropImagesToAspectRatio()
                             ->maxSize(2048)
-                            ->helperText('Gunakan JPG, PNG, atau WEBP dengan ukuran maksimal 2 MB.')
+                            ->helperText('Gunakan JPG, PNG, atau WEBP maksimal 2 MB. Sampul akan disimpan utuh, tidak dipaksa ke rasio tertentu.')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                     ])
                     ->columns(1),

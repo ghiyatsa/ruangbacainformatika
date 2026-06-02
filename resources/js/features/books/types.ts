@@ -39,6 +39,7 @@ export interface BookData {
     isbn: string | null;
     issn: string | null;
     description: string;
+    shortDescription: string;
     coverImageUrl: string;
     authors: string[];
     categories: { name: string; slug: string }[];
@@ -60,4 +61,12 @@ export interface LoanRequestSummary {
     activeLoansCount: number;
     containsBook: boolean;
     hasActiveQr: boolean;
+}
+
+export interface BookShowProps {
+    book: {
+        data: BookData;
+    };
+    loanRequest?: LoanRequestSummary | null;
+    relatedBooks?: BookData[];
 }

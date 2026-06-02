@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\BookResource;
+use App\Http\Resources\BookCatalogResource;
 use App\Models\Book;
 use App\Services\CatalogService;
 use App\Support\PageMeta;
@@ -18,19 +18,14 @@ class HomeController extends Controller
     protected const BOOK_LIST_COLUMNS = [
         'id',
         'title',
-        'subtitle',
         'slug',
-        'isbn',
-        'issn',
         'description',
         'cover_image',
         'published_year',
         'pages',
-        'language',
         'is_featured',
         'is_borrowable',
         'view_count',
-        'publisher_id',
     ];
 
     public function __construct(
@@ -43,7 +38,7 @@ class HomeController extends Controller
         $books = Book::query()
             ->published()
             ->select(self::BOOK_LIST_COLUMNS)
-            ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
+            ->with(['authors:id,name', 'categories:id,name,slug'])
             ->withCount([
                 'items',
                 'items as available_items_count' => fn ($query) => $query->available(),
@@ -67,7 +62,7 @@ class HomeController extends Controller
             'popularBooks' => Inertia::defer(fn () => $this->popularBooks()),
             'books' => Inertia::defer(function () use ($books) {
                 $paginated = $books->toArray();
-                $paginated['data'] = BookResource::collection($books->getCollection())->resolve();
+                $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
 
                 return $paginated;
             }),
@@ -85,7 +80,7 @@ class HomeController extends Controller
             ->published()
             ->featured()
             ->select(self::BOOK_LIST_COLUMNS)
-            ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
+            ->with(['authors:id,name', 'categories:id,name,slug'])
             ->withCount([
                 'items',
                 'items as available_items_count' => fn ($query) => $query->available(),
@@ -93,7 +88,7 @@ class HomeController extends Controller
             ->limit(5)
             ->get();
 
-        return BookResource::collection($books)->resolve();
+        return BookCatalogResource::collection($books)->resolve();
     }
 
     /**
@@ -104,7 +99,7 @@ class HomeController extends Controller
         $books = Book::query()
             ->published()
             ->select(self::BOOK_LIST_COLUMNS)
-            ->with(['authors:id,name', 'categories:id,name', 'publisher:id,name'])
+            ->with(['authors:id,name', 'categories:id,name,slug'])
             ->withCount([
                 'items',
                 'items as available_items_count' => fn ($query) => $query->available(),
@@ -114,6 +109,6 @@ class HomeController extends Controller
             ->limit(6)
             ->get();
 
-        return BookResource::collection($books)->resolve();
+        return BookCatalogResource::collection($books)->resolve();
     }
 }

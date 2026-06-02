@@ -1,8 +1,11 @@
 <?php
 
+use App\Models\Author;
 use App\Models\Book;
 use App\Models\BookItem;
+use App\Models\Category;
 use App\Models\LoanDraft;
+use App\Models\Publisher;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
@@ -34,6 +37,42 @@ it('book detail page increments view count', function () {
     get(route('books.show', $book));
 
     expect($book->fresh()->view_count)->toBe(7);
+});
+
+it('book detail page loads related books as deferred props', function () {
+    $sharedAuthor = Author::factory()->create();
+    $sharedCategory = Category::factory()->create();
+    $publisher = Publisher::factory()->create();
+
+    $book = Book::factory()->published()->create([
+        'title' => 'Pemrograman Web Lanjut',
+        'publisher_id' => $publisher->id,
+        'published_year' => 2024,
+    ]);
+    $book->authors()->attach($sharedAuthor);
+    $book->categories()->attach($sharedCategory);
+
+    $relatedBook = Book::factory()->published()->create([
+        'title' => 'Pemrograman Web Praktis',
+        'publisher_id' => $publisher->id,
+        'published_year' => 2024,
+    ]);
+    $relatedBook->authors()->attach($sharedAuthor);
+    $relatedBook->categories()->attach($sharedCategory);
+
+    Book::factory()->published()->create([
+        'title' => 'Fisika Dasar',
+        'published_year' => 2018,
+    ]);
+
+    get(route('books.show', $book))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books/show')
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('relatedBooks')
+                ->where('relatedBooks.0.id', $relatedBook->id)
+            ));
 });
 
 it('book detail page shares loan request summary for authenticated users', function () {

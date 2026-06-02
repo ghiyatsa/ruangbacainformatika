@@ -20,6 +20,8 @@ class SimilarityApiService
 
     private const BULK_JOB_POLL_DELAY_US = 500000;
 
+    private const INDEXED_IDS_PAGE_SIZE = 500;
+
     private ?string $baseUrl = null;
 
     private ?string $secret = null;
@@ -312,6 +314,66 @@ class SimilarityApiService
         } catch (\Exception $e) {
             Log::error('Similarity API: bulk-upsert gagal', ['error' => $e->getMessage()]);
         }
+
+        return false;
+    }
+
+    /**
+     * @return array{ids: array<int, int>, total_indexed: int, next_offset: int|null}|null
+     */
+    public function indexedIds(int $limit = 500, int $offset = 0): ?array
+    {
+        try {
+            $response = $this->sendWithRetry(
+                fn (PendingRequest $request): Response => $request->get('/api/v1/sync/indexed-ids', [
+                    'limit' => $limit,
+                    'offset' => $offset,
+                ]),
+            );
+
+            if ($response->successful()) {
+                $ids = array_values(array_map(
+                    static fn (mixed $id): int => (int) $id,
+                    array_filter(
+                        $response->json('ids', []),
+                        static fn (mixed $id): bool => is_numeric($id),
+                    ),
+                ));
+
+                return [
+                    'ids' => $ids,
+                    'total_indexed' => (int) $response->json('total_indexed', count($ids)),
+                    'next_offset' => is_numeric($response->json('next_offset'))
+                        ? (int) $response->json('next_offset')
+                        : null,
+                ];
+            }
+
+            $this->logFailedResponse('indexed-ids', $response);
+        } catch (\Exception $e) {
+            Log::error('Similarity API: indexed-ids gagal', ['error' => $e->getMessage()]);
+        }
+
+        return null;
+    }
+
+    public function hasIndexedId(int $skripsiId): ?bool
+    {
+        $offset = 0;
+
+        do {
+            $page = $this->indexedIds(limit: self::INDEXED_IDS_PAGE_SIZE, offset: $offset);
+
+            if ($page === null) {
+                return null;
+            }
+
+            if (in_array($skripsiId, $page['ids'], true)) {
+                return true;
+            }
+
+            $offset = $page['next_offset'];
+        } while ($offset !== null);
 
         return false;
     }

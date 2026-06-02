@@ -2,18 +2,21 @@ import { router } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { ReactNode } from 'react';
 import type { PaginationData } from '@/types/pagination';
 
 interface MobileProgressivePaginationProps<T> {
     data?: PaginationData<T>;
     propKey: string;
     resourceLabel: string;
+    loadingFallback?: ReactNode;
 }
 
 export function MobileProgressivePagination<T>({
     data,
     propKey,
     resourceLabel,
+    loadingFallback,
 }: MobileProgressivePaginationProps<T>) {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isAutoLoadEnabled, setIsAutoLoadEnabled] = useState(false);
@@ -79,7 +82,7 @@ export function MobileProgressivePagination<T>({
         return null;
     }
 
-    const loadingSkeleton = (
+    const loadingSkeleton = loadingFallback ?? (
         <div className="w-full space-y-2" aria-hidden="true">
             <Skeleton className="h-10 w-full rounded-xl" />
             <div className="grid grid-cols-3 gap-2">
@@ -127,7 +130,9 @@ export function MobileProgressivePagination<T>({
                         </Button>
                     )}
 
-                    {!isAutoLoadEnabled && isLoadingMore ? loadingSkeleton : null}
+                    {!isAutoLoadEnabled && isLoadingMore
+                        ? loadingSkeleton
+                        : null}
                 </div>
             ) : (
                 <div className="rounded-2xl border border-dashed bg-muted/20 px-4 py-4 text-center text-sm text-muted-foreground">

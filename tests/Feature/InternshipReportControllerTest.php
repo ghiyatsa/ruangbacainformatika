@@ -69,6 +69,42 @@ it('internship report detail page returns 404 for unknown nim', function () {
         ->assertNotFound();
 });
 
+it('internship report detail page loads related reports as deferred props', function () {
+    $report = InternshipReport::factory()->create([
+        'title' => 'Monitoring Server Berbasis Web',
+        'author_name' => 'Dewi Lestari',
+        'student_id' => '2301701001',
+        'year' => 2025,
+        'abstract' => 'Laporan ini membahas monitoring server berbasis web.',
+        'keywords' => 'monitoring, server, web',
+    ]);
+
+    $relatedReport = InternshipReport::factory()->create([
+        'title' => 'Dashboard Monitoring Server',
+        'author_name' => 'Rina Sari',
+        'student_id' => '2301701002',
+        'year' => 2025,
+        'abstract' => 'Fokus laporan pada dashboard monitoring server.',
+        'keywords' => 'monitoring, server, dashboard',
+    ]);
+
+    InternshipReport::factory()->create([
+        'title' => 'Audit Infrastruktur Jaringan',
+        'student_id' => '2301701003',
+        'year' => 2019,
+        'keywords' => 'jaringan, audit, topologi',
+    ]);
+
+    get(route('internship-reports.show', ['internshipReport' => $report->student_id]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('internship-report/show')
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('relatedReports')
+                ->where('relatedReports.0.id', $relatedReport->id)
+            ));
+});
+
 it('internship report catalog page returns the requested pagination page', function () {
     foreach (range(1, 21) as $number) {
         InternshipReport::factory()->create([

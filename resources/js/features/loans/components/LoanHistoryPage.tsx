@@ -230,7 +230,9 @@ function LoanHistoryMobileCard({
                             <dt className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                                 Dipinjam
                             </dt>
-                            <dd className="text-foreground">{loan.borrowedAt}</dd>
+                            <dd className="text-foreground">
+                                {loan.borrowedAt}
+                            </dd>
                         </div>
                         <div className="space-y-1 rounded-xl border border-border/50 p-3">
                             <dt className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
@@ -251,7 +253,9 @@ function LoanHistoryMobileCard({
                             <dt className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                                 Dikembalikan
                             </dt>
-                            <dd className="text-foreground">{loan.returnedAt}</dd>
+                            <dd className="text-foreground">
+                                {loan.returnedAt}
+                            </dd>
                         </div>
                     </dl>
                 </div>
@@ -517,8 +521,7 @@ export default function LoanHistoryPage({
             ? {
                   key: 'search',
                   label: `"${filters.search}"`,
-                  onRemove: () =>
-                      applyHistoryFilters(filters.filter, ''),
+                  onRemove: () => applyHistoryFilters(filters.filter, ''),
               }
             : null,
     ].filter((chip): chip is NonNullable<typeof chip> => chip !== null);
@@ -710,19 +713,23 @@ export default function LoanHistoryPage({
 
                                         {activeFilterChips.length > 0 ? (
                                             <div className="flex flex-wrap gap-2">
-                                                {activeFilterChips.map((chip) => (
-                                                    <Button
-                                                        key={chip.key}
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="h-8 gap-1 rounded-full px-3 text-xs"
-                                                        onClick={chip.onRemove}
-                                                    >
-                                                        {chip.label}
-                                                        <X className="size-3.5" />
-                                                    </Button>
-                                                ))}
+                                                {activeFilterChips.map(
+                                                    (chip) => (
+                                                        <Button
+                                                            key={chip.key}
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 gap-1 rounded-full px-3 text-xs"
+                                                            onClick={
+                                                                chip.onRemove
+                                                            }
+                                                        >
+                                                            {chip.label}
+                                                            <X className="size-3.5" />
+                                                        </Button>
+                                                    ),
+                                                )}
                                             </div>
                                         ) : null}
 
@@ -762,18 +769,23 @@ export default function LoanHistoryPage({
                                                     variant="destructive"
                                                     className="w-fit"
                                                 >
-                                                    {groupedLoans.overdue.length}{' '}
+                                                    {
+                                                        groupedLoans.overdue
+                                                            .length
+                                                    }{' '}
                                                     buku
                                                 </Badge>
                                             </div>
 
-                                            {renderLoanCollection(groupedLoans.overdue)}
+                                            {renderLoanCollection(
+                                                groupedLoans.overdue,
+                                            )}
                                         </section>
                                     ) : null}
 
                                     {groupedLoans.active.length > 0 ? (
                                         <section className="space-y-3">
-                                            <div className="flex flex-col gap-2 rounded-2xl border border-blue-200/60 bg-blue-50/60 p-4 dark:border-blue-900/60 dark:bg-blue-950/20 sm:flex-row sm:items-center sm:justify-between">
+                                            <div className="flex flex-col gap-2 rounded-2xl border border-blue-200/60 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/20">
                                                 <div className="space-y-1">
                                                     <h3 className="text-sm font-semibold text-foreground">
                                                         Masih dipinjam
@@ -792,7 +804,9 @@ export default function LoanHistoryPage({
                                                 </Badge>
                                             </div>
 
-                                            {renderLoanCollection(groupedLoans.active)}
+                                            {renderLoanCollection(
+                                                groupedLoans.active,
+                                            )}
                                         </section>
                                     ) : null}
 
@@ -822,7 +836,10 @@ export default function LoanHistoryPage({
                                                         variant="outline"
                                                         className="w-fit"
                                                     >
-                                                        {groupedLoans.returned.length}{' '}
+                                                        {
+                                                            groupedLoans
+                                                                .returned.length
+                                                        }{' '}
                                                         buku
                                                     </Badge>
                                                     <CollapsibleTrigger asChild>
@@ -832,19 +849,23 @@ export default function LoanHistoryPage({
                                                             size="sm"
                                                             className="gap-2"
                                                         >
-                                                            {(filters.filter ===
-                                                            'returned'
-                                                                ? true
-                                                                : showReturnedLoans)
+                                                            {(
+                                                                filters.filter ===
+                                                                'returned'
+                                                                    ? true
+                                                                    : showReturnedLoans
+                                                            )
                                                                 ? 'Tutup'
                                                                 : 'Buka'}
                                                             <ChevronDown
                                                                 className={cn(
                                                                     'size-4 transition-transform',
-                                                                    (filters.filter ===
-                                                                    'returned'
-                                                                        ? true
-                                                                        : showReturnedLoans)
+                                                                    (
+                                                                        filters.filter ===
+                                                                        'returned'
+                                                                            ? true
+                                                                            : showReturnedLoans
+                                                                    )
                                                                         ? 'rotate-180'
                                                                         : '',
                                                                 )}
@@ -855,7 +876,9 @@ export default function LoanHistoryPage({
                                             </div>
 
                                             <CollapsibleContent className="border-t border-border/60 p-4 pt-4">
-                                                {renderLoanCollection(groupedLoans.returned)}
+                                                {renderLoanCollection(
+                                                    groupedLoans.returned,
+                                                )}
                                             </CollapsibleContent>
                                         </Collapsible>
                                     ) : null}
@@ -961,7 +984,7 @@ export default function LoanHistoryPage({
 
                                     {returnDraft.qrCodeSvg ? (
                                         <div className="space-y-4">
-                                            <div className="mx-auto w-max rounded-3xl border border-border/50 bg-white p-4 shadow-sm dark:bg-card text-primary dark:text-white">
+                                            <div className="mx-auto w-max rounded-3xl border border-border/50 bg-white p-4 text-primary shadow-sm dark:bg-card dark:text-white">
                                                 <div
                                                     className="flex justify-center [&_svg]:mx-auto"
                                                     dangerouslySetInnerHTML={{
@@ -1048,5 +1071,3 @@ export default function LoanHistoryPage({
         </>
     );
 }
-
-

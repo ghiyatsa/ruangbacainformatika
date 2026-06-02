@@ -14,10 +14,10 @@ export function FooterLinks() {
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
             >
-                <h4 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
+                <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
                     <BookOpen className="size-3.5 text-primary" />
                     Koleksi
-                </h4>
+                </p>
                 <ul className="flex flex-col gap-2.5">
                     {KOLEKSI_LINKS.map(({ label, href, icon: Icon }) => (
                         <li key={label}>
@@ -41,10 +41,10 @@ export function FooterLinks() {
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
             >
-                <h4 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
+                <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
                     <FileCheck className="size-3.5 text-primary" />
                     Informasi
-                </h4>
+                </p>
                 <ul className="flex flex-col gap-2.5">
                     {LEGAL_LINKS.map(({ label, href, icon: Icon }) => (
                         <li key={label}>

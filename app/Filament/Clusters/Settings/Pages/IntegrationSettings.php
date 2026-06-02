@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
+use App\Jobs\ReconcileSimilarityIndexStatuses;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
 use App\Services\SimilarityFullSyncDispatcher;
@@ -178,10 +179,14 @@ class IntegrationSettings extends Page
                             ->color('warning')
                             ->requiresConfirmation()
                             ->modalHeading('Sinkronkan Ulang Semua Skripsi')
-                            ->modalDescription('Gunakan setelah bobot similarity berubah agar seluruh embedding similarity di-reset dan dibangun ulang.')
+                            ->modalDescription('Gunakan setelah bobot similarity berubah agar seluruh embedding similarity di-reset dan dibangun ulang. Proses akan lanjut di background dan notifikasi Filament dikirim saat selesai.')
                             ->modalSubmitActionLabel('Mulai Sinkron Ulang')
                             ->action(function (): void {
-                                $result = app(SimilarityFullSyncDispatcher::class)->dispatch(forceSync: true);
+                                $result = app(SimilarityFullSyncDispatcher::class)->dispatch(
+                                    chunk: 10,
+                                    forceSync: false,
+                                    initiatedByUserId: auth()->id(),
+                                );
 
                                 try {
                                     app(ActivityLogService::class)->log(
@@ -196,14 +201,44 @@ class IntegrationSettings extends Page
                                 Notification::make()
                                     ->{$result['success'] ? 'success' : 'danger'}()
                                     ->title($result['success']
-                                        ? ($result['mode'] === 'sync' ? 'Sinkron penuh selesai' : 'Sinkron penuh dijadwalkan')
+                                        ? ($result['mode'] === 'sync' ? 'Sinkron penuh selesai' : 'Sinkron penuh dimulai')
                                         : 'Sinkron penuh gagal')
                                     ->body($result['success']
                                         ? ($result['mode'] === 'sync'
                                             ? 'Seluruh skripsi sudah diproses dan embedding similarity sudah dibangun ulang.'
-                                            : 'Pastikan worker queue tetap aktif sampai proses selesai.')
+                                            : 'Proses berjalan di background. Pastikan worker queue tetap aktif. Notifikasi Filament akan dikirim saat selesai.')
                                         : ($result['error_message'] ?? 'Periksa koneksi Similarity API, lalu coba lagi.'))
                                     ->persistent($result['mode'] === 'queued')
+                                    ->send();
+                            }),
+                        Action::make('reconcileSimilarityIndex')
+                            ->label('Samakan Status dari Index API')
+                            ->icon(Heroicon::OutlinedCheckBadge)
+                            ->color('gray')
+                            ->requiresConfirmation()
+                            ->modalHeading('Samakan Status Similarity dari Index API')
+                            ->modalDescription('Gunakan jika dashboard similarity tertinggal dari index API. Proses akan mencocokkan status berdasarkan skripsi_id dan berjalan di background.')
+                            ->modalSubmitActionLabel('Mulai Rekonsiliasi')
+                            ->action(function (): void {
+                                ReconcileSimilarityIndexStatuses::dispatch(
+                                    initiatedByUserId: auth()->id(),
+                                );
+
+                                try {
+                                    app(ActivityLogService::class)->log(
+                                        'integration.skripsi_reconcile.triggered',
+                                        'Rekonsiliasi status similarity dipicu',
+                                        'Integrasi',
+                                        ['page_size' => 500],
+                                    );
+                                } catch (Throwable) {
+                                }
+
+                                Notification::make()
+                                    ->success()
+                                    ->title('Rekonsiliasi similarity dimulai')
+                                    ->body('Proses berjalan di background. Notifikasi Filament akan dikirim saat selesai.')
+                                    ->persistent()
                                     ->send();
                             }),
                         Action::make('save')

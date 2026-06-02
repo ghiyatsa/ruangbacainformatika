@@ -15,6 +15,7 @@ export interface SkripsiShowProps {
     skripsi: {
         data: SkripsiData;
     };
+    relatedSkripsis?: SkripsiData[];
 }
 
 export interface SkripsiFilters {

@@ -15,6 +15,7 @@ export interface InternshipReportShowProps {
     report: {
         data: InternshipReportData;
     };
+    relatedReports?: InternshipReportData[];
 }
 
 export interface InternshipReportFilters {

@@ -258,10 +258,10 @@ export function NotificationsDropdown({
     const contentBody = (
         <>
             <div
-                className={`max-h-96 overflow-y-auto ${open ? 'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-top-1 motion-safe:duration-200' : ''}`}
+                className={`max-h-96 overflow-y-auto ${open ? 'motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in-0 motion-safe:slide-in-from-top-1' : ''}`}
             >
                 {isLoading ? (
-                    <div className="space-y-3 px-4 py-4 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-150">
+                    <div className="space-y-3 px-4 py-4 motion-safe:animate-in motion-safe:duration-150 motion-safe:fade-in-0">
                         {[0, 1, 2].map((item) => (
                             <div
                                 key={item}
@@ -274,7 +274,7 @@ export function NotificationsDropdown({
                         ))}
                     </div>
                 ) : notifications.length === 0 ? (
-                    <div className="px-4 py-8 text-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95 motion-safe:duration-200">
+                    <div className="px-4 py-8 text-center motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in-0 motion-safe:zoom-in-95">
                         <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-primary/8 text-primary">
                             <Bell className="size-5" />
                         </div>
@@ -360,9 +360,7 @@ export function NotificationsDropdown({
     if (isMobile) {
         return (
             <Dialog open={open} onOpenChange={handleOpenChange}>
-                <DialogTrigger asChild>
-                    {trigger}
-                </DialogTrigger>
+                <DialogTrigger asChild>{trigger}</DialogTrigger>
 
                 <DialogContent
                     className="w-[min(92vw,22rem)] max-w-[min(92vw,22rem)] gap-0 overflow-hidden p-0"
@@ -377,9 +375,7 @@ export function NotificationsDropdown({
 
     return (
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-            <DropdownMenuTrigger asChild>
-                {trigger}
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="w-80 min-w-80 p-0">
                 {desktopHeader}

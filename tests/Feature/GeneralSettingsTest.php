@@ -150,7 +150,7 @@ it('public pages use the stored site metadata and icon links', function () {
                 ->where('site.ogImage', route('og.site'))
                 ->where('site.ogImageType', 'image/png')
                 ->where('site.ogImageWidth', 1200)
-                ->where('site.ogImageHeight', 600)
+                ->where('site.ogImageHeight', 1200)
                 ->where('site.icons.favicon', url('/storage/site-assets/custom-favicon.png'))
                 ->where('site.icons.faviconSvg', url('/storage/site-assets/custom-favicon.svg'))
                 ->where('site.icons.appleTouchIcon', url('/storage/site-assets/custom-apple-touch.png')),

@@ -76,7 +76,11 @@ export default function GoogleOneTapPrompt({
         let cancelled = false;
 
         const initializePrompt = () => {
-            if (cancelled || initializedRef.current || !window.google?.accounts?.id) {
+            if (
+                cancelled ||
+                initializedRef.current ||
+                !window.google?.accounts?.id
+            ) {
                 return;
             }
 

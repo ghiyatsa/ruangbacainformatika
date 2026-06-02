@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ThesisResource;
 use App\Models\Thesis;
+use App\Services\RelatedCatalogService;
 use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +13,7 @@ use Inertia\Response;
 class ThesisController extends Controller
 {
     public function __construct(
+        protected RelatedCatalogService $relatedCatalogService,
         protected PageMeta $pageMeta,
     ) {}
 
@@ -58,6 +60,10 @@ class ThesisController extends Controller
 
         return Inertia::render('thesis/show', [
             'thesis' => new ThesisResource($thesis->fresh()),
+            'relatedTheses' => Inertia::defer(
+                fn () => ThesisResource::collection($this->relatedCatalogService->forThesis($thesis))->resolve(),
+                rescue: true,
+            ),
         ])->withViewData([
             'meta' => $this->pageMeta->forAcademicDocument(
                 title: $thesis->title,

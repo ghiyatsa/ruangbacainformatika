@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\InternshipReportResource;
 use App\Models\InternshipReport;
+use App\Services\RelatedCatalogService;
 use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +13,7 @@ use Inertia\Response;
 class InternshipReportController extends Controller
 {
     public function __construct(
+        protected RelatedCatalogService $relatedCatalogService,
         protected PageMeta $pageMeta,
     ) {}
 
@@ -58,6 +60,10 @@ class InternshipReportController extends Controller
 
         return Inertia::render('internship-report/show', [
             'report' => new InternshipReportResource($internshipReport->fresh()),
+            'relatedReports' => Inertia::defer(
+                fn () => InternshipReportResource::collection($this->relatedCatalogService->forInternshipReport($internshipReport))->resolve(),
+                rescue: true,
+            ),
         ])->withViewData([
             'meta' => $this->pageMeta->forAcademicDocument(
                 title: $internshipReport->title,

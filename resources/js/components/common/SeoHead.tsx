@@ -63,7 +63,7 @@ export function SeoHead({
     const metaImageHeight = String(page.props.site.ogImageHeight);
     const metaKeywords = Array.isArray(keywords)
         ? keywords.filter(Boolean).join(', ')
-        : keywords ?? page.props.site.keywords;
+        : (keywords ?? page.props.site.keywords);
 
     return (
         <Head title={title}>

@@ -270,7 +270,7 @@ export default function FeaturedSpotlight({
 
             {count > 1 && (
                 <div className="flex items-center justify-between border-t border-primary/10 px-5 py-3 sm:px-8">
-                    <div className="text-xs font-medium tabular-nums text-muted-foreground">
+                    <div className="text-xs font-medium text-muted-foreground tabular-nums">
                         {currentIndex + 1}/{count}
                     </div>
                     <div className="flex items-center gap-1">

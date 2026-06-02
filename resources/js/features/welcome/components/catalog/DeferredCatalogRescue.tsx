@@ -35,9 +35,7 @@ export default function DeferredCatalogRescue({
                 disabled={reloading}
                 onClick={() => router.reload({ only: [dataKey] })}
             >
-                <RefreshCw
-                    className={reloading ? 'animate-spin' : undefined}
-                />
+                <RefreshCw className={reloading ? 'animate-spin' : undefined} />
                 {reloading ? 'Memuat ulang...' : 'Coba lagi'}
             </Button>
         </div>

@@ -11,6 +11,11 @@ use function Pest\Laravel\get;
 
 function assertPngOpenGraphResponse(TestResponse $response): void
 {
+    assertPngOpenGraphResponseWithSize($response, OpenGraphImage::DETAIL_WIDTH, OpenGraphImage::DETAIL_HEIGHT);
+}
+
+function assertPngOpenGraphResponseWithSize(TestResponse $response, int $expectedWidth, int $expectedHeight): void
+{
     $response->assertOk()
         ->assertHeader('Content-Type', OpenGraphImage::MIME_TYPE);
 
@@ -21,8 +26,8 @@ function assertPngOpenGraphResponse(TestResponse $response): void
     $image = imagecreatefromstring($binary);
 
     expect($image)->toBeInstanceOf(GdImage::class)
-        ->and(imagesx($image))->toBe(OpenGraphImage::WIDTH)
-        ->and(imagesy($image))->toBe(OpenGraphImage::HEIGHT);
+        ->and(imagesx($image))->toBe($expectedWidth)
+        ->and(imagesy($image))->toBe($expectedHeight);
 
     imagedestroy($image);
 }
@@ -37,7 +42,7 @@ it('renders the site open graph image with the configured logo-driven identity',
         ['value' => 'Portal koleksi dan layanan digital'],
     );
 
-    assertPngOpenGraphResponse(get(route('og.site')));
+    assertPngOpenGraphResponseWithSize(get(route('og.site')), OpenGraphImage::SITE_WIDTH, OpenGraphImage::SITE_HEIGHT);
 });
 
 it('renders a catalog detail open graph image with title author and logo', function () {

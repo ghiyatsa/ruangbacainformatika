@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
+use Carbon\CarbonInterface;
 
 class SimilaritySyncStatusService
 {
@@ -88,9 +89,7 @@ class SimilaritySyncStatusService
     {
         $timestamp = now();
 
-        SimilaritySyncStatus::query()
-            ->whereDoesntHave('skripsi')
-            ->delete();
+        $this->deleteOrphanStatuses();
 
         SimilaritySyncStatus::query()
             ->forExistingSkripsi()
@@ -123,5 +122,95 @@ class SimilaritySyncStatusService
                     ['status', 'last_operation', 'last_synced_at', 'last_error', 'updated_at'],
                 );
             });
+    }
+
+    public function deleteOrphanStatuses(): void
+    {
+        SimilaritySyncStatus::query()
+            ->whereDoesntHave('skripsi')
+            ->delete();
+    }
+
+    /**
+     * @param  array<int, int>  $skripsiIds
+     */
+    public function markIndexedIdsAsSynced(array $skripsiIds, CarbonInterface $syncedAt): void
+    {
+        if ($skripsiIds === []) {
+            return;
+        }
+
+        SimilaritySyncStatus::query()
+            ->whereIn('source_skripsi_id', $skripsiIds)
+            ->update([
+                'status' => SimilaritySyncStatus::STATUS_SYNCED,
+                'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+                'last_synced_at' => $syncedAt,
+                'last_error' => null,
+                'updated_at' => $syncedAt,
+            ]);
+
+        $rows = collect($skripsiIds)
+            ->map(fn (int $skripsiId): array => [
+                'source_skripsi_id' => $skripsiId,
+                'status' => SimilaritySyncStatus::STATUS_SYNCED,
+                'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+                'attempts' => 0,
+                'last_attempt_at' => null,
+                'last_synced_at' => $syncedAt,
+                'last_error' => null,
+                'created_at' => $syncedAt,
+                'updated_at' => $syncedAt,
+            ])
+            ->all();
+
+        SimilaritySyncStatus::query()->upsert(
+            $rows,
+            ['source_skripsi_id'],
+            ['status', 'last_operation', 'last_synced_at', 'last_error', 'updated_at'],
+        );
+    }
+
+    /**
+     * @param  array<int, int>  $skripsiIds
+     */
+    public function markIdsMissingFromIndex(array $skripsiIds, string $errorMessage, CarbonInterface $timestamp): void
+    {
+        if ($skripsiIds === []) {
+            return;
+        }
+
+        $errorMessage = mb_substr($errorMessage, 0, 2000);
+
+        SimilaritySyncStatus::query()
+            ->whereIn('source_skripsi_id', $skripsiIds)
+            ->update([
+                'status' => SimilaritySyncStatus::STATUS_FAILED,
+                'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+                'last_attempt_at' => $timestamp,
+                'last_synced_at' => null,
+                'last_error' => $errorMessage,
+                'updated_at' => $timestamp,
+            ]);
+
+        $rows = collect($skripsiIds)
+            ->map(fn (int $skripsiId): array => [
+                'source_skripsi_id' => $skripsiId,
+                'status' => SimilaritySyncStatus::STATUS_FAILED,
+                'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+                'attempts' => 0,
+                'last_attempt_at' => $timestamp,
+                'last_synced_at' => null,
+                'last_error' => $errorMessage,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ])
+            ->all();
+
+        SimilaritySyncStatus::query()->upsert(
+            $rows,
+            ['source_skripsi_id'],
+            ['status', 'last_operation', 'last_attempt_at', 'last_synced_at', 'last_error', 'updated_at'],
+        );
     }
 }

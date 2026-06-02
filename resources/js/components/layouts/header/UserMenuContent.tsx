@@ -75,24 +75,15 @@ export function UserMenuContent({ user }: Props) {
                         updateAppearance(value as 'light' | 'dark' | 'system')
                     }
                 >
-                    <DropdownMenuRadioItem
-                        value="light"
-                        className="px-2 py-2"
-                    >
+                    <DropdownMenuRadioItem value="light" className="px-2 py-2">
                         <Sun className="mr-2 h-4 w-4" />
                         Light
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                        value="dark"
-                        className="px-2 py-2"
-                    >
+                    <DropdownMenuRadioItem value="dark" className="px-2 py-2">
                         <Moon className="mr-2 h-4 w-4" />
                         Dark
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                        value="system"
-                        className="px-2 py-2"
-                    >
+                    <DropdownMenuRadioItem value="system" className="px-2 py-2">
                         <Laptop className="mr-2 h-4 w-4" />
                         System
                     </DropdownMenuRadioItem>

@@ -1,3 +1,4 @@
+import { Deferred } from '@inertiajs/react';
 import {
     Bookmark,
     BookMarked,
@@ -10,12 +11,16 @@ import {
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
+import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
+import { RelatedCatalogSectionSkeleton } from '@/components/resource/RelatedCatalogSectionSkeleton';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import InternshipReportCard from '@/features/internship-report/components/InternshipReportCard';
+import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import internshipReportsRoute from '@/routes/internship-reports';
@@ -72,8 +77,8 @@ export default function InternshipReportDetailPage(
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
 
-                    <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-12 sm:pt-40 lg:px-8">
-                        <div className="mb-8">
+                    <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-12 sm:pt-30 lg:px-8">
+                        <div className="mb-6">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -229,6 +234,36 @@ export default function InternshipReportDetailPage(
                         catalogTitle={report.title}
                     />
                 </div>
+            }
+            footer={
+                <Deferred
+                    data="relatedReports"
+                    fallback={<RelatedCatalogSectionSkeleton />}
+                    rescue={({ reloading }) => (
+                        <DeferredCatalogRescue
+                            dataKey="relatedReports"
+                            title="Daftar laporan lain belum sempat dimuat"
+                            description="Muat lagi sebentar untuk melihat beberapa laporan KP yang masih dekat dengan topik ini."
+                            reloading={reloading}
+                        />
+                    )}
+                >
+                    {props.relatedReports && props.relatedReports.length > 0 ? (
+                        <RelatedCatalogSection
+                            title="Laporan lain yang bisa kamu lihat"
+                            description="Kalau bahasannya terasa nyambung, beberapa laporan KP ini bisa kamu lanjut buka dari sini."
+                        >
+                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                {props.relatedReports.map((relatedReport) => (
+                                    <InternshipReportCard
+                                        key={relatedReport.id}
+                                        report={relatedReport}
+                                    />
+                                ))}
+                            </div>
+                        </RelatedCatalogSection>
+                    ) : null}
+                </Deferred>
             }
         >
             <section>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\SkripsiResource;
 use App\Models\Skripsi;
+use App\Services\RelatedCatalogService;
 use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +13,7 @@ use Inertia\Response;
 class SkripsiController extends Controller
 {
     public function __construct(
+        protected RelatedCatalogService $relatedCatalogService,
         protected PageMeta $pageMeta,
     ) {}
 
@@ -58,6 +60,10 @@ class SkripsiController extends Controller
 
         return Inertia::render('skripsi/show', [
             'skripsi' => new SkripsiResource($skripsi->fresh()),
+            'relatedSkripsis' => Inertia::defer(
+                fn () => SkripsiResource::collection($this->relatedCatalogService->forSkripsi($skripsi))->resolve(),
+                rescue: true,
+            ),
         ])->withViewData([
             'meta' => $this->pageMeta->forAcademicDocument(
                 title: $skripsi->title,

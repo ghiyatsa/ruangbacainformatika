@@ -40,7 +40,7 @@ class BookCoverImageService
         Storage::disk($disk)->makeDirectory(trim($directory, '/'));
 
         Image::load($sourcePath)
-            ->fit(Fit::Crop, 600, 800)
+            ->fit(Fit::Max, 1200, 1600)
             ->save($targetPath);
 
         return $relativePath;

@@ -15,6 +15,7 @@ export interface ThesisShowProps {
     thesis: {
         data: ThesisData;
     };
+    relatedTheses?: ThesisData[];
 }
 
 export interface ThesisFilters {

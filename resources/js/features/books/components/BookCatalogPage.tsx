@@ -17,8 +17,8 @@ export default function BookCatalogPage({
 }: BookCatalogPageProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const activeCategoryLabel =
-        categories.find((category) => category.slug === filters.category)?.name ??
-        undefined;
+        categories.find((category) => category.slug === filters.category)
+            ?.name ?? undefined;
 
     function clearAllFilters(): void {
         router.get(
@@ -100,6 +100,25 @@ export default function BookCatalogPage({
                 data={books}
                 propKey="books"
                 resourceLabel="judul buku"
+                loadingFallback={
+                    <div
+                        className={
+                            viewMode === 'list'
+                                ? 'grid w-full grid-cols-1 gap-3'
+                                : 'grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6'
+                        }
+                        aria-hidden="true"
+                    >
+                        {Array.from({ length: 4 }).map((_, index) => (
+                            <BookCardSkeleton
+                                key={`load-more-${index}`}
+                                variant={
+                                    viewMode === 'list' ? 'compact' : 'grid'
+                                }
+                            />
+                        ))}
+                    </div>
+                }
             />
         </CatalogPage>
     );

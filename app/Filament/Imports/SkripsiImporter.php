@@ -3,9 +3,11 @@
 namespace App\Filament\Imports;
 
 use App\Models\Skripsi;
+use App\Services\SimilaritySyncStatusService;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Number;
 
 class SkripsiImporter extends Importer
@@ -44,6 +46,34 @@ class SkripsiImporter extends Importer
         return Skripsi::firstOrNew([
             'student_id' => $this->data['student_id'],
         ]);
+    }
+
+    public function saveRecord(): void
+    {
+        Skripsi::withoutEvents(fn (): mixed => parent::saveRecord());
+    }
+
+    protected function afterSave(): void
+    {
+        /** @var Skripsi $skripsi */
+        $skripsi = $this->record;
+
+        app(SimilaritySyncStatusService::class)->markQueued($skripsi);
+
+        $cacheKey = static::importedIdsCacheKey($this->getImport()->getKey());
+        $existingIds = collect(Cache::get($cacheKey, []))
+            ->map(fn (mixed $id): int => (int) $id)
+            ->push($skripsi->getKey())
+            ->unique()
+            ->values()
+            ->all();
+
+        Cache::put($cacheKey, $existingIds, now()->addDay());
+    }
+
+    public static function importedIdsCacheKey(int $importId): string
+    {
+        return "skripsi-import:{$importId}:similarity-ids";
     }
 
     public static function getCompletedNotificationBody(Import $import): string

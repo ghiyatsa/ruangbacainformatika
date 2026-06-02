@@ -1,3 +1,4 @@
+import { Deferred } from '@inertiajs/react';
 import {
     Bookmark,
     BookMarked,
@@ -10,12 +11,16 @@ import {
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
+import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
+import { RelatedCatalogSectionSkeleton } from '@/components/resource/RelatedCatalogSectionSkeleton';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import SkripsiCard from '@/features/skripsi/components/SkripsiCard';
+import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
 import { cn } from '@/lib/utils';
 import skripsiRoute from '@/routes/skripsi';
@@ -72,8 +77,8 @@ export default function SkripsiDetailPage(
                 <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
 
-                    <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-12 sm:pt-40 lg:px-8">
-                        <div className="mb-8">
+                    <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-12 sm:pt-30 lg:px-8">
+                        <div className="mb-6">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -229,6 +234,37 @@ export default function SkripsiDetailPage(
                         catalogTitle={skripsi.title}
                     />
                 </div>
+            }
+            footer={
+                <Deferred
+                    data="relatedSkripsis"
+                    fallback={<RelatedCatalogSectionSkeleton />}
+                    rescue={({ reloading }) => (
+                        <DeferredCatalogRescue
+                            dataKey="relatedSkripsis"
+                            title="Daftar skripsi lain belum sempat dimuat"
+                            description="Muat lagi sebentar untuk melihat beberapa skripsi yang bahasannya masih dekat dengan halaman ini."
+                            reloading={reloading}
+                        />
+                    )}
+                >
+                    {props.relatedSkripsis &&
+                    props.relatedSkripsis.length > 0 ? (
+                        <RelatedCatalogSection
+                            title="Masih satu bahasan"
+                            description="Kalau kamu lagi menelusuri topik yang mirip, beberapa skripsi ini bisa jadi lanjutan yang enak dibuka."
+                        >
+                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                {props.relatedSkripsis.map((relatedSkripsi) => (
+                                    <SkripsiCard
+                                        key={relatedSkripsi.id}
+                                        skripsi={relatedSkripsi}
+                                    />
+                                ))}
+                            </div>
+                        </RelatedCatalogSection>
+                    ) : null}
+                </Deferred>
             }
         >
             <section>

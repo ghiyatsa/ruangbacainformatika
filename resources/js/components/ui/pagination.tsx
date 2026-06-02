@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
@@ -47,17 +47,35 @@ function PaginationLink({
   size = "icon",
   ...props
 }: PaginationLinkProps) {
+  const classes = cn(
+    buttonVariants({ variant: isActive ? "outline" : "ghost", size }),
+    disabled && "pointer-events-none opacity-50",
+    className
+  )
+
+  if (disabled) {
+    return (
+      <span
+        role="link"
+        aria-disabled="true"
+        data-slot="pagination-link"
+        data-active={isActive}
+        className={classes}
+        {...props}
+      />
+    )
+  }
+
   return (
     <Button
       asChild
       variant={isActive ? "outline" : "ghost"}
       size={size}
-      className={cn(disabled && "pointer-events-none opacity-50", className)}
+      className={className}
     >
       <a
-        href={disabled ? undefined : href}
+        href={href}
         aria-current={isActive ? "page" : undefined}
-        aria-disabled={disabled || undefined}
         data-slot="pagination-link"
         data-active={isActive}
         {...props}

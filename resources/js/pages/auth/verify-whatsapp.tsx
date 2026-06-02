@@ -104,7 +104,11 @@ export default function VerifyWhatsApp() {
                                                 name="whatsapp"
                                                 type="tel"
                                                 value={whatsappVal}
-                                                onChange={(e) => setWhatsappVal(e.target.value)}
+                                                onChange={(e) =>
+                                                    setWhatsappVal(
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 autoComplete="tel"
                                                 inputMode="tel"
                                                 placeholder="08123456789"
@@ -125,7 +129,7 @@ export default function VerifyWhatsApp() {
                                                     whatsappVal ===
                                                         auth.user?.whatsapp)
                                             }
-                                            className="shrink-0 min-w-[110px] tabular-nums"
+                                            className="min-w-[110px] shrink-0 tabular-nums"
                                         >
                                             {processing ? (
                                                 <Spinner />
@@ -133,7 +137,9 @@ export default function VerifyWhatsApp() {
                                                 <Clock3 className="size-4" />
                                             ) : null}
                                             {resendAvailableIn > 0
-                                                ? formatRemaining(resendAvailableIn)
+                                                ? formatRemaining(
+                                                      resendAvailableIn,
+                                                  )
                                                 : hasWhatsapp &&
                                                     verification.hasActiveChallenge
                                                   ? 'Kirim Ulang'
