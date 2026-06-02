@@ -24,9 +24,54 @@ export default defineConfig(({ command }) => ({
                             priority: 25,
                         },
                         {
-                            name: 'ui-vendor',
-                            test: /node_modules[\\/](?:radix-ui|motion|lucide-react|class-variance-authority|clsx|tailwind-merge|cmdk|sonner)/,
+                            name: 'motion-vendor',
+                            test: /node_modules[\\/]motion[\\/]/,
+                            priority: 24,
+                        },
+                        {
+                            name: 'icons-vendor',
+                            test: /node_modules[\\/]lucide-react[\\/]/,
+                            priority: 23,
+                        },
+                        {
+                            name: 'radix-vendor',
+                            test: /node_modules[\\/](?:@radix-ui|radix-ui)[\\/]/,
+                            priority: 22,
+                        },
+                        {
+                            name: 'search-vendor',
+                            test: /node_modules[\\/]cmdk[\\/]/,
+                            priority: 21,
+                        },
+                        {
+                            name: 'toast-vendor',
+                            test: /node_modules[\\/]sonner[\\/]/,
                             priority: 20,
+                        },
+                        {
+                            name: 'qr-vendor',
+                            test: /node_modules[\\/]jsqr[\\/]/,
+                            priority: 19,
+                        },
+                        {
+                            name: 'turnstile-vendor',
+                            test: /node_modules[\\/]@marsidev[\\/]react-turnstile[\\/]/,
+                            priority: 18,
+                        },
+                        {
+                            name: 'otp-vendor',
+                            test: /node_modules[\\/]input-otp[\\/]/,
+                            priority: 17,
+                        },
+                        {
+                            name: 'theme-vendor',
+                            test: /node_modules[\\/]next-themes[\\/]/,
+                            priority: 16,
+                        },
+                        {
+                            name: 'ui-vendor',
+                            test: /node_modules[\\/](?:class-variance-authority|clsx|tailwind-merge)/,
+                            priority: 15,
                         },
                         {
                             name: 'vendor',
