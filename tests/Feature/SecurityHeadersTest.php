@@ -22,3 +22,13 @@ test('web responses include baseline security headers', function () {
         ->toContain('https://www.googleapis.com')
         ->toContain("'nonce-");
 });
+
+test('kiosk responses allow camera access for the same origin only', function () {
+    $response = $this->get(route('kiosk.index'));
+
+    $response->assertOk()
+        ->assertHeader(
+            'Permissions-Policy',
+            'camera=(self), geolocation=(), microphone=()',
+        );
+});
