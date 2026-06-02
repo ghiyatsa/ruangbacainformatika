@@ -20,7 +20,7 @@ class ShieldSeeder extends Seeder
             return;
         }
 
-        Artisan::call('shield:generate --all --panel=admin --no-interaction --silent');
+        Artisan::call('shield:generate --all --panel=admin --ignore-existing-policies --no-interaction --silent');
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
