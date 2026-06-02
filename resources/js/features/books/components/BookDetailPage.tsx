@@ -185,7 +185,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                         >
                                             <Badge
                                                 variant="secondary"
-                                                className="bg-muted/80 backdrop-blur-sm"
+                                                className="bg-muted"
                                             >
                                                 {category.name}
                                             </Badge>
@@ -209,17 +209,17 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                         : 'Penulis anonim'}
                                 </p>
 
-                                <div className="flex flex-wrap items-center gap-3">
+                                <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center">
                                     <div
-                                        className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${availabilityBackground} ${availabilityColor}`}
+                                        className={`inline-flex w-full items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold sm:w-auto sm:rounded-full sm:py-2 ${availabilityBackground} ${availabilityColor}`}
                                     >
-                                        <AvailabilityIcon className="size-4" />
+                                        <AvailabilityIcon className="size-4 shrink-0" />
                                         {availabilityLabel}
                                     </div>
 
-                                    <div className="inline-flex items-center gap-2 rounded-full border bg-muted/60 px-4 py-2 text-sm font-medium text-muted-foreground backdrop-blur-sm">
-                                        <Library className="size-4" />
-                                        <span>
+                                    <div className="inline-flex w-full items-start gap-2 rounded-2xl border bg-muted/60 px-4 py-3 text-sm font-medium text-muted-foreground sm:w-auto sm:items-center sm:rounded-full sm:py-2">
+                                        <Library className="mt-0.5 size-4 shrink-0 sm:mt-0" />
+                                        <span className="min-w-0 text-left leading-relaxed sm:leading-normal">
                                             {book.isBorrowable ? (
                                                 <>
                                                     <strong className="text-foreground">
@@ -243,15 +243,15 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                     </div>
 
                                     {book.publishedYear ? (
-                                        <div className="inline-flex items-center gap-2 rounded-full border bg-muted/60 px-4 py-2 text-sm font-medium text-muted-foreground backdrop-blur-sm">
-                                            <Calendar className="size-4" />
+                                        <div className="inline-flex w-full items-center gap-2 rounded-2xl border bg-muted/60 px-4 py-3 text-sm font-medium text-muted-foreground sm:w-auto sm:rounded-full sm:py-2">
+                                            <Calendar className="size-4 shrink-0" />
                                             {book.publishedYear}
                                         </div>
                                     ) : null}
 
-                                    <div className="inline-flex items-center gap-2 rounded-full border bg-muted/60 px-4 py-2 text-sm font-medium text-muted-foreground backdrop-blur-sm">
-                                        <Eye className="size-4" />
-                                        <span>
+                                    <div className="inline-flex w-full items-start gap-2 rounded-2xl border bg-muted/60 px-4 py-3 text-sm font-medium text-muted-foreground sm:w-auto sm:items-center sm:rounded-full sm:py-2">
+                                        <Eye className="mt-0.5 size-4 shrink-0 sm:mt-0" />
+                                        <span className="min-w-0 text-left leading-relaxed sm:leading-normal">
                                             <strong className="text-foreground">
                                                 {book.viewCount.toLocaleString(
                                                     'id-ID',
@@ -267,7 +267,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                         type="button"
                                         variant="outline"
                                         className={cn(
-                                            'inline-flex h-auto items-center gap-2 rounded-full bg-background/70 px-4 py-2 text-sm font-medium backdrop-blur-sm',
+                                            'inline-flex h-auto items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-medium',
                                             isBookmarkedByUser &&
                                                 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
                                         )}
@@ -300,7 +300,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                             'Penulis tidak tersedia'
                                         }
                                         kindLabel="Buku"
-                                        className="bg-background/70 backdrop-blur-sm"
+                                        className="bg-background"
                                     />
 
                                     {user &&
@@ -320,7 +320,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                     <Button
                                                         type="submit"
                                                         variant="outline"
-                                                        className="inline-flex h-auto items-center gap-2 rounded-full bg-background/70 px-4 py-2 text-sm font-medium backdrop-blur-sm"
+                                                        className="inline-flex h-auto items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-medium"
                                                         disabled={
                                                             processing ||
                                                             requestSummary.containsBook
@@ -337,14 +337,6 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                     ) : null}
                                 </div>
 
-                                {user &&
-                                !auth.canBorrowBooks &&
-                                book.isBorrowable ? (
-                                    <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                                        {auth.borrowingAccessMessage ??
-                                            'Layanan peminjaman tersedia untuk mahasiswa Teknik Informatika yang terdaftar.'}
-                                    </p>
-                                ) : null}
                             </div>
                         </div>
                     </div>
@@ -352,7 +344,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+                    <div className="rounded-2xl border bg-card shadow-sm">
                         <div className="p-5">
                             <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Data Buku

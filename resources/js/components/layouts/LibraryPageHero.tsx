@@ -44,7 +44,7 @@ export function LibraryPageHero({
                 )}
             >
                 {eyebrow ? (
-                    <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background/75 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-primary uppercase shadow-sm backdrop-blur-sm">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-primary uppercase shadow-sm">
                         {eyebrow}
                     </div>
                 ) : null}

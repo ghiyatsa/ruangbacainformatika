@@ -170,8 +170,10 @@ function BookCard({ book, variant = 'grid', auth, loanRequestCart }: BookCardPro
             />
             <div
                 className={cn(
-                    'relative aspect-3/4 w-32 shrink-0 self-start overflow-hidden bg-muted',
-                    isCompact ? 'sm:w-36' : 'sm:h-auto sm:w-full sm:self-auto',
+                    'relative w-32 shrink-0 overflow-hidden bg-muted',
+                    isCompact
+                        ? 'self-stretch sm:w-36'
+                        : 'aspect-3/4 self-start sm:h-auto sm:w-full sm:self-auto',
                 )}
             >
                 <CoverImage
@@ -180,7 +182,7 @@ function BookCard({ book, variant = 'grid', auth, loanRequestCart }: BookCardPro
                     className={cn(
                         'h-full w-full transition-transform duration-500 group-hover:scale-105',
                         isCompact
-                            ? 'object-contain'
+                            ? 'object-cover'
                             : 'object-contain sm:object-cover',
                     )}
                 />

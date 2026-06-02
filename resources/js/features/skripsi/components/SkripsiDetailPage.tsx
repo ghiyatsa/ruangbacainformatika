@@ -171,7 +171,7 @@ export default function SkripsiDetailPage(
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+                    <div className="rounded-2xl border bg-card shadow-sm">
                         <div className="p-5">
                             <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Informasi Skripsi
@@ -200,7 +200,7 @@ export default function SkripsiDetailPage(
                     </div>
 
                     {skripsi.keywords.length > 0 ? (
-                        <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+                        <div className="rounded-2xl border bg-card shadow-sm">
                             <div className="p-5">
                                 <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                     Kata Kunci

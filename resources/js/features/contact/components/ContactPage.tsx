@@ -195,7 +195,7 @@ export function ContactPage() {
                     </Card>
 
                     <div className="space-y-4">
-                        <div className="rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-card to-card p-6 shadow-sm shadow-primary/5 backdrop-blur-sm">
+                        <div className="rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-card to-card p-6 shadow-sm shadow-primary/5">
                             <h3 className="mb-3 text-base font-semibold text-foreground">
                                 Alamat layanan
                             </h3>
@@ -210,7 +210,7 @@ export function ContactPage() {
                             </p>
                         </div>
 
-                        <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm backdrop-blur-sm">
+                        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
                             <h3 className="mb-3 text-base font-semibold text-foreground">
                                 Email resmi
                             </h3>
@@ -221,7 +221,7 @@ export function ContactPage() {
                             </p>
                         </div>
 
-                        <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm backdrop-blur-sm">
+                        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
                             <h3 className="mb-3 text-base font-semibold text-foreground">
                                 Jam layanan
                             </h3>

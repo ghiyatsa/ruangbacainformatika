@@ -81,7 +81,7 @@ export default function InternshipReportCard({
                                 size="icon-sm"
                                 variant="outline"
                                 className={cn(
-                                    'relative z-20 shrink-0 rounded-full border-border/60 bg-background/90 shadow-sm backdrop-blur-sm hover:border-primary/30 hover:bg-primary/5',
+                                    'relative z-20 shrink-0 rounded-full border-border/60 bg-background shadow-sm hover:border-primary/30 hover:bg-primary/5',
                                     isBookmarkedByUser &&
                                         'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
                                 )}

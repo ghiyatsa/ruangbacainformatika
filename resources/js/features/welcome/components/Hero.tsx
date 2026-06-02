@@ -11,6 +11,7 @@ import CountUp from '@/components/common/CountUp';
 import ShinyText from '@/components/common/ShinyText';
 import StarBorder from '@/components/common/StarBorder';
 import { Kbd } from '@/components/ui/kbd';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { RUANG_BACA_DESCRIPTION } from '@/lib/brand';
 import books from '@/routes/books';
 import type { WelcomeProps } from '@/features/welcome/types';
@@ -66,6 +67,7 @@ const NOTICE_STYLES = {
 } as const;
 
 export default function Hero({ stats, categoriesCount }: HeroProps) {
+    const isMobile = useIsMobile();
     const {
         props: {
             site: { notice },
@@ -89,9 +91,9 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                 className="pointer-events-none absolute inset-0 -z-10"
                 aria-hidden="true"
             >
-                <div className="absolute top-[40%] left-1/2 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[100px] dark:bg-primary/15" />
-                <div className="absolute -top-20 right-0 h-[400px] w-[400px] rounded-full bg-indigo-400/10 blur-[80px] dark:bg-indigo-500/15" />
-                <div className="absolute bottom-0 left-0 h-[300px] w-[500px] rounded-full bg-primary/5 blur-[80px] dark:bg-primary/10" />
+                <div className="absolute top-[42%] left-1/2 hidden h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[100px] dark:bg-primary/15 sm:block" />
+                <div className="absolute -top-12 right-0 h-48 w-48 rounded-full bg-indigo-400/8 blur-[52px] dark:bg-indigo-500/12 sm:-top-20 sm:h-[400px] sm:w-[400px] sm:blur-[80px]" />
+                <div className="absolute bottom-0 left-0 h-40 w-56 rounded-full bg-primary/5 blur-[44px] dark:bg-primary/8 sm:h-[300px] sm:w-[500px] sm:blur-[80px]" />
             </div>
 
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -129,7 +131,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                                     direction="left"
                                                     yoyo={false}
                                                     pauseOnHover={false}
-                                                    disabled={false}
+                                                    disabled={isMobile}
                                                 />
                                             </span>
 
@@ -170,7 +172,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                 <StarBorder
                                     as="div"
                                     color="var(--color-primary)"
-                                    contentClassName="flex h-full w-full items-center rounded-2xl bg-background/60 px-4 py-3.5 backdrop-blur-sm"
+                                    contentClassName="flex h-full w-full items-center rounded-2xl bg-background px-4 py-3.5"
                                     className="h-full w-full rounded-2xl"
                                 >
                                     <div className="flex w-full items-center justify-between gap-3 text-muted-foreground">
@@ -199,7 +201,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                     </div>
 
                     <div className="w-full pt-2 lg:max-w-sm lg:justify-self-end lg:pt-0">
-                        <div className="mx-auto grid max-w-2xl grid-cols-3 divide-x divide-border/50 overflow-hidden rounded-2xl border border-border/50 bg-background/60 backdrop-blur-sm lg:grid-cols-1 lg:divide-x-0 lg:divide-y">
+                        <div className="mx-auto grid max-w-2xl grid-cols-3 divide-x divide-border/50 overflow-hidden rounded-2xl border border-border/50 bg-background lg:grid-cols-1 lg:divide-x-0 lg:divide-y">
                             {STATS.map(({ key, label, icon: Icon, suffix }) => (
                                 <div
                                     key={key}
@@ -214,11 +216,19 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                         </span>
                                     </div>
                                     <div className="flex items-baseline gap-0.5">
-                                        <CountUp
-                                            to={statsValues[key]}
-                                            duration={1.8}
-                                            className="text-2xl font-bold text-foreground tabular-nums sm:text-3xl"
-                                        />
+                                        {isMobile ? (
+                                            <span className="text-2xl font-bold text-foreground tabular-nums sm:text-3xl">
+                                                {statsValues[key].toLocaleString(
+                                                    'id-ID',
+                                                )}
+                                            </span>
+                                        ) : (
+                                            <CountUp
+                                                to={statsValues[key]}
+                                                duration={1.8}
+                                                className="text-2xl font-bold text-foreground tabular-nums sm:text-3xl"
+                                            />
+                                        )}
                                         {suffix && (
                                             <span className="text-lg font-bold text-primary">
                                                 {suffix}

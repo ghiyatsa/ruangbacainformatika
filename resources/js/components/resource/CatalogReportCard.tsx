@@ -34,7 +34,7 @@ export function CatalogReportCard({
     const user = usePage().props.auth?.user;
 
     return (
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 shadow-sm backdrop-blur-sm">
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-50 shadow-sm dark:bg-amber-950/20">
             <div className="flex items-start gap-3 p-5">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300">
                     <Flag className="size-4" />

@@ -66,6 +66,7 @@ export default function GoogleOneTapPrompt({
             disabled ||
             auth.user !== null ||
             !googleAuth.enabled ||
+            !googleAuth.oneTapEnabled ||
             !clientId ||
             DISABLED_COMPONENTS.has(component)
         ) {
@@ -138,6 +139,7 @@ export default function GoogleOneTapPrompt({
         disabled,
         googleAuth.clientId,
         googleAuth.enabled,
+        googleAuth.oneTapEnabled,
     ]);
 
     return null;

@@ -541,10 +541,12 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                         className={cx(
                             'flex items-center',
                             isVertical && 'flex-col',
+                            copyIndex > 0 && 'pointer-events-none',
                         )}
                         key={`copy-${copyIndex}`}
                         role="list"
                         aria-hidden={copyIndex > 0}
+                        inert={copyIndex > 0}
                         ref={copyIndex === 0 ? seqRef : undefined}
                     >
                         {items.map((item, itemIndex) =>

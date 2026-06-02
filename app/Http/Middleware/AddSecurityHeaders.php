@@ -53,6 +53,7 @@ class AddSecurityHeaders
             "'self'",
             "'unsafe-inline'",
             'https://fonts.bunny.net',
+            'https://accounts.google.com/gsi/style',
         ];
         $connectSources = [
             "'self'",

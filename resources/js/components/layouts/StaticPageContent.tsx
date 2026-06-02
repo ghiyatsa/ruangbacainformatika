@@ -12,7 +12,7 @@ export function StaticPageContent({
     return (
         <div
             className={cn(
-                'mx-auto max-w-4xl rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm backdrop-blur-xs sm:p-8',
+                'mx-auto max-w-4xl rounded-3xl border border-border/60 bg-card p-6 shadow-sm sm:p-8',
                 className,
             )}
         >

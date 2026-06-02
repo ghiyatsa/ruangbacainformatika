@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import VelocityScroll from '@/components/common/VelocityScroll';
+import { useIsMobile } from '@/hooks/use-mobile';
 import booksRoute from '@/routes/books';
 
 interface CategoryMarqueeProps {
@@ -39,7 +40,9 @@ type MarqueeCategory = NonNullable<CategoryMarqueeProps['categories']>[number];
 export default function CategoryMarquee({
     categories = [],
 }: CategoryMarqueeProps) {
-    if (categories.length === 0) {
+    const isMobile = useIsMobile();
+
+    if (categories.length === 0 || isMobile) {
         return null;
     }
 

@@ -23,7 +23,7 @@ export function PublicInfoCard({
     return (
         <Card
             className={cn(
-                'border-border/60 bg-card/90 shadow-sm backdrop-blur-sm',
+                'border-border/60 bg-card shadow-sm',
                 tone === 'accent' &&
                     'border-primary/20 bg-linear-to-br from-primary/8 via-card to-card shadow-primary/5',
                 className,

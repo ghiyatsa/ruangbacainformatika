@@ -1,10 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import {
-    ChevronDown,
-    Menu,
-    ShoppingCart,
-    X,
-} from 'lucide-react';
+import { ChevronDown, Menu, ShoppingCart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Collapsible,
@@ -52,35 +47,35 @@ export function MobileSheet({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="-ml-2 h-8 w-8 rounded-lg md:hidden"
+                    className="-ml-2 h-10 w-10 rounded-lg md:hidden"
                     aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
                     aria-expanded={mobileOpen}
                 >
-                    <Menu className="h-[18px] w-[18px]" />
+                    <Menu className="size-5" />
                 </Button>
             </SheetTrigger>
 
             <SheetContent
                 side="left"
                 showCloseButton={false}
-                overlayClassName="bg-black/8 supports-backdrop-filter:backdrop-blur-sm"
-                className="h-svh w-[min(92vw,24rem)] max-w-[24rem] rounded-r-[1.15rem] transform-gpu gap-0 border-r border-border/60 bg-background/88 p-0 shadow-none backdrop-blur-md supports-backdrop-filter:bg-background/78 will-change-transform [contain:layout_paint] data-open:duration-200 data-closed:duration-0"
+                overlayClassName="bg-black/20"
+                className="h-svh w-[min(92vw,24rem)] max-w-[24rem] transform-gpu gap-0 rounded-r-[1.15rem] border-r border-border/60 bg-background p-0 shadow-none will-change-transform contain-[layout_paint] data-open:duration-200 data-closed:duration-0"
             >
-                <SheetHeader className="flex h-16 flex-row items-center gap-0.5 rounded-tr-[1.15rem] border-b border-border/60 bg-background/88 px-3 text-left backdrop-blur-md supports-backdrop-filter:bg-background/78 sm:px-4">
+                <SheetHeader className="flex h-16 flex-row items-center gap-0.5 rounded-tr-[1.15rem] border-b border-border/60 bg-background px-3 text-left">
                     <SheetClose asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="-ml-1 h-8 w-8 rounded-lg"
+                            className="-ml-2 h-10 w-10 rounded-lg"
                             aria-label="Tutup menu"
                         >
-                            <X className="h-[18px] w-[18px]" />
+                            <X className="size-5" />
                         </Button>
                     </SheetClose>
                     <AppLogo compact />
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto px-3 pt-2 pb-4 sm:px-4">
+                <div className="flex-1 overflow-y-auto px-1 pt-2 pb-4">
                     <nav className="space-y-2">
                         {auth.user && auth.canBorrowBooks ? (
                             <SheetClose asChild>
@@ -93,7 +88,7 @@ export function MobileSheet({
                                             : 'text-foreground hover:bg-accent/70',
                                     ].join(' ')}
                                 >
-                                    <ShoppingCart className="size-4 shrink-0 text-muted-foreground" />
+                                    <ShoppingCart className="size-5 shrink-0 text-muted-foreground" />
                                     <span>Keranjang Peminjaman</span>
                                     {loanRequestCart &&
                                         loanRequestCart.count > 0 && (
@@ -123,7 +118,7 @@ export function MobileSheet({
                                                 type="button"
                                                 className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-accent/70"
                                             >
-                                                <item.icon className="size-4 shrink-0 text-muted-foreground" />
+                                                <item.icon className="size-5 shrink-0 text-muted-foreground" />
                                                 <span
                                                     className={
                                                         isSectionActive
@@ -133,7 +128,7 @@ export function MobileSheet({
                                                 >
                                                     {item.label}
                                                 </span>
-                                                <ChevronDown className="ml-auto size-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                                                <ChevronDown className="ml-auto size-5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
                                             </button>
                                         </CollapsibleTrigger>
 
@@ -157,7 +152,7 @@ export function MobileSheet({
                                                                     : 'text-muted-foreground hover:bg-accent/70 hover:text-foreground',
                                                             ].join(' ')}
                                                         >
-                                                            <ChildIcon className="mt-0.5 size-4 shrink-0" />
+                                                            <ChildIcon className="mt-0.5 size-5 shrink-0" />
                                                             <div className="space-y-1">
                                                                 <div className="text-sm font-medium">
                                                                     {
@@ -185,7 +180,7 @@ export function MobileSheet({
                                                 : 'text-foreground hover:bg-accent/70',
                                         ].join(' ')}
                                     >
-                                        <item.icon className="size-4 shrink-0 text-muted-foreground" />
+                                        <item.icon className="size-5 shrink-0 text-muted-foreground" />
                                         {item.label}
                                     </Link>
                                 </SheetClose>

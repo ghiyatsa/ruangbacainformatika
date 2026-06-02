@@ -26,6 +26,7 @@ export type GoogleAuth = {
     loginUrl: string;
     oneTapUrl: string;
     enabled: boolean;
+    oneTapEnabled: boolean;
 };
 
 export type LoanRequestCart = {

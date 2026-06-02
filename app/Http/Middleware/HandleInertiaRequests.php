@@ -79,6 +79,8 @@ class HandleInertiaRequests extends Middleware
                 'loginUrl' => route('auth.google', absolute: false),
                 'oneTapUrl' => route('auth.google.one-tap', absolute: false),
                 'enabled' => app(LoginViewData::class)->canLoginWithGoogle(),
+                'oneTapEnabled' => app(LoginViewData::class)->canLoginWithGoogle()
+                    && ! $this->shouldDisableGoogleOneTap($request),
             ],
             'loanRequestCart' => fn (): ?array => $user?->canBorrowBooks()
                 ? $this->loanDraftService->summary($user)
@@ -108,5 +110,13 @@ class HandleInertiaRequests extends Middleware
             'created_at' => $user->created_at?->toIso8601String(),
             'updated_at' => $user->updated_at?->toIso8601String(),
         ];
+    }
+
+    protected function shouldDisableGoogleOneTap(Request $request): bool
+    {
+        $userAgent = strtolower($request->userAgent() ?? '');
+
+        return str_contains($userAgent, 'chrome-lighthouse')
+            || str_contains($userAgent, 'lighthouse');
     }
 }

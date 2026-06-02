@@ -277,7 +277,7 @@ export const QrCameraScanner = forwardRef<
 
                     {!isScanning ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center text-white/80">
-                            <div className="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-sm">
+                            <div className="rounded-2xl border border-white/15 bg-black/65 p-3">
                                 <QrCode className="size-6" />
                             </div>
                             <p className="max-w-xs text-sm leading-6">

@@ -45,16 +45,16 @@ export function HeaderActions({
                 </div>
             )}
 
-            <div className="flex items-center gap-0.5 sm:gap-1">
+            <div className="flex items-center">
                 {!hideSearch && (
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 rounded-xl xl:hidden"
+                        className="h-10 w-10 rounded-xl xl:hidden"
                         onClick={openSearch}
                         aria-label="Cari buku"
                     >
-                        <Search className="h-[18px] w-[18px]" />
+                        <Search className="size-[18px] sm:size-[14px]" />
                     </Button>
                 )}
 
@@ -67,9 +67,9 @@ export function HeaderActions({
                     title={isDark ? 'Mode terang' : 'Mode gelap'}
                 >
                     {isDark ? (
-                        <SunIcon className="h-[18px] w-[18px] text-primary transition-transform duration-500 group-hover:rotate-45" />
+                        <SunIcon className="h-[14px] w-[14px] text-primary transition-transform duration-500 group-hover:rotate-45" />
                     ) : (
-                        <MoonIcon className="h-[18px] w-[18px] text-primary transition-transform duration-500 group-hover:-rotate-12" />
+                        <MoonIcon className="h-[14px] w-[14px] text-primary transition-transform duration-500 group-hover:-rotate-12" />
                     )}
                     <span className="sr-only">Ubah tema</span>
                 </Button>
@@ -97,7 +97,7 @@ export function HeaderActions({
                                     aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
                                     title="Keranjang peminjaman"
                                 >
-                                    <ShoppingCart className="h-[18px] w-[18px] text-primary transition-transform duration-300 group-hover:scale-110" />
+                                    <ShoppingCart className="h-[14px] w-[14px] text-primary transition-transform duration-300 group-hover:scale-110" />
                                     <span className="sr-only">
                                         Keranjang peminjaman
                                     </span>
@@ -125,12 +125,17 @@ export function HeaderActions({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button
-                                className="flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-transparent transition-all duration-200 hover:ring-primary/40 focus-visible:ring-primary/60 focus-visible:outline-none sm:h-9 sm:w-9"
+                                className="flex h-10 w-10 items-center justify-center rounded-full ring-2 ring-transparent transition-all duration-200 hover:ring-primary/40 focus-visible:ring-primary/60 focus-visible:outline-none sm:h-9 sm:w-9"
                                 aria-label="Menu pengguna"
                             >
                                 <UserAvatar
                                     name={auth.user.name}
-                                    avatar={auth.user.avatar as string | null | undefined}
+                                    avatar={
+                                        auth.user.avatar as
+                                            | string
+                                            | null
+                                            | undefined
+                                    }
                                 />
                             </button>
                         </DropdownMenuTrigger>

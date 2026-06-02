@@ -156,7 +156,7 @@ export default function FeaturedSpotlight({
     const book = featuredBooks?.[currentIndex] || null;
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-background/40 backdrop-blur-sm dark:bg-background/10">
+        <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-card">
             <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/10 via-transparent to-primary/5 opacity-50 dark:from-primary/20 dark:to-transparent" />
             <Deferred
                 data="featuredBooks"

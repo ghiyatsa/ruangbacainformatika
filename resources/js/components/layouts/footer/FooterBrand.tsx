@@ -20,7 +20,7 @@ export function FooterBrand() {
                 href={home.url()}
                 className="group mb-5 inline-flex items-center gap-3"
             >
-                <RuangBacaLogo className="size-10" />
+                <RuangBacaLogo className="-ml-2 size-10" />
                 <div className="flex flex-col">
                     <span className="text-sm font-bold tracking-wider uppercase">
                         Ruang Baca

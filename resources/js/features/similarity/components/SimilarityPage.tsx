@@ -199,7 +199,7 @@ export default function SimilarityPage({
         >
             <div className="mx-auto max-w-4xl space-y-8">
                 {/* Form Input Card */}
-                <Card className="relative overflow-hidden border-border/60 bg-card/95 shadow-md backdrop-blur-xs transition-all duration-300 hover:shadow-lg">
+                <Card className="relative overflow-hidden border-border/60 bg-card shadow-md transition-all duration-300 hover:shadow-lg">
                     <div className="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-primary via-primary/85 to-primary/60" />
 
                     <CardContent>

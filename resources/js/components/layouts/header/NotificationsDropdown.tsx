@@ -190,11 +190,11 @@ export function NotificationsDropdown({
         <Button
             variant="ghost"
             size="icon"
-            className="group relative h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
+            className="group relative h-10 w-10 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-9 sm:w-9"
             aria-label={`Notifikasi, ${unreadCount} belum dibaca`}
             title="Notifikasi"
         >
-            <Bell className="h-[18px] w-[18px] text-primary transition-transform duration-300 group-hover:scale-110" />
+            <Bell className="size-[18px] text-primary transition-transform duration-300 group-hover:scale-110 sm:h-[18px] sm:w-[18px]" />
             <span className="sr-only">Notifikasi</span>
             {unreadCount > 0 && (
                 <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 animate-in items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm duration-200 zoom-in-50">

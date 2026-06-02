@@ -45,7 +45,9 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
     const { auth, site } = page.props;
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const [mobileOpen, setMobileOpen] = React.useState(false);
-    const [dismissedNoticeKey, setDismissedNoticeKey] = React.useState<string | null>(null);
+    const [dismissedNoticeKey, setDismissedNoticeKey] = React.useState<
+        string | null
+    >(null);
 
     const currentUrl = page.url;
     const notice = site.notice;
@@ -56,9 +58,9 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
         [notice.linkLabel, notice.text, notice.tone, notice.url],
     );
     const isNoticeDismissed =
-        dismissedNoticeKey === noticeStorageKey
-        || (typeof window !== 'undefined'
-            && window.localStorage.getItem(noticeStorageKey) === '1');
+        dismissedNoticeKey === noticeStorageKey ||
+        (typeof window !== 'undefined' &&
+            window.localStorage.getItem(noticeStorageKey) === '1');
 
     const isActive = (href: string) => {
         if (href === '/') {
@@ -88,7 +90,7 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
     return (
         <>
             {notice.isActive && !isNoticeDismissed && (
-                <div className="border-b border-border/60 bg-muted/85 backdrop-blur-md supports-backdrop-filter:bg-muted/75 md:hidden">
+                <div className="border-b border-border/60 bg-muted md:hidden">
                     <div className="mx-auto flex max-w-7xl items-start gap-3 px-4 py-2.5 sm:px-5">
                         <span
                             className={`relative mt-0.5 flex size-8 shrink-0 items-center justify-center transition-transform duration-200 ${noticeStyle.icon}`}
@@ -131,9 +133,9 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                 </div>
             )}
 
-            <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 shadow-sm shadow-black/5 backdrop-blur-md supports-backdrop-filter:bg-background/70 md:fixed md:top-4 md:left-0 md:border-b-0 md:bg-transparent md:shadow-none md:backdrop-blur-none">
-                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 bg-transparent px-4 transition-all duration-300 sm:px-5 md:rounded-[1.15rem] md:border md:border-border/60 md:bg-background/88 md:shadow-lg md:shadow-black/5 md:backdrop-blur-md md:supports-backdrop-filter:bg-background/78 lg:gap-4 xl:gap-6 dark:md:border-white/10 dark:md:shadow-black/20">
-                    <div className="flex min-w-0 flex-1 items-center gap-0.5 md:gap-4 lg:gap-5">
+            <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background shadow-sm shadow-black/5 md:fixed md:top-4 md:left-0 md:border-b-0 md:bg-transparent md:shadow-none">
+                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 bg-background px-3 transition-all duration-300 sm:px-5 md:rounded-[1.15rem] md:border md:border-border/60 md:shadow-lg md:shadow-black/5 lg:gap-4 xl:gap-6 dark:md:border-white/10 dark:md:shadow-black/20">
+                    <div className="flex min-w-0 flex-1 items-center gap-0 md:gap-4 lg:gap-5">
                         <MobileSheet
                             mobileOpen={mobileOpen}
                             setMobileOpen={setMobileOpen}
@@ -144,7 +146,7 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                         <DesktopNav isActive={isActive} />
                     </div>
 
-                    <div className="flex shrink-0 items-center lg:gap-1">
+                    <div className="flex shrink-0 items-center gap-1 lg:gap-1">
                         <HeaderActions
                             auth={auth}
                             resolvedAppearance={resolvedAppearance}

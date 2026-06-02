@@ -115,7 +115,7 @@ export function ResourceDetailPageSkeleton({
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+                    <div className="rounded-2xl border bg-card shadow-sm">
                         <div className="p-5">
                             <Skeleton className="h-4 w-32" />
                         </div>
@@ -133,7 +133,7 @@ export function ResourceDetailPageSkeleton({
                     </div>
 
                     {isBook ? (
-                        <div className="rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur-sm">
+                        <div className="rounded-2xl border bg-card p-4 shadow-sm">
                             <Skeleton className="h-4 w-24" />
                             <div className="mt-4 space-y-3">
                                 <Skeleton className="h-10 w-full rounded-xl" />
@@ -143,7 +143,7 @@ export function ResourceDetailPageSkeleton({
                         </div>
                     ) : (
                         <>
-                            <div className="rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+                            <div className="rounded-2xl border bg-card shadow-sm">
                                 <div className="p-5">
                                     <Skeleton className="h-4 w-24" />
                                 </div>
@@ -156,7 +156,7 @@ export function ResourceDetailPageSkeleton({
                                 </div>
                             </div>
 
-                            <div className="rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur-sm">
+                            <div className="rounded-2xl border bg-card p-4 shadow-sm">
                                 <Skeleton className="h-4 w-28" />
                                 <div className="mt-4 space-y-3">
                                     <Skeleton className="h-10 w-full rounded-xl" />

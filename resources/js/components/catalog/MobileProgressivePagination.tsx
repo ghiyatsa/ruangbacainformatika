@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { PaginationData } from '@/types/pagination';
 
 interface MobileProgressivePaginationProps<T> {
@@ -28,6 +28,7 @@ export function MobileProgressivePagination<T>({
             only: [propKey],
             preserveScroll: true,
             preserveState: true,
+            preserveUrl: true,
             onStart: () => setIsLoadingMore(true),
             onFinish: () => setIsLoadingMore(false),
         });
@@ -78,6 +79,17 @@ export function MobileProgressivePagination<T>({
         return null;
     }
 
+    const loadingSkeleton = (
+        <div className="w-full space-y-2" aria-hidden="true">
+            <Skeleton className="h-10 w-full rounded-xl" />
+            <div className="grid grid-cols-3 gap-2">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-full" />
+            </div>
+        </div>
+    );
+
     return (
         <div className="md:hidden">
             {data?.next_page_url ? (
@@ -96,21 +108,12 @@ export function MobileProgressivePagination<T>({
 
                     {isAutoLoadEnabled ? (
                         <div className="flex w-full flex-col items-center gap-2">
-                            <p className="text-xs text-muted-foreground">
-                                Lanjutkan scroll untuk menampilkan hasil
-                                berikutnya secara otomatis.
-                            </p>
                             <div
                                 ref={autoLoadTriggerRef}
                                 className="h-2 w-full"
                                 aria-hidden="true"
                             />
-                            {isLoadingMore ? (
-                                <div className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
-                                    <LoaderCircle className="size-4 animate-spin" />
-                                    Memuat hasil berikutnya...
-                                </div>
-                            ) : null}
+                            {isLoadingMore ? loadingSkeleton : null}
                         </div>
                     ) : (
                         <Button
@@ -120,21 +123,15 @@ export function MobileProgressivePagination<T>({
                             onClick={enableAutoLoad}
                             disabled={isLoadingMore}
                         >
-                            {isLoadingMore ? (
-                                <>
-                                    <LoaderCircle className="size-4 animate-spin" />
-                                    Memuat hasil berikutnya...
-                                </>
-                            ) : (
-                                'Tampilkan lebih banyak'
-                            )}
+                            Tampilkan lebih banyak
                         </Button>
                     )}
+
+                    {!isAutoLoadEnabled && isLoadingMore ? loadingSkeleton : null}
                 </div>
             ) : (
                 <div className="rounded-2xl border border-dashed bg-muted/20 px-4 py-4 text-center text-sm text-muted-foreground">
-                    Seluruh {resourceLabel} yang sesuai dengan filter ini sudah
-                    ditampilkan.
+                    Semua daftar telah ditampilkan.
                 </div>
             )}
         </div>
