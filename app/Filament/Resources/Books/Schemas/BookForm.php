@@ -61,7 +61,7 @@ class BookForm
                         Textarea::make('description')
                             ->label('Deskripsi Singkat')
                             ->rows(3)
-                            ->maxLength(500)
+                            ->maxLength(1500)
                             ->helperText('Ringkasan singkat isi buku.')
                             ->columnSpanFull(),
 
