@@ -148,7 +148,12 @@ class OpenGraphImage
             );
             $this->drawLogo($image, $logoBoxLeft, $logoBoxTop, $logoBoxSize, $logoBoxSize, $colors);
 
-            // Label pill top-left
+            // Title: large bold, constrained to area left of logo
+            // Gap of 40px between title right edge and logo left edge
+            $titleMaxWidth = $logoBoxLeft - $paddingX - 40;
+            $textAreaCenterX = $paddingX + (int) floor($titleMaxWidth / 2);
+
+            // Label pill top-left (now centered within text area)
             $labelFontPath = $this->fontPath(false);
             $labelPillW = 220; // default fallback
             if ($labelFontPath !== null) {
@@ -158,11 +163,12 @@ class OpenGraphImage
                 }
             }
             $labelPillH = 38;
+            $labelPillLeft = $textAreaCenterX - (int) floor($labelPillW / 2);
             $this->drawRoundedRectangle(
                 $image,
-                $paddingX,
+                $labelPillLeft,
                 $paddingY,
-                $paddingX + $labelPillW,
+                $labelPillLeft + $labelPillW,
                 $paddingY + $labelPillH,
                 10,
                 $colors['slate200']
@@ -170,16 +176,12 @@ class OpenGraphImage
             $this->drawCenteredTextLine(
                 $image,
                 $label,
-                $paddingX + (int) floor($labelPillW / 2),
+                $textAreaCenterX,
                 $paddingY + 26,
                 16,
                 $colors['slate700'],
                 false
             );
-
-            // Title: large bold, constrained to area left of logo
-            // Gap of 40px between title right edge and logo left edge
-            $titleMaxWidth = $logoBoxLeft - $paddingX - 40;
 
             // Determine optimal font size starting from 40 down to 24
             $fontSize = 40;
@@ -192,10 +194,18 @@ class OpenGraphImage
                 }
             }
 
-            $titleY = $paddingY + $labelPillH + 52;
+            $titleY = $paddingY + $labelPillH + 64;
             $lineHeight = (int) round($fontSize * 1.35);
             foreach ($titleLines as $index => $line) {
-                $this->drawTextLine($image, $line, $paddingX, $titleY + ($index * $lineHeight), $fontSize, $colors['slate900'], true);
+                $this->drawCenteredTextLine(
+                    $image,
+                    $line,
+                    $textAreaCenterX,
+                    $titleY + ($index * $lineHeight),
+                    $fontSize,
+                    $colors['slate900'],
+                    true
+                );
             }
 
             // Separator line above bottom row

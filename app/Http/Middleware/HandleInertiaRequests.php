@@ -7,6 +7,8 @@ use App\Services\Auth\AuthenticationRedirector;
 use App\Services\LoanDraftService;
 use App\Support\LoginViewData;
 use App\Support\SiteSettings;
+use Filament\Notifications\DatabaseNotification as FilamentDatabaseNotification;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -70,7 +72,7 @@ class HandleInertiaRequests extends Middleware
                     : app(AuthenticationRedirector::class)->pathFor($user),
             ],
             'notifications' => fn (): array => [
-                'unreadCount' => $user?->unreadNotifications()->count() ?? 0,
+                'unreadCount' => $user ? $this->visibleUnreadNotifications($user)->count() : 0,
             ],
             'googleAuth' => [
                 'clientId' => filled(config('services.google.client_id'))
@@ -118,5 +120,16 @@ class HandleInertiaRequests extends Middleware
 
         return str_contains($userAgent, 'chrome-lighthouse')
             || str_contains($userAgent, 'lighthouse');
+    }
+
+    protected function visibleUnreadNotifications(User $user): MorphMany
+    {
+        return $this->visibleNotifications($user)->whereNull('read_at');
+    }
+
+    protected function visibleNotifications(User $user): MorphMany
+    {
+        return $user->notifications()
+            ->where('type', '!=', FilamentDatabaseNotification::class);
     }
 }

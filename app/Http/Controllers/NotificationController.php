@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Filament\Notifications\DatabaseNotification as FilamentDatabaseNotification;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
@@ -14,7 +17,7 @@ class NotificationController extends Controller
 
         abort_unless($user !== null, 401);
 
-        $notifications = $user->notifications()
+        $notifications = $this->visibleNotifications($user)
             ->latest()
             ->limit(10)
             ->get()
@@ -24,7 +27,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'notifications' => $notifications,
-            'unreadCount' => $user->unreadNotifications()->count(),
+            'unreadCount' => $this->visibleUnreadNotifications($user)->count(),
         ]);
     }
 
@@ -34,7 +37,7 @@ class NotificationController extends Controller
 
         abort_unless($user !== null, 401);
 
-        $user->unreadNotifications()->update([
+        $this->visibleUnreadNotifications($user)->update([
             'read_at' => now(),
         ]);
 
@@ -49,7 +52,7 @@ class NotificationController extends Controller
 
         abort_unless($user !== null, 401);
 
-        $databaseNotification = $user->notifications()
+        $databaseNotification = $this->visibleNotifications($user)
             ->whereKey($notification)
             ->firstOrFail();
 
@@ -60,8 +63,19 @@ class NotificationController extends Controller
         }
 
         return response()->json([
-            'unreadCount' => $user->unreadNotifications()->count(),
+            'unreadCount' => $this->visibleUnreadNotifications($user)->count(),
         ]);
+    }
+
+    protected function visibleUnreadNotifications(User $user): MorphMany
+    {
+        return $this->visibleNotifications($user)->whereNull('read_at');
+    }
+
+    protected function visibleNotifications(User $user): MorphMany
+    {
+        return $user->notifications()
+            ->where('type', '!=', FilamentDatabaseNotification::class);
     }
 
     /**

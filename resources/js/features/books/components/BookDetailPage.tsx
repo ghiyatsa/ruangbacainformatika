@@ -10,6 +10,7 @@ import {
     Globe,
     Hash,
     Library,
+    MapPinned,
     ShoppingCart,
     Star,
     XCircle,
@@ -117,6 +118,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
         'katalog buku',
         'ruang baca informatika',
     ].filter((value): value is string => Boolean(value));
+    const shelfLocations = book.displayShelfLocations.join(', ');
 
     return (
         <ResourceDetailPage
@@ -389,6 +391,28 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                     label="Halaman"
                                     value={`${book.pages} halaman`}
                                 />
+                            ) : null}
+                            {book.displayShelfLocations.length > 0 ? (
+                                <div className="group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-muted/50">
+                                    <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <MapPinned className="size-4" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                            Lokasi rak
+                                        </p>
+                                        <p className="mt-0.5 text-sm font-semibold text-foreground">
+                                            {shelfLocations}
+                                        </p>
+                                        {book.usesBackupShelfLocations ? (
+                                            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                                Rak utama sedang kosong, jadi
+                                                lokasi ini memakai rak cadangan
+                                                yang masih tersedia.
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </div>
                             ) : null}
                             <ResourceDetailItem
                                 icon={<Globe className="size-4" />}

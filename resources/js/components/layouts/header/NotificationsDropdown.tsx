@@ -1,5 +1,12 @@
 import { router } from '@inertiajs/react';
-import { Bell, BellRing, BookCheck, CheckCheck } from 'lucide-react';
+import {
+    ArrowUpRight,
+    Bell,
+    BellRing,
+    BookCheck,
+    CheckCheck,
+    Inbox,
+} from 'lucide-react';
 import * as React from 'react';
 import * as NotificationController from '@/actions/App/Http/Controllers/NotificationController';
 import { Badge } from '@/components/ui/badge';
@@ -54,10 +61,26 @@ function formatNotificationTime(value: string): string {
 
 function NotificationIcon({ icon }: { icon: string | null }) {
     if (icon === 'bell-ring') {
-        return <BellRing className="size-4 text-amber-600" />;
+        return (
+            <BellRing className="size-4 text-amber-600 dark:text-amber-400" />
+        );
     }
 
-    return <BookCheck className="size-4 text-emerald-600" />;
+    return (
+        <BookCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+    );
+}
+
+function notificationKindLabel(kind: string | null): string | null {
+    if (kind === 'loan_receipt') {
+        return 'Peminjaman';
+    }
+
+    if (kind === 'loan_reminder') {
+        return 'Pengingat';
+    }
+
+    return null;
 }
 
 export function NotificationsDropdown({
@@ -258,48 +281,58 @@ export function NotificationsDropdown({
     const contentBody = (
         <>
             <div
-                className={`max-h-96 overflow-y-auto ${open ? 'motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in-0 motion-safe:slide-in-from-top-1' : ''}`}
+                className={`max-h-[26rem] overflow-y-auto ${open ? 'motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in-0 motion-safe:slide-in-from-top-1' : ''}`}
             >
                 {isLoading ? (
                     <div className="space-y-3 px-4 py-4 motion-safe:animate-in motion-safe:duration-150 motion-safe:fade-in-0">
                         {[0, 1, 2].map((item) => (
                             <div
                                 key={item}
-                                className="animate-pulse rounded-2xl border border-border/50 p-3"
+                                className="animate-pulse rounded-2xl border border-border/60 bg-background/70 p-3.5"
                             >
-                                <div className="h-3 w-24 rounded bg-muted" />
-                                <div className="mt-2 h-3 w-full rounded bg-muted" />
-                                <div className="mt-1 h-3 w-2/3 rounded bg-muted" />
+                                <div className="flex items-start gap-3">
+                                    <div className="size-10 rounded-2xl bg-muted" />
+                                    <div className="min-w-0 flex-1">
+                                        <div className="h-3.5 w-28 rounded bg-muted" />
+                                        <div className="mt-2 h-3 w-full rounded bg-muted" />
+                                        <div className="mt-1.5 h-3 w-2/3 rounded bg-muted" />
+                                        <div className="mt-3 h-3 w-20 rounded bg-muted" />
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
                 ) : notifications.length === 0 ? (
-                    <div className="px-4 py-8 text-center motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in-0 motion-safe:zoom-in-95">
-                        <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-primary/8 text-primary">
-                            <Bell className="size-5" />
+                    <div className="px-5 py-10 text-center motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in-0 motion-safe:zoom-in-95">
+                        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/8 text-primary">
+                            <Inbox className="size-5" />
                         </div>
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-medium text-foreground">
                             Belum ada notifikasi
                         </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                            Notifikasi buku dan aktivitas akun akan muncul di
-                            sini.
+                        <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">
+                            Notifikasi akun dan peminjaman akan muncul di sini.
                         </p>
                     </div>
                 ) : (
-                    <div className="p-2">
+                    <div className="space-y-2 p-3">
                         {notifications.map((notification, index) => {
                             const isUnread = notification.readAt === null;
+                            const kindLabel = notificationKindLabel(
+                                notification.kind,
+                            );
 
                             return (
                                 <button
                                     key={notification.id}
                                     type="button"
                                     className={cn(
-                                        'flex w-full items-start gap-3 rounded-2xl px-3 py-3 text-left transition-[background-color,transform,opacity] duration-200 hover:bg-accent/60',
+                                        'flex w-full items-start gap-3 rounded-2xl border px-3.5 py-3.5 text-left transition-[background-color,border-color,transform,opacity] duration-200 hover:border-border hover:bg-accent/30',
                                         open &&
                                             'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-top-1',
-                                        isUnread && 'bg-primary/6',
+                                        isUnread
+                                            ? 'border-primary/15 bg-primary/6'
+                                            : 'border-border/60 bg-background/70',
                                     )}
                                     style={
                                         open
@@ -317,33 +350,51 @@ export function NotificationsDropdown({
                                         )
                                     }
                                 >
-                                    <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-muted/70">
+                                    <div
+                                        className={cn(
+                                            'mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-2xl',
+                                            isUnread
+                                                ? 'bg-primary/8'
+                                                : 'bg-muted/70',
+                                        )}
+                                    >
                                         <NotificationIcon
                                             icon={notification.icon}
                                         />
                                     </div>
 
                                     <div className="min-w-0 flex-1">
-                                        <div className="flex items-start gap-2">
-                                            <p className="line-clamp-1 text-sm font-medium">
-                                                {notification.title}
-                                            </p>
-                                            {isUnread && (
-                                                <span className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
-                                            )}
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0 space-y-1">
+                                                {kindLabel ? (
+                                                    <span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                                        {kindLabel}
+                                                    </span>
+                                                ) : null}
+                                                <p className="line-clamp-2 text-sm leading-5 font-semibold text-foreground">
+                                                    {notification.title}
+                                                </p>
+                                            </div>
+
+                                            {isUnread ? (
+                                                <span className="mt-1 size-2.5 shrink-0 rounded-full bg-primary" />
+                                            ) : null}
                                         </div>
-                                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+
+                                        <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-muted-foreground">
                                             {notification.message}
                                         </p>
-                                        <div className="mt-2 flex items-center justify-between gap-3">
-                                            <span className="text-[11px] text-muted-foreground">
+
+                                        <div className="mt-3 flex items-center justify-between gap-3">
+                                            <span className="text-[11px] font-medium text-muted-foreground">
                                                 {formatNotificationTime(
                                                     notification.createdAt,
                                                 )}
                                             </span>
                                             {notification.actionLabel && (
-                                                <span className="text-[11px] font-medium text-primary">
+                                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary">
                                                     {notification.actionLabel}
+                                                    <ArrowUpRight className="size-3" />
                                                 </span>
                                             )}
                                         </div>
@@ -377,7 +428,7 @@ export function NotificationsDropdown({
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>
             <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-80 min-w-80 p-0">
+            <DropdownMenuContent align="end" className="w-88 min-w-88 p-0">
                 {desktopHeader}
                 {contentBody}
             </DropdownMenuContent>

@@ -29,6 +29,9 @@ class BookController extends Controller
             'authors:id,name',
             'categories:id,name,slug',
             'publisher:id,name',
+            'items' => fn ($query) => $query
+                ->select(['id', 'book_id', 'status', 'shelf_location'])
+                ->orderBy('id'),
         ])->loadCount([
             'items',
             'items as available_items_count' => fn ($query) => $query->available(),

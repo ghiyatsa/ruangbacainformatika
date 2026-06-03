@@ -3,8 +3,10 @@
 namespace App\Http\Resources;
 
 use App\Models\Book;
+use App\Models\BookItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /** @mixin Book */
@@ -15,6 +17,8 @@ class BookResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $displayShelfData = $this->displayShelfData();
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -39,7 +43,77 @@ class BookResource extends JsonResource
             'isBorrowable' => $this->is_borrowable,
             'isAvailable' => $this->is_borrowable && ($this->available_items_count ?? 0) > 0,
             'viewCount' => $this->view_count,
+            'displayShelfLocations' => $displayShelfData['locations'],
+            'usesBackupShelfLocations' => $displayShelfData['usesBackup'],
         ];
+    }
 
+    /**
+     * @return array{locations: list<string>, usesBackup: bool}
+     */
+    protected function displayShelfData(): array
+    {
+        if (! $this->relationLoaded('items')) {
+            return [
+                'locations' => [],
+                'usesBackup' => false,
+            ];
+        }
+
+        /** @var Collection<int, BookItem> $items */
+        $items = $this->items
+            ->sortBy('id')
+            ->values();
+
+        if ($items->isEmpty()) {
+            return [
+                'locations' => [],
+                'usesBackup' => false,
+            ];
+        }
+
+        $primaryDisplayItems = $items->take(5)->values();
+        $primaryAvailableItems = $primaryDisplayItems
+            ->where('status', 'available')
+            ->values();
+
+        if ($primaryAvailableItems->isNotEmpty()) {
+            return [
+                'locations' => $this->extractShelfLocations($primaryAvailableItems),
+                'usesBackup' => false,
+            ];
+        }
+
+        $backupAvailableItems = $items
+            ->slice(5)
+            ->where('status', 'available')
+            ->values();
+
+        if ($backupAvailableItems->isNotEmpty()) {
+            return [
+                'locations' => $this->extractShelfLocations($backupAvailableItems),
+                'usesBackup' => true,
+            ];
+        }
+
+        return [
+            'locations' => $this->extractShelfLocations($primaryDisplayItems),
+            'usesBackup' => false,
+        ];
+    }
+
+    /**
+     * @param  Collection<int, BookItem>  $items
+     * @return list<string>
+     */
+    protected function extractShelfLocations(Collection $items): array
+    {
+        return $items
+            ->pluck('shelf_location')
+            ->filter(fn (?string $location): bool => filled($location))
+            ->map(fn (string $location): string => trim($location))
+            ->unique()
+            ->values()
+            ->all();
     }
 }

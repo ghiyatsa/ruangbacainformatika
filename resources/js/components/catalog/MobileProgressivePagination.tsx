@@ -15,7 +15,6 @@ interface MobileProgressivePaginationProps<T> {
 export function MobileProgressivePagination<T>({
     data,
     propKey,
-    resourceLabel,
     loadingFallback,
 }: MobileProgressivePaginationProps<T>) {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -94,35 +93,27 @@ export function MobileProgressivePagination<T>({
     );
 
     return (
-        <div className="md:hidden">
+        <div className={`md:hidden ${isAutoLoadEnabled ? '-mt-8' : ''}`}>
             {data?.next_page_url ? (
-                <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed bg-muted/20 px-4 py-5 text-center">
-                    <p className="text-sm text-muted-foreground">
-                        Menampilkan{' '}
-                        <span className="font-semibold text-foreground">
-                            {data.data.length.toLocaleString('id-ID')}
-                        </span>{' '}
-                        dari{' '}
-                        <span className="font-semibold text-foreground">
-                            {(data.total ?? 0).toLocaleString('id-ID')}
-                        </span>{' '}
-                        {resourceLabel}
-                    </p>
-
+                <div className="flex flex-col items-center gap-3 text-center">
                     {isAutoLoadEnabled ? (
-                        <div className="flex w-full flex-col items-center gap-2">
+                        <div className="flex w-full flex-col items-center">
                             <div
                                 ref={autoLoadTriggerRef}
-                                className="h-2 w-full"
+                                className="h-px w-full"
                                 aria-hidden="true"
                             />
-                            {isLoadingMore ? loadingSkeleton : null}
+                            {isLoadingMore ? (
+                                <div className="w-full mt-3 sm:mt-4">
+                                    {loadingSkeleton}
+                                </div>
+                            ) : null}
                         </div>
                     ) : (
                         <Button
                             type="button"
                             size="lg"
-                            className="w-full max-w-xs"
+                            className="w-full"
                             onClick={enableAutoLoad}
                             disabled={isLoadingMore}
                         >
@@ -130,12 +121,14 @@ export function MobileProgressivePagination<T>({
                         </Button>
                     )}
 
-                    {!isAutoLoadEnabled && isLoadingMore
-                        ? loadingSkeleton
-                        : null}
+                    {!isAutoLoadEnabled && isLoadingMore ? (
+                        <div className="w-full mt-3">
+                            {loadingSkeleton}
+                        </div>
+                    ) : null}
                 </div>
             ) : (
-                <div className="rounded-2xl border border-dashed bg-muted/20 px-4 py-4 text-center text-sm text-muted-foreground">
+                <div className="py-4 text-center text-sm text-muted-foreground">
                     Semua daftar telah ditampilkan.
                 </div>
             )}

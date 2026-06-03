@@ -60,6 +60,7 @@ it('keeps breadcrumb heroes closer to the header across catalog and detail pages
         ->and($thesisDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
         ->and($skripsiDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
         ->and($internshipReportDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
+        ->and($detailSkeleton)->toContain('pt-24 pb-6 sm:pt-30 sm:pb-8')
         ->and($detailSkeleton)->toContain('pt-24 pb-12 sm:pt-30')
         ->and($detailSkeleton)->toContain('mb-6 flex items-center gap-2');
 });

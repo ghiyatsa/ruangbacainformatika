@@ -53,6 +53,8 @@ export interface BookData {
     isBorrowable: boolean;
     isAvailable: boolean;
     viewCount: number;
+    displayShelfLocations: string[];
+    usesBackupShelfLocations: boolean;
 }
 
 export interface LoanRequestSummary {

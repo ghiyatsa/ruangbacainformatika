@@ -8,6 +8,7 @@ use App\Models\Publisher;
 use App\Models\User;
 use App\Notifications\LoanReceiptDatabaseNotification;
 use App\Notifications\LoanReminderDatabaseNotification;
+use Filament\Notifications\Notification as FilamentNotification;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\actingAs;
@@ -17,6 +18,10 @@ it('shares unread notification count for authenticated users', function () {
     $loan = createLoanWithBookFor($user);
 
     $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
+    FilamentNotification::make()
+        ->title('Import completed')
+        ->body('Ada pembaruan pada akun Anda.')
+        ->sendToDatabase($user);
 
     actingAs($user)
         ->get(route('home'))
@@ -49,6 +54,26 @@ it('returns the latest notifications for the authenticated user', function () {
         ->and($titles)->toContain('Peminjaman berhasil diproses');
 });
 
+it('excludes filament notifications from the public notification center', function () {
+    $user = User::factory()->create();
+    $loan = createLoanWithBookFor($user);
+
+    $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
+    FilamentNotification::make()
+        ->title('Import completed')
+        ->body('Ada pembaruan pada akun Anda.')
+        ->sendToDatabase($user);
+
+    actingAs($user)
+        ->getJson(route('notifications.index'))
+        ->assertOk()
+        ->assertJsonPath('unreadCount', 1)
+        ->assertJsonCount(1, 'notifications')
+        ->assertJsonMissing([
+            'title' => 'Import completed',
+        ]);
+});
+
 it('marks a notification as read', function () {
     $user = User::factory()->create();
     $loan = createLoanWithBookFor($user);
@@ -71,13 +96,17 @@ it('marks all notifications as read', function () {
 
     $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
     $user->notifyNow(new LoanReminderDatabaseNotification($loan));
+    FilamentNotification::make()
+        ->title('Rekonsiliasi similarity selesai')
+        ->body('Ada pembaruan pada akun Anda.')
+        ->sendToDatabase($user);
 
     actingAs($user)
         ->postJson(route('notifications.read-all'))
         ->assertOk()
         ->assertJsonPath('unreadCount', 0);
 
-    expect($user->fresh()->unreadNotifications()->count())->toBe(0);
+    expect($user->fresh()->unreadNotifications()->count())->toBe(1);
 });
 
 function createLoanWithBookFor(User $user): Loan

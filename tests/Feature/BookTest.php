@@ -39,6 +39,57 @@ it('book detail page increments view count', function () {
     expect($book->fresh()->view_count)->toBe(7);
 });
 
+it('book detail page shares primary shelf locations from the first five displayed copies', function () {
+    $book = Book::factory()->published()->create([
+        'title' => 'Algoritma Dasar',
+    ]);
+
+    foreach (range(1, 6) as $index) {
+        BookItem::factory()->create([
+            'book_id' => $book->id,
+            'internal_code' => sprintf('ALG-%03d', $index),
+            'status' => 'available',
+            'shelf_location' => $index <= 5 ? 'R-01-A' : 'ARSIP-02',
+        ]);
+    }
+
+    get(route('books.show', $book))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books/show')
+            ->where('book.data.displayShelfLocations', ['R-01-A'])
+            ->where('book.data.usesBackupShelfLocations', false)
+        );
+});
+
+it('book detail page falls back to backup shelf locations when the first five displayed copies are borrowed', function () {
+    $book = Book::factory()->published()->create([
+        'title' => 'Struktur Data Lanjut',
+    ]);
+
+    foreach (range(1, 5) as $index) {
+        BookItem::factory()->borrowed()->create([
+            'book_id' => $book->id,
+            'internal_code' => sprintf('SDL-%03d', $index),
+            'shelf_location' => 'R-02-B',
+        ]);
+    }
+
+    BookItem::factory()->available()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'SDL-006',
+        'shelf_location' => 'CAD-01',
+    ]);
+
+    get(route('books.show', $book))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books/show')
+            ->where('book.data.displayShelfLocations', ['CAD-01'])
+            ->where('book.data.usesBackupShelfLocations', true)
+        );
+});
+
 it('book detail page loads related books as deferred props', function () {
     $sharedAuthor = Author::factory()->create();
     $sharedCategory = Category::factory()->create();
