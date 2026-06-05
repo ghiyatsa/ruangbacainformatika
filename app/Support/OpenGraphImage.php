@@ -147,41 +147,7 @@ class OpenGraphImage
                 $colors['slate200']
             );
             $this->drawLogo($image, $logoBoxLeft, $logoBoxTop, $logoBoxSize, $logoBoxSize, $colors);
-
-            // Title: large bold, constrained to area left of logo
-            // Gap of 40px between title right edge and logo left edge
             $titleMaxWidth = $logoBoxLeft - $paddingX - 40;
-            $textAreaCenterX = $paddingX + (int) floor($titleMaxWidth / 2);
-
-            // Label pill top-left (now centered within text area)
-            $labelFontPath = $this->fontPath(false);
-            $labelPillW = 220; // default fallback
-            if ($labelFontPath !== null) {
-                $box = imagettfbbox(16, 0, $labelFontPath, $label);
-                if (is_array($box)) {
-                    $labelPillW = (int) abs($box[4] - $box[0]) + 48;
-                }
-            }
-            $labelPillH = 38;
-            $labelPillLeft = $textAreaCenterX - (int) floor($labelPillW / 2);
-            $this->drawRoundedRectangle(
-                $image,
-                $labelPillLeft,
-                $paddingY,
-                $labelPillLeft + $labelPillW,
-                $paddingY + $labelPillH,
-                10,
-                $colors['slate200']
-            );
-            $this->drawCenteredTextLine(
-                $image,
-                $label,
-                $textAreaCenterX,
-                $paddingY + 26,
-                16,
-                $colors['slate700'],
-                false
-            );
 
             // Determine optimal font size starting from 40 down to 24
             $fontSize = 40;
@@ -194,13 +160,51 @@ class OpenGraphImage
                 }
             }
 
-            $titleY = $paddingY + $labelPillH + 64;
+            // Calculate height of the text block to center it vertically
             $lineHeight = (int) round($fontSize * 1.35);
+            $labelPillH = 38;
+            $gap = 28;
+            $titleHeight = (count($titleLines) - 1) * $lineHeight + $fontSize + (int) round($fontSize * 0.2);
+            $totalHeight = $labelPillH + $gap + $titleHeight;
+
+            // Available vertical space is from 80 to 490 (410px)
+            $startY = max(80, 80 + (int) floor((410 - $totalHeight) / 2));
+
+            // Label pill: left-aligned at $paddingX
+            $labelFontPath = $this->fontPath(false);
+            $labelPillW = 220; // default fallback
+            if ($labelFontPath !== null) {
+                $box = imagettfbbox(16, 0, $labelFontPath, $label);
+                if (is_array($box)) {
+                    $labelPillW = (int) abs($box[4] - $box[0]) + 48;
+                }
+            }
+            $this->drawRoundedRectangle(
+                $image,
+                $paddingX,
+                $startY,
+                $paddingX + $labelPillW,
+                $startY + $labelPillH,
+                10,
+                $colors['slate200']
+            );
+            $this->drawCenteredTextLine(
+                $image,
+                $label,
+                $paddingX + (int) floor($labelPillW / 2),
+                $startY + 26,
+                16,
+                $colors['slate700'],
+                false
+            );
+
+            // Title: left-aligned at $paddingX and vertically centered
+            $titleY = $startY + $labelPillH + $gap + $fontSize;
             foreach ($titleLines as $index => $line) {
-                $this->drawCenteredTextLine(
+                $this->drawTextLine(
                     $image,
                     $line,
-                    $textAreaCenterX,
+                    $paddingX,
                     $titleY + ($index * $lineHeight),
                     $fontSize,
                     $colors['slate900'],
@@ -595,8 +599,8 @@ class OpenGraphImage
         foreach (
             [
                 $settings['site_logo_path'],
-                $settings['favicon_path'],
                 $settings['apple_touch_icon_path'],
+                $settings['favicon_path'],
             ] as $path
         ) {
             if (! filled($path) || ! Storage::disk('public')->exists($path)) {
@@ -612,9 +616,11 @@ class OpenGraphImage
 
         foreach (
             [
-                public_path('images/ruangbaca.svg'),
-                public_path('favicon-32x32.png'),
+                public_path('images/ruangbaca.png'),
+                public_path('android-chrome-512x512.png'),
+                public_path('android-chrome-192x192.png'),
                 public_path('apple-touch-icon.png'),
+                public_path('favicon-32x32.png'),
             ] as $path
         ) {
             if (! is_file($path)) {

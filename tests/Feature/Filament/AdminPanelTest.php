@@ -162,7 +162,7 @@ it('super admin users can render book relation helpers on the create book form',
         ->assertSee('Pilih penerbit yang sudah ada atau tambah baru.')
         ->assertSee('Pilih penulis yang sudah ada atau tambah baru.')
         ->assertSee('Pilih kategori yang sudah ada atau tambah baru.')
-        ->assertSee('Isi angka tanpa spasi atau tanda lain.')
+        ->assertSee('Isi jumlah halaman utama buku.')
         ->assertSee('Gunakan 4 digit tahun.')
         ->assertSee('Gunakan JPG, PNG, atau WEBP maksimal 2 MB.');
 });
