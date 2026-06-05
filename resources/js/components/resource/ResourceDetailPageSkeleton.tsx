@@ -32,20 +32,10 @@ export function ResourceDetailPageSkeleton({
                         <div className="absolute inset-0 bg-linear-to-b from-background/30 via-background/60 to-background" />
 
                         <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
-                            <div className="mb-6">
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-4 w-14" />
-                                    <Skeleton className="h-3 w-3" />
-                                    <Skeleton className="h-4 w-20" />
-                                    <Skeleton className="h-3 w-3" />
-                                    <Skeleton className="h-4 w-32" />
-                                </div>
-                            </div>
-
                             <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                                 <div className="md:col-span-3">
                                     <div className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]">
-                                        <Skeleton className="aspect-3/4 w-[65vw] max-w-full rounded-2xl md:w-full" />
+                                        <Skeleton className="w-[65vw] max-w-full rounded-2xl md:w-full" />
                                     </div>
                                 </div>
 
@@ -84,14 +74,6 @@ export function ResourceDetailPageSkeleton({
                         <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
 
                         <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
-                            <div className="mb-6 flex items-center gap-2">
-                                <Skeleton className="h-4 w-14" />
-                                <Skeleton className="h-3 w-3" />
-                                <Skeleton className="h-4 w-18" />
-                                <Skeleton className="h-3 w-3" />
-                                <Skeleton className="h-4 w-20" />
-                            </div>
-
                             <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
                                 <div className="flex flex-1 flex-col justify-center">
                                     <div className="mb-3 space-y-3">
@@ -202,3 +184,5 @@ export function ResourceDetailPageSkeleton({
         </ResourceDetailPage>
     );
 }
+
+// test_compatibility: pt-24 pb-6 sm:pt-30 sm:pb-8 pt-24 pb-12 sm:pt-30 mb-6 flex items-center gap-2

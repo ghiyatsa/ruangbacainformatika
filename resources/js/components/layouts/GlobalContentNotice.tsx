@@ -1,7 +1,15 @@
-import { usePage } from '@inertiajs/react';
+import { Deferred, usePage } from '@inertiajs/react';
 import { Bell, X } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+
+export interface GlobalNoticeData {
+    isActive: boolean;
+    text: string;
+    url: string | null;
+    linkLabel: string | null;
+    tone: 'info' | 'warning' | 'success';
+}
 
 const NOTICE_STYLES = {
     info: {
@@ -26,25 +34,19 @@ const NOTICE_STYLES = {
 
 interface GlobalContentNoticeProps {
     className?: string;
+    notice?: GlobalNoticeData | null;
     variant?: 'card' | 'topbar';
 }
 
 export function GlobalContentNotice({
     className,
+    notice: providedNotice,
     variant = 'card',
 }: GlobalContentNoticeProps = {}) {
     const page = usePage<{
-        site: {
-            notice: {
-                isActive: boolean;
-                text: string;
-                url: string | null;
-                linkLabel: string | null;
-                tone: 'info' | 'warning' | 'success';
-            };
-        };
+        site: { notice: GlobalNoticeData };
     }>();
-    const notice = page.props.site.notice;
+    const notice = providedNotice ?? page.props.site.notice;
     const noticeStyle = NOTICE_STYLES[notice.tone];
     const noticeStorageKey = React.useMemo(
         () =>
@@ -164,5 +166,35 @@ export function GlobalContentNotice({
                 </button>
             </div>
         </div>
+    );
+}
+
+let lastKnownNotice: GlobalNoticeData | null = null;
+
+export function DeferredGlobalContentNotice({
+    className,
+    variant = 'card',
+}: Pick<GlobalContentNoticeProps, 'className' | 'variant'> = {}) {
+    const page = usePage<{
+        globalNotice?: GlobalNoticeData | null;
+    }>();
+
+    const notice = page.props.globalNotice;
+    if (typeof window !== 'undefined' && notice !== undefined) {
+        lastKnownNotice = notice;
+    }
+
+    const activeNotice = notice ?? lastKnownNotice;
+
+    if (!activeNotice) {
+        return null;
+    }
+
+    return (
+        <GlobalContentNotice
+            className={className}
+            notice={activeNotice}
+            variant={variant}
+        />
     );
 }

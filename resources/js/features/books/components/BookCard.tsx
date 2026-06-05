@@ -185,10 +185,7 @@ function BookCard({
                     src={book.coverImageUrl}
                     alt={book.title}
                     className={cn(
-                        'absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-105',
-                        isCompact
-                            ? 'object-cover'
-                            : 'object-contain sm:object-cover',
+                        'absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105',
                     )}
                 />
 

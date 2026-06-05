@@ -1,6 +1,6 @@
 import { SeoHead } from '@/components/common/SeoHead';
 import { BackgroundPattern } from '@/components/layouts/BackgroundPattern';
-import { GlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
+import { DeferredGlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
@@ -133,7 +133,7 @@ export function PageLayout({
                         )}
                     >
                         {showDesktopNoticeInContent ? (
-                            <GlobalContentNotice className="hidden md:block" />
+                            <DeferredGlobalContentNotice className="hidden md:block" />
                         ) : null}
                         {children}
                     </div>

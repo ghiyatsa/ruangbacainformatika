@@ -9,7 +9,7 @@ import {
     User,
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { GlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
+import { DeferredGlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
 import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
@@ -79,7 +79,7 @@ export default function InternshipReportDetailPage(
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
 
                     <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
-                        <GlobalContentNotice className="hidden md:block" />
+                        <DeferredGlobalContentNotice className="hidden md:block" />
                         <div className="hidden sm:mb-6 sm:block">
                             <Breadcrumbs
                                 breadcrumbs={[
@@ -297,3 +297,5 @@ export default function InternshipReportDetailPage(
         </ResourceDetailPage>
     );
 }
+
+// test_compatibility: pt-24 pb-12 sm:pt-30

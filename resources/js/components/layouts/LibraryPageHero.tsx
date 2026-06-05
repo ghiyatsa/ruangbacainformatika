@@ -1,4 +1,4 @@
-import { GlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
+import { DeferredGlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
@@ -44,7 +44,7 @@ export function LibraryPageHero({
                     contentClassName,
                 )}
             >
-                <GlobalContentNotice className="hidden w-full md:block" />
+                <DeferredGlobalContentNotice className="hidden w-full md:block" />
 
                 {eyebrow ? (
                     <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-primary uppercase shadow-sm">

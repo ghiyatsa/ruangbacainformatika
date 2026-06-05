@@ -55,9 +55,6 @@ class SiteSettings
     public function shared(): array
     {
         $settings = $this->values();
-        $heroNoticeText = trim($settings['hero_notice_text']);
-        $heroNoticeUrl = trim($settings['hero_notice_url']);
-        $heroNoticeLinkLabel = trim($settings['hero_notice_link_label']);
 
         return [
             'name' => $settings['site_name'],
@@ -83,14 +80,27 @@ class SiteSettings
                     'faviconSvg' => $this->publicDiskUrl($settings['favicon_svg_path']) ?? asset('favicon.svg'),
                     'appleTouchIcon' => $this->publicDiskUrl($settings['apple_touch_icon_path']) ?? asset('apple-touch-icon.png'),
                 ],
-                'notice' => [
-                    'isActive' => $settings['hero_notice_enabled'] === '1' && $heroNoticeText !== '',
-                    'text' => $heroNoticeText,
-                    'url' => $heroNoticeUrl !== '' ? $heroNoticeUrl : null,
-                    'linkLabel' => $heroNoticeLinkLabel !== '' ? $heroNoticeLinkLabel : null,
-                    'tone' => $settings['hero_notice_tone'],
-                ],
+                'notice' => $this->sharedNotice(),
             ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function sharedNotice(): array
+    {
+        $settings = $this->values();
+        $heroNoticeText = trim($settings['hero_notice_text']);
+        $heroNoticeUrl = trim($settings['hero_notice_url']);
+        $heroNoticeLinkLabel = trim($settings['hero_notice_link_label']);
+
+        return [
+            'isActive' => $settings['hero_notice_enabled'] === '1' && $heroNoticeText !== '',
+            'text' => $heroNoticeText,
+            'url' => $heroNoticeUrl !== '' ? $heroNoticeUrl : null,
+            'linkLabel' => $heroNoticeLinkLabel !== '' ? $heroNoticeLinkLabel : null,
+            'tone' => $settings['hero_notice_tone'],
         ];
     }
 
