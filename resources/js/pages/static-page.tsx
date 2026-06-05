@@ -16,10 +16,12 @@ export default function StaticPage({
             title={title}
             metaDescription={pageContent.summary}
             maxWidth="5xl"
+            className="[&>div]:px-4 [&>div]:sm:px-6 [&>div]:lg:px-8"
             header={
                 <LibraryPageHero
                     title={title}
                     description={pageContent.summary}
+                    contentClassName="px-4 sm:px-6 lg:px-8"
                 />
             }
         >

@@ -9,6 +9,7 @@ export function AboutPage({ pageContent }: StaticPageProps) {
             title="Tentang Layanan"
             metaDescription={pageContent.summary}
             maxWidth="5xl"
+            className="[&>div]:px-4 [&>div]:sm:px-6 [&>div]:lg:px-8"
             header={
                 <LibraryPageHero
                     eyebrow="Tentang Ruang Baca"
@@ -21,7 +22,7 @@ export function AboutPage({ pageContent }: StaticPageProps) {
                         </>
                     }
                     description={pageContent.summary}
-                    contentClassName="max-w-4xl"
+                    contentClassName="max-w-4xl px-4 sm:px-6 lg:px-8"
                     align="center"
                 />
             }

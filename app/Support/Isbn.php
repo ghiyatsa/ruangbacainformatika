@@ -34,6 +34,10 @@ class Isbn
 
     public static function isValidNormalized(string $value): bool
     {
+        if (preg_match('/^\d{8}$/', $value) === 1) {
+            return true;
+        }
+
         if (preg_match('/^\d{13}$/', $value) === 1) {
             return static::passesIsbn13Checksum($value);
         }

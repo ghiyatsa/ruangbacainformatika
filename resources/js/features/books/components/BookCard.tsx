@@ -177,7 +177,7 @@ function BookCard({
                 className={cn(
                     'relative w-32 shrink-0 overflow-hidden bg-muted',
                     isCompact
-                        ? 'self-stretch sm:w-36'
+                        ? 'min-h-full self-stretch sm:w-36'
                         : 'aspect-3/4 self-start sm:h-auto sm:w-full sm:self-auto',
                 )}
             >
@@ -185,7 +185,7 @@ function BookCard({
                     src={book.coverImageUrl}
                     alt={book.title}
                     className={cn(
-                        'h-full w-full transition-transform duration-500 group-hover:scale-105',
+                        'absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-105',
                         isCompact
                             ? 'object-cover'
                             : 'object-contain sm:object-cover',

@@ -160,17 +160,27 @@ class OpenGraphImage
                 }
             }
 
-            // Calculate height of the text block to center it vertically
+            // Calculate height of the title block
             $lineHeight = (int) round($fontSize * 1.35);
-            $labelPillH = 38;
-            $gap = 28;
             $titleHeight = (count($titleLines) - 1) * $lineHeight + $fontSize + (int) round($fontSize * 0.2);
-            $totalHeight = $labelPillH + $gap + $titleHeight;
 
-            // Available vertical space is from 80 to 490 (410px)
-            $startY = max(80, 80 + (int) floor((410 - $totalHeight) / 2));
+            // Wrap all author names without truncation
+            $authorText = 'Oleh: '.$author;
+            $authorFontSize = 22;
+            $authorLineHeight = (int) round($authorFontSize * 1.35);
+            $authorLines = $this->wrapTextToPixelWidthNoTruncate($authorText, $titleMaxWidth, $authorFontSize, false);
+            $authorHeight = (count($authorLines) - 1) * $authorLineHeight + $authorFontSize + (int) round($authorFontSize * 0.2);
 
-            // Label pill: left-aligned at $paddingX
+            $gapBetweenTitleAndAuthor = 18;
+            $totalContentHeight = $titleHeight + $gapBetweenTitleAndAuthor + $authorHeight;
+
+            // Center the content vertically in the space below the fixed badge (Y=118 to Y=490, which is 372px height)
+            $contentStartY = 118 + (int) floor((372 - $totalContentHeight) / 2);
+            $contentStartY = max(130, $contentStartY); // Ensure at least a small gap below the badge
+
+            // Draw label pill: left-aligned at $paddingX, fixed at Y=80 (sejajar dengan logo)
+            $badgeY = 80;
+            $labelPillH = 38;
             $labelFontPath = $this->fontPath(false);
             $labelPillW = 220; // default fallback
             if ($labelFontPath !== null) {
@@ -182,9 +192,9 @@ class OpenGraphImage
             $this->drawRoundedRectangle(
                 $image,
                 $paddingX,
-                $startY,
+                $badgeY,
                 $paddingX + $labelPillW,
-                $startY + $labelPillH,
+                $badgeY + $labelPillH,
                 10,
                 $colors['slate200']
             );
@@ -192,14 +202,14 @@ class OpenGraphImage
                 $image,
                 $label,
                 $paddingX + (int) floor($labelPillW / 2),
-                $startY + 26,
+                $badgeY + 26,
                 16,
                 $colors['slate700'],
                 false
             );
 
             // Title: left-aligned at $paddingX and vertically centered
-            $titleY = $startY + $labelPillH + $gap + $fontSize;
+            $titleY = $contentStartY + $fontSize;
             foreach ($titleLines as $index => $line) {
                 $this->drawTextLine(
                     $image,
@@ -212,6 +222,20 @@ class OpenGraphImage
                 );
             }
 
+            // Author: drawn directly below the title, left-aligned
+            $authorY = $contentStartY + $titleHeight + $gapBetweenTitleAndAuthor + $authorFontSize;
+            foreach ($authorLines as $index => $line) {
+                $this->drawTextLine(
+                    $image,
+                    $line,
+                    $paddingX,
+                    $authorY + ($index * $authorLineHeight),
+                    $authorFontSize,
+                    $colors['slate600'],
+                    false
+                );
+            }
+
             // Separator line above bottom row
             $separatorY = $height - $stripeHeight - 90;
             imageline($image, $paddingX, $separatorY, $width - $paddingX, $separatorY, $colors['slate200']);
@@ -219,7 +243,6 @@ class OpenGraphImage
             // Bottom row stats (GitHub-style)
             $bottomTextY = $separatorY + 56;
             $cursor = $paddingX;
-            $statGap = 52;
             $iconR = 11;
 
             // --- Eye icon (views) ---
@@ -234,41 +257,6 @@ class OpenGraphImage
             // views count
             $viewsLabel = number_format($views).' dilihat';
             $this->drawTextLine($image, $viewsLabel, $cursor, $bottomTextY, 26, $colors['slate600']);
-
-            // measure views text width to position next stat
-            $fontPath = $this->fontPath(false);
-            if ($fontPath !== null) {
-                $box = imagettfbbox(26, 0, $fontPath, $viewsLabel);
-                if (is_array($box)) {
-                    $cursor += (int) abs($box[4] - $box[0]) + $statGap;
-                }
-            } else {
-                $cursor += 200;
-            }
-
-            // --- Person icon (author) ---
-            $personCX = $cursor + $iconR;
-            $personCY = $bottomTextY - $iconR - 2;
-            // head
-            imagefilledellipse($image, $personCX, $personCY, $iconR, $iconR, $colors['slate400']);
-            // body arc
-            imagearc($image, $personCX, $personCY + $iconR, (int) round($iconR * 1.6), $iconR, 180, 360, $colors['slate400']);
-            $cursor += $iconR * 2 + 10;
-
-            // Parse author list: only show 1 author and a count of others if multiple
-            $authorsList = collect(explode(',', $author))
-                ->map(fn ($name) => trim($name))
-                ->filter()
-                ->values();
-
-            if ($authorsList->count() > 1) {
-                $authorDisplay = $authorsList->first().' + '.($authorsList->count() - 1);
-            } else {
-                $authorDisplay = $authorsList->first() ?: 'Ruang Baca Informatika';
-            }
-
-            // author name (truncated)
-            $this->drawTextLine($image, Str::limit($authorDisplay, 50), $cursor, $bottomTextY, 26, $colors['slate600']);
 
             // Site name right-aligned
             $siteName = $settings['site_name'];

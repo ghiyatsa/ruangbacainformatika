@@ -70,13 +70,13 @@ class BookForm
                         TextInput::make('isbn')
                             ->label('ISBN')
                             ->unique('books', 'isbn', ignoreRecord: true)
-                            ->minLength(10)
+                            ->minLength(8)
                             ->maxLength(13)
                             ->placeholder('9786020000001')
-                            ->helperText('Isi ISBN-10 atau ISBN-13 tanpa spasi. Akhiran X hanya untuk ISBN-10.')
+                            ->helperText('Isi ISBN 8 digit, ISBN-10, atau ISBN-13 tanpa spasi. Akhiran X hanya untuk ISBN-10.')
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('isbn', Isbn::normalize($state)))
-                            ->rule('regex:/^(?:[0-9]{10}|[0-9]{13}|[0-9]{9}X)$/i')
+                            ->rule('regex:/^(?:[0-9]{8}|[0-9]{10}|[0-9]{13}|[0-9]{9}X)$/i')
                             ->rules([
                                 fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
                                     if (blank($value)) {
@@ -84,12 +84,12 @@ class BookForm
                                     }
 
                                     if (! Isbn::isValid((string) $value)) {
-                                        $fail('ISBN harus berupa ISBN-10 atau ISBN-13 yang valid.');
+                                        $fail('ISBN harus berupa 8 digit, ISBN-10, atau ISBN-13 yang valid.');
                                     }
                                 },
                             ])
                             ->validationMessages([
-                                'regex' => 'ISBN harus 10 atau 13 karakter tanpa spasi. Gunakan X hanya di akhir ISBN-10.',
+                                'regex' => 'ISBN harus 8, 10, atau 13 karakter tanpa spasi. Gunakan X hanya di akhir ISBN-10.',
                             ]),
 
                         TextInput::make('issn')

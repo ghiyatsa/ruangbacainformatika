@@ -11,6 +11,11 @@ it('accepts valid isbn-10 and isbn-13 values', function () {
         ->and(Isbn::isValid('978-0-306-40615-7'))->toBeTrue();
 });
 
+it('accepts local 8 digit isbn values', function () {
+    expect(Isbn::isValid('1234-5678'))->toBeTrue()
+        ->and(Isbn::normalize(' 1234-5678 '))->toBe('12345678');
+});
+
 it('rejects incomplete or invalid isbn values', function () {
     expect(Isbn::isValid('123456789'))->toBeFalse()
         ->and(Isbn::isValid('0804429579'))->toBeFalse()

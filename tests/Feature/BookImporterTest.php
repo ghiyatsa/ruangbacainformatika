@@ -126,3 +126,22 @@ it('imports valid isbn-10 values with an uppercase x check digit', function () {
         ->and($book?->isbn)->toBe('080442957X')
         ->and($book?->publisher?->name)->toBe('Pearson');
 });
+
+it('imports local 8 digit isbn values', function () {
+    $importer = makeBookImporter();
+
+    $importer([
+        'title' => 'Buku Referensi Lokal',
+        'isbn' => '1234-5678',
+        'publisher' => 'Penerbit Lokal',
+        'language' => 'Indonesia',
+        'is_featured' => '0',
+        'is_published' => '1',
+    ]);
+
+    $book = Book::query()->where('isbn', '12345678')->first();
+
+    expect($book)->not->toBeNull()
+        ->and($book?->isbn)->toBe('12345678')
+        ->and($book?->publisher?->name)->toBe('Penerbit Lokal');
+});
