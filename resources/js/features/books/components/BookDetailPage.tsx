@@ -163,15 +163,17 @@ export default function BookDetailPage(props: BookDetailPageProps) {
 
                         <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
-                                <div className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]">
-                                    <img
-                                        src={book.coverImageUrl}
-                                        alt={`Cover buku ${book.title}`}
-                                        fetchPriority="high"
-                                        decoding="async"
-                                        sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
-                                        className="max-h-[28rem] w-auto max-w-full object-contain"
-                                    />
+                                <div className="flex items-center justify-center">
+                                    <div className="aspect-3/4 w-[65vw] max-w-72 overflow-hidden rounded-2xl bg-muted shadow-2xl ring-1 shadow-black/10 ring-border/70 sm:w-72 md:w-full">
+                                        <img
+                                            src={book.coverImageUrl}
+                                            alt={`Cover buku ${book.title}`}
+                                            fetchPriority="high"
+                                            decoding="async"
+                                            sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
