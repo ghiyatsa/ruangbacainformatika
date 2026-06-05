@@ -10,6 +10,8 @@ use App\Models\Book;
 use App\Models\Category;
 use App\Models\Publisher;
 use App\Services\BookCoverImageService;
+use App\Support\Isbn;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -71,10 +73,23 @@ class BookForm
                             ->minLength(10)
                             ->maxLength(13)
                             ->placeholder('9786020000001')
-                            ->helperText('Isi angka tanpa spasi atau tanda lain.')
-                            ->rule('regex:/^[0-9]+$/')
+                            ->helperText('Isi ISBN-10 atau ISBN-13 tanpa spasi. Akhiran X hanya untuk ISBN-10.')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('isbn', Isbn::normalize($state)))
+                            ->rule('regex:/^(?:[0-9]{10}|[0-9]{13}|[0-9]{9}X)$/i')
+                            ->rules([
+                                fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
+                                    if (blank($value)) {
+                                        return;
+                                    }
+
+                                    if (! Isbn::isValid((string) $value)) {
+                                        $fail('ISBN harus berupa ISBN-10 atau ISBN-13 yang valid.');
+                                    }
+                                },
+                            ])
                             ->validationMessages([
-                                'regex' => 'ISBN hanya boleh berisi angka.',
+                                'regex' => 'ISBN harus 10 atau 13 karakter tanpa spasi. Gunakan X hanya di akhir ISBN-10.',
                             ]),
 
                         TextInput::make('issn')

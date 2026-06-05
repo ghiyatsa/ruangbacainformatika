@@ -56,13 +56,15 @@ export default function WelcomePage({
                     categoriesCount={stats.activeCategoriesCount}
                 />
 
-                <WhenVisible
-                    data="marqueeCategories"
-                    buffer={250}
-                    fallback={<CategoryMarqueeSkeleton />}
-                >
-                    <CategoryMarquee categories={marqueeCategories} />
-                </WhenVisible>
+                <div className="hidden md:block">
+                    <WhenVisible
+                        data="marqueeCategories"
+                        buffer={250}
+                        fallback={<CategoryMarqueeSkeleton />}
+                    >
+                        <CategoryMarquee categories={marqueeCategories} />
+                    </WhenVisible>
+                </div>
 
                 <CatalogSection
                     stats={stats}

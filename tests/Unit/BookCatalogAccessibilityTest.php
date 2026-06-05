@@ -80,6 +80,16 @@ it('shows book card skeletons when mobile progressive pagination starts loading 
         ->and($bookCatalogPage)->toContain("viewMode === 'list' ? 'compact' : 'grid'");
 });
 
+it('keeps the welcome category marquee and its skeleton desktop only', function () {
+    $welcomePage = file_get_contents(
+        resource_path('js/features/welcome/components/WelcomePage.tsx')
+    );
+
+    expect($welcomePage)->not->toBeFalse()
+        ->and($welcomePage)->toContain('<div className="hidden md:block">')
+        ->and($welcomePage)->toContain('fallback={<CategoryMarqueeSkeleton />}');
+});
+
 it('does not use a skipped heading level for skripsi card titles in the catalog grid', function () {
     $component = file_get_contents(
         resource_path('js/features/skripsi/components/SkripsiCard.tsx')

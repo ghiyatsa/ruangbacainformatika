@@ -93,7 +93,7 @@ export default function CategoryMarquee({
                     <h2 className="sr-only">Kategori buku unggulan</h2>
                     <VelocityScroll
                         items={row1}
-                        speed={30}
+                        speed={80}
                         direction="left"
                         pauseOnHover
                         fadeOut
@@ -102,7 +102,7 @@ export default function CategoryMarquee({
                     />
                     <VelocityScroll
                         items={row2Items}
-                        speed={30}
+                        speed={80}
                         direction="right"
                         pauseOnHover
                         fadeOut

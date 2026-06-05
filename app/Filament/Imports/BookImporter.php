@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Models\Category;
 use App\Models\Publisher;
 use App\Services\BookItemBatchCreator;
+use App\Support\Isbn;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -34,10 +35,22 @@ class BookImporter extends Importer
                 ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
             ImportColumn::make('isbn')
                 ->label('ISBN')
-                ->rules(['nullable', 'max:20'])
-                ->helperText('Boleh dengan atau tanpa tanda hubung. Sistem akan menyimpan angka saja.')
+                ->rules([
+                    'nullable',
+                    'max:20',
+                    function (string $attribute, mixed $value, \Closure $fail): void {
+                        if (blank($value)) {
+                            return;
+                        }
+
+                        if (! Isbn::isValid((string) $value)) {
+                            $fail('Kolom ISBN harus berisi ISBN-10 atau ISBN-13 yang valid.');
+                        }
+                    },
+                ])
+                ->helperText('Boleh dengan atau tanpa tanda hubung. Sistem akan menyimpan ISBN yang sudah dinormalisasi.')
                 ->fillRecordUsing(function ($record, $state) {
-                    $record->isbn = preg_replace('/\D+/', '', trim((string) $state));
+                    $record->isbn = Isbn::normalize((string) $state);
                 }),
             ImportColumn::make('authors')
                 ->label('Penulis')
@@ -139,7 +152,7 @@ class BookImporter extends Importer
 
     public function resolveRecord(): ?Model
     {
-        $isbn = preg_replace('/\D+/', '', trim((string) ($this->data['isbn'] ?? ''))) ?? '';
+        $isbn = Isbn::normalize((string) ($this->data['isbn'] ?? '')) ?? '';
 
         if (blank($isbn)) {
             return new Book;

@@ -34,7 +34,7 @@ it('imports a book row with relations, stock, and rack location', function () {
     $importer([
         'title' => '  C++ Primer  ',
         'subtitle' => ' Panduan Dasar ',
-        'isbn' => '978-602-1234-567',
+        'isbn' => '978-602-1234-563',
         'authors' => ' Bjarne Stroustrup | Bjarne Stroustrup | Herb Sutter ',
         'categories' => ' Pemrograman | C++ | Pemrograman ',
         'ddc_code' => '005.13',
@@ -50,7 +50,7 @@ it('imports a book row with relations, stock, and rack location', function () {
         'is_published' => '1',
     ]);
 
-    $book = Book::query()->where('isbn', '9786021234567')->first();
+    $book = Book::query()->where('isbn', '9786021234563')->first();
 
     expect($book)->not->toBeNull()
         ->and($book?->title)->toBe('C++ Primer')
@@ -69,7 +69,7 @@ it('updates existing books by isbn and only backfills missing shelf locations', 
 
     $book = Book::factory()->create([
         'title' => 'Legacy C++',
-        'isbn' => '9786020000001',
+        'isbn' => '9786020000008',
         'publisher_id' => $publisher->getKey(),
     ]);
 
@@ -87,7 +87,7 @@ it('updates existing books by isbn and only backfills missing shelf locations', 
 
     $importer([
         'title' => 'Legacy C Plus Plus',
-        'isbn' => '9786020000001',
+        'isbn' => '9786020000008',
         'authors' => ' Admin Legacy ',
         'categories' => ' Arsip ',
         'stock' => '3',
@@ -106,4 +106,23 @@ it('updates existing books by isbn and only backfills missing shelf locations', 
         ->and($book->items()->where('internal_code', 'LEG-001')->value('shelf_location'))->toBe('R-09-C')
         ->and($book->items()->where('internal_code', 'LEG-002')->value('shelf_location'))->toBe('ARSIP-A1')
         ->and($book->items()->where('internal_code', '!=', 'LEG-001')->where('internal_code', '!=', 'LEG-002')->value('shelf_location'))->toBe('R-09-C');
+});
+
+it('imports valid isbn-10 values with an uppercase x check digit', function () {
+    $importer = makeBookImporter();
+
+    $importer([
+        'title' => 'The Elements of Style',
+        'isbn' => '0-8044-2957-x',
+        'publisher' => 'Pearson',
+        'language' => 'Inggris',
+        'is_featured' => '0',
+        'is_published' => '1',
+    ]);
+
+    $book = Book::query()->where('isbn', '080442957X')->first();
+
+    expect($book)->not->toBeNull()
+        ->and($book?->isbn)->toBe('080442957X')
+        ->and($book?->publisher?->name)->toBe('Pearson');
 });

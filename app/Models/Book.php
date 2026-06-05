@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\GeneratesSlug;
+use App\Support\Isbn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -72,9 +73,7 @@ class Book extends Model
     protected function isbn(): Attribute
     {
         return Attribute::make(
-            set: fn (?string $value): ?string => filled($value)
-                ? preg_replace('/\D+/', '', $value)
-                : null,
+            set: fn (?string $value): ?string => Isbn::normalize($value),
         );
     }
 
