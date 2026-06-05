@@ -26,6 +26,7 @@ import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import BookCard from '@/features/books/components/BookCard';
 import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
@@ -163,17 +164,35 @@ export default function BookDetailPage(props: BookDetailPageProps) {
 
                         <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
-                                <div className="flex items-center justify-center">
-                                    <div className="aspect-3/4 w-[65vw] max-w-72 overflow-hidden rounded-2xl bg-muted shadow-2xl ring-1 shadow-black/10 ring-border/70 sm:w-72 md:w-full">
-                                        <img
-                                            src={book.coverImageUrl}
-                                            alt={`Cover buku ${book.title}`}
-                                            fetchPriority="high"
-                                            decoding="async"
-                                            sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
-                                            className="h-full w-full object-cover"
-                                        />
-                                    </div>
+                                <div className="flex flex-col items-center justify-center gap-2">
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <button
+                                                type="button"
+                                                className="aspect-3/4 w-[65vw] max-w-72 overflow-hidden rounded-2xl bg-muted text-left shadow-2xl shadow-black/10 transition duration-200 sm:w-72 md:w-full"
+                                                aria-label={`Lihat cover penuh buku ${book.title}`}
+                                            >
+                                                <img
+                                                    src={book.coverImageUrl}
+                                                    alt={`Cover buku ${book.title}`}
+                                                    fetchPriority="high"
+                                                    decoding="async"
+                                                    sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
+                                                    className="h-full w-full object-cover transition duration-300"
+                                                />
+                                            </button>
+                                        </DialogTrigger>
+
+                                        <DialogContent className="max-w-[min(22rem,calc(100vw-2rem))] gap-0 bg-transparent p-0 shadow-none ring-0 sm:max-w-sm">
+                                            <div className="flex max-h-[80vh] items-center justify-center overflow-hidden">
+                                                <img
+                                                    src={book.coverImageUrl}
+                                                    alt={`Cover penuh buku ${book.title}`}
+                                                    className="max-h-[80vh] max-w-full object-contain"
+                                                />
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
                             </div>
 
