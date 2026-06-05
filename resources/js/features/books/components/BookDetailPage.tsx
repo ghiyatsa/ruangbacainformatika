@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
+import { GlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
 import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
 import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
@@ -26,7 +27,13 @@ import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import BookCard from '@/features/books/components/BookCard';
 import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
@@ -145,8 +152,9 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                     </div>
                     <div className="absolute inset-0 bg-linear-to-b from-background/30 via-background/60 to-background" />
 
-                    <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-6 sm:pt-30 sm:pb-8 lg:px-8">
-                        <div className="mb-6">
+                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
+                        <GlobalContentNotice className="hidden md:block" />
+                        <div className="hidden sm:mb-6 sm:block">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -165,30 +173,49 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                         <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
                                 <div className="flex flex-col items-center justify-center gap-2">
+                                    <img
+                                        src={book.coverImageUrl}
+                                        alt={`Cover buku ${book.title}`}
+                                        decoding="async"
+                                        loading="lazy"
+                                        sizes="100vw"
+                                        className="block aspect-3/4 h-auto w-full object-contain sm:hidden"
+                                    />
+
                                     <Dialog>
                                         <DialogTrigger asChild>
                                             <button
                                                 type="button"
-                                                className="aspect-3/4 w-[65vw] max-w-72 overflow-hidden rounded-2xl bg-muted text-left shadow-2xl shadow-black/10 transition duration-200 sm:w-72 md:w-full"
+                                                className="hidden bg-transparent text-left transition duration-200 hover:scale-[1.015] focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none sm:flex sm:h-96 sm:w-auto sm:items-center sm:justify-center md:h-[22rem]"
                                                 aria-label={`Lihat cover penuh buku ${book.title}`}
                                             >
                                                 <img
                                                     src={book.coverImageUrl}
                                                     alt={`Cover buku ${book.title}`}
-                                                    fetchPriority="high"
                                                     decoding="async"
+                                                    loading="lazy"
                                                     sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
-                                                    className="h-full w-full object-cover transition duration-300"
+                                                    className="block h-full w-full object-contain transition duration-300 sm:w-auto"
                                                 />
                                             </button>
                                         </DialogTrigger>
 
-                                        <DialogContent className="max-w-[min(22rem,calc(100vw-2rem))] gap-0 bg-transparent p-0 shadow-none ring-0 sm:max-w-sm">
+                                        <DialogContent
+                                            className="max-w-[calc(100vw-2rem)] gap-0 bg-background/90 p-2 shadow-xl ring-0 backdrop-blur-sm sm:max-w-md"
+                                            overlayClassName="bg-black/45"
+                                        >
+                                            <DialogTitle className="sr-only">
+                                                Cover buku {book.title}
+                                            </DialogTitle>
+                                            <DialogDescription className="sr-only">
+                                                Pratinjau cover buku tanpa
+                                                dipotong.
+                                            </DialogDescription>
                                             <div className="flex max-h-[80vh] items-center justify-center overflow-hidden">
                                                 <img
                                                     src={book.coverImageUrl}
                                                     alt={`Cover penuh buku ${book.title}`}
-                                                    className="max-h-[80vh] max-w-full object-contain"
+                                                    className="aspect-3/4 max-h-[80vh] w-full object-contain"
                                                 />
                                             </div>
                                         </DialogContent>
@@ -466,8 +493,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                 >
                     {props.relatedBooks && props.relatedBooks.length > 0 ? (
                         <RelatedCatalogSection
-                            title="Buku lain yang mungkin cocok"
-                            description="Kalau topik atau kategorinya terasa pas, beberapa judul ini bisa jadi bacaan berikutnya."
+                            title="Buku Terkait"
+                            description="Beberapa judul berikut mungkin sesuai dengan topik atau kategori buku ini."
                         >
                             <div className="grid gap-4 lg:grid-cols-2">
                                 {props.relatedBooks.map((relatedBook) => (

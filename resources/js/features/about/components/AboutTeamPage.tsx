@@ -108,8 +108,9 @@ export function AboutTeamPage() {
         <PageLayout
             title="Tentang Tim"
             metaDescription="Foto bersama tim mahasiswa kerja praktek pengembang aplikasi Ruang Baca Teknik Informatika Universitas Malikussaleh."
-            maxWidth="4xl"
+            maxWidth="5xl"
             className="py-10 sm:py-14 lg:py-16 [&>div]:px-4 [&>div]:sm:px-6 [&>div]:lg:px-8"
+            showDesktopNoticeInContent={false}
             header={
                 <LibraryPageHero
                     title={
@@ -121,7 +122,7 @@ export function AboutTeamPage() {
                         </>
                     }
                     description="Tim mahasiswa kerja praktek yang membangun dan mengembangkan sistem Ruang Baca Teknik Informatika."
-                    contentClassName="max-w-4xl px-4 sm:px-6 lg:px-8"
+                    contentClassName="max-w-5xl px-4 sm:px-6 lg:px-8"
                     align="center"
                 />
             }

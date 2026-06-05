@@ -31,7 +31,7 @@ export function ResourceDetailPageSkeleton({
                         </div>
                         <div className="absolute inset-0 bg-linear-to-b from-background/30 via-background/60 to-background" />
 
-                        <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-6 sm:pt-30 sm:pb-8 lg:px-8">
+                        <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
                             <div className="mb-6">
                                 <div className="flex items-center gap-2">
                                     <Skeleton className="h-4 w-14" />
@@ -83,7 +83,7 @@ export function ResourceDetailPageSkeleton({
                     <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
                         <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
 
-                        <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-12 sm:pt-30 lg:px-8">
+                        <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
                             <div className="mb-6 flex items-center gap-2">
                                 <Skeleton className="h-4 w-14" />
                                 <Skeleton className="h-3 w-3" />

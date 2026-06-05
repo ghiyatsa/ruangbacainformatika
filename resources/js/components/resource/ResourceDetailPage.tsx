@@ -52,7 +52,7 @@ export function ResourceDetailPage({
                 {hero}
 
                 <div className={cn('py-10', contentClassName)}>
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="grid gap-8 md:grid-cols-12 md:gap-10">
                             <aside
                                 className="order-2 md:order-1 md:col-span-4 lg:col-span-3"

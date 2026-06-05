@@ -1,5 +1,6 @@
 import { SeoHead } from '@/components/common/SeoHead';
 import { BackgroundPattern } from '@/components/layouts/BackgroundPattern';
+import { GlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
@@ -54,6 +55,11 @@ interface PageLayoutProps {
      * @default true
      */
     showHero?: boolean;
+    /**
+     * Whether to show the desktop global notice inside the main content container
+     * @default true
+     */
+    showDesktopNoticeInContent?: boolean;
 }
 
 const maxWidthMap = {
@@ -84,6 +90,7 @@ export function PageLayout({
     header,
     showBackground = true,
     showHero = true,
+    showDesktopNoticeInContent = true,
 }: PageLayoutProps) {
     return (
         <div className="relative flex min-h-[calc(100vh-(--spacing(20)))] flex-col sm:min-h-[calc(100vh-(--spacing(28)))]">
@@ -105,7 +112,7 @@ export function PageLayout({
                             <div className="absolute right-1/4 bottom-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
                         </div>
 
-                        <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
+                        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                             <h1 className="animate-in text-4xl font-extrabold tracking-tight text-foreground duration-700 fade-in slide-in-from-bottom-4 sm:text-5xl lg:text-6xl">
                                 {title}
                             </h1>
@@ -121,10 +128,13 @@ export function PageLayout({
                 <main className={cn('flex-1 py-12', className)}>
                     <div
                         className={cn(
-                            'mx-auto animate-in px-6 delay-200 duration-700 fade-in slide-in-from-bottom-4 lg:px-8',
+                            'mx-auto animate-in px-4 delay-200 duration-700 fade-in slide-in-from-bottom-4 sm:px-6 lg:px-8',
                             maxWidthMap[maxWidth],
                         )}
                     >
+                        {showDesktopNoticeInContent ? (
+                            <GlobalContentNotice className="hidden md:block" />
+                        ) : null}
                         {children}
                     </div>
                 </main>

@@ -182,7 +182,8 @@ export default function SimilarityPage({
         <PageLayout
             title="Cek Kemiripan Judul"
             metaDescription="Periksa kemiripan judul skripsi sebelum diajukan."
-            maxWidth="7xl"
+            maxWidth="5xl"
+            showDesktopNoticeInContent={false}
             header={
                 <LibraryPageHero
                     title={
@@ -194,10 +195,11 @@ export default function SimilarityPage({
                         </span>
                     }
                     description="Pemeriksaan awal untuk membantu meninjau kemiripan judul skripsi Anda."
+                    contentClassName="max-w-5xl px-4 sm:px-6 lg:px-8"
                 />
             }
         >
-            <div className="mx-auto max-w-4xl space-y-8">
+            <div className="space-y-8">
                 {/* Form Input Card */}
                 <Card className="relative overflow-hidden border-border/60 bg-card shadow-md transition-all duration-300 hover:shadow-lg">
                     <div className="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-primary via-primary/85 to-primary/60" />

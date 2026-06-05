@@ -3,6 +3,7 @@ import GoogleOneTapPrompt from '@/components/auth/GoogleOneTapPrompt';
 import { AppContent } from '@/components/layouts/AppContent';
 import { AppShell } from '@/components/layouts/AppShell';
 import Footer from '@/components/layouts/footer';
+import { GlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import { AppHeader } from '@/components/layouts/header';
 import type { AppLayoutProps } from '@/types';
 
@@ -16,6 +17,7 @@ export default function AppLayout({
     return (
         <AppShell variant="header">
             <GoogleOneTapPrompt />
+            <GlobalContentNotice className="md:hidden" variant="topbar" />
             <AppHeader hideSearch={hideSearch} />
             <AppContent variant={isWelcome ? 'full' : 'header'}>
                 {children}

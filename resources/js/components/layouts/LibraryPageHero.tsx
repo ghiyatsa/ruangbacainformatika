@@ -1,3 +1,4 @@
+import { GlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
@@ -38,11 +39,13 @@ export function LibraryPageHero({
 
             <div
                 className={cn(
-                    'mx-auto flex max-w-7xl flex-col gap-5 px-6 lg:px-8',
+                    'mx-auto flex max-w-7xl flex-col gap-5 px-4 sm:px-6 lg:px-8',
                     isCentered ? 'items-center text-center' : 'items-start',
                     contentClassName,
                 )}
             >
+                <GlobalContentNotice className="hidden w-full md:block" />
+
                 {eyebrow ? (
                     <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-primary uppercase shadow-sm">
                         {eyebrow}

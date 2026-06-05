@@ -177,7 +177,7 @@ function BookCard({
                 className={cn(
                     'relative w-32 shrink-0 overflow-hidden bg-muted',
                     isCompact
-                        ? 'min-h-full self-stretch sm:w-36'
+                        ? 'aspect-3/4 self-start sm:w-36 sm:self-stretch'
                         : 'aspect-3/4 self-start sm:h-auto sm:w-full sm:self-auto',
                 )}
             >

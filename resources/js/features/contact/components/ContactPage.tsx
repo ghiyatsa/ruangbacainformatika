@@ -29,6 +29,7 @@ export function ContactPage() {
             title="Hubungi Kami"
             metaDescription="Hubungi Ruang Baca Teknik Informatika Universitas Malikussaleh untuk pertanyaan buku, layanan, dan akses akun."
             maxWidth="5xl"
+            showDesktopNoticeInContent={false}
             header={
                 <LibraryPageHero
                     title={
@@ -40,7 +41,7 @@ export function ContactPage() {
                         </>
                     }
                     description="Informasi kontak Ruang Baca Teknik Informatika Universitas Malikussaleh."
-                    contentClassName="max-w-3xl"
+                    contentClassName="max-w-5xl px-4 sm:px-6 lg:px-8"
                 />
             }
         >

@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { GlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -27,8 +28,9 @@ export function ResourceCatalogHeader({
     return (
         <div className="relative -mt-20 overflow-hidden bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
             <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
-            <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-12 sm:pt-30 lg:px-8">
-                <Breadcrumb className="mb-6">
+            <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
+                <GlobalContentNotice className="hidden md:block" />
+                <Breadcrumb className="mb-6 hidden sm:block">
                     <BreadcrumbList>
                         <BreadcrumbItem>
                             <BreadcrumbLink asChild>

@@ -141,7 +141,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                                     className={`inline-flex shrink-0 justify-center font-semibold transition-colors ${noticeStyle.link}`}
                                                 >
                                                     {notice.linkLabel ??
-                                                        'Baca selengkapnya'}
+                                                        'Lihat detail'}
                                                 </a>
                                             )}
                                         </div>

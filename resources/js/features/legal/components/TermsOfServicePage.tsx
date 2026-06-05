@@ -10,11 +10,12 @@ export function TermsOfServicePage({ pageContent }: StaticPageProps) {
             metaDescription={pageContent.summary}
             maxWidth="5xl"
             className="[&>div]:px-4 [&>div]:sm:px-6 [&>div]:lg:px-8"
+            showDesktopNoticeInContent={false}
             header={
                 <LibraryPageHero
                     title="Syarat Layanan"
                     description={pageContent.summary}
-                    contentClassName="px-4 sm:px-6 lg:px-8"
+                    contentClassName="max-w-5xl px-4 sm:px-6 lg:px-8"
                 />
             }
         >

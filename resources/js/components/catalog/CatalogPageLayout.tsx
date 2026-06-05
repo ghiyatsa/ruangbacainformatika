@@ -69,6 +69,7 @@ export function CatalogPageLayout<T>({
             header={header ?? defaultHeader}
             maxWidth="7xl"
             className="pt-0 pb-16"
+            showDesktopNoticeInContent={false}
         >
             <div className="flex flex-col gap-8 md:gap-10">
                 {hasActiveFilters && onClearFilters && (
