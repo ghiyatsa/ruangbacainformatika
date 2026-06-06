@@ -1,31 +1,52 @@
-/.phpunit.cache
-/bootstrap/ssr
+# Dependency Directories
 /node_modules
+/vendor
+
+# Laravel & Vite Build / Cache Directories
+/.phpunit.cache
+/.phpunit.result.cache
+/bootstrap/ssr
 /public/build
 /public/hot
 /public/storage
 /storage/*.key
 /storage/pail
+
+# Laravel Wayfinder Generated Files
 /resources/js/actions
 /resources/js/routes
 /resources/js/wayfinder
-/vendor
-.DS_Store
+
+# Environment & Authentication Configurations
 .env
 .env.backup
 .env.production
-mailpit.exe
+.env.testing
+.env.local
+.env.*.local
+/auth.json
+
+# Local Development / Tooling Configurations
+.DS_Store
 .phpactor.json
-.phpunit.result.cache
 Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
-/auth.json
+.eslintcache
+*.tsbuildinfo
+mailpit
+mailpit.exe
+mailpit.bin
+composer.phar
+
+# Editor/IDE Folders
 /.fleet
 /.idea
 /.nova
 /.vscode
 /.zed
 
-testsprite_tests\tmp\config.json
+# Project Scratch & TestSprite Temp Directories
+/scratch/
+/testsprite_tests/tmp/
