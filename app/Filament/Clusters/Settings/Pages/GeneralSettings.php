@@ -66,7 +66,7 @@ class GeneralSettings extends Page
                         TextInput::make('site_tagline')
                             ->label('Tagline')
                             ->maxLength(255)
-                            ->placeholder('Layanan buku dan arsip yang mudah diakses'),
+                            ->placeholder('Layanan koleksi dan arsip akademik'),
                         TextInput::make('department')
                             ->label('Nama Instansi / Program Studi')
                             ->required()
@@ -83,7 +83,7 @@ class GeneralSettings extends Page
                             ->tel()
                             ->maxLength(255)
                             ->placeholder('0812xxxxxx')
-                            ->helperText('Nomor yang ditampilkan sebagai kontak bantuan.'),
+                            ->helperText('Nomor kontak layanan.'),
                         Textarea::make('address')
                             ->label('Alamat')
                             ->rows(3)
@@ -93,20 +93,20 @@ class GeneralSettings extends Page
                     ])
                     ->columns(2),
                 Section::make('SEO & Metadata')
-                    ->description('Nilai default ini dipakai untuk deskripsi halaman, preview tautan, dan metadata publik.')
+                    ->description('Nilai default untuk deskripsi halaman, preview tautan, dan metadata publik.')
                     ->schema([
                         Textarea::make('site_description')
                             ->label('Deskripsi Situs')
                             ->required()
                             ->rows(4)
                             ->maxLength(500)
-                            ->placeholder('Ruang baca digital untuk buku dan arsip akademik.'),
+                            ->placeholder('Layanan katalog, koleksi, dan arsip akademik.'),
                         Textarea::make('site_keywords')
                             ->label('Kata Kunci SEO')
                             ->rows(4)
                             ->maxLength(500)
                             ->placeholder('perpustakaan digital, teknik informatika, unimal, katalog buku')
-                            ->helperText('Pisahkan dengan koma bila mengisi lebih dari satu kata kunci.'),
+                            ->helperText('Pisahkan dengan koma.'),
                         Select::make('seo_robots')
                             ->label('Aturan Index')
                             ->options([
@@ -122,11 +122,11 @@ class GeneralSettings extends Page
                             ->required()
                             ->default('#ffffff')
                             ->regex('/^#[0-9A-Fa-f]{6}$/')
-                            ->helperText('Gunakan format hex, misalnya #ffffff.'),
+                            ->helperText('Gunakan format hex, misalnya #FFFFFF.'),
                     ])
                     ->columns(2),
                 Section::make('Branding & Icon')
-                    ->description('Unggah aset visual utama untuk logo, favicon, dan preview tautan.')
+                    ->description('Aset visual utama untuk logo, favicon, dan preview tautan.')
                     ->schema([
                         FileUpload::make('site_logo_path')
                             ->label('Logo Situs')
@@ -147,7 +147,7 @@ class GeneralSettings extends Page
                             ->imageEditor()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(4096)
-                            ->helperText('Gambar pratinjau saat tautan dibagikan. Disarankan rasio 1200x630.'),
+                            ->helperText('Gambar preview saat tautan dibagikan. Disarankan 1200x630.'),
                         FileUpload::make('favicon_path')
                             ->label('Favicon PNG')
                             ->image()
@@ -156,7 +156,7 @@ class GeneralSettings extends Page
                             ->visibility('public')
                             ->acceptedFileTypes(['image/png'])
                             ->maxSize(1024)
-                            ->helperText('Dipakai sebagai favicon default bila tidak memakai file bawaan.'),
+                            ->helperText('Ikon default situs.'),
                         FileUpload::make('favicon_svg_path')
                             ->label('Favicon SVG')
                             ->disk('public')
@@ -164,7 +164,7 @@ class GeneralSettings extends Page
                             ->visibility('public')
                             ->acceptedFileTypes(['image/svg+xml'])
                             ->maxSize(1024)
-                            ->helperText('Opsional. Gunakan SVG bila ingin ikon lebih tajam di browser modern.'),
+                            ->helperText('Gunakan jika tersedia untuk tampilan yang lebih tajam.'),
                         FileUpload::make('apple_touch_icon_path')
                             ->label('Apple Touch Icon')
                             ->image()
@@ -177,11 +177,11 @@ class GeneralSettings extends Page
                     ])
                     ->columns(2),
                 Section::make('Notifikasi Global')
-                    ->description('Informasi singkat yang tampil di bagian atas halaman beranda.')
+                    ->description('Pesan singkat yang tampil di bagian atas beranda.')
                     ->schema([
                         Toggle::make('hero_notice_enabled')
                             ->label('Tampilkan notifikasi')
-                            ->helperText('Aktifkan untuk menampilkan pesan singkat di beranda.')
+                            ->helperText('Tampilkan pesan di beranda.')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
@@ -190,7 +190,7 @@ class GeneralSettings extends Page
                             ->label('Teks notifikasi')
                             ->rows(3)
                             ->maxLength(255)
-                            ->placeholder('Contoh: Layanan ruang baca tutup sementara pada hari libur nasional.'),
+                            ->placeholder('Contoh: Layanan tutup sementara pada hari libur nasional.'),
                         TextInput::make('hero_notice_url')
                             ->label('URL tujuan')
                             ->url()
@@ -266,7 +266,7 @@ class GeneralSettings extends Page
 
         Notification::make()
             ->success()
-            ->title('Pengaturan umum berhasil disimpan')
+            ->title('Pengaturan umum disimpan')
             ->send();
 
         $this->form->fill($this->formValues());

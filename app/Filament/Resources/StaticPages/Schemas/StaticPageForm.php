@@ -49,7 +49,7 @@ class StaticPageForm
                                     ->maxLength(255)
                                     ->unique('static_pages', 'slug', ignoreRecord: true)
                                     ->readOnly(fn (?StaticPage $record): bool => $record?->isSystemPage() ?? false)
-                                    ->helperText('Dipakai pada alamat halaman publik. Untuk halaman bawaan, slug mengikuti rute utama.')
+                                    ->helperText('Digunakan pada alamat halaman publik. Untuk halaman bawaan, slug mengikuti rute utama.')
                                     ->placeholder('panduan-layanan'),
                                 Toggle::make('is_active')
                                     ->label('Publikasi')
@@ -70,7 +70,7 @@ class StaticPageForm
                                     ->required()
                                     ->rows(3)
                                     ->maxLength(255)
-                                    ->placeholder('Ringkasan singkat di bagian atas halaman.'),
+                                    ->placeholder('Ringkasan singkat halaman.'),
                                 RichEditor::make('content')
                                     ->label('Isi halaman')
                                     ->required()

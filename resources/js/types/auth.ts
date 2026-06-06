@@ -15,6 +15,7 @@ export type Auth = {
     user: User | null;
     canAccessAdminPanel?: boolean;
     canBorrowBooks?: boolean;
+    canViewNotifications?: boolean;
     hasVerifiedWhatsApp?: boolean;
     requiresWhatsAppVerification?: boolean;
     borrowingAccessMessage?: string | null;

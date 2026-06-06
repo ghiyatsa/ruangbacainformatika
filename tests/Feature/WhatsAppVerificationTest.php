@@ -5,6 +5,7 @@ use App\Notifications\WhatsAppOtpNotification;
 use App\Services\WhatsAppGateway;
 use App\Services\WhatsAppOtpService;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Testing\AssertableInertia;
@@ -43,6 +44,7 @@ it('renders the whatsapp verification page for campus users before profile compl
             fn (AssertableInertia $page) => $page
                 ->component('auth/verify-whatsapp')
                 ->where('verification.approvalMode', 'automatic')
+                ->where('verification.approvalMessage', 'Verifikasi WhatsApp akan melengkapi status anggota Anda.')
                 ->where('verification.hasActiveChallenge', true),
         );
 
@@ -132,6 +134,29 @@ it('verifying whatsapp otp keeps non student campus accounts pending admin appro
     expect($user->fresh()?->whatsapp_verified_at)->not->toBeNull();
     expect($user->fresh()?->requiresManualApproval())->toBeTrue();
     expect($user->fresh()?->canBorrowBooks())->toBeFalse();
+});
+
+it('renders manual approval guidance on the whatsapp verification page for non student campus users', function () {
+    Notification::fake();
+
+    $user = User::factory()->create([
+        'email' => 'dosen@unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => null,
+        'profile_completed_at' => null,
+        'whatsapp_verified_at' => null,
+        'is_approved' => false,
+    ]);
+
+    actingAs($user)
+        ->get(route('register.whatsapp'))
+        ->assertSuccessful()
+        ->assertInertia(
+            fn (AssertableInertia $page) => $page
+                ->component('auth/verify-whatsapp')
+                ->where('verification.approvalMode', 'manual')
+                ->where('verification.approvalMessage', 'Setelah verifikasi WhatsApp, akun Anda akan menunggu persetujuan admin.'),
+        );
 });
 
 it('sending whatsapp otp can store the number first for campus users', function () {
@@ -286,4 +311,29 @@ it('prevents sending otp if the new whatsapp number is identical to current veri
         ->assertSessionHasErrors('whatsapp');
 
     Notification::assertNothingSent();
+});
+
+it('shows a friendly error when whatsapp otp delivery cannot reach the gateway', function () {
+    $gateway = mock(WhatsAppGateway::class);
+    $gateway->shouldReceive('configured')->andReturn(true);
+    $gateway->shouldReceive('sendMessage')->andThrow(new RuntimeException('request invalid on disconnected device'));
+    app()->instance(WhatsAppGateway::class, $gateway);
+
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => null,
+        'profile_completed_at' => null,
+        'whatsapp_verified_at' => null,
+        'is_approved' => false,
+    ]);
+
+    actingAs($user)
+        ->post(route('register.whatsapp.send'))
+        ->assertSessionHasErrors([
+            'otp' => 'Kode belum dapat dikirim. Coba lagi beberapa saat lagi.',
+        ]);
+
+    expect(Cache::has('whatsapp-otp:challenge:'.$user->id))->toBeFalse()
+        ->and(RateLimiter::attempts('whatsapp-otp:hourly:'.$user->id))->toBe(0);
 });

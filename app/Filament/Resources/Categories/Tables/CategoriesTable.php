@@ -20,7 +20,7 @@ class CategoriesTable
         return $table
             ->searchPlaceholder('Cari nama kategori')
             ->emptyStateHeading('Belum ada kategori')
-            ->emptyStateDescription('Data kategori akan tampil di sini.')
+            ->emptyStateDescription('Daftar kategori akan muncul di sini.')
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama Kategori')
@@ -63,7 +63,7 @@ class CategoriesTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Kategori tidak dapat dihapus')
+                                ->title('Kategori belum bisa dihapus')
                                 ->body($reason)
                                 ->send();
 
@@ -86,8 +86,8 @@ class CategoriesTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Beberapa kategori tidak dapat dihapus')
-                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada kategori yang digunakan oleh buku.')
+                                ->title('Sebagian kategori belum bisa dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada buku yang memakai kategori ini.')
                                 ->send();
 
                             $action->halt();

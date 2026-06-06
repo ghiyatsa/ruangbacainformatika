@@ -182,8 +182,34 @@ it('book detail page hides loan request summary for authenticated users without 
         ->assertInertia(fn (Assert $page) => $page
             ->component('books/show')
             ->where('auth.canBorrowBooks', false)
+            ->where('auth.borrowingAccessMessage', 'Layanan peminjaman tersedia setelah status anggota Anda lengkap.')
             ->where('loanRequest', null)
             ->where('loanRequestCart', null)
+        );
+});
+
+it('book detail page explains manual approval status for campus users who still cannot borrow', function () {
+    $user = User::factory()->create([
+        'email' => 'dosen@unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+        'is_approved' => false,
+    ]);
+
+    $book = Book::factory()->published()->create([
+        'title' => 'Campus Book',
+        'is_borrowable' => true,
+    ]);
+
+    /** @var User $user */
+    actingAs($user);
+
+    get(route('books.show', $book))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books/show')
+            ->where('auth.canBorrowBooks', false)
+            ->where('auth.borrowingAccessMessage', 'Akun kampus Anda sedang menunggu persetujuan admin.')
         );
 });
 

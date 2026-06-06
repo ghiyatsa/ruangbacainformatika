@@ -26,7 +26,7 @@ class UsersTable
         return $table
             ->searchPlaceholder('Cari nama, email, WhatsApp, atau alamat')
             ->emptyStateHeading('Belum ada pengguna')
-            ->emptyStateDescription('Data pengguna akan tampil di sini.')
+            ->emptyStateDescription('Data pengguna akan muncul di sini.')
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
             ->columns([
@@ -66,10 +66,10 @@ class UsersTable
             ])
             ->filters([
                 TernaryFilter::make('is_approved')
-                    ->label('Persetujuan')
+                    ->label('Review Awal')
                     ->placeholder('Semua')
-                    ->trueLabel('Sudah disetujui')
-                    ->falseLabel('Belum disetujui'),
+                    ->trueLabel('Sudah lolos review awal')
+                    ->falseLabel('Belum lolos review awal'),
                 Filter::make('registered_between')
                     ->label('Rentang Tanggal')
                     ->form([
@@ -122,7 +122,7 @@ class UsersTable
                         return $query->whereBetween('created_at', [$startOfDay, $endOfDay]);
                     }),
                 Filter::make('approved_today')
-                    ->label('Disetujui hari ini')
+                    ->label('Lolos review awal hari ini')
                     ->toggle()
                     ->query(function (Builder $query): Builder {
                         [$startOfDay, $endOfDay] = AppTimezone::dayRange();
@@ -139,8 +139,8 @@ class UsersTable
                     ->color('success')
                     ->hidden(fn (User $record): bool => $record->is_approved)
                     ->requiresConfirmation()
-                    ->modalHeading('Setujui akun pengguna')
-                    ->modalDescription('Akun ini akan ditandai siap digunakan untuk layanan anggota.')
+                    ->modalHeading('Setujui akun')
+                    ->modalDescription('Akun ini akan dicatat lolos review awal. Akses pinjam tetap menunggu verifikasi WhatsApp dan peran anggota.')
                     ->action(function (User $record): void {
                         $record->forceFill([
                             'is_approved' => true,
@@ -157,7 +157,7 @@ class UsersTable
 
                         Notification::make()
                             ->success()
-                            ->title('Akun berhasil disetujui')
+                            ->title('Status review awal diperbarui')
                             ->send();
                     }),
                 EditAction::make()
@@ -198,7 +198,7 @@ class UsersTable
 
                             Notification::make()
                                 ->success()
-                                ->title($approvedCount > 0 ? "{$approvedCount} akun disetujui" : 'Tidak ada akun yang perlu disetujui')
+                                ->title($approvedCount > 0 ? "{$approvedCount} akun diperbarui" : 'Tidak ada akun yang perlu diperbarui')
                                 ->send();
                         }),
                     DeleteBulkAction::make()

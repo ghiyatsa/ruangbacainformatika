@@ -125,6 +125,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasRole('member') && $this->canReceiveMemberRole();
     }
 
+    public function canViewPublicNotifications(): bool
+    {
+        return $this->hasRole('member');
+    }
+
     public function hasRequiredProfileDetails(): bool
     {
         return filled($this->whatsapp) && filled($this->address);

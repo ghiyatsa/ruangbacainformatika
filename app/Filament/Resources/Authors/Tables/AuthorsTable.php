@@ -20,7 +20,7 @@ class AuthorsTable
         return $table
             ->searchPlaceholder('Cari nama penulis atau email')
             ->emptyStateHeading('Belum ada data penulis')
-            ->emptyStateDescription('Data penulis akan tampil di sini.')
+            ->emptyStateDescription('Daftar penulis akan muncul di sini.')
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama')
@@ -69,7 +69,7 @@ class AuthorsTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Penulis tidak dapat dihapus')
+                                ->title('Penulis belum bisa dihapus')
                                 ->body($reason)
                                 ->send();
 
@@ -92,8 +92,8 @@ class AuthorsTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Beberapa penulis tidak dapat dihapus')
-                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada penulis yang terhubung dengan buku.')
+                                ->title('Sebagian penulis belum bisa dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada buku yang memakai penulis ini.')
                                 ->send();
 
                             $action->halt();

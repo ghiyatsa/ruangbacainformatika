@@ -53,7 +53,7 @@ class LibrarySettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Aturan Peminjaman')
-                    ->description('Aturan dasar peminjaman untuk layanan mandiri dan pengelolaan admin.')
+                    ->description('Aturan dasar peminjaman untuk layanan anggota.')
                     ->schema([
                         TextInput::make('loan_max_books')
                             ->label('Maksimal Buku Dipinjam')
@@ -61,7 +61,7 @@ class LibrarySettings extends Page
                             ->required()
                             ->minValue(1)
                             ->maxValue(10)
-                            ->helperText('Jumlah pinjaman aktif maksimal per anggota.'),
+                            ->helperText('Batas pinjaman aktif per anggota.'),
                         TextInput::make('loan_duration_days')
                             ->label('Durasi Peminjaman (Hari Kerja)')
                             ->numeric()
@@ -72,11 +72,11 @@ class LibrarySettings extends Page
                     ])
                     ->columns(2),
                 Section::make('Pembatasan Keterlambatan')
-                    ->description('Pembatasan ini dipakai sebagai pengganti denda agar buku dikembalikan tepat waktu.')
+                    ->description('Aturan ini membatasi peminjaman saat ada keterlambatan.')
                     ->schema([
                         Toggle::make('late_return_suspension_enabled')
                             ->label('Aktifkan pembatasan peminjaman')
-                            ->helperText('Saat aktif, anggota yang terlambat tidak bisa meminjam lagi untuk sementara.')
+                            ->helperText('Anggota yang terlambat akan dibatasi sementara.')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
@@ -90,7 +90,7 @@ class LibrarySettings extends Page
                             ->maxValue(30)
                             ->default(1)
                             ->visible(fn (Get $get): bool => (bool) $get('late_return_suspension_enabled'))
-                            ->helperText('Isi 1 jika pembatasan mulai berlaku setelah telat 1 hari.'),
+                            ->helperText('Contoh: isi 1 jika pembatasan mulai berlaku setelah telat 1 hari.'),
                         TextInput::make('late_return_cooldown_days')
                             ->label('Masa Pembatasan Setelah Pengembalian (Hari)')
                             ->numeric()
@@ -99,7 +99,7 @@ class LibrarySettings extends Page
                             ->maxValue(30)
                             ->default(3)
                             ->visible(fn (Get $get): bool => (bool) $get('late_return_suspension_enabled'))
-                            ->helperText('Isi 0 jika pembatasan hanya berlaku selama buku belum dikembalikan.'),
+                            ->helperText('Isi 0 jika pembatasan berhenti saat buku dikembalikan.'),
                     ])
                     ->columns(3),
             ])
@@ -132,7 +132,7 @@ class LibrarySettings extends Page
 
         Notification::make()
             ->success()
-            ->title('Pengaturan peminjaman berhasil disimpan')
+            ->title('Pengaturan peminjaman disimpan')
             ->send();
 
         $this->form->fill($this->settingRepository()->sectionValues('library', $this->defaultValues()));

@@ -21,7 +21,7 @@ class ThesesTable
         return $table
             ->searchPlaceholder('Cari judul, nama, atau NIM')
             ->emptyStateHeading('Belum ada data tesis')
-            ->emptyStateDescription('Data tesis akan tampil di sini.')
+            ->emptyStateDescription('Data tesis akan muncul di sini.')
             ->emptyStateIcon(Heroicon::OutlinedAcademicCap)
             ->columns([
                 TextColumn::make('title')

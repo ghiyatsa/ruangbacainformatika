@@ -16,10 +16,10 @@ import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSecti
 import { RelatedCatalogSectionSkeleton } from '@/components/resource/RelatedCatalogSectionSkeleton';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
-import { ResourceDetailPageSkeleton } from '@/components/resource/ResourceDetailPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import ThesisCard from '@/features/thesis/components/ThesisCard';
 import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
 import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
@@ -33,45 +33,50 @@ export default function ThesisDetailPage(
 ) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
 
-    if (props.loading || !props.thesis?.data) {
-        return <ResourceDetailPageSkeleton contentTitle="Abstrak" />;
-    }
+    const thesis = props.thesis?.data ?? null;
 
-    const {
-        thesis: { data: thesis },
-    } = props;
-    const isBookmarkedByUser = isBookmarked({
-        catalogType: 'thesis',
-        id: thesis.id,
-    });
-    const bookmarkRecord: CatalogBookmarkRecord = {
-        catalogType: 'thesis',
-        id: thesis.id,
-        href: thesisRoute.show.url(thesis.studentId),
-        title: thesis.title,
-        subtitle: thesis.authorName,
-        meta: `NIM: ${thesis.studentId}`,
-        year: thesis.year,
-        coverImageUrl: null,
-        kindLabel: 'Tesis',
-        statusLabel: null,
-    };
-    const seoKeywords = [
-        thesis.title,
-        thesis.authorName,
-        thesis.studentId,
-        ...(thesis.keywords ?? []),
-        'tesis informatika',
-        'ruang baca informatika',
-    ].filter((value): value is string => Boolean(value));
+    const isBookmarkedByUser = thesis
+        ? isBookmarked({
+              catalogType: 'thesis',
+              id: thesis.id,
+          })
+        : false;
+
+    const bookmarkRecord: CatalogBookmarkRecord | null = thesis
+        ? {
+              catalogType: 'thesis',
+              id: thesis.id,
+              href: thesisRoute.show.url(thesis.studentId),
+              title: thesis.title,
+              subtitle: thesis.authorName,
+              meta: `NIM: ${thesis.studentId}`,
+              year: thesis.year,
+              coverImageUrl: null,
+              kindLabel: 'Tesis',
+              statusLabel: null,
+          }
+        : null;
+
+    const seoKeywords = thesis
+        ? [
+              thesis.title,
+              thesis.authorName,
+              thesis.studentId,
+              ...(thesis.keywords ?? []),
+              'tesis informatika',
+              'ruang baca informatika',
+          ].filter((value): value is string => Boolean(value))
+        : ['tesis informatika', 'ruang baca informatika'];
 
     return (
         <ResourceDetailPage
-            title={thesis.title}
+            title={thesis?.title ?? 'Detail Tesis'}
             description={
-                thesis.abstract
+                thesis?.abstract
                     ? thesis.abstract.slice(0, 160)
-                    : `${thesis.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+                    : thesis
+                      ? `${thesis.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
+                      : 'Memuat detail tesis dari katalog Ruang Baca Teknik Informatika Universitas Malikussaleh.'
             }
             keywords={seoKeywords}
             hero={
@@ -89,194 +94,268 @@ export default function ThesisDetailPage(
                                         href: thesisRoute.index.url(),
                                     },
                                     {
-                                        title: thesis.studentId,
-                                        href: thesisRoute.show.url(
-                                            thesis.studentId,
+                                        title: thesis?.studentId ?? (
+                                            <Skeleton className="h-4 w-24" />
                                         ),
+                                        href: thesis
+                                            ? thesisRoute.show.url(
+                                                  thesis.studentId,
+                                              )
+                                            : thesisRoute.index.url(),
                                     },
                                 ]}
                             />
                         </div>
 
-                        <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
-                            <div className="flex flex-col justify-center">
-                                <h1 className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                                    {thesis.title}
-                                </h1>
+                        {thesis ? (
+                            <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
+                                <div className="flex flex-col justify-center">
+                                    <h1 className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                                        {thesis.title}
+                                    </h1>
 
-                                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                                    <span className="flex items-center gap-1.5">
-                                        <User className="size-3.5" />
-                                        {thesis.authorName}
-                                    </span>
-                                    <span className="text-border">&bull;</span>
-                                    <span className="flex items-center gap-1.5">
-                                        <Hash className="size-3.5" />
-                                        NIM: {thesis.studentId}
-                                    </span>
-                                    {thesis.year ? (
-                                        <>
-                                            <span className="text-border">
-                                                &bull;
-                                            </span>
-                                            <span className="flex items-center gap-1.5">
-                                                <Calendar className="size-3.5" />
-                                                {thesis.year}
-                                            </span>
-                                        </>
-                                    ) : null}
-                                    <span className="text-border">&bull;</span>
-                                    <span className="flex items-center gap-1.5">
-                                        <Eye className="size-3.5" />
-                                        {thesis.viewCount.toLocaleString(
-                                            'id-ID',
-                                        )}
-                                    </span>
-                                </div>
+                                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                                        <span className="flex items-center gap-1.5">
+                                            <User className="size-3.5" />
+                                            {thesis.authorName}
+                                        </span>
+                                        <span className="text-border">
+                                            &bull;
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <Hash className="size-3.5" />
+                                            NIM: {thesis.studentId}
+                                        </span>
+                                        {thesis.year ? (
+                                            <>
+                                                <span className="text-border">
+                                                    &bull;
+                                                </span>
+                                                <span className="flex items-center gap-1.5">
+                                                    <Calendar className="size-3.5" />
+                                                    {thesis.year}
+                                                </span>
+                                            </>
+                                        ) : null}
+                                        <span className="text-border">
+                                            &bull;
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <Eye className="size-3.5" />
+                                            {thesis.viewCount.toLocaleString(
+                                                'id-ID',
+                                            )}
+                                        </span>
+                                    </div>
 
-                                <div className="mt-5 flex flex-wrap items-center gap-3">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className={cn(
-                                            'h-auto gap-2 rounded-full px-4 py-2 text-sm font-medium',
-                                            isBookmarkedByUser &&
-                                                'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
-                                        )}
-                                        aria-label={
-                                            isBookmarkedByUser
-                                                ? 'Hapus bookmark'
-                                                : 'Simpan bookmark'
-                                        }
-                                        aria-pressed={isBookmarkedByUser}
-                                        onClick={() =>
-                                            toggleBookmark(bookmarkRecord)
-                                        }
-                                    >
-                                        <Bookmark
-                                            className={
+                                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className={cn(
+                                                'h-auto gap-2 rounded-full px-4 py-2 text-sm font-medium',
+                                                isBookmarkedByUser &&
+                                                    'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
+                                            )}
+                                            aria-label={
                                                 isBookmarkedByUser
-                                                    ? 'fill-current'
-                                                    : ''
+                                                    ? 'Hapus bookmark'
+                                                    : 'Simpan bookmark'
                                             }
-                                        />
-                                        {isBookmarkedByUser
-                                            ? 'Tersimpan'
-                                            : 'Simpan'}
-                                    </Button>
+                                            aria-pressed={isBookmarkedByUser}
+                                            onClick={() =>
+                                                bookmarkRecord &&
+                                                toggleBookmark(bookmarkRecord)
+                                            }
+                                        >
+                                            <Bookmark
+                                                className={
+                                                    isBookmarkedByUser
+                                                        ? 'fill-current'
+                                                        : ''
+                                                }
+                                            />
+                                            {isBookmarkedByUser
+                                                ? 'Tersimpan'
+                                                : 'Simpan'}
+                                        </Button>
 
-                                    <CatalogShareButton
-                                        title={thesis.title}
-                                        subtitle={thesis.authorName}
-                                        kindLabel="Tesis"
-                                    />
+                                        <CatalogShareButton
+                                            title={thesis.title}
+                                            subtitle={thesis.authorName}
+                                            kindLabel="Tesis"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
+                                <div className="flex flex-1 flex-col justify-center">
+                                    <div className="mb-3 space-y-3">
+                                        <Skeleton className="h-8 w-full max-w-3xl" />
+                                        <Skeleton className="h-8 w-4/5 max-w-2xl" />
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <Skeleton className="h-4 w-34" />
+                                        <Skeleton className="h-3 w-3 rounded-full" />
+                                        <Skeleton className="h-4 w-28" />
+                                        <Skeleton className="h-3 w-3 rounded-full" />
+                                        <Skeleton className="h-4 w-14" />
+                                        <Skeleton className="h-3 w-3 rounded-full" />
+                                        <Skeleton className="h-4 w-12" />
+                                    </div>
+
+                                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                                        <Skeleton className="h-10 w-28 rounded-full" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             }
             sidebar={
-                <div className="space-y-4">
-                    <div className="rounded-2xl border bg-card shadow-sm">
-                        <div className="p-5">
-                            <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                Informasi Tesis
-                            </h2>
-                        </div>
-                        <Separator />
-                        <div className="p-2">
-                            <ResourceDetailItem
-                                icon={<User className="size-4" />}
-                                label="Penulis"
-                                value={thesis.authorName}
-                            />
-                            <ResourceDetailItem
-                                icon={<Hash className="size-4" />}
-                                label="NIM"
-                                value={thesis.studentId}
-                            />
-                            {thesis.year ? (
-                                <ResourceDetailItem
-                                    icon={<Calendar className="size-4" />}
-                                    label="Tahun"
-                                    value={String(thesis.year)}
-                                />
-                            ) : null}
-                        </div>
-                    </div>
-
-                    {thesis.keywords.length > 0 ? (
+                thesis ? (
+                    <div className="space-y-4">
                         <div className="rounded-2xl border bg-card shadow-sm">
                             <div className="p-5">
                                 <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                    Kata Kunci
+                                    Informasi Tesis
                                 </h2>
                             </div>
                             <Separator />
-                            <div className="flex flex-wrap gap-2 p-4">
-                                {thesis.keywords.map((keyword) => (
-                                    <Badge
-                                        key={keyword}
-                                        variant="secondary"
-                                        className="gap-1 bg-muted/80"
+                            <div className="p-2">
+                                <ResourceDetailItem
+                                    icon={<User className="size-4" />}
+                                    label="Penulis"
+                                    value={thesis.authorName}
+                                />
+                                <ResourceDetailItem
+                                    icon={<Hash className="size-4" />}
+                                    label="NIM"
+                                    value={thesis.studentId}
+                                />
+                                {thesis.year ? (
+                                    <ResourceDetailItem
+                                        icon={<Calendar className="size-4" />}
+                                        label="Tahun"
+                                        value={String(thesis.year)}
+                                    />
+                                ) : null}
+                            </div>
+                        </div>
+
+                        {thesis.keywords.length > 0 ? (
+                            <div className="rounded-2xl border bg-card shadow-sm">
+                                <div className="p-5">
+                                    <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                                        Kata Kunci
+                                    </h2>
+                                </div>
+                                <Separator />
+                                <div className="flex flex-wrap gap-2 p-4">
+                                    {thesis.keywords.map((keyword) => (
+                                        <Badge
+                                            key={keyword}
+                                            variant="secondary"
+                                            className="gap-1 bg-muted/80"
+                                        >
+                                            <Tag className="size-2.5" />
+                                            {keyword}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
+
+                        <CatalogReportCard
+                            catalogType="thesis"
+                            catalogId={thesis.id}
+                            catalogLabel="Tesis"
+                            catalogTitle={thesis.title}
+                        />
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="rounded-2xl border bg-card shadow-sm">
+                            <div className="p-5">
+                                <Skeleton className="h-4 w-32" />
+                            </div>
+                            <Separator />
+                            <div className="p-2">
+                                {[0, 1, 2].map((item) => (
+                                    <div
+                                        key={item}
+                                        className="flex items-start gap-3 rounded-xl p-3"
                                     >
-                                        <Tag className="size-2.5" />
-                                        {keyword}
-                                    </Badge>
+                                        <Skeleton className="mt-0.5 size-8 rounded-lg" />
+                                        <div className="min-w-0 flex-1 space-y-2">
+                                            <Skeleton className="h-3 w-20" />
+                                            <Skeleton className="h-4 w-full" />
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </div>
-                    ) : null}
 
-                    <CatalogReportCard
-                        catalogType="thesis"
-                        catalogId={thesis.id}
-                        catalogLabel="Tesis"
-                        catalogTitle={thesis.title}
-                    />
-                </div>
+                        <div className="rounded-2xl border bg-card shadow-sm">
+                            <div className="p-5">
+                                <Skeleton className="h-4 w-24" />
+                            </div>
+                            <Separator />
+                            <div className="flex flex-wrap gap-2 p-4">
+                                <Skeleton className="h-6 w-16 rounded-full" />
+                                <Skeleton className="h-6 w-20 rounded-full" />
+                                <Skeleton className="h-6 w-14 rounded-full" />
+                                <Skeleton className="h-6 w-18 rounded-full" />
+                            </div>
+                        </div>
+                    </div>
+                )
             }
             footer={
-                <Deferred
-                    data="relatedTheses"
-                    fallback={<RelatedCatalogSectionSkeleton />}
-                    rescue={({ reloading }) => (
-                        <DeferredCatalogRescue
-                            dataKey="relatedTheses"
-                            title="Daftar tesis lain belum sempat dimuat"
-                            description="Muat lagi sebentar kalau kamu ingin melihat tesis lain yang arahnya masih serupa."
-                            reloading={reloading}
-                        />
-                    )}
-                >
-                    {props.relatedTheses && props.relatedTheses.length > 0 ? (
-                        <RelatedCatalogSection
-                            title="Tesis lain yang searah"
-                            description="Kalau kamu sedang mendalami bahasan yang mirip, daftar ini bisa jadi titik lanjut yang pas."
-                        >
-                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                {props.relatedTheses.map((relatedThesis) => (
-                                    <ThesisCard
-                                        key={relatedThesis.id}
-                                        thesis={relatedThesis}
-                                    />
-                                ))}
-                            </div>
-                        </RelatedCatalogSection>
-                    ) : null}
-                </Deferred>
+                thesis ? (
+                    <Deferred
+                        data="relatedTheses"
+                        fallback={<RelatedCatalogSectionSkeleton />}
+                        rescue={({ reloading }) => (
+                            <DeferredCatalogRescue
+                                dataKey="relatedTheses"
+                                title="Daftar tesis lain belum sempat dimuat"
+                                description="Muat lagi sebentar kalau kamu ingin melihat tesis lain yang arahnya masih serupa."
+                                reloading={reloading}
+                            />
+                        )}
+                    >
+                        {props.relatedTheses &&
+                        props.relatedTheses.length > 0 ? (
+                            <RelatedCatalogSection
+                                title="Tesis Terkait"
+                                description="Daftar tesis lainnya dengan topik atau bidang penelitian serupa."
+                            >
+                                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                    {props.relatedTheses.map(
+                                        (relatedThesis) => (
+                                            <ThesisCard
+                                                key={relatedThesis.id}
+                                                thesis={relatedThesis}
+                                            />
+                                        ),
+                                    )}
+                                </div>
+                            </RelatedCatalogSection>
+                        ) : null}
+                    </Deferred>
+                ) : null
             }
         >
             <section>
                 <div className="mb-5 flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <BookMarked className="size-4" />
-                    </div>
                     <h2 className="text-xl font-bold">Abstrak</h2>
                 </div>
 
-                {thesis.abstract ? (
+                {thesis?.abstract ? (
                     <div className="space-y-4 text-justify text-base leading-[1.85] text-muted-foreground">
                         {thesis.abstract
                             .split('\n')
@@ -285,12 +364,23 @@ export default function ThesisDetailPage(
                                 <p key={index}>{paragraph}</p>
                             ))}
                     </div>
-                ) : (
+                ) : thesis ? (
                     <div className="rounded-2xl border border-dashed bg-muted/30 p-10 text-center">
                         <BookMarked className="mx-auto mb-3 size-10 text-muted-foreground/40" />
                         <p className="text-sm text-muted-foreground">
                             Abstrak belum tersedia untuk tesis ini.
                         </p>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-11/12" />
+                        <Skeleton className="h-4 w-10/12" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-4/5" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-5/6" />
                     </div>
                 )}
             </section>

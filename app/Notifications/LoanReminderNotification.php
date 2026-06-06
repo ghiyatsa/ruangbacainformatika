@@ -10,11 +10,14 @@ use App\Support\AppTimezone;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Throwable;
 
 class LoanReminderNotification extends Notification implements ShouldQueue
 {
     use Queueable;
     use RateLimitsWhatsAppNotifications;
+
+    public int $tries = 12;
 
     /**
      * Create a new notification instance.
@@ -49,7 +52,11 @@ class LoanReminderNotification extends Notification implements ShouldQueue
         $lines[] = 'Riwayat pinjaman: '.url('/loans/history');
         $lines[] = 'Salam, Tim Perpustakaan '.config('app.name');
 
-        return new WhatsAppMessage(implode("\n", $lines));
+        return new WhatsAppMessage(
+            implode("\n", $lines),
+            category: 'loan_reminder',
+            templateName: 'loan_due_reminder',
+        );
     }
 
     /**
@@ -63,5 +70,25 @@ class LoanReminderNotification extends Notification implements ShouldQueue
             'loan_id' => $this->loan->id,
             'due_at' => $this->loan->due_at,
         ];
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function backoff(): array
+    {
+        return [300, 900, 1800, 3600];
+    }
+
+    public function retryUntil(): \DateTimeInterface
+    {
+        return now()->addDay();
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        if ($exception) {
+            report($exception);
+        }
     }
 }

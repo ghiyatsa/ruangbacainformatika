@@ -25,12 +25,12 @@ class BookImporter extends Importer
                 ->label('Judul')
                 ->requiredMapping()
                 ->rules(['required', 'max:255'])
-                ->helperText('Wajib diisi. Gunakan judul utama buku.')
+                ->helperText('Gunakan judul utama buku.')
                 ->castStateUsing(fn ($state): string => static::normalizeRequiredString($state))
                 ->fillRecordUsing(fn ($record, $state) => $record->title = $state),
             ImportColumn::make('subtitle')
                 ->label('Subjudul')
-                ->helperText('Opsional. Kosongkan jika buku tidak memiliki subjudul.')
+                ->helperText('Kosongkan jika tidak ada subjudul.')
                 ->rules(['nullable', 'max:255'])
                 ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
             ImportColumn::make('isbn')
@@ -48,7 +48,7 @@ class BookImporter extends Importer
                         }
                     },
                 ])
-                ->helperText('Boleh dengan atau tanpa tanda hubung. Sistem akan menyimpan ISBN yang sudah dinormalisasi.')
+                ->helperText('Boleh dengan atau tanpa tanda hubung.')
                 ->fillRecordUsing(function ($record, $state) {
                     $record->isbn = Isbn::normalize((string) $state);
                 }),
@@ -86,7 +86,7 @@ class BookImporter extends Importer
             ImportColumn::make('stock')
                 ->label('Stok')
                 ->numeric()
-                ->helperText('Jika lebih besar dari stok saat ini, sistem akan menambah eksemplar yang kurang.')
+                ->helperText('Jika lebih besar dari stok saat ini, eksemplar akan ditambahkan sesuai kebutuhan.')
                 ->rules(['nullable', 'integer', 'min:0'])
                 ->fillRecordUsing(function ($record, $state) {}),
             ImportColumn::make('rack')
@@ -98,7 +98,7 @@ class BookImporter extends Importer
             ImportColumn::make('publisher')
                 ->label('Penerbit')
                 ->requiredMapping()
-                ->helperText('Wajib diisi. Nama penerbit akan dibuat otomatis jika belum ada.')
+                ->helperText('Nama penerbit baru akan ditambahkan otomatis jika belum tersedia.')
                 ->castStateUsing(fn ($state): string => static::normalizeRequiredString($state))
                 ->fillRecordUsing(function ($record, $state) {
                     $publisher = Publisher::firstOrCreate(

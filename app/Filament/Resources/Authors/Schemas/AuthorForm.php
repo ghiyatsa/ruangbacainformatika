@@ -29,7 +29,7 @@ class AuthorForm
         return $schema
             ->components([
                 Section::make('Informasi Dasar')
-                    ->description('Informasi dasar penulis.')
+                    ->description('Data utama penulis.')
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
@@ -48,7 +48,7 @@ class AuthorForm
                     ->columns(2),
 
                 Section::make('Biografi')
-                    ->description('Informasi tambahan tentang penulis.')
+                    ->description('Keterangan tambahan penulis.')
                     ->schema([
                         static::bioField(),
                     ]),
@@ -61,7 +61,7 @@ class AuthorForm
             ->label('Nama Penulis')
             ->required()
             ->maxLength(255)
-            ->placeholder('Nama lengkap penulis');
+            ->placeholder('Nama lengkap');
     }
 
     protected static function emailField(): TextInput
@@ -80,7 +80,7 @@ class AuthorForm
             ->label('Biografi')
             ->rows(8)
             ->maxLength(65535)
-            ->placeholder('Tuliskan latar belakang atau keterangan singkat penulis...')
+            ->placeholder('Profil singkat penulis...')
             ->columnSpanFull();
     }
 }

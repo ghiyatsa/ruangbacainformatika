@@ -78,7 +78,15 @@ class WhatsAppVerificationController extends Controller
             ])->save();
         }
 
-        $this->whatsAppOtpService->dispatch($user);
+        try {
+            $this->whatsAppOtpService->dispatch($user);
+        } catch (RuntimeException $exception) {
+            report($exception);
+
+            throw ValidationException::withMessages([
+                'otp' => 'Kode belum dapat dikirim. Coba lagi beberapa saat lagi.',
+            ]);
+        }
 
         Inertia::flash('toast', [
             'type' => 'success',

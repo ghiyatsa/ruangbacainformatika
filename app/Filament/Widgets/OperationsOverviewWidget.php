@@ -64,7 +64,7 @@ class OperationsOverviewWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Peminjaman Aktif', $activeLoans)
-                ->description($overdueLoans > 0 ? "{$overdueLoans} lewat jatuh tempo" : 'Tidak ada keterlambatan')
+                ->description($overdueLoans > 0 ? "{$overdueLoans} melewati jatuh tempo" : 'Tidak ada keterlambatan')
                 ->descriptionIcon($overdueLoans > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle)
                 ->color($overdueLoans > 0 ? 'danger' : 'success')
                 ->icon(Heroicon::OutlinedRectangleStack),
@@ -88,13 +88,13 @@ class OperationsOverviewWidget extends StatsOverviewWidget
                 ->icon(Heroicon::OutlinedUserGroup),
 
             Stat::make('Koleksi Buku', $totalBooks)
-                ->description("{$availableItems}/{$totalItems} bisa dipinjam")
+                ->description("{$availableItems}/{$totalItems} tersedia untuk dipinjam")
                 ->descriptionIcon(Heroicon::OutlinedBookOpen)
                 ->color('info')
                 ->icon(Heroicon::OutlinedBookOpen),
 
             Stat::make('Anggota Baru Bulan Ini', $newMembersThisMonth)
-                ->description("{$newMembersThisMonth} terdaftar bulan ini")
+                ->description("{$newMembersThisMonth} pendaftaran bulan ini")
                 ->descriptionIcon(Heroicon::OutlinedCalendarDays)
                 ->color($pendingApproval > 0 ? 'warning' : 'success')
                 ->icon(Heroicon::OutlinedUserPlus),

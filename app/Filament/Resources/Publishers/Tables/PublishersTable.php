@@ -20,7 +20,7 @@ class PublishersTable
         return $table
             ->searchPlaceholder('Cari nama penerbit atau kota')
             ->emptyStateHeading('Belum ada penerbit')
-            ->emptyStateDescription('Data penerbit akan tampil di sini.')
+            ->emptyStateDescription('Daftar penerbit akan muncul di sini.')
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama Penerbit')
@@ -69,7 +69,7 @@ class PublishersTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Penerbit tidak dapat dihapus')
+                                ->title('Penerbit belum bisa dihapus')
                                 ->body($reason)
                                 ->send();
 
@@ -92,8 +92,8 @@ class PublishersTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Beberapa penerbit tidak dapat dihapus')
-                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada penerbit yang digunakan oleh buku.')
+                                ->title('Sebagian penerbit belum bisa dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada buku yang memakai penerbit ini.')
                                 ->send();
 
                             $action->halt();

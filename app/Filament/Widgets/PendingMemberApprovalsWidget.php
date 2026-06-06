@@ -47,7 +47,7 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Menunggu Persetujuan', $pendingTotal)
-                ->description($pendingTotal > 0 ? 'Akun menunggu peninjauan admin' : 'Belum ada antrean baru')
+                ->description($pendingTotal > 0 ? 'Akun menunggu review admin' : 'Belum ada antrean')
                 ->descriptionIcon($pendingTotal > 0 ? Heroicon::OutlinedClock : Heroicon::OutlinedCheckCircle)
                 ->color($pendingTotal > 0 ? 'warning' : 'success')
                 ->icon(Heroicon::OutlinedUserPlus)
@@ -57,7 +57,7 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
                 ])),
 
             Stat::make('Daftar Hari Ini', $pendingRegisteredToday)
-                ->description($pendingRegisteredToday > 0 ? 'Pendaftaran baru yang masih menunggu persetujuan' : 'Belum ada pendaftaran baru')
+                ->description($pendingRegisteredToday > 0 ? 'Pendaftaran baru yang masih menunggu review' : 'Belum ada pendaftaran baru')
                 ->descriptionIcon(Heroicon::OutlinedAcademicCap)
                 ->color($pendingRegisteredToday > 0 ? 'info' : 'gray')
                 ->icon(Heroicon::OutlinedAcademicCap)
@@ -66,8 +66,8 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
                     'registered_today' => ['isActive' => true],
                 ])),
 
-            Stat::make('Disetujui Hari Ini', $approvedToday)
-                ->description($approvedToday > 0 ? 'Persetujuan bertambah hari ini' : 'Belum ada persetujuan hari ini')
+            Stat::make('Review Awal Hari Ini', $approvedToday)
+                ->description($approvedToday > 0 ? 'Review awal bertambah hari ini' : 'Belum ada review awal baru')
                 ->descriptionIcon(Heroicon::OutlinedCheckBadge)
                 ->color($approvedToday > 0 ? 'success' : 'gray')
                 ->icon(Heroicon::OutlinedCheckBadge)

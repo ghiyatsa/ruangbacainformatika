@@ -35,7 +35,7 @@ class LoanInfolist
                             ->badge()
                             ->color(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['color']),
                         TextEntry::make('borrowing_access_detail')
-                            ->label('Keterangan')
+                            ->label('Catatan Status')
                             ->state(fn (User $record): string => app(LoanConsequenceService::class)->borrowingAccessSummary($record)['detail'] ?? '-')
                             ->columnSpanFull(),
                     ])

@@ -83,7 +83,7 @@ class OverdueLoanTableWidget extends BaseTableWidget
             ])
             ->emptyStateIcon(Heroicon::OutlinedCheckCircle)
             ->emptyStateHeading('Tidak ada pinjaman terlambat')
-            ->emptyStateDescription('Semua pinjaman masih tepat waktu.')
+            ->emptyStateDescription('Semua pinjaman masih dalam batas waktu.')
             ->paginated([5, 10]);
     }
 }

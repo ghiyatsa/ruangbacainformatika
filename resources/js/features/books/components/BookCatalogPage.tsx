@@ -51,10 +51,10 @@ export default function BookCatalogPage({
 
     return (
         <CatalogPage
-            title="Katalog Buku"
+            title="Buku"
             metaDescription="Lihat daftar buku Ruang Baca Teknik Informatika Universitas Malikussaleh."
             resourceName="judul buku"
-            breadcrumbLabel="Katalog Buku"
+            breadcrumbLabel="Buku"
             totalCount={stats.booksCount ?? 0}
             paginationData={books}
             filters={filters}

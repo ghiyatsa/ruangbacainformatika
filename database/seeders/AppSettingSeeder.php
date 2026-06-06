@@ -74,6 +74,8 @@ class AppSettingSeeder extends Seeder
                 'similarity_weight_kata_kunci' => '0.1',
                 'whatsapp_api_url' => (string) config('services.fonnte.url', ''),
                 'whatsapp_api_token' => (string) config('services.fonnte.token', ''),
+                'whatsapp_failure_pause_threshold' => (string) config('services.fonnte.failure_pause_threshold', 5),
+                'whatsapp_failure_pause_window_minutes' => (string) config('services.fonnte.failure_pause_window_minutes', 15),
             ],
         ];
     }

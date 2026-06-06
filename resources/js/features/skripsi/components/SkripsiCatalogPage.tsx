@@ -38,10 +38,10 @@ export default function SkripsiCatalogPage({
 
     return (
         <CatalogPage
-            title="Katalog Skripsi"
+            title="Skripsi"
             metaDescription="Lihat daftar skripsi mahasiswa Teknik Informatika Universitas Malikussaleh."
             resourceName="skripsi"
-            breadcrumbLabel="Katalog Skripsi"
+            breadcrumbLabel="Skripsi"
             totalCount={total}
             paginationData={skripsis}
             filters={filters}

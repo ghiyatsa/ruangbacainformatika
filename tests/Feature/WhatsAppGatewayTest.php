@@ -20,6 +20,7 @@ it('sends whatsapp messages to fonnte with the expected authorization header', f
     $repository = mock(SettingRepository::class);
     $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url', 'https://api.fonnte.com/send')->andReturn('https://api.fonnte.com/send');
     $repository->shouldReceive('get')->with('integration', 'whatsapp_api_token', 'plain-token-value')->andReturn('plain-token-value');
+    allowWhatsAppHealthSettings($repository);
 
     $response = (new WhatsAppGateway($repository, app(HttpFactory::class)))->send(
         '08123456789',
@@ -33,7 +34,8 @@ it('sends whatsapp messages to fonnte with the expected authorization header', f
             && $request->hasHeader('Authorization', 'plain-token-value')
             && ! $request->hasHeader('Authorization', 'Bearer plain-token-value')
             && $request['target'] === '08123456789'
-            && $request['message'] === 'Kode OTP Anda: 123456';
+            && $request['message'] === 'Kode OTP Anda: 123456'
+            && $request['connectOnly'] === true;
     });
 });
 
@@ -51,6 +53,7 @@ it('throws a runtime exception when fonnte rejects the message request', functio
     $repository = mock(SettingRepository::class);
     $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url', 'https://api.fonnte.com/send')->andReturn('https://api.fonnte.com/send');
     $repository->shouldReceive('get')->with('integration', 'whatsapp_api_token', 'plain-token-value')->andReturn('plain-token-value');
+    allowWhatsAppHealthSettings($repository);
 
     expect(fn () => (new WhatsAppGateway($repository, app(HttpFactory::class)))->send(
         '08123456789',
@@ -76,6 +79,7 @@ it('falls back to env-backed config when whatsapp integration settings are missi
     $repository->shouldReceive('get')
         ->with('integration', 'whatsapp_api_token', 'env-token-value')
         ->andReturn('env-token-value');
+    allowWhatsAppHealthSettings($repository);
 
     $response = (new WhatsAppGateway($repository, app(HttpFactory::class)))->send(
         '08123456789',
@@ -105,6 +109,7 @@ it('decrypts encrypted whatsapp integration tokens before sending messages', fun
     $repository->shouldReceive('get')
         ->with('integration', 'whatsapp_api_token', 'env-token-value')
         ->andReturn($encryptedToken);
+    allowWhatsAppHealthSettings($repository);
 
     $response = (new WhatsAppGateway($repository, app(HttpFactory::class)))->send(
         '08123456789',
@@ -117,3 +122,13 @@ it('decrypts encrypted whatsapp integration tokens before sending messages', fun
         return $request->hasHeader('Authorization', 'stored-encrypted-token');
     });
 });
+
+function allowWhatsAppHealthSettings(object $repository): void
+{
+    $repository->shouldReceive('get')
+        ->with('integration', 'whatsapp_failure_pause_threshold', 5)
+        ->andReturn(5);
+    $repository->shouldReceive('get')
+        ->with('integration', 'whatsapp_failure_pause_window_minutes', 15)
+        ->andReturn(15);
+}

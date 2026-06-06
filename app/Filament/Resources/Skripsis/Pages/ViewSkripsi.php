@@ -29,7 +29,7 @@ class ViewSkripsi extends ViewRecord
 
                     Notification::make()
                         ->success()
-                        ->title('Sync dijadwalkan')
+                        ->title('Sinkron masuk antrean')
                         ->send();
                 }),
             EditAction::make(),

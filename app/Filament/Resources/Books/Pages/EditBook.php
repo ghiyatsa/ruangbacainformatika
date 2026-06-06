@@ -24,7 +24,7 @@ class EditBook extends EditRecord
 
                     Notification::make()
                         ->warning()
-                        ->title('Buku tidak dapat dihapus')
+                        ->title('Buku belum bisa dihapus')
                         ->body($reason)
                         ->send();
 

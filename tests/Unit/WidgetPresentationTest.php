@@ -56,7 +56,7 @@ it('links pending member approval stats to filtered user tables', function () {
         ->and($stats[0]->getUrl())->toContain('tableFilters%5Bmanual_approval%5D%5BisActive%5D=1')
         ->and($stats[1]->getLabel())->toBe('Daftar Hari Ini')
         ->and($stats[1]->getUrl())->toContain('tableFilters%5Bregistered_today%5D%5BisActive%5D=1')
-        ->and($stats[2]->getLabel())->toBe('Disetujui Hari Ini')
+        ->and($stats[2]->getLabel())->toBe('Review Awal Hari Ini')
         ->and($stats[2]->getUrl())->toContain('tableFilters%5Bapproved_today%5D%5BisActive%5D=1');
 });
 
@@ -76,7 +76,7 @@ it('separates operational member growth from approval queue copy', function () {
     $approvalStats = invade(app(PendingMemberApprovalsWidget::class))->getStats();
 
     expect($operationsStats[3]->getLabel())->toBe('Anggota Baru Bulan Ini')
-        ->and($operationsStats[3]->getDescription())->toContain('terdaftar bulan ini')
+        ->and($operationsStats[3]->getDescription())->toContain('pendaftaran bulan ini')
         ->and($operationsStats[3]->getDescription())->not->toContain('menunggu persetujuan')
         ->and($approvalStats[0]->getDescription())->not->toContain('Google')
         ->and($approvalStats[1]->getDescription())->not->toContain('Google');

@@ -66,13 +66,13 @@ class KioskSettings extends Page implements HasTable
         return $schema->components([
             Form::make([
                 Section::make('Akses Kios')
-                    ->description('PIN digunakan untuk membuka akses sebelum perangkat dipakai oleh pengunjung.')
+                    ->description('Pengaturan akses perangkat kios.')
                     ->schema([
                         FormTextInput::make('pin')
                             ->label('PIN Kios')
                             ->password()
                             ->revealable()
-                            ->helperText('Biarkan kosong jika PIN tidak diubah.')
+                            ->helperText('Kosongkan jika PIN tidak diubah.')
                             ->required(fn (): bool => ! $this->kioskPinManager()->isConfigured())
                             ->minLength(4)
                             ->maxLength(8),
@@ -80,7 +80,7 @@ class KioskSettings extends Page implements HasTable
                             ->label('Daftar IP / Subnet yang Diizinkan')
                             ->rows(4)
                             ->placeholder("127.0.0.1\n192.168.10.0/24\n10.10.0.0/16")
-                            ->helperText('Kosongkan untuk mengizinkan semua jaringan. Pisahkan IP atau CIDR dengan baris baru atau koma.')
+                            ->helperText('Kosongkan untuk membuka akses ke semua jaringan. Pisahkan IP atau CIDR dengan baris baru atau koma.')
                             ->rule(function (): Closure {
                                 return function (string $attribute, mixed $value, Closure $fail): void {
                                     $invalidNetworks = collect($this->kioskNetworkGuard()->normalizeNetworks($value))
@@ -95,12 +95,12 @@ class KioskSettings extends Page implements HasTable
                     ]),
 
                 Section::make('Perangkat Aktif')
-                    ->description('Daftar perangkat yang saat ini masih memiliki sesi kios aktif.')
+                    ->description('Perangkat yang masih memiliki sesi kios aktif.')
                     ->schema([
                         EmbeddedTable::make(),
                     ]),
                 Section::make('Tampilan Kios')
-                    ->description('Atur teks utama yang tampil pada layar layanan mandiri.')
+                    ->description('Teks utama yang tampil pada layar kios.')
                     ->schema([
                         FormTextInput::make('title')
                             ->label('Judul')
@@ -110,7 +110,7 @@ class KioskSettings extends Page implements HasTable
                         FormTextInput::make('subtitle')
                             ->label('Subjudul')
                             ->maxLength(255)
-                            ->placeholder('Masukkan PIN untuk mulai menggunakan perangkat ini.'),
+                            ->placeholder('Masukkan PIN untuk mulai.'),
                     ])
                     ->columns(2),
             ])
@@ -123,7 +123,7 @@ class KioskSettings extends Page implements HasTable
                             ->icon(Heroicon::OutlinedArrowPath)
                             ->requiresConfirmation()
                             ->modalHeading('Reset Semua Sesi Kios')
-                            ->modalDescription('Semua perangkat akan diminta memasukkan PIN kembali.')
+                            ->modalDescription('Semua perangkat harus memasukkan PIN kembali.')
                             ->modalSubmitActionLabel('Reset Sesi')
                             ->action('rotateSessions'),
                         Action::make('save')
@@ -167,7 +167,7 @@ class KioskSettings extends Page implements HasTable
         Notification::make()
             ->success()
             ->title('Pengaturan kios disimpan')
-            ->body($pinWasUpdated ? 'PIN diperbarui dan semua sesi perangkat sebelumnya telah direset.' : null)
+            ->body($pinWasUpdated ? 'PIN diperbarui. Semua perangkat perlu masuk kembali.' : null)
             ->send();
 
         $this->form->fill($this->settingRepository()->sectionValues('kiosk', $this->defaultValues()));
@@ -198,8 +198,8 @@ class KioskSettings extends Page implements HasTable
 
         Notification::make()
             ->success()
-            ->title('Semua sesi kios telah direset')
-            ->body('Semua perangkat harus memasukkan PIN kembali.')
+            ->title('Sesi kios direset')
+            ->body('Semua perangkat perlu memasukkan PIN kembali.')
             ->send();
 
         $this->form->fill($this->settingRepository()->sectionValues('kiosk', $this->defaultValues()));
@@ -252,7 +252,7 @@ class KioskSettings extends Page implements HasTable
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Keluarkan Perangkat')
-                    ->modalDescription('Perangkat ini harus memasukkan PIN lagi sebelum bisa digunakan.')
+                    ->modalDescription('Perangkat ini perlu memasukkan PIN kembali sebelum digunakan.')
                     ->modalSubmitActionLabel('Keluarkan')
                     ->action(function (Action $action): void {
                         /** @var KioskDevice $device */
@@ -273,7 +273,7 @@ class KioskSettings extends Page implements HasTable
                     }),
             ])
             ->emptyStateHeading('Tidak ada perangkat aktif')
-            ->emptyStateDescription('Perangkat yang sedang aktif akan tampil di sini.');
+            ->emptyStateDescription('Perangkat aktif akan muncul di sini.');
     }
 
     protected function kioskPinManager(): KioskPinManager

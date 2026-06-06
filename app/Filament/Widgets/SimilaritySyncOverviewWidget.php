@@ -62,7 +62,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
                     'similarity_status' => ['value' => SimilaritySyncStatus::STATUS_SYNCED],
                 ])),
             Stat::make('Perlu Tindak Lanjut', $failedCount)
-                ->description($failedCount > 0 ? 'Ada sinkronisasi yang gagal.' : 'Tidak ada kendala.')
+                ->description($failedCount > 0 ? 'Ada proses yang perlu ditindaklanjuti.' : 'Tidak ada kendala.')
                 ->descriptionIcon($failedCount > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle, IconPosition::Before)
                 ->color($failedCount > 0 ? 'danger' : 'success')
                 ->icon(Heroicon::OutlinedExclamationTriangle)

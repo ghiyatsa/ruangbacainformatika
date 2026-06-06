@@ -42,6 +42,7 @@ class WhatsAppOtpNotification extends Notification
         return new WhatsAppMessage(
             implode("\n", $lines),
             bypassPacing: true,
+            category: 'otp',
         );
     }
 

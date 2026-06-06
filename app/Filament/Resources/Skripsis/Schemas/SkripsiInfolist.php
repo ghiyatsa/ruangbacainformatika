@@ -62,11 +62,11 @@ class SkripsiInfolist
                                     ->badge()
                                     ->color(fn (Skripsi $record): string => $record->similaritySyncStatusColor()),
                                 TextEntry::make('similaritySyncStatus.last_operation')
-                                    ->label('Operasi terakhir')
+                                    ->label('Proses terakhir')
                                     ->formatStateUsing(fn (Skripsi $record): string => $record->similaritySyncStatus?->operationLabel() ?? 'Belum ada')
                                     ->placeholder('-'),
                                 TextEntry::make('similaritySyncStatus.attempts')
-                                    ->label('Jumlah percobaan')
+                                    ->label('Percobaan')
                                     ->placeholder('0'),
                                 TextEntry::make('similaritySyncStatus.last_attempt_at')
                                     ->label('Percobaan terakhir')
@@ -77,8 +77,8 @@ class SkripsiInfolist
                                     ->dateTime('d/m/Y H:i')
                                     ->placeholder('-'),
                                 TextEntry::make('similaritySyncStatus.last_error')
-                                    ->label('Error terakhir')
-                                    ->placeholder('Belum ada error')
+                                    ->label('Catatan error terakhir')
+                                    ->placeholder('Belum ada catatan error')
                                     ->columnSpanFull(),
                             ]),
                     ])

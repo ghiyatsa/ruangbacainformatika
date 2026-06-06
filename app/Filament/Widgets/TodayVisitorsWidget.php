@@ -45,7 +45,7 @@ class TodayVisitorsWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Total Hari Ini', $total)
-                ->description("Tujuan terbanyak: {$topPurposeLabel}")
+                ->description("Tujuan utama: {$topPurposeLabel}")
                 ->descriptionIcon(Heroicon::OutlinedMapPin)
                 ->color('primary')
                 ->icon(Heroicon::OutlinedUserGroup),
@@ -65,7 +65,7 @@ class TodayVisitorsWidget extends StatsOverviewWidget
             Stat::make('Minggu Ini', VisitLog::query()
                 ->whereBetween('visited_at', [$weekStart, $weekEnd])
                 ->count())
-                ->description('Total kunjungan pekan ini')
+                ->description('Total kunjungan minggu ini')
                 ->descriptionIcon(Heroicon::OutlinedCalendarDays)
                 ->color('success')
                 ->icon(Heroicon::OutlinedCalendarDays),

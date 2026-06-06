@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\WhatsAppMessageLog;
 use App\Notifications\Messages\WhatsAppMessage;
 use App\Repositories\SettingRepository;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -30,42 +31,52 @@ class WhatsAppGateway
         );
     }
 
-    public function sendMessage(string $phoneNumber, WhatsAppMessage $message): Response
+    public function sendMessage(string $phoneNumber, WhatsAppMessage $message, ?WhatsAppMessageLog $log = null): Response
     {
-        if (! $this->configured()) {
-            throw new RuntimeException('Gateway WhatsApp belum dikonfigurasi.');
+        try {
+            if (! $this->configured()) {
+                throw new RuntimeException('Gateway WhatsApp belum dikonfigurasi.');
+            }
+
+            $this->ensureRoutineDeliveryIsHealthy($message);
+
+            $response = $this->sendWithPacing(function () use ($message, $phoneNumber): Response {
+                return $this->http
+                    ->acceptJson()
+                    ->timeout(10)
+                    ->retry(2, 200, throw: false)
+                    ->withHeaders([
+                        'Authorization' => (string) $this->apiToken(),
+                    ])
+                    ->asForm()
+                    ->post($this->apiUrl(), [
+                        'target' => $phoneNumber,
+                        'message' => $message->content,
+                        'connectOnly' => true,
+                    ])
+                    ->throw();
+            }, $message->bypassPacing);
+
+            $payload = $this->responsePayload($response);
+            $status = $payload['status'] ?? $payload['Status'] ?? null;
+
+            if ($status === false) {
+                $reason = $payload['reason'] ?? $payload['detail'] ?? 'Pengiriman WhatsApp ditolak oleh gateway.';
+                $log?->markFailed((string) $reason, $payload);
+
+                throw new RuntimeException((string) $reason);
+            }
+
+            $log?->markSent($payload);
+
+            return $response;
+        } catch (\Throwable $exception) {
+            if ($log?->status !== WhatsAppMessageLog::StatusFailed) {
+                $log?->markFailed($exception->getMessage());
+            }
+
+            throw $exception;
         }
-
-        $response = $this->sendWithPacing(function () use ($message, $phoneNumber): Response {
-            return $this->http
-                ->acceptJson()
-                ->timeout(10)
-                ->retry(2, 200, throw: false)
-                ->withHeaders([
-                    'Authorization' => (string) $this->apiToken(),
-                ])
-                ->asForm()
-                ->post($this->apiUrl(), [
-                    'target' => $phoneNumber,
-                    'message' => $message->content,
-                ])
-                ->throw();
-        }, $message->bypassPacing);
-
-        $payload = $response->json();
-        $status = is_array($payload)
-            ? ($payload['status'] ?? $payload['Status'] ?? null)
-            : null;
-
-        if ($status === false) {
-            $reason = is_array($payload)
-                ? ($payload['reason'] ?? $payload['detail'] ?? 'Pengiriman WhatsApp ditolak oleh gateway.')
-                : 'Pengiriman WhatsApp ditolak oleh gateway.';
-
-            throw new RuntimeException((string) $reason);
-        }
-
-        return $response;
     }
 
     protected function apiUrl(): ?string
@@ -97,6 +108,49 @@ class WhatsAppGateway
         }
 
         return $token !== '' ? $token : null;
+    }
+
+    protected function ensureRoutineDeliveryIsHealthy(WhatsAppMessage $message): void
+    {
+        if ($message->bypassPacing || $message->category === 'otp') {
+            return;
+        }
+
+        $failureThreshold = max((int) $this->settingRepository->get(
+            'integration',
+            'whatsapp_failure_pause_threshold',
+            config('services.fonnte.failure_pause_threshold', 5),
+        ), 0);
+
+        if ($failureThreshold === 0) {
+            return;
+        }
+
+        $windowMinutes = max((int) $this->settingRepository->get(
+            'integration',
+            'whatsapp_failure_pause_window_minutes',
+            config('services.fonnte.failure_pause_window_minutes', 15),
+        ), 1);
+
+        $recentFailures = WhatsAppMessageLog::query()
+            ->where('status', WhatsAppMessageLog::StatusFailed)
+            ->where('category', '!=', 'otp')
+            ->where('created_at', '>=', now()->subMinutes($windowMinutes))
+            ->count();
+
+        if ($recentFailures >= $failureThreshold) {
+            throw new RuntimeException('Pengiriman WhatsApp rutin dijeda sementara karena banyak kegagalan terbaru.');
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function responsePayload(Response $response): array
+    {
+        $payload = $response->json();
+
+        return is_array($payload) ? $payload : [];
     }
 
     /**

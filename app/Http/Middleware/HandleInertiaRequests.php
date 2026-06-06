@@ -62,6 +62,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $this->serializeUser($user),
                 'canAccessAdminPanel' => $user?->canAccessAdminPanel() ?? false,
                 'canBorrowBooks' => $user?->canBorrowBooks() ?? false,
+                'canViewNotifications' => $user?->canViewPublicNotifications() ?? false,
                 'hasVerifiedWhatsApp' => $user?->hasVerifiedWhatsApp() ?? false,
                 'requiresWhatsAppVerification' => $user?->requiresWhatsAppVerification() ?? false,
                 'borrowingAccessMessage' => $user !== null && ! $user->canBorrowBooks()
@@ -69,14 +70,16 @@ class HandleInertiaRequests extends Middleware
                         ? 'Verifikasi WhatsApp diperlukan sebelum layanan anggota dapat digunakan.'
                         : ($user->requiresManualApproval()
                             ? 'Akun kampus Anda sedang menunggu persetujuan admin.'
-                            : 'Layanan peminjaman tersedia untuk anggota yang telah disetujui.'))
+                            : 'Layanan peminjaman tersedia setelah status anggota Anda lengkap.'))
                     : null,
                 'homeUrl' => $user === null
                     ? route('home', absolute: false)
                     : app(AuthenticationRedirector::class)->pathFor($user),
             ],
             'notifications' => fn (): array => [
-                'unreadCount' => $user ? $this->visibleUnreadNotifications($user)->count() : 0,
+                'unreadCount' => $user?->canViewPublicNotifications()
+                    ? $this->visibleUnreadNotifications($user)->count()
+                    : 0,
             ],
             'googleAuth' => [
                 'clientId' => filled(config('services.google.client_id'))

@@ -30,7 +30,7 @@ class SkripsisTable
         return $table
             ->searchPlaceholder('Cari judul, nama, atau NIM')
             ->emptyStateHeading('Belum ada data skripsi')
-            ->emptyStateDescription('Data skripsi akan tampil di sini.')
+            ->emptyStateDescription('Data skripsi akan muncul di sini.')
             ->emptyStateIcon(Heroicon::OutlinedNewspaper)
             ->defaultSort('created_at', 'desc')
             ->striped()
@@ -142,7 +142,7 @@ class SkripsisTable
 
                         Notification::make()
                             ->success()
-                            ->title('Sinkron dijadwalkan')
+                            ->title('Sinkron masuk antrean')
                             ->send();
                     }),
             ])
@@ -172,7 +172,7 @@ class SkripsisTable
 
                             Notification::make()
                                 ->success()
-                                ->title($queuedCount.' skripsi dijadwalkan')
+                                ->title($queuedCount.' skripsi masuk antrean')
                                 ->send();
                         }),
                     DeleteBulkAction::make()

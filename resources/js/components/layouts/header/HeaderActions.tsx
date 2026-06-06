@@ -80,10 +80,12 @@ export function HeaderActions({
 
                 {auth.user ? (
                     <>
-                        <NotificationsDropdown
-                            key={notifications.unreadCount}
-                            initialUnreadCount={notifications.unreadCount}
-                        />
+                        {auth.canViewNotifications ? (
+                            <NotificationsDropdown
+                                key={notifications.unreadCount}
+                                initialUnreadCount={notifications.unreadCount}
+                            />
+                        ) : null}
 
                         {auth.canBorrowBooks ? (
                             <Button

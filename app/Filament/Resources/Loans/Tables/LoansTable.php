@@ -21,7 +21,7 @@ class LoansTable
         return $table
             ->searchPlaceholder('Cari nama anggota atau email')
             ->emptyStateHeading('Belum ada data peminjaman')
-            ->emptyStateDescription('Riwayat peminjaman anggota akan tampil di sini.')
+            ->emptyStateDescription('Riwayat peminjaman akan muncul di sini.')
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
             ->recordUrl(fn (User $record): string => LoanResource::getUrl('view', ['record' => $record]))

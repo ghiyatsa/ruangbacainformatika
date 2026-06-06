@@ -16,6 +16,7 @@ class NotificationController extends Controller
         $user = $request->user();
 
         abort_unless($user !== null, 401);
+        abort_unless($user->canViewPublicNotifications(), 403);
 
         $notifications = $this->visibleNotifications($user)
             ->latest()
@@ -36,6 +37,7 @@ class NotificationController extends Controller
         $user = $request->user();
 
         abort_unless($user !== null, 401);
+        abort_unless($user->canViewPublicNotifications(), 403);
 
         $this->visibleUnreadNotifications($user)->update([
             'read_at' => now(),
@@ -51,6 +53,7 @@ class NotificationController extends Controller
         $user = $request->user();
 
         abort_unless($user !== null, 401);
+        abort_unless($user->canViewPublicNotifications(), 403);
 
         $databaseNotification = $this->visibleNotifications($user)
             ->whereKey($notification)

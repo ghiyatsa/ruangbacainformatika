@@ -10,11 +10,12 @@ use App\Notifications\LoanReceiptDatabaseNotification;
 use App\Notifications\LoanReminderDatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 
 it('shares unread notification count for authenticated users', function () {
-    $user = User::factory()->create();
+    $user = createNotificationMember();
     $loan = createLoanWithBookFor($user);
 
     $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
@@ -31,8 +32,24 @@ it('shares unread notification count for authenticated users', function () {
         );
 });
 
-it('returns the latest notifications for the authenticated user', function () {
+it('does not share unread notification count for non members', function () {
     $user = User::factory()->create();
+    $loan = createLoanWithBookFor($user);
+
+    $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
+
+    actingAs($user)
+        ->get(route('home'))
+        ->assertOk()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->where('auth.canViewNotifications', false)
+                ->where('notifications.unreadCount', 0),
+        );
+});
+
+it('returns the latest notifications for the authenticated user', function () {
+    $user = createNotificationMember();
     $loan = createLoanWithBookFor($user);
 
     $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
@@ -55,7 +72,7 @@ it('returns the latest notifications for the authenticated user', function () {
 });
 
 it('excludes filament notifications from the public notification center', function () {
-    $user = User::factory()->create();
+    $user = createNotificationMember();
     $loan = createLoanWithBookFor($user);
 
     $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
@@ -74,8 +91,19 @@ it('excludes filament notifications from the public notification center', functi
         ]);
 });
 
-it('marks a notification as read', function () {
+it('blocks the public notification center for non members', function () {
     $user = User::factory()->create();
+    $loan = createLoanWithBookFor($user);
+
+    $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
+
+    actingAs($user)
+        ->getJson(route('notifications.index'))
+        ->assertForbidden();
+});
+
+it('marks a notification as read', function () {
+    $user = createNotificationMember();
     $loan = createLoanWithBookFor($user);
 
     $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
@@ -91,7 +119,7 @@ it('marks a notification as read', function () {
 });
 
 it('marks all notifications as read', function () {
-    $user = User::factory()->create();
+    $user = createNotificationMember();
     $loan = createLoanWithBookFor($user);
 
     $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
@@ -108,6 +136,15 @@ it('marks all notifications as read', function () {
 
     expect($user->fresh()->unreadNotifications()->count())->toBe(1);
 });
+
+function createNotificationMember(): User
+{
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    return User::factory()->create([
+        'whatsapp_verified_at' => now(),
+    ]);
+}
 
 function createLoanWithBookFor(User $user): Loan
 {

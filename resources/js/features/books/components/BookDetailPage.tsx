@@ -249,11 +249,13 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
                                     {
-                                        title: 'Katalog Buku',
+                                        title: 'Buku',
                                         href: booksRoute.index.url(),
                                     },
                                     {
-                                        title: book?.title ?? 'Detail Buku',
+                                        title: book?.title ?? (
+                                            <Skeleton className="h-4 w-28" />
+                                        ),
                                         href: book
                                             ? booksRoute.show.url(book.slug)
                                             : booksRoute.index.url(),
@@ -285,13 +287,15 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                         aria-label={`Lihat cover penuh buku ${book.title}`}
                                                     >
                                                         <img
-                                                            src={book.coverImageUrl}
+                                                            src={
+                                                                book.coverImageUrl
+                                                            }
                                                             alt={`Cover buku ${book.title}`}
                                                             fetchPriority="high"
                                                             decoding="async"
                                                             loading="lazy"
                                                             sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
-                                                            className="max-h-[28rem] w-auto max-w-full object-contain transition duration-300 block h-full w-auto"
+                                                            className="block h-full max-h-[28rem] w-auto max-w-full object-contain transition duration-300"
                                                         />
                                                     </button>
                                                 </DialogTrigger>
@@ -308,7 +312,9 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                     </DialogDescription>
                                                     <div className="flex max-h-[80vh] items-center justify-center overflow-hidden">
                                                         <img
-                                                            src={book.coverImageUrl}
+                                                            src={
+                                                                book.coverImageUrl
+                                                            }
                                                             alt={`Cover penuh buku ${book.title}`}
                                                             className="max-h-[80vh] w-full object-contain"
                                                         />
@@ -328,26 +334,29 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                             </Badge>
                                         ) : null}
 
-                                        {book.categories.map((category, index) => (
-                                            <Link
-                                                key={
-                                                    category.slug ??
-                                                    `${category.name}-${index}`
-                                                }
-                                                href={booksRoute.index.url({
-                                                    query: {
-                                                        category: category.slug,
-                                                    },
-                                                })}
-                                            >
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="bg-muted"
+                                        {book.categories.map(
+                                            (category, index) => (
+                                                <Link
+                                                    key={
+                                                        category.slug ??
+                                                        `${category.name}-${index}`
+                                                    }
+                                                    href={booksRoute.index.url({
+                                                        query: {
+                                                            category:
+                                                                category.slug,
+                                                        },
+                                                    })}
                                                 >
-                                                    {category.name}
-                                                </Badge>
-                                            </Link>
-                                        ))}
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-muted"
+                                                    >
+                                                        {category.name}
+                                                    </Badge>
+                                                </Link>
+                                            ),
+                                        )}
                                     </div>
 
                                     <h1 className="mb-3 text-3xl leading-tight font-bold tracking-tight sm:text-4xl lg:text-5xl">
@@ -392,8 +401,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                         <strong className="text-foreground">
                                                             {book.itemsCount}
                                                         </strong>{' '}
-                                                        eksemplar tersedia di ruang
-                                                        baca
+                                                        eksemplar tersedia di
+                                                        ruang baca
                                                     </>
                                                 )}
                                             </span>
@@ -555,9 +564,10 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                             </p>
                                             {book.usesBackupShelfLocations ? (
                                                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                                    Rak utama sedang kosong, jadi
-                                                    lokasi ini memakai rak cadangan
-                                                    yang masih tersedia.
+                                                    Rak utama sedang kosong,
+                                                    jadi lokasi ini memakai rak
+                                                    cadangan yang masih
+                                                    tersedia.
                                                 </p>
                                             ) : null}
                                         </div>
@@ -601,7 +611,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                         {props.relatedBooks && props.relatedBooks.length > 0 ? (
                             <RelatedCatalogSection
                                 title="Buku Terkait"
-                                description="Beberapa judul berikut mungkin sesuai dengan topik atau kategori buku ini."
+                                description="Rekomendasi buku lainnya dengan kategori atau topik serupa."
                             >
                                 <div className="grid gap-4 lg:grid-cols-2">
                                     {props.relatedBooks.map((relatedBook) => (
@@ -622,10 +632,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
         >
             <section>
                 <div className="mb-5 flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <BookOpen className="size-4" />
-                    </div>
-                    <h2 className="text-xl font-bold">Sinopsis</h2>
+                    <h2 className="text-xl font-bold">Deskripsi</h2>
                 </div>
 
                 {book?.description ? (

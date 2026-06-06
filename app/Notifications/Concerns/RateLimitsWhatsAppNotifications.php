@@ -8,6 +8,16 @@ use Illuminate\Queue\Middleware\RateLimited;
 trait RateLimitsWhatsAppNotifications
 {
     /**
+     * @return array<class-string, string>
+     */
+    public function viaQueues(): array
+    {
+        return [
+            WhatsAppChannel::class => 'whatsapp',
+        ];
+    }
+
+    /**
      * @return array<int, object>
      */
     public function middleware(object $notifiable, string $channel): array

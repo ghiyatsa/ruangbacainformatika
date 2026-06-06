@@ -21,7 +21,7 @@ class InternshipReportsTable
         return $table
             ->searchPlaceholder('Cari judul, nama, atau NIM')
             ->emptyStateHeading('Belum ada data laporan KP')
-            ->emptyStateDescription('Data laporan KP akan tampil di sini.')
+            ->emptyStateDescription('Data laporan KP akan muncul di sini.')
             ->emptyStateIcon(Heroicon::OutlinedNewspaper)
             ->columns([
                 TextColumn::make('title')

@@ -21,7 +21,7 @@ class StaticPagesTable
         return $table
             ->searchPlaceholder('Cari judul atau slug halaman')
             ->emptyStateHeading('Belum ada halaman statis')
-            ->emptyStateDescription('Halaman publik akan tampil di sini.')
+            ->emptyStateDescription('Halaman publik akan muncul di sini.')
             ->columns([
                 TextColumn::make('title')
                     ->label('Judul')
@@ -67,8 +67,8 @@ class StaticPagesTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Halaman bawaan tidak dapat dihapus')
-                                ->body('Gunakan ubah konten untuk memperbarui halaman bawaan seperti About, Kebijakan Privasi, atau Syarat Layanan.')
+                                ->title('Halaman bawaan belum bisa dihapus')
+                                ->body('Gunakan menu ubah untuk memperbarui halaman bawaan seperti About, Kebijakan Privasi, atau Syarat Layanan.')
                                 ->send();
 
                             $action->halt();

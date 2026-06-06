@@ -22,7 +22,7 @@ class VisitLogsTable
         return $table
             ->searchPlaceholder('Cari nama, identitas, atau instansi')
             ->emptyStateHeading('Belum ada data kunjungan')
-            ->emptyStateDescription('Data kunjungan akan tampil di sini.')
+            ->emptyStateDescription('Data kunjungan akan muncul di sini.')
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
             ->columns([

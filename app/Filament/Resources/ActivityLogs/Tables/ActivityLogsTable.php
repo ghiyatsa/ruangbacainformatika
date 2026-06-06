@@ -52,6 +52,6 @@ class ActivityLogsTable
             ])
             ->defaultSort('created_at', 'desc')
             ->emptyStateHeading('Belum ada aktivitas admin')
-            ->emptyStateDescription('Riwayat perubahan penting akan tampil di sini.');
+            ->emptyStateDescription('Riwayat aktivitas penting akan muncul di sini.');
     }
 }

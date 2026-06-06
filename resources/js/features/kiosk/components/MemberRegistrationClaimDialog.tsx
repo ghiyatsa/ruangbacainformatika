@@ -96,6 +96,7 @@ export function MemberRegistrationClaimDialog({
     const isClaimed = activeRegistration.status === 'claimed';
     const isExpired = activeRegistration.status === 'expired';
     const isKioskCompleted = isLinkedClaim || isClaimed;
+    const isConnectionCompleted = isLinkedClaim || isClaimed;
     const secondsRemaining = isPendingClaim
         ? getSecondsRemaining(activeRegistration.expiresAt, currentTimestamp)
         : 0;
@@ -184,7 +185,7 @@ export function MemberRegistrationClaimDialog({
 
     // Poll registration status
     useEffect(() => {
-        if (!isOpen || (!isPendingClaim && !isLinkedClaim)) {
+        if (!isOpen || !isPendingClaim) {
             if (pollingIntervalRef.current) {
                 window.clearInterval(pollingIntervalRef.current);
                 pollingIntervalRef.current = null;
@@ -226,10 +227,7 @@ export function MemberRegistrationClaimDialog({
                         return payload.memberRegistrationClaim;
                     }
 
-                    if (
-                        current.status === 'claimed' ||
-                        current.status === 'expired'
-                    ) {
+                    if (current.status === 'linked' || current.status === 'claimed' || current.status === 'expired') {
                         return current;
                     }
 
@@ -253,7 +251,7 @@ export function MemberRegistrationClaimDialog({
 
             isPollingRef.current = false;
         };
-    }, [isOpen, isLinkedClaim, isPendingClaim]);
+    }, [isOpen, isPendingClaim]);
 
     // Countdown tick effect
     useEffect(() => {
@@ -341,33 +339,25 @@ export function MemberRegistrationClaimDialog({
                             >
                                 {isPendingClaim
                                     ? 'Menunggu scan'
-                                    : isLinkedClaim
-                                      ? 'Selesai'
-                                      : isClaimed
-                                        ? 'Berhasil'
+                                    : isConnectionCompleted
+                                      ? 'Terhubung'
                                         : 'Kedaluwarsa'}
                             </Badge>
 
                             <div className="space-y-1.5">
                                 <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                                    {isClaimed
+                                    {isConnectionCompleted
                                         ? 'Akun tertaut'
-                                        : isLinkedClaim
-                                          ? 'Registrasi selesai'
-                                          : isExpired
-                                            ? 'Waktu habis'
-                                            : 'Scan QR'}
+                                        : isExpired
+                                          ? 'Waktu habis'
+                                          : 'Scan QR'}
                                 </h2>
                                 <p className="mx-auto max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                    {isClaimed
-                                        ? activeRegistration.approvalPending
-                                            ? 'Akun menunggu persetujuan admin.'
-                                            : 'Selesai.'
-                                        : isLinkedClaim
-                                          ? 'Selesai.'
-                                          : isExpired
-                                            ? 'QR kedaluwarsa. Buat ulang untuk lanjut.'
-                                            : 'Pilih akun Google yang sesuai.'}
+                                    {isConnectionCompleted
+                                        ? 'Akun Google sudah berhasil ditautkan.'
+                                        : isExpired
+                                          ? 'QR kedaluwarsa. Buat ulang untuk lanjut.'
+                                          : 'Pilih akun Google yang sesuai.'}
                                 </p>
                             </div>
 
@@ -386,18 +376,14 @@ export function MemberRegistrationClaimDialog({
                                         <Clock3 className="mt-0.5 size-5 text-emerald-600 dark:text-emerald-400" />
                                         <div className="space-y-2">
                                             <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                                                {isLinkedClaim
+                                                {isConnectionCompleted
                                                     ? 'Akun sudah tertaut.'
-                                                    : activeRegistration.approvalPending
-                                                      ? 'Proses selesai.'
-                                                      : 'Proses hampir selesai.'}
+                                                    : 'Proses hampir selesai.'}
                                             </p>
                                             <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                                {isLinkedClaim
+                                                {isConnectionCompleted
                                                     ? 'Form sedang diatur ulang.'
-                                                    : activeRegistration.approvalPending
-                                                      ? 'Akses peminjaman menunggu persetujuan admin.'
-                                                      : 'Form sedang diatur ulang.'}
+                                                    : 'Form sedang diatur ulang.'}
                                             </p>
                                         </div>
                                     </div>
@@ -441,25 +427,19 @@ export function MemberRegistrationClaimDialog({
                                 </Alert>
                             ) : null}
 
-                            {isClaimed ? (
+                            {isConnectionCompleted ? (
                                 <Alert className="w-full max-w-md border-emerald-200 bg-emerald-50 text-left text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100">
                                     <CheckCircle2 className="size-4" />
-                                    <AlertTitle>
-                                        {activeRegistration.approvalPending
-                                            ? 'Menunggu persetujuan admin'
-                                            : 'Akun sudah terhubung'}
-                                    </AlertTitle>
+                                    <AlertTitle>Akun sudah terhubung</AlertTitle>
                                     <AlertDescription>
-                                        {activeRegistration.approvalPending
-                                            ? 'Akses peminjaman akan aktif setelah disetujui admin.'
-                                            : 'Form sedang diatur ulang.'}
+                                        Form sedang diatur ulang.
                                     </AlertDescription>
                                 </Alert>
                             ) : null}
                         </div>
                     </div>
 
-                    {!isClaimed ? (
+                    {!isConnectionCompleted ? (
                         <div className="flex flex-col gap-2 border-t border-slate-200/80 bg-white/80 px-5 py-4 sm:flex-row sm:justify-end dark:border-slate-800 dark:bg-slate-950/80">
                             {isExpired ? (
                                 <Button

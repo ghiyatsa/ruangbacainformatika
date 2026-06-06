@@ -52,7 +52,11 @@ class LoanReturnNotification extends Notification implements ShouldQueue
         $lines[] = 'Riwayat pinjaman: '.url('/loans/history');
         $lines[] = 'Salam, Tim Perpustakaan '.config('app.name');
 
-        return new WhatsAppMessage(implode("\n", $lines));
+        return new WhatsAppMessage(
+            implode("\n", $lines),
+            category: 'loan_return',
+            templateName: 'loan_return',
+        );
     }
 
     /**

@@ -54,7 +54,7 @@ class ContactMessagesTableWidget extends BaseTableWidget
             ])
             ->emptyStateIcon(Heroicon::OutlinedEnvelope)
             ->emptyStateHeading('Belum ada pesan masuk')
-            ->emptyStateDescription('Pesan dari halaman kontak akan tampil di sini.')
+            ->emptyStateDescription('Pesan kontak akan muncul di sini.')
             ->paginated([5, 10]);
     }
 }

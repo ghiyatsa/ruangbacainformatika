@@ -38,10 +38,10 @@ export default function InternshipReportCatalogPage({
 
     return (
         <CatalogPage
-            title="Katalog Laporan KP"
+            title="Laporan KP"
             metaDescription="Lihat daftar laporan kerja praktik mahasiswa Teknik Informatika Universitas Malikussaleh."
             resourceName="laporan"
-            breadcrumbLabel="Katalog Laporan KP"
+            breadcrumbLabel="Laporan KP"
             totalCount={total}
             paginationData={reports}
             filters={filters}

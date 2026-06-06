@@ -33,7 +33,7 @@ class BookForm
         return $schema
             ->components([
                 Section::make('Informasi Dasar')
-                    ->description('Isi informasi utama buku berdasarkan data yang paling jelas dan mudah dicek.')
+                    ->description('Isi data utama buku berdasarkan sumber yang paling jelas.')
                     ->schema([
                         TextInput::make('title')
                             ->label('Judul Buku')
@@ -43,7 +43,7 @@ class BookForm
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Book::generateSlugPreview($state)))
                             ->placeholder('Judul buku')
-                            ->helperText('Gunakan judul utama yang tertera pada buku.'),
+                            ->helperText('Gunakan judul utama pada buku.'),
 
                         TextInput::make('slug')
                             ->label('Slug')
@@ -56,8 +56,8 @@ class BookForm
                         TextInput::make('subtitle')
                             ->label('Subjudul')
                             ->maxLength(255)
-                            ->placeholder('Subjudul buku jika ada')
-                            ->helperText('Isi jika buku memiliki subjudul resmi.')
+                            ->placeholder('Subjudul jika ada')
+                            ->helperText('Isi jika tersedia.')
                             ->columnSpanFull(),
 
                         Textarea::make('description')
@@ -73,7 +73,7 @@ class BookForm
                             ->minLength(8)
                             ->maxLength(13)
                             ->placeholder('9786020000001')
-                            ->helperText('Isi ISBN 8 digit, ISBN-10, atau ISBN-13 tanpa spasi. Akhiran X hanya untuk ISBN-10.')
+                            ->helperText('Gunakan ISBN 8 digit, ISBN-10, atau ISBN-13 tanpa spasi.')
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('isbn', Isbn::normalize($state)))
                             ->rule('regex:/^(?:[0-9]{8}|[0-9]{10}|[0-9]{13}|[0-9]{9}X)$/i')
@@ -97,7 +97,7 @@ class BookForm
                             ->unique('books', 'issn', ignoreRecord: true)
                             ->maxLength(20)
                             ->placeholder('1234-5678')
-                            ->helperText('Isi jika tersedia pada buku.')
+                            ->helperText('Isi jika tersedia.')
                             ->rule('regex:/^[0-9\\-\\s]+$/')
                             ->validationMessages([
                                 'regex' => 'ISSN hanya boleh berisi angka, spasi, dan tanda hubung.',
@@ -105,14 +105,14 @@ class BookForm
 
                         TextInput::make('ddc_code')
                             ->label('Kode DDC')
-                            ->helperText('Isi jika kode DDC sudah tersedia.')
+                            ->helperText('Isi jika tersedia.')
                             ->maxLength(20)
                             ->placeholder('000-999'),
                     ])
                     ->columns(2),
 
                 Section::make('Detail Publikasi')
-                    ->description('Lengkapi data penerbitan agar katalog lebih rapi dan mudah dicari.')
+                    ->description('Lengkapi data terbit agar katalog lebih rapi dan mudah ditelusuri.')
                     ->schema([
                         Select::make('publisher_id')
                             ->label('Penerbit')
@@ -120,12 +120,12 @@ class BookForm
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->helperText('Pilih penerbit yang sudah ada atau tambah baru.')
+                            ->helperText('Pilih penerbit atau tambahkan data baru.')
                             ->createOptionForm(PublisherForm::optionFormSchema())
                             ->createOptionUsing(fn (array $data): int => static::createPublisher($data))
                             ->createOptionModalHeading('Tambah Penerbit')
                             ->createOptionAction(fn (Action $action): Action => $action
-                                ->modalDescription('Tambahkan penerbit baru.')
+                                ->modalDescription('Tambahkan data penerbit baru.')
                                 ->modalSubmitActionLabel('Simpan'))
                             ->editOptionForm(PublisherForm::optionFormSchema())
                             ->updateOptionUsing(function (array $data, Schema $schema): void {
@@ -139,8 +139,8 @@ class BookForm
                         TextInput::make('edition')
                             ->label('Edisi')
                             ->maxLength(255)
-                            ->placeholder('Edisi 1, Edisi Revisi, dan sebagainya')
-                            ->helperText('Isi jika ada keterangan edisi pada buku.'),
+                            ->placeholder('Edisi 1, Edisi Revisi, dan lain-lain')
+                            ->helperText('Isi jika tersedia.'),
 
                         TextInput::make('published_year')
                             ->label('Tahun Terbit')
@@ -157,7 +157,7 @@ class BookForm
                             ->integer()
                             ->minValue(1)
                             ->placeholder('250')
-                            ->helperText('Isi jumlah halaman utama buku.'),
+                            ->helperText('Isi jumlah halaman utama.'),
 
                         TextInput::make('language')
                             ->label('Bahasa')
@@ -169,7 +169,7 @@ class BookForm
                     ->columns(2),
 
                 Section::make('Konten & Media')
-                    ->description('Unggah sampul agar buku lebih mudah dikenali di panel admin dan katalog.')
+                    ->description('Unggah sampul agar buku lebih mudah dikenali.')
                     ->schema([
 
                         FileUpload::make('cover_image')
@@ -188,7 +188,7 @@ class BookForm
                             })
                             ->imageEditor()
                             ->maxSize(2048)
-                            ->helperText('Gunakan JPG, PNG, atau WEBP maksimal 2 MB. Sampul akan disimpan utuh, tidak dipaksa ke rasio tertentu.')
+                            ->helperText('JPG, PNG, atau WEBP. Maksimal 2 MB.')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                     ])
                     ->columns(1),
@@ -202,12 +202,12 @@ class BookForm
                             ->multiple()
                             ->searchable()
                             ->preload()
-                            ->helperText('Pilih penulis yang sudah ada atau tambah baru.')
+                            ->helperText('Pilih penulis atau tambahkan data baru.')
                             ->createOptionForm(AuthorForm::optionFormSchema())
                             ->createOptionUsing(fn (array $data): int => static::createAuthor($data))
                             ->createOptionModalHeading('Tambah Penulis')
                             ->createOptionAction(fn (Action $action): Action => $action
-                                ->modalDescription('Tambahkan penulis baru.')
+                                ->modalDescription('Tambahkan data penulis baru.')
                                 ->modalSubmitActionLabel('Simpan')),
 
                         Select::make('categories')
@@ -216,7 +216,7 @@ class BookForm
                             ->multiple()
                             ->searchable()
                             ->preload()
-                            ->helperText('Pilih kategori yang sudah ada atau tambah baru.')
+                            ->helperText('Pilih kategori atau tambahkan data baru.')
                             ->createOptionForm(CategoryForm::optionFormSchema())
                             ->createOptionUsing(fn (array $data): int => static::createCategory($data))
                             ->createOptionModalHeading('Tambah Kategori')
@@ -227,7 +227,7 @@ class BookForm
                     ->columns(2),
 
                 Section::make('Status & Visibilitas')
-                    ->description('Tentukan bagaimana buku ini tampil dan digunakan dalam sistem.')
+                    ->description('Atur visibilitas dan penggunaan buku.')
                     ->schema([
                         Toggle::make('is_published')
                             ->label('Dipublikasikan')
@@ -244,7 +244,7 @@ class BookForm
                         Placeholder::make('view_count')
                             ->label('Jumlah Dilihat')
                             ->content(fn ($record): string => number_format((int) ($record?->view_count ?? 0)))
-                            ->helperText('Nilai ini diperbarui otomatis oleh sistem.'),
+                            ->helperText('Diperbarui otomatis.'),
                     ]),
             ]);
     }

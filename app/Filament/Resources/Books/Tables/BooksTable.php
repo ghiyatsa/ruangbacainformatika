@@ -31,7 +31,7 @@ class BooksTable
         return $table
             ->searchPlaceholder('Cari judul, ISBN, atau penerbit')
             ->emptyStateHeading('Belum ada data buku')
-            ->emptyStateDescription('Data buku akan tampil di sini.')
+            ->emptyStateDescription('Daftar buku akan muncul di sini.')
             ->emptyStateIcon(Heroicon::OutlinedBookOpen)
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100])
@@ -177,9 +177,9 @@ class BooksTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
-                        ->label('Ubah Buku'),
+                        ->label('Ubah'),
                     DeleteAction::make()
-                        ->label('Hapus Buku')
+                        ->label('Hapus')
                         ->before(function (DeleteAction $action, Book $record): void {
                             if (! $reason = $record->deletionBlockedReason()) {
                                 return;
@@ -187,7 +187,7 @@ class BooksTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Buku tidak dapat dihapus')
+                                ->title('Buku belum bisa dihapus')
                                 ->body($reason)
                                 ->send();
 
@@ -263,8 +263,8 @@ class BooksTable
 
                             Notification::make()
                                 ->warning()
-                                ->title('Beberapa buku tidak dapat dihapus')
-                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada data yang terhubung dengan buku terpilih.')
+                                ->title('Sebagian buku belum bisa dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada data yang terkait dengan buku terpilih.')
                                 ->send();
 
                             $action->halt();

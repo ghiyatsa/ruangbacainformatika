@@ -84,19 +84,20 @@ class WhatsAppOtpService
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $now = now();
 
-        Cache::put($this->challengeKey($user), [
+        $challenge = [
             'hash' => $this->hashCode($code),
             'phone' => $user->whatsapp,
             'expires_at' => $now->copy()->addSeconds(self::OTP_TTL_SECONDS)->timestamp,
-        ], $now->copy()->addSeconds(self::OTP_TTL_SECONDS));
+        ];
 
         $attempts = RateLimiter::attempts($this->hourlySendKey($user));
         $cooldownSeconds = self::RESEND_COOLDOWN_SECONDS * ($attempts + 1);
 
+        $user->notify(new WhatsAppOtpNotification($code));
+
+        Cache::put($this->challengeKey($user), $challenge, $now->copy()->addSeconds(self::OTP_TTL_SECONDS));
         RateLimiter::hit($this->cooldownKey($user), $cooldownSeconds);
         RateLimiter::hit($this->hourlySendKey($user), 3600);
-
-        $user->notify(new WhatsAppOtpNotification($code));
 
         return $this->status($user);
     }
@@ -190,8 +191,8 @@ class WhatsAppOtpService
             'resendAvailableIn' => $resendAvailableIn,
             'approvalMode' => $autoApproval ? 'automatic' : 'manual',
             'approvalMessage' => $autoApproval
-                ? 'Akun akan aktif otomatis setelah verifikasi.'
-                : 'Akun akan menunggu persetujuan admin setelah verifikasi.',
+                ? 'Verifikasi WhatsApp akan melengkapi status anggota Anda.'
+                : 'Setelah verifikasi WhatsApp, akun Anda akan menunggu persetujuan admin.',
         ];
     }
 

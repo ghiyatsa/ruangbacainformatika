@@ -29,7 +29,7 @@ class PublisherForm
         return $schema
             ->components([
                 Section::make('Informasi Dasar')
-                    ->description('Informasi dasar penerbit.')
+                    ->description('Data utama penerbit.')
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
@@ -48,7 +48,7 @@ class PublisherForm
                     ->columns(2),
 
                 Section::make('Deskripsi')
-                    ->description('Informasi tambahan tentang penerbit.')
+                    ->description('Keterangan tambahan penerbit.')
                     ->schema([
                         static::descriptionField(),
                     ]),
@@ -61,7 +61,7 @@ class PublisherForm
             ->label('Nama Penerbit')
             ->required()
             ->maxLength(255)
-            ->placeholder('Nama lengkap penerbit');
+            ->placeholder('Nama penerbit');
     }
 
     protected static function cityField(): TextInput
@@ -78,7 +78,7 @@ class PublisherForm
             ->label('Deskripsi')
             ->rows(8)
             ->maxLength(65535)
-            ->placeholder('Tuliskan profil singkat penerbit...')
+            ->placeholder('Profil singkat penerbit...')
             ->columnSpanFull();
     }
 }

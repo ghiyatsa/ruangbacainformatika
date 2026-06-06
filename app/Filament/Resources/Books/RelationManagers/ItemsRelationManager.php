@@ -138,7 +138,7 @@ class ItemsRelationManager extends RelationManager
                 DeleteAction::make()
                     ->label('Hapus')
                     ->modalHeading('Hapus Eksemplar')
-                    ->modalDescription('Eksemplar ini akan dihapus.')
+                    ->modalDescription('Eksemplar ini akan dihapus dari daftar.')
                     ->modalSubmitActionLabel('Hapus')
                     ->before(function (DeleteAction $action, Model $record): void {
                         if (! method_exists($record, 'deletionBlockedReason') || ! $reason = $record->deletionBlockedReason()) {
@@ -147,7 +147,7 @@ class ItemsRelationManager extends RelationManager
 
                         Notification::make()
                             ->warning()
-                            ->title('Eksemplar belum dapat dihapus')
+                            ->title('Eksemplar belum bisa dihapus')
                             ->body($reason)
                             ->send();
 
@@ -159,7 +159,7 @@ class ItemsRelationManager extends RelationManager
                     DeleteBulkAction::make()
                         ->label('Hapus Terpilih')
                         ->modalHeading('Hapus Eksemplar Terpilih')
-                        ->modalDescription('Eksemplar terpilih akan dihapus.')
+                        ->modalDescription('Eksemplar terpilih akan dihapus dari daftar.')
                         ->modalSubmitActionLabel('Hapus')
                         ->before(function (DeleteBulkAction $action, Collection $records): void {
                             $blockedRecord = $records->first(fn (Model $record): bool => method_exists($record, 'deletionBlockedReason') && filled($record->deletionBlockedReason()));
@@ -170,8 +170,8 @@ class ItemsRelationManager extends RelationManager
 
                             Notification::make()
                                 ->warning()
-                                ->title('Beberapa eksemplar tidak dapat dihapus')
-                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada eksemplar yang terhubung dengan riwayat peminjaman.')
+                                ->title('Sebagian eksemplar belum bisa dihapus')
+                                ->body($blockedRecord->deletionBlockedReason() ?? 'Masih ada riwayat peminjaman pada eksemplar terpilih.')
                                 ->send();
 
                             $action->halt();
@@ -196,7 +196,7 @@ class ItemsRelationManager extends RelationManager
                             Notification::make()
                                 ->success()
                                 ->title('Lokasi rak diperbarui')
-                                ->body("{$records->count()} eksemplar diperbarui ke {$data['shelf_location']}.")
+                                ->body("{$records->count()} eksemplar dipindahkan ke {$data['shelf_location']}.")
                                 ->send();
                         })
                         ->deselectRecordsAfterCompletion(),

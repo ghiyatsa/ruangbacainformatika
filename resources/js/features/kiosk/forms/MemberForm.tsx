@@ -20,6 +20,11 @@ interface MemberFormProps {
     memberRegistrationClaim?: KioskMemberRegistrationClaim | null;
 }
 
+const isInteractiveClaim = (
+    claim: KioskMemberRegistrationClaim | null | undefined,
+): claim is KioskMemberRegistrationClaim =>
+    Boolean(claim && claim.status !== 'claimed' && claim.status !== 'linked');
+
 const ALLOWED_EMAIL_DOMAINS = ['mhs.unimal.ac.id', 'unimal.ac.id'] as const;
 
 const INITIAL_FORM_DATA = {
@@ -105,11 +110,13 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
         splitMemberEmail(INITIAL_FORM_DATA.email),
     );
     const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(
-        Boolean(memberRegistrationClaim),
+        isInteractiveClaim(memberRegistrationClaim),
     );
     const [activeRegistration, setActiveRegistration] =
         useState<KioskMemberRegistrationClaim | null>(
-            memberRegistrationClaim ?? null,
+            isInteractiveClaim(memberRegistrationClaim)
+                ? memberRegistrationClaim
+                : null,
         );
     const [prevClaim, setPrevClaim] = useState<
         KioskMemberRegistrationClaim | null | undefined
@@ -117,15 +124,13 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
 
     if (memberRegistrationClaim !== prevClaim) {
         setPrevClaim(memberRegistrationClaim);
-        setActiveRegistration(memberRegistrationClaim ?? null);
+        setActiveRegistration(
+            isInteractiveClaim(memberRegistrationClaim)
+                ? memberRegistrationClaim
+                : null,
+        );
 
-        if (
-            memberRegistrationClaim &&
-            memberRegistrationClaim.status !== 'claimed' &&
-            memberRegistrationClaim.status !== 'linked'
-        ) {
-            setIsClaimDialogOpen(true);
-        }
+        setIsClaimDialogOpen(isInteractiveClaim(memberRegistrationClaim));
     }
 
     const isPendingClaim = activeRegistration?.status === 'pending';

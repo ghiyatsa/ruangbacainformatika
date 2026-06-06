@@ -11,20 +11,28 @@ class InternshipReportInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('title'),
-                TextEntry::make('author_name'),
-                TextEntry::make('student_id'),
-                TextEntry::make('year'),
+                TextEntry::make('title')
+                    ->label('Judul'),
+                TextEntry::make('author_name')
+                    ->label('Nama Mahasiswa'),
+                TextEntry::make('student_id')
+                    ->label('NIM'),
+                TextEntry::make('year')
+                    ->label('Tahun'),
                 TextEntry::make('abstract')
+                    ->label('Abstrak')
                     ->placeholder('-')
                     ->columnSpanFull(),
                 TextEntry::make('keywords')
+                    ->label('Kata Kunci')
                     ->placeholder('-'),
                 TextEntry::make('created_at')
-                    ->dateTime()
+                    ->label('Dibuat')
+                    ->dateTime('d/m/Y H:i')
                     ->placeholder('-'),
                 TextEntry::make('updated_at')
-                    ->dateTime()
+                    ->label('Diperbarui')
+                    ->dateTime('d/m/Y H:i')
                     ->placeholder('-'),
             ]);
     }
