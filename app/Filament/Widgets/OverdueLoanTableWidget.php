@@ -81,6 +81,7 @@ class OverdueLoanTableWidget extends BaseTableWidget
                     ->url(fn (Loan $record): string => LoanResource::getUrl('view', ['record' => $record->user]))
                     ->openUrlInNewTab(),
             ])
+            ->recordUrl(fn (Loan $record): string => LoanResource::getUrl('view', ['record' => $record->user]))
             ->emptyStateIcon(Heroicon::OutlinedCheckCircle)
             ->emptyStateHeading('Tidak ada pinjaman terlambat')
             ->emptyStateDescription('Semua pinjaman masih dalam batas waktu.')

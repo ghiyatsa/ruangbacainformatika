@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Books\Tables;
 
 use App\Filament\Imports\BookImporter;
 use App\Models\Book;
+use App\Models\BookItem;
 use App\Services\BookCoverImageService;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
@@ -12,6 +13,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -47,7 +49,7 @@ class BooksTable
 
                 TextColumn::make('title')
                     ->label('Judul')
-                    ->searchable()
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->search($search))
                     ->sortable()
                     ->weight('bold')
                     ->description(fn ($record): string => collect([
@@ -165,6 +167,16 @@ class BooksTable
                     )
                     ->multiple()
                     ->preload(),
+                SelectFilter::make('authors')
+                    ->label('Penulis')
+                    ->relationship(
+                        'authors',
+                        'name',
+                        fn (Builder $query): Builder => $query->whereNotNull('name')->orderBy('name'),
+                    )
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('published_year')
                     ->label('Tahun Terbit')
                     ->options(fn (): array => Book::query()
@@ -173,9 +185,27 @@ class BooksTable
                         ->pluck('published_year', 'published_year')
                         ->mapWithKeys(fn ($year): array => [(string) $year => (string) $year])
                         ->all()),
+                SelectFilter::make('shelf_location')
+                    ->label('Lokasi Rak')
+                    ->options(fn (): array => BookItem::query()
+                        ->whereNotNull('shelf_location')
+                        ->where('shelf_location', '!=', '')
+                        ->orderBy('shelf_location')
+                        ->distinct()
+                        ->pluck('shelf_location', 'shelf_location')
+                        ->all())
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['value'] ?? null,
+                        fn (Builder $query, $value): Builder => $query->whereHas(
+                            'items',
+                            fn (Builder $q): Builder => $q->where('shelf_location', $value)
+                        )
+                    )),
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Lihat'),
                     EditAction::make()
                         ->label('Ubah'),
                     DeleteAction::make()

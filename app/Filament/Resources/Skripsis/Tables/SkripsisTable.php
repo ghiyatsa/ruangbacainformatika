@@ -7,6 +7,7 @@ use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Services\SimilaritySyncDispatcher;
 use App\Services\SimilaritySyncStatusService;
+use App\Support\AppTimezone;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -14,12 +15,14 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
 
@@ -37,7 +40,7 @@ class SkripsisTable
             ->columns([
                 TextColumn::make('title')
                     ->label('Judul')
-                    ->searchable()
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->search($search))
                     ->sortable()
                     ->description(fn (Skripsi $record): ?string => filled($record->keywords)
                         ? 'Kata kunci: '.Str::limit($record->keywords, 80)
@@ -120,6 +123,31 @@ class SkripsisTable
                 Filter::make('belum_dijadwalkan')
                     ->label('Belum dijadwalkan')
                     ->query(fn ($query) => $query->whereDoesntHave('similaritySyncStatus')),
+                Filter::make('created_at')
+                    ->label('Tanggal Masuk')
+                    ->form([
+                        DatePicker::make('from')
+                            ->label('Dari'),
+                        DatePicker::make('until')
+                            ->label('Sampai'),
+                    ])
+                    ->query(
+                        fn (Builder $query, array $data): Builder => $query->when(
+                            $data['from'],
+                            function (Builder $query, $date): Builder {
+                                [$startOfDay] = AppTimezone::dayRange($date);
+
+                                return $query->where('created_at', '>=', $startOfDay);
+                            }
+                        )->when(
+                            $data['until'],
+                            function (Builder $query, $date): Builder {
+                                [, $endOfDay] = AppTimezone::dayRange($date);
+
+                                return $query->where('created_at', '<=', $endOfDay);
+                            }
+                        )
+                    ),
             ])
             ->recordActions([
                 ViewAction::make()

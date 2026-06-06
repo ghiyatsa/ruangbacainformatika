@@ -2,6 +2,10 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\Books\BookResource;
+use App\Filament\Resources\Loans\LoanResource;
+use App\Filament\Resources\Users\UserResource;
+use App\Filament\Resources\VisitLogs\VisitLogResource;
 use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Loan;
@@ -67,7 +71,8 @@ class OperationsOverviewWidget extends StatsOverviewWidget
                 ->description($overdueLoans > 0 ? "{$overdueLoans} melewati jatuh tempo" : 'Tidak ada keterlambatan')
                 ->descriptionIcon($overdueLoans > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle)
                 ->color($overdueLoans > 0 ? 'danger' : 'success')
-                ->icon(Heroicon::OutlinedRectangleStack),
+                ->icon(Heroicon::OutlinedRectangleStack)
+                ->url(LoanResource::getUrl('index', ['filters' => ['active_borrowers' => ['isActive' => true]]])),
 
             Stat::make('Kunjungan Hari Ini', $todayVisitors)
                 ->description(match ($visitorTrend) {
@@ -85,19 +90,29 @@ class OperationsOverviewWidget extends StatsOverviewWidget
                     'decrease' => 'warning',
                     default => 'info',
                 })
-                ->icon(Heroicon::OutlinedUserGroup),
+                ->icon(Heroicon::OutlinedUserGroup)
+                ->url(VisitLogResource::getUrl('index', ['filters' => ['today' => ['isActive' => true]]])),
 
             Stat::make('Koleksi Buku', $totalBooks)
                 ->description("{$availableItems}/{$totalItems} tersedia untuk dipinjam")
                 ->descriptionIcon(Heroicon::OutlinedBookOpen)
                 ->color('info')
-                ->icon(Heroicon::OutlinedBookOpen),
+                ->icon(Heroicon::OutlinedBookOpen)
+                ->url(BookResource::getUrl('index')),
 
             Stat::make('Anggota Baru Bulan Ini', $newMembersThisMonth)
                 ->description("{$newMembersThisMonth} pendaftaran bulan ini")
                 ->descriptionIcon(Heroicon::OutlinedCalendarDays)
                 ->color($pendingApproval > 0 ? 'warning' : 'success')
-                ->icon(Heroicon::OutlinedUserPlus),
+                ->icon(Heroicon::OutlinedUserPlus)
+                ->url(UserResource::getUrl('index', [
+                    'filters' => [
+                        'registered_between' => [
+                            'registered_from' => now()->startOfMonth()->toDateString(),
+                            'registered_until' => now()->endOfMonth()->toDateString(),
+                        ],
+                    ],
+                ])),
         ];
     }
 }

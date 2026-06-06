@@ -3,13 +3,18 @@
 namespace App\Filament\Resources\CatalogReports\Tables;
 
 use App\Models\CatalogReport;
+use App\Support\AppTimezone;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CatalogReportsTable
 {
@@ -59,10 +64,36 @@ class CatalogReportsTable
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options(CatalogReport::statusOptions()),
+                Filter::make('created_at')
+                    ->label('Tanggal Masuk')
+                    ->form([
+                        DatePicker::make('from')
+                            ->label('Dari'),
+                        DatePicker::make('until')
+                            ->label('Sampai'),
+                    ])
+                    ->query(
+                        fn (Builder $query, array $data): Builder => $query->when(
+                            $data['from'],
+                            function (Builder $query, $date): Builder {
+                                [$startOfDay] = AppTimezone::dayRange($date);
+
+                                return $query->where('created_at', '>=', $startOfDay);
+                            }
+                        )->when(
+                            $data['until'],
+                            function (Builder $query, $date): Builder {
+                                [, $endOfDay] = AppTimezone::dayRange($date);
+
+                                return $query->where('created_at', '<=', $endOfDay);
+                            }
+                        )
+                    ),
             ])
             ->recordActions([
                 ViewAction::make()->label('Lihat'),
                 EditAction::make()->label('Tindak Lanjut'),
+                DeleteAction::make()->label('Hapus'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

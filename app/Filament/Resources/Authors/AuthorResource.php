@@ -5,7 +5,9 @@ namespace App\Filament\Resources\Authors;
 use App\Filament\Resources\Authors\Pages\CreateAuthor;
 use App\Filament\Resources\Authors\Pages\EditAuthor;
 use App\Filament\Resources\Authors\Pages\ListAuthors;
+use App\Filament\Resources\Authors\Pages\ViewAuthor;
 use App\Filament\Resources\Authors\Schemas\AuthorForm;
+use App\Filament\Resources\Authors\Schemas\AuthorInfolist;
 use App\Filament\Resources\Authors\Tables\AuthorsTable;
 use App\Models\Author;
 use BackedEnum;
@@ -55,6 +57,11 @@ class AuthorResource extends Resource
         return AuthorForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return AuthorInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return AuthorsTable::configure($table);
@@ -72,6 +79,7 @@ class AuthorResource extends Resource
         return [
             'index' => ListAuthors::route('/'),
             'create' => CreateAuthor::route('/create'),
+            'view' => ViewAuthor::route('/{record}'),
             'edit' => EditAuthor::route('/{record}/edit'),
         ];
     }

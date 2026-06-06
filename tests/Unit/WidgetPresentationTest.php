@@ -4,6 +4,7 @@ use App\Filament\Resources\Users\Widgets\RestrictedBorrowersOverviewWidget;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
@@ -33,7 +34,8 @@ it('uses concise headings across filament widgets', function () {
         ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'heading'))->toBeNull()
         ->and(widgetProperty(LoanActivityChartWidget::class, 'heading'))->toBe('Aktivitas Mingguan')
         ->and(widgetProperty(TodayVisitorsWidget::class, 'heading'))->toBeNull()
-        ->and(widgetProperty(ContactMessagesTableWidget::class, 'heading'))->toBeNull()
+        ->and(widgetProperty(ContactMessagesTableWidget::class, 'heading'))->toBe('Pesan Kontak Terbaru')
+        ->and(widgetProperty(CatalogReportsTableWidget::class, 'heading'))->toBe('Laporan Umpan Balik Katalog')
         ->and(widgetProperty(OverdueLoanTableWidget::class, 'heading'))->toBeNull()
         ->and(widgetProperty(ServerInfoWidget::class, 'heading'))->toBeNull()
         ->and(widgetProperty(RestrictedBorrowersOverviewWidget::class, 'heading'))->toBeNull();
@@ -52,23 +54,23 @@ it('links pending member approval stats to filtered user tables', function () {
     $stats = invade(app(PendingMemberApprovalsWidget::class))->getStats();
 
     expect($stats[0]->getLabel())->toBe('Menunggu Persetujuan')
-        ->and($stats[0]->getUrl())->toContain('tableFilters%5Bis_approved%5D%5Bvalue%5D=0')
-        ->and($stats[0]->getUrl())->toContain('tableFilters%5Bmanual_approval%5D%5BisActive%5D=1')
+        ->and($stats[0]->getUrl())->toContain('filters%5Bis_approved%5D%5Bvalue%5D=0')
+        ->and($stats[0]->getUrl())->toContain('filters%5Bmanual_approval%5D%5BisActive%5D=1')
         ->and($stats[1]->getLabel())->toBe('Daftar Hari Ini')
-        ->and($stats[1]->getUrl())->toContain('tableFilters%5Bregistered_today%5D%5BisActive%5D=1')
+        ->and($stats[1]->getUrl())->toContain('filters%5Bregistered_today%5D%5BisActive%5D=1')
         ->and($stats[2]->getLabel())->toBe('Review Awal Hari Ini')
-        ->and($stats[2]->getUrl())->toContain('tableFilters%5Bapproved_today%5D%5BisActive%5D=1');
+        ->and($stats[2]->getUrl())->toContain('filters%5Bapproved_today%5D%5BisActive%5D=1');
 });
 
 it('links restricted borrower stats to the matching user filters', function () {
     $stats = invade(app(RestrictedBorrowersOverviewWidget::class))->getStats();
 
     expect($stats[0]->getLabel())->toBe('Sedang Dibatasi')
-        ->and($stats[0]->getUrl())->toContain('tableFilters%5Brestricted_borrowers%5D%5BisActive%5D=1')
+        ->and($stats[0]->getUrl())->toContain('filters%5Brestricted_borrowers%5D%5BisActive%5D=1')
         ->and($stats[1]->getLabel())->toBe('Terlambat Aktif')
-        ->and($stats[1]->getUrl())->toContain('tableFilters%5Bactive_overdue_borrowers%5D%5BisActive%5D=1')
+        ->and($stats[1]->getUrl())->toContain('filters%5Bactive_overdue_borrowers%5D%5BisActive%5D=1')
         ->and($stats[2]->getLabel())->toBe('Masa Jeda')
-        ->and($stats[2]->getUrl())->toContain('tableFilters%5Blate_return_cooldown%5D%5BisActive%5D=1');
+        ->and($stats[2]->getUrl())->toContain('filters%5Blate_return_cooldown%5D%5BisActive%5D=1');
 });
 
 it('separates operational member growth from approval queue copy', function () {

@@ -3,6 +3,7 @@
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use App\Filament\Resources\Authors\AuthorResource;
 use App\Filament\Resources\Books\BookResource;
+use App\Filament\Resources\Books\Pages\ListBooks;
 use App\Filament\Resources\CatalogReports\CatalogReportResource;
 use App\Filament\Resources\ContactMessages\ContactMessageResource;
 use App\Filament\Resources\InternshipReports\InternshipReportResource;
@@ -11,6 +12,7 @@ use App\Filament\Resources\Skripsis\SkripsiResource;
 use App\Filament\Resources\Theses\ThesisResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\VisitLogs\VisitLogResource;
+use App\Models\Author;
 use App\Models\Book;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
@@ -18,6 +20,7 @@ use App\Models\User;
 use App\Models\VisitLog;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -471,13 +474,16 @@ it('filament catalog report resource exposes pending navigation badge metadata',
         ->and(CatalogReportResource::getNavigationBadgeTooltip())->toBe('Umpan balik menunggu tindak lanjut');
 });
 
-it('super admin users can see the contact messages widget on the dashboard', function () {
+it('super admin users can see the contact messages and catalog reports widgets on the dashboard', function () {
     $user = makeSuperAdmin();
 
     actingAs($user)
         ->get('/admin?tab=messages')
         ->assertOk()
-        ->assertSee('Pesan kontak akan muncul di sini.');
+        ->assertSee('Pesan Kontak Terbaru')
+        ->assertSee('Laporan Umpan Balik Katalog')
+        ->assertSee('Pesan kontak akan muncul di sini.')
+        ->assertSee('Laporan katalog akan muncul di sini.');
 });
 
 it('super admin users can see the server info widget on the dashboard', function () {
@@ -491,4 +497,24 @@ it('super admin users can see the server info widget on the dashboard', function
         ->assertSee('Driver Layanan')
         ->assertSee('Penyimpanan')
         ->assertSee('Waktu Server');
+});
+
+it('can filter books by author', function () {
+    $user = makeSuperAdmin();
+    $author1 = Author::factory()->create(['name' => 'Author Alpha']);
+    $author2 = Author::factory()->create(['name' => 'Author Beta']);
+
+    $book1 = Book::factory()->create(['title' => 'Book Alpha Edition']);
+    $book1->authors()->attach($author1);
+
+    $book2 = Book::factory()->create(['title' => 'Book Beta Edition']);
+    $book2->authors()->attach($author2);
+
+    actingAs($user);
+
+    Livewire::test(ListBooks::class)
+        ->assertCanSeeTableRecords([$book1, $book2])
+        ->filterTable('authors', [$author1->id])
+        ->assertCanSeeTableRecords([$book1])
+        ->assertCanNotSeeTableRecords([$book2]);
 });

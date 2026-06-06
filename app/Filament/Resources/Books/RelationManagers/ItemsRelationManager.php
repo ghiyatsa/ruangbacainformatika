@@ -10,12 +10,15 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -68,6 +71,72 @@ class ItemsRelationManager extends RelationManager
                 DatePicker::make('acquired_date')
                     ->label('Tanggal Pengadaan')
                     ->default(now()),
+            ]);
+    }
+
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Detail Eksemplar')
+                    ->columnSpanFull()
+                    ->schema([
+                        TextEntry::make('internal_code')
+                            ->label('Kode Unik / Barcode')
+                            ->weight('bold'),
+                        TextEntry::make('status')
+                            ->label('Status Saat Ini')
+                            ->badge()
+                            ->color(fn (string $state): string => match ($state) {
+                                'available' => 'success',
+                                'borrowed' => 'info',
+                                'reserved' => 'warning',
+                                'maintenance' => 'danger',
+                                default => 'gray',
+                            })
+                            ->formatStateUsing(fn (string $state): string => match ($state) {
+                                'available' => 'Tersedia di Rak',
+                                'borrowed' => 'Sedang Dipinjam',
+                                'reserved' => 'Dipesan',
+                                'maintenance' => 'Dalam Perbaikan',
+                                default => $state,
+                            }),
+                        TextEntry::make('condition')
+                            ->label('Kondisi Fisik')
+                            ->badge()
+                            ->color(fn (string $state): string => match ($state) {
+                                'good' => 'success',
+                                'damaged' => 'warning',
+                                'lost' => 'danger',
+                                default => 'gray',
+                            })
+                            ->formatStateUsing(fn (string $state): string => match ($state) {
+                                'good' => 'Bagus',
+                                'damaged' => 'Rusak',
+                                'lost' => 'Hilang',
+                                default => $state,
+                            }),
+                        TextEntry::make('shelf_location')
+                            ->label('Lokasi Rak')
+                            ->placeholder('-'),
+                        TextEntry::make('acquired_date')
+                            ->label('Tanggal Pengadaan')
+                            ->date('d/m/Y')
+                            ->placeholder('-'),
+                        TextEntry::make('price')
+                            ->label('Harga')
+                            ->placeholder('-')
+                            ->formatStateUsing(fn (?float $state): ?string => $state !== null ? 'Rp '.number_format($state, 0, ',', '.') : null),
+                        TextEntry::make('created_at')
+                            ->label('Dibuat')
+                            ->dateTime('d/m/Y H:i')
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label('Diperbarui')
+                            ->dateTime('d/m/Y H:i')
+                            ->placeholder('-'),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -127,19 +196,26 @@ class ItemsRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Tambah Eksemplar')
                     ->modalHeading('Tambah Eksemplar')
-                    ->modalSubmitActionLabel('Simpan'),
-                BatchCreateBookItemsAction::make(),
+                    ->modalSubmitActionLabel('Simpan')
+                    ->hidden(fn ($livewire) => $livewire->isReadOnly()),
+                BatchCreateBookItemsAction::make()
+                    ->hidden(fn ($livewire) => $livewire->isReadOnly()),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('Lihat')
+                    ->modalHeading('Detail Eksemplar'),
                 EditAction::make()
                     ->label('Ubah')
                     ->modalHeading('Ubah Eksemplar')
-                    ->modalSubmitActionLabel('Simpan'),
+                    ->modalSubmitActionLabel('Simpan')
+                    ->hidden(fn ($livewire) => $livewire->isReadOnly()),
                 DeleteAction::make()
                     ->label('Hapus')
                     ->modalHeading('Hapus Eksemplar')
                     ->modalDescription('Eksemplar ini akan dihapus dari daftar.')
                     ->modalSubmitActionLabel('Hapus')
+                    ->hidden(fn ($livewire) => $livewire->isReadOnly())
                     ->before(function (DeleteAction $action, Model $record): void {
                         if (! method_exists($record, 'deletionBlockedReason') || ! $reason = $record->deletionBlockedReason()) {
                             return;
@@ -200,7 +276,8 @@ class ItemsRelationManager extends RelationManager
                                 ->send();
                         })
                         ->deselectRecordsAfterCompletion(),
-                ]),
+                ])
+                    ->hidden(fn ($livewire) => $livewire->isReadOnly()),
             ]);
     }
 }

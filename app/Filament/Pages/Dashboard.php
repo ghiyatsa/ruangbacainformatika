@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
@@ -118,6 +119,7 @@ class Dashboard extends \Filament\Pages\Dashboard
             ],
             'messages' => [
                 ContactMessagesTableWidget::class,
+                CatalogReportsTableWidget::class,
             ],
             'system' => [
                 ServerInfoWidget::class,

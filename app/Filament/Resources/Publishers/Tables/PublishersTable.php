@@ -3,14 +3,20 @@
 namespace App\Filament\Resources\Publishers\Tables;
 
 use App\Models\Publisher;
+use App\Support\AppTimezone;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class PublishersTable
@@ -54,10 +60,45 @@ class PublishersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TernaryFilter::make('has_books')
+                    ->label('Buku Terbit')
+                    ->placeholder('Semua Penerbit')
+                    ->trueLabel('Memiliki Buku')
+                    ->falseLabel('Tidak Memiliki Buku')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereHas('books'),
+                        false: fn (Builder $query) => $query->whereDoesntHave('books'),
+                    ),
+                Filter::make('created_at')
+                    ->label('Tanggal Dibuat')
+                    ->form([
+                        DatePicker::make('from')
+                            ->label('Dari'),
+                        DatePicker::make('until')
+                            ->label('Sampai'),
+                    ])
+                    ->query(
+                        fn (Builder $query, array $data): Builder => $query->when(
+                            $data['from'],
+                            function (Builder $query, $date): Builder {
+                                [$startOfDay] = AppTimezone::dayRange($date);
+
+                                return $query->where('created_at', '>=', $startOfDay);
+                            }
+                        )->when(
+                            $data['until'],
+                            function (Builder $query, $date): Builder {
+                                [, $endOfDay] = AppTimezone::dayRange($date);
+
+                                return $query->where('created_at', '<=', $endOfDay);
+                            }
+                        )
+                    ),
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Lihat'),
                     EditAction::make()
                         ->label('Ubah'),
                     DeleteAction::make()

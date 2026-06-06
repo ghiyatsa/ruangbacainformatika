@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Loan;
 use App\Models\VisitLog;
+use App\Support\AppTimezone;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 
@@ -25,11 +26,13 @@ class LoanActivityChartWidget extends ChartWidget
             fn (int $daysAgo): \DateTimeInterface => now(VisitLog::adminTimezone())->subDays($daysAgo)->startOfDay(),
         );
 
-        $loanData = $days->map(
-            fn (\DateTimeInterface $day): int => Loan::query()
-                ->whereDate('borrowed_at', '=', $day, 'and')
-                ->count('*')
-        );
+        $loanData = $days->map(function (\DateTimeInterface $day): int {
+            [$startOfDay, $endOfDay] = AppTimezone::dayRange($day);
+
+            return Loan::query()
+                ->whereBetween('borrowed_at', [$startOfDay, $endOfDay])
+                ->count('*');
+        });
 
         $visitorData = $days->map(function (\DateTimeInterface $day): int {
             [$startOfDay, $endOfDay] = VisitLog::adminDayRange($day);

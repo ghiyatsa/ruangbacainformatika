@@ -26,7 +26,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
     protected function skripsisUrl(array $filters = []): string
     {
         return SkripsiResource::getUrl('index', [
-            'tableFilters' => $filters,
+            'filters' => $filters,
         ]);
     }
 

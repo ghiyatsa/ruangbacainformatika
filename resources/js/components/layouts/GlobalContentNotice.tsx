@@ -1,4 +1,4 @@
-import { Deferred, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { Bell, X } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
@@ -169,8 +169,6 @@ export function GlobalContentNotice({
     );
 }
 
-let lastKnownNotice: GlobalNoticeData | null = null;
-
 export function DeferredGlobalContentNotice({
     className,
     variant = 'card',
@@ -180,11 +178,16 @@ export function DeferredGlobalContentNotice({
     }>();
 
     const notice = page.props.globalNotice;
-    if (typeof window !== 'undefined' && notice !== undefined) {
-        lastKnownNotice = notice;
-    }
+    const [prevNotice, setPrevNotice] = React.useState<GlobalNoticeData | null | undefined>(notice);
+    const [activeNotice, setActiveNotice] = React.useState<GlobalNoticeData | null>(notice ?? null);
 
-    const activeNotice = notice ?? lastKnownNotice;
+    if (notice !== prevNotice) {
+        setPrevNotice(notice);
+
+        if (notice !== undefined && notice !== null) {
+            setActiveNotice(notice);
+        }
+    }
 
     if (!activeNotice) {
         return null;

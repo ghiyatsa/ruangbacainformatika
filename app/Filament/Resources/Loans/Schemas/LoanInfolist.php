@@ -15,6 +15,7 @@ class LoanInfolist
         return $schema
             ->components([
                 Section::make('Informasi Anggota')
+                    ->columnSpanFull()
                     ->schema([
                         TextEntry::make('name')
                             ->label('Nama Anggota'),

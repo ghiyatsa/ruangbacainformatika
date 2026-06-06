@@ -23,7 +23,7 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
     protected function usersUrl(array $filters = []): string
     {
         return UserResource::getUrl('index', [
-            'tableFilters' => $filters,
+            'filters' => $filters,
         ]);
     }
 

@@ -40,7 +40,7 @@ it('super admin users can render the static pages resource', function () {
         ->assertSee('Judul')
         ->assertSee('Slug')
         ->assertSee('Ringkasan halaman')
-        ->assertSee('Dipakai pada alamat halaman publik.')
+        ->assertSee('Digunakan pada alamat halaman publik.')
         ->assertSee('Isi halaman');
 });
 

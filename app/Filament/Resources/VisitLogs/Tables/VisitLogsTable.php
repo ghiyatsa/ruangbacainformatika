@@ -6,8 +6,12 @@ use App\Filament\Exports\VisitLogExporter;
 use App\Models\VisitLog;
 use Carbon\CarbonInterface;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -88,8 +92,12 @@ class VisitLogsTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Lihat'),
                     EditAction::make()
                         ->label('Ubah'),
+                    DeleteAction::make()
+                        ->label('Hapus'),
                 ])
                     ->label('Aksi'),
             ])
@@ -97,7 +105,9 @@ class VisitLogsTable
                 ExportAction::make()
                     ->label('Ekspor')
                     ->exporter(VisitLogExporter::class),
-
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->label('Hapus Terpilih'),
+                ]),
             ])
             ->defaultSort('visited_at', 'desc');
     }

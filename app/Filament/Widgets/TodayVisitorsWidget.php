@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\VisitLogs\VisitLogResource;
 use App\Models\VisitLog;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
@@ -48,19 +49,27 @@ class TodayVisitorsWidget extends StatsOverviewWidget
                 ->description("Tujuan utama: {$topPurposeLabel}")
                 ->descriptionIcon(Heroicon::OutlinedMapPin)
                 ->color('primary')
-                ->icon(Heroicon::OutlinedUserGroup),
+                ->icon(Heroicon::OutlinedUserGroup)
+                ->url(VisitLogResource::getUrl('index', ['filters' => ['today' => ['isActive' => true]]])),
 
             Stat::make('Mahasiswa', $mahasiswa)
                 ->description("{$dosen} dosen hari ini")
                 ->descriptionIcon(Heroicon::OutlinedAcademicCap)
                 ->color('info')
-                ->icon(Heroicon::OutlinedAcademicCap),
+                ->icon(Heroicon::OutlinedAcademicCap)
+                ->url(VisitLogResource::getUrl('index', [
+                    'filters' => [
+                        'today' => ['isActive' => true],
+                        'visitor_type' => ['value' => VisitLog::VISITOR_TYPE_MAHASISWA],
+                    ],
+                ])),
 
             Stat::make('Staf dan Umum', $staff + $umum)
                 ->description("{$staff} staf, {$umum} umum")
                 ->descriptionIcon(Heroicon::OutlinedBriefcase)
                 ->color('warning')
-                ->icon(Heroicon::OutlinedBriefcase),
+                ->icon(Heroicon::OutlinedBriefcase)
+                ->url(VisitLogResource::getUrl('index', ['filters' => ['today' => ['isActive' => true]]])),
 
             Stat::make('Minggu Ini', VisitLog::query()
                 ->whereBetween('visited_at', [$weekStart, $weekEnd])
@@ -68,7 +77,15 @@ class TodayVisitorsWidget extends StatsOverviewWidget
                 ->description('Total kunjungan minggu ini')
                 ->descriptionIcon(Heroicon::OutlinedCalendarDays)
                 ->color('success')
-                ->icon(Heroicon::OutlinedCalendarDays),
+                ->icon(Heroicon::OutlinedCalendarDays)
+                ->url(VisitLogResource::getUrl('index', [
+                    'filters' => [
+                        'visited_between' => [
+                            'visited_from' => now()->startOfWeek()->toDateString(),
+                            'visited_until' => now()->endOfWeek()->toDateString(),
+                        ],
+                    ],
+                ])),
         ];
     }
 }

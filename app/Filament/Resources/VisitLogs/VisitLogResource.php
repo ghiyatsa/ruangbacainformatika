@@ -4,7 +4,9 @@ namespace App\Filament\Resources\VisitLogs;
 
 use App\Filament\Resources\VisitLogs\Pages\EditVisitLog;
 use App\Filament\Resources\VisitLogs\Pages\ListVisitLogs;
+use App\Filament\Resources\VisitLogs\Pages\ViewVisitLog;
 use App\Filament\Resources\VisitLogs\Schemas\VisitLogForm;
+use App\Filament\Resources\VisitLogs\Schemas\VisitLogInfolist;
 use App\Filament\Resources\VisitLogs\Tables\VisitLogsTable;
 use App\Models\VisitLog;
 use BackedEnum;
@@ -54,6 +56,11 @@ class VisitLogResource extends Resource
         return VisitLogForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return VisitLogInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return VisitLogsTable::configure($table);
@@ -70,6 +77,7 @@ class VisitLogResource extends Resource
     {
         return [
             'index' => ListVisitLogs::route('/'),
+            'view' => ViewVisitLog::route('/{record}'),
             'edit' => EditVisitLog::route('/{record}/edit'),
         ];
     }

@@ -16,6 +16,8 @@ class ContactMessagesTableWidget extends BaseTableWidget
 
     protected static ?int $sort = 4;
 
+    protected static ?string $heading = 'Pesan Kontak Terbaru';
+
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
@@ -52,6 +54,7 @@ class ContactMessagesTableWidget extends BaseTableWidget
                     ->icon(Heroicon::OutlinedEye)
                     ->url(fn (ContactMessage $record): string => ContactMessageResource::getUrl('view', ['record' => $record])),
             ])
+            ->recordUrl(fn (ContactMessage $record): string => ContactMessageResource::getUrl('view', ['record' => $record]))
             ->emptyStateIcon(Heroicon::OutlinedEnvelope)
             ->emptyStateHeading('Belum ada pesan masuk')
             ->emptyStateDescription('Pesan kontak akan muncul di sini.')
