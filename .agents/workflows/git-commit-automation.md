@@ -1,4 +1,5 @@
 ---
+name: git-commit-automation
 description: Analyze git changes, split them into logical commits, stage the right files, and create Conventional Commits without pushing. Designed for AI agents working in this repository with automated versioning and changelog rules.
 ---
 
@@ -30,7 +31,7 @@ Turn the current git changes into a clean series of logical commits that:
 
 ## Repository Context
 
-This repository uses Conventional Commits plus automated versioning/changelog rules.
+This repository uses:
 
 - `fix(...)` normally maps to `PATCH`
 - `feat(...)` normally maps to `MINOR`
@@ -62,7 +63,7 @@ Preferred scopes in this repository:
 - `test`
 - `ci`
 
-## Safety Rules
+## Core Rules
 
 - Always inspect `git status` and `git diff` before touching staging.
 - Never assume every changed file belongs together.
@@ -89,7 +90,7 @@ Build a mental model of:
 - whether tests/config/docs are coupled to that change,
 - whether there are unrelated edits in the same worktree.
 
-### 2. Propose Commit Groups
+### 2. Determine Commit Groups
 
 Before staging, produce a commit plan:
 
@@ -120,7 +121,7 @@ For each commit group:
 
 If a file contains both relevant and unrelated edits, prefer not to commit it unless the separation is safe and explicit.
 
-### 4. Commit with Conventional Commits
+### 4. Create Conventional Commits
 
 Use the format:
 
@@ -156,19 +157,19 @@ Leave unrelated or ambiguous changes untouched and report them clearly at the en
 
 ## Output Contract
 
-When running this workflow, the agent should report:
+When running this workflow, the agent should return:
 
 1. A short summary of the current worktree.
 2. The proposed commit groups before committing.
 3. For each commit:
-    - purpose
-    - files being staged
-    - commit message
-    - versioning impact
+   - purpose
+   - files being staged
+   - commit message
+   - versioning impact
 4. A final summary:
-    - commits created
-    - remaining uncommitted changes, if any
-    - whether any ambiguity blocked full completion
+   - commits created
+   - remaining uncommitted changes, if any
+   - whether any ambiguity blocked full completion
 
 ## Execution Prompt
 
@@ -214,7 +215,7 @@ Required execution order:
 6. Repeat for the next group until safe changes are complete.
 7. Report all created commits and any remaining changes.
 
-Output format:
+Output:
 1. Current change summary.
 2. Proposed commit list.
 3. For each commit:
