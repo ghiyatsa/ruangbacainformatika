@@ -103,20 +103,6 @@ class KioskSettings extends Page implements HasTable
                             ->type('time')
                             ->required()
                             ->rule('date_format:H:i'),
-                        FormTextInput::make('idle_timeout_open_minutes')
-                            ->label('Idle Saat Jam Operasional (Menit)')
-                            ->numeric()
-                            ->required()
-                            ->minValue(1)
-                            ->maxValue(240)
-                            ->helperText('Perangkat akan kembali ke PIN setelah tidak digunakan selama durasi ini pada jam layanan.'),
-                        FormTextInput::make('idle_timeout_closed_minutes')
-                            ->label('Idle Di Luar Jam Operasional (Menit)')
-                            ->numeric()
-                            ->required()
-                            ->minValue(1)
-                            ->maxValue(60)
-                            ->helperText('Gunakan durasi lebih singkat untuk mempercepat lock otomatis di luar jam layanan.'),
                     ]),
 
                 Section::make('Perangkat Aktif')
@@ -156,16 +142,12 @@ class KioskSettings extends Page implements HasTable
                 'allowed_networks',
                 'operating_open_time',
                 'operating_close_time',
-                'idle_timeout_open_minutes',
-                'idle_timeout_closed_minutes',
             ],
         );
         $savedValues = [
             'allowed_networks' => collect($this->kioskNetworkGuard()->normalizeNetworks($data['allowed_networks'] ?? ''))->implode(PHP_EOL),
             'operating_open_time' => $data['operating_open_time'] ?? null,
             'operating_close_time' => $data['operating_close_time'] ?? null,
-            'idle_timeout_open_minutes' => $data['idle_timeout_open_minutes'] ?? null,
-            'idle_timeout_closed_minutes' => $data['idle_timeout_closed_minutes'] ?? null,
         ];
 
         if ($pinWasUpdated) {
@@ -202,8 +184,6 @@ class KioskSettings extends Page implements HasTable
             'allowed_networks' => '',
             'operating_open_time' => KioskIdlePolicy::DEFAULT_OPERATING_OPEN_TIME,
             'operating_close_time' => KioskIdlePolicy::DEFAULT_OPERATING_CLOSE_TIME,
-            'idle_timeout_open_minutes' => (string) KioskIdlePolicy::DEFAULT_IDLE_TIMEOUT_OPEN_MINUTES,
-            'idle_timeout_closed_minutes' => (string) KioskIdlePolicy::DEFAULT_IDLE_TIMEOUT_CLOSED_MINUTES,
         ];
     }
 

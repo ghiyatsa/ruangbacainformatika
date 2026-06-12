@@ -13,71 +13,25 @@ function getCsrfToken(): string | null {
     );
 }
 
-function getMinutesInTimezone(date: Date, timezone: string): number {
-    const formatter = new Intl.DateTimeFormat('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-        timeZone: timezone,
-    });
-    const parts = formatter.formatToParts(date);
-    const hours = Number(
-        parts.find((part) => part.type === 'hour')?.value ?? 0,
-    );
-    const minutes = Number(
-        parts.find((part) => part.type === 'minute')?.value ?? 0,
-    );
+function shouldLockForOperatingHours(config: KioskSessionConfig): boolean {
+    if (config.persistentForDevelopment) {
+        return false;
+    }
 
-    return hours * 60 + minutes;
-}
-
-function getMinutesFromTime(time: string): number {
-    const [hours = '0', minutes = '0'] = time.split(':');
-
-    return Number(hours) * 60 + Number(minutes);
-}
-
-function isWithinOperatingHours(
-    config: KioskSessionConfig,
-    date: Date,
-): boolean {
-    const openMinutes = getMinutesFromTime(config.operatingOpenTime);
-    const closeMinutes = getMinutesFromTime(config.operatingCloseTime);
-    const currentMinutes = getMinutesInTimezone(date, config.timezone);
-
-    if (openMinutes === closeMinutes) {
+    if (!config.withinOperatingHours || !config.sessionExpiresAtIso) {
         return true;
     }
 
-    if (openMinutes < closeMinutes) {
-        return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
-    }
-
-    return currentMinutes >= openMinutes || currentMinutes < closeMinutes;
-}
-
-function getIdleTimeoutMs(config: KioskSessionConfig, date: Date): number {
-    const idleMinutes = isWithinOperatingHours(config, date)
-        ? config.idleTimeoutOpenMinutes
-        : config.idleTimeoutClosedMinutes;
-
-    return Math.max(idleMinutes, 1) * 60 * 1000;
+    return Date.now() >= new Date(config.sessionExpiresAtIso).getTime();
 }
 
 export default function KioskPage(props: KioskProps) {
-    const lastInteractionAtRef = useRef(0);
     const isLockingRef = useRef(false);
 
     useEffect(() => {
         if (props.step !== 'ready') {
             return;
         }
-
-        lastInteractionAtRef.current = Date.now();
-
-        const markInteraction = () => {
-            lastInteractionAtRef.current = Date.now();
-        };
 
         const lockKiosk = async () => {
             if (isLockingRef.current) {
@@ -108,35 +62,17 @@ export default function KioskPage(props: KioskProps) {
         };
 
         const interval = window.setInterval(() => {
-            const now = new Date();
-            const idleTimeoutMs = getIdleTimeoutMs(props.kioskSession, now);
-            const idleDurationMs = Date.now() - lastInteractionAtRef.current;
-
-            if (idleDurationMs >= idleTimeoutMs) {
+            if (shouldLockForOperatingHours(props.kioskSession)) {
                 void lockKiosk();
             }
         }, 15000);
 
-        const eventNames: Array<keyof WindowEventMap> = [
-            'click',
-            'keydown',
-            'mousemove',
-            'scroll',
-            'touchstart',
-        ];
-
-        for (const eventName of eventNames) {
-            window.addEventListener(eventName, markInteraction, {
-                passive: true,
-            });
+        if (shouldLockForOperatingHours(props.kioskSession)) {
+            void lockKiosk();
         }
 
         return () => {
             window.clearInterval(interval);
-
-            for (const eventName of eventNames) {
-                window.removeEventListener(eventName, markInteraction);
-            }
         };
     }, [props.kioskSession, props.step]);
 

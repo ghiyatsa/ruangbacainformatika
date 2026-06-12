@@ -40,8 +40,6 @@ it('kiosk settings rotate active sessions when the pin is updated', function () 
             'allowed_networks' => "192.168.10.0/24\n10.10.0.0/16",
             'operating_open_time' => '08:00',
             'operating_close_time' => '17:00',
-            'idle_timeout_open_minutes' => 20,
-            'idle_timeout_closed_minutes' => 4,
         ])
         ->call('save')
         ->assertHasNoFormErrors()
@@ -54,8 +52,8 @@ it('kiosk settings rotate active sessions when the pin is updated', function () 
         ->toBe('08:00')
         ->and((string) Setting::query()->where('section', 'kiosk')->where('key', 'operating_close_time')->value('value'))
         ->toBe('17:00')
-        ->and((string) Setting::query()->where('section', 'kiosk')->where('key', 'idle_timeout_open_minutes')->value('value'))
-        ->toBe('20')
-        ->and((string) Setting::query()->where('section', 'kiosk')->where('key', 'idle_timeout_closed_minutes')->value('value'))
-        ->toBe('4');
+        ->and(Setting::query()->where('section', 'kiosk')->where('key', 'idle_timeout_open_minutes')->exists())
+        ->toBeFalse()
+        ->and(Setting::query()->where('section', 'kiosk')->where('key', 'idle_timeout_closed_minutes')->exists())
+        ->toBeFalse();
 });

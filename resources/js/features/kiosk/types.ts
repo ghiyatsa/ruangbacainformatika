@@ -18,10 +18,9 @@ export interface KioskSessionConfig {
     timezone: string;
     operatingOpenTime: string;
     operatingCloseTime: string;
-    idleTimeoutOpenMinutes: number;
-    idleTimeoutClosedMinutes: number;
-    activeIdleTimeoutMinutes: number;
     withinOperatingHours: boolean;
+    persistentForDevelopment: boolean;
+    sessionExpiresAtIso: string | null;
 }
 
 export interface KioskMemberRegistrationClaim {

@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\VisitLog;
 use App\Services\KioskPinManager;
+use App\Support\KioskIdlePolicy;
 use Carbon\Carbon;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -23,6 +24,7 @@ use function Pest\Laravel\withoutMiddleware;
 
 beforeEach(function () {
     withoutMiddleware(PreventRequestForgery::class);
+    Carbon::setTestNow('2026-06-07 03:00:00');
 
     Setting::query()->create([
         'section' => 'kiosk',
@@ -57,8 +59,9 @@ it('kiosk shows pin entry when not verified', function () {
                 ->where('step', 'pin')
                 ->where('kioskSession.operatingOpenTime', '08:00')
                 ->where('kioskSession.operatingCloseTime', '17:00')
-                ->where('kioskSession.idleTimeoutOpenMinutes', 15)
-                ->where('kioskSession.idleTimeoutClosedMinutes', 3)
+                ->has('kioskSession.withinOperatingHours')
+                ->has('kioskSession.persistentForDevelopment')
+                ->has('kioskSession.sessionExpiresAtIso')
                 ->has('visitorTypeOptions')
                 ->has('purposeOptions'),
         );
@@ -167,10 +170,9 @@ it('kiosk allows access after valid pin entry', function () {
         'timezone' => 'Asia/Jakarta',
         'operatingOpenTime' => '08:00',
         'operatingCloseTime' => '17:00',
-        'idleTimeoutOpenMinutes' => 15,
-        'idleTimeoutClosedMinutes' => 3,
-        'activeIdleTimeoutMinutes' => 15,
         'withinOperatingHours' => true,
+        'persistentForDevelopment' => false,
+        'sessionExpiresAtIso' => now()->setTime(17, 0)->toIso8601String(),
     ]);
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
@@ -182,12 +184,12 @@ it('kiosk allows access after valid pin entry', function () {
                 ->component('kiosk/index')
                 ->where('step', 'ready')
                 ->where('activeMenu', 'visit')
-                ->where('kioskSession.activeIdleTimeoutMinutes', 15),
+                ->where('kioskSession.withinOperatingHours', true),
         );
 });
 
-it('kiosk expires idle verified sessions during operating hours', function () {
-    Carbon::setTestNow('2026-06-07 10:00:00');
+it('kiosk keeps verified sessions active during operating hours without idle expiry', function () {
+    Carbon::setTestNow('2026-06-07 03:00:00');
 
     Setting::query()->updateOrCreate(
         ['section' => 'kiosk', 'key' => 'operating_open_time'],
@@ -197,32 +199,21 @@ it('kiosk expires idle verified sessions during operating hours', function () {
         ['section' => 'kiosk', 'key' => 'operating_close_time'],
         ['value' => '17:00'],
     );
-    Setting::query()->updateOrCreate(
-        ['section' => 'kiosk', 'key' => 'idle_timeout_open_minutes'],
-        ['value' => '15'],
-    );
 
     post(route('kiosk.pin.store'), [
         'pin' => '123456',
     ])->assertRedirect(route('kiosk.index'));
 
     KioskDevice::query()->update([
-        'last_active_at' => now()->subMinutes(16),
+        'last_active_at' => Carbon::parse('2026-06-07 01:01:00'),
     ]);
 
-    get(route('kiosk.index'))
-        ->assertSuccessful()
-        ->assertInertia(
-            fn (Assert $page) => $page
-                ->component('kiosk/index')
-                ->where('step', 'pin'),
-        );
-
-    assertDatabaseCount('kiosk_devices', 0);
+    expect(app(KioskIdlePolicy::class)->isSessionStillActive(Carbon::parse('2026-06-07 01:01:00')))
+        ->toBeTrue();
 });
 
-it('kiosk expires idle verified sessions faster outside operating hours', function () {
-    Carbon::setTestNow('2026-06-07 20:30:00');
+it('kiosk expires verified sessions at the operating close time', function () {
+    Carbon::setTestNow('2026-06-07 09:30:00');
 
     Setting::query()->updateOrCreate(
         ['section' => 'kiosk', 'key' => 'operating_open_time'],
@@ -232,18 +223,12 @@ it('kiosk expires idle verified sessions faster outside operating hours', functi
         ['section' => 'kiosk', 'key' => 'operating_close_time'],
         ['value' => '17:00'],
     );
-    Setting::query()->updateOrCreate(
-        ['section' => 'kiosk', 'key' => 'idle_timeout_closed_minutes'],
-        ['value' => '2'],
-    );
 
     post(route('kiosk.pin.store'), [
         'pin' => '123456',
     ])->assertRedirect(route('kiosk.index'));
 
-    KioskDevice::query()->update([
-        'last_active_at' => now()->subMinutes(3),
-    ]);
+    Carbon::setTestNow('2026-06-07 10:00:01');
 
     get(route('kiosk.index'))
         ->assertSuccessful()
@@ -251,9 +236,29 @@ it('kiosk expires idle verified sessions faster outside operating hours', functi
             fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin')
-                ->where('kioskSession.activeIdleTimeoutMinutes', 2)
                 ->where('kioskSession.withinOperatingHours', false),
         );
+
+    assertDatabaseCount('kiosk_devices', 0);
+});
+
+it('kiosk cannot start a session outside operating hours', function () {
+    Carbon::setTestNow('2026-06-07 13:30:00');
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'kiosk', 'key' => 'operating_open_time'],
+        ['value' => '08:00'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'kiosk', 'key' => 'operating_close_time'],
+        ['value' => '17:00'],
+    );
+
+    post(route('kiosk.pin.store'), [
+        'pin' => '123456',
+    ])->assertSessionHasErrors([
+        'pin' => 'Sesi kiosk hanya dapat dimulai pada jam operasional perpustakaan.',
+    ]);
 });
 
 it('kiosk respects the selected menu query when already verified', function () {
@@ -763,7 +768,7 @@ it('kiosk find member returns member details when found', function () {
         ->assertJson([
             'member' => [
                 'name' => 'John Doe',
-                'emailMasked' => 'jo******@mhs.unimal.ac.id',
+                'emailMasked' => 'john.doe@mhs.unimal.ac.id',
                 'whatsappMasked' => '0812******90',
             ],
         ]);
