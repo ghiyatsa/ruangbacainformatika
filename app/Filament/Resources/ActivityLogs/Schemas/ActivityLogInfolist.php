@@ -13,9 +13,11 @@ class ActivityLogInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Grid::make(2)
+            Grid::make(3)
+                ->columnSpanFull()
                 ->schema([
                     Section::make('Ringkasan Aktivitas')
+                        ->columnSpan(1)
                         ->schema([
                             TextEntry::make('description')
                                 ->label('Aktivitas'),
@@ -31,6 +33,7 @@ class ActivityLogInfolist
                                 ->dateTime('d M Y H:i'),
                         ]),
                     Section::make('Pelaku dan Detail')
+                        ->columnSpan(2)
                         ->schema([
                             TextEntry::make('user.name')
                                 ->label('Pelaku')
