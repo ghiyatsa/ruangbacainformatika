@@ -30,7 +30,7 @@ class MemberRegistrationClaimService
         $claim = MemberRegistrationClaim::query()->create([
             ...$attributes,
             'token_hash' => hash('sha256', $token),
-            'expires_at' => now()->addMinutes(5),
+            'expires_at' => now()->addMinutes(3),
             'status' => MemberRegistrationClaim::STATUS_PENDING,
         ]);
 

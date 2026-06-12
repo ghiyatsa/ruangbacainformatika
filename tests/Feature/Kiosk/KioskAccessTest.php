@@ -6,7 +6,10 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\VisitLog;
 use App\Services\KioskPinManager;
+use Carbon\Carbon;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -26,6 +29,10 @@ beforeEach(function () {
         'key' => 'pin_hash',
         'value' => Hash::make('123456'),
     ]);
+});
+
+afterEach(function () {
+    Carbon::setTestNow();
 });
 
 it('kiosk denies access from networks outside the allowlist', function () {
@@ -48,8 +55,10 @@ it('kiosk shows pin entry when not verified', function () {
             fn (Assert $page) => $page
                 ->component('kiosk/index')
                 ->where('step', 'pin')
-                ->where('pageTitle', 'Masuk Layanan Mandiri')
-                ->where('pageSubtitle', 'Masukkan PIN untuk mulai.')
+                ->where('kioskSession.operatingOpenTime', '08:00')
+                ->where('kioskSession.operatingCloseTime', '17:00')
+                ->where('kioskSession.idleTimeoutOpenMinutes', 15)
+                ->where('kioskSession.idleTimeoutClosedMinutes', 3)
                 ->has('visitorTypeOptions')
                 ->has('purposeOptions'),
         );
@@ -94,6 +103,52 @@ it('kiosk shows a neutral message when the pin is not configured', function () {
         ]);
 });
 
+it('kiosk routes apply the expected rate limiters', function () {
+    $routes = app('router')->getRoutes();
+
+    expect($routes->getByName('kiosk.pin.store')?->gatherMiddleware())
+        ->toContain('throttle:kiosk-pin')
+        ->and($routes->getByName('kiosk.books.search')?->gatherMiddleware())
+        ->toContain('throttle:kiosk-book-search')
+        ->and($routes->getByName('kiosk.members.find')?->gatherMiddleware())
+        ->toContain('throttle:kiosk-member-lookup')
+        ->and($routes->getByName('kiosk.members.status')?->gatherMiddleware())
+        ->toContain('throttle:kiosk-member-status')
+        ->and($routes->getByName('kiosk.visits.store')?->gatherMiddleware())
+        ->toContain('throttle:kiosk-submit')
+        ->and($routes->getByName('kiosk.loan-drafts.consume')?->gatherMiddleware())
+        ->toContain('throttle:kiosk-consume');
+});
+
+it('kiosk rate limiters are registered with lobby-safe thresholds', function () {
+    $request = Request::create(route('kiosk.index', absolute: false), 'GET', server: [
+        'REMOTE_ADDR' => '127.0.0.1',
+    ]);
+    $request->setLaravelSession(app('session.store'));
+
+    $rateLimiter = app(RateLimiter::class);
+    $pinLimiter = $rateLimiter->limiter('kiosk-pin');
+    $bookSearchLimiter = $rateLimiter->limiter('kiosk-book-search');
+    $memberStatusLimiter = $rateLimiter->limiter('kiosk-member-status');
+    $consumeLimiter = $rateLimiter->limiter('kiosk-consume');
+
+    expect($pinLimiter)->not->toBeNull()
+        ->and($bookSearchLimiter)->not->toBeNull()
+        ->and($memberStatusLimiter)->not->toBeNull()
+        ->and($consumeLimiter)->not->toBeNull();
+
+    $pinLimit = $pinLimiter($request);
+    $bookSearchLimit = $bookSearchLimiter($request);
+    $memberStatusLimit = $memberStatusLimiter($request);
+    $consumeLimit = $consumeLimiter($request);
+
+    expect($pinLimit->maxAttempts)->toBe(8)
+        ->and($pinLimit->decaySeconds)->toBe(60)
+        ->and($bookSearchLimit->maxAttempts)->toBe(180)
+        ->and($memberStatusLimit->maxAttempts)->toBe(180)
+        ->and($consumeLimit->maxAttempts)->toBe(20);
+});
+
 it('kiosk allows access after valid pin entry', function () {
     post(route('kiosk.pin.store'), [
         'pin' => '123456',
@@ -108,6 +163,15 @@ it('kiosk allows access after valid pin entry', function () {
 
     $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldReceive('sessionConfiguration')->andReturn([
+        'timezone' => 'Asia/Jakarta',
+        'operatingOpenTime' => '08:00',
+        'operatingCloseTime' => '17:00',
+        'idleTimeoutOpenMinutes' => 15,
+        'idleTimeoutClosedMinutes' => 3,
+        'activeIdleTimeoutMinutes' => 15,
+        'withinOperatingHours' => true,
+    ]);
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
@@ -118,7 +182,77 @@ it('kiosk allows access after valid pin entry', function () {
                 ->component('kiosk/index')
                 ->where('step', 'ready')
                 ->where('activeMenu', 'visit')
-                ->where('pageSubtitle', 'Pilih layanan yang ingin digunakan.'),
+                ->where('kioskSession.activeIdleTimeoutMinutes', 15),
+        );
+});
+
+it('kiosk expires idle verified sessions during operating hours', function () {
+    Carbon::setTestNow('2026-06-07 10:00:00');
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'kiosk', 'key' => 'operating_open_time'],
+        ['value' => '08:00'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'kiosk', 'key' => 'operating_close_time'],
+        ['value' => '17:00'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'kiosk', 'key' => 'idle_timeout_open_minutes'],
+        ['value' => '15'],
+    );
+
+    post(route('kiosk.pin.store'), [
+        'pin' => '123456',
+    ])->assertRedirect(route('kiosk.index'));
+
+    KioskDevice::query()->update([
+        'last_active_at' => now()->subMinutes(16),
+    ]);
+
+    get(route('kiosk.index'))
+        ->assertSuccessful()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('kiosk/index')
+                ->where('step', 'pin'),
+        );
+
+    assertDatabaseCount('kiosk_devices', 0);
+});
+
+it('kiosk expires idle verified sessions faster outside operating hours', function () {
+    Carbon::setTestNow('2026-06-07 20:30:00');
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'kiosk', 'key' => 'operating_open_time'],
+        ['value' => '08:00'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'kiosk', 'key' => 'operating_close_time'],
+        ['value' => '17:00'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'kiosk', 'key' => 'idle_timeout_closed_minutes'],
+        ['value' => '2'],
+    );
+
+    post(route('kiosk.pin.store'), [
+        'pin' => '123456',
+    ])->assertRedirect(route('kiosk.index'));
+
+    KioskDevice::query()->update([
+        'last_active_at' => now()->subMinutes(3),
+    ]);
+
+    get(route('kiosk.index'))
+        ->assertSuccessful()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('kiosk/index')
+                ->where('step', 'pin')
+                ->where('kioskSession.activeIdleTimeoutMinutes', 2)
+                ->where('kioskSession.withinOperatingHours', false),
         );
 });
 
@@ -275,6 +409,25 @@ it('kiosk member registration rejects duplicate email or whatsapp number', funct
         'name' => 'Duplicated Kiosk Member',
         'email' => 'other@mhs.unimal.ac.id',
         'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 1',
+    ])->assertSessionHasErrors(['whatsapp']);
+});
+
+it('kiosk member registration rejects duplicate whatsapp numbers with alternate formatting', function () {
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    User::factory()->create([
+        'email' => 'existing@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+    ]);
+
+    post(route('kiosk.members.store'), [
+        'name' => 'Duplicated Kiosk Member',
+        'email' => 'other@mhs.unimal.ac.id',
+        'whatsapp' => '+62 812-3456-789',
         'address' => 'Jl. Kampus No. 1',
     ])->assertSessionHasErrors(['whatsapp']);
 });
@@ -500,6 +653,20 @@ it('kiosk member registration cancel endpoint clears expired registrations from 
         ->assertSessionMissing('kiosk.member_registration_claim');
 });
 
+it('kiosk lock endpoint clears the active kiosk session', function () {
+    post(route('kiosk.pin.store'), [
+        'pin' => '123456',
+    ])->assertRedirect(route('kiosk.index'));
+
+    assertDatabaseCount('kiosk_devices', 1);
+
+    post(route('kiosk.lock'))
+        ->assertSuccessful()
+        ->assertJsonPath('locked', true);
+
+    assertDatabaseCount('kiosk_devices', 0);
+});
+
 it('kiosk visit submission flashes a sonner toast after saving', function () {
     $mock = mock(KioskPinManager::class);
     $mock->shouldReceive('isVerified')->andReturn(true);
@@ -595,10 +762,9 @@ it('kiosk find member returns member details when found', function () {
         ->assertSuccessful()
         ->assertJson([
             'member' => [
-                'id' => $user->id,
                 'name' => 'John Doe',
-                'email' => 'john.doe@mhs.unimal.ac.id',
-                'whatsapp' => '081234567890',
+                'emailMasked' => 'jo******@mhs.unimal.ac.id',
+                'whatsappMasked' => '0812******90',
             ],
         ]);
 });

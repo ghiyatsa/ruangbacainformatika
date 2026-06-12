@@ -28,8 +28,8 @@ export const kioskMenuItems: KioskMenuItem[] = [
     {
         key: 'borrow',
         label: 'Pinjam Buku',
-        description: 'Pilih dan konfirmasi',
-        helper: 'Bisa scan QR atau input manual.',
+        description: 'Pilih buku di kiosk',
+        helper: 'Selesaikan dengan scan QR anggota dari akun pengguna.',
         icon: BookMarked,
     },
     {
