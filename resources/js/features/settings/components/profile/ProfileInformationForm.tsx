@@ -25,7 +25,7 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
     const hasVerifiedWhatsapp = Boolean(user.whatsapp_verified_at);
 
     return (
-        <section className="flex flex-col gap-6">
+        <section className="rounded-xl border border-border/70 bg-card p-6 shadow-xs">
             <SettingsSectionHeader
                 title="Informasi profil"
                 description="Perbarui nama, WhatsApp, dan alamat akun Anda."
@@ -36,7 +36,7 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                 options={{
                     preserveScroll: true,
                 }}
-                className="flex flex-col gap-5"
+                className="mt-6 flex flex-col gap-5"
             >
                 {({ processing, errors, recentlySuccessful }) => (
                     <div className="flex flex-col gap-5">
@@ -130,7 +130,7 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                             </InputGroup>
                             <p className="text-xs text-muted-foreground">
                                 {hasVerifiedWhatsapp && !isEditingWhatsapp
-                                    ? 'Nomor WhatsApp sudah terverifikasi.'
+                                    ? 'Nomor WhatsApp ini sudah terverifikasi.'
                                     : hasVerifiedWhatsapp
                                       ? 'Nomor baru akan meminta verifikasi ulang sebelum layanan anggota aktif kembali.'
                                       : 'Gunakan nomor WhatsApp yang aktif.'}

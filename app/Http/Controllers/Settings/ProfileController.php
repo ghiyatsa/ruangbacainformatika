@@ -42,7 +42,7 @@ class ProfileController extends Controller
             return to_route('settings.profile.edit');
         }
 
-        if ($user->requiresWhatsAppVerification()) {
+        if ($this->authenticationRedirector->requiresWhatsAppVerification($user)) {
             return to_route('register.whatsapp');
         }
 
