@@ -100,6 +100,10 @@ class KioskPinManager
             return false;
         }
 
+        if (! $this->kioskIdlePolicy->canStartSession()) {
+            return false;
+        }
+
         $request->session()->regenerate();
         $request->session()->put(self::SESSION_PIN_HASH_KEY, $currentPinHash);
         $request->session()->put(self::SESSION_VERSION_KEY, $this->currentSessionVersion());
@@ -120,6 +124,11 @@ class KioskPinManager
         Cookie::queue(self::COOKIE_DEVICE_TOKEN_KEY, $deviceToken, 525600); // 1 year
 
         return true;
+    }
+
+    public function canStartSession(): bool
+    {
+        return $this->kioskIdlePolicy->canStartSession();
     }
 
     public function updateLastActive(Request $request): void
@@ -177,10 +186,9 @@ class KioskPinManager
      *     timezone: string,
      *     operatingOpenTime: string,
      *     operatingCloseTime: string,
-     *     idleTimeoutOpenMinutes: int,
-     *     idleTimeoutClosedMinutes: int,
-     *     activeIdleTimeoutMinutes: int,
-     *     withinOperatingHours: bool
+     *     withinOperatingHours: bool,
+     *     persistentForDevelopment: bool,
+     *     sessionExpiresAtIso: string|null
      * }
      */
     public function sessionConfiguration(): array
