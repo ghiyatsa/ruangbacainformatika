@@ -24,8 +24,8 @@ interface MemberRegistrationClaimDialogProps {
 }
 
 const CLAIM_TIMEOUT_SECONDS = 3 * 60;
-const QR_SURFACE_COLOR = 'rgb(15, 23, 42)';
-const QR_MODULE_COLOR = 'rgb(255, 255, 255)';
+const QR_SURFACE_COLOR = 'var(--card)';
+const QR_MODULE_COLOR = 'var(--foreground)';
 
 function getSecondsRemaining(
     expiresAt: string | null | undefined,
@@ -107,6 +107,23 @@ export function MemberRegistrationClaimDialog({
             Math.min(100, (secondsRemaining / CLAIM_TIMEOUT_SECONDS) * 100),
         );
     }, [secondsRemaining]);
+
+    const isLowTime = secondsRemaining < 60;
+    const timerColorClass = isLowTime
+        ? 'text-red-600 dark:text-red-400 animate-pulse'
+        : 'text-slate-900 dark:text-slate-100';
+    const timerIconColorClass = isLowTime
+        ? 'text-red-600 dark:text-red-400'
+        : 'text-primary dark:text-primary';
+    const progressBarColorClass = isLowTime
+        ? 'bg-red-600 dark:bg-red-500'
+        : 'bg-primary';
+    const progressBgColorClass = isLowTime
+        ? 'bg-red-100 dark:bg-red-950/60'
+        : 'bg-primary/10 dark:bg-primary/20';
+    const bracketColorClass = isLowTime ? 'border-red-500' : 'border-primary';
+
+    // Flat color background used instead of gradient
 
     const renderedQrSvg = useMemo(() => {
         if (!activeRegistration.qrSvg) {
@@ -227,11 +244,18 @@ export function MemberRegistrationClaimDialog({
                         return payload.memberRegistrationClaim;
                     }
 
-                    if (current.status === 'linked' || current.status === 'claimed' || current.status === 'expired') {
+                    if (
+                        current.status === 'linked' ||
+                        current.status === 'claimed' ||
+                        current.status === 'expired'
+                    ) {
                         return current;
                     }
 
-                    return current; // Keep current if payload has null
+                    return {
+                        ...current,
+                        status: 'expired',
+                    };
                 });
             } finally {
                 isPollingRef.current = false;
@@ -330,60 +354,90 @@ export function MemberRegistrationClaimDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="overflow-hidden rounded-[2rem] bg-white text-slate-950 shadow-2xl ring-1 ring-black/10 dark:bg-slate-950 dark:text-slate-50 dark:ring-white/10">
-                    <div className="bg-[radial-gradient(circle_at_top,_rgba(5,150,105,0.16),_transparent_56%),linear-gradient(180deg,#f8fffc_0%,#ffffff_42%)] px-6 py-6 sm:px-8 dark:bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.16),_transparent_56%),linear-gradient(180deg,#07130f_0%,#0f172a_42%)]">
-                        <div className="mx-auto flex max-w-md flex-col items-center gap-5 text-center">
+                <div className="overflow-hidden rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-foreground/10">
+                    <div className="bg-card px-5 py-4 sm:px-6 sm:py-5">
+                        <div className="mx-auto flex max-w-md flex-col items-center gap-3.5 text-center">
                             <Badge
                                 variant="outline"
-                                className="rounded-full border border-emerald-300/80 bg-white/90 px-3 py-1 text-xs font-medium tracking-[0.22em] text-emerald-700 uppercase dark:border-emerald-500/40 dark:bg-slate-950/70 dark:text-emerald-300"
+                                className={
+                                    isPendingClaim
+                                        ? 'rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium tracking-[0.22em] text-primary uppercase dark:border-primary/40 dark:bg-primary/10 dark:text-primary'
+                                        : isConnectionCompleted
+                                          ? 'rounded-full border border-emerald-300/80 bg-emerald-50/50 px-3 py-1 text-xs font-medium tracking-[0.22em] text-emerald-800 uppercase dark:border-emerald-500/40 dark:bg-slate-950/70 dark:text-emerald-300'
+                                          : 'rounded-full border border-red-300/80 bg-red-50/50 px-3 py-1 text-xs font-medium tracking-[0.22em] text-red-800 uppercase dark:border-red-500/40 dark:bg-slate-950/70 dark:text-red-300'
+                                }
                             >
                                 {isPendingClaim
                                     ? 'Menunggu scan'
                                     : isConnectionCompleted
                                       ? 'Terhubung'
-                                        : 'Kedaluwarsa'}
+                                      : 'Kedaluwarsa'}
                             </Badge>
 
-                            <div className="space-y-1.5">
-                                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                            <div className="space-y-2">
+                                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                                     {isConnectionCompleted
-                                        ? 'Akun tertaut'
+                                        ? 'Pendaftaran Berhasil!'
                                         : isExpired
-                                          ? 'Waktu habis'
-                                          : 'Scan QR'}
+                                          ? 'Sesi Telah Berakhir'
+                                          : 'Tautkan Akun Google'}
                                 </h2>
-                                <p className="mx-auto max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">
+                                <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
                                     {isConnectionCompleted
-                                        ? 'Akun Google sudah berhasil ditautkan.'
+                                        ? 'Akun Google Anda telah terhubung dengan data pendaftaran di perpustakaan.'
                                         : isExpired
-                                          ? 'QR kedaluwarsa. Buat ulang untuk lanjut.'
-                                          : 'Pilih akun Google yang sesuai.'}
+                                          ? 'QR code pendaftaran telah kedaluwarsa demi keamanan data Anda.'
+                                          : 'Pindai QR ini dengan ponsel Anda untuk masuk menggunakan Google dan menyelesaikan pendaftaran.'}
                                 </p>
                             </div>
 
                             {isPendingClaim ? (
-                                <div className="rounded-[1.75rem] border border-slate-800 bg-slate-950 p-4 shadow-sm sm:p-5 dark:border-slate-700 dark:bg-slate-900">
+                                <div className="relative overflow-hidden rounded-2xl bg-card p-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:p-4">
+                                    {/* Corner Brackets */}
                                     <div
-                                        className="flex justify-center [&_svg]:mx-auto [&_svg]:block [&_svg]:h-[240px] [&_svg]:w-[240px] sm:[&_svg]:h-[280px] sm:[&_svg]:w-[280px]"
+                                        className={`absolute top-1 left-1 size-4 border-t-2 border-l-2 ${bracketColorClass} rounded-tl-md`}
+                                    />
+                                    <div
+                                        className={`absolute top-1 right-1 size-4 border-t-2 border-r-2 ${bracketColorClass} rounded-tr-md`}
+                                    />
+                                    <div
+                                        className={`absolute bottom-1 left-1 size-4 border-b-2 border-l-2 ${bracketColorClass} rounded-bl-md`}
+                                    />
+                                    <div
+                                        className={`absolute right-1 bottom-1 size-4 border-r-2 border-b-2 ${bracketColorClass} rounded-br-md`}
+                                    />
+
+                                    <div
+                                        className="flex justify-center [&_svg]:mx-auto [&_svg]:block [&_svg]:h-[180px] [&_svg]:w-[180px] sm:[&_svg]:h-[220px] sm:[&_svg]:w-[220px]"
                                         dangerouslySetInnerHTML={{
                                             __html: renderedQrSvg,
                                         }}
                                     />
                                 </div>
-                            ) : (
-                                <div className="w-full max-w-md rounded-[1.75rem] border border-slate-200 bg-white px-6 py-7 text-left dark:border-slate-800 dark:bg-slate-900">
+                            ) : isConnectionCompleted ? (
+                                <div className="w-full max-w-md animate-in rounded-[1.75rem] border border-emerald-100 bg-emerald-50/20 px-6 py-7 text-left duration-300 fade-in dark:border-emerald-900/30 dark:bg-emerald-950/10">
                                     <div className="flex items-start gap-3">
-                                        <Clock3 className="mt-0.5 size-5 text-emerald-600 dark:text-emerald-400" />
-                                        <div className="space-y-2">
-                                            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                                                {isConnectionCompleted
-                                                    ? 'Akun sudah tertaut.'
-                                                    : 'Proses hampir selesai.'}
+                                        <CheckCircle2 className="mt-0.5 size-5 text-emerald-600 dark:text-emerald-400" />
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-400">
+                                                Akun Google berhasil ditautkan!
                                             </p>
-                                            <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                                {isConnectionCompleted
-                                                    ? 'Form sedang diatur ulang.'
-                                                    : 'Form sedang diatur ulang.'}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="w-full max-w-md animate-in rounded-[1.75rem] border border-red-100 bg-red-50/20 px-6 py-7 text-left duration-300 fade-in dark:border-red-900/30 dark:bg-red-950/10">
+                                    <div className="flex items-start gap-3">
+                                        <TriangleAlert className="mt-0.5 size-5 text-red-600 dark:text-red-400" />
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-semibold text-red-900 dark:text-red-300">
+                                                QR Telah Kedaluwarsa
+                                            </p>
+                                            <p className="text-sm leading-relaxed text-red-800 dark:text-red-300">
+                                                Batas waktu penautan akun (3
+                                                menit) telah habis. Silakan klik
+                                                tombol "Buat QR Baru" di bawah
+                                                untuk mencoba kembali.
                                             </p>
                                         </div>
                                     </div>
@@ -391,19 +445,25 @@ export function MemberRegistrationClaimDialog({
                             )}
 
                             {isPendingClaim ? (
-                                <div className="w-full max-w-sm space-y-3">
-                                    <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-300">
+                                <div className="w-full max-w-sm space-y-2">
+                                    <div
+                                        className={`flex items-center justify-center gap-2 ${timerIconColorClass}`}
+                                    >
                                         <Clock3 className="size-4" />
                                         <span className="text-sm font-medium">
                                             Scan sekarang
                                         </span>
                                     </div>
-                                    <div className="text-4xl font-semibold tracking-[0.18em] tabular-nums sm:text-5xl">
+                                    <div
+                                        className={`text-4xl font-semibold tracking-[0.18em] tabular-nums sm:text-5xl ${timerColorClass}`}
+                                    >
                                         {formatRemaining(secondsRemaining)}
                                     </div>
-                                    <div className="h-2 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-950/60">
+                                    <div
+                                        className={`h-2 overflow-hidden rounded-full ${progressBgColorClass}`}
+                                    >
                                         <div
-                                            className="h-full rounded-full bg-emerald-600 transition-[width] dark:bg-emerald-400"
+                                            className={`h-full rounded-full transition-[width] ${progressBarColorClass}`}
                                             style={{
                                                 width: `${countdownProgress}%`,
                                             }}
@@ -430,7 +490,9 @@ export function MemberRegistrationClaimDialog({
                             {isConnectionCompleted ? (
                                 <Alert className="w-full max-w-md border-emerald-200 bg-emerald-50 text-left text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100">
                                     <CheckCircle2 className="size-4" />
-                                    <AlertTitle>Akun sudah terhubung</AlertTitle>
+                                    <AlertTitle>
+                                        Akun sudah terhubung
+                                    </AlertTitle>
                                     <AlertDescription>
                                         Form sedang diatur ulang.
                                     </AlertDescription>
@@ -440,12 +502,13 @@ export function MemberRegistrationClaimDialog({
                     </div>
 
                     {!isConnectionCompleted ? (
-                        <div className="flex flex-col gap-2 border-t border-slate-200/80 bg-white/80 px-5 py-4 sm:flex-row sm:justify-end dark:border-slate-800 dark:bg-slate-950/80">
+                        <div className="flex flex-col gap-2 border-t border-border bg-card px-5 py-3 sm:flex-row sm:justify-end">
                             {isExpired ? (
                                 <Button
                                     type="button"
                                     variant="secondary"
                                     onClick={restartRegistration}
+                                    className="rounded-xl"
                                 >
                                     Buat QR Baru
                                 </Button>
@@ -455,13 +518,15 @@ export function MemberRegistrationClaimDialog({
                                         type="button"
                                         variant="outline"
                                         onClick={cancelRegistration}
+                                        className="rounded-xl"
                                     >
-                                        Batalkan proses
+                                        Batalkan
                                     </Button>
                                     <Button
                                         type="button"
                                         variant="ghost"
                                         onClick={() => onOpenChange(false)}
+                                        className="rounded-xl"
                                     >
                                         Tutup
                                     </Button>

@@ -183,16 +183,17 @@ class WhatsAppOtpService
             ? RateLimiter::availableIn($this->cooldownKey($user))
             : 0;
         $autoApproval = $this->campusEmail->shouldAutoApprove($user->email);
+        $approvalPendingAfterVerification = ! ($user->is_approved || $autoApproval);
 
         return [
             'maskedWhatsapp' => $this->maskPhoneNumber($user->whatsapp),
             'hasActiveChallenge' => $expiresIn > 0,
             'expiresIn' => $expiresIn,
             'resendAvailableIn' => $resendAvailableIn,
-            'approvalMode' => $autoApproval ? 'automatic' : 'manual',
-            'approvalMessage' => $autoApproval
-                ? 'Verifikasi WhatsApp akan melengkapi status anggota Anda.'
-                : 'Setelah verifikasi WhatsApp, akun Anda akan menunggu persetujuan admin.',
+            'approvalMode' => $approvalPendingAfterVerification ? 'manual' : 'automatic',
+            'approvalMessage' => $approvalPendingAfterVerification
+                ? 'Setelah verifikasi WhatsApp, akun Anda akan menunggu persetujuan admin.'
+                : 'Verifikasi WhatsApp akan melengkapi status anggota Anda.',
         ];
     }
 

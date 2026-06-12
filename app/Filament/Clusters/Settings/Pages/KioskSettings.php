@@ -7,6 +7,7 @@ use App\Models\KioskDevice;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
 use App\Services\KioskPinManager;
+use App\Support\KioskIdlePolicy;
 use App\Support\KioskNetworkGuard;
 use BackedEnum;
 use Closure;
@@ -92,6 +93,30 @@ class KioskSettings extends Page implements HasTable
                                     }
                                 };
                             }),
+                        FormTextInput::make('operating_open_time')
+                            ->label('Jam Buka Operasional')
+                            ->type('time')
+                            ->required()
+                            ->rule('date_format:H:i'),
+                        FormTextInput::make('operating_close_time')
+                            ->label('Jam Tutup Operasional')
+                            ->type('time')
+                            ->required()
+                            ->rule('date_format:H:i'),
+                        FormTextInput::make('idle_timeout_open_minutes')
+                            ->label('Idle Saat Jam Operasional (Menit)')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1)
+                            ->maxValue(240)
+                            ->helperText('Perangkat akan kembali ke PIN setelah tidak digunakan selama durasi ini pada jam layanan.'),
+                        FormTextInput::make('idle_timeout_closed_minutes')
+                            ->label('Idle Di Luar Jam Operasional (Menit)')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1)
+                            ->maxValue(60)
+                            ->helperText('Gunakan durasi lebih singkat untuk mempercepat lock otomatis di luar jam layanan.'),
                     ]),
 
                 Section::make('Perangkat Aktif')
@@ -99,20 +124,6 @@ class KioskSettings extends Page implements HasTable
                     ->schema([
                         EmbeddedTable::make(),
                     ]),
-                Section::make('Tampilan Kios')
-                    ->description('Teks utama yang tampil pada layar kios.')
-                    ->schema([
-                        FormTextInput::make('title')
-                            ->label('Judul')
-                            ->required()
-                            ->maxLength(255)
-                            ->placeholder('Pendataan Pengunjung Ruang Baca'),
-                        FormTextInput::make('subtitle')
-                            ->label('Subjudul')
-                            ->maxLength(255)
-                            ->placeholder('Masukkan PIN untuk mulai.'),
-                    ])
-                    ->columns(2),
             ])
                 ->livewireSubmitHandler('save')
                 ->footer([
@@ -141,12 +152,20 @@ class KioskSettings extends Page implements HasTable
         $pinWasUpdated = filled($data['pin'] ?? null);
         $existingValues = Arr::only(
             $this->settingRepository()->sectionValues('kiosk', $this->defaultValues()),
-            ['title', 'subtitle', 'allowed_networks'],
+            [
+                'allowed_networks',
+                'operating_open_time',
+                'operating_close_time',
+                'idle_timeout_open_minutes',
+                'idle_timeout_closed_minutes',
+            ],
         );
         $savedValues = [
-            'title' => $data['title'] ?? null,
-            'subtitle' => $data['subtitle'] ?? null,
             'allowed_networks' => collect($this->kioskNetworkGuard()->normalizeNetworks($data['allowed_networks'] ?? ''))->implode(PHP_EOL),
+            'operating_open_time' => $data['operating_open_time'] ?? null,
+            'operating_close_time' => $data['operating_close_time'] ?? null,
+            'idle_timeout_open_minutes' => $data['idle_timeout_open_minutes'] ?? null,
+            'idle_timeout_closed_minutes' => $data['idle_timeout_closed_minutes'] ?? null,
         ];
 
         if ($pinWasUpdated) {
@@ -181,8 +200,10 @@ class KioskSettings extends Page implements HasTable
         return [
             'pin' => '',
             'allowed_networks' => '',
-            'title' => 'Pendataan Pengunjung Ruang Baca',
-            'subtitle' => 'Masukkan PIN untuk mulai menggunakan perangkat kios.',
+            'operating_open_time' => KioskIdlePolicy::DEFAULT_OPERATING_OPEN_TIME,
+            'operating_close_time' => KioskIdlePolicy::DEFAULT_OPERATING_CLOSE_TIME,
+            'idle_timeout_open_minutes' => (string) KioskIdlePolicy::DEFAULT_IDLE_TIMEOUT_OPEN_MINUTES,
+            'idle_timeout_closed_minutes' => (string) KioskIdlePolicy::DEFAULT_IDLE_TIMEOUT_CLOSED_MINUTES,
         ];
     }
 

@@ -7,14 +7,21 @@ export type KioskBookSearchMode = 'borrow' | 'return';
 export interface KioskProps {
     step: KioskStep;
     activeMenu: KioskMenu;
-    pageTitle: string;
-    pageSubtitle: string;
-    siteName: string;
-    siteTagline: string;
     loanMaxBooks: number;
     visitorTypeOptions: Record<string, string>;
     purposeOptions: Record<string, string>;
+    kioskSession: KioskSessionConfig;
     memberRegistrationClaim?: KioskMemberRegistrationClaim | null;
+}
+
+export interface KioskSessionConfig {
+    timezone: string;
+    operatingOpenTime: string;
+    operatingCloseTime: string;
+    idleTimeoutOpenMinutes: number;
+    idleTimeoutClosedMinutes: number;
+    activeIdleTimeoutMinutes: number;
+    withinOperatingHours: boolean;
 }
 
 export interface KioskMemberRegistrationClaim {

@@ -1,13 +1,19 @@
-import { User } from 'lucide-react';
+import { Mail, Phone, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ProfileSummaryProps {
     name: string;
     email: string;
     avatar?: string | null;
+    whatsapp?: string | null;
 }
 
-export function ProfileSummary({ name, email, avatar }: ProfileSummaryProps) {
+export function ProfileSummary({
+    name,
+    email,
+    avatar,
+    whatsapp,
+}: ProfileSummaryProps) {
     const initials = (name ?? '')
         .split(' ')
         .slice(0, 2)
@@ -15,8 +21,8 @@ export function ProfileSummary({ name, email, avatar }: ProfileSummaryProps) {
         .join('');
 
     return (
-        <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16 rounded-2xl shadow-md shadow-primary/20">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <Avatar className="h-18 w-18 rounded-2xl shadow-md shadow-primary/15">
                 <AvatarImage
                     src={avatar ?? undefined}
                     alt={name}
@@ -26,9 +32,22 @@ export function ProfileSummary({ name, email, avatar }: ProfileSummaryProps) {
                     {initials || <User className="h-7 w-7" />}
                 </AvatarFallback>
             </Avatar>
-            <div>
-                <p className="text-base leading-tight font-semibold">{name}</p>
-                <p className="text-sm text-muted-foreground">{email}</p>
+            <div className="min-w-0 flex-1">
+                <p className="text-lg leading-tight font-semibold">{name}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    Identitas akun utama untuk layanan Ruang Baca.
+                </p>
+
+                <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 shrink-0" />
+                        <span>{whatsapp || 'Nomor WhatsApp belum diisi'}</span>
+                    </div>
+                </div>
             </div>
         </div>
     );

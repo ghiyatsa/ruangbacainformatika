@@ -334,7 +334,7 @@ class LoanDraftService
 
         if (! $user->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'draft' => 'Layanan peminjaman tersedia untuk mahasiswa Teknik Informatika yang terdaftar.',
+                'draft' => 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.',
             ]);
         }
     }

@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\User;
 use App\Support\CampusEmail;
+use App\Support\WhatsAppPhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -101,7 +102,7 @@ trait ProfileValidationRules
                     return;
                 }
 
-                if (! preg_match('/^(?:08|628)[1-9][0-9]{7,11}$/', $value)) {
+                if (! preg_match('/^08[1-9][0-9]{7,11}$/', $value)) {
                     $fail('Masukkan nomor WhatsApp yang valid, misalnya 08123456789.');
                 }
             },
@@ -128,7 +129,7 @@ trait ProfileValidationRules
                     return;
                 }
 
-                if (! preg_match('/^(?:08|628)[1-9][0-9]{7,11}$/', $value)) {
+                if (! preg_match('/^08[1-9][0-9]{7,11}$/', $value)) {
                     $fail('Masukkan nomor telepon yang valid, misalnya 08123456789.');
                 }
             },
@@ -232,13 +233,7 @@ trait ProfileValidationRules
 
     protected function normalizePhoneNumber(?string $value): string
     {
-        $digits = preg_replace('/\D+/', '', trim((string) $value)) ?? '';
-
-        if (Str::startsWith($digits, '8')) {
-            return '0'.$digits;
-        }
-
-        return $digits;
+        return app(WhatsAppPhoneNumber::class)->normalize($value) ?? '';
     }
 
     protected function countMeaningfulSegments(string $value): int

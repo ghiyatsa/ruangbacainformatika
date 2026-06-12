@@ -2,7 +2,6 @@ import { useForm } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
-import KioskLoanDraftController from '@/actions/App/Http/Controllers/KioskLoanDraftController';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,10 +20,9 @@ function getQrErrorMessage(
     errors: Record<string, string | undefined>,
 ): string | null {
     const priorityKeys = [
-        'payload',
+        'verification_payload',
         'book_ids',
         'book_ids.0',
-        'member_identifier',
         'draft',
     ];
 
@@ -47,9 +45,11 @@ function getQrErrorMessage(
 export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
     const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
     const [hasDetectedQr, setHasDetectedQr] = useState(false);
+    const [selectedBookIds, setSelectedBookIds] = useState<number[]>([]);
     const scannerRef = useRef<QrCameraScannerHandle | null>(null);
     const qrForm = useForm({
-        payload: '',
+        verification_payload: '',
+        book_ids: [] as number[],
     });
     const qrErrorMessage = getQrErrorMessage(qrForm.errors);
 
@@ -59,6 +59,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
         if (!open) {
             scannerRef.current?.stop();
             setHasDetectedQr(false);
+            setSelectedBookIds([]);
             qrForm.reset();
             qrForm.clearErrors();
         }
@@ -88,14 +89,17 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
     };
 
     const submitDetectedPayload = (payload: string) => {
-        if (qrForm.processing) {
+        if (qrForm.processing || selectedBookIds.length === 0) {
             return;
         }
 
         setHasDetectedQr(true);
         qrForm.clearErrors();
-        qrForm.setData('payload', payload);
-        qrForm.post(KioskLoanDraftController.store.url(), {
+        qrForm.setData({
+            verification_payload: payload,
+            book_ids: selectedBookIds,
+        });
+        qrForm.post(KioskController.borrow().url, {
             preserveScroll: true,
             onSuccess: () => {
                 handleQrDialogChange(false);
@@ -110,17 +114,33 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
         });
     };
 
+    const startBorrowVerification = (bookIds: number[]) => {
+        if (bookIds.length === 0 || qrForm.processing) {
+            return;
+        }
+
+        setSelectedBookIds(bookIds);
+        setHasDetectedQr(false);
+        qrForm.clearErrors();
+        setIsQrDialogOpen(true);
+    };
+
     return (
         <div className="space-y-4">
             <BookActionForm
                 action={KioskController.borrow()}
-                submitLabel="Pinjam Buku"
+                submitLabel="Verifikasi & Pinjam"
                 description={`Maksimal ${loanMaxBooks} buku per anggota.`}
                 maxInputs={loanMaxBooks}
                 bookSearchUrl={KioskController.searchBooks.url()}
                 bookSearchMode="borrow"
                 autoFocus={false}
-                onScanQr={() => handleQrDialogChange(true)}
+                memberFieldMode="hidden"
+                onActionSubmit={({ selectedBooks }) =>
+                    startBorrowVerification(
+                        selectedBooks.map((book) => book.id),
+                    )
+                }
             />
 
             <Dialog open={isQrDialogOpen} onOpenChange={handleQrDialogChange}>
@@ -128,7 +148,9 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                     <DialogHeader>
                         <DialogTitle>Scan QR Anggota</DialogTitle>
                         <DialogDescription>
-                            Arahkan QR ke kamera. Proses akan berjalan otomatis.
+                            Anggota membuka QR anggota dari akun mereka di
+                            ponsel. Setelah terbaca, peminjaman akan diproses
+                            otomatis.
                         </DialogDescription>
                     </DialogHeader>
 

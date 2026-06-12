@@ -24,6 +24,8 @@ export function BookActionForm({
     bookSearchMode = 'borrow',
     autoFocus = true,
     onScanQr,
+    memberFieldMode = 'required',
+    onActionSubmit,
 }: {
     action: {
         url: string;
@@ -36,6 +38,12 @@ export function BookActionForm({
     bookSearchMode?: KioskBookSearchMode;
     autoFocus?: boolean;
     onScanQr?: () => void;
+    memberFieldMode?: 'required' | 'hidden';
+    onActionSubmit?: (data: {
+        memberIdentifier: string;
+        selectedBooks: KioskBookSearchResult[];
+        firstIsbn: string;
+    }) => void;
 }) {
     const [memberIdentifier, setMemberIdentifier] = useState('');
     const [firstIsbn, setFirstIsbn] = useState('');
@@ -44,16 +52,23 @@ export function BookActionForm({
         [],
     );
     const [memberData, setMemberData] = useState<{
-        id: number;
         name: string;
-        email: string;
-        whatsapp: string;
+        emailMasked: string | null;
+        whatsappMasked: string | null;
     } | null>(null);
     const [isSearchingMember, setIsSearchingMember] = useState(false);
 
     const deferredMemberIdentifier = useDeferredValue(memberIdentifier.trim());
 
     useEffect(() => {
+        if (memberFieldMode === 'hidden') {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setMemberData(null);
+            setIsSearchingMember(false);
+
+            return;
+        }
+
         if (deferredMemberIdentifier === '') {
             return;
         }
@@ -75,10 +90,9 @@ export function BookActionForm({
 
                 const payload = (await response.json()) as {
                     member?: {
-                        id: number;
                         name: string;
-                        email: string;
-                        whatsapp: string;
+                        emailMasked: string | null;
+                        whatsappMasked: string | null;
                     } | null;
                 };
 
@@ -101,14 +115,15 @@ export function BookActionForm({
             });
 
         return () => abortController.abort();
-    }, [deferredMemberIdentifier]);
+    }, [deferredMemberIdentifier, memberFieldMode]);
 
     const usesBookSearch = Boolean(bookSearchUrl);
     const requiresMemberBeforeSearch = bookSearchMode === 'return';
+    const requiresMemberField = memberFieldMode === 'required';
     const memberIdentifierTrimmed = memberIdentifier.trim();
 
     const isComplete =
-        memberIdentifierTrimmed !== '' &&
+        (!requiresMemberField || memberIdentifierTrimmed !== '') &&
         (usesBookSearch ? selectedBooks.length > 0 : firstIsbn.trim() !== '');
 
     const handleSearchDialogChange = (open: boolean) => {
@@ -171,101 +186,132 @@ export function BookActionForm({
 
                         <div className="grid gap-4">
                             <FieldGroup className="grid gap-4 border-none bg-transparent p-0 shadow-none">
-                                <div className="grid gap-4">
-                                    <KioskField
-                                        label="NIM, Email, atau No. HP"
-                                        htmlFor="book-member"
-                                        error={errors.member_identifier}
-                                        required
-                                    >
-                                        <div className="flex gap-2">
-                                            <InputGroup className="flex-1">
-                                                <InputGroupInput
-                                                    id="book-member"
-                                                    name="member_identifier"
-                                                    autoFocus={autoFocus}
-                                                    autoComplete="new-password"
-                                                    autoCapitalize="none"
-                                                    autoCorrect="off"
-                                                    spellCheck={false}
-                                                    data-lpignore="true"
-                                                    data-1p-ignore="true"
-                                                    data-bwignore="true"
-                                                    placeholder="NIM, email, atau no. HP"
-                                                    value={memberIdentifier}
-                                                    onChange={(e) => {
-                                                        const val =
-                                                            e.target.value;
-                                                        setMemberIdentifier(
-                                                            val,
-                                                        );
+                                {requiresMemberField ? (
+                                    <div className="grid gap-4">
+                                        <KioskField
+                                            label="NIM, Email, atau No. HP"
+                                            htmlFor="book-member"
+                                            error={errors.member_identifier}
+                                            required
+                                        >
+                                            <div className="flex gap-2">
+                                                <InputGroup className="flex-1">
+                                                    <InputGroupInput
+                                                        id="book-member"
+                                                        name="member_identifier"
+                                                        autoFocus={autoFocus}
+                                                        autoComplete="new-password"
+                                                        autoCapitalize="none"
+                                                        autoCorrect="off"
+                                                        spellCheck={false}
+                                                        data-lpignore="true"
+                                                        data-1p-ignore="true"
+                                                        data-bwignore="true"
+                                                        placeholder="NIM, email, atau no. HP"
+                                                        value={memberIdentifier}
+                                                        onChange={(e) => {
+                                                            const val =
+                                                                e.target.value;
+                                                            setMemberIdentifier(
+                                                                val,
+                                                            );
 
-                                                        if (val.trim() === '') {
-                                                            setMemberData(null);
-                                                            setIsSearchingMember(
-                                                                false,
-                                                            );
-                                                        } else {
-                                                            setIsSearchingMember(
-                                                                true,
-                                                            );
+                                                            if (
+                                                                val.trim() === ''
+                                                            ) {
+                                                                setMemberData(
+                                                                    null,
+                                                                );
+                                                                setIsSearchingMember(
+                                                                    false,
+                                                                );
+                                                            } else {
+                                                                setIsSearchingMember(
+                                                                    true,
+                                                                );
+                                                            }
+                                                        }}
+                                                        aria-invalid={Boolean(
+                                                            errors.member_identifier,
+                                                        )}
+                                                        className="h-full text-base"
+                                                    />
+                                                    <InputGroupAddon>
+                                                        {isSearchingMember ? (
+                                                            <Spinner />
+                                                        ) : (
+                                                            <UserIcon />
+                                                        )}
+                                                    </InputGroupAddon>
+                                                </InputGroup>
+                                                {usesBookSearch && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="default"
+                                                        className="shrink-0 rounded-md px-4 text-sm font-medium"
+                                                        disabled={
+                                                            selectedBooks.length >=
+                                                                maxInputs ||
+                                                            (requiresMemberBeforeSearch &&
+                                                                memberIdentifierTrimmed ===
+                                                                    '')
                                                         }
-                                                    }}
-                                                    aria-invalid={Boolean(
-                                                        errors.member_identifier,
-                                                    )}
-                                                    className="h-full text-base"
-                                                />
-                                                <InputGroupAddon>
-                                                    {isSearchingMember ? (
-                                                        <Spinner />
-                                                    ) : (
-                                                        <UserIcon />
-                                                    )}
-                                                </InputGroupAddon>
-                                            </InputGroup>
-                                            {usesBookSearch && (
-                                                <Button
-                                                    type="button"
-                                                    variant="default"
-                                                    className="shrink-0 rounded-md px-4 text-sm font-medium"
-                                                    disabled={
-                                                        selectedBooks.length >=
-                                                            maxInputs ||
-                                                        (requiresMemberBeforeSearch &&
-                                                            memberIdentifierTrimmed ===
-                                                                '')
-                                                    }
-                                                    onClick={() =>
-                                                        handleSearchDialogChange(
-                                                            true,
-                                                        )
-                                                    }
-                                                >
-                                                    <SearchIcon />
-                                                    Cari Buku
-                                                </Button>
-                                            )}
-                                            {onScanQr && (
-                                                <Button
-                                                    type="button"
-                                                    variant="secondary"
-                                                    className="shrink-0 rounded-md px-4 text-sm font-medium"
-                                                    onClick={onScanQr}
-                                                >
-                                                    <QrCode className="size-4" />
-                                                    Scan QR
-                                                </Button>
-                                            )}
-                                        </div>
-                                        {memberData && (
-                                            <FieldDescription className="mt-1">
-                                                {memberData.name} (
-                                                {memberData.email})
-                                            </FieldDescription>
-                                        )}
-                                    </KioskField>
-                                </div>
+                                                        onClick={() =>
+                                                            handleSearchDialogChange(
+                                                                true,
+                                                            )
+                                                        }
+                                                    >
+                                                        <SearchIcon />
+                                                        Cari Buku
+                                                    </Button>
+                                                )}
+                                                {onScanQr && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        className="shrink-0 rounded-md px-4 text-sm font-medium"
+                                                        onClick={onScanQr}
+                                                    >
+                                                        <QrCode className="size-4" />
+                                                        Scan QR
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            {memberData ? (
+                                                <FieldDescription className="mt-1">
+                                                    {memberData.name} (
+                                                    {memberData.emailMasked ??
+                                                        memberData.whatsappMasked ??
+                                                        'Data anggota ditemukan'}
+                                                    )
+                                                </FieldDescription>
+                                            ) : null}
+                                        </KioskField>
+                                    </div>
+                                ) : (
+                                    <div className="flex justify-end">
+                                        {usesBookSearch ? (
+                                            <Button
+                                                type="button"
+                                                variant="default"
+                                                className="rounded-md px-4 text-sm font-medium"
+                                                disabled={
+                                                    selectedBooks.length >=
+                                                    maxInputs
+                                                }
+                                                onClick={() =>
+                                                    handleSearchDialogChange(
+                                                        true,
+                                                    )
+                                                }
+                                            >
+                                                <SearchIcon />
+                                                Cari Buku
+                                            </Button>
+                                        ) : null}
+                                    </div>
+                                )}
 
                                 {usesBookSearch ? (
                                     <>
@@ -351,12 +397,28 @@ export function BookActionForm({
 
                                             <div className="mt-4">
                                                 <Button
-                                                    type="submit"
+                                                    type={
+                                                        onActionSubmit
+                                                            ? 'button'
+                                                            : 'submit'
+                                                    }
                                                     size="lg"
                                                     className="h-12 w-full text-base"
                                                     disabled={
                                                         processing ||
                                                         !isComplete
+                                                    }
+                                                    onClick={
+                                                        onActionSubmit
+                                                            ? () =>
+                                                                  onActionSubmit(
+                                                                      {
+                                                                          memberIdentifier,
+                                                                          selectedBooks,
+                                                                          firstIsbn,
+                                                                      },
+                                                                  )
+                                                            : undefined
                                                     }
                                                 >
                                                     {processing ? (
@@ -435,10 +497,24 @@ export function BookActionForm({
                                             </div>
                                         </KioskField>
                                         <Button
-                                            type="submit"
+                                            type={
+                                                onActionSubmit
+                                                    ? 'button'
+                                                    : 'submit'
+                                            }
                                             size="lg"
                                             className="h-12 w-full text-base"
                                             disabled={processing || !isComplete}
+                                            onClick={
+                                                onActionSubmit
+                                                    ? () =>
+                                                          onActionSubmit({
+                                                              memberIdentifier,
+                                                              selectedBooks,
+                                                              firstIsbn,
+                                                          })
+                                                    : undefined
+                                            }
                                         >
                                             {processing ? <Spinner /> : null}
                                             {submitLabel}

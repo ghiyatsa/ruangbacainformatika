@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import { QrCode, UserIcon, MailIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
@@ -131,6 +131,16 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
         );
 
         setIsClaimDialogOpen(isInteractiveClaim(memberRegistrationClaim));
+
+        if (isInteractiveClaim(memberRegistrationClaim)) {
+            form.setData({
+                name: memberRegistrationClaim.name || '',
+                email: memberRegistrationClaim.email || '',
+                whatsapp: memberRegistrationClaim.whatsapp || '',
+                address: memberRegistrationClaim.address || '',
+            });
+            setEmailParts(splitMemberEmail(memberRegistrationClaim.email || ''));
+        }
     }
 
     const isPendingClaim = activeRegistration?.status === 'pending';
@@ -210,6 +220,7 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
     const submitMemberRegistrationRequest = () => {
         form.post(KioskController.storeMember.url(), {
             preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 setIsClaimDialogOpen(true);
             },
@@ -219,11 +230,13 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
     const handleLinked = () => {
         resetMemberForm();
         setActiveRegistration(null);
+        router.reload({ only: ['memberRegistrationClaim'] });
     };
 
     const handleCancel = () => {
         resetMemberForm();
         setActiveRegistration(null);
+        router.reload({ only: ['memberRegistrationClaim'] });
     };
 
     const handleRestart = () => {
@@ -253,23 +266,23 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
     return (
         <div className="flex flex-col gap-6">
             {activeRegistration && !isClaimDialogOpen ? (
-                <div className="rounded-3xl border border-border/70 bg-muted/20 p-5">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="space-y-2">
-                            <Badge variant="outline">
-                                {isPendingClaim
-                                    ? 'Proses masih berjalan'
-                                    : isLinkedClaim
-                                      ? 'Registrasi selesai'
-                                      : isExpired
-                                        ? 'Waktu habis'
-                                        : 'Registrasi berhasil'}
-                            </Badge>
-                            <div className="space-y-1">
-                                <p className="text-base font-semibold text-foreground">
+                <div className="rounded-2xl border border-border/70 bg-muted/20 p-3 sm:p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
+                            {!isPendingClaim && (
+                                <Badge variant="outline" className="w-fit shrink-0">
+                                    {isLinkedClaim
+                                        ? 'Terhubung'
+                                        : isExpired
+                                          ? 'Kedaluwarsa'
+                                          : 'Registrasi berhasil'}
+                                </Badge>
+                            )}
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-foreground">
                                     Registrasi {activeRegistration.name}
                                 </p>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs text-muted-foreground">
                                     {isPendingClaim
                                         ? 'QR masih aktif.'
                                         : isLinkedClaim
@@ -284,10 +297,12 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
                         <Button
                             type="button"
                             variant={isPendingClaim ? 'default' : 'secondary'}
+                            size="sm"
                             onClick={() => setIsClaimDialogOpen(true)}
+                            className="w-full shrink-0 sm:w-auto"
                         >
                             {isPendingClaim ? (
-                                <QrCode className="size-4" />
+                                <QrCode className="size-3.5" />
                             ) : null}
                             {isPendingClaim ? 'Buka QR' : 'Lihat status'}
                         </Button>
@@ -297,9 +312,16 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
 
             <form
                 onSubmit={submitMemberRegistration}
-                className="flex flex-col gap-4"
+                className="relative flex flex-col gap-4"
                 autoComplete="off"
             >
+                {isPendingClaim && (
+                    <div
+                        className="absolute inset-0 z-10 cursor-pointer"
+                        onClick={() => setIsClaimDialogOpen(true)}
+                        title="Klik untuk membuka QR pendaftaran yang sedang berjalan"
+                    />
+                )}
                 <input
                     type="text"
                     name="username"

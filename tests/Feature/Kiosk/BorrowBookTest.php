@@ -8,10 +8,12 @@ use App\Models\Publisher;
 use App\Models\User;
 use App\Notifications\LoanReceiptNotification;
 use App\Notifications\LoanReturnNotification;
+use App\Services\KioskBorrowVerificationService;
 use App\Services\KioskLoanService;
 use App\Services\KioskPinManager;
 use Illuminate\Contracts\Notifications\Dispatcher;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -21,7 +23,7 @@ use function Pest\Laravel\instance;
 use function Pest\Laravel\post;
 use function Pest\Laravel\withoutMiddleware;
 
-it('kiosk borrowing rejects partial member identifiers', function () {
+it('kiosk borrowing requires a verification qr payload', function () {
     withoutMiddleware(PreventRequestForgery::class);
 
     $mock = mock(KioskPinManager::class);
@@ -30,10 +32,57 @@ it('kiosk borrowing rejects partial member identifiers', function () {
     instance(KioskPinManager::class, $mock);
 
     post(route('kiosk.loans.borrow'), [
-        'member_identifier' => '170020',
         'book_ids' => [1],
     ])
-        ->assertSessionHasErrors('member_identifier');
+        ->assertSessionHasErrors('verification_payload');
+});
+
+it('kiosk borrowing rejects expired verification qr payloads', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '081234567891',
+        'whatsapp_verified_at' => now(),
+    ]);
+    $member->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Expired Verification',
+        'slug' => 'penerbit-expired-verification',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Expired Verification',
+        'slug' => 'buku-expired-verification',
+        'isbn' => '9786020000311',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-311',
+        'status' => 'available',
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $verification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
+    Cache::flush();
+
+    post(route('kiosk.loans.borrow'), [
+        'verification_payload' => $verification['payload'],
+        'book_ids' => [$book->id],
+    ])->assertSessionHasErrors('verification_payload');
 });
 
 it('members must fill whatsapp and address before borrowing books', function () {
@@ -144,8 +193,12 @@ it('borrows selected books from kiosk using book ids', function () {
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
+    $verification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
     post(route('kiosk.loans.borrow'), [
-        'member_identifier' => $member->nim(),
+        'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
@@ -201,8 +254,12 @@ it('stores kiosk borrowing even when receipt email dispatch fails', function () 
         ->andThrow(new RuntimeException('Daily limit exceeded by mail provider.'));
     app()->instance(Dispatcher::class, $dispatcher);
 
+    $verification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
     post(route('kiosk.loans.borrow'), [
-        'member_identifier' => $member->nim(),
+        'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
@@ -555,7 +612,7 @@ it('lists active borrowed books for kiosk returns without a search query', funct
         ->toBe(collect([$firstBook->id, $secondBook->id])->sort()->values()->all());
 });
 
-it('borrows and returns books using email as identifier', function () {
+it('borrows books using a verification qr and returns them using email as identifier', function () {
     withoutMiddleware(PreventRequestForgery::class);
 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
@@ -592,9 +649,12 @@ it('borrows and returns books using email as identifier', function () {
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
-    // Test borrowing with email
+    $verification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
     post(route('kiosk.loans.borrow'), [
-        'member_identifier' => $member->email,
+        'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']));
@@ -611,7 +671,7 @@ it('borrows and returns books using email as identifier', function () {
     expect($bookItem->fresh()->status)->toBe('available');
 });
 
-it('borrows and returns books using phone number as identifier with different prefix formats', function () {
+it('borrows books using a verification qr and returns them using phone identifiers', function () {
     withoutMiddleware(PreventRequestForgery::class);
 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
@@ -648,9 +708,12 @@ it('borrows and returns books using phone number as identifier with different pr
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
-    // Test borrowing with phone number containing spaces/dashes/+ prefix
+    $verification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
     post(route('kiosk.loans.borrow'), [
-        'member_identifier' => '+62 812-3456-789',
+        'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']));

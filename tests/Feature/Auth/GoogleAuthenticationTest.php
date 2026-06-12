@@ -160,7 +160,7 @@ it('non student campus accounts require manual approval after google login', fun
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('register.whatsapp', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 
     assertAuthenticated();
 
@@ -185,6 +185,35 @@ it('administrative users with complete profiles are redirected to admin after go
     $socialiteUser = (new SocialiteUser)->map([
         'id' => 'google-123',
         'name' => 'Mahasiswa TI',
+        'email' => '230170001@mhs.unimal.ac.id',
+    ]);
+
+    Socialite::fake('google', $socialiteUser);
+
+    get(route('auth.google.callback'))
+        ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
+});
+
+it('administrative users are redirected to admin after google login even when member onboarding is incomplete', function () {
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => null,
+        'whatsapp_verified_at' => null,
+        'address' => null,
+        'profile_completed_at' => null,
+        'is_approved' => true,
+    ]);
+    $user->assignRole('super_admin');
+    $user->assignRole('staff');
+    $user->assignRole('member');
+
+    $socialiteUser = (new SocialiteUser)->map([
+        'id' => 'google-admin-loop-123',
+        'name' => 'Admin Multi Role',
         'email' => '230170001@mhs.unimal.ac.id',
     ]);
 
@@ -250,7 +279,7 @@ it('public users with a valid external google email can still sign in', function
     ]);
 });
 
-it('non teknik informatika student accounts are also auto approved but still need whatsapp verification', function () {
+it('non teknik informatika student accounts require manual approval after google login', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $socialiteUser = (new SocialiteUser)->map([
@@ -262,19 +291,63 @@ it('non teknik informatika student accounts are also auto approved but still nee
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('register.whatsapp', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 
     assertAuthenticated();
 
     assertDatabaseHas('users', [
         'email' => '230160001@mhs.unimal.ac.id',
-        'is_approved' => true,
+        'is_approved' => false,
     ]);
 
     $user = User::query()->where('email', '230160001@mhs.unimal.ac.id')->firstOrFail();
 
     expect($user->hasRole('member'))->toBeFalse();
     expect($user->canBorrowBooks())->toBeFalse();
+});
+
+it('approved non student campus accounts are redirected to whatsapp verification after google login', function () {
+    $user = User::factory()->create([
+        'email' => 'dosen@unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Bukit Indah',
+        'whatsapp_verified_at' => null,
+        'profile_completed_at' => now(),
+        'is_approved' => true,
+    ]);
+
+    $socialiteUser = (new SocialiteUser)->map([
+        'id' => 'google-dosen-approved',
+        'name' => 'Dosen Approved',
+        'email' => $user->email,
+    ]);
+
+    Socialite::fake('google', $socialiteUser);
+
+    get(route('auth.google.callback'))
+        ->assertRedirect(route('register.whatsapp', absolute: false));
+});
+
+it('approved non teknik informatika student accounts are redirected to whatsapp verification after google login', function () {
+    $user = User::factory()->create([
+        'email' => '230160001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Bukit Indah',
+        'whatsapp_verified_at' => null,
+        'profile_completed_at' => now(),
+        'is_approved' => true,
+    ]);
+
+    $socialiteUser = (new SocialiteUser)->map([
+        'id' => 'google-non-ti-approved',
+        'name' => 'Mahasiswa Non TI Approved',
+        'email' => $user->email,
+    ]);
+
+    Socialite::fake('google', $socialiteUser);
+
+    get(route('auth.google.callback'))
+        ->assertRedirect(route('register.whatsapp', absolute: false));
 });
 
 it('google users can access onboarding only once', function () {

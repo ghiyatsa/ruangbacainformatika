@@ -15,21 +15,10 @@ class BorrowBookRequest extends KioskBookActionRequest
     public function rules(): array
     {
         return [
-            'member_identifier' => [
+            'verification_payload' => [
                 'required',
                 'string',
-                'max:255',
-                function (string $attribute, mixed $value, \Closure $fail): void {
-                    $identifier = Str::of((string) $value)->trim()->lower()->toString();
-                    $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL) !== false;
-                    $isNim = preg_match('/^\d{9}$/', $identifier) === 1;
-                    $phoneDigits = preg_replace('/\D+/', '', $identifier);
-                    $isPhone = preg_match('/^(?:0|62)?8[1-9][0-9]{7,11}$/', $phoneDigits) === 1;
-
-                    if (! $isEmail && ! $isNim && ! $isPhone) {
-                        $fail('Masukkan email lengkap, NIM 9 digit, atau nomor HP.');
-                    }
-                },
+                'max:2048',
             ],
             'book_ids' => ['required', 'array', 'min:1'],
             'book_ids.*' => [
@@ -52,7 +41,7 @@ class BorrowBookRequest extends KioskBookActionRequest
             ->all();
 
         $this->merge([
-            'member_identifier' => Str::of((string) $this->input('member_identifier'))->trim()->lower()->toString(),
+            'verification_payload' => Str::of((string) $this->input('verification_payload'))->trim()->toString(),
             'book_ids' => $bookIds,
         ]);
     }
@@ -63,5 +52,10 @@ class BorrowBookRequest extends KioskBookActionRequest
     public function validatedBookIds(): array
     {
         return array_map('intval', (array) $this->validated('book_ids'));
+    }
+
+    public function validatedVerificationPayload(): string
+    {
+        return (string) $this->validated('verification_payload');
     }
 }

@@ -25,7 +25,7 @@ class LoanRequestController extends Controller
         if (! $request->user()->canBorrowBooks()) {
             Inertia::flash('toast', [
                 'type' => 'info',
-                'message' => 'Layanan peminjaman tersedia untuk mahasiswa Teknik Informatika yang terdaftar.',
+                'message' => 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.',
             ]);
 
             return redirect()->route('home');

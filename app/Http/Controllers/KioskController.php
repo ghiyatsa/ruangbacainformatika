@@ -13,6 +13,7 @@ use App\Models\Book;
 use App\Models\Loan;
 use App\Models\VisitLog;
 use App\Repositories\SettingRepository;
+use App\Services\KioskBorrowVerificationService;
 use App\Services\KioskLoanService;
 use App\Services\KioskPinManager;
 use App\Services\MemberRegistrationClaimService;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,38 +31,27 @@ class KioskController extends Controller
         protected SettingRepository $settingRepository,
         protected KioskPinManager $kioskPinManager,
         protected KioskLoanService $kioskLoanService,
+        protected KioskBorrowVerificationService $kioskBorrowVerificationService,
         protected MemberRegistrationClaimService $memberRegistrationClaimService,
     ) {}
 
     public function show(Request $request): Response
     {
         $memberRegistrationClaim = $this->resolveMemberRegistrationClaim($request);
-
-        $siteSettings = $this->settingRepository->sectionValues('general', [
-            'site_name' => config('app.name'),
-            'site_tagline' => 'Sistem pendataan pengunjung',
-        ]);
+        $kioskSession = $this->kioskPinManager->sessionConfiguration();
 
         $librarySettings = $this->settingRepository->sectionValues('library', [
             'loan_max_books' => 3,
-        ]);
-
-        $kioskSettings = $this->settingRepository->sectionValues('kiosk', [
-            'title' => 'Layanan Mandiri Perpustakaan',
-            'subtitle' => 'Pilih layanan yang ingin digunakan.',
         ]);
 
         if (! $this->kioskPinManager->isVerified($request)) {
             return Inertia::render('kiosk/index', [
                 'step' => 'pin',
                 'activeMenu' => 'landing',
-                'pageTitle' => 'Masuk Layanan Mandiri',
-                'pageSubtitle' => 'Masukkan PIN untuk mulai.',
-                'siteName' => $siteSettings['site_name'],
-                'siteTagline' => $siteSettings['site_tagline'],
                 'loanMaxBooks' => max((int) $librarySettings['loan_max_books'], 1),
                 'visitorTypeOptions' => VisitLog::visitorTypeOptions(),
                 'purposeOptions' => VisitLog::purposeOptions(),
+                'kioskSession' => $kioskSession,
                 'memberRegistrationClaim' => $memberRegistrationClaim,
             ]);
         }
@@ -74,15 +65,10 @@ class KioskController extends Controller
         return Inertia::render('kiosk/index', [
             'step' => 'ready',
             'activeMenu' => $activeMenu,
-            'pageTitle' => $kioskSettings['title'],
-            'pageSubtitle' => $activeMenu === 'landing'
-                ? 'Pilih layanan yang ingin digunakan.'
-                : $kioskSettings['subtitle'],
-            'siteName' => $siteSettings['site_name'],
-            'siteTagline' => $siteSettings['site_tagline'],
             'loanMaxBooks' => max((int) $librarySettings['loan_max_books'], 1),
             'visitorTypeOptions' => VisitLog::visitorTypeOptions(),
             'purposeOptions' => VisitLog::purposeOptions(),
+            'kioskSession' => $kioskSession,
             'memberRegistrationClaim' => $memberRegistrationClaim,
         ]);
     }
@@ -149,6 +135,15 @@ class KioskController extends Controller
 
         return response()->json([
             'cancelled' => true,
+        ]);
+    }
+
+    public function lock(Request $request): JsonResponse
+    {
+        $this->kioskPinManager->forget($request);
+
+        return response()->json([
+            'locked' => true,
         ]);
     }
 
@@ -231,8 +226,12 @@ class KioskController extends Controller
 
     public function borrow(BorrowBookRequest $request): RedirectResponse
     {
+        $member = $this->kioskBorrowVerificationService->consume(
+            $request->validatedVerificationPayload(),
+        );
+
         $loan = $this->kioskLoanService->borrow(
-            (string) $request->validated('member_identifier'),
+            $member->email,
             $request->validatedBookIds(),
         );
 
@@ -279,12 +278,45 @@ class KioskController extends Controller
 
         return response()->json([
             'member' => [
-                'id' => $member->id,
                 'name' => $member->name,
-                'email' => $member->email,
-                'whatsapp' => $member->whatsapp,
+                'emailMasked' => $this->maskEmail($member->email),
+                'whatsappMasked' => $this->maskPhoneNumber($member->whatsapp),
             ],
         ]);
+    }
+
+    protected function maskEmail(?string $email): ?string
+    {
+        if (! is_string($email) || $email === '' || ! str_contains($email, '@')) {
+            return null;
+        }
+
+        [$localPart, $domain] = explode('@', Str::lower($email), 2);
+        $localLength = Str::length($localPart);
+
+        if ($localLength <= 2) {
+            $maskedLocalPart = Str::substr($localPart, 0, 1).'*';
+        } else {
+            $maskedLocalPart = Str::substr($localPart, 0, 2).str_repeat('*', max($localLength - 2, 2));
+        }
+
+        return "{$maskedLocalPart}@{$domain}";
+    }
+
+    protected function maskPhoneNumber(?string $phoneNumber): ?string
+    {
+        if (! is_string($phoneNumber) || $phoneNumber === '') {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $phoneNumber) ?? '';
+        $length = strlen($digits);
+
+        if ($length < 4) {
+            return null;
+        }
+
+        return substr($digits, 0, 4).str_repeat('*', max($length - 6, 1)).substr($digits, -2);
     }
 
     protected function searchBorrowableBooks(string $search): EloquentCollection

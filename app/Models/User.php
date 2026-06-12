@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\CampusEmail;
 use App\Support\LoanConsequenceService;
+use App\Support\WhatsAppPhoneNumber;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
@@ -58,6 +59,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     protected static function booted(): void
     {
+        static::saving(function (User $user): void {
+            $user->whatsapp = app(WhatsAppPhoneNumber::class)->normalize($user->whatsapp);
+        });
+
         static::updating(function (User $user) {
             if ($user->isDirty('email') && $user->getOriginal('email') !== null) {
                 $user->email = $user->getOriginal('email');
@@ -152,13 +157,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function requiresWhatsAppVerification(): bool
     {
-        return $this->usesCampusEmail() && ! $this->hasVerifiedWhatsApp();
+        return $this->usesCampusEmail()
+            && $this->is_approved
+            && ! $this->hasVerifiedWhatsApp();
     }
 
     public function requiresManualApproval(): bool
     {
         return $this->usesCampusEmail()
-            && $this->hasVerifiedWhatsApp()
+            && ! app(CampusEmail::class)->shouldAutoApprove($this->email)
             && ! $this->is_approved;
     }
 

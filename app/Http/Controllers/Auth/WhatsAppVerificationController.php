@@ -26,15 +26,20 @@ class WhatsAppVerificationController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $allowWhatsAppChange = $request->session()->get('allow_whatsapp_change') === true;
 
         if (! $user->usesCampusEmail()) {
             return to_route('settings.profile.edit');
         }
 
-        if (! $user->requiresWhatsAppVerification() && $request->session()->get('allow_whatsapp_change') !== true) {
-            return $user->hasRequiredProfileDetails()
-                ? to_route('settings.profile.edit')
-                : to_route('register.profile');
+        if (! $this->authenticationRedirector->requiresWhatsAppVerification($user) && ! $allowWhatsAppChange) {
+            if ($user->canAccessAdminPanel()) {
+                return to_route('filament.admin.pages.dashboard');
+            }
+
+            return $this->authenticationRedirector->requiresProfileCompletion($user)
+                ? to_route('register.profile')
+                : to_route('settings.profile.edit');
         }
 
         $verification = $this->whatsAppOtpService->status($user);
@@ -63,6 +68,13 @@ class WhatsAppVerificationController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $allowWhatsAppChange = $request->session()->get('allow_whatsapp_change') === true;
+
+        if (! $this->authenticationRedirector->requiresWhatsAppVerification($user) && ! $allowWhatsAppChange) {
+            throw ValidationException::withMessages([
+                'otp' => 'Verifikasi tidak tersedia untuk akun ini.',
+            ]);
+        }
 
         if ($request->filled('whatsapp')) {
             $newWhatsapp = $request->validated('whatsapp');
@@ -100,6 +112,13 @@ class WhatsAppVerificationController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $allowWhatsAppChange = $request->session()->get('allow_whatsapp_change') === true;
+
+        if (! $this->authenticationRedirector->requiresWhatsAppVerification($user) && ! $allowWhatsAppChange) {
+            throw ValidationException::withMessages([
+                'otp' => 'Verifikasi tidak tersedia untuk akun ini.',
+            ]);
+        }
 
         $result = $this->whatsAppOtpService->verify(
             $user,

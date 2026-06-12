@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\KioskDevice;
 use App\Repositories\SettingRepository;
+use App\Support\KioskIdlePolicy;
 use App\Support\KioskNetworkGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -21,6 +22,7 @@ class KioskPinManager
     public function __construct(
         protected SettingRepository $settingRepository,
         protected KioskNetworkGuard $kioskNetworkGuard,
+        protected KioskIdlePolicy $kioskIdlePolicy,
     ) {}
 
     public function isConfigured(): bool
@@ -39,8 +41,16 @@ class KioskPinManager
             && $sessionVersion === $this->currentSessionVersion()
             && hash_equals($currentPinHash, (string) $sessionPinHash);
 
-        if ($isSessionVerified && KioskDevice::query()->where('session_id', $request->session()->getId())->exists()) {
-            return true;
+        if ($isSessionVerified) {
+            $device = KioskDevice::query()
+                ->where('session_id', $request->session()->getId())
+                ->first();
+
+            if ($device && $this->kioskIdlePolicy->isSessionStillActive($device->last_active_at)) {
+                return true;
+            }
+
+            $this->invalidateSession($request, $device);
         }
 
         // Try to verify via persistent cookie
@@ -53,6 +63,7 @@ class KioskPinManager
                 $device
                 && $device->network_scope !== null
                 && $device->network_scope === $this->kioskNetworkGuard->networkScopeForRequest($request)
+                && $this->kioskIdlePolicy->isSessionStillActive($device->last_active_at)
             ) {
                 // Re-verify session
                 $request->session()->put(self::SESSION_PIN_HASH_KEY, $currentPinHash);
@@ -67,6 +78,10 @@ class KioskPinManager
                 ]);
 
                 return true;
+            }
+
+            if ($device && ! $this->kioskIdlePolicy->isSessionStillActive($device->last_active_at)) {
+                $this->invalidateSession($request, $device);
             }
         }
 
@@ -122,7 +137,32 @@ class KioskPinManager
 
     public function forget(Request $request): void
     {
-        KioskDevice::query()->where('session_id', $request->session()->getId())->delete();
+        $deviceToken = $request->cookie(self::COOKIE_DEVICE_TOKEN_KEY);
+        $sessionId = $request->session()->getId();
+        $ipAddress = $request->ip();
+        $userAgent = $request->userAgent();
+
+        if (filled($sessionId) || filled($deviceToken) || filled($ipAddress) || filled($userAgent)) {
+            KioskDevice::query()
+                ->where(function ($query) use ($deviceToken, $ipAddress, $sessionId, $userAgent): void {
+                    if (filled($sessionId)) {
+                        $query->where('session_id', $sessionId);
+                    }
+
+                    if (filled($deviceToken)) {
+                        $query->orWhere('device_token', $deviceToken);
+                    }
+
+                    if (filled($ipAddress) && filled($userAgent)) {
+                        $query->orWhere(function ($deviceQuery) use ($ipAddress, $userAgent): void {
+                            $deviceQuery
+                                ->where('ip_address', $ipAddress)
+                                ->where('user_agent', $userAgent);
+                        });
+                    }
+                })
+                ->delete();
+        }
 
         Cookie::queue(Cookie::forget(self::COOKIE_DEVICE_TOKEN_KEY));
 
@@ -130,6 +170,22 @@ class KioskPinManager
             self::SESSION_PIN_HASH_KEY,
             self::SESSION_VERSION_KEY,
         ]);
+    }
+
+    /**
+     * @return array{
+     *     timezone: string,
+     *     operatingOpenTime: string,
+     *     operatingCloseTime: string,
+     *     idleTimeoutOpenMinutes: int,
+     *     idleTimeoutClosedMinutes: int,
+     *     activeIdleTimeoutMinutes: int,
+     *     withinOperatingHours: bool
+     * }
+     */
+    public function sessionConfiguration(): array
+    {
+        return $this->kioskIdlePolicy->configuration();
     }
 
     public function currentPinHash(): ?string
@@ -153,5 +209,12 @@ class KioskPinManager
         KioskDevice::query()->delete();
 
         return $nextVersion;
+    }
+
+    protected function invalidateSession(Request $request, ?KioskDevice $device = null): void
+    {
+        $device?->delete();
+
+        $this->forget($request);
     }
 }

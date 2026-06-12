@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Support\KioskIdlePolicy;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -56,9 +57,11 @@ class AppSettingSeeder extends Seeder
             ],
             'kiosk' => [
                 'pin_hash' => $kioskDefaultPin !== '' ? Hash::make($kioskDefaultPin) : '',
-                'title' => 'Pendataan Pengunjung Perpustakaan',
-                'subtitle' => 'Silakan masukkan PIN untuk mengaktifkan perangkat kios.',
                 'session_version' => '1',
+                'operating_open_time' => KioskIdlePolicy::DEFAULT_OPERATING_OPEN_TIME,
+                'operating_close_time' => KioskIdlePolicy::DEFAULT_OPERATING_CLOSE_TIME,
+                'idle_timeout_open_minutes' => (string) KioskIdlePolicy::DEFAULT_IDLE_TIMEOUT_OPEN_MINUTES,
+                'idle_timeout_closed_minutes' => (string) KioskIdlePolicy::DEFAULT_IDLE_TIMEOUT_CLOSED_MINUTES,
             ],
             'integration' => [
                 'turnstile_enabled' => '0',

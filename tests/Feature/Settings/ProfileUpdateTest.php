@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\withoutMiddleware;
@@ -16,7 +17,10 @@ it('profile page is displayed', function () {
     /** @var User $user */
     actingAs($user)
         ->get(route('settings.profile.edit'))
-        ->assertOk();
+        ->assertOk()
+        ->assertInertia(
+            fn (Assert $page) => $page->component('settings/profile'),
+        );
 });
 
 it('external users with incomplete profiles can still access profile settings', function () {

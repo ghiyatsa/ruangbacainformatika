@@ -14,6 +14,7 @@ use App\Observers\CatalogActivityObserver;
 use App\Observers\SkripsiObserver;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
+use App\Services\KioskPinManager;
 use App\Services\SimilarityApiService;
 use App\Support\AppTimezone;
 use App\Support\SiteSettings;
@@ -33,6 +34,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Inertia\ExceptionResponse;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -60,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureTurnstile();
         $this->configureWhatsAppRateLimiter();
         $this->configureContactRateLimiter();
+        $this->configureKioskRateLimiters();
         $this->composeRootView();
 
         Author::observe(CatalogActivityObserver::class);
@@ -98,6 +101,94 @@ class AppServiceProvider extends ServiceProvider
                     ], 429, $headers);
                 });
         });
+    }
+
+    protected function configureKioskRateLimiters(): void
+    {
+        RateLimiter::for('kiosk-pin', function (Request $request): Limit {
+            return Limit::perMinute(8)
+                ->by($this->kioskThrottleKey($request, 'pin'))
+                ->response(fn (Request $request, array $headers) => $this->kioskThrottleResponse(
+                    $request,
+                    $headers,
+                    'Terlalu banyak percobaan PIN. Coba lagi sebentar.',
+                ));
+        });
+
+        RateLimiter::for('kiosk-book-search', function (Request $request): Limit {
+            return Limit::perMinute(180)
+                ->by($this->kioskThrottleKey($request, 'book-search'))
+                ->response(fn (Request $request, array $headers) => $this->kioskThrottleResponse(
+                    $request,
+                    $headers,
+                    'Pencarian buku sedang dibatasi sebentar. Coba lagi sesaat.',
+                ));
+        });
+
+        RateLimiter::for('kiosk-member-lookup', function (Request $request): Limit {
+            return Limit::perMinute(120)
+                ->by($this->kioskThrottleKey($request, 'member-lookup'))
+                ->response(fn (Request $request, array $headers) => $this->kioskThrottleResponse(
+                    $request,
+                    $headers,
+                    'Pencarian anggota sedang dibatasi sebentar. Coba lagi sesaat.',
+                ));
+        });
+
+        RateLimiter::for('kiosk-member-status', function (Request $request): Limit {
+            return Limit::perMinute(180)
+                ->by($this->kioskThrottleKey($request, 'member-status'))
+                ->response(fn (Request $request, array $headers) => $this->kioskThrottleResponse(
+                    $request,
+                    $headers,
+                    'Status penautan sedang diperiksa terlalu sering. Coba lagi sebentar.',
+                ));
+        });
+
+        RateLimiter::for('kiosk-submit', function (Request $request): Limit {
+            return Limit::perMinute(30)
+                ->by($this->kioskThrottleKey($request, 'submit'))
+                ->response(fn (Request $request, array $headers) => $this->kioskThrottleResponse(
+                    $request,
+                    $headers,
+                    'Permintaan layanan mandiri sedang dibatasi sebentar. Coba lagi sesaat.',
+                ));
+        });
+
+        RateLimiter::for('kiosk-consume', function (Request $request): Limit {
+            return Limit::perMinute(20)
+                ->by($this->kioskThrottleKey($request, 'consume'))
+                ->response(fn (Request $request, array $headers) => $this->kioskThrottleResponse(
+                    $request,
+                    $headers,
+                    'Pemrosesan QR sedang dibatasi sebentar. Coba lagi sesaat.',
+                ));
+        });
+    }
+
+    protected function kioskThrottleKey(Request $request, string $bucket): string
+    {
+        $deviceToken = (string) ($request->cookie(KioskPinManager::COOKIE_DEVICE_TOKEN_KEY) ?? '');
+        $sessionId = $request->hasSession() ? (string) $request->session()->getId() : 'no-session';
+        $deviceFingerprint = $deviceToken !== '' ? $deviceToken : $sessionId;
+
+        return implode('|', [
+            'kiosk',
+            $bucket,
+            (string) $request->ip(),
+            $deviceFingerprint,
+        ]);
+    }
+
+    protected function kioskThrottleResponse(Request $request, array $headers, string $message): Response
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => $message,
+            ], 429, $headers);
+        }
+
+        return response($message, 429, $headers);
     }
 
     protected function configureTurnstile(): void
