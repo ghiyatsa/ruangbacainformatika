@@ -6,6 +6,14 @@
 ### Features
 
 * implement kiosk verification, member key renaming, and book page adjustments ([#5](https://github.com/ghiyatsa/ruangbacainformatika/issues/5)) ([5e94a85](https://github.com/ghiyatsa/ruangbacainformatika/commit/5e94a85b370f1ebd841562717f843aa523ca3eb8))
+* **kiosk:** require member key verification and align session timeouts with operating hours ([7bfe0eb](https://github.com/ghiyatsa/ruangbacainformatika/commit/7bfe0eb8524d728cd17759294f246e5c4ccaefbf))
+
+## [1.2.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.1.0...v1.2.0) (2026-06-12)
+
+
+### Features
+
+* implement kiosk verification, member key renaming, and book page adjustments ([#5](https://github.com/ghiyatsa/ruangbacainformatika/issues/5)) ([5e94a85](https://github.com/ghiyatsa/ruangbacainformatika/commit/5e94a85b370f1ebd841562717f843aa523ca3eb8))
 
 ## [1.1.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.0.0...v1.1.0) (2026-06-12)
 
