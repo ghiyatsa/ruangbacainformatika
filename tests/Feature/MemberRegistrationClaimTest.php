@@ -82,6 +82,50 @@ it('completes a kiosk account link through google login', function () {
         ->and($claim->fresh()->user_id)->toBe($user->id);
 });
 
+it('completes a non teknik informatika kiosk account link without forcing whatsapp before admin approval', function () {
+    $token = 'rb-link-non-ti-token';
+
+    $claim = MemberRegistrationClaim::query()->create([
+        'name' => 'Member Non TI',
+        'email' => '230160001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 2',
+        'token_hash' => hash('sha256', $token),
+        'expires_at' => now()->addMinutes(30),
+    ]);
+
+    $socialiteUser = (new SocialiteUser)->map([
+        'id' => 'google-non-ti-123',
+        'name' => 'Mahasiswa Non TI',
+        'email' => '230160001@mhs.unimal.ac.id',
+    ]);
+
+    Socialite::fake('google', $socialiteUser);
+
+    get(route('auth.google', ['link_token' => $token]))
+        ->assertRedirect();
+
+    get(route('auth.google.callback'))
+        ->assertRedirect(route('home', absolute: false));
+
+    assertAuthenticated();
+
+    assertDatabaseHas('users', [
+        'email' => '230160001@mhs.unimal.ac.id',
+        'google_id' => 'google-non-ti-123',
+        'name' => 'Member Non TI',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus No. 2',
+        'auth_provider' => 'google',
+        'is_approved' => false,
+    ]);
+
+    assertDatabaseHas('member_registration_claims', [
+        'id' => $claim->id,
+        'status' => MemberRegistrationClaim::STATUS_CLAIMED,
+    ]);
+});
+
 it('marks a linked kiosk account-link claim as claimed after whatsapp verification finishes', function () {
     $user = User::factory()->create([
         'email' => '230170001@mhs.unimal.ac.id',

@@ -73,12 +73,12 @@ class AuthenticationRedirector
 
     public function requiresProfileCompletion(User $user): bool
     {
-        return $user->usesCampusEmail() && ! $user->hasRequiredProfileDetails();
+        return $this->requiresMemberOnboarding($user) && ! $user->hasRequiredProfileDetails();
     }
 
     public function requiresWhatsAppVerification(User $user): bool
     {
-        return $user->requiresWhatsAppVerification();
+        return $this->requiresMemberOnboarding($user) && $user->requiresWhatsAppVerification();
     }
 
     protected function mustUseDefaultPath(User $user): bool
@@ -94,5 +94,12 @@ class AuthenticationRedirector
         }
 
         return in_array($intendedPath, self::DISALLOWED_INTENDED_PATHS, true);
+    }
+
+    protected function requiresMemberOnboarding(User $user): bool
+    {
+        return $user->usesCampusEmail()
+            && $user->is_approved
+            && ! $user->canAccessAdminPanel();
     }
 }

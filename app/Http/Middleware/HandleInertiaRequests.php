@@ -51,6 +51,7 @@ class HandleInertiaRequests extends Middleware
         $session = $request->hasSession() ? $request->session() : null;
         $user = $request->user();
         $siteData = $this->siteSettings->shared();
+        $authenticationRedirector = app(AuthenticationRedirector::class);
 
         return [
             ...parent::share($request),
@@ -64,8 +65,10 @@ class HandleInertiaRequests extends Middleware
                 'canBorrowBooks' => $user?->canBorrowBooks() ?? false,
                 'canViewNotifications' => $user?->canViewPublicNotifications() ?? false,
                 'hasVerifiedWhatsApp' => $user?->hasVerifiedWhatsApp() ?? false,
-                'requiresWhatsAppVerification' => $user?->requiresWhatsAppVerification() ?? false,
-                'borrowingAccessMessage' => $user !== null && ! $user->canBorrowBooks()
+                'requiresWhatsAppVerification' => $user !== null
+                    ? $authenticationRedirector->requiresWhatsAppVerification($user)
+                    : false,
+                'borrowingAccessMessage' => $user !== null && ! $user->canBorrowBooks() && ! $user->canAccessAdminPanel()
                     ? ($user->requiresWhatsAppVerification()
                         ? 'Verifikasi WhatsApp diperlukan sebelum layanan anggota dapat digunakan.'
                         : ($user->requiresManualApproval()
@@ -74,7 +77,7 @@ class HandleInertiaRequests extends Middleware
                     : null,
                 'homeUrl' => $user === null
                     ? route('home', absolute: false)
-                    : app(AuthenticationRedirector::class)->pathFor($user),
+                    : $authenticationRedirector->pathFor($user),
             ],
             'notifications' => fn (): array => [
                 'unreadCount' => $user?->canViewPublicNotifications()
