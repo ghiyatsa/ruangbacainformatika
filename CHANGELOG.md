@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.0.0...v1.1.0) (2026-06-12)
+
+
+### Features
+
+* **kiosk:** implement operating hours, idle timeouts, and member qr verificationFeature/git automation ([#3](https://github.com/ghiyatsa/ruangbacainformatika/issues/3)) ([6b46b6f](https://github.com/ghiyatsa/ruangbacainformatika/commit/6b46b6fb017567a45b96655d2477efd7dc255762))
+
 ## 1.0.0 (2026-06-06)
 
 
