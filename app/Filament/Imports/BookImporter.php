@@ -81,8 +81,7 @@ class BookImporter extends Importer
                 ->rules(['nullable', 'integer', 'min:1000', 'max:2100']),
             ImportColumn::make('pages')
                 ->label('Jumlah Halaman')
-                ->numeric()
-                ->rules(['nullable', 'integer', 'min:1']),
+                ->rules(['nullable', 'max:255']),
             ImportColumn::make('stock')
                 ->label('Stok')
                 ->numeric()
@@ -170,8 +169,6 @@ class BookImporter extends Importer
             'publisher.required' => 'Kolom penerbit wajib diisi.',
             'stock.integer' => 'Kolom stok harus berupa angka bulat.',
             'stock.min' => 'Kolom stok tidak boleh kurang dari 0.',
-            'pages.integer' => 'Kolom jumlah halaman harus berupa angka bulat.',
-            'pages.min' => 'Kolom jumlah halaman minimal 1.',
             'published_year.integer' => 'Kolom tahun terbit harus berupa angka bulat.',
         ];
     }

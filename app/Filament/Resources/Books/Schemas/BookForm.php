@@ -153,9 +153,7 @@ class BookForm
 
                         TextInput::make('pages')
                             ->label('Jumlah Halaman')
-                            ->numeric()
-                            ->integer()
-                            ->minValue(1)
+                            ->maxLength(255)
                             ->placeholder('250')
                             ->helperText('Isi jumlah halaman utama.'),
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Books\Tables;
 
+use App\Filament\Exports\BookExporter;
 use App\Filament\Imports\BookImporter;
 use App\Models\Book;
 use App\Models\BookItem;
@@ -12,6 +13,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
@@ -97,7 +99,6 @@ class BooksTable
 
                 TextColumn::make('pages')
                     ->label('Halaman')
-                    ->numeric()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 IconColumn::make('is_published')
@@ -232,6 +233,11 @@ class BooksTable
                     ->label('Impor')
                     ->icon(Heroicon::OutlinedDocumentArrowDown)
                     ->color('info'),
+                ExportAction::make('exportBooks')
+                    ->exporter(BookExporter::class)
+                    ->label('Ekspor')
+                    ->icon(Heroicon::OutlinedDocumentArrowUp)
+                    ->color('success'),
                 BulkActionGroup::make([
                     BulkAction::make('feature_selected')
                         ->label('Tandai Unggulan')

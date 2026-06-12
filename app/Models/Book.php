@@ -65,7 +65,7 @@ class Book extends Model
             'is_published' => 'boolean',
             'cover_image_editor_state' => 'array',
             'published_year' => 'integer',
-            'pages' => 'integer',
+            'pages' => 'string',
             'view_count' => 'integer',
         ];
     }

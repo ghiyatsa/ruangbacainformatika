@@ -74,7 +74,6 @@ class BookInfolist
                                             ->placeholder('-'),
                                         TextEntry::make('pages')
                                             ->label('Jumlah Halaman')
-                                            ->numeric()
                                             ->placeholder('-'),
                                         TextEntry::make('language')
                                             ->label('Bahasa')
