@@ -46,43 +46,47 @@ export default function CategoryMarquee({
         return null;
     }
 
-    const renderCategoryCard = (category: MarqueeCategory, index: number) => {
-        const Icon = icons[index % icons.length];
+    interface RowItem {
+        category: MarqueeCategory;
+        originalIndex: number;
+    }
 
-        return {
-            node: (
-                <div className="py-2 sm:py-3">
-                    <Link
-                        href={booksRoute.index.url({
-                            query: {
-                                category: category.slug,
-                            },
-                        })}
-                        className="relative flex w-56 flex-col rounded-2xl border bg-background p-4 text-left text-base whitespace-normal transition-all duration-300 group-hover/loop:opacity-40 hover:opacity-100! sm:w-72 sm:p-6"
-                    >
-                        <div className="mb-3 flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary transition-colors sm:mb-4 sm:size-12">
-                            <Icon className="size-5 sm:size-6" />
-                        </div>
-                        <h3 className="mb-1.5 text-sm leading-tight font-bold text-foreground sm:mb-2 sm:text-base">
-                            {category.name}
-                        </h3>
-                        <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                            {category.description ||
-                                'Daftar buku dalam kategori ini.'}
-                        </p>
-                    </Link>
-                </div>
-            ),
-        };
+    const renderCategoryCard = (item: RowItem, isHiddenCopy = false) => {
+        const Icon = icons[item.originalIndex % icons.length];
+
+        return (
+            <div className="py-2 sm:py-3">
+                <Link
+                    href={booksRoute.index.url({
+                        query: {
+                            category: item.category.slug,
+                        },
+                    })}
+                    tabIndex={isHiddenCopy ? -1 : undefined}
+                    className="relative flex w-56 flex-col rounded-2xl border bg-background p-4 text-left text-base whitespace-normal transition-all duration-300 group-hover/loop:opacity-40 hover:opacity-100! sm:w-72 sm:p-6"
+                >
+                    <div className="mb-3 flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary transition-colors sm:mb-4 sm:size-12">
+                        <Icon className="size-5 sm:size-6" />
+                    </div>
+                    <h3 className="mb-1.5 text-sm leading-tight font-bold text-foreground sm:mb-2 sm:text-base">
+                        {item.category.name}
+                    </h3>
+                    <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                        {item.category.description ||
+                            'Daftar buku dalam kategori ini.'}
+                    </p>
+                </Link>
+            </div>
+        );
     };
 
     const midPoint = Math.ceil(categories.length / 2);
-    const row1 = categories
+    const row1: RowItem[] = categories
         .slice(0, midPoint)
-        .map((cat, i) => renderCategoryCard(cat, i));
-    const row2 = categories
+        .map((cat, i) => ({ category: cat, originalIndex: i }));
+    const row2: RowItem[] = categories
         .slice(midPoint)
-        .map((cat, i) => renderCategoryCard(cat, i + midPoint));
+        .map((cat, i) => ({ category: cat, originalIndex: i + midPoint }));
 
     const row2Items = row2.length > 0 ? row2 : row1;
 
@@ -99,6 +103,9 @@ export default function CategoryMarquee({
                         fadeOut
                         gap={16}
                         className="group/loop"
+                        renderItem={(item, key, isHiddenCopy) =>
+                            renderCategoryCard(item as RowItem, isHiddenCopy)
+                        }
                     />
                     <VelocityScroll
                         items={row2Items}
@@ -108,6 +115,9 @@ export default function CategoryMarquee({
                         fadeOut
                         gap={16}
                         className="group/loop"
+                        renderItem={(item, key, isHiddenCopy) =>
+                            renderCategoryCard(item as RowItem, isHiddenCopy)
+                        }
                     />
                 </div>
             </div>

@@ -24,7 +24,8 @@ export type VelocityScrollItem =
           sizes?: string;
           width?: number;
           height?: number;
-      };
+      }
+    | Record<string, any>;
 
 export interface VelocityScrollProps {
     items: VelocityScrollItem[];
@@ -38,7 +39,11 @@ export interface VelocityScrollProps {
     fadeOut?: boolean;
     fadeOutColor?: string;
     scaleOnHover?: boolean;
-    renderItem?: (item: VelocityScrollItem, key: React.Key) => React.ReactNode;
+    renderItem?: (
+        item: VelocityScrollItem,
+        key: React.Key,
+        isHiddenCopy?: boolean,
+    ) => React.ReactNode;
     ariaLabel?: string;
     className?: string;
     style?: React.CSSProperties;
@@ -447,7 +452,7 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                             key={key}
                             role="listitem"
                         >
-                            {renderItem(item, key)}
+                            {renderItem(item, key, isHiddenCopy)}
                         </li>
                     );
                 }
@@ -541,12 +546,10 @@ export const VelocityScroll = React.memo<VelocityScrollProps>(
                         className={cx(
                             'flex items-center',
                             isVertical && 'flex-col',
-                            copyIndex > 0 && 'pointer-events-none',
                         )}
                         key={`copy-${copyIndex}`}
                         role="list"
                         aria-hidden={copyIndex > 0}
-                        inert={copyIndex > 0}
                         ref={copyIndex === 0 ? seqRef : undefined}
                     >
                         {items.map((item, itemIndex) =>
