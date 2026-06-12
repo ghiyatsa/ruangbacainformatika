@@ -11,168 +11,91 @@ Activate this workflow when:
 
 - the user is about to use `Squash and merge`,
 - a pull request already exists and needs a final squash commit message,
-- the repository uses Conventional Commits and release automation,
-- the user wants AI to suggest the merge message instead of relying on GitHub's default text.
-
-Do not apply this workflow when:
-
-- the user is not merging a PR,
-- the repository does not care about Conventional Commits,
-- the user wants to preserve the branch's individual commits without squash.
+- the user wants AI to suggest the merge message.
 
 ## Goal
 
 Produce a squash commit message that is:
 
 - accurate to the PR's real change,
-- short and readable in `main`,
 - valid for Conventional Commits,
+- passes `commitlint` (allowed types, scopes, and line length limits),
 - and useful for automated versioning and changelog generation.
 
 ## Repository Context
 
 This repository uses:
 
-- `commitlint`
-- Conventional Commits
+- `commitlint` (with a strict configuration)
 - `release-please`
 
-SemVer expectations:
+### Allowed Types
 
-- `fix(...)` usually maps to `PATCH`
-- `feat(...)` usually maps to `MINOR`
-- `!` or `BREAKING CHANGE:` maps to `MAJOR`
+Only these types are allowed:
+- `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `test`
 
-Preferred scopes in this repository:
+> [!IMPORTANT]
+> **The `style` type is NOT allowed.** For UI styling, layouts, or code formatting changes, use `refactor` or `chore`.
 
-- `auth`
-- `admin`
-- `catalog`
-- `loan`
-- `return`
-- `kiosk`
-- `whatsapp`
-- `similarity`
-- `settings`
-- `ui`
-- `github`
-- `deps`
-- `test`
-- `ci`
+### Allowed Scopes
+
+Only these scopes are allowed:
+- `admin`, `auth`, `catalog`, `deps`, `github`, `kiosk`, `loan`, `settings`, `similarity`, `ui`, `return`, `whatsapp`
+
+> [!WARNING]
+> Do NOT use `ci` or `test` as a scope. Use `github` for CI/workflow changes, or another valid scope.
+
+### Commit Body Limits
+
+- **Ensure no line in the commit message body or PR description exceeds 100 characters.** Long lines will cause the commitlint check to fail on merge.
 
 ## Core Rules
 
 - Never trust GitHub's default squash message without review.
 - Always infer the message from the actual PR content, not only the branch name.
-- Prefer one clear Conventional Commit message over a vague summary.
 - Keep the subject concise and user-meaningful.
-- If the PR is primarily CI, GitHub Actions, commitlint, release, or automation work, prefer `ci(...)` or `chore(...)` with an appropriate scope.
-- If the PR introduces user-facing functionality, prefer `feat(...)`.
-- If the PR corrects broken behavior, prefer `fix(...)`.
-- If the PR only updates tests, prefer `test(...)`.
-- If the PR only updates documentation, prefer `docs(...)`.
-- If the PR introduces a breaking change, mark it explicitly with `!` and explain why.
+- Ensure the description is formatted (manually wrapped at ~80 characters) to pass the 100-character line length limit.
 
 ## Required Workflow
 
 ### 1. Inspect the PR Changes
 
 Review the actual PR content:
-
 - changed files,
 - diff summary,
 - current PR title,
-- commit history if useful,
-- whether the change is feature, fix, refactor, CI, docs, test, or config.
-
-Do not propose a message before understanding the dominant purpose of the PR.
+- and whether the change is feature, fix, refactor, CI, docs, test, or config.
 
 ### 2. Determine the Main Intent
 
-Choose the single strongest purpose of the PR:
+Choose the single strongest purpose of the PR using the allowed types and scopes.
 
-- feature,
-- fix,
-- CI or release automation,
-- internal maintenance,
-- tests,
-- docs,
-- refactor.
-
-If the PR mixes several concerns, base the squash message on the most important merged outcome in `main`.
-
-### 3. Choose the Best Conventional Commit
+### 3. Draft the Conventional Commit Message
 
 Use:
-
 ```txt
 type(scope): subject
 ```
 
-Examples:
-
-```txt
-ci(github): add release-please and commitlint automation
-feat(kiosk): add subnet-aware pin validation
-fix(admin): correct book item action visibility
-```
-
-Breaking change example:
-
+If there are breaking changes, add `!` after the scope:
 ```txt
 feat(loan)!: change qr draft consumption contract
 ```
 
-### 4. Report Alternatives
+### 4. Format the Extended Description
 
-Provide:
+If the commit has a body, break the lines manually using newlines so that no single line exceeds 100 characters.
 
-- 1 recommended squash commit message,
-- up to 2 alternatives if the scope or type is somewhat ambiguous,
-- the expected versioning impact for each option.
+### 5. Verify local commitlint (optional)
 
-### 5. Keep Merge Safe
-
-- Do not merge automatically unless the user explicitly asks.
-- Do not assume GitHub's auto-filled title/body is good enough.
-- If the PR content is too mixed, say so and recommend splitting future PRs more cleanly.
+Verify the message before suggesting it:
+`echo "type(scope): subject" | npx commitlint --verbose`
 
 ## Output Contract
 
 When running this workflow, the agent should return:
 
-1. A one-paragraph summary of what the PR mainly changes.
-2. The recommended squash commit message.
-3. The SemVer impact: `MAJOR`, `MINOR`, `PATCH`, or `no release`.
-4. Up to 2 alternative messages when useful.
-5. A short note on whether GitHub's default squash message should be replaced.
-
-## Execution Prompt
-
-Use the following prompt when the user wants AI help for the squash message:
-
-```txt
-You are an AI agent preparing the final squash commit message for a pull request in this repository.
-
-Your job is to inspect the PR changes and generate the best final squash commit message for `Squash and merge`.
-
-Rules:
-1. Review the actual changed files and diff before proposing a message.
-2. Use Conventional Commits in the format `type(scope): subject`.
-3. Prefer repository scopes such as:
-   `auth`, `admin`, `catalog`, `loan`, `return`, `kiosk`, `whatsapp`, `similarity`, `settings`, `ui`, `github`, `deps`, `test`, `ci`.
-4. Choose the message based on the dominant outcome of the PR, not on the branch name alone.
-5. If the change is CI, GitHub Actions, release automation, or commit tooling, prefer `ci(...)` or `chore(...)`.
-6. If the change is user-facing functionality, prefer `feat(...)`.
-7. If the change is a bug fix, prefer `fix(...)`.
-8. If the change is breaking, mark it with `!` or explain `BREAKING CHANGE:`.
-9. Keep the subject concise and readable in the `main` branch history.
-10. Do not rely on GitHub's default squash message unless it already matches the best Conventional Commit.
-
-Output:
-1. Short summary of the PR.
-2. Recommended squash commit message.
-3. Versioning impact: `MAJOR`, `MINOR`, `PATCH`, or `no release`.
-4. Up to 2 alternative messages.
-5. One sentence telling whether the default GitHub squash message should be replaced.
-```
+1. A short summary of the PR.
+2. The recommended squash commit title.
+3. The recommended extended description (with lines manually wrapped to be under 100 characters).
+4. SemVer impact: `MAJOR`, `MINOR`, `PATCH`, or `no release`.

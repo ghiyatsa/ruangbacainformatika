@@ -1,227 +1,106 @@
 ---
 name: git-commit-automation
-description: Analyze git changes, split them into logical commits, stage the right files, and create Conventional Commits without pushing. Designed for AI agents working in this repository with automated versioning and changelog rules.
+description: Analyze git changes, run checks, split them into logical commits, stage files, create Conventional Commits, and push to GitHub.
 ---
 
-# Git Commit Automation
+# Git Commit and Push Automation
 
 ## When to Apply
 
 Activate this workflow when:
 
-- The user has finished a feature, fix, refactor, or maintenance change
-- An AI agent should analyze the current worktree and prepare commits
-- The repository uses Conventional Commits, commitlint, and automated changelog/versioning
-- The user wants help splitting changes into small, reviewable commits
+- The user has finished a feature, fix, refactor, or maintenance change.
+- An AI agent should analyze the current worktree, run tests, and prepare commits.
+- The user wants the agent to automatically commit and push the changes to GitHub.
 
 Do not apply this workflow when:
 
-- The user only wants analysis without staging or committing
-- The user explicitly asks to avoid touching git state
-- The worktree contains unresolved ambiguity that could mix unrelated work
+- The user explicitly asks to avoid touching git state or pushing.
+- The worktree contains unresolved ambiguity that could mix unrelated work.
 
 ## Goal
 
 Turn the current git changes into a clean series of logical commits that:
 
-- use Conventional Commit messages,
-- preserve unrelated user work,
-- keep release notes readable,
-- and never push automatically.
+- use Conventional Commit messages passing local `commitlint` checks,
+- pass PHP tests and frontend linting/type checks,
+- and are pushed to the remote branch automatically.
 
 ## Repository Context
 
 This repository uses:
 
-- `fix(...)` normally maps to `PATCH`
-- `feat(...)` normally maps to `MINOR`
-- `type(scope)!:` or `BREAKING CHANGE:` maps to `MAJOR`
+- `commitlint` (with a strict configuration)
+- `release-please` (which triggers on main pushes)
 
-Breaking changes in this repository require extra care. Treat these areas as potentially breaking:
+### Allowed Types
 
-- authentication and member approval flows
-- kiosk access and QR consumption flows
-- loan and return draft behavior
-- destructive migrations or schema resets
-- new required environment variables
-- external integration contract changes such as WhatsApp or similarity sync
+Only these types are allowed:
+- `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `test`
 
-Preferred scopes in this repository:
+> [!IMPORTANT]
+> **The `style` type is NOT allowed.** For UI styling, layouts, or code formatting changes, use `refactor` or `chore`.
 
-- `auth`
-- `admin`
-- `catalog`
-- `loan`
-- `return`
-- `kiosk`
-- `whatsapp`
-- `similarity`
-- `settings`
-- `ui`
-- `github`
-- `deps`
-- `test`
-- `ci`
+### Allowed Scopes
+
+Only these scopes are allowed:
+- `admin`, `auth`, `catalog`, `deps`, `github`, `kiosk`, `loan`, `settings`, `similarity`, `ui`, `return`, `whatsapp`
+
+> [!WARNING]
+> Do NOT use `ci` or `test` as a scope, as they will fail the scope check. Use `github` for CI/workflow changes, or another valid scope.
+
+### Commit Body Limits
+
+- **Ensure no line in the commit message body exceeds 100 characters.** Long lines will cause `commitlint` validation to fail.
 
 ## Core Rules
 
 - Always inspect `git status` and `git diff` before touching staging.
-- Never assume every changed file belongs together.
-- Never use destructive git commands such as `git reset --hard`.
-- Never push automatically.
-- Never switch branches automatically.
-- Never amend a commit unless the user explicitly asks.
-- Do not stage unrelated files just because they are already modified.
-- If existing user changes are mixed together in the same file and cannot be safely separated, stop and explain the ambiguity before committing.
+- Never use destructive git commands such as `git reset --hard` on uncommitted user work.
+- Automatically run `vendor/bin/pint --dirty --format agent`, `php artisan test --compact`, `npm run types:check`, and `npm run lint:check` to verify code quality before committing.
+- Commit in logical groups and push to the remote branch.
 
 ## Required Workflow
 
-### 1. Inspect Changes
+### 1. Run Quality Checks & Formatting
 
-Start by reviewing:
+Before committing:
+- Format modified PHP code: `vendor/bin/pint --dirty --format agent`
+- Run PHP tests: `php artisan test --compact`
+- Run frontend type check: `npm run types:check`
+- Run frontend lint: `npm run lint:check`
 
+### 2. Inspect Changes
+
+Review changes in the worktree:
 - `git status --short`
 - `git diff`
-- `git diff --staged` if anything is already staged
 
-Build a mental model of:
+### 3. Determine Commit Groups
 
-- which files belong to which feature or fix,
-- whether tests/config/docs are coupled to that change,
-- whether there are unrelated edits in the same worktree.
+Produce a commit plan:
+- One logical purpose per commit.
+- Use Conventional Commit messages with allowed types and scopes.
+- Ensure all line lengths in the body are under 100 characters.
 
-### 2. Determine Commit Groups
-
-Before staging, produce a commit plan:
-
-- one logical purpose per commit,
-- the files expected in each commit,
-- the Conventional Commit message,
-- the expected versioning impact: `MAJOR`, `MINOR`, `PATCH`, or `no release`.
-
-Good commit groups:
-
-- feature code plus its directly related tests
-- CI/workflow changes separated from application behavior
-- docs-only changes separated from runtime changes
-
-Avoid:
-
-- mixing UI cleanup with backend behavior unless they are inseparable
-- mixing workflow automation with product code
-- mixing refactors with bug fixes if they can be split cleanly
-
-### 3. Stage Carefully
+### 4. Stage & Verify Commit Message
 
 For each commit group:
+- Stage only the relevant files.
+- Verify the proposed commit message using the local commitlint config:
+  `echo "type(scope): subject" | npx commitlint --verbose`
+- If commitlint passes, commit the files.
 
-- stage only the files that belong to that group,
-- review the staged set,
-- confirm the staged diff matches the intended purpose.
+### 5. Push changes
 
-If a file contains both relevant and unrelated edits, prefer not to commit it unless the separation is safe and explicit.
-
-### 4. Create Conventional Commits
-
-Use the format:
-
-```txt
-type(scope): subject
-```
-
-Examples:
-
-```txt
-fix(admin): simplify resource table actions
-feat(kiosk): add subnet-aware pin validation
-ci(github): enforce commitlint on pull requests
-```
-
-For breaking changes:
-
-```txt
-feat(loan)!: change qr draft consumption contract
-```
-
-And include a body when needed:
-
-```txt
-BREAKING CHANGE: draft QR payload now requires loan item level identifiers.
-```
-
-### 5. Repeat Until Clean
-
-Continue commit-by-commit until every safe, relevant change is committed.
-
-Leave unrelated or ambiguous changes untouched and report them clearly at the end.
+Once all commits are created:
+- Push commits to the remote branch: `git push origin <branch-name>`
 
 ## Output Contract
 
 When running this workflow, the agent should return:
 
 1. A short summary of the current worktree.
-2. The proposed commit groups before committing.
-3. For each commit:
-   - purpose
-   - files being staged
-   - commit message
-   - versioning impact
-4. A final summary:
-   - commits created
-   - remaining uncommitted changes, if any
-   - whether any ambiguity blocked full completion
-
-## Execution Prompt
-
-Use the following prompt when the user wants analysis + stage + commit:
-
-```txt
-You are an AI agent responsible for git workflow in this repository.
-
-Your job is to:
-- analyze the current git changes,
-- split them into small logical commits,
-- stage the correct files for each commit,
-- create Conventional Commits,
-- and never push.
-
-Rules:
-1. Start by checking `git status --short`, `git diff`, and `git diff --staged` when relevant.
-2. Group changes by real purpose: feature, fix, refactor, test, docs, config, CI, or build.
-3. Do not mix unrelated changes in one commit.
-4. Use Conventional Commits in the format `type(scope): subject`.
-5. Prefer these scopes when relevant:
-   `auth`, `admin`, `catalog`, `loan`, `return`, `kiosk`, `whatsapp`, `similarity`, `settings`, `ui`, `github`, `deps`, `test`, `ci`.
-6. Determine the versioning impact of each commit:
-   - `fix` => `PATCH`
-   - `feat` => `MINOR`
-   - `!` or `BREAKING CHANGE:` => `MAJOR`
-   - otherwise explain whether it is `no release`
-7. Treat auth, member approval, kiosk, QR borrow/return, destructive migrations, required env changes, and external integration contract changes as potentially breaking.
-8. Stage only the files that belong to the current commit.
-9. Show the intended commit grouping before creating commits.
-10. Create commits only when the grouping is clear and safe.
-11. Do not push.
-12. Do not switch branches.
-13. Do not amend existing commits unless explicitly asked.
-14. If unrelated or ambiguous changes are mixed together, stop and explain the problem instead of guessing.
-
-Required execution order:
-1. Analyze the worktree.
-2. Propose commit groups.
-3. Stage the first commit group.
-4. Review staged changes.
-5. Create the commit.
-6. Repeat for the next group until safe changes are complete.
-7. Report all created commits and any remaining changes.
-
-Output:
-1. Current change summary.
-2. Proposed commit list.
-3. For each commit:
-   - purpose
-   - staged files
-   - commit message
-   - versioning impact
-4. Final result with commits created and remaining changes.
-```
+2. The results of the tests and lint checks.
+3. The list of commits created (with their commit messages).
+4. The confirmation that the commits have been pushed to GitHub.
