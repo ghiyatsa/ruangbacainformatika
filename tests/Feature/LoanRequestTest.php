@@ -86,7 +86,7 @@ it('members can add books to a loan request and generate a qr draft', function (
         );
 });
 
-it('public users without teknik informatika borrowing access cannot add books to the cart', function () {
+it('users without member borrowing access cannot add books to the cart', function () {
     withoutMiddleware(PreventRequestForgery::class);
 
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
@@ -122,7 +122,7 @@ it('public users without teknik informatika borrowing access cannot add books to
             'book_id' => $book->id,
         ])
         ->assertSessionHasErrors([
-            'draft' => 'Layanan peminjaman tersedia untuk mahasiswa Teknik Informatika yang terdaftar.',
+            'draft' => 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.',
         ]);
 
     expect($user->fresh()->hasRole('member'))->toBeFalse();
@@ -142,7 +142,7 @@ it('authenticated public users are redirected away from the loan request page', 
     actingAs($user)
         ->get(route('loans.request'))
         ->assertRedirect(route('home'))
-        ->assertSessionHas('inertia.flash_data.toast.message', 'Layanan peminjaman tersedia untuk mahasiswa Teknik Informatika yang terdaftar.');
+        ->assertSessionHas('inertia.flash_data.toast.message', 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.');
 });
 
 it('users can add books to cart before profile is complete but cannot generate qr yet', function () {
