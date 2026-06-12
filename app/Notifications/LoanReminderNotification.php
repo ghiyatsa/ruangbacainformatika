@@ -37,8 +37,8 @@ class LoanReminderNotification extends Notification implements ShouldQueue
     public function toWhatsApp(object $notifiable): WhatsAppMessage
     {
         $lines = [
-            "Halo {$notifiable->name},",
-            'Ini pengingat bahwa masa peminjaman buku Anda berakhir besok.',
+            "Assalamualaikum {$notifiable->name},",
+            'Peminjaman buku Anda berakhir besok.',
             'Buku yang perlu dikembalikan:',
         ];
 
@@ -49,8 +49,7 @@ class LoanReminderNotification extends Notification implements ShouldQueue
 
         $lines[] = '';
         $lines[] = 'Batas pengembalian: '.AppTimezone::format($this->loan->due_at, 'd F Y');
-        $lines[] = 'Riwayat pinjaman: '.url('/loans/history');
-        $lines[] = 'Salam, Tim Perpustakaan '.config('app.name');
+        $lines[] = 'Terima kasih! '.config('app.name');
 
         return new WhatsAppMessage(
             implode("\n", $lines),

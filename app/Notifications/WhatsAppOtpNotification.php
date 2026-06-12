@@ -31,7 +31,7 @@ class WhatsAppOtpNotification extends Notification
     public function toWhatsApp(object $notifiable): WhatsAppMessage
     {
         $lines = [
-            "Halo {$notifiable->name},",
+            "Assalamualaikum {$notifiable->name},",
             'Kode OTP WhatsApp Ruang Baca Anda:',
             $this->code,
             '',

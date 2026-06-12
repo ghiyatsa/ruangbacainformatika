@@ -11,10 +11,6 @@ class KioskIdlePolicy
 
     public const DEFAULT_OPERATING_CLOSE_TIME = '17:00';
 
-    public const DEFAULT_IDLE_TIMEOUT_OPEN_MINUTES = 15;
-
-    public const DEFAULT_IDLE_TIMEOUT_CLOSED_MINUTES = 3;
-
     public function __construct(
         protected SettingRepository $settingRepository,
     ) {}
@@ -24,10 +20,9 @@ class KioskIdlePolicy
      *     timezone: string,
      *     operatingOpenTime: string,
      *     operatingCloseTime: string,
-     *     idleTimeoutOpenMinutes: int,
-     *     idleTimeoutClosedMinutes: int,
-     *     activeIdleTimeoutMinutes: int,
-     *     withinOperatingHours: bool
+     *     withinOperatingHours: bool,
+     *     persistentForDevelopment: bool,
+     *     sessionExpiresAtIso: string|null
      * }
      */
     public function configuration(?CarbonInterface $at = null): array
@@ -41,36 +36,44 @@ class KioskIdlePolicy
             $this->settingRepository->get('kiosk', 'operating_close_time', self::DEFAULT_OPERATING_CLOSE_TIME),
             self::DEFAULT_OPERATING_CLOSE_TIME,
         );
-        $idleTimeoutOpenMinutes = max(
-            (int) $this->settingRepository->get('kiosk', 'idle_timeout_open_minutes', self::DEFAULT_IDLE_TIMEOUT_OPEN_MINUTES),
-            1,
-        );
-        $idleTimeoutClosedMinutes = max(
-            (int) $this->settingRepository->get('kiosk', 'idle_timeout_closed_minutes', self::DEFAULT_IDLE_TIMEOUT_CLOSED_MINUTES),
-            1,
-        );
         $withinOperatingHours = $this->isWithinOperatingHoursAt(
             $referenceTime,
             $operatingOpenTime,
             $operatingCloseTime,
         );
+        $operatingWindow = $this->operatingWindowFor($referenceTime, $operatingOpenTime, $operatingCloseTime);
 
         return [
             'timezone' => AppTimezone::displayTimezone(),
             'operatingOpenTime' => $operatingOpenTime,
             'operatingCloseTime' => $operatingCloseTime,
-            'idleTimeoutOpenMinutes' => $idleTimeoutOpenMinutes,
-            'idleTimeoutClosedMinutes' => $idleTimeoutClosedMinutes,
-            'activeIdleTimeoutMinutes' => $withinOperatingHours
-                ? $idleTimeoutOpenMinutes
-                : $idleTimeoutClosedMinutes,
             'withinOperatingHours' => $withinOperatingHours,
+            'persistentForDevelopment' => $this->isPersistentForDevelopment(),
+            'sessionExpiresAtIso' => $withinOperatingHours
+                ? $operatingWindow['close']->toIso8601String()
+                : null,
         ];
     }
 
-    public function idleTimeoutMinutes(?CarbonInterface $at = null): int
+    public function canStartSession(?CarbonInterface $at = null): bool
     {
-        return $this->configuration($at)['activeIdleTimeoutMinutes'];
+        if ($this->isPersistentForDevelopment()) {
+            return true;
+        }
+
+        $referenceTime = $this->resolveReferenceTime($at);
+
+        return $this->isWithinOperatingHoursAt(
+            $referenceTime,
+            $this->normalizeTime(
+                $this->settingRepository->get('kiosk', 'operating_open_time', self::DEFAULT_OPERATING_OPEN_TIME),
+                self::DEFAULT_OPERATING_OPEN_TIME,
+            ),
+            $this->normalizeTime(
+                $this->settingRepository->get('kiosk', 'operating_close_time', self::DEFAULT_OPERATING_CLOSE_TIME),
+                self::DEFAULT_OPERATING_CLOSE_TIME,
+            ),
+        );
     }
 
     public function isSessionStillActive(?CarbonInterface $lastActiveAt, ?CarbonInterface $at = null): bool
@@ -79,11 +82,30 @@ class KioskIdlePolicy
             return false;
         }
 
+        if ($this->isPersistentForDevelopment()) {
+            return true;
+        }
+
         $referenceTime = $this->resolveReferenceTime($at);
         $lastActivityTime = $lastActiveAt->copy()->setTimezone(AppTimezone::displayTimezone());
-        $idleSeconds = $this->idleTimeoutMinutes($referenceTime) * 60;
+        $operatingOpenTime = $this->normalizeTime(
+            $this->settingRepository->get('kiosk', 'operating_open_time', self::DEFAULT_OPERATING_OPEN_TIME),
+            self::DEFAULT_OPERATING_OPEN_TIME,
+        );
+        $operatingCloseTime = $this->normalizeTime(
+            $this->settingRepository->get('kiosk', 'operating_close_time', self::DEFAULT_OPERATING_CLOSE_TIME),
+            self::DEFAULT_OPERATING_CLOSE_TIME,
+        );
 
-        return $lastActivityTime->diffInSeconds($referenceTime) < $idleSeconds;
+        if (! $this->isWithinOperatingHoursAt($referenceTime, $operatingOpenTime, $operatingCloseTime)) {
+            return false;
+        }
+
+        $operatingWindow = $this->operatingWindowFor($referenceTime, $operatingOpenTime, $operatingCloseTime);
+
+        return $lastActivityTime->greaterThanOrEqualTo($operatingWindow['open'])
+            && $lastActivityTime->lessThan($operatingWindow['close'])
+            && $referenceTime->lessThan($operatingWindow['close']);
     }
 
     protected function resolveReferenceTime(?CarbonInterface $at = null): CarbonInterface
@@ -128,10 +150,64 @@ class KioskIdlePolicy
         return $currentMinutes >= $openMinutes || $currentMinutes < $closeMinutes;
     }
 
+    /**
+     * @return array{open: CarbonInterface, close: CarbonInterface}
+     */
+    protected function operatingWindowFor(
+        CarbonInterface $referenceTime,
+        string $operatingOpenTime,
+        string $operatingCloseTime,
+    ): array {
+        $openMinutes = $this->minutesFromTime($operatingOpenTime);
+        $closeMinutes = $this->minutesFromTime($operatingCloseTime);
+        $reference = $referenceTime->copy()->setTimezone(AppTimezone::displayTimezone());
+        $open = $this->timeOnReferenceDate($reference, $operatingOpenTime);
+        $close = $this->timeOnReferenceDate($reference, $operatingCloseTime);
+
+        if ($openMinutes === $closeMinutes) {
+            return [
+                'open' => $reference->copy()->startOfDay(),
+                'close' => $reference->copy()->endOfDay(),
+            ];
+        }
+
+        if ($openMinutes < $closeMinutes) {
+            return [
+                'open' => $open,
+                'close' => $close,
+            ];
+        }
+
+        if ($reference->lessThan($close)) {
+            $open = $open->subDay();
+        } else {
+            $close = $close->addDay();
+        }
+
+        return [
+            'open' => $open,
+            'close' => $close,
+        ];
+    }
+
+    protected function timeOnReferenceDate(CarbonInterface $referenceTime, string $time): CarbonInterface
+    {
+        [$hours, $minutes] = array_map('intval', explode(':', $time, 2));
+
+        return $referenceTime->copy()
+            ->setTimezone(AppTimezone::displayTimezone())
+            ->setTime($hours, $minutes);
+    }
+
     protected function minutesFromTime(string $time): int
     {
         [$hours, $minutes] = array_map('intval', explode(':', $time, 2));
 
         return ($hours * 60) + $minutes;
+    }
+
+    protected function isPersistentForDevelopment(): bool
+    {
+        return app()->isLocal();
     }
 }

@@ -1,8 +1,8 @@
 import { Form } from '@inertiajs/react';
 import { UserIcon, BarcodeIcon, SearchIcon, QrCode } from 'lucide-react';
-import { useDeferredValue, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FieldGroup, FieldDescription } from '@/components/ui/field';
+import { FieldGroup } from '@/components/ui/field';
 import {
     InputGroup,
     InputGroupAddon,
@@ -51,71 +51,6 @@ export function BookActionForm({
     const [selectedBooks, setSelectedBooks] = useState<KioskBookSearchResult[]>(
         [],
     );
-    const [memberData, setMemberData] = useState<{
-        name: string;
-        emailMasked: string | null;
-        whatsappMasked: string | null;
-    } | null>(null);
-    const [isSearchingMember, setIsSearchingMember] = useState(false);
-
-    const deferredMemberIdentifier = useDeferredValue(memberIdentifier.trim());
-
-    useEffect(() => {
-        if (memberFieldMode === 'hidden') {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setMemberData(null);
-            setIsSearchingMember(false);
-
-            return;
-        }
-
-        if (deferredMemberIdentifier === '') {
-            return;
-        }
-
-        const abortController = new AbortController();
-        const searchUrl = new URL(
-            '/kiosk/members/find',
-            window.location.origin,
-        );
-        searchUrl.searchParams.set('identifier', deferredMemberIdentifier);
-
-        void fetch(searchUrl.toString(), {
-            signal: abortController.signal,
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    throw new Error('Gagal memuat data anggota.');
-                }
-
-                const payload = (await response.json()) as {
-                    member?: {
-                        name: string;
-                        emailMasked: string | null;
-                        whatsappMasked: string | null;
-                    } | null;
-                };
-
-                setMemberData(payload.member ?? null);
-            })
-            .catch((error: unknown) => {
-                if (
-                    error instanceof DOMException &&
-                    error.name === 'AbortError'
-                ) {
-                    return;
-                }
-
-                setMemberData(null);
-            })
-            .finally(() => {
-                if (!abortController.signal.aborted) {
-                    setIsSearchingMember(false);
-                }
-            });
-
-        return () => abortController.abort();
-    }, [deferredMemberIdentifier, memberFieldMode]);
 
     const usesBookSearch = Boolean(bookSearchUrl);
     const requiresMemberBeforeSearch = bookSearchMode === 'return';
@@ -150,8 +85,6 @@ export function BookActionForm({
                 setFirstIsbn('');
                 setSelectedBooks([]);
                 setIsSearchDialogOpen(false);
-                setMemberData(null);
-                setIsSearchingMember(false);
             }}
         >
             {({ errors, processing }) => {
@@ -209,39 +142,18 @@ export function BookActionForm({
                                                         data-bwignore="true"
                                                         placeholder="NIM, email, atau no. HP"
                                                         value={memberIdentifier}
-                                                        onChange={(e) => {
-                                                            const val =
-                                                                e.target.value;
+                                                        onChange={(e) =>
                                                             setMemberIdentifier(
-                                                                val,
-                                                            );
-
-                                                            if (
-                                                                val.trim() === ''
-                                                            ) {
-                                                                setMemberData(
-                                                                    null,
-                                                                );
-                                                                setIsSearchingMember(
-                                                                    false,
-                                                                );
-                                                            } else {
-                                                                setIsSearchingMember(
-                                                                    true,
-                                                                );
-                                                            }
-                                                        }}
+                                                                e.target.value,
+                                                            )
+                                                        }
                                                         aria-invalid={Boolean(
                                                             errors.member_identifier,
                                                         )}
                                                         className="h-full text-base"
                                                     />
                                                     <InputGroupAddon>
-                                                        {isSearchingMember ? (
-                                                            <Spinner />
-                                                        ) : (
-                                                            <UserIcon />
-                                                        )}
+                                                        <UserIcon />
                                                     </InputGroupAddon>
                                                 </InputGroup>
                                                 {usesBookSearch && (
@@ -278,19 +190,10 @@ export function BookActionForm({
                                                     </Button>
                                                 )}
                                             </div>
-                                            {memberData ? (
-                                                <FieldDescription className="mt-1">
-                                                    {memberData.name} (
-                                                    {memberData.emailMasked ??
-                                                        memberData.whatsappMasked ??
-                                                        'Data anggota ditemukan'}
-                                                    )
-                                                </FieldDescription>
-                                            ) : null}
                                         </KioskField>
                                     </div>
                                 ) : (
-                                    <div className="flex justify-end">
+                                    <div className="flex justify-end gap-2">
                                         {usesBookSearch ? (
                                             <Button
                                                 type="button"
@@ -310,6 +213,17 @@ export function BookActionForm({
                                                 Cari Buku
                                             </Button>
                                         ) : null}
+                                        {onScanQr ? (
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                className="rounded-md px-4 text-sm font-medium"
+                                                onClick={onScanQr}
+                                            >
+                                                <QrCode className="size-4" />
+                                                Scan QR
+                                            </Button>
+                                        ) : null}
                                     </div>
                                 )}
 
@@ -323,76 +237,102 @@ export function BookActionForm({
                                         ) : null}
 
                                         <div className="mt-2 space-y-4">
-                                            <div className="flex items-center justify-between border-b border-border/40 pb-2">
-                                                <p className="text-sm font-semibold text-foreground">
-                                                    Buku dipilih
-                                                </p>
-                                                <span className="text-xs font-medium text-muted-foreground">
-                                                    {selectedBooks.length} /{' '}
-                                                    {maxInputs}
-                                                </span>
-                                            </div>
-
-                                            <div className="mt-2 space-y-1">
-                                                {selectedBooks.map(
-                                                    (book, index) => (
-                                                        <div
-                                                            key={book.id}
-                                                            className="flex items-center justify-between gap-4 border-b border-border/40 py-3 last:border-0"
-                                                        >
-                                                            <input
-                                                                type="hidden"
-                                                                name={`book_ids.${index}`}
-                                                                value={book.id}
-                                                            />
-                                                            <div className="min-w-0 space-y-1">
-                                                                <p className="line-clamp-1 text-sm font-semibold text-foreground">
-                                                                    {book.title}
-                                                                </p>
-                                                                <p className="line-clamp-1 text-xs text-muted-foreground">
-                                                                    {book.authors?.join(
-                                                                        ', ',
-                                                                    ) ||
-                                                                        'Penulis belum tersedia'}
-                                                                    {' | '}
-                                                                    {book.isbn
-                                                                        ? `ISBN ${book.isbn}`
-                                                                        : book.issn
-                                                                          ? `ISSN ${book.issn}`
-                                                                          : 'Tanpa ISBN/ISSN'}
-                                                                </p>
-                                                            </div>
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                size="sm"
-                                                                className="shrink-0"
-                                                                onClick={() =>
-                                                                    setSelectedBooks(
-                                                                        (
-                                                                            current,
-                                                                        ) =>
-                                                                            current.filter(
-                                                                                (
-                                                                                    selectedBook,
-                                                                                ) =>
-                                                                                    selectedBook.id !==
-                                                                                    book.id,
-                                                                            ),
-                                                                    )
-                                                                }
-                                                            >
-                                                                Hapus
-                                                            </Button>
-                                                        </div>
-                                                    ),
-                                                )}
-
-                                                {selectedBooks.length === 0 ? (
-                                                    <p className="py-6 text-center text-sm text-muted-foreground">
-                                                        Belum ada buku dipilih.
+                                            <div className="rounded-lg border border-border/70">
+                                                <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-3">
+                                                    <p className="text-sm font-semibold text-foreground">
+                                                        Buku dipilih
                                                     </p>
-                                                ) : null}
+                                                    <span className="text-xs font-medium text-muted-foreground">
+                                                        {selectedBooks.length} /{' '}
+                                                        {maxInputs}
+                                                    </span>
+                                                </div>
+
+                                                <div className="max-h-[24rem] overflow-y-auto p-3">
+                                                    {selectedBooks.length > 0 ? (
+                                                        <div className="grid gap-2">
+                                                            {selectedBooks.map(
+                                                                (
+                                                                    book,
+                                                                    index,
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            book.id
+                                                                        }
+                                                                        className="flex items-center gap-3 rounded-lg border border-border/60 p-3 transition hover:bg-accent/40"
+                                                                    >
+                                                                        <input
+                                                                            type="hidden"
+                                                                            name={`book_ids.${index}`}
+                                                                            value={
+                                                                                book.id
+                                                                            }
+                                                                        />
+                                                                        <img
+                                                                            src={
+                                                                                book.coverImageUrl
+                                                                            }
+                                                                            alt={
+                                                                                book.title
+                                                                            }
+                                                                            className="h-16 w-12 shrink-0 rounded-md border border-border/70 object-cover"
+                                                                            loading="lazy"
+                                                                        />
+                                                                        <div className="min-w-0 flex-1 space-y-1">
+                                                                            <p className="line-clamp-1 text-sm font-semibold text-foreground">
+                                                                                {
+                                                                                    book.title
+                                                                                }
+                                                                            </p>
+                                                                            <p className="line-clamp-1 text-xs text-muted-foreground">
+                                                                                {book.authors?.join(
+                                                                                    ', ',
+                                                                                ) ||
+                                                                                    'Penulis belum tersedia'}
+                                                                                {
+                                                                                    ' | '
+                                                                                }
+                                                                                {book.isbn
+                                                                                    ? `ISBN ${book.isbn}`
+                                                                                    : book.issn
+                                                                                      ? `ISSN ${book.issn}`
+                                                                                      : 'Tanpa ISBN/ISSN'}
+                                                                            </p>
+                                                                        </div>
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            className="shrink-0"
+                                                                            onClick={() =>
+                                                                                setSelectedBooks(
+                                                                                    (
+                                                                                        current,
+                                                                                    ) =>
+                                                                                        current.filter(
+                                                                                            (
+                                                                                                selectedBook,
+                                                                                            ) =>
+                                                                                                selectedBook.id !==
+                                                                                                book.id,
+                                                                                        ),
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Hapus
+                                                                        </Button>
+                                                                    </div>
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="px-2 py-6 text-center text-sm text-muted-foreground">
+                                                            Belum ada buku
+                                                            dipilih.
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <div className="mt-4">

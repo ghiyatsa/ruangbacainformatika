@@ -75,7 +75,7 @@ function CoverImage({
 function FeaturedSpotlightSkeleton() {
     return (
         <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-8">
-            <div className="mx-auto w-36 shrink-0 sm:mx-0 sm:w-40 md:w-44">
+            <div className="mx-auto w-48 shrink-0 sm:mx-0 sm:w-40 md:w-44">
                 <Skeleton className="aspect-3/4 w-full rounded-xl" />
             </div>
 
@@ -187,7 +187,7 @@ export default function FeaturedSpotlight({
                                 instant
                                 component="books/show"
                                 pageProps={instantLoadingPageProps()}
-                                className="group/cover mx-auto w-36 shrink-0 sm:mx-0 sm:w-40 md:w-44"
+                                className="group/cover mx-auto w-48 shrink-0 sm:mx-0 sm:w-40 md:w-44"
                             >
                                 <div className="aspect-3/4 overflow-hidden rounded-xl border bg-background shadow-lg ring-1 ring-black/5 transition-transform duration-300 group-hover/cover:scale-[1.03] dark:ring-white/5">
                                     <CoverImage

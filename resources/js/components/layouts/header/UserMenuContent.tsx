@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { History, Laptop, LogOut, Moon, QrCode, Settings, Sun } from 'lucide-react';
+import { History, KeyRound, Laptop, LogOut, Moon, Settings, Sun } from 'lucide-react';
 import { UserInfo } from '@/components/common/UserInfo';
 import {
     DropdownMenuGroup,
@@ -43,12 +43,12 @@ export function UserMenuContent({ user }: Props) {
                     <DropdownMenuItem asChild>
                         <Link
                             className="block w-full cursor-pointer px-2 py-2"
-                            href={settings.memberQr.show()}
+                            href={settings.memberKey.show()}
                             prefetch
                             onClick={cleanup}
                         >
-                            <QrCode className="mr-2 h-4 w-4" />
-                            QR Anggota
+                            <KeyRound className="mr-2 h-4 w-4" />
+                            Member Key
                         </Link>
                     </DropdownMenuItem>
                 ) : null}

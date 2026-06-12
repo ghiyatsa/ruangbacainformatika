@@ -197,7 +197,8 @@ it('super admin users can render concise table filter and bulk action labels', f
         ->assertSee('Tanpa sampul')
         ->assertSee('Tandai Unggulan')
         ->assertSee('Aktifkan Pinjam')
-        ->assertSee('Hapus Terpilih');
+        ->assertSee('Hapus Terpilih')
+        ->assertSee('Ekspor');
 
     actingAs($user)
         ->get('/admin/loans')

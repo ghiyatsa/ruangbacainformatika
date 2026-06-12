@@ -26,10 +26,7 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
 
     return (
         <section className="rounded-xl border border-border/70 bg-card p-6 shadow-xs">
-            <SettingsSectionHeader
-                title="Informasi profil"
-                description="Perbarui nama, WhatsApp, dan alamat akun Anda."
-            />
+            <SettingsSectionHeader title="Detail profil" />
 
             <Form
                 action={ProfileController.update()}
@@ -76,9 +73,6 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                                     <AtSign className="size-4" />
                                 </InputGroupAddon>
                             </InputGroup>
-                            <p className="text-xs text-muted-foreground">
-                                Email tidak dapat diubah.
-                            </p>
                         </div>
 
                         <div className="grid gap-2">
@@ -128,13 +122,6 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                                     <Phone className="size-4" />
                                 </InputGroupAddon>
                             </InputGroup>
-                            <p className="text-xs text-muted-foreground">
-                                {hasVerifiedWhatsapp && !isEditingWhatsapp
-                                    ? 'Nomor WhatsApp ini sudah terverifikasi.'
-                                    : hasVerifiedWhatsapp
-                                      ? 'Nomor baru akan meminta verifikasi ulang sebelum layanan anggota aktif kembali.'
-                                      : 'Gunakan nomor WhatsApp yang aktif.'}
-                            </p>
                             <InputError message={errors.whatsapp} />
                         </div>
 

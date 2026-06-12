@@ -80,6 +80,7 @@ it('kiosk borrowing rejects expired verification qr payloads', function () {
     Cache::flush();
 
     post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $member->nim(),
         'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])->assertSessionHasErrors('verification_payload');
@@ -198,6 +199,7 @@ it('borrows selected books from kiosk using book ids', function () {
     );
 
     post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $member->nim(),
         'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
@@ -210,6 +212,65 @@ it('borrows selected books from kiosk using book ids', function () {
     Notification::assertSentTo($member, LoanReceiptNotification::class);
 
     expect($bookItem->fresh()->status)->toBe('borrowed');
+});
+
+it('rejects kiosk borrowing when the typed member identifier does not match the scanned member key', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+    ]);
+    $member->assignRole('member');
+
+    $otherMember = User::factory()->create([
+        'whatsapp' => '08123456780',
+        'whatsapp_verified_at' => now(),
+    ]);
+    $otherMember->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Mismatch',
+        'slug' => 'penerbit-mismatch',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Mismatch',
+        'slug' => 'buku-mismatch',
+        'isbn' => '978-602-000-0303',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $bookItem = BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-303',
+        'status' => 'available',
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $verification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
+    post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $otherMember->nim(),
+        'verification_payload' => $verification['payload'],
+        'book_ids' => [$book->id],
+    ])
+        ->assertRedirect()
+        ->assertSessionHasErrors([
+            'member_identifier' => 'Identitas anggota tidak sesuai dengan member key yang discan.',
+        ]);
+
+    expect($bookItem->fresh()->status)->toBe('available');
 });
 
 it('stores kiosk borrowing even when receipt email dispatch fails', function () {
@@ -259,6 +320,7 @@ it('stores kiosk borrowing even when receipt email dispatch fails', function () 
     );
 
     post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $member->nim(),
         'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
@@ -387,8 +449,13 @@ it('returns selected books from kiosk using book ids', function () {
     $mock->shouldIgnoreMissing();
     instance(KioskPinManager::class, $mock);
 
+    $verification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
     post(route('kiosk.loans.return'), [
         'member_identifier' => $member->nim(),
+        'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'return']))
@@ -406,6 +473,78 @@ it('returns selected books from kiosk using book ids', function () {
     expect($loanItem->fresh()->returned_at)->not->toBeNull()
         ->and($bookItem->fresh()->status)->toBe('available')
         ->and($loan->fresh()->status)->toBe(Loan::STATUS_RETURNED);
+});
+
+it('rejects kiosk returns when the typed member identifier does not match the scanned member key', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+    ]);
+    $member->assignRole('member');
+
+    $otherMember = User::factory()->create([
+        'whatsapp' => '08123456780',
+        'whatsapp_verified_at' => now(),
+    ]);
+    $otherMember->assignRole('member');
+
+    $publisher = Publisher::query()->create([
+        'name' => 'Penerbit Return Mismatch',
+        'slug' => 'penerbit-return-mismatch',
+    ]);
+
+    $book = Book::query()->create([
+        'title' => 'Buku Return Mismatch',
+        'slug' => 'buku-return-mismatch',
+        'isbn' => '9786020000310',
+        'publisher_id' => $publisher->id,
+        'is_published' => true,
+        'is_borrowable' => true,
+    ]);
+
+    $bookItem = BookItem::query()->create([
+        'book_id' => $book->id,
+        'internal_code' => 'ITEM-310',
+        'status' => 'borrowed',
+    ]);
+
+    $loan = Loan::query()->create([
+        'user_id' => $member->id,
+        'status' => Loan::STATUS_BORROWED,
+        'borrowed_at' => now()->subDay(),
+        'due_at' => now()->addDays(3),
+    ]);
+
+    $loanItem = LoanItem::query()->create([
+        'loan_id' => $loan->id,
+        'book_item_id' => $bookItem->id,
+    ]);
+
+    $mock = mock(KioskPinManager::class);
+    $mock->shouldReceive('isVerified')->andReturn(true);
+    $mock->shouldIgnoreMissing();
+    instance(KioskPinManager::class, $mock);
+
+    $verification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
+    post(route('kiosk.loans.return'), [
+        'member_identifier' => $otherMember->nim(),
+        'verification_payload' => $verification['payload'],
+        'book_ids' => [$book->id],
+    ])
+        ->assertRedirect()
+        ->assertSessionHasErrors([
+            'member_identifier' => 'Identitas anggota tidak sesuai dengan member key yang discan.',
+        ]);
+
+    expect($loanItem->fresh()->returned_at)->toBeNull()
+        ->and($bookItem->fresh()->status)->toBe('borrowed');
 });
 
 it('searches only active borrowed books for kiosk returns', function () {
@@ -654,6 +793,7 @@ it('borrows books using a verification qr and returns them using email as identi
     );
 
     post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $member->nim(),
         'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
@@ -662,8 +802,13 @@ it('borrows books using a verification qr and returns them using email as identi
     expect($bookItem->fresh()->status)->toBe('borrowed');
 
     // Test returning with email
+    $returnVerification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
     post(route('kiosk.loans.return'), [
         'member_identifier' => $member->email,
+        'verification_payload' => $returnVerification['payload'],
         'book_ids' => [$book->id],
     ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'return']));
@@ -713,6 +858,7 @@ it('borrows books using a verification qr and returns them using phone identifie
     );
 
     post(route('kiosk.loans.borrow'), [
+        'member_identifier' => $member->nim(),
         'verification_payload' => $verification['payload'],
         'book_ids' => [$book->id],
     ])
@@ -721,8 +867,13 @@ it('borrows books using a verification qr and returns them using phone identifie
     expect($bookItem->fresh()->status)->toBe('borrowed');
 
     // Test returning with phone number starting with 08
+    $returnVerification = app(KioskBorrowVerificationService::class)->generate(
+        $member,
+    );
+
     post(route('kiosk.loans.return'), [
         'member_identifier' => '08123456789',
+        'verification_payload' => $returnVerification['payload'],
         'book_ids' => [$book->id],
     ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'return']));

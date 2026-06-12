@@ -92,7 +92,7 @@ export function ReadyStep(props: KioskProps) {
                             <BorrowForm loanMaxBooks={props.loanMaxBooks} />
                         ) : null}
                         {selectedMenu === 'return' ? (
-                            <ReturnForm loanMaxBooks={props.loanMaxBooks} />
+                            <ReturnForm />
                         ) : null}
                         {!selectedMenu ? (
                             <div className="flex h-full min-h-56 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">

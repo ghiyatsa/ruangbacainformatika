@@ -7,6 +7,7 @@ use App\Models\LoanItem;
 use App\Models\Publisher;
 use App\Models\ReturnDraft;
 use App\Models\User;
+use App\Services\ReturnDraftService;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 
@@ -66,7 +67,11 @@ it('generates a return qr draft from active loan history items', function () {
         ->and($draft?->status)->toBe(ReturnDraft::STATUS_PENDING)
         ->and($draft?->items()->count())->toBe(1)
         ->and($draft?->selected_loan_item_ids)->toBe([$loanItem->id])
-        ->and(session('return_request_qr.payload'))->toBeString();
+        ->and(session('return_request_qr.payload'))
+        ->toBeString()
+        ->toHaveLength(51)
+        ->toStartWith(ReturnDraftService::SHORT_TOKEN_PREFIX)
+        ->not->toStartWith(ReturnDraftService::TOKEN_PREFIX);
 
     actingAs($member)
         ->get(route('loans.history'))

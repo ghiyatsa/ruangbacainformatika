@@ -34,11 +34,7 @@ export function ProfileSummary({
             </Avatar>
             <div className="min-w-0 flex-1">
                 <p className="text-lg leading-tight font-semibold">{name}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                    Identitas akun utama untuk layanan Ruang Baca.
-                </p>
-
-                <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
+                <div className="mt-3 grid gap-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 shrink-0" />
                         <span className="truncate">{email}</span>
