@@ -22,6 +22,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -78,6 +79,12 @@ class KioskController extends Controller
         if (! $this->kioskPinManager->isConfigured()) {
             return back()->withErrors([
                 'pin' => 'PIN kiosk belum tersedia. Silakan hubungi petugas perpustakaan.',
+            ])->onlyInput('pin');
+        }
+
+        if (! $this->kioskPinManager->canStartSession()) {
+            return back()->withErrors([
+                'pin' => 'Sesi kiosk hanya dapat dimulai pada jam operasional perpustakaan.',
             ])->onlyInput('pin');
         }
 
@@ -226,7 +233,20 @@ class KioskController extends Controller
 
     public function borrow(BorrowBookRequest $request): RedirectResponse
     {
-        $member = $this->kioskBorrowVerificationService->consume(
+        $member = $this->kioskBorrowVerificationService->resolveUser(
+            $request->validatedVerificationPayload(),
+        );
+        $submittedMember = $this->kioskLoanService->findMemberByIdentifier(
+            $request->validatedMemberIdentifier(),
+        );
+
+        if (! $submittedMember || $submittedMember->isNot($member)) {
+            throw ValidationException::withMessages([
+                'member_identifier' => 'Identitas anggota tidak sesuai dengan member key yang discan.',
+            ]);
+        }
+
+        $this->kioskBorrowVerificationService->consume(
             $request->validatedVerificationPayload(),
         );
 
@@ -245,9 +265,26 @@ class KioskController extends Controller
 
     public function storeReturn(ReturnBookRequest $request): RedirectResponse
     {
+        $member = $this->kioskBorrowVerificationService->resolveUser(
+            $request->validatedVerificationPayload(),
+        );
+        $submittedMember = $this->kioskLoanService->findMemberByIdentifier(
+            $request->validatedMemberIdentifier(),
+        );
+
+        if (! $submittedMember || $submittedMember->isNot($member)) {
+            throw ValidationException::withMessages([
+                'member_identifier' => 'Identitas anggota tidak sesuai dengan member key yang discan.',
+            ]);
+        }
+
         $returnedCount = $this->kioskLoanService->returnBooksByBookIds(
-            (string) $request->validated('member_identifier'),
+            $member->email,
             $request->validatedBookIds(),
+        );
+
+        $this->kioskBorrowVerificationService->consume(
+            $request->validatedVerificationPayload(),
         );
 
         Inertia::flash('toast', [
@@ -279,7 +316,7 @@ class KioskController extends Controller
         return response()->json([
             'member' => [
                 'name' => $member->name,
-                'emailMasked' => $this->maskEmail($member->email),
+                'emailMasked' => $member->email,
                 'whatsappMasked' => $this->maskPhoneNumber($member->whatsapp),
             ],
         ]);

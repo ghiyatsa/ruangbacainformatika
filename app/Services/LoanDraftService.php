@@ -25,6 +25,10 @@ class LoanDraftService
 {
     public const TOKEN_PREFIX = 'RB-LOAN-';
 
+    public const SHORT_TOKEN_PREFIX = 'BB-';
+
+    protected const OPAQUE_TOKEN_LENGTH = 48;
+
     public function __construct(
         protected KioskLoanService $kioskLoanService,
     ) {}
@@ -186,7 +190,7 @@ class LoanDraftService
             }
         }
 
-        $plainToken = self::TOKEN_PREFIX.Str::upper(Str::random(40));
+        $plainToken = $this->makeToken();
         $draft->forceFill([
             'token_hash' => hash('sha256', $plainToken),
             'expires_at' => now()->addMinutes(10),
@@ -408,7 +412,7 @@ class LoanDraftService
             return null;
         }
 
-        if (Str::startsWith($normalized, self::TOKEN_PREFIX)) {
+        if ($this->isReadableToken($normalized)) {
             return $normalized;
         }
 
@@ -423,12 +427,26 @@ class LoanDraftService
 
             $token = $queryParams['token'] ?? null;
 
-            return is_string($token) && Str::startsWith($token, self::TOKEN_PREFIX)
+            return is_string($token) && $this->isReadableToken($token)
                 ? $token
                 : null;
         }
 
         return null;
+    }
+
+    protected function makeToken(): string
+    {
+        return self::SHORT_TOKEN_PREFIX.Str::random(self::OPAQUE_TOKEN_LENGTH);
+    }
+
+    protected function isReadableToken(string $token): bool
+    {
+        if (Str::startsWith($token, [self::TOKEN_PREFIX, self::SHORT_TOKEN_PREFIX])) {
+            return true;
+        }
+
+        return preg_match('/\A[A-Za-z0-9]{80,160}\z/', $token) === 1;
     }
 
     protected function generateQrSvg(string $payload): string

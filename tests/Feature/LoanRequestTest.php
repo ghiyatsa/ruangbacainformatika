@@ -8,6 +8,7 @@ use App\Models\LoanItem;
 use App\Models\Publisher;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\LoanDraftService;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
@@ -71,7 +72,11 @@ it('members can add books to a loan request and generate a qr draft', function (
     expect($draft->token_hash)->not->toBeNull();
     expect($draft->items()->count())->toBe(1);
     assertDatabaseCount('loans', 0);
-    expect(session('loan_request_qr.payload'))->toBeString();
+    expect(session('loan_request_qr.payload'))
+        ->toBeString()
+        ->toHaveLength(51)
+        ->toStartWith(LoanDraftService::SHORT_TOKEN_PREFIX)
+        ->not->toStartWith(LoanDraftService::TOKEN_PREFIX);
 
     /** @var User $member */
     actingAs($member)

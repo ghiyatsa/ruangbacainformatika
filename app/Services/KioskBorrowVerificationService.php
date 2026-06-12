@@ -20,7 +20,11 @@ class KioskBorrowVerificationService
 {
     public const TOKEN_PREFIX = 'RB-KIOSK-BORROW-VERIFY-';
 
-    protected const EXPIRY_MINUTES = 3;
+    public const SHORT_TOKEN_PREFIX = 'MK-';
+
+    protected const OPAQUE_TOKEN_LENGTH = 48;
+
+    protected const EXPIRY_MINUTES = 1;
 
     /**
      * @return array{payload: string, qr_svg: string, expires_at: Carbon}
@@ -29,7 +33,7 @@ class KioskBorrowVerificationService
     {
         $this->clearExistingForUser($user);
 
-        $payload = self::TOKEN_PREFIX.Str::upper(Str::random(40));
+        $payload = $this->makeToken();
         $expiresAt = now()->addMinutes(self::EXPIRY_MINUTES);
 
         Cache::put($this->userCacheKey($user), [
@@ -76,6 +80,18 @@ class KioskBorrowVerificationService
 
     public function consume(string $payload): User
     {
+        $user = $this->resolveUser($payload);
+        $token = $this->extractToken($payload);
+
+        if ($token !== null) {
+            $this->forgetToken($token, $user->getKey());
+        }
+
+        return $user;
+    }
+
+    public function resolveUser(string $payload): User
+    {
         $token = $this->extractToken($payload);
 
         if ($token === null) {
@@ -111,8 +127,6 @@ class KioskBorrowVerificationService
                 'verification_payload' => 'Akun untuk QR verifikasi ini tidak ditemukan.',
             ]);
         }
-
-        $this->forgetToken($token, $user->getKey());
 
         return $user;
     }
@@ -162,7 +176,7 @@ class KioskBorrowVerificationService
             return null;
         }
 
-        if (Str::startsWith($normalized, self::TOKEN_PREFIX)) {
+        if ($this->isReadableToken($normalized)) {
             return $normalized;
         }
 
@@ -177,12 +191,26 @@ class KioskBorrowVerificationService
 
             $token = $queryParams['token'] ?? null;
 
-            return is_string($token) && Str::startsWith($token, self::TOKEN_PREFIX)
+            return is_string($token) && $this->isReadableToken($token)
                 ? $token
                 : null;
         }
 
         return null;
+    }
+
+    protected function makeToken(): string
+    {
+        return self::SHORT_TOKEN_PREFIX.Str::random(self::OPAQUE_TOKEN_LENGTH);
+    }
+
+    protected function isReadableToken(string $token): bool
+    {
+        if (Str::startsWith($token, [self::TOKEN_PREFIX, self::SHORT_TOKEN_PREFIX])) {
+            return true;
+        }
+
+        return preg_match('/\A[A-Za-z0-9]{80,160}\z/', $token) === 1;
     }
 
     protected function generateQrSvg(string $payload): string

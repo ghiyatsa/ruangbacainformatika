@@ -31,6 +31,11 @@ class ReturnBookRequest extends KioskBookActionRequest
                     }
                 },
             ],
+            'verification_payload' => [
+                'required',
+                'string',
+                'max:2048',
+            ],
             'book_ids' => ['required', 'array', 'min:1'],
             'book_ids.*' => [
                 'required',
@@ -53,6 +58,7 @@ class ReturnBookRequest extends KioskBookActionRequest
 
         $this->merge([
             'member_identifier' => Str::of((string) $this->input('member_identifier'))->trim()->lower()->toString(),
+            'verification_payload' => Str::of((string) $this->input('verification_payload'))->trim()->toString(),
             'book_ids' => $bookIds,
         ]);
     }
@@ -63,5 +69,15 @@ class ReturnBookRequest extends KioskBookActionRequest
     public function validatedBookIds(): array
     {
         return array_map('intval', (array) $this->validated('book_ids'));
+    }
+
+    public function validatedMemberIdentifier(): string
+    {
+        return (string) $this->validated('member_identifier');
+    }
+
+    public function validatedVerificationPayload(): string
+    {
+        return (string) $this->validated('verification_payload');
     }
 }
