@@ -79,7 +79,7 @@ export default function BookCatalogPage({
             }}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
-            paginationVisibility="desktop-only"
+            paginationVisibility="none"
             filtersPanel={
                 <Suspense fallback={<BookCatalogFiltersSkeleton />}>
                     <Deferred
@@ -123,10 +123,39 @@ export default function BookCatalogPage({
         >
             <BookCatalogResults books={books} viewMode={viewMode} />
             <MobileProgressivePagination
+                key={`desktop-${JSON.stringify(filters)}`}
+                data={books}
+                propKey="books"
+                resourceLabel="judul buku"
+                className="hidden md:block"
+                buttonLabel="Tampilkan lebih banyak"
+                completeLabel="Semua judul buku telah ditampilkan."
+                loadingFallback={
+                    <div
+                        className={
+                            viewMode === 'list'
+                                ? 'grid w-full grid-cols-1 gap-3 lg:grid-cols-2'
+                                : 'grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6'
+                        }
+                        aria-hidden="true"
+                    >
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <BookCardSkeleton
+                                key={`desktop-load-more-${index}`}
+                                variant={
+                                    viewMode === 'list' ? 'compact' : 'grid'
+                                }
+                            />
+                        ))}
+                    </div>
+                }
+            />
+            <MobileProgressivePagination
                 key={JSON.stringify(filters)}
                 data={books}
                 propKey="books"
                 resourceLabel="judul buku"
+                className="md:hidden"
                 loadingFallback={
                     <div
                         className={

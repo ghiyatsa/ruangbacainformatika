@@ -2,24 +2,45 @@ import { router } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 import type { PaginationData } from '@/types/pagination';
+
+type ProgressivePaginationMode = 'auto' | 'manual-then-auto';
 
 interface MobileProgressivePaginationProps<T> {
     data?: PaginationData<T>;
     propKey: string;
     resourceLabel: string;
     loadingFallback?: ReactNode;
+    className?: string;
+    mode?: ProgressivePaginationMode;
+    buttonLabel?: string;
+    completeLabel?: string;
 }
 
 export function MobileProgressivePagination<T>({
     data,
     propKey,
+    resourceLabel,
     loadingFallback,
+    className,
+    mode = 'manual-then-auto',
+    buttonLabel = 'Tampilkan lebih banyak',
+    completeLabel = 'Semua daftar telah ditampilkan.',
 }: MobileProgressivePaginationProps<T>) {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [isAutoLoadEnabled, setIsAutoLoadEnabled] = useState(false);
+    const [isAutoLoadEnabled, setIsAutoLoadEnabled] = useState(mode === 'auto');
     const autoLoadTriggerRef = useRef<HTMLDivElement | null>(null);
+
+    const [prevMode, setPrevMode] = useState(mode);
+    const [prevPage, setPrevPage] = useState(data?.current_page);
+
+    if (mode !== prevMode || data?.current_page !== prevPage) {
+        setPrevMode(mode);
+        setPrevPage(data?.current_page);
+        setIsAutoLoadEnabled(mode === 'auto');
+    }
 
     const loadMore = useCallback((): void => {
         if (!data?.next_page_url || isLoadingMore) {
@@ -93,7 +114,7 @@ export function MobileProgressivePagination<T>({
     );
 
     return (
-        <div className={`md:hidden ${isAutoLoadEnabled ? '-mt-8' : ''}`}>
+        <div className={cn(className, isAutoLoadEnabled ? '-mt-8' : '')}>
             {data?.next_page_url ? (
                 <div className="flex flex-col items-center gap-3 text-center">
                     {isAutoLoadEnabled ? (
@@ -101,6 +122,7 @@ export function MobileProgressivePagination<T>({
                             <div
                                 ref={autoLoadTriggerRef}
                                 className="h-px w-full"
+                                aria-label={`Pemicu lazy loading ${resourceLabel}`}
                                 aria-hidden="true"
                             />
                             {isLoadingMore ? (
@@ -113,11 +135,11 @@ export function MobileProgressivePagination<T>({
                         <Button
                             type="button"
                             size="lg"
-                            className="w-full"
+                            className="min-w-56"
                             onClick={enableAutoLoad}
                             disabled={isLoadingMore}
                         >
-                            Tampilkan lebih banyak
+                            {buttonLabel}
                         </Button>
                     )}
 
@@ -129,7 +151,7 @@ export function MobileProgressivePagination<T>({
                 </div>
             ) : (
                 <div className="py-4 text-center text-sm text-muted-foreground">
-                    Semua daftar telah ditampilkan.
+                    {completeLabel}
                 </div>
             )}
         </div>

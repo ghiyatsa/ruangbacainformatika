@@ -25,7 +25,7 @@ interface CatalogPageProps<T> {
     filtersPanel?: ReactNode;
     deferredData?: string;
     loadingFallback?: ReactNode;
-    paginationVisibility?: 'all' | 'desktop-only';
+    paginationVisibility?: 'all' | 'desktop-only' | 'none';
     children: ReactNode;
 }
 

@@ -13,7 +13,7 @@ interface CatalogPageLayoutProps<T> {
     paginationData?: PaginationData<T>;
     header?: ReactNode; // Optional override
     children: ReactNode;
-    paginationVisibility?: 'all' | 'desktop-only';
+    paginationVisibility?: 'all' | 'desktop-only' | 'none';
 }
 
 /**
@@ -52,7 +52,7 @@ export function CatalogPageLayout<T>({
             <div className="relative z-10 flex flex-col gap-6 md:gap-8 -mt-6 sm:-mt-8">
                 {children}
 
-                {paginationData && (
+                {paginationData && paginationVisibility !== 'none' && (
                     <div
                         className={`mt-8 ${paginationVisibility === 'desktop-only' ? 'hidden md:block' : ''}`}
                     >

@@ -95,24 +95,60 @@ it('shows book card skeletons when mobile progressive pagination starts loading 
     );
 
     expect($mobileProgressivePagination)->toContain('loadingFallback?: ReactNode;')
+        ->and($mobileProgressivePagination)->toContain("type ProgressivePaginationMode = 'auto' | 'manual-then-auto';")
+        ->and($mobileProgressivePagination)->toContain("mode = 'manual-then-auto'")
+        ->and($mobileProgressivePagination)->toContain('const [isAutoLoadEnabled, setIsAutoLoadEnabled] = useState(mode === \'auto\');')
+        ->and($mobileProgressivePagination)->toContain("setIsAutoLoadEnabled(mode === 'auto');")
         ->and($mobileProgressivePagination)->toContain('const loadingSkeleton = loadingFallback ?? (')
         ->and($bookCatalogPage)->toContain('loadingFallback={')
         ->and($bookCatalogPage)->toContain('fallback={<BookCatalogFiltersSkeleton />}')
         ->and($bookCatalogPage)->toContain("data={['categories', 'authors', 'publishers', 'years']}")
         ->and($bookCatalogPage)->toContain('const LazyBookCatalogFilters = lazy(async () => {')
+        ->and($bookCatalogPage)->toContain('Array.from({ length: 6 })')
         ->and($bookCatalogPage)->toContain('Array.from({ length: 4 })')
         ->and($bookCatalogPage)->toContain("viewMode === 'list' ? 'compact' : 'grid'")
+        ->and($bookCatalogPage)->toContain('className="hidden md:block"')
+        ->and($bookCatalogPage)->toContain('buttonLabel="Tampilkan lebih banyak"')
+        ->and($bookCatalogPage)->toContain('paginationVisibility="none"')
         ->and($filtersSkeleton)->toContain('aria-hidden="true"');
 });
 
-it('keeps the welcome category marquee and its skeleton desktop only', function () {
+it('replaces the old welcome category-only surfaces with popular category book shelves', function () {
     $welcomePage = file_get_contents(
         resource_path('js/features/welcome/components/WelcomePage.tsx')
     );
+    $catalogSection = file_get_contents(
+        resource_path('js/features/welcome/components/catalog/CatalogSection.tsx')
+    );
+    $popularCategoryShelves = file_get_contents(
+        resource_path('js/features/welcome/components/catalog/PopularCategoryShelves.tsx')
+    );
 
     expect($welcomePage)->not->toBeFalse()
-        ->and($welcomePage)->toContain('<div className="hidden md:block">')
-        ->and($welcomePage)->toContain('fallback={<CategoryMarqueeSkeleton />}');
+        ->and($welcomePage)->not->toContain('CategoryMarquee')
+        ->and($welcomePage)->not->toContain('marqueeCategories')
+        ->and($catalogSection)->toContain('<PopularCategoryShelves')
+        ->and($catalogSection)->not->toContain('<PopularCategories')
+        ->and($popularCategoryShelves)->toContain('data="popularCategoryShelves"')
+        ->and($popularCategoryShelves)->toContain('Array.from({ length: 3 })')
+        ->and($popularCategoryShelves)->toContain('Lihat semua buku')
+        ->and($popularCategoryShelves)->toContain('skeletonCount={6}');
+});
+
+it('renders a deferred most-borrowed books section on the welcome page', function () {
+    $catalogSection = file_get_contents(
+        resource_path('js/features/welcome/components/catalog/CatalogSection.tsx')
+    );
+    $mostBorrowedBooks = file_get_contents(
+        resource_path('js/features/welcome/components/catalog/MostBorrowedBooks.tsx')
+    );
+
+    expect($catalogSection)->not->toBeFalse()
+        ->and($mostBorrowedBooks)->not->toBeFalse()
+        ->and($catalogSection)->toContain('<MostBorrowedBooks')
+        ->and($mostBorrowedBooks)->toContain('data="mostBorrowedBooks"')
+        ->and($mostBorrowedBooks)->toContain('title="Paling Sering Dipinjam"')
+        ->and($mostBorrowedBooks)->toContain('skeletonCount={6}');
 });
 
 it('does not use a skipped heading level for skripsi card titles in the catalog grid', function () {
