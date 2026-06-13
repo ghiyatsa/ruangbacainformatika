@@ -52,6 +52,16 @@ class BookImporter extends Importer
                 ->fillRecordUsing(function ($record, $state) {
                     $record->isbn = Isbn::normalize((string) $state);
                 }),
+
+            ImportColumn::make('issn')
+                ->label('ISSN')
+                ->rules([
+                    'nullable',
+                    'max:20',
+                    'regex:/^[0-9\-\s]+$/',
+                ])
+                ->helperText('Isi jika tersedia.')
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
             ImportColumn::make('authors')
                 ->label('Penulis')
                 ->helperText('Pisahkan beberapa penulis dengan tanda |')
@@ -152,13 +162,20 @@ class BookImporter extends Importer
     public function resolveRecord(): ?Model
     {
         $isbn = Isbn::normalize((string) ($this->data['isbn'] ?? '')) ?? '';
+        $issn = static::normalizeOptionalString($this->data['issn'] ?? null);
 
-        if (blank($isbn)) {
+        if (blank($isbn) && blank($issn)) {
             return new Book;
         }
 
+        if (filled($isbn)) {
+            return Book::firstOrNew([
+                'isbn' => $isbn,
+            ]);
+        }
+
         return Book::firstOrNew([
-            'isbn' => $isbn,
+            'issn' => $issn,
         ]);
     }
 
@@ -170,6 +187,7 @@ class BookImporter extends Importer
             'stock.integer' => 'Kolom stok harus berupa angka bulat.',
             'stock.min' => 'Kolom stok tidak boleh kurang dari 0.',
             'published_year.integer' => 'Kolom tahun terbit harus berupa angka bulat.',
+            'issn.regex' => 'Kolom ISSN hanya boleh berisi angka, spasi, dan tanda hubung.',
         ];
     }
 

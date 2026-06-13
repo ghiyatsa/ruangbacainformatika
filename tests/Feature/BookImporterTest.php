@@ -12,6 +12,7 @@ function makeBookImporter(): BookImporter
         'title' => 'title',
         'subtitle' => 'subtitle',
         'isbn' => 'isbn',
+        'issn' => 'issn',
         'authors' => 'authors',
         'categories' => 'categories',
         'ddc_code' => 'ddc_code',
@@ -163,4 +164,72 @@ it('imports isbn values that match the expected format even when checksum valida
     expect($book)->not->toBeNull()
         ->and($book?->isbn)->toBe('9786028599000')
         ->and($book?->publisher?->name)->toBe('Penerbit Arsip');
+});
+
+it('imports a book row with issn and no isbn', function () {
+    $importer = makeBookImporter();
+
+    $importer([
+        'title' => 'Jurnal Informatika',
+        'subtitle' => 'Edisi Khusus',
+        'isbn' => '',
+        'issn' => '1234-5678',
+        'authors' => 'Penulis Jurnal',
+        'categories' => 'Jurnal',
+        'ddc_code' => '005',
+        'description' => 'Deskripsi Jurnal.',
+        'edition' => 'Vol. 1',
+        'published_year' => '2025',
+        'pages' => '100',
+        'stock' => '2',
+        'rack' => 'R-01-A',
+        'publisher' => 'IT Press',
+        'language' => 'Indonesia',
+        'is_featured' => '0',
+        'is_published' => '1',
+    ]);
+
+    $book = Book::query()->where('issn', '1234-5678')->first();
+
+    expect($book)->not->toBeNull()
+        ->and($book?->title)->toBe('Jurnal Informatika')
+        ->and($book?->issn)->toBe('1234-5678')
+        ->and($book?->isbn)->toBeNull()
+        ->and($book?->publisher?->name)->toBe('IT Press');
+});
+
+it('updates existing books by issn when isbn is blank', function () {
+    $publisher = Publisher::factory()->create(['name' => 'IT Press']);
+    $book = Book::factory()->create([
+        'title' => 'Jurnal Informatika Lama',
+        'issn' => '1234-5678',
+        'isbn' => null,
+        'publisher_id' => $publisher->getKey(),
+    ]);
+
+    $importer = makeBookImporter();
+
+    $importer([
+        'title' => 'Jurnal Informatika Baru',
+        'isbn' => '',
+        'issn' => '1234-5678',
+        'authors' => 'Penulis Jurnal',
+        'categories' => 'Jurnal',
+        'ddc_code' => '005',
+        'description' => 'Deskripsi Baru.',
+        'edition' => 'Vol. 1',
+        'published_year' => '2025',
+        'pages' => '100',
+        'stock' => '2',
+        'rack' => 'R-01-A',
+        'publisher' => 'IT Press',
+        'language' => 'Indonesia',
+        'is_featured' => '0',
+        'is_published' => '1',
+    ]);
+
+    $book->refresh();
+
+    expect($book->title)->toBe('Jurnal Informatika Baru')
+        ->and($book->issn)->toBe('1234-5678');
 });
