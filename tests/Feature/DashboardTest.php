@@ -2,6 +2,6 @@
 
 use function Pest\Laravel\get;
 
-it('dashboard starter route is no longer available', function () {
-    get('/dashboard')->assertNotFound();
+it('redirects guest to login page when accessing dashboard', function () {
+    get('/dashboard')->assertRedirect(route('login'));
 });

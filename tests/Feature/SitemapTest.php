@@ -5,10 +5,12 @@ use App\Models\InternshipReport;
 use App\Models\Skripsi;
 use App\Models\StaticPage;
 use App\Models\Thesis;
+use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\get;
 
 it('generates the sitemap correctly', function () {
+    Queue::fake();
     // Seed test records
     $staticPage = StaticPage::factory()->create([
         'title' => 'Custom Page',
