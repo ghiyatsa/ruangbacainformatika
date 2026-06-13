@@ -101,50 +101,64 @@ export function SearchableCatalogFilter({
         };
     }, [open]);
 
-    function handleDragStart(clientY: number): void {
-        dragStartYRef.current = clientY;
+    const getSnapPoints = () => {
+        const low = MOBILE_SHEET_MIN_HEIGHT;
+        const high = typeof window !== 'undefined'
+            ? Math.max(low + 120, Math.min(720, window.innerHeight * 0.8))
+            : 600;
+
+        return { low, high };
+    };
+
+    function handleDragStart(event: React.PointerEvent<HTMLDivElement>): void {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        dragStartYRef.current = event.clientY;
         dragStartHeightRef.current = sheetHeight;
         setIsDragging(true);
     }
 
-    function handleDragMove(clientY: number): void {
+    function handleDragMove(event: React.PointerEvent<HTMLDivElement>): void {
         if (
+            !isDragging ||
             dragStartYRef.current === null ||
             dragStartHeightRef.current === null
         ) {
             return;
         }
 
-        const deltaY = clientY - dragStartYRef.current;
-        const maxHeight = Math.max(
-            MOBILE_SHEET_MIN_HEIGHT,
-            window.innerHeight - 24,
-        );
+        const deltaY = event.clientY - dragStartYRef.current;
         const nextHeight = dragStartHeightRef.current - deltaY;
 
-        setSheetHeight(
-            Math.min(maxHeight, Math.max(MOBILE_SHEET_MIN_HEIGHT, nextHeight)),
-        );
+        // Allow dragging from 0 up to maxHeight
+        const maxHeight = typeof window !== 'undefined' ? window.innerHeight - 24 : 700;
+        setSheetHeight(Math.max(0, Math.min(maxHeight, nextHeight)));
     }
 
-    function handleDragEnd(): void {
-        if (
-            dragStartHeightRef.current !== null &&
-            dragStartYRef.current !== null &&
-            dragStartHeightRef.current - sheetHeight > 0
-        ) {
-            setIsDragging(false);
-            dragStartYRef.current = null;
-            dragStartHeightRef.current = null;
-
+    function handleDragEnd(event: React.PointerEvent<HTMLDivElement>): void {
+        if (!isDragging) {
             return;
         }
 
-        if (sheetHeight <= MOBILE_SHEET_MIN_HEIGHT + 12) {
+        setIsDragging(false);
+        event.currentTarget.releasePointerCapture(event.pointerId);
+
+        const { low, high } = getSnapPoints();
+
+        // jika user drag lebih rendah dari titik pertama (low) otomatis sheet nutup ketika user lepas drag
+        if (sheetHeight < low) {
             setOpen(false);
+        } else {
+            // snap ke titik terdekat
+            const distToLow = Math.abs(sheetHeight - low);
+            const distToHigh = Math.abs(sheetHeight - high);
+
+            if (distToLow < distToHigh) {
+                setSheetHeight(low);
+            } else {
+                setSheetHeight(high);
+            }
         }
 
-        setIsDragging(false);
         dragStartYRef.current = null;
         dragStartHeightRef.current = null;
     }
@@ -222,18 +236,14 @@ export function SearchableCatalogFilter({
                         onOpenAutoFocus={(event) => event.preventDefault()}
                         style={{
                             height: `${sheetHeight}px`,
-                            transition: isDragging ? 'none' : 'height 180ms ease-out',
+                            transition: isDragging ? 'none' : 'height 250ms cubic-bezier(0.16, 1, 0.3, 1)',
                         }}
                     >
                         <div
-                            className="flex justify-center px-4 pt-3 pb-2"
+                            className="flex justify-center px-4 pt-3 pb-2 cursor-grab active:cursor-grabbing hover:bg-muted/10 transition-colors"
                             role="presentation"
-                            onPointerDown={(event) =>
-                                handleDragStart(event.clientY)
-                            }
-                            onPointerMove={(event) =>
-                                handleDragMove(event.clientY)
-                            }
+                            onPointerDown={handleDragStart}
+                            onPointerMove={handleDragMove}
                             onPointerUp={handleDragEnd}
                             onPointerCancel={handleDragEnd}
                             style={{ touchAction: 'none' }}
