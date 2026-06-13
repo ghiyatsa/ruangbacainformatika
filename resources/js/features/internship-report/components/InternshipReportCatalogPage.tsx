@@ -1,11 +1,20 @@
 import { router } from '@inertiajs/react';
+import { lazy, Suspense } from 'react';
 import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
+import { KtiCatalogFiltersSkeleton } from '@/components/kti/KtiCatalogFiltersSkeleton';
 import { CatalogMobilePagination } from '@/features/books/components/CatalogMobilePagination';
 import { CatalogPage } from '@/features/books/components/CatalogPage';
 import internshipReportRoute from '@/routes/internship-reports';
-import { InternshipReportCatalogFilters } from './InternshipReportCatalogFilters';
 import { InternshipReportCatalogResults } from './InternshipReportCatalogResults';
 import type { InternshipReportCatalogPageProps } from '@/features/internship-report/types';
+
+const LazyInternshipReportCatalogFilters = lazy(async () => {
+    const { InternshipReportCatalogFilters } = await import(
+        './InternshipReportCatalogFilters'
+    );
+
+    return { default: InternshipReportCatalogFilters };
+});
 
 export default function InternshipReportCatalogPage({
     filters,
@@ -49,11 +58,13 @@ export default function InternshipReportCatalogPage({
             onRemoveFilter={removeFilter}
             paginationVisibility="desktop-only"
             filtersPanel={
-                <InternshipReportCatalogFilters
-                    filters={filters}
-                    years={years}
-                    total={total}
-                />
+                <Suspense fallback={<KtiCatalogFiltersSkeleton />}>
+                    <LazyInternshipReportCatalogFilters
+                        filters={filters}
+                        years={years}
+                        total={total}
+                    />
+                </Suspense>
             }
             deferredData="reports"
             loadingFallback={

@@ -1,12 +1,21 @@
 import { router } from '@inertiajs/react';
+import { lazy, Suspense } from 'react';
 import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
-import { AcademicWorkCatalogFilters } from '@/features/academic-works/components/AcademicWorkCatalogFilters';
+import { KtiCatalogFiltersSkeleton } from '@/components/kti/KtiCatalogFiltersSkeleton';
 import { AcademicWorkCatalogResults } from '@/features/academic-works/components/AcademicWorkCatalogResults';
 import { CatalogMobilePagination } from '@/features/books/components/CatalogMobilePagination';
 import { CatalogPage } from '@/features/books/components/CatalogPage';
 import skripsiRoute from '@/routes/skripsi';
 import thesisRoute from '@/routes/thesis';
 import type { AcademicWorkCatalogPageProps } from '@/features/academic-works/types';
+
+const LazyAcademicWorkCatalogFilters = lazy(async () => {
+    const { AcademicWorkCatalogFilters } = await import(
+        './AcademicWorkCatalogFilters'
+    );
+
+    return { default: AcademicWorkCatalogFilters };
+});
 
 export default function AcademicWorkCatalogPage({
     workType,
@@ -58,12 +67,14 @@ export default function AcademicWorkCatalogPage({
             onRemoveFilter={removeFilter}
             paginationVisibility="desktop-only"
             filtersPanel={
-                <AcademicWorkCatalogFilters
-                    workType={workType}
-                    filters={filters}
-                    years={years}
-                    total={total}
-                />
+                <Suspense fallback={<KtiCatalogFiltersSkeleton />}>
+                    <LazyAcademicWorkCatalogFilters
+                        workType={workType}
+                        filters={filters}
+                        years={years}
+                        total={total}
+                    />
+                </Suspense>
             }
             deferredData={dataProp}
             loadingFallback={
