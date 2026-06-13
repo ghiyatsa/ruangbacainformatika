@@ -39,7 +39,10 @@ export function CatalogMobilePagination<T>({
     if (mode !== prevMode || data?.current_page !== prevPage) {
         setPrevMode(mode);
         setPrevPage(data?.current_page);
-        setIsAutoLoadEnabled(mode === 'auto');
+
+        if (mode !== prevMode) {
+            setIsAutoLoadEnabled(mode === 'auto');
+        }
     }
 
     const loadMore = useCallback((): void => {
