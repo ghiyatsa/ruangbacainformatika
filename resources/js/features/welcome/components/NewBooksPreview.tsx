@@ -1,10 +1,10 @@
-import { Deferred, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import booksRoute from '@/routes/books';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
-import DeferredCatalogRescue from './DeferredCatalogRescue';
+import LazyDeferred from './LazyDeferred';
 import SectionHeader from './SectionHeader';
 import type { WelcomeProps } from '@/features/welcome/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
@@ -32,8 +32,9 @@ export default function NewBooksPreview({
                 }
             />
 
-            <Deferred
-                data="books"
+            <LazyDeferred
+                dataKey="books"
+                isLoaded={!!books}
                 fallback={
                     <BookGrid
                         books={[]}
@@ -42,21 +43,15 @@ export default function NewBooksPreview({
                         isLoading={true}
                     />
                 }
-                rescue={({ reloading }) => (
-                    <DeferredCatalogRescue
-                        dataKey="books"
-                        title="Daftar buku terbaru belum tersedia"
-                        description="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
-                        reloading={reloading}
-                    />
-                )}
+                rescueTitle="Daftar buku terbaru belum tersedia"
+                rescueDescription="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
             >
                 <BookGrid
                     books={previewBooks}
                     viewMode={viewMode}
                     keyPrefix="new-books"
                 />
-            </Deferred>
+            </LazyDeferred>
 
             <div className="flex justify-center">
                 <Button asChild size="lg" className="rounded-xl px-8">

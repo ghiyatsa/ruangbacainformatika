@@ -1,4 +1,4 @@
-import { Deferred, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import {
     BookOpen,
     Calendar,
@@ -12,7 +12,7 @@ import BookController from '@/actions/App/Http/Controllers/BookController';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
-import DeferredCatalogRescue from './DeferredCatalogRescue';
+import LazyDeferred from './LazyDeferred';
 import type { CatalogBook } from '@/features/welcome/types';
 
 const SLIDE_DURATION = 5000;
@@ -160,17 +160,12 @@ export default function FeaturedSpotlight({
     return (
         <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-card">
             <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/10 via-transparent to-primary/5 opacity-50 dark:from-primary/20 dark:to-transparent" />
-            <Deferred
-                data="featuredBooks"
+            <LazyDeferred
+                dataKey="featuredBooks"
+                isLoaded={!!featuredBooks}
                 fallback={<FeaturedSpotlightSkeleton />}
-                rescue={({ reloading }) => (
-                    <DeferredCatalogRescue
-                        dataKey="featuredBooks"
-                        title="Sorotan buku belum tersedia"
-                        description="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
-                        reloading={reloading}
-                    />
-                )}
+                rescueTitle="Sorotan buku belum tersedia"
+                rescueDescription="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
             >
                 <AnimatePresence mode="wait">
                     {book && (
@@ -268,7 +263,7 @@ export default function FeaturedSpotlight({
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </Deferred>
+            </LazyDeferred>
 
             {count > 1 && (
                 <div className="flex items-center justify-between border-t border-primary/10 px-5 py-3 sm:px-8">

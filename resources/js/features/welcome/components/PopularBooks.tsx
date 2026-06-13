@@ -1,8 +1,7 @@
-import { Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
-import DeferredCatalogRescue from './DeferredCatalogRescue';
+import LazyDeferred from './LazyDeferred';
 import SectionHeader from './SectionHeader';
 import type { CatalogBook } from '@/features/welcome/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
@@ -28,8 +27,9 @@ export default function PopularBooks({
                 }
             />
 
-            <Deferred
-                data="popularBooks"
+            <LazyDeferred
+                dataKey="popularBooks"
+                isLoaded={!!popularBooks}
                 fallback={
                     <BookGrid
                         books={[]}
@@ -38,14 +38,8 @@ export default function PopularBooks({
                         isLoading={true}
                     />
                 }
-                rescue={({ reloading }) => (
-                    <DeferredCatalogRescue
-                        dataKey="popularBooks"
-                        title="Daftar buku populer belum tersedia"
-                        description="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
-                        reloading={reloading}
-                    />
-                )}
+                rescueTitle="Daftar buku populer belum tersedia"
+                rescueDescription="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
             >
                 <BookGrid
                     books={previewBooks}
@@ -54,7 +48,7 @@ export default function PopularBooks({
                     emptyTitle="Belum ada data buku populer"
                     emptyDescription="Daftar buku yang paling sering dilihat akan tampil di sini."
                 />
-            </Deferred>
+            </LazyDeferred>
         </div>
     );
 }

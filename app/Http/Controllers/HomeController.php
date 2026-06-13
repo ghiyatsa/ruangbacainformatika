@@ -27,14 +27,13 @@ class HomeController extends Controller
                 $this->catalogService->getStats(),
                 ['searchResultsCount' => $books->total()]
             ),
-            'featuredBooks' => Inertia::defer(fn () => $this->buildHomeCatalogSections->featuredBooks()),
-            'popularBooks' => Inertia::defer(fn () => $this->buildHomeCatalogSections->popularBooks()),
-            'mostBorrowedBooks' => Inertia::defer(fn () => $this->buildHomeCatalogSections->mostBorrowedBooks()),
-            'popularCategoryShelves' => Inertia::defer(
-                fn () => $this->buildHomeCatalogSections->popularCategoryShelves(),
-                'popular-category-shelves'
+            'featuredBooks' => Inertia::optional(fn () => $this->buildHomeCatalogSections->featuredBooks()),
+            'popularBooks' => Inertia::optional(fn () => $this->buildHomeCatalogSections->popularBooks()),
+            'mostBorrowedBooks' => Inertia::optional(fn () => $this->buildHomeCatalogSections->mostBorrowedBooks()),
+            'popularCategoryShelves' => Inertia::optional(
+                fn () => $this->buildHomeCatalogSections->popularCategoryShelves()
             ),
-            'books' => Inertia::defer(function () use ($books) {
+            'books' => Inertia::optional(function () use ($books) {
                 $paginated = $books->toArray();
                 $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
 

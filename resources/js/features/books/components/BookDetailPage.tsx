@@ -237,13 +237,13 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                     <DialogDescription className="sr-only">
                                                         Pratinjau cover buku.
                                                     </DialogDescription>
-                                                    <div className="flex max-h-[80vh] items-center justify-center overflow-hidden">
+                                                    <div className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]">
                                                         <img
                                                             src={book.coverImageUrl}
                                                             alt={`Cover penuh buku ${book.title}`}
                                                             width={448}
                                                             height={600}
-                                                            className="max-h-[80vh] w-full object-contain"
+                                                            className="max-h-[28rem] w-auto max-w-full object-contain"
                                                         />
                                                     </div>
                                                 </DialogContent>

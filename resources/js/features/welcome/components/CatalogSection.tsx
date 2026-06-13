@@ -8,6 +8,7 @@ import SectionHeader from './SectionHeader';
 import type { WelcomeProps } from '@/features/welcome/types';
 
 interface CatalogSectionProps {
+    stats: WelcomeProps['stats'];
     featuredBooks: WelcomeProps['featuredBooks'];
     popularBooks: WelcomeProps['popularBooks'];
     mostBorrowedBooks: WelcomeProps['mostBorrowedBooks'];
@@ -16,13 +17,14 @@ interface CatalogSectionProps {
 }
 
 export default function CatalogSection({
+    stats,
     featuredBooks,
     popularBooks,
     mostBorrowedBooks,
     books,
     popularCategoryShelves,
 }: CatalogSectionProps) {
-    const hasFeaturedBooks = (featuredBooks?.length ?? 0) > 0;
+    const hasFeaturedBooks = stats.featuredCount > 0;
 
     return (
         <section className="py-16 sm:py-20 lg:py-28">

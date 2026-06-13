@@ -32,6 +32,7 @@ export default function WelcomePage({
                 />
 
                 <CatalogSection
+                    stats={stats}
                     featuredBooks={featuredBooks}
                     popularBooks={popularBooks}
                     mostBorrowedBooks={mostBorrowedBooks}

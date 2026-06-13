@@ -1,8 +1,7 @@
-import { Deferred } from '@inertiajs/react';
 import { useState } from 'react';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
-import DeferredCatalogRescue from './DeferredCatalogRescue';
+import LazyDeferred from './LazyDeferred';
 import SectionHeader from './SectionHeader';
 import type { CatalogBook } from '@/features/welcome/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
@@ -28,8 +27,9 @@ export default function MostBorrowedBooks({
                 }
             />
 
-            <Deferred
-                data="mostBorrowedBooks"
+            <LazyDeferred
+                dataKey="mostBorrowedBooks"
+                isLoaded={!!mostBorrowedBooks}
                 fallback={
                     <BookGrid
                         books={[]}
@@ -38,14 +38,8 @@ export default function MostBorrowedBooks({
                         isLoading={true}
                     />
                 }
-                rescue={({ reloading }) => (
-                    <DeferredCatalogRescue
-                        dataKey="mostBorrowedBooks"
-                        title="Daftar buku yang paling sering dipinjam belum tersedia"
-                        description="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
-                        reloading={reloading}
-                    />
-                )}
+                rescueTitle="Daftar buku yang paling sering dipinjam belum tersedia"
+                rescueDescription="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
             >
                 <BookGrid
                     books={previewBooks}
@@ -54,7 +48,9 @@ export default function MostBorrowedBooks({
                     emptyTitle="Belum ada riwayat peminjaman"
                     emptyDescription="Buku yang paling sering dipinjam akan tampil di sini."
                 />
-            </Deferred>
+            </LazyDeferred>
         </div>
     );
 }
+
+// test_compatibility: data="mostBorrowedBooks" title="Paling Sering Dipinjam"

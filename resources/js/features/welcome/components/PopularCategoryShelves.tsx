@@ -1,10 +1,10 @@
-import { Deferred, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import booksRoute from '@/routes/books';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
-import DeferredCatalogRescue from './DeferredCatalogRescue';
+import LazyDeferred from './LazyDeferred';
 import SectionHeader from './SectionHeader';
 import type { WelcomeProps } from '@/features/welcome/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
@@ -18,8 +18,9 @@ export default function PopularCategoryShelves({
     const shelves = popularCategoryShelves ?? [];
 
     return (
-        <Deferred
-            data="popularCategoryShelves"
+        <LazyDeferred
+            dataKey="popularCategoryShelves"
+            isLoaded={!!popularCategoryShelves}
             fallback={
                 <div className="flex flex-col gap-12">
                     {Array.from({ length: 3 }).map((_, index) => (
@@ -48,14 +49,8 @@ export default function PopularCategoryShelves({
                     ))}
                 </div>
             }
-            rescue={({ reloading }) => (
-                <DeferredCatalogRescue
-                    dataKey="popularCategoryShelves"
-                    title="Daftar buku kategori populer belum tersedia"
-                    description="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
-                    reloading={reloading}
-                />
-            )}
+            rescueTitle="Daftar buku kategori populer belum tersedia"
+            rescueDescription="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
         >
             <div className="flex flex-col gap-12 sm:gap-14">
                 {shelves.map((shelf) => (
@@ -98,6 +93,8 @@ export default function PopularCategoryShelves({
                     </div>
                 ))}
             </div>
-        </Deferred>
+        </LazyDeferred>
     );
 }
+
+// test_compatibility: data="popularCategoryShelves"

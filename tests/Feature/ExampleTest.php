@@ -34,16 +34,15 @@ it('home page shows published books from the catalog', function () {
                 ->where('stats.featuredCount', 1)
                 ->where('stats.availableItemsCount', 1)
                 ->where('stats.activeCategoriesCount', 1)
-                ->loadDeferredProps(
-                    fn (Assert $reload) => $reload
-                        ->has('featuredBooks', 1)
-                        ->where('featuredBooks.0.title', 'Laskar Pelangi')
-                        ->has('books.data', 1)
-                        ->where('books.data.0.title', 'Laskar Pelangi')
-                        ->where('books.data.0.authors.0', 'Andrea Hirata')
-                        ->where('books.data.0.categories.0.name', 'Novel')
-                        ->where('books.data.0.isAvailable', true)
-                ),
+                ->reloadOnly(['featuredBooks', 'books'], fn (Assert $reload) => $reload
+                    ->has('featuredBooks', 1)
+                    ->where('featuredBooks.0.title', 'Laskar Pelangi')
+                    ->has('books.data', 1)
+                    ->where('books.data.0.title', 'Laskar Pelangi')
+                    ->where('books.data.0.authors.0', 'Andrea Hirata')
+                    ->where('books.data.0.categories.0.name', 'Novel')
+                    ->where('books.data.0.isAvailable', true)
+                )
         );
 });
 
@@ -80,11 +79,10 @@ it('home page previews the newest books instead of prioritizing featured books',
         ->assertInertia(
             fn (Assert $page) => $page
                 ->component('welcome/index')
-                ->loadDeferredProps(
-                    fn (Assert $reload) => $reload
-                        ->where('books.data.0.title', 'Buku Terbaru')
-                        ->where('books.data.1.title', 'Buku Unggulan Lama')
-                ),
+                ->reloadOnly('books', fn (Assert $reload) => $reload
+                    ->where('books.data.0.title', 'Buku Terbaru')
+                    ->where('books.data.1.title', 'Buku Unggulan Lama')
+                )
         );
 });
 
@@ -127,14 +125,11 @@ it('home page exposes top popular-category shelves and most viewed books', funct
             fn (Assert $page) => $page
                 ->component('welcome/index')
                 ->where('stats.activeCategoriesCount', 2)
-                ->loadDeferredProps(
-                    fn (Assert $reload) => $reload
-                        ->has('popularBooks', 2)
-                        ->where('popularBooks.0.title', 'Deep Learning Praktis')
-                        ->where('popularBooks.0.viewCount', 42)
-                        ->where('popularBooks.1.title', 'Dasar Jaringan')
-                )
-                ->loadDeferredProps('popular-category-shelves', fn (Assert $reload) => $reload
+                ->reloadOnly(['popularBooks', 'popularCategoryShelves'], fn (Assert $reload) => $reload
+                    ->has('popularBooks', 2)
+                    ->where('popularBooks.0.title', 'Deep Learning Praktis')
+                    ->where('popularBooks.0.viewCount', 42)
+                    ->where('popularBooks.1.title', 'Dasar Jaringan')
                     ->has('popularCategoryShelves', 2)
                     ->where('popularCategoryShelves.0.name', 'Jaringan Komputer')
                     ->where('popularCategoryShelves.0.booksCount', 1)
@@ -143,7 +138,7 @@ it('home page exposes top popular-category shelves and most viewed books', funct
                     ->where('popularCategoryShelves.1.description', 'Pembelajaran mesin dan sistem cerdas.')
                     ->where('popularCategoryShelves.1.booksCount', 1)
                     ->where('popularCategoryShelves.1.books.0.title', 'Deep Learning Praktis')
-                ),
+                )
         );
 });
 
@@ -162,13 +157,12 @@ it('home page excludes non-borrowable books from available counts', function () 
                 ->component('welcome/index')
                 ->where('stats.availableItemsCount', 0)
                 ->where('stats.activeCategoriesCount', 0)
-                ->loadDeferredProps(
-                    fn (Assert $reload) => $reload
-                        ->has('featuredBooks', 1)
-                        ->where('featuredBooks.0.title', 'Ensiklopedia Arsip')
-                        ->where('featuredBooks.0.availableItemsCount', 0)
-                        ->where('featuredBooks.0.isAvailable', false)
-                ),
+                ->reloadOnly('featuredBooks', fn (Assert $reload) => $reload
+                    ->has('featuredBooks', 1)
+                    ->where('featuredBooks.0.title', 'Ensiklopedia Arsip')
+                    ->where('featuredBooks.0.availableItemsCount', 0)
+                    ->where('featuredBooks.0.isAvailable', false)
+                )
         );
 });
 
@@ -205,12 +199,11 @@ it('home page exposes books ordered by the most borrowing history', function () 
         ->assertInertia(
             fn (Assert $page) => $page
                 ->component('welcome/index')
-                ->loadDeferredProps(
-                    fn (Assert $reload) => $reload
-                        ->has('mostBorrowedBooks', 2)
-                        ->where('mostBorrowedBooks.0.title', 'Algoritma Lanjut')
-                        ->where('mostBorrowedBooks.1.title', 'Basis Data Praktis')
-                ),
+                ->reloadOnly('mostBorrowedBooks', fn (Assert $reload) => $reload
+                    ->has('mostBorrowedBooks', 2)
+                    ->where('mostBorrowedBooks.0.title', 'Algoritma Lanjut')
+                    ->where('mostBorrowedBooks.1.title', 'Basis Data Praktis')
+                )
         );
 });
 
@@ -245,11 +238,11 @@ it('home page limits popular category shelves to the top three categories', func
             fn (Assert $page) => $page
                 ->component('welcome/index')
                 ->where('stats.activeCategoriesCount', 30)
-                ->loadDeferredProps('popular-category-shelves', fn (Assert $reload) => $reload
+                ->reloadOnly('popularCategoryShelves', fn (Assert $reload) => $reload
                     ->has('popularCategoryShelves', 3)
                     ->where('popularCategoryShelves.0.name', 'Kategori 01')
                     ->where('popularCategoryShelves.0.books.0.title', 'Buku 01')
-                ),
+                )
         );
 });
 
