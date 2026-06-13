@@ -32,6 +32,17 @@ class Isbn
         return static::isValidNormalized($normalized);
     }
 
+    public static function hasAcceptedFormat(?string $value): bool
+    {
+        $normalized = static::normalize($value);
+
+        if ($normalized === null) {
+            return false;
+        }
+
+        return preg_match('/^(?:\d{8}|\d{13}|\d{9}[\dX])$/', $normalized) === 1;
+    }
+
     public static function isValidNormalized(string $value): bool
     {
         if (preg_match('/^\d{8}$/', $value) === 1) {

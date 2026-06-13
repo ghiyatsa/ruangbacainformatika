@@ -145,3 +145,22 @@ it('imports local 8 digit isbn values', function () {
         ->and($book?->isbn)->toBe('12345678')
         ->and($book?->publisher?->name)->toBe('Penerbit Lokal');
 });
+
+it('imports isbn values that match the expected format even when checksum validation would fail', function () {
+    $importer = makeBookImporter();
+
+    $importer([
+        'title' => 'Buku Cetak Lama',
+        'isbn' => '9786028599000',
+        'publisher' => 'Penerbit Arsip',
+        'language' => 'Indonesia',
+        'is_featured' => '0',
+        'is_published' => '1',
+    ]);
+
+    $book = Book::query()->where('isbn', '9786028599000')->first();
+
+    expect($book)->not->toBeNull()
+        ->and($book?->isbn)->toBe('9786028599000')
+        ->and($book?->publisher?->name)->toBe('Penerbit Arsip');
+});

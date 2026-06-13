@@ -83,8 +83,8 @@ class BookForm
                                         return;
                                     }
 
-                                    if (! Isbn::isValid((string) $value)) {
-                                        $fail('ISBN harus berupa 8 digit, ISBN-10, atau ISBN-13 yang valid.');
+                                    if (! Isbn::hasAcceptedFormat((string) $value)) {
+                                        $fail('ISBN harus berupa 8 digit, ISBN-10, atau ISBN-13 tanpa spasi.');
                                     }
                                 },
                             ])

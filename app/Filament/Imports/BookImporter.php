@@ -43,8 +43,8 @@ class BookImporter extends Importer
                             return;
                         }
 
-                        if (! Isbn::isValid((string) $value)) {
-                            $fail('Kolom ISBN harus berisi 8 digit, ISBN-10, atau ISBN-13 yang valid.');
+                        if (! Isbn::hasAcceptedFormat((string) $value)) {
+                            $fail('Kolom ISBN harus berisi 8 digit, ISBN-10, atau ISBN-13 tanpa spasi.');
                         }
                     },
                 ])
