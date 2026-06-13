@@ -14,6 +14,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\ReturnDraftController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SimilarityController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SkripsiController;
 use App\Http\Controllers\ThesisController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,7 @@ Route::post('/contact', [ContactMessageController::class, 'store'])
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service');
 Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::middleware('auth')->group(function () {
     Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
     Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');
