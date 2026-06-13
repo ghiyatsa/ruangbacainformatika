@@ -128,7 +128,7 @@ class HomeController extends Controller
                 'items as available_items_count' => fn ($query) => $query->available(),
             ])
             ->with(['authors:id,name', 'categories:id,name,slug'])
-            ->having('borrow_count', '>', 0)
+            ->has('loanItems')
             ->orderByDesc('borrow_count')
             ->orderByDesc('view_count')
             ->orderBy('title')
