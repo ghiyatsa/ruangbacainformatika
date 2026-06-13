@@ -32,8 +32,16 @@ class BookResource extends JsonResource
                 ? asset('storage/'.$this->cover_image)
                 : asset('images/book-cover-placeholder.svg'),
             'authors' => $this->whenLoaded('authors', fn () => $this->authors->pluck('name')->values()),
+            'authorsData' => $this->whenLoaded('authors', fn () => $this->authors->map(fn ($author) => [
+                'name' => $author->name,
+                'slug' => $author->slug,
+            ])->values()),
             'categories' => $this->whenLoaded('categories', fn () => CategoryResource::collection($this->categories)->resolve()),
             'publisher' => $this->whenLoaded('publisher', fn () => $this->publisher->name),
+            'publisherData' => $this->whenLoaded('publisher', fn () => $this->publisher ? [
+                'name' => $this->publisher->name,
+                'slug' => $this->publisher->slug,
+            ] : null),
             'publishedYear' => $this->published_year,
             'pages' => $this->pages,
             'language' => $this->language,

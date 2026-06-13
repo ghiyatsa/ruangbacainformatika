@@ -11,9 +11,12 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { SearchableCatalogFilter } from '@/features/books/components/SearchableCatalogFilter';
 import booksRoute from '@/routes/books';
 import type {
     CategoryItem,
+    AuthorItem,
+    PublisherItem,
     BookCatalogStats,
     ViewMode,
     BookCatalogFilters as FilterTypes,
@@ -23,6 +26,8 @@ interface BookCatalogFiltersProps {
     filters: FilterTypes;
     stats: BookCatalogStats;
     categories: CategoryItem[];
+    authors: AuthorItem[];
+    publishers: PublisherItem[];
     years: number[];
     viewMode: ViewMode;
     onViewModeChange: (mode: ViewMode) => void;
@@ -32,6 +37,8 @@ export function BookCatalogFilters({
     filters,
     stats,
     categories,
+    authors,
+    publishers,
     years,
     viewMode,
     onViewModeChange,
@@ -46,6 +53,8 @@ export function BookCatalogFilters({
             {
                 ...next,
                 category: next.category === 'all' ? '' : next.category,
+                author: next.author === 'all' ? '' : next.author,
+                publisher: next.publisher === 'all' ? '' : next.publisher,
             },
             { preserveScroll: true, replace: true },
         );
@@ -93,41 +102,44 @@ export function BookCatalogFilters({
                 </ToggleGroup>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-                <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-none">
-                    <span className="hidden text-xs font-medium text-muted-foreground sm:inline-block">
-                        Kategori:
-                    </span>
-                    <Select
-                        value={filters.category || 'all'}
-                        onValueChange={(val) => applyFilters({ category: val })}
-                    >
-                        <SelectTrigger
-                            aria-label="Filter kategori buku"
-                            className="h-10 w-full rounded-lg shadow-xs sm:w-[220px] sm:flex-none"
-                        >
-                            <SelectValue placeholder="Pilih Kategori" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Semua Kategori</SelectItem>
-                            {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.slug}>
-                                    <div className="flex w-full items-center justify-between gap-4">
-                                        <span>{cat.name}</span>
-                                        <span className="text-[10px] text-muted-foreground">
-                                            ({cat.booksCount})
-                                        </span>
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-start">
+                <SearchableCatalogFilter
+                    label="Kategori"
+                    value={filters.category || ''}
+                    placeholder="Pilih Kategori"
+                    allLabel="Semua Kategori"
+                    searchPlaceholder="Cari kategori..."
+                    emptyMessage="Kategori tidak ditemukan."
+                    triggerAriaLabel="Filter kategori buku"
+                    options={categories}
+                    onValueChange={(val) => applyFilters({ category: val })}
+                />
 
-                <div className="flex items-center gap-2">
-                    <span className="hidden text-xs font-medium text-muted-foreground sm:inline-block">
-                        Tahun:
-                    </span>
+                <SearchableCatalogFilter
+                    label="Penulis"
+                    value={filters.author || ''}
+                    placeholder="Pilih Penulis"
+                    allLabel="Semua Penulis"
+                    searchPlaceholder="Cari penulis..."
+                    emptyMessage="Penulis tidak ditemukan."
+                    triggerAriaLabel="Filter penulis buku"
+                    options={authors}
+                    onValueChange={(val) => applyFilters({ author: val })}
+                />
+
+                <SearchableCatalogFilter
+                    label="Penerbit"
+                    value={filters.publisher || ''}
+                    placeholder="Pilih Penerbit"
+                    allLabel="Semua Penerbit"
+                    searchPlaceholder="Cari penerbit..."
+                    emptyMessage="Penerbit tidak ditemukan."
+                    triggerAriaLabel="Filter penerbit buku"
+                    options={publishers}
+                    onValueChange={(val) => applyFilters({ publisher: val })}
+                />
+
+                <div className="flex flex-1 items-center gap-2 sm:flex-none">
                     <Select
                         value={filters.year ? String(filters.year) : 'all'}
                         onValueChange={(val) =>
@@ -138,11 +150,11 @@ export function BookCatalogFilters({
                     >
                         <SelectTrigger
                             aria-label="Filter tahun buku"
-                            className="h-10 w-28 rounded-lg shadow-xs sm:w-32"
+                            className="h-10 w-full rounded-lg shadow-xs sm:w-32"
                         >
                             <SelectValue placeholder="Tahun" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                             <SelectItem value="all">Semua</SelectItem>
                             {years.map((y) => (
                                 <SelectItem key={y} value={String(y)}>
@@ -153,7 +165,7 @@ export function BookCatalogFilters({
                     </Select>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-background/70 px-3 py-2">
+                <div className="flex flex-1 items-center justify-center gap-3 rounded-xl border bg-background/70 px-3 py-2 sm:flex-none sm:justify-start">
                     <div className="flex items-center gap-2">
                         <Checkbox
                             id="featured-filter"

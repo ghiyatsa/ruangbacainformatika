@@ -1,23 +1,33 @@
-import { router } from '@inertiajs/react';
-import { useState } from 'react';
+import { Deferred, router } from '@inertiajs/react';
+import { lazy, Suspense, useState } from 'react';
 import { CatalogPage } from '@/components/catalog/CatalogPage';
 import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
-import { BookCatalogFilters } from '@/features/books/components/BookCatalogFilters';
+import BookCatalogFiltersSkeleton from '@/features/books/components/BookCatalogFiltersSkeleton';
 import { BookCatalogResults } from '@/features/books/components/BookCatalogResults';
 import booksRoute from '@/routes/books';
 import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
+
+const LazyBookCatalogFilters = lazy(async () => {
+    const { BookCatalogFilters } = await import(
+        './BookCatalogFilters'
+    );
+
+    return { default: BookCatalogFilters };
+});
 
 export default function BookCatalogPage({
     filters,
     stats,
     categories,
+    authors,
+    publishers,
     years,
     books,
 }: BookCatalogPageProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const activeCategoryLabel =
-        categories.find((category) => category.slug === filters.category)
+        categories?.find((category) => category.slug === filters.category)
             ?.name ?? undefined;
 
     function clearAllFilters(): void {
@@ -35,6 +45,10 @@ export default function BookCatalogPage({
             next.search = '';
         } else if (key === 'category') {
             next.category = '';
+        } else if (key === 'author') {
+            next.author = '';
+        } else if (key === 'publisher') {
+            next.publisher = '';
         } else if (key === 'year') {
             next.year = null;
         } else if (key === 'featured') {
@@ -58,19 +72,32 @@ export default function BookCatalogPage({
             totalCount={stats.booksCount ?? 0}
             paginationData={books}
             filters={filters}
-            filterLabels={{ category: activeCategoryLabel }}
+            filterLabels={{
+                category: activeCategoryLabel,
+                author: filters.author ? (authors?.find(a => a.slug === filters.author)?.name ?? undefined) : undefined,
+                publisher: filters.publisher ? (publishers?.find(p => p.slug === filters.publisher)?.name ?? undefined) : undefined,
+            }}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
             paginationVisibility="desktop-only"
             filtersPanel={
-                <BookCatalogFilters
-                    filters={filters}
-                    stats={stats}
-                    categories={categories}
-                    years={years}
-                    viewMode={viewMode}
-                    onViewModeChange={setViewMode}
-                />
+                <Suspense fallback={<BookCatalogFiltersSkeleton />}>
+                    <Deferred
+                        data={['categories', 'authors', 'publishers', 'years']}
+                        fallback={<BookCatalogFiltersSkeleton />}
+                    >
+                        <LazyBookCatalogFilters
+                            filters={filters}
+                            stats={stats}
+                            categories={categories ?? []}
+                            authors={authors ?? []}
+                            publishers={publishers ?? []}
+                            years={years ?? []}
+                            viewMode={viewMode}
+                            onViewModeChange={setViewMode}
+                        />
+                    </Deferred>
+                </Suspense>
             }
             deferredData="books"
             loadingFallback={

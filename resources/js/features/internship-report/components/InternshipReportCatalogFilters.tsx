@@ -53,10 +53,7 @@ export function InternshipReportCatalogFilters({
                     className="hidden h-8 lg:block"
                 />
 
-                <div className="flex items-center gap-2">
-                    <span className="hidden text-xs font-medium text-muted-foreground sm:inline-block">
-                        Tahun:
-                    </span>
+                <div className="flex flex-1 items-center gap-2 sm:flex-none">
                     <Select
                         value={filters.year ? String(filters.year) : 'all'}
                         onValueChange={(val) =>
@@ -67,11 +64,11 @@ export function InternshipReportCatalogFilters({
                     >
                         <SelectTrigger
                             id="internship-report-year-filter"
-                            className="h-10 w-36 rounded-lg shadow-xs"
+                            className="h-10 w-full rounded-lg shadow-xs sm:w-36"
                         >
                             <SelectValue placeholder="Semua Tahun" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper">
                             <SelectItem value="all">Semua Tahun</SelectItem>
                             {years.map((y) => (
                                 <SelectItem key={y} value={String(y)}>

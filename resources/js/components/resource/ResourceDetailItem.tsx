@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 interface ResourceDetailItemProps {
     icon: ReactNode;
     label: string;
-    value: string;
+    value: ReactNode;
 }
 
 export function ResourceDetailItem({

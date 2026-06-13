@@ -26,9 +26,9 @@ class BookController extends Controller
         $book->increment('view_count', 1);
 
         $book->load([
-            'authors:id,name',
+            'authors:id,name,slug',
             'categories:id,name,slug',
-            'publisher:id,name',
+            'publisher:id,name,slug',
             'items' => fn ($query) => $query
                 ->select(['id', 'book_id', 'status', 'shelf_location'])
                 ->orderBy('id'),

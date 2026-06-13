@@ -30,6 +30,27 @@ it('book detail page renders correctly', function () {
     expect($book->fresh()->view_count)->toBe(1);
 });
 
+it('book detail page renders correctly with detailed authors and publisher data', function () {
+    $author = Author::factory()->create(['name' => 'John Doe', 'slug' => 'john-doe']);
+    $publisher = Publisher::factory()->create(['name' => 'Acme Publishing', 'slug' => 'acme-publishing']);
+    $book = Book::factory()->published()->create([
+        'title' => 'Test Book',
+        'publisher_id' => $publisher->id,
+    ]);
+    $book->authors()->attach($author);
+
+    get(route('books.show', $book))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books/show')
+            ->where('book.data.title', 'Test Book')
+            ->where('book.data.authorsData.0.name', 'John Doe')
+            ->where('book.data.authorsData.0.slug', 'john-doe')
+            ->where('book.data.publisherData.name', 'Acme Publishing')
+            ->where('book.data.publisherData.slug', 'acme-publishing')
+        );
+});
+
 it('book detail page increments view count', function () {
     $book = Book::factory()->published()->create(['view_count' => 5]);
 

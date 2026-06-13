@@ -1,13 +1,31 @@
 <?php
 
 it('keeps accessible names on the book catalog filter comboboxes', function () {
-    $component = file_get_contents(
+    $filtersComponent = file_get_contents(
         resource_path('js/features/books/components/BookCatalogFilters.tsx')
     );
+    $searchableFilterComponent = file_get_contents(
+        resource_path('js/features/books/components/SearchableCatalogFilter.tsx')
+    );
 
-    expect($component)->not->toBeFalse()
-        ->and($component)->toContain('aria-label="Filter kategori buku"')
-        ->and($component)->toContain('aria-label="Filter tahun buku"');
+    expect($filtersComponent)->not->toBeFalse()
+        ->and($searchableFilterComponent)->not->toBeFalse()
+        ->and($filtersComponent)->toContain('triggerAriaLabel="Filter kategori buku"')
+        ->and($filtersComponent)->toContain('aria-label="Filter tahun buku"')
+        ->and($filtersComponent)->toContain('triggerAriaLabel="Filter penulis buku"')
+        ->and($filtersComponent)->toContain('triggerAriaLabel="Filter penerbit buku"')
+        ->and($searchableFilterComponent)->toContain('aria-label={triggerAriaLabel}')
+        ->and($searchableFilterComponent)->toContain('role="combobox"')
+        ->and($searchableFilterComponent)->toContain("touchAction: 'none'")
+        ->and($searchableFilterComponent)->toContain('height: `${sheetHeight}px`')
+        ->and($searchableFilterComponent)->toContain('max-h-[min(26rem,calc(100svh-10rem))]')
+        ->and($searchableFilterComponent)->toContain('max-h-[min(34rem,calc(100svh-4rem))]')
+        ->and($searchableFilterComponent)->toContain('const MOBILE_SHEET_MIN_HEIGHT = 320;')
+        ->and($searchableFilterComponent)->not->toContain('<CommandGroup')
+        ->and($searchableFilterComponent)->not->toContain('<CommandShortcut>')
+        ->and($searchableFilterComponent)->not->toContain('<SheetHeader')
+        ->and($searchableFilterComponent)->not->toContain('<SheetTitle')
+        ->and($searchableFilterComponent)->not->toContain('<SheetDescription');
 });
 
 it('does not use a skipped heading level for book card titles in the catalog grid', function () {
@@ -72,12 +90,19 @@ it('shows book card skeletons when mobile progressive pagination starts loading 
     $bookCatalogPage = file_get_contents(
         resource_path('js/features/books/components/BookCatalogPage.tsx')
     );
+    $filtersSkeleton = file_get_contents(
+        resource_path('js/features/books/components/BookCatalogFiltersSkeleton.tsx')
+    );
 
     expect($mobileProgressivePagination)->toContain('loadingFallback?: ReactNode;')
         ->and($mobileProgressivePagination)->toContain('const loadingSkeleton = loadingFallback ?? (')
         ->and($bookCatalogPage)->toContain('loadingFallback={')
+        ->and($bookCatalogPage)->toContain('fallback={<BookCatalogFiltersSkeleton />}')
+        ->and($bookCatalogPage)->toContain("data={['categories', 'authors', 'publishers', 'years']}")
+        ->and($bookCatalogPage)->toContain('const LazyBookCatalogFilters = lazy(async () => {')
         ->and($bookCatalogPage)->toContain('Array.from({ length: 4 })')
-        ->and($bookCatalogPage)->toContain("viewMode === 'list' ? 'compact' : 'grid'");
+        ->and($bookCatalogPage)->toContain("viewMode === 'list' ? 'compact' : 'grid'")
+        ->and($filtersSkeleton)->toContain('aria-hidden="true"');
 });
 
 it('keeps the welcome category marquee and its skeleton desktop only', function () {

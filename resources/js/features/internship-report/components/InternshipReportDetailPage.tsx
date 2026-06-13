@@ -11,9 +11,9 @@ import {
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DeferredGlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
 import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
+import { CatalogResourceCardSkeleton } from '@/components/resource/CatalogResourceCardSkeleton';
 import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
 import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
-import { RelatedCatalogSectionSkeleton } from '@/components/resource/RelatedCatalogSectionSkeleton';
 import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
 import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
 import { Badge } from '@/components/ui/badge';
@@ -188,23 +188,41 @@ export default function InternshipReportDetailPage(
                         ) : (
                             <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
                                 <div className="flex flex-1 flex-col justify-center">
-                                    <div className="mb-3 space-y-3">
-                                        <Skeleton className="h-8 w-full max-w-3xl" />
-                                        <Skeleton className="h-8 w-4/5 max-w-2xl" />
-                                    </div>
+                                    <h1 className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                                        <Skeleton className="h-7 w-full max-w-3xl sm:h-8 lg:h-9 animate-pulse" />
+                                        <Skeleton className="mt-2 h-7 w-4/5 max-w-2xl sm:h-8 lg:h-9 animate-pulse" />
+                                    </h1>
 
-                                    <div className="flex flex-wrap items-center gap-3">
-                                        <Skeleton className="h-4 w-34" />
-                                        <Skeleton className="h-3 w-3 rounded-full" />
-                                        <Skeleton className="h-4 w-28" />
-                                        <Skeleton className="h-3 w-3 rounded-full" />
-                                        <Skeleton className="h-4 w-14" />
-                                        <Skeleton className="h-3 w-3 rounded-full" />
-                                        <Skeleton className="h-4 w-12" />
+                                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                                        <span className="flex items-center gap-1.5">
+                                            <User className="size-3.5 text-muted-foreground/50" />
+                                            <Skeleton className="h-4 w-32 animate-pulse" />
+                                        </span>
+                                        <span className="text-border">
+                                            &bull;
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <Hash className="size-3.5 text-muted-foreground/50" />
+                                            <Skeleton className="h-4 w-24 animate-pulse" />
+                                        </span>
+                                        <span className="text-border">
+                                            &bull;
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <Calendar className="size-3.5 text-muted-foreground/50" />
+                                            <Skeleton className="h-4 w-12 animate-pulse" />
+                                        </span>
+                                        <span className="text-border">
+                                            &bull;
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <Eye className="size-3.5 text-muted-foreground/50" />
+                                            <Skeleton className="h-4 w-10 animate-pulse" />
+                                        </span>
                                     </div>
 
                                     <div className="mt-5 flex flex-wrap items-center gap-3">
-                                        <Skeleton className="h-10 w-28 rounded-full" />
+                                        <Skeleton className="h-10 w-28 rounded-full animate-pulse" />
                                     </div>
                                 </div>
                             </div>
@@ -213,37 +231,59 @@ export default function InternshipReportDetailPage(
                 </div>
             }
             sidebar={
-                report ? (
-                    <div className="space-y-4">
-                        <div className="rounded-2xl border bg-card shadow-sm">
-                            <div className="p-5">
-                                <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                    Informasi Laporan KP
-                                </h2>
-                            </div>
-                            <Separator />
-                            <div className="p-2">
-                                <ResourceDetailItem
-                                    icon={<User className="size-4" />}
-                                    label="Penulis"
-                                    value={report.authorName}
-                                />
-                                <ResourceDetailItem
-                                    icon={<Hash className="size-4" />}
-                                    label="NIM"
-                                    value={report.studentId}
-                                />
-                                {report.year ? (
+                <div className="space-y-4">
+                    <div className="rounded-2xl border bg-card shadow-sm">
+                        <div className="p-5">
+                            <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                                Informasi Laporan KP
+                            </h2>
+                        </div>
+                        <Separator />
+                        <div className="p-2">
+                            {report ? (
+                                <>
+                                    <ResourceDetailItem
+                                        icon={<User className="size-4" />}
+                                        label="Penulis"
+                                        value={report.authorName}
+                                    />
+                                    <ResourceDetailItem
+                                        icon={<Hash className="size-4" />}
+                                        label="NIM"
+                                        value={report.studentId}
+                                    />
+                                    {report.year ? (
+                                        <ResourceDetailItem
+                                            icon={<Calendar className="size-4" />}
+                                            label="Tahun"
+                                            value={String(report.year)}
+                                        />
+                                    ) : null}
+                                </>
+                            ) : (
+                                <>
+                                    <ResourceDetailItem
+                                        icon={<User className="size-4" />}
+                                        label="Penulis"
+                                        value={<Skeleton className="h-5 w-32 animate-pulse" />}
+                                    />
+                                    <ResourceDetailItem
+                                        icon={<Hash className="size-4" />}
+                                        label="NIM"
+                                        value={<Skeleton className="h-5 w-24 animate-pulse" />}
+                                    />
                                     <ResourceDetailItem
                                         icon={<Calendar className="size-4" />}
                                         label="Tahun"
-                                        value={String(report.year)}
+                                        value={<Skeleton className="h-5 w-16 animate-pulse" />}
                                     />
-                                ) : null}
-                            </div>
+                                </>
+                            )}
                         </div>
+                    </div>
 
-                        {report.keywords.length > 0 ? (
+                    {report ? (
+                        report.keywords.length > 0 ? (
                             <div className="rounded-2xl border bg-card shadow-sm">
                                 <div className="p-5">
                                     <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
@@ -264,87 +304,69 @@ export default function InternshipReportDetailPage(
                                     ))}
                                 </div>
                             </div>
-                        ) : null}
+                        ) : null
+                    ) : (
+                        <div className="rounded-2xl border bg-card shadow-sm">
+                            <div className="p-5">
+                                <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                                    Kata Kunci
+                                </h2>
+                            </div>
+                            <Separator />
+                            <div className="flex flex-wrap gap-2 p-4">
+                                <Skeleton className="h-6 w-16 rounded-full animate-pulse" />
+                                <Skeleton className="h-6 w-20 rounded-full animate-pulse" />
+                                <Skeleton className="h-6 w-14 rounded-full animate-pulse" />
+                                <Skeleton className="h-6 w-18 rounded-full animate-pulse" />
+                            </div>
+                        </div>
+                    )}
 
+                    {report && (
                         <CatalogReportCard
                             catalogType="internship_report"
                             catalogId={report.id}
                             catalogLabel="Laporan KP"
                             catalogTitle={report.title}
                         />
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        <div className="rounded-2xl border bg-card shadow-sm">
-                            <div className="p-5">
-                                <Skeleton className="h-4 w-32" />
-                            </div>
-                            <Separator />
-                            <div className="p-2">
-                                {[0, 1, 2].map((item) => (
-                                    <div
-                                        key={item}
-                                        className="flex items-start gap-3 rounded-xl p-3"
-                                    >
-                                        <Skeleton className="mt-0.5 size-8 rounded-lg" />
-                                        <div className="min-w-0 flex-1 space-y-2">
-                                            <Skeleton className="h-3 w-20" />
-                                            <Skeleton className="h-4 w-full" />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="rounded-2xl border bg-card shadow-sm">
-                            <div className="p-5">
-                                <Skeleton className="h-4 w-24" />
-                            </div>
-                            <Separator />
-                            <div className="flex flex-wrap gap-2 p-4">
-                                <Skeleton className="h-6 w-16 rounded-full" />
-                                <Skeleton className="h-6 w-20 rounded-full" />
-                                <Skeleton className="h-6 w-14 rounded-full" />
-                                <Skeleton className="h-6 w-18 rounded-full" />
-                            </div>
-                        </div>
-                    </div>
-                )
+                    )}
+                </div>
             }
             footer={
-                report ? (
-                    <Deferred
-                        data="relatedReports"
-                        fallback={<RelatedCatalogSectionSkeleton />}
-                        rescue={({ reloading }) => (
-                            <DeferredCatalogRescue
-                                dataKey="relatedReports"
-                                title="Daftar laporan lain belum sempat dimuat"
-                                description="Muat lagi sebentar untuk melihat beberapa laporan KP yang masih dekat dengan topik ini."
-                                reloading={reloading}
-                            />
-                        )}
+                (props.relatedReports === undefined || props.relatedReports.length > 0) && (
+                    <RelatedCatalogSection
+                        title="Laporan KP Terkait"
+                        description="Daftar laporan kerja praktik lainnya dengan topik atau bidang pembahasan serupa."
                     >
-                        {props.relatedReports &&
-                        props.relatedReports.length > 0 ? (
-                            <RelatedCatalogSection
-                                title="Laporan KP Terkait"
-                                description="Daftar laporan kerja praktik lainnya dengan topik atau bidang pembahasan serupa."
-                            >
+                        <Deferred
+                            data="relatedReports"
+                            fallback={
                                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                    {props.relatedReports.map(
-                                        (relatedReport) => (
-                                            <InternshipReportCard
-                                                key={relatedReport.id}
-                                                report={relatedReport}
-                                            />
-                                        ),
-                                    )}
+                                    <CatalogResourceCardSkeleton />
+                                    <CatalogResourceCardSkeleton />
+                                    <CatalogResourceCardSkeleton />
                                 </div>
-                            </RelatedCatalogSection>
-                        ) : null}
-                    </Deferred>
-                ) : null
+                            }
+                            rescue={({ reloading }) => (
+                                <DeferredCatalogRescue
+                                    dataKey="relatedReports"
+                                    title="Daftar laporan lain belum sempat dimuat"
+                                    description="Muat lagi sebentar untuk melihat beberapa laporan KP yang masih dekat dengan topik ini."
+                                    reloading={reloading}
+                                />
+                            )}
+                        >
+                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                {props.relatedReports?.map((relatedReport) => (
+                                    <InternshipReportCard
+                                        key={relatedReport.id}
+                                        report={relatedReport}
+                                    />
+                                ))}
+                            </div>
+                        </Deferred>
+                    </RelatedCatalogSection>
+                )
             }
         >
             <section>
@@ -369,15 +391,19 @@ export default function InternshipReportDetailPage(
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-3">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-11/12" />
-                        <Skeleton className="h-4 w-10/12" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-4/5" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-5/6" />
+                    <div className="space-y-6">
+                        <div className="space-y-3">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-11/12" />
+                            <Skeleton className="h-4 w-10/12" />
+                            <Skeleton className="h-4 w-4/5" />
+                        </div>
+                        <div className="space-y-3">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-5/6" />
+                            <Skeleton className="h-4 w-2/3" />
+                        </div>
                     </div>
                 )}
             </section>

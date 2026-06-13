@@ -19,12 +19,9 @@ interface ResourceCatalogHeaderProps {
 /**
  * Standard header for catalog-style pages with breadcrumbs and stats.
  */
-export function ResourceCatalogHeader({
-    title,
-    total,
-    resourceName,
-    breadcrumbLabel,
-}: ResourceCatalogHeaderProps) {
+export function ResourceCatalogHeader(props: ResourceCatalogHeaderProps) {
+    const { title, breadcrumbLabel } = props;
+
     return (
         <div className="relative -mt-20 overflow-hidden bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
             <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
@@ -49,9 +46,6 @@ export function ResourceCatalogHeader({
                         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                             {title}
                         </h1>
-                        <p className="mt-2 text-muted-foreground">
-                            {total.toLocaleString('id-ID')} {resourceName}
-                        </p>
                     </div>
                 </div>
             </div>

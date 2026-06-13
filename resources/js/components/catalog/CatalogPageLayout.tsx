@@ -1,11 +1,7 @@
-import { Calendar, CheckCircle, Library, Search, Star, X } from 'lucide-react';
 import { ResourceCatalogHeader } from '@/components/catalog/ResourceCatalogHeader';
 import { ResourcePagination } from '@/components/catalog/ResourcePagination';
 import { PageLayout } from '@/components/layouts/PageLayout';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import type { ReactNode } from 'react';
-import type { CatalogActiveFilters } from '@/components/catalog/types';
 import type { PaginationData } from '@/types/pagination';
 
 interface CatalogPageLayoutProps<T> {
@@ -17,12 +13,6 @@ interface CatalogPageLayoutProps<T> {
     paginationData?: PaginationData<T>;
     header?: ReactNode; // Optional override
     children: ReactNode;
-    filters?: CatalogActiveFilters;
-    filterLabels?: {
-        category?: string;
-    };
-    onClearFilters?: () => void;
-    onRemoveFilter?: (key: string) => void;
     paginationVisibility?: 'all' | 'desktop-only';
 }
 
@@ -39,20 +29,8 @@ export function CatalogPageLayout<T>({
     paginationData,
     header,
     children,
-    filters,
-    filterLabels,
-    onClearFilters,
-    onRemoveFilter,
     paginationVisibility = 'all',
 }: CatalogPageLayoutProps<T>) {
-    const hasActiveFilters =
-        filters &&
-        (filters.search ||
-            filters.category ||
-            filters.year ||
-            filters.featured ||
-            filters.availability);
-
     const defaultHeader = (
         <ResourceCatalogHeader
             title={title}
@@ -71,143 +49,7 @@ export function CatalogPageLayout<T>({
             className="pt-0 pb-16"
             showDesktopNoticeInContent={false}
         >
-            <div className="flex flex-col gap-8 md:gap-10">
-                {hasActiveFilters && onClearFilters && (
-                    <div className="flex flex-wrap items-center gap-2">
-                        {/* Search Badge */}
-                        {filters.search && (
-                            <Badge
-                                variant="secondary"
-                                className="gap-1.5 py-1.5 pr-2 pl-2.5"
-                            >
-                                <Search className="size-3 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    Pencarian:
-                                </span>
-                                &ldquo;{filters.search}&rdquo;
-                                {onRemoveFilter && (
-                                    <button
-                                        type="button"
-                                        aria-label="Hapus filter pencarian"
-                                        onClick={() => onRemoveFilter('search')}
-                                        className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
-                                    >
-                                        <X className="size-3" />
-                                    </button>
-                                )}
-                            </Badge>
-                        )}
-
-                        {/* Year Badge */}
-                        {filters.category && (
-                            <Badge
-                                variant="secondary"
-                                className="gap-1.5 py-1.5 pr-2 pl-2.5"
-                            >
-                                <Library className="size-3 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    Kategori:
-                                </span>
-                                {filterLabels?.category ?? filters.category}
-                                {onRemoveFilter && (
-                                    <button
-                                        type="button"
-                                        aria-label="Hapus filter kategori"
-                                        onClick={() =>
-                                            onRemoveFilter('category')
-                                        }
-                                        className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
-                                    >
-                                        <X className="size-3" />
-                                    </button>
-                                )}
-                            </Badge>
-                        )}
-
-                        {/* Year Badge */}
-                        {filters.year && (
-                            <Badge
-                                variant="secondary"
-                                className="gap-1.5 py-1.5 pr-2 pl-2.5"
-                            >
-                                <Calendar className="size-3 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    Tahun:
-                                </span>
-                                {filters.year}
-                                {onRemoveFilter && (
-                                    <button
-                                        type="button"
-                                        aria-label="Hapus filter tahun"
-                                        onClick={() => onRemoveFilter('year')}
-                                        className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
-                                    >
-                                        <X className="size-3" />
-                                    </button>
-                                )}
-                            </Badge>
-                        )}
-
-                        {/* Featured Badge */}
-                        {filters.featured && (
-                            <Badge
-                                variant="secondary"
-                                className="gap-1.5 py-1.5 pr-2 pl-2.5"
-                            >
-                                <Star className="size-3 fill-amber-500 text-amber-500" />
-                                <span className="text-muted-foreground">
-                                    Unggulan
-                                </span>
-                                {onRemoveFilter && (
-                                    <button
-                                        type="button"
-                                        aria-label="Hapus filter unggulan"
-                                        onClick={() =>
-                                            onRemoveFilter('featured')
-                                        }
-                                        className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
-                                    >
-                                        <X className="size-3" />
-                                    </button>
-                                )}
-                            </Badge>
-                        )}
-
-                        {/* Availability Badge */}
-                        {filters.availability && (
-                            <Badge
-                                variant="secondary"
-                                className="gap-1.5 py-1.5 pr-2 pl-2.5"
-                            >
-                                <CheckCircle className="size-3 text-emerald-500" />
-                                <span className="text-muted-foreground">
-                                    Tersedia
-                                </span>
-                                {onRemoveFilter && (
-                                    <button
-                                        type="button"
-                                        aria-label="Hapus filter ketersediaan"
-                                        onClick={() =>
-                                            onRemoveFilter('availability')
-                                        }
-                                        className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
-                                    >
-                                        <X className="size-3" />
-                                    </button>
-                                )}
-                            </Badge>
-                        )}
-
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 text-xs text-muted-foreground"
-                            onClick={onClearFilters}
-                        >
-                            Hapus semua
-                        </Button>
-                    </div>
-                )}
+            <div className="relative z-10 flex flex-col gap-6 md:gap-8 -mt-6 sm:-mt-8">
                 {children}
 
                 {paginationData && (

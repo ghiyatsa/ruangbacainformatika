@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BookCatalogResource;
+use App\Models\Author;
 use App\Models\Book;
+use App\Models\Category;
+use App\Models\Publisher;
 use App\Services\CatalogService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,6 +42,8 @@ class CatalogController extends Controller
             ->toString();
 
         $categorySlug = $request->string('category')->toString();
+        $authorSlug = $request->string('author')->toString();
+        $publisherSlug = $request->string('publisher')->toString();
         $year = $request->integer('year') ?: null;
         $featured = $request->boolean('featured');
         $availability = $request->boolean('availability');
@@ -47,6 +52,8 @@ class CatalogController extends Controller
             ->published()
             ->search($search)
             ->forCategory($categorySlug)
+            ->forAuthor($authorSlug)
+            ->forPublisher($publisherSlug)
             ->forYear($year)
             ->when($featured, fn ($q) => $q->featured())
             ->onlyAvailable($availability)
@@ -66,6 +73,8 @@ class CatalogController extends Controller
             'filters' => [
                 'search' => $search,
                 'category' => $categorySlug,
+                'author' => $authorSlug,
+                'publisher' => $publisherSlug,
                 'year' => $year,
                 'featured' => $featured,
                 'availability' => $availability,
@@ -74,13 +83,51 @@ class CatalogController extends Controller
                 $this->catalogService->getStats(),
                 ['searchResultsCount' => $searchResultsCount]
             ),
-            'years' => Book::published()
+            'activeFilterLabels' => [
+                'category' => $this->resolveCategoryLabel($categorySlug),
+                'author' => $this->resolveAuthorLabel($authorSlug),
+                'publisher' => $this->resolvePublisherLabel($publisherSlug),
+            ],
+            'years' => Inertia::defer(fn () => Book::published()
                 ->whereNotNull('published_year')
                 ->distinct()
                 ->orderByDesc('published_year')
                 ->pluck('published_year')
-                ->all(),
-            'categories' => $this->catalogService->getCategoriesWithCounts()->all(),
+                ->all(), 'catalog-filters'),
+            'categories' => Inertia::defer(
+                fn () => $this->catalogService->getCategoriesWithCounts()->all(),
+                'catalog-filters',
+            ),
+            'authors' => Inertia::defer(fn () => Author::query()
+                ->select(['id', 'name', 'slug'])
+                ->whereHas('books', fn ($query) => $query->published())
+                ->withCount([
+                    'books' => fn ($query) => $query->published(),
+                ])
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Author $author) => [
+                    'id' => $author->id,
+                    'name' => $author->name,
+                    'slug' => $author->slug,
+                    'booksCount' => $author->books_count,
+                ])
+                ->all(), 'catalog-filters'),
+            'publishers' => Inertia::defer(fn () => Publisher::query()
+                ->select(['id', 'name', 'slug'])
+                ->whereHas('books', fn ($query) => $query->published())
+                ->withCount([
+                    'books' => fn ($query) => $query->published(),
+                ])
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Publisher $publisher) => [
+                    'id' => $publisher->id,
+                    'name' => $publisher->name,
+                    'slug' => $publisher->slug,
+                    'booksCount' => $publisher->books_count,
+                ])
+                ->all(), 'catalog-filters'),
             'books' => Inertia::defer(function () use ($booksQuery) {
                 $books = (clone $booksQuery)
                     ->paginate(12)
@@ -92,5 +139,38 @@ class CatalogController extends Controller
                 return $paginated;
             })->merge()->append('data'),
         ]);
+    }
+
+    private function resolveCategoryLabel(string $categorySlug): ?string
+    {
+        if ($categorySlug === '') {
+            return null;
+        }
+
+        return Category::query()
+            ->where('slug', $categorySlug)
+            ->value('name');
+    }
+
+    private function resolveAuthorLabel(string $authorSlug): ?string
+    {
+        if ($authorSlug === '') {
+            return null;
+        }
+
+        return Author::query()
+            ->where('slug', $authorSlug)
+            ->value('name');
+    }
+
+    private function resolvePublisherLabel(string $publisherSlug): ?string
+    {
+        if ($publisherSlug === '') {
+            return null;
+        }
+
+        return Publisher::query()
+            ->where('slug', $publisherSlug)
+            ->value('name');
     }
 }

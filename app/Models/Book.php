@@ -159,6 +159,30 @@ class Book extends Model
         );
     }
 
+    public function scopeForAuthor(Builder $query, string $authorSlug): Builder
+    {
+        if ($authorSlug === '') {
+            return $query;
+        }
+
+        return $query->whereHas(
+            'authors',
+            fn (Builder $q): Builder => $q->where('slug', $authorSlug),
+        );
+    }
+
+    public function scopeForPublisher(Builder $query, string $publisherSlug): Builder
+    {
+        if ($publisherSlug === '') {
+            return $query;
+        }
+
+        return $query->whereHas(
+            'publisher',
+            fn (Builder $q): Builder => $q->where('slug', $publisherSlug),
+        );
+    }
+
     public function scopeForYear(Builder $query, ?int $year): Builder
     {
         if (! $year) {
