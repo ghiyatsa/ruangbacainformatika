@@ -19,7 +19,6 @@
         "laravel/socialite": "^5.26",
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
-        "resend/resend-laravel": "^1.4",
         "ryangjchandler/laravel-cloudflare-turnstile": "^3.0",
         "spatie/image": "^3.9"
     },
