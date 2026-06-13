@@ -202,70 +202,52 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                 <div className="flex w-full items-center justify-center">
                                     <div className="relative flex aspect-[3/4] w-full max-w-[16rem] items-center justify-center overflow-hidden rounded-2xl border bg-muted/10 shadow-xs sm:max-w-none sm:h-96 sm:w-72 md:h-[22rem] md:w-[16.5rem]">
                                         {book && (
-                                            <>
-                                                <img
-                                                    src={book.coverImageUrl}
-                                                    alt={`Cover buku ${book.title}`}
-                                                    fetchPriority="high"
-                                                    decoding="async"
-                                                    loading="lazy"
-                                                    width={256}
-                                                    height={341}
-                                                    sizes="100vw"
-                                                    onLoad={() => setImageLoaded(true)}
-                                                    className={cn(
-                                                        "block h-full w-full object-cover sm:hidden transition-opacity duration-300",
-                                                        imageLoaded ? "opacity-100" : "opacity-0 absolute"
-                                                    )}
-                                                />
-
-                                                <Dialog>
-                                                    <DialogTrigger asChild>
-                                                        <button
-                                                            type="button"
-                                                            className={cn(
-                                                                "bg-transparent text-left transition duration-200 hover:scale-[1.015] focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none w-full h-full sm:items-center sm:justify-center",
-                                                                imageLoaded ? "sm:flex" : "hidden"
-                                                            )}
-                                                            aria-label={`Lihat cover penuh buku ${book.title}`}
-                                                        >
-                                                            <img
-                                                                src={book.coverImageUrl}
-                                                                alt={`Cover buku ${book.title}`}
-                                                                fetchPriority="high"
-                                                                decoding="async"
-                                                                loading="lazy"
-                                                                width={288}
-                                                                height={384}
-                                                                sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
-                                                                onLoad={() => setImageLoaded(true)}
-                                                                className="block h-full w-full object-cover transition duration-300"
-                                                            />
-                                                        </button>
-                                                    </DialogTrigger>
-
-                                                    <DialogContent
-                                                        className="max-w-[calc(100vw-2rem)] gap-0 bg-background/90 p-2 shadow-xl ring-0 backdrop-blur-sm sm:max-w-md"
-                                                        overlayClassName="bg-black/45"
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <button
+                                                        type="button"
+                                                        className={cn(
+                                                            "bg-transparent text-left transition duration-200 hover:scale-[1.015] focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none w-full h-full flex items-center justify-center transition-opacity duration-300",
+                                                            imageLoaded ? "opacity-100" : "opacity-0 absolute"
+                                                        )}
+                                                        aria-label={`Lihat cover penuh buku ${book.title}`}
                                                     >
-                                                        <DialogTitle className="sr-only">
-                                                            Cover buku {book.title}
-                                                        </DialogTitle>
-                                                        <DialogDescription className="sr-only">
-                                                            Pratinjau cover buku.
-                                                        </DialogDescription>
-                                                        <div className="flex max-h-[80vh] items-center justify-center overflow-hidden">
-                                                            <img
-                                                                src={book.coverImageUrl}
-                                                                alt={`Cover penuh buku ${book.title}`}
-                                                                width={448}
-                                                                height={600}
-                                                                className="max-h-[80vh] w-full object-contain"
-                                                            />
-                                                        </div>
-                                                    </DialogContent>
-                                                </Dialog>
-                                            </>
+                                                        <img
+                                                            src={book.coverImageUrl}
+                                                            alt={`Cover buku ${book.title}`}
+                                                            fetchPriority="high"
+                                                            decoding="async"
+                                                            loading="lazy"
+                                                            width={288}
+                                                            height={384}
+                                                            sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
+                                                            onLoad={() => setImageLoaded(true)}
+                                                            className="block h-full w-full object-cover transition duration-300"
+                                                        />
+                                                    </button>
+                                                </DialogTrigger>
+
+                                                <DialogContent
+                                                    className="max-w-[calc(100vw-2rem)] gap-0 bg-background/90 p-2 shadow-xl ring-0 backdrop-blur-sm sm:max-w-md"
+                                                    overlayClassName="bg-black/45"
+                                                >
+                                                    <DialogTitle className="sr-only">
+                                                        Cover buku {book.title}
+                                                    </DialogTitle>
+                                                    <DialogDescription className="sr-only">
+                                                        Pratinjau cover buku.
+                                                    </DialogDescription>
+                                                    <div className="flex max-h-[80vh] items-center justify-center overflow-hidden">
+                                                        <img
+                                                            src={book.coverImageUrl}
+                                                            alt={`Cover penuh buku ${book.title}`}
+                                                            width={448}
+                                                            height={600}
+                                                            className="max-h-[80vh] w-full object-contain"
+                                                        />
+                                                    </div>
+                                                </DialogContent>
+                                            </Dialog>
                                         )}
 
                                         {(!book || !imageLoaded) && (
