@@ -228,8 +228,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                 </DialogTrigger>
 
                                                 <DialogContent
-                                                    className="max-w-[calc(100vw-2rem)] gap-0 bg-background/90 p-2 shadow-xl ring-0 backdrop-blur-sm sm:max-w-md"
-                                                    overlayClassName="bg-black/45"
+                                                    className="max-w-[calc(100vw-2rem)] gap-0 bg-transparent p-0 shadow-none border-0 ring-0 backdrop-blur-none sm:max-w-md"
+                                                    overlayClassName="bg-black/80"
                                                 >
                                                     <DialogTitle className="sr-only">
                                                         Cover buku {book.title}
