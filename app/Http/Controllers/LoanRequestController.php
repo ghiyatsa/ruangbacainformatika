@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Loans\AddBookToLoanDraft;
+use App\Actions\Loans\GenerateLoanDraftQr;
 use App\Http\Requests\LoanDraftBookRequest;
 use App\Http\Requests\LoanDraftQrRequest;
 use App\Models\Book;
@@ -43,12 +45,12 @@ class LoanRequestController extends Controller
         ]);
     }
 
-    public function storeBook(LoanDraftBookRequest $request): RedirectResponse
+    public function storeBook(LoanDraftBookRequest $request, AddBookToLoanDraft $addBookToLoanDraft): RedirectResponse
     {
         session()->forget('loan_request_qr');
         $book = Book::query()->findOrFail($request->validatedBookId());
 
-        $this->loanDraftService->addBook(
+        $addBookToLoanDraft->execute(
             $request->user(),
             $request->validatedBookId(),
         );
@@ -75,9 +77,9 @@ class LoanRequestController extends Controller
         return redirect()->back();
     }
 
-    public function generateQr(LoanDraftQrRequest $request): RedirectResponse
+    public function generateQr(LoanDraftQrRequest $request, GenerateLoanDraftQr $generateLoanDraftQr): RedirectResponse
     {
-        $checkout = $this->loanDraftService->generateQr(
+        $checkout = $generateLoanDraftQr->execute(
             $request->user(),
             $request->validatedBookIds(),
         );

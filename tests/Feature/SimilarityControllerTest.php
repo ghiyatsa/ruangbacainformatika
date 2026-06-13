@@ -21,7 +21,7 @@ it('similarity page is displayed', function () {
         ->assertOk()
         ->assertSee('name="csrf-token"', false)
         ->assertInertia(fn (Assert $page) => $page
-            ->component('similarity')
+            ->component('similarity/index')
             ->has('turnstileEnabled')
             ->has('turnstileSiteKey')
         );

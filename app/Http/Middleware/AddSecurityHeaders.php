@@ -101,6 +101,6 @@ class AddSecurityHeaders
             ? 'camera=(self)'
             : 'camera=()';
 
-        return "{$cameraPolicy}, geolocation=(), microphone=()";
+        return "{$cameraPolicy}, geolocation=(), microphone=(), identity-credentials-get=(self \"https://accounts.google.com\")";
     }
 }

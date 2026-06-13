@@ -114,7 +114,7 @@ it('custom static pages are available on the public route', function () {
     get(route('pages.show', ['slug' => $page->slug]))
         ->assertOk()
         ->assertInertia(fn ($assert) => $assert
-            ->component('static-page')
+            ->component('static/index')
             ->where('title', 'FAQ Layanan')
             ->where('pageContent.summary', 'Pertanyaan yang sering diajukan.')
             ->where('pageContent.content', '<h2>FAQ</h2><p>Isi FAQ layanan.</p>'));

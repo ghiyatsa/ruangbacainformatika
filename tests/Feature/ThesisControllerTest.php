@@ -5,6 +5,26 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
+it('thesis index page loads theses as deferred props', function () {
+    Thesis::factory()->create([
+        'title' => 'Analisis Sistem Cerdas',
+        'author_name' => 'Andi Pratama',
+        'student_id' => '2201700020',
+        'year' => 2024,
+    ]);
+
+    get(route('thesis.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('thesis/index')
+            ->where('total', 1)
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('theses.data', 1)
+                ->where('theses.data.0.title', 'Analisis Sistem Cerdas')
+                ->where('theses.data.0.studentId', '2201700020')
+            ));
+});
+
 it('thesis detail page renders correctly', function () {
     $thesis = Thesis::factory()->create([
         'title' => 'Analisis Sistem Cerdas',

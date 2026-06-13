@@ -164,7 +164,7 @@ it('public pages use the stored site metadata and icon links', function () {
         ->assertOk()
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('about')
+                ->component('about/index')
                 ->where('name', 'Ruang Baca Custom')
                 ->where('site.description', 'Deskripsi publik kustom untuk pengujian metadata.')
                 ->where('site.department', 'Teknik Informatika Test')

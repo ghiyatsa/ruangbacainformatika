@@ -77,10 +77,6 @@ it('successful similarity deletion removes the orphan status record', function (
     $skripsi->delete();
 
     $api = Mockery::mock(SimilarityApiService::class);
-    $api->shouldReceive('hasIndexedId')
-        ->once()
-        ->with($skripsi->id)
-        ->andReturn(true);
     $api->shouldReceive('delete')
         ->once()
         ->with($skripsi->id)
@@ -94,7 +90,7 @@ it('successful similarity deletion removes the orphan status record', function (
         ->exists())->toBeFalse();
 });
 
-it('skips delete api call when an unsynced skripsi is not present in the index', function () {
+it('sends deletion once for unsynced skripsi records without scanning indexed ids first', function () {
     Queue::fake();
 
     $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
@@ -104,43 +100,42 @@ it('skips delete api call when an unsynced skripsi is not present in the index',
     $skripsi->delete();
 
     $api = Mockery::mock(SimilarityApiService::class);
-    $api->shouldReceive('hasIndexedId')
+    $api->shouldReceive('delete')
+        ->once()
+        ->with($skripsi->id)
+        ->andReturn(true);
+
+    $job = new RemoveSkripsiFromSimilarity($skripsi->id);
+    $job->handle($api, $statusService);
+
+    expect(SimilaritySyncStatus::query()
+        ->where('source_skripsi_id', $skripsi->id)
+        ->exists())->toBeFalse();
+});
+
+it('keeps status failed when deletion cannot be confirmed by the api', function () {
+    Queue::fake();
+
+    $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+    $statusService = app(SimilaritySyncStatusService::class);
+
+    $statusService->markQueued($skripsi, SimilaritySyncStatus::OPERATION_DELETE);
+    $skripsi->delete();
+
+    $api = Mockery::mock(SimilarityApiService::class);
+    $api->shouldReceive('delete')
         ->once()
         ->with($skripsi->id)
         ->andReturn(false);
-    $api->shouldNotReceive('delete');
 
     $job = new RemoveSkripsiFromSimilarity($skripsi->id);
-    $job->handle($api, $statusService);
+    try {
+        $job->handle($api, $statusService);
+    } catch (RuntimeException $exception) {
+        $job->failed($exception);
+    }
 
     expect(SimilaritySyncStatus::query()
         ->where('source_skripsi_id', $skripsi->id)
-        ->exists())->toBeFalse();
-});
-
-it('still deletes from api when an unsynced skripsi is confirmed in the index', function () {
-    Queue::fake();
-
-    $skripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
-    $statusService = app(SimilaritySyncStatusService::class);
-
-    $statusService->markQueued($skripsi, SimilaritySyncStatus::OPERATION_DELETE);
-    $skripsi->delete();
-
-    $api = Mockery::mock(SimilarityApiService::class);
-    $api->shouldReceive('hasIndexedId')
-        ->once()
-        ->with($skripsi->id)
-        ->andReturn(true);
-    $api->shouldReceive('delete')
-        ->once()
-        ->with($skripsi->id)
-        ->andReturn(true);
-
-    $job = new RemoveSkripsiFromSimilarity($skripsi->id);
-    $job->handle($api, $statusService);
-
-    expect(SimilaritySyncStatus::query()
-        ->where('source_skripsi_id', $skripsi->id)
-        ->exists())->toBeFalse();
+        ->value('status'))->toBe(SimilaritySyncStatus::STATUS_FAILED);
 });

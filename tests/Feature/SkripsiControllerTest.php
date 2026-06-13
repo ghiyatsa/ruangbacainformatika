@@ -6,6 +6,28 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
+it('skripsi index page loads skripsis as deferred props', function () {
+    Queue::fake();
+
+    Skripsi::factory()->create([
+        'title' => 'Analisis Sistem Informasi Perpustakaan',
+        'author_name' => 'Budi Santoso',
+        'student_id' => '1234567890',
+        'year' => 2024,
+    ]);
+
+    get(route('skripsi.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('skripsi/index')
+            ->where('total', 1)
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('skripsis.data', 1)
+                ->where('skripsis.data.0.title', 'Analisis Sistem Informasi Perpustakaan')
+                ->where('skripsis.data.0.studentId', '1234567890')
+            ));
+});
+
 it('skripsi detail page renders correctly', function () {
     Queue::fake();
     $skripsi = Skripsi::factory()->create([

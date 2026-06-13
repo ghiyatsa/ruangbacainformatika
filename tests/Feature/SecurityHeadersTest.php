@@ -13,7 +13,7 @@ test('web responses include baseline security headers', function () {
         ->assertHeader('Content-Security-Policy')
         ->assertHeader(
             'Permissions-Policy',
-            'camera=(), geolocation=(), microphone=()',
+            'camera=(), geolocation=(), microphone=(), identity-credentials-get=(self "https://accounts.google.com")',
         );
 
     expect($contentSecurityPolicy)
@@ -32,7 +32,7 @@ test('kiosk responses allow camera access for the same origin only', function ()
     $response->assertOk()
         ->assertHeader(
             'Permissions-Policy',
-            'camera=(self), geolocation=(), microphone=()',
+            'camera=(self), geolocation=(), microphone=(), identity-credentials-get=(self "https://accounts.google.com")',
         );
 });
 

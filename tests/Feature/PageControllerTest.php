@@ -10,7 +10,7 @@ it('about page is displayed', function () {
         ->assertOk()
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('about')
+                ->component('about/index')
                 ->where('pageContent.summary', 'Informasi singkat tentang Ruang Baca Teknik Informatika Universitas Malikussaleh.')
                 ->where('pageContent.content', fn (string $content) => str_contains($content, 'Katalog terpadu'))
                 ->where('site.contactEmail', 'informatika@unimal.ac.id')
@@ -23,7 +23,7 @@ it('about team page is displayed', function () {
         ->assertOk()
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('about-team')
+                ->component('about/team')
                 ->where('site.contactEmail', 'informatika@unimal.ac.id'),
         );
 });
@@ -33,7 +33,7 @@ it('contact page is displayed', function () {
         ->assertOk()
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('contact')
+                ->component('contact/index')
                 ->where('site.address', 'Jl. Cot Tengku Nie, Reuleut, Aceh Utara 24355'),
         );
 });
@@ -43,7 +43,7 @@ it('privacy policy page is displayed', function () {
         ->assertOk()
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('privacy-policy')
+                ->component('legal/privacy')
                 ->where('pageContent.summary', 'Ringkasan penggunaan dan perlindungan data pengguna di Ruang Baca Teknik Informatika.')
                 ->where('pageContent.content', fn (string $content) => str_contains($content, 'Hak pengguna')),
         );
@@ -54,7 +54,7 @@ it('terms of service page is displayed', function () {
         ->assertOk()
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('terms-of-service')
+                ->component('legal/terms')
                 ->where('pageContent.summary', 'Ketentuan penggunaan layanan Ruang Baca Teknik Informatika.')
                 ->where('pageContent.content', fn (string $content) => str_contains($content, 'Ketentuan penggunaan layanan')),
         );
@@ -76,7 +76,7 @@ it('system static pages use the matching static page record when available', fun
         ->assertOk()
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('about')
+                ->component('about/index')
                 ->where('pageContent.summary', 'Ringkasan about dari resource.')
                 ->where('pageContent.content', '<h2>About Resource</h2><p>Isi about dari resource.</p>'),
         );

@@ -35,9 +35,6 @@ npm-debug.log
 yarn-error.log
 .eslintcache
 *.tsbuildinfo
-mailpit
-mailpit.exe
-mailpit.bin
 composer.phar
 
 # Editor/IDE Folders
@@ -49,4 +46,3 @@ composer.phar
 
 # Project Scratch & TestSprite Temp Directories
 /scratch/
-/testsprite_tests/tmp/

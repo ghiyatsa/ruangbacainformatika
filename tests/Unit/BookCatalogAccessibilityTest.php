@@ -53,30 +53,26 @@ it('renders disabled pagination items without forbidden aria attributes on ancho
 
 it('keeps breadcrumb heroes closer to the header across catalog and detail pages', function () {
     $catalogHeader = file_get_contents(
-        resource_path('js/components/catalog/ResourceCatalogHeader.tsx')
+        resource_path('js/features/books/components/CatalogHeader.tsx')
     );
     $bookDetailPage = file_get_contents(
         resource_path('js/features/books/components/BookDetailPage.tsx')
     );
-    $thesisDetailPage = file_get_contents(
-        resource_path('js/features/thesis/components/ThesisDetailPage.tsx')
-    );
-    $skripsiDetailPage = file_get_contents(
-        resource_path('js/features/skripsi/components/SkripsiDetailPage.tsx')
+    $academicWorkDetailPage = file_get_contents(
+        resource_path('js/features/academic-works/components/AcademicWorkDetailPage.tsx')
     );
     $internshipReportDetailPage = file_get_contents(
         resource_path('js/features/internship-report/components/InternshipReportDetailPage.tsx')
     );
     $detailSkeleton = file_get_contents(
-        resource_path('js/components/resource/ResourceDetailPageSkeleton.tsx')
+        resource_path('js/components/kti/KtiDetailPageSkeleton.tsx')
     );
 
     expect($catalogHeader)->toContain('pt-24 pb-12 sm:pt-30')
         ->and($catalogHeader)->toContain('className="mb-6"')
         ->and($bookDetailPage)->toContain('pt-24 pb-6 sm:pt-30 sm:pb-8')
         ->and($bookDetailPage)->toContain('className="mb-6"')
-        ->and($thesisDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
-        ->and($skripsiDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
+        ->and($academicWorkDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
         ->and($internshipReportDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
         ->and($detailSkeleton)->toContain('pt-24 pb-6 sm:pt-30 sm:pb-8')
         ->and($detailSkeleton)->toContain('pt-24 pb-12 sm:pt-30')
@@ -85,7 +81,7 @@ it('keeps breadcrumb heroes closer to the header across catalog and detail pages
 
 it('shows book card skeletons when mobile progressive pagination starts loading more results', function () {
     $mobileProgressivePagination = file_get_contents(
-        resource_path('js/components/catalog/MobileProgressivePagination.tsx')
+        resource_path('js/features/books/components/CatalogMobilePagination.tsx')
     );
     $bookCatalogPage = file_get_contents(
         resource_path('js/features/books/components/BookCatalogPage.tsx')
@@ -118,10 +114,10 @@ it('replaces the old welcome category-only surfaces with popular category book s
         resource_path('js/features/welcome/components/WelcomePage.tsx')
     );
     $catalogSection = file_get_contents(
-        resource_path('js/features/welcome/components/catalog/CatalogSection.tsx')
+        resource_path('js/features/welcome/components/CatalogSection.tsx')
     );
     $popularCategoryShelves = file_get_contents(
-        resource_path('js/features/welcome/components/catalog/PopularCategoryShelves.tsx')
+        resource_path('js/features/welcome/components/PopularCategoryShelves.tsx')
     );
 
     expect($welcomePage)->not->toBeFalse()
@@ -137,10 +133,10 @@ it('replaces the old welcome category-only surfaces with popular category book s
 
 it('renders a deferred most-borrowed books section on the welcome page', function () {
     $catalogSection = file_get_contents(
-        resource_path('js/features/welcome/components/catalog/CatalogSection.tsx')
+        resource_path('js/features/welcome/components/CatalogSection.tsx')
     );
     $mostBorrowedBooks = file_get_contents(
-        resource_path('js/features/welcome/components/catalog/MostBorrowedBooks.tsx')
+        resource_path('js/features/welcome/components/MostBorrowedBooks.tsx')
     );
 
     expect($catalogSection)->not->toBeFalse()
@@ -151,9 +147,9 @@ it('renders a deferred most-borrowed books section on the welcome page', functio
         ->and($mostBorrowedBooks)->toContain('skeletonCount={6}');
 });
 
-it('does not use a skipped heading level for skripsi card titles in the catalog grid', function () {
+it('does not use a skipped heading level for academic work card titles in the catalog grid', function () {
     $component = file_get_contents(
-        resource_path('js/features/skripsi/components/SkripsiCard.tsx')
+        resource_path('js/features/academic-works/components/AcademicWorkCard.tsx')
     );
 
     expect($component)->not->toBeFalse()
@@ -161,14 +157,27 @@ it('does not use a skipped heading level for skripsi card titles in the catalog 
         ->and($component)->toContain('<p className="line-clamp-3 text-sm leading-snug font-bold transition-colors group-hover:text-primary">');
 });
 
-it('does not use a skipped heading level for thesis card titles in the catalog grid', function () {
+it('uses the concrete deferred prop names for academic work catalog data', function () {
     $component = file_get_contents(
-        resource_path('js/features/thesis/components/ThesisCard.tsx')
+        resource_path('js/features/academic-works/components/AcademicWorkCatalogPage.tsx')
     );
 
     expect($component)->not->toBeFalse()
-        ->and($component)->not->toContain('<h3 className="line-clamp-3 text-sm leading-snug font-bold transition-colors group-hover:text-primary">')
-        ->and($component)->toContain('<p className="line-clamp-3 text-sm leading-snug font-bold transition-colors group-hover:text-primary">');
+        ->and($component)->toContain("const dataProp = workType === 'skripsi' ? 'skripsis' : 'theses';")
+        ->and($component)->toContain('deferredData={dataProp}')
+        ->and($component)->toContain('propKey={dataProp}')
+        ->and($component)->not->toContain('deferredData="academicWorks"')
+        ->and($component)->not->toContain('propKey="academicWorks"');
+});
+
+it('allows skeleton values inside KTI detail items without invalid paragraph nesting', function () {
+    $component = file_get_contents(
+        resource_path('js/components/kti/KtiDetailItem.tsx')
+    );
+
+    expect($component)->not->toBeFalse()
+        ->and($component)->toContain('<div className="mt-0.5 truncate text-sm font-semibold text-foreground">')
+        ->and($component)->not->toContain('<p className="mt-0.5 truncate text-sm font-semibold text-foreground">');
 });
 
 it('does not use a skipped heading level for internship report card titles in the catalog grid', function () {
@@ -183,7 +192,7 @@ it('does not use a skipped heading level for internship report card titles in th
 
 it('uses non-heading labels for footer navigation groups', function () {
     $component = file_get_contents(
-        resource_path('js/components/layouts/footer/FooterLinks.tsx')
+        resource_path('js/components/layout/footer/FooterLinks.tsx')
     );
 
     expect($component)->not->toBeFalse()
@@ -193,7 +202,7 @@ it('uses non-heading labels for footer navigation groups', function () {
 
 it('uses the lighter detail-book rendering path for performance-sensitive content', function () {
     $resourceDetailPage = file_get_contents(
-        resource_path('js/components/resource/ResourceDetailPage.tsx')
+        resource_path('js/components/kti/KtiDetailPage.tsx')
     );
     $bookDetailPage = file_get_contents(
         resource_path('js/features/books/components/BookDetailPage.tsx')

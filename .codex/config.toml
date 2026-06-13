@@ -3,11 +3,6 @@
 command = "npx"
 args = ["shadcn@latest", "mcp"]
 
-[mcp_servers.MCP_DOCKER]
-command = "docker"
-args = ["mcp", "gateway", "run", "--profile", "my_profile"]
-type = "stdio"
-
 [mcp_servers.laravel-boost]
 command = "php"
 args = ["artisan", "boost:mcp"]

@@ -15,31 +15,31 @@ class PageController extends Controller
 
     public function about(): Response
     {
-        return Inertia::render('about', [
+        return Inertia::render('about/index', [
             'pageContent' => $this->staticPageContent->about(),
         ]);
     }
 
     public function aboutTeam(): Response
     {
-        return Inertia::render('about-team');
+        return Inertia::render('about/team');
     }
 
     public function contact(): Response
     {
-        return Inertia::render('contact');
+        return Inertia::render('contact/index');
     }
 
     public function privacyPolicy(): Response
     {
-        return Inertia::render('privacy-policy', [
+        return Inertia::render('legal/privacy', [
             'pageContent' => $this->staticPageContent->privacyPolicy(),
         ]);
     }
 
     public function termsOfService(): Response
     {
-        return Inertia::render('terms-of-service', [
+        return Inertia::render('legal/terms', [
             'pageContent' => $this->staticPageContent->termsOfService(),
         ]);
     }
@@ -50,7 +50,7 @@ class PageController extends Controller
 
         abort_unless($page !== null, HttpResponse::HTTP_NOT_FOUND);
 
-        return Inertia::render('static-page', [
+        return Inertia::render('static/index', [
             'title' => $page->title,
             'pageContent' => [
                 'summary' => $page->summary,

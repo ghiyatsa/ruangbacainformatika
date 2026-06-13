@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Kiosk\BorrowBooksFromKiosk;
+use App\Actions\Kiosk\RegisterKioskVisit;
+use App\Actions\Kiosk\ResolveKioskMemberRegistrationClaim;
+use App\Actions\Kiosk\ReturnBooksFromKiosk;
+use App\Actions\Kiosk\SearchKioskBooks;
 use App\Http\Requests\Kiosk\BorrowBookRequest;
+use App\Http\Requests\Kiosk\FindMemberRequest;
 use App\Http\Requests\Kiosk\RegisterMemberRequest;
 use App\Http\Requests\Kiosk\ReturnBookRequest;
 use App\Http\Requests\Kiosk\SearchBooksRequest;
 use App\Http\Requests\Kiosk\SubmitVisitRequest;
 use App\Http\Requests\Kiosk\VerifyPinRequest;
 use App\Http\Resources\BookResource;
-use App\Models\Book;
-use App\Models\Loan;
 use App\Models\VisitLog;
 use App\Repositories\SettingRepository;
-use App\Services\KioskBorrowVerificationService;
-use App\Services\KioskLoanService;
+use App\Services\Kiosk\KioskMemberLookupService;
 use App\Services\KioskPinManager;
 use App\Services\MemberRegistrationClaimService;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -31,9 +31,9 @@ class KioskController extends Controller
     public function __construct(
         protected SettingRepository $settingRepository,
         protected KioskPinManager $kioskPinManager,
-        protected KioskLoanService $kioskLoanService,
-        protected KioskBorrowVerificationService $kioskBorrowVerificationService,
+        protected KioskMemberLookupService $kioskMemberLookupService,
         protected MemberRegistrationClaimService $memberRegistrationClaimService,
+        protected ResolveKioskMemberRegistrationClaim $resolveKioskMemberRegistrationClaim,
     ) {}
 
     public function show(Request $request): Response
@@ -173,34 +173,12 @@ class KioskController extends Controller
      */
     protected function resolveMemberRegistrationClaim(Request $request): ?array
     {
-        $presentedClaim = $request->session()->get('kiosk.member_registration_claim');
-
-        if (! is_array($presentedClaim)) {
-            return null;
-        }
-
-        $claim = $this->memberRegistrationClaimService->syncPresentedClaim($presentedClaim);
-
-        if ($claim === null) {
-            $request->session()->forget('kiosk.member_registration_claim');
-
-            return null;
-        }
-
-        $request->session()->put('kiosk.member_registration_claim', $claim);
-
-        return $claim;
+        return $this->resolveKioskMemberRegistrationClaim->execute($request);
     }
 
-    public function store(SubmitVisitRequest $request): RedirectResponse
+    public function store(SubmitVisitRequest $request, RegisterKioskVisit $registerKioskVisit): RedirectResponse
     {
-        $kioskDevice = $this->kioskPinManager->currentDevice($request);
-
-        VisitLog::create([
-            ...$request->validated(),
-            'kiosk_device_id' => $kioskDevice?->getKey(),
-            'visited_at' => now(),
-        ]);
+        $registerKioskVisit->execute($request, $request->validated());
 
         Inertia::flash('toast', [
             'type' => 'success',
@@ -210,7 +188,7 @@ class KioskController extends Controller
         return redirect()->route('kiosk.index', ['menu' => 'visit']);
     }
 
-    public function searchBooks(SearchBooksRequest $request): JsonResponse
+    public function searchBooks(SearchBooksRequest $request, SearchKioskBooks $searchKioskBooks): JsonResponse
     {
         $search = $request->validatedQuery();
         $mode = $request->validatedMode();
@@ -222,36 +200,18 @@ class KioskController extends Controller
             ]);
         }
 
-        $books = $mode === 'return'
-            ? $this->searchReturnableBooks($search, $memberIdentifier)
-            : $this->searchBorrowableBooks($search);
+        $books = $searchKioskBooks->execute($search, $mode, $memberIdentifier);
 
         return response()->json([
             'books' => BookResource::collection($books)->resolve(),
         ]);
     }
 
-    public function borrow(BorrowBookRequest $request): RedirectResponse
+    public function borrow(BorrowBookRequest $request, BorrowBooksFromKiosk $borrowBooksFromKiosk): RedirectResponse
     {
-        $member = $this->kioskBorrowVerificationService->resolveUser(
+        $loan = $borrowBooksFromKiosk->execute(
             $request->validatedVerificationPayload(),
-        );
-        $submittedMember = $this->kioskLoanService->findMemberByIdentifier(
             $request->validatedMemberIdentifier(),
-        );
-
-        if (! $submittedMember || $submittedMember->isNot($member)) {
-            throw ValidationException::withMessages([
-                'member_identifier' => 'Identitas anggota tidak sesuai dengan member key yang discan.',
-            ]);
-        }
-
-        $this->kioskBorrowVerificationService->consume(
-            $request->validatedVerificationPayload(),
-        );
-
-        $loan = $this->kioskLoanService->borrow(
-            $member->email,
             $request->validatedBookIds(),
         );
 
@@ -263,28 +223,12 @@ class KioskController extends Controller
         return redirect()->route('kiosk.index', ['menu' => 'borrow']);
     }
 
-    public function storeReturn(ReturnBookRequest $request): RedirectResponse
+    public function storeReturn(ReturnBookRequest $request, ReturnBooksFromKiosk $returnBooksFromKiosk): RedirectResponse
     {
-        $member = $this->kioskBorrowVerificationService->resolveUser(
+        $returnedCount = $returnBooksFromKiosk->execute(
             $request->validatedVerificationPayload(),
-        );
-        $submittedMember = $this->kioskLoanService->findMemberByIdentifier(
             $request->validatedMemberIdentifier(),
-        );
-
-        if (! $submittedMember || $submittedMember->isNot($member)) {
-            throw ValidationException::withMessages([
-                'member_identifier' => 'Identitas anggota tidak sesuai dengan member key yang discan.',
-            ]);
-        }
-
-        $returnedCount = $this->kioskLoanService->returnBooksByBookIds(
-            $member->email,
             $request->validatedBookIds(),
-        );
-
-        $this->kioskBorrowVerificationService->consume(
-            $request->validatedVerificationPayload(),
         );
 
         Inertia::flash('toast', [
@@ -295,106 +239,10 @@ class KioskController extends Controller
         return redirect()->route('kiosk.index', ['menu' => 'return']);
     }
 
-    public function findMember(Request $request): JsonResponse
+    public function findMember(FindMemberRequest $request): JsonResponse
     {
-        $identifier = (string) $request->query('identifier', '');
-
-        if (blank($identifier)) {
-            return response()->json([
-                'member' => null,
-            ]);
-        }
-
-        $member = $this->kioskLoanService->findMemberByIdentifier($identifier);
-
-        if (! $member) {
-            return response()->json([
-                'member' => null,
-            ]);
-        }
-
         return response()->json([
-            'member' => [
-                'name' => $member->name,
-                'emailMasked' => $member->email,
-                'whatsappMasked' => $this->maskPhoneNumber($member->whatsapp),
-            ],
+            'member' => $this->kioskMemberLookupService->preview($request->validatedIdentifier()),
         ]);
-    }
-
-    protected function maskEmail(?string $email): ?string
-    {
-        if (! is_string($email) || $email === '' || ! str_contains($email, '@')) {
-            return null;
-        }
-
-        [$localPart, $domain] = explode('@', Str::lower($email), 2);
-        $localLength = Str::length($localPart);
-
-        if ($localLength <= 2) {
-            $maskedLocalPart = Str::substr($localPart, 0, 1).'*';
-        } else {
-            $maskedLocalPart = Str::substr($localPart, 0, 2).str_repeat('*', max($localLength - 2, 2));
-        }
-
-        return "{$maskedLocalPart}@{$domain}";
-    }
-
-    protected function maskPhoneNumber(?string $phoneNumber): ?string
-    {
-        if (! is_string($phoneNumber) || $phoneNumber === '') {
-            return null;
-        }
-
-        $digits = preg_replace('/\D+/', '', $phoneNumber) ?? '';
-        $length = strlen($digits);
-
-        if ($length < 4) {
-            return null;
-        }
-
-        return substr($digits, 0, 4).str_repeat('*', max($length - 6, 1)).substr($digits, -2);
-    }
-
-    protected function searchBorrowableBooks(string $search): EloquentCollection
-    {
-        return Book::query()
-            ->search($search)
-            ->where('is_borrowable', true)
-            ->whereHas('items', fn ($query) => $query->available())
-            ->with(['authors:id,name'])
-            ->withCount('items')
-            ->withCount([
-                'items as available_items_count' => fn ($query) => $query->available(),
-            ])
-            ->orderBy('title')
-            ->limit(8)
-            ->get();
-    }
-
-    protected function searchReturnableBooks(string $search, string $memberIdentifier): EloquentCollection
-    {
-        $member = filled($memberIdentifier)
-            ? $this->kioskLoanService->findMemberByIdentifier($memberIdentifier)
-            : null;
-
-        if (! $member || ! $member->canBorrowBooks()) {
-            return new EloquentCollection;
-        }
-
-        return Book::query()
-            ->when($search !== '', fn ($query) => $query->search($search))
-            ->whereHas('items.loanItems', function ($query) use ($member) {
-                $query
-                    ->whereNull('returned_at', 'and', false)
-                    ->whereHas('loan', fn ($loanQuery) => $loanQuery
-                        ->whereBelongsTo($member)
-                        ->where('status', Loan::STATUS_BORROWED));
-            })
-            ->with(['authors:id,name'])
-            ->withCount('items')
-            ->orderBy('title')
-            ->limit(8)
-            ->get();
     }
 }

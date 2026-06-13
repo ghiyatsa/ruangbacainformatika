@@ -222,7 +222,7 @@ class AppServiceProvider extends ServiceProvider
 
             if (in_array($statusCode, [403, 404, 419, 429, 500, 503], true)) {
                 return $response
-                    ->render('error-page', [
+                    ->render('error/index', [
                         'status' => $statusCode,
                     ])
                     ->withSharedData();

@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Auth\AuthenticateGoogleIdentity;
+use App\Actions\Auth\HandleGoogleOneTapLogin;
+use App\Actions\Auth\ResolveGoogleAccount;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Services\Auth\AuthenticationRedirector;
-use App\Services\GoogleIdTokenVerifier;
+use App\Http\Requests\Auth\GoogleOneTapRequest;
+use App\Services\Auth\GoogleLoginConfiguration;
 use App\Services\MemberRegistrationClaimService;
-use App\Support\CampusEmail;
-use App\Support\GoogleAccountData;
 use GuzzleHttp\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -25,15 +23,16 @@ use Throwable;
 class GoogleController extends Controller
 {
     public function __construct(
-        protected AuthenticationRedirector $authenticationRedirector,
-        protected CampusEmail $campusEmail,
-        protected GoogleIdTokenVerifier $googleIdTokenVerifier,
+        protected AuthenticateGoogleIdentity $authenticateGoogleIdentity,
+        protected GoogleLoginConfiguration $googleLoginConfiguration,
+        protected HandleGoogleOneTapLogin $handleGoogleOneTapLogin,
         protected MemberRegistrationClaimService $memberRegistrationClaimService,
+        protected ResolveGoogleAccount $resolveGoogleAccount,
     ) {}
 
     public function redirectToGoogle(Request $request): Response
     {
-        if (! $this->isGoogleLoginConfigured()) {
+        if (! $this->googleLoginConfiguration->isConfigured()) {
             Inertia::flash('toast', [
                 'type' => 'error',
                 'message' => 'Konfigurasi login Google belum lengkap.',
@@ -74,7 +73,7 @@ class GoogleController extends Controller
         $linkToken = request()->session()->pull('auth.google.link_token');
 
         try {
-            if (! $this->isGoogleLoginConfigured()) {
+            if (! $this->googleLoginConfiguration->isConfigured()) {
                 Inertia::flash('toast', [
                     'type' => 'error',
                     'message' => 'Konfigurasi login Google belum lengkap.',
@@ -84,16 +83,10 @@ class GoogleController extends Controller
             }
 
             $googleUser = $this->googleProvider(request())->user();
-            $googleAccount = $this->resolveGoogleAccount(
-                $googleUser->getEmail(),
-                is_string($linkToken) ? $linkToken : null,
-            );
+            $googleAccount = $this->resolveGoogleAccount->execute($googleUser->getEmail());
 
-            if ($googleAccount instanceof RedirectResponse) {
-                return $googleAccount;
-            }
-
-            return $this->authenticateGoogleIdentity(
+            return $this->authenticateGoogleIdentity->execute(
+                request: request(),
                 googleId: $googleUser->getId(),
                 email: $googleAccount->email,
                 name: $googleUser->getName(),
@@ -115,136 +108,28 @@ class GoogleController extends Controller
         }
     }
 
-    public function handleOneTap(Request $request): Response
+    public function handleOneTap(GoogleOneTapRequest $request): Response
     {
-        $linkToken = $request->string('link_token')->trim()->toString();
+        $linkToken = $request->validatedLinkToken();
 
         try {
-            if (! $this->isGoogleLoginConfigured()) {
-                return $this->redirectToEntryWithError(
-                    'Konfigurasi login Google belum lengkap.',
-                    $linkToken !== '' ? $linkToken : null,
-                );
-            }
-
-            $validated = $request->validate([
-                'credential' => ['required', 'string', 'max:8192'],
-                'link_token' => ['nullable', 'string', 'max:255'],
-            ]);
-
-            $identity = $this->googleIdTokenVerifier->verify($validated['credential']);
-            $googleAccount = $this->resolveGoogleAccount(
-                $identity['email'],
-                $linkToken !== '' ? $linkToken : null,
-            );
-
-            if ($googleAccount instanceof RedirectResponse) {
-                return $googleAccount;
-            }
-
             return $this->toOneTapResponse(
                 $request,
-                $this->authenticateGoogleIdentity(
-                    googleId: $identity['sub'],
-                    email: $googleAccount->email,
-                    name: $identity['name'],
-                    avatarUrl: $identity['avatar'] ?? null,
-                    linkToken: $linkToken !== '' ? $linkToken : null,
-                ),
+                $this->handleGoogleOneTapLogin->execute($request),
             );
         } catch (ValidationException $exception) {
             return $this->redirectToEntryWithError(
                 collect($exception->errors())->flatten()->first() ?: 'Google One Tap gagal diproses.',
-                $linkToken !== '' ? $linkToken : null,
+                $linkToken,
             );
         } catch (Throwable $exception) {
             report($exception);
 
             return $this->redirectToEntryWithError(
                 'Google One Tap gagal diproses. Silakan coba lagi.',
-                $linkToken !== '' ? $linkToken : null,
+                $linkToken,
             );
         }
-    }
-
-    protected function authenticateGoogleIdentity(
-        string $googleId,
-        string $email,
-        ?string $name,
-        ?string $avatarUrl = null,
-        ?string $linkToken = null,
-    ): RedirectResponse {
-        $existingUser = User::query()
-            ->where('google_id', $googleId)
-            ->orWhere('email', $email)
-            ->first();
-
-        $pendingLink = null;
-
-        if ($linkToken !== null) {
-            $pendingLink = $this->memberRegistrationClaimService->findByToken($linkToken);
-
-            if (! $pendingLink) {
-                throw ValidationException::withMessages([
-                    'link' => 'Permintaan penautan akun tidak ditemukan atau sudah tidak berlaku.',
-                ]);
-            }
-
-            if (! hash_equals(Str::lower($pendingLink->email), $email)) {
-                throw ValidationException::withMessages([
-                    'link' => 'Gunakan akun Google dengan email UNIMAL yang sama seperti data registrasi.',
-                ]);
-            }
-        }
-
-        $user = User::updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => $name ?: $existingUser?->name ?: Str::before($email, '@'),
-                'google_id' => $googleId,
-                'avatar_url' => filter_var($avatarUrl, FILTER_VALIDATE_URL) ? $avatarUrl : $existingUser?->avatarUrl(),
-                'auth_provider' => 'google',
-                'is_approved' => $existingUser?->is_approved || $this->campusEmail->shouldAutoApprove($email),
-            ],
-        );
-
-        if ($pendingLink !== null) {
-            $this->memberRegistrationClaimService->consume($linkToken, $googleId, $user);
-        }
-
-        Auth::guard('web')->login($user);
-        request()->session()->regenerate();
-
-        return $this->authenticationRedirector->redirectResponse(request(), $user);
-    }
-
-    protected function resolveGoogleAccount(?string $rawEmail, ?string $linkToken = null): GoogleAccountData|RedirectResponse
-    {
-        if ($rawEmail === null) {
-            return $this->redirectToEntryWithError('Akun Google Anda tidak memiliki email yang valid.', $linkToken);
-        }
-
-        $normalizedEmail = Str::lower(trim($rawEmail));
-
-        if ($normalizedEmail === '') {
-            return $this->redirectToEntryWithError('Akun Google Anda tidak memiliki email yang valid.', $linkToken);
-        }
-
-        if (! filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
-            return $this->redirectToEntryWithError('Akun Google Anda tidak memiliki email yang valid.', $linkToken);
-        }
-
-        return new GoogleAccountData(
-            email: $normalizedEmail,
-            isApproved: $this->campusEmail->shouldAutoApprove($normalizedEmail),
-        );
-    }
-
-    protected function isGoogleLoginConfigured(): bool
-    {
-        return filled(Config::string('services.google.client_id'))
-            && filled(Config::string('services.google.client_secret'))
-            && filled(Config::string('services.google.redirect'));
     }
 
     protected function redirectToEntryWithError(string $message, ?string $linkToken = null): RedirectResponse

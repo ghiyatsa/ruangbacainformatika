@@ -20,8 +20,6 @@ class SimilarityApiService
 
     private const BULK_JOB_POLL_DELAY_US = 500000;
 
-    private const INDEXED_IDS_PAGE_SIZE = 500;
-
     private ?string $baseUrl = null;
 
     private ?string $secret = null;
@@ -357,27 +355,6 @@ class SimilarityApiService
         return null;
     }
 
-    public function hasIndexedId(int $skripsiId): ?bool
-    {
-        $offset = 0;
-
-        do {
-            $page = $this->indexedIds(limit: self::INDEXED_IDS_PAGE_SIZE, offset: $offset);
-
-            if ($page === null) {
-                return null;
-            }
-
-            if (in_array($skripsiId, $page['ids'], true)) {
-                return true;
-            }
-
-            $offset = $page['next_offset'];
-        } while ($offset !== null);
-
-        return false;
-    }
-
     /**
      * Hapus skripsi dari vector store berdasarkan ID Laravel.
      */
@@ -388,7 +365,7 @@ class SimilarityApiService
                 fn (PendingRequest $request): Response => $request->delete("/api/v1/sync/{$laravelId}"),
             );
 
-            if ($response->successful()) {
+            if ($response->successful() || $response->notFound()) {
                 return true;
             }
 

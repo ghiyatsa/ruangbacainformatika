@@ -29,7 +29,7 @@ it('home page shows published books from the catalog', function () {
     get(route('home'))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->where('stats.booksCount', 1)
                 ->where('stats.featuredCount', 1)
                 ->where('stats.availableItemsCount', 1)
@@ -53,7 +53,7 @@ it('home page does not expose search filtering', function () {
     get(route('home', ['search' => 'Atomic']))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->missing('filters'),
         );
 });
@@ -79,7 +79,7 @@ it('home page previews the newest books instead of prioritizing featured books',
     get(route('home'))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->loadDeferredProps(
                     fn (Assert $reload) => $reload
                         ->where('books.data.0.title', 'Buku Terbaru')
@@ -125,7 +125,7 @@ it('home page exposes top popular-category shelves and most viewed books', funct
     get(route('home'))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->where('stats.activeCategoriesCount', 2)
                 ->loadDeferredProps(
                     fn (Assert $reload) => $reload
@@ -159,7 +159,7 @@ it('home page excludes non-borrowable books from available counts', function () 
     get(route('home'))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->where('stats.availableItemsCount', 0)
                 ->where('stats.activeCategoriesCount', 0)
                 ->loadDeferredProps(
@@ -204,7 +204,7 @@ it('home page exposes books ordered by the most borrowing history', function () 
     get(route('home'))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->loadDeferredProps(
                     fn (Assert $reload) => $reload
                         ->has('mostBorrowedBooks', 2)
@@ -218,7 +218,7 @@ it('home page exposes zeroed stats when the catalog is empty', function () {
     get(route('home'))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->where('stats.booksCount', 0)
                 ->where('stats.featuredCount', 0)
                 ->where('stats.availableItemsCount', 0)
@@ -243,7 +243,7 @@ it('home page limits popular category shelves to the top three categories', func
     get(route('home'))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->where('stats.activeCategoriesCount', 30)
                 ->loadDeferredProps('popular-category-shelves', fn (Assert $reload) => $reload
                     ->has('popularCategoryShelves', 3)
@@ -278,7 +278,7 @@ it('home page shares the hero notice from general settings', function () {
     get(route('home'))
         ->assertInertia(
             fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('welcome/index')
                 ->where('site.notice.isActive', true)
                 ->where('site.notice.text', 'Layanan perpustakaan tutup pada Jumat, 30 Mei 2026.')
                 ->where('site.notice.url', 'https://example.com/pengumuman')
