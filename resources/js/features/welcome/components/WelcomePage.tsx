@@ -1,5 +1,5 @@
 import { SeoHead } from '@/components/common/SeoHead';
-import CatalogSection from '@/features/welcome/components/catalog/CatalogSection';
+import CatalogSection from '@/features/welcome/components/CatalogSection';
 import Hero from '@/features/welcome/components/Hero';
 import type { WelcomeProps } from '@/features/welcome/types';
 

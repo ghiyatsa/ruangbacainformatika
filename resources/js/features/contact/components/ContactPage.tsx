@@ -2,8 +2,8 @@ import { Form, usePage } from '@inertiajs/react';
 import { Mail, User, Phone, Tag, MessageSquare } from 'lucide-react';
 import ContactMessageController from '@/actions/App/Http/Controllers/ContactMessageController';
 import InputError from '@/components/common/InputError';
-import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
-import { PageLayout } from '@/components/layouts/PageLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { PublicPageHero } from '@/components/layout/PublicPageHero';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -31,7 +31,7 @@ export function ContactPage() {
             maxWidth="5xl"
             showDesktopNoticeInContent={false}
             header={
-                <LibraryPageHero
+                <PublicPageHero
                     title={
                         <>
                             Hubungi{' '}

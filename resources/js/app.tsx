@@ -1,8 +1,8 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { createElement } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
-import { LazyToaster } from '@/components/app/LazyToaster';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { LazyToaster } from '@/components/layout/LazyToaster';
 import { initializeTheme } from '@/hooks/use-appearance';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import AppLayout from '@/layouts/AppLayout';
@@ -66,7 +66,7 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name === 'error-page':
+            case name === 'error/index':
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
@@ -80,6 +80,10 @@ createInertiaApp({
     },
     strictMode: true,
     setup({ el, App, props }) {
+        if (!el) {
+            return;
+        }
+
         const rootElement = el as RootElement;
         const app = createElement(App, props);
         const wrappedApp = <AppProviders>{app}</AppProviders>;

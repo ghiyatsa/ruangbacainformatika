@@ -7,9 +7,9 @@ import {
     Search,
     Tags,
 } from 'lucide-react';
-import CountUp from '@/components/common/CountUp';
-import ShinyText from '@/components/common/ShinyText';
-import StarBorder from '@/components/common/StarBorder';
+import CountUp from '@/components/animated/CountUp';
+import ShinyText from '@/components/animated/ShinyText';
+import StarBorder from '@/components/animated/StarBorder';
 import { Kbd } from '@/components/ui/kbd';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { RUANG_BACA_DESCRIPTION } from '@/lib/brand';

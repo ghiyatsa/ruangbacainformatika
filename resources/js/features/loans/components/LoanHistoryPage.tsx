@@ -14,7 +14,6 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import ReturnDraftController from '@/actions/App/Http/Controllers/ReturnDraftController';
-import { ResourcePagination } from '@/components/catalog/ResourcePagination';
 import InputError from '@/components/common/InputError';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,6 +39,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { CatalogPagination } from '@/features/books/components/CatalogPagination';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { downloadSvgAsPng } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -886,7 +886,7 @@ export default function LoanHistoryPage({
                             </Card>
 
                             <div className="pt-2">
-                                <ResourcePagination
+                                <CatalogPagination
                                     data={loans}
                                     resourceName="riwayat buku"
                                 />

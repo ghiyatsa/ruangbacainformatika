@@ -1,10 +1,10 @@
 import { Deferred, router } from '@inertiajs/react';
 import { lazy, Suspense, useState } from 'react';
-import { CatalogPage } from '@/components/catalog/CatalogPage';
-import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import BookCatalogFiltersSkeleton from '@/features/books/components/BookCatalogFiltersSkeleton';
 import { BookCatalogResults } from '@/features/books/components/BookCatalogResults';
+import { CatalogMobilePagination } from '@/features/books/components/CatalogMobilePagination';
+import { CatalogPage } from '@/features/books/components/CatalogPage';
 import booksRoute from '@/routes/books';
 import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
 
@@ -122,7 +122,7 @@ export default function BookCatalogPage({
             }
         >
             <BookCatalogResults books={books} viewMode={viewMode} />
-            <MobileProgressivePagination
+            <CatalogMobilePagination
                 key={`desktop-${JSON.stringify(filters)}`}
                 data={books}
                 propKey="books"
@@ -150,7 +150,7 @@ export default function BookCatalogPage({
                     </div>
                 }
             />
-            <MobileProgressivePagination
+            <CatalogMobilePagination
                 key={JSON.stringify(filters)}
                 data={books}
                 propKey="books"

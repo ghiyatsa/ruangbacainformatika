@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { QrCode, UserIcon } from 'lucide-react';
 import { useDeferredValue, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
 import KioskReturnDraftController from '@/actions/App/Http/Controllers/KioskReturnDraftController';
@@ -21,9 +22,14 @@ import {
 } from '@/components/ui/input-group';
 import { Spinner } from '@/components/ui/spinner';
 import { KioskField } from '@/features/kiosk/components/KioskField';
-import { QrCameraScanner } from '@/features/kiosk/components/QrCameraScanner';
 import type { QrCameraScannerHandle } from '@/features/kiosk/components/QrCameraScanner';
 import type { KioskBookSearchResult } from '@/features/kiosk/types';
+const QrCameraScanner = lazy(() =>
+    import('@/features/kiosk/components/QrCameraScanner').then((module) => ({
+        default: module.QrCameraScanner,
+    })),
+);
+
 
 function getQrErrorMessage(
     errors: Record<string, string | undefined>,
@@ -394,6 +400,8 @@ export function ReturnForm() {
                                             <img
                                                 src={book.coverImageUrl}
                                                 alt={book.title}
+                                                width={48}
+                                                height={64}
                                                 className="h-16 w-12 shrink-0 rounded-md border border-border/70 object-cover"
                                                 loading="lazy"
                                             />
@@ -458,10 +466,20 @@ export function ReturnForm() {
                     </DialogHeader>
 
                     <div className="space-y-4">
-                        <QrCameraScanner
-                            ref={memberKeyScannerRef}
-                            onDetected={submitDetectedMemberKey}
-                        />
+                        <Suspense
+                            fallback={
+                                <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
+                                    <span className="text-sm text-muted-foreground">
+                                        Memuat kamera...
+                                    </span>
+                                </div>
+                            }
+                        >
+                            <QrCameraScanner
+                                ref={memberKeyScannerRef}
+                                onDetected={submitDetectedMemberKey}
+                            />
+                        </Suspense>
 
                         {manualForm.processing ? (
                             <Alert>
@@ -532,10 +550,20 @@ export function ReturnForm() {
                     </DialogHeader>
 
                     <div className="space-y-4">
-                        <QrCameraScanner
-                            ref={qrScannerRef}
-                            onDetected={submitDetectedQr}
-                        />
+                        <Suspense
+                            fallback={
+                                <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
+                                    <span className="text-sm text-muted-foreground">
+                                        Memuat kamera...
+                                    </span>
+                                </div>
+                            }
+                        >
+                            <QrCameraScanner
+                                ref={qrScannerRef}
+                                onDetected={submitDetectedQr}
+                            />
+                        </Suspense>
 
                         {qrForm.processing ? (
                             <Alert>

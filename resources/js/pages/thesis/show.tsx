@@ -1,6 +1,21 @@
-import ThesisDetailPage from '@/features/thesis/components/ThesisDetailPage';
-import type { ThesisShowProps } from '@/features/thesis/types';
+import AcademicWorkDetailPage from '@/features/academic-works/components/AcademicWorkDetailPage';
+import type { AcademicWorkData } from '@/features/academic-works/types';
 
-export default function ThesisShow(props: ThesisShowProps) {
-    return <ThesisDetailPage {...props} />;
+interface ThesisShowProps {
+    thesis: {
+        data: AcademicWorkData;
+    };
+    relatedTheses?: AcademicWorkData[];
 }
+
+export default function ThesisShow({ thesis, relatedTheses, ...props }: ThesisShowProps) {
+    return (
+        <AcademicWorkDetailPage
+            workType="thesis"
+            academicWork={thesis}
+            relatedWorks={relatedTheses}
+            {...props}
+        />
+    );
+}
+

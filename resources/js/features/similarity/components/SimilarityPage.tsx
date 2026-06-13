@@ -8,8 +8,8 @@ import {
     Info,
 } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
-import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
-import { PageLayout } from '@/components/layouts/PageLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { PublicPageHero } from '@/components/layout/PublicPageHero';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -185,7 +185,7 @@ export default function SimilarityPage({
             maxWidth="5xl"
             showDesktopNoticeInContent={false}
             header={
-                <LibraryPageHero
+                <PublicPageHero
                     title={
                         <span>
                             Cek{' '}
@@ -265,7 +265,7 @@ export default function SimilarityPage({
                                     </span>
                                     <div className="flex items-center gap-1.5">
                                         <span
-                                            className={`inline-flex size-4 items-center justify-center rounded-full text-[10px] ${isWordCountValid ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}`}
+                                            className={`inline-flex size-4 items-center justify-center rounded-full text-[10px] ${isWordCountValid ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}`}
                                         >
                                             {isWordCountValid ? (
                                                 <Check className="size-3" />
@@ -276,7 +276,7 @@ export default function SimilarityPage({
                                         <span
                                             className={
                                                 isWordCountValid
-                                                    ? 'font-medium text-emerald-600 dark:text-emerald-400'
+                                                    ? 'font-medium text-emerald-700 dark:text-emerald-400'
                                                     : 'text-muted-foreground'
                                             }
                                         >
@@ -285,7 +285,7 @@ export default function SimilarityPage({
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <span
-                                            className={`inline-flex size-4 items-center justify-center rounded-full text-[10px] ${isCharCountValid ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}`}
+                                            className={`inline-flex size-4 items-center justify-center rounded-full text-[10px] ${isCharCountValid ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}`}
                                         >
                                             {isCharCountValid ? (
                                                 <Check className="size-3" />
@@ -296,7 +296,7 @@ export default function SimilarityPage({
                                         <span
                                             className={
                                                 isCharCountValid
-                                                    ? 'font-medium text-emerald-600 dark:text-emerald-400'
+                                                    ? 'font-medium text-emerald-700 dark:text-emerald-400'
                                                     : 'text-muted-foreground'
                                             }
                                         >
@@ -390,7 +390,7 @@ export default function SimilarityPage({
                                             className="flex items-center gap-3 transition-all duration-300"
                                         >
                                             {isDone ? (
-                                                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                                                     <Check className="size-3.5 stroke-[3px]" />
                                                 </span>
                                             ) : isActive ? (

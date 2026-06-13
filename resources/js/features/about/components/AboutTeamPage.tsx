@@ -1,8 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, Mail } from 'lucide-react';
 import { useState } from 'react';
-import { LibraryPageHero } from '@/components/layouts/LibraryPageHero';
-import { PageLayout } from '@/components/layouts/PageLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { PublicPageHero } from '@/components/layout/PublicPageHero';
 import { Button } from '@/components/ui/button';
 import { contact } from '@/routes';
 
@@ -112,7 +112,7 @@ export function AboutTeamPage() {
             className="py-10 sm:py-14 lg:py-16 [&>div]:px-4 [&>div]:sm:px-6 [&>div]:lg:px-8"
             showDesktopNoticeInContent={false}
             header={
-                <LibraryPageHero
+                <PublicPageHero
                     title={
                         <>
                             Tim{' '}
@@ -134,6 +134,8 @@ export function AboutTeamPage() {
                         <img
                             src="/images/team-photo.jpg"
                             alt="Foto Bersama Tim Ruang Baca"
+                            width={1024}
+                            height={576}
                             className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.01]"
                         />
 

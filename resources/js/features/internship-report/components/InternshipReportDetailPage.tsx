@@ -9,24 +9,24 @@ import {
     User,
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { DeferredGlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
-import { CatalogReportCard } from '@/components/resource/CatalogReportCard';
-import { CatalogResourceCardSkeleton } from '@/components/resource/CatalogResourceCardSkeleton';
-import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
-import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
-import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
-import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
+import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
+import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
+import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
+import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
+import { KtiReportCard } from '@/components/kti/KtiReportCard';
+import { KtiShareButton } from '@/components/kti/KtiShareButton';
+import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import InternshipReportCard from '@/features/internship-report/components/InternshipReportCard';
-import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
-import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
 import { cn } from '@/lib/utils';
 import internshipReportsRoute from '@/routes/internship-reports';
+import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 import type { InternshipReportShowProps } from '@/features/internship-report/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
 export default function InternshipReportDetailPage(
     props: InternshipReportShowProps & { loading?: boolean },
@@ -66,7 +66,7 @@ export default function InternshipReportDetailPage(
         : ['laporan kerja praktik informatika', 'ruang baca informatika'];
 
     return (
-        <ResourceDetailPage
+        <KtiDetailPage
             title={report?.title ?? 'Detail Laporan KP'}
             description={
                 report?.abstract
@@ -77,7 +77,7 @@ export default function InternshipReportDetailPage(
             }
             keywords={seoKeywords}
             hero={
-                <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28">
+                <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28 md:-mt-24">
                     <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
 
                     <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
@@ -177,7 +177,7 @@ export default function InternshipReportDetailPage(
                                                 : 'Simpan'}
                                         </Button>
 
-                                        <CatalogShareButton
+                                        <KtiShareButton
                                             title={report.title}
                                             subtitle={report.authorName}
                                             kindLabel="Laporan KP"
@@ -242,18 +242,18 @@ export default function InternshipReportDetailPage(
                         <div className="p-2">
                             {report ? (
                                 <>
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<User className="size-4" />}
                                         label="Penulis"
                                         value={report.authorName}
                                     />
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<Hash className="size-4" />}
                                         label="NIM"
                                         value={report.studentId}
                                     />
                                     {report.year ? (
-                                        <ResourceDetailItem
+                                        <KtiDetailItem
                                             icon={<Calendar className="size-4" />}
                                             label="Tahun"
                                             value={String(report.year)}
@@ -262,17 +262,17 @@ export default function InternshipReportDetailPage(
                                 </>
                             ) : (
                                 <>
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<User className="size-4" />}
                                         label="Penulis"
                                         value={<Skeleton className="h-5 w-32 animate-pulse" />}
                                     />
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<Hash className="size-4" />}
                                         label="NIM"
                                         value={<Skeleton className="h-5 w-24 animate-pulse" />}
                                     />
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<Calendar className="size-4" />}
                                         label="Tahun"
                                         value={<Skeleton className="h-5 w-16 animate-pulse" />}
@@ -323,7 +323,7 @@ export default function InternshipReportDetailPage(
                     )}
 
                     {report && (
-                        <CatalogReportCard
+                        <KtiReportCard
                             catalogType="internship_report"
                             catalogId={report.id}
                             catalogLabel="Laporan KP"
@@ -334,7 +334,7 @@ export default function InternshipReportDetailPage(
             }
             footer={
                 (props.relatedReports === undefined || props.relatedReports.length > 0) && (
-                    <RelatedCatalogSection
+                    <KtiRelatedSection
                         title="Laporan KP Terkait"
                         description="Daftar laporan kerja praktik lainnya dengan topik atau bidang pembahasan serupa."
                     >
@@ -342,9 +342,9 @@ export default function InternshipReportDetailPage(
                             data="relatedReports"
                             fallback={
                                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                    <CatalogResourceCardSkeleton />
-                                    <CatalogResourceCardSkeleton />
-                                    <CatalogResourceCardSkeleton />
+                                    <KtiCardSkeleton />
+                                    <KtiCardSkeleton />
+                                    <KtiCardSkeleton />
                                 </div>
                             }
                             rescue={({ reloading }) => (
@@ -365,7 +365,7 @@ export default function InternshipReportDetailPage(
                                 ))}
                             </div>
                         </Deferred>
-                    </RelatedCatalogSection>
+                    </KtiRelatedSection>
                 )
             }
         >
@@ -407,8 +407,9 @@ export default function InternshipReportDetailPage(
                     </div>
                 )}
             </section>
-        </ResourceDetailPage>
+        </KtiDetailPage>
     );
 }
 
 // test_compatibility: pt-24 pb-12 sm:pt-30
+

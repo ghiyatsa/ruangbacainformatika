@@ -276,6 +276,8 @@ export function BookActionForm({
                                                                             alt={
                                                                                 book.title
                                                                             }
+                                                                            width={48}
+                                                                            height={64}
                                                                             className="h-16 w-12 shrink-0 rounded-md border border-border/70 object-cover"
                                                                             loading="lazy"
                                                                         />

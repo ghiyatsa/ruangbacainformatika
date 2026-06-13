@@ -1,7 +1,7 @@
 import React, { Component, Suspense, lazy } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 
-const ErrorPage = lazy(() => import('@/pages/error-page'));
+const ErrorPage = lazy(() => import('@/pages/error/index'));
 
 interface Props {
     children?: ReactNode;

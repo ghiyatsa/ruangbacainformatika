@@ -19,11 +19,11 @@ import { useState } from 'react';
 
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
-import { DeferredGlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
-import { CatalogShareButton } from '@/components/resource/CatalogShareButton';
-import { RelatedCatalogSection } from '@/components/resource/RelatedCatalogSection';
-import { ResourceDetailItem } from '@/components/resource/ResourceDetailItem';
-import { ResourceDetailPage } from '@/components/resource/ResourceDetailPage';
+import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
+import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
+import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
+import { KtiShareButton } from '@/components/kti/KtiShareButton';
+import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,13 +37,13 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
-import DeferredCatalogRescue from '@/features/welcome/components/catalog/DeferredCatalogRescue';
-import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
+import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 
+import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 import type { BookData, LoanRequestSummary } from '@/features/books/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import type { Auth, LoanRequestCart } from '@/types';
 
 export interface BookDetailPageProps {
@@ -150,7 +150,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
     const publisherData = book?.publisherData;
 
     return (
-        <ResourceDetailPage
+        <KtiDetailPage
             title={book?.title ?? 'Detail Buku'}
             description={
                 book?.description
@@ -165,7 +165,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             deferSecondaryContent
             contentClassName="pt-2 pb-10 sm:pt-3"
             hero={
-                <div className="relative -mt-20 overflow-hidden sm:-mt-28">
+                <div className="relative -mt-20 overflow-hidden sm:-mt-28 md:-mt-24">
                     <div
                         className="pointer-events-none absolute inset-0"
                         aria-hidden="true"
@@ -209,6 +209,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                     fetchPriority="high"
                                                     decoding="async"
                                                     loading="lazy"
+                                                    width={256}
+                                                    height={341}
                                                     sizes="100vw"
                                                     onLoad={() => setImageLoaded(true)}
                                                     className={cn(
@@ -233,6 +235,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                                 fetchPriority="high"
                                                                 decoding="async"
                                                                 loading="lazy"
+                                                                width={288}
+                                                                height={384}
                                                                 sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
                                                                 onLoad={() => setImageLoaded(true)}
                                                                 className="block h-full max-h-[28rem] w-auto max-w-full object-contain transition duration-300"
@@ -254,6 +258,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                             <img
                                                                 src={book.coverImageUrl}
                                                                 alt={`Cover penuh buku ${book.title}`}
+                                                                width={448}
+                                                                height={600}
                                                                 className="max-h-[80vh] w-full object-contain"
                                                             />
                                                         </div>
@@ -334,7 +340,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                     <Skeleton className="mb-3 h-6 w-3/5" />
                                 )}
 
-                                <p className="mb-6 text-base font-medium text-muted-foreground sm:text-lg">
+                                <div className="mb-6 text-base font-medium text-muted-foreground sm:text-lg">
                                     {book ? (
                                         authorsData && authorsData.length > 0 ? (
                                             authorsData.map((author, index) => (
@@ -358,7 +364,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                     ) : (
                                         <Skeleton className="h-5 w-2/5" />
                                     )}
-                                </p>
+                                </div>
 
                                 <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center">
                                     {book ? (
@@ -458,7 +464,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                     : 'Simpan'}
                                             </Button>
 
-                                            <CatalogShareButton
+                                            <KtiShareButton
                                                 title={book.title}
                                                 subtitle={
                                                     book.authors.join(', ') ||
@@ -527,7 +533,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                             {book ? (
                                 <>
                                     {book.publisher ? (
-                                        <ResourceDetailItem
+                                        <KtiDetailItem
                                             icon={<Building2 className="size-4" />}
                                             label="Penerbit"
                                             value={
@@ -547,21 +553,21 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                         />
                                     ) : null}
                                     {book.publishedYear ? (
-                                        <ResourceDetailItem
+                                        <KtiDetailItem
                                             icon={<Calendar className="size-4" />}
                                             label="Tahun"
                                             value={String(book.publishedYear)}
                                         />
                                     ) : null}
                                     {book.isbn || book.issn ? (
-                                        <ResourceDetailItem
+                                        <KtiDetailItem
                                             icon={<Hash className="size-4" />}
                                             label={book.isbn ? 'ISBN' : 'ISSN'}
                                             value={book.isbn ?? book.issn ?? '-'}
                                         />
                                     ) : null}
                                     {book.pages ? (
-                                        <ResourceDetailItem
+                                        <KtiDetailItem
                                             icon={<FileText className="size-4" />}
                                             label="Halaman"
                                             value={`${book.pages} halaman`}
@@ -590,7 +596,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                             </div>
                                         </div>
                                     ) : null}
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<Globe className="size-4" />}
                                         label="Bahasa"
                                         value={book.language ?? '-'}
@@ -598,32 +604,32 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                 </>
                             ) : (
                                 <>
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<Building2 className="size-4" />}
                                         label="Penerbit"
                                         value={<Skeleton className="h-5 w-28 animate-pulse" />}
                                     />
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<Calendar className="size-4" />}
                                         label="Tahun"
                                         value={<Skeleton className="h-5 w-16 animate-pulse" />}
                                     />
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<Hash className="size-4" />}
                                         label="ISBN"
                                         value={<Skeleton className="h-5 w-32 animate-pulse" />}
                                     />
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<FileText className="size-4" />}
                                         label="Halaman"
                                         value={<Skeleton className="h-5 w-20 animate-pulse" />}
                                     />
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<MapPinned className="size-4" />}
                                         label="Lokasi Rak"
                                         value={<Skeleton className="h-5 w-24 animate-pulse" />}
                                     />
-                                    <ResourceDetailItem
+                                    <KtiDetailItem
                                         icon={<Globe className="size-4" />}
                                         label="Bahasa"
                                         value={<Skeleton className="h-5 w-16 animate-pulse" />}
@@ -636,7 +642,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             }
             footer={
                 (props.relatedBooks === undefined || props.relatedBooks.length > 0) && (
-                    <RelatedCatalogSection
+                    <KtiRelatedSection
                         title="Buku Terkait"
                         description="Rekomendasi buku lainnya dengan kategori atau topik serupa."
                     >
@@ -669,7 +675,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                 ))}
                             </div>
                         </Deferred>
-                    </RelatedCatalogSection>
+                    </KtiRelatedSection>
                 )
             }
         >
@@ -698,8 +704,9 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                     <BookDescriptionSkeleton />
                 )}
             </section>
-        </ResourceDetailPage>
+        </KtiDetailPage>
     );
 }
 
 // test_compatibility: pt-24 pb-6 sm:pt-30 sm:pb-8 className="mb-6" className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]"
+

@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react';
-import { CatalogPage } from '@/components/catalog/CatalogPage';
-import { MobileProgressivePagination } from '@/components/catalog/MobileProgressivePagination';
-import { CatalogResourceCardSkeleton } from '@/components/resource/CatalogResourceCardSkeleton';
+import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
+import { CatalogMobilePagination } from '@/features/books/components/CatalogMobilePagination';
+import { CatalogPage } from '@/features/books/components/CatalogPage';
 import internshipReportRoute from '@/routes/internship-reports';
 import { InternshipReportCatalogFilters } from './InternshipReportCatalogFilters';
 import { InternshipReportCatalogResults } from './InternshipReportCatalogResults';
@@ -59,13 +59,13 @@ export default function InternshipReportCatalogPage({
             loadingFallback={
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                     {Array.from({ length: 10 }).map((_, index) => (
-                        <CatalogResourceCardSkeleton key={index} />
+                        <KtiCardSkeleton key={index} />
                     ))}
                 </div>
             }
         >
             <InternshipReportCatalogResults reports={reports} />
-            <MobileProgressivePagination
+            <CatalogMobilePagination
                 key={JSON.stringify(filters)}
                 data={reports}
                 propKey="reports"
@@ -74,3 +74,4 @@ export default function InternshipReportCatalogPage({
         </CatalogPage>
     );
 }
+

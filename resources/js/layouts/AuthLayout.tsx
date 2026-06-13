@@ -1,4 +1,4 @@
-import { AppLogo } from '@/components/layouts/header/AppLogo';
+import { AppLogo } from '@/components/layout/header/AppLogo';
 import {
     Card,
     CardContent,
@@ -7,6 +7,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { FieldDescription } from '@/components/ui/field';
+import GoogleOneTapPrompt from '@/features/auth/components/GoogleOneTapPrompt';
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
@@ -28,6 +29,7 @@ export default function AuthLayout({
                 isCardLayout ? 'bg-muted' : 'bg-background',
             )}
         >
+            <GoogleOneTapPrompt />
             <div className="flex w-full max-w-sm flex-col gap-6">
                 <div className="flex w-full justify-center">
                     <AppLogo />

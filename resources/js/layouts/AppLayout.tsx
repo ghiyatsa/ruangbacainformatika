@@ -1,10 +1,10 @@
 import { usePage } from '@inertiajs/react';
-import GoogleOneTapPrompt from '@/components/auth/GoogleOneTapPrompt';
-import { AppContent } from '@/components/layouts/AppContent';
-import { AppShell } from '@/components/layouts/AppShell';
-import Footer from '@/components/layouts/footer';
-import { DeferredGlobalContentNotice } from '@/components/layouts/GlobalContentNotice';
-import { AppHeader } from '@/components/layouts/header';
+import { AppContent } from '@/components/layout/AppContent';
+import { AppShell } from '@/components/layout/AppShell';
+import Footer from '@/components/layout/footer';
+import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
+import { AppHeader } from '@/components/layout/header';
+import GoogleOneTapPrompt from '@/features/auth/components/GoogleOneTapPrompt';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppLayout({
@@ -12,7 +12,7 @@ export default function AppLayout({
     hideSearch = false,
 }: AppLayoutProps & { hideSearch?: boolean }) {
     const { component } = usePage();
-    const isWelcome = component === 'welcome';
+    const isWelcome = component === 'welcome' || component === 'welcome/index';
 
     return (
         <AppShell variant="header">

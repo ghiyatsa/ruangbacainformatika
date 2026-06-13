@@ -16,12 +16,12 @@ import {
     CardFooter,
     CardHeader,
 } from '@/components/ui/card';
-import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
 import internshipReportRoute from '@/routes/internship-reports';
+import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 import type { InternshipReportData } from '@/features/internship-report/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 
 interface InternshipReportCardProps {
     report: InternshipReportData;

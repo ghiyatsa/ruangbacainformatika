@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
 import KioskLoanDraftController from '@/actions/App/Http/Controllers/KioskLoanDraftController';
@@ -13,9 +14,15 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { QrCameraScanner } from '@/features/kiosk/components/QrCameraScanner';
 import { BookActionForm } from './BookActionForm';
 import type { QrCameraScannerHandle } from '@/features/kiosk/components/QrCameraScanner';
+
+const QrCameraScanner = lazy(() =>
+    import('@/features/kiosk/components/QrCameraScanner').then((module) => ({
+        default: module.QrCameraScanner,
+    })),
+);
+
 
 function getQrErrorMessage(
     errors: Record<string, string | undefined>,
@@ -240,10 +247,20 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                     </DialogHeader>
 
                     <div className="space-y-4">
-                        <QrCameraScanner
-                            ref={scannerRef}
-                            onDetected={submitDetectedPayload}
-                        />
+                        <Suspense
+                            fallback={
+                                <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
+                                    <span className="text-sm text-muted-foreground">
+                                        Memuat kamera...
+                                    </span>
+                                </div>
+                            }
+                        >
+                            <QrCameraScanner
+                                ref={scannerRef}
+                                onDetected={submitDetectedPayload}
+                            />
+                        </Suspense>
 
                         {qrForm.processing ? (
                             <Alert>
@@ -313,10 +330,20 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                     </DialogHeader>
 
                     <div className="space-y-4">
-                        <QrCameraScanner
-                            ref={loanQrScannerRef}
-                            onDetected={submitDetectedLoanPayload}
-                        />
+                        <Suspense
+                            fallback={
+                                <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
+                                    <span className="text-sm text-muted-foreground">
+                                        Memuat kamera...
+                                    </span>
+                                </div>
+                            }
+                        >
+                            <QrCameraScanner
+                                ref={loanQrScannerRef}
+                                onDetected={submitDetectedLoanPayload}
+                            />
+                        </Suspense>
 
                         {loanQrForm.processing ? (
                             <Alert>

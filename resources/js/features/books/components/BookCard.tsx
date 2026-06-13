@@ -9,12 +9,12 @@ import { memo, useMemo, useState } from 'react';
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { useCatalogBookmarks } from '@/hooks/use-catalog-bookmarks';
+import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
+import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 import type { CatalogBook } from '@/features/welcome/types';
-import type { CatalogBookmarkRecord } from '@/hooks/use-catalog-bookmarks';
 import type { Auth, LoanRequestCart } from '@/types';
 
 function CoverImage({
@@ -42,6 +42,8 @@ function CoverImage({
         <img
             src={src}
             alt={alt}
+            width={128}
+            height={171}
             loading="lazy"
             className={className}
             onError={() => setErrored(true)}
@@ -193,13 +195,14 @@ function BookCard({
 
                 <div className="absolute top-2 left-2 z-20">
                     {book.isFeatured && (
-                        <div
+                        <span
+                            role="img"
                             title="Buku unggulan"
                             aria-label="Buku unggulan"
                             className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary text-primary-foreground shadow-sm"
                         >
                             <Star className="size-3 fill-current" />
-                        </div>
+                        </span>
                     )}
                 </div>
 

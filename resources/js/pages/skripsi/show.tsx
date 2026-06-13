@@ -1,6 +1,21 @@
-import SkripsiDetailPage from '@/features/skripsi/components/SkripsiDetailPage';
-import type { SkripsiShowProps } from '@/features/skripsi/types';
+import AcademicWorkDetailPage from '@/features/academic-works/components/AcademicWorkDetailPage';
+import type { AcademicWorkData } from '@/features/academic-works/types';
 
-export default function SkripsiShow(props: SkripsiShowProps) {
-    return <SkripsiDetailPage {...props} />;
+interface SkripsiShowProps {
+    skripsi: {
+        data: AcademicWorkData;
+    };
+    relatedSkripsis?: AcademicWorkData[];
 }
+
+export default function SkripsiShow({ skripsi, relatedSkripsis, ...props }: SkripsiShowProps) {
+    return (
+        <AcademicWorkDetailPage
+            workType="skripsi"
+            academicWork={skripsi}
+            relatedWorks={relatedSkripsis}
+            {...props}
+        />
+    );
+}
+
