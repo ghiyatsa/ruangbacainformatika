@@ -25,8 +25,29 @@ function makeGeneralSettingsSuperAdmin(): User
     return $user;
 }
 
-it('general settings can persist site metadata and branding fields', function () {
+it('general settings can persist site metadata without changing stored branding fields', function () {
     $user = makeGeneralSettingsSuperAdmin();
+
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'site_logo_path'],
+        ['value' => 'site-assets/logo-existing.png'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'og_image_path'],
+        ['value' => 'site-assets/og-existing.png'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'favicon_path'],
+        ['value' => 'site-assets/favicon-existing.png'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'favicon_svg_path'],
+        ['value' => 'site-assets/favicon-existing.svg'],
+    );
+    Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'apple_touch_icon_path'],
+        ['value' => 'site-assets/apple-existing.png'],
+    );
 
     actingAs($user);
 
@@ -57,7 +78,12 @@ it('general settings can persist site metadata and branding fields', function ()
         ->and(Setting::query()->where('section', 'general')->where('key', 'seo_robots')->value('value'))->toBe('noindex,follow')
         ->and(Setting::query()->where('section', 'general')->where('key', 'theme_color')->value('value'))->toBe('#123ABC')
         ->and(Setting::query()->where('section', 'general')->where('key', 'hero_notice_enabled')->value('value'))->toBe('1')
-        ->and(Setting::query()->where('section', 'general')->where('key', 'hero_notice_tone')->value('value'))->toBe('warning');
+        ->and(Setting::query()->where('section', 'general')->where('key', 'hero_notice_tone')->value('value'))->toBe('warning')
+        ->and(Setting::query()->where('section', 'general')->where('key', 'site_logo_path')->value('value'))->toBe('site-assets/logo-existing.png')
+        ->and(Setting::query()->where('section', 'general')->where('key', 'og_image_path')->value('value'))->toBe('site-assets/og-existing.png')
+        ->and(Setting::query()->where('section', 'general')->where('key', 'favicon_path')->value('value'))->toBe('site-assets/favicon-existing.png')
+        ->and(Setting::query()->where('section', 'general')->where('key', 'favicon_svg_path')->value('value'))->toBe('site-assets/favicon-existing.svg')
+        ->and(Setting::query()->where('section', 'general')->where('key', 'apple_touch_icon_path')->value('value'))->toBe('site-assets/apple-existing.png');
 });
 
 it('general settings writes an activity log entry for changed values', function () {

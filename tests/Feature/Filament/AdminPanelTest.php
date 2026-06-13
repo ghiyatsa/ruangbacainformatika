@@ -91,11 +91,12 @@ it('super admin users can render the general settings form', function () {
         ->assertSee('Tagline')
         ->assertSee('Deskripsi Situs')
         ->assertSee('Kata Kunci SEO')
-        ->assertSee('Logo Situs')
-        ->assertSee('Open Graph Image')
-        ->assertSee('Favicon PNG')
         ->assertSee('WhatsApp Bantuan')
         ->assertSee('Nomor kontak layanan.')
+        ->assertDontSee('Branding & Icon')
+        ->assertDontSee('Logo Situs')
+        ->assertDontSee('Open Graph Image')
+        ->assertDontSee('Favicon PNG')
         ->assertSee('Simpan');
 });
 

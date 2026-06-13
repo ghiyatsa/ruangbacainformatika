@@ -9,7 +9,6 @@ use App\Support\SiteSettings;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -21,7 +20,6 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Storage;
 
 class GeneralSettings extends Page
 {
@@ -125,57 +123,6 @@ class GeneralSettings extends Page
                             ->helperText('Gunakan format hex, misalnya #FFFFFF.'),
                     ])
                     ->columns(2),
-                Section::make('Branding & Icon')
-                    ->description('Aset visual utama untuk logo, favicon, dan preview tautan.')
-                    ->schema([
-                        FileUpload::make('site_logo_path')
-                            ->label('Logo Situs')
-                            ->image()
-                            ->disk('public')
-                            ->directory('site-assets')
-                            ->visibility('public')
-                            ->imageEditor()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
-                            ->maxSize(2048)
-                            ->helperText('JPG, PNG, WEBP, atau SVG. Maksimal 2 MB.'),
-                        FileUpload::make('og_image_path')
-                            ->label('Open Graph Image')
-                            ->image()
-                            ->disk('public')
-                            ->directory('site-assets')
-                            ->visibility('public')
-                            ->imageEditor()
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->maxSize(4096)
-                            ->helperText('Gambar preview saat tautan dibagikan. Disarankan 1200x630.'),
-                        FileUpload::make('favicon_path')
-                            ->label('Favicon PNG')
-                            ->image()
-                            ->disk('public')
-                            ->directory('site-assets')
-                            ->visibility('public')
-                            ->acceptedFileTypes(['image/png'])
-                            ->maxSize(1024)
-                            ->helperText('Ikon default situs.'),
-                        FileUpload::make('favicon_svg_path')
-                            ->label('Favicon SVG')
-                            ->disk('public')
-                            ->directory('site-assets')
-                            ->visibility('public')
-                            ->acceptedFileTypes(['image/svg+xml'])
-                            ->maxSize(1024)
-                            ->helperText('Gunakan jika tersedia untuk tampilan yang lebih tajam.'),
-                        FileUpload::make('apple_touch_icon_path')
-                            ->label('Apple Touch Icon')
-                            ->image()
-                            ->disk('public')
-                            ->directory('site-assets')
-                            ->visibility('public')
-                            ->acceptedFileTypes(['image/png'])
-                            ->maxSize(2048)
-                            ->helperText('Ikon untuk shortcut iPhone/iPad. Disarankan 180x180 PNG.'),
-                    ])
-                    ->columns(2),
                 Section::make('Notifikasi Global')
                     ->description('Pesan singkat yang tampil di bagian atas beranda.')
                     ->schema([
@@ -245,11 +192,6 @@ class GeneralSettings extends Page
             'theme_color' => preg_match('/^#[0-9A-Fa-f]{6}$/', (string) ($data['theme_color'] ?? '')) === 1
                 ? strtoupper((string) $data['theme_color'])
                 : '#ffffff',
-            'site_logo_path' => $data['site_logo_path'] ?? null,
-            'og_image_path' => $data['og_image_path'] ?? null,
-            'favicon_path' => $data['favicon_path'] ?? null,
-            'favicon_svg_path' => $data['favicon_svg_path'] ?? null,
-            'apple_touch_icon_path' => $data['apple_touch_icon_path'] ?? null,
             'hero_notice_enabled' => ($data['hero_notice_enabled'] ?? false) ? '1' : '0',
             'hero_notice_text' => $data['hero_notice_text'] ?? null,
             'hero_notice_url' => $data['hero_notice_url'] ?? null,
@@ -258,8 +200,6 @@ class GeneralSettings extends Page
                 ? $data['hero_notice_tone']
                 : 'info',
         ];
-
-        $this->deleteReplacedUploads($existingValues, $data);
 
         $this->settingRepository()->putMany('general', $savedValues);
         app(ActivityLogService::class)->logSettingsUpdate('general', 'Pengaturan umum', $existingValues, $savedValues);
@@ -291,21 +231,5 @@ class GeneralSettings extends Page
     protected function siteSettings(): SiteSettings
     {
         return app(SiteSettings::class);
-    }
-
-    /**
-     * @param  array<string, string>  $existingValues
-     * @param  array<string, mixed>  $newValues
-     */
-    protected function deleteReplacedUploads(array $existingValues, array $newValues): void
-    {
-        foreach (['site_logo_path', 'og_image_path', 'favicon_path', 'favicon_svg_path', 'apple_touch_icon_path'] as $key) {
-            $currentPath = $existingValues[$key] ?? '';
-            $nextPath = is_string($newValues[$key] ?? null) ? $newValues[$key] : '';
-
-            if ($currentPath !== '' && $currentPath !== $nextPath && Storage::disk('public')->exists($currentPath)) {
-                Storage::disk('public')->delete($currentPath);
-            }
-        }
     }
 }
