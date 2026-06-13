@@ -12,6 +12,7 @@ class LocalDevelopmentSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            CategorySeeder::class,
             AuthorSeeder::class,
             PublisherSeeder::class,
             BookSeeder::class,
