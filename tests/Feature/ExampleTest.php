@@ -4,6 +4,7 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Category;
+use App\Models\LoanItem;
 use App\Models\Setting;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -87,7 +88,7 @@ it('home page previews the newest books instead of prioritizing featured books',
         );
 });
 
-it('home page exposes popular categories and most viewed books', function () {
+it('home page exposes top popular-category shelves and most viewed books', function () {
     $artificialIntelligence = Category::factory()->create([
         'name' => 'Kecerdasan Buatan',
         'description' => 'Pembelajaran mesin dan sistem cerdas.',
@@ -125,25 +126,23 @@ it('home page exposes popular categories and most viewed books', function () {
         ->assertInertia(
             fn (Assert $page) => $page
                 ->component('welcome')
-                ->has('categories', 2)
-                ->missing('marqueeCategories')
                 ->where('stats.activeCategoriesCount', 2)
-                ->where('categories.0.name', 'Jaringan Komputer')
-                ->where('categories.0.booksCount', 1)
-                ->where('categories.1.name', 'Kecerdasan Buatan')
-                ->where('categories.1.description', 'Pembelajaran mesin dan sistem cerdas.')
-                ->where('categories.1.booksCount', 1)
-                ->loadDeferredProps('marquee', fn (Assert $reload) => $reload
-                    ->has('marqueeCategories', 2)
-                    ->where('marqueeCategories.0.name', 'Jaringan Komputer')
-                    ->where('marqueeCategories.1.name', 'Kecerdasan Buatan')
-                )
                 ->loadDeferredProps(
                     fn (Assert $reload) => $reload
                         ->has('popularBooks', 2)
                         ->where('popularBooks.0.title', 'Deep Learning Praktis')
                         ->where('popularBooks.0.viewCount', 42)
                         ->where('popularBooks.1.title', 'Dasar Jaringan')
+                )
+                ->loadDeferredProps('popular-category-shelves', fn (Assert $reload) => $reload
+                    ->has('popularCategoryShelves', 2)
+                    ->where('popularCategoryShelves.0.name', 'Jaringan Komputer')
+                    ->where('popularCategoryShelves.0.booksCount', 1)
+                    ->where('popularCategoryShelves.0.books.0.title', 'Dasar Jaringan')
+                    ->where('popularCategoryShelves.1.name', 'Kecerdasan Buatan')
+                    ->where('popularCategoryShelves.1.description', 'Pembelajaran mesin dan sistem cerdas.')
+                    ->where('popularCategoryShelves.1.booksCount', 1)
+                    ->where('popularCategoryShelves.1.books.0.title', 'Deep Learning Praktis')
                 ),
         );
 });
@@ -173,6 +172,48 @@ it('home page excludes non-borrowable books from available counts', function () 
         );
 });
 
+it('home page exposes books ordered by the most borrowing history', function () {
+    $mostBorrowedBook = Book::factory()
+        ->published()
+        ->create(['title' => 'Algoritma Lanjut']);
+
+    $lessBorrowedBook = Book::factory()
+        ->published()
+        ->create(['title' => 'Basis Data Praktis']);
+
+    $neverBorrowedBook = Book::factory()
+        ->published()
+        ->create(['title' => 'Pemrograman Web Dasar']);
+
+    foreach (range(1, 3) as $index) {
+        $bookItem = BookItem::factory()->borrowed()->create([
+            'book_id' => $mostBorrowedBook->id,
+            'internal_code' => "ALG-{$index}",
+        ]);
+
+        LoanItem::factory()->for($bookItem)->create();
+    }
+
+    $lessBorrowedItem = BookItem::factory()->borrowed()->create([
+        'book_id' => $lessBorrowedBook->id,
+        'internal_code' => 'DB-1',
+    ]);
+
+    LoanItem::factory()->for($lessBorrowedItem)->create();
+
+    get(route('home'))
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('welcome')
+                ->loadDeferredProps(
+                    fn (Assert $reload) => $reload
+                        ->has('mostBorrowedBooks', 2)
+                        ->where('mostBorrowedBooks.0.title', 'Algoritma Lanjut')
+                        ->where('mostBorrowedBooks.1.title', 'Basis Data Praktis')
+                ),
+        );
+});
+
 it('home page exposes zeroed stats when the catalog is empty', function () {
     get(route('home'))
         ->assertInertia(
@@ -185,7 +226,7 @@ it('home page exposes zeroed stats when the catalog is empty', function () {
         );
 });
 
-it('home page limits category highlights and defers marquee categories', function () {
+it('home page limits popular category shelves to the top three categories', function () {
     foreach (range(1, 30) as $number) {
         $category = Category::factory()->create([
             'name' => sprintf('Kategori %02d', $number),
@@ -204,10 +245,10 @@ it('home page limits category highlights and defers marquee categories', functio
             fn (Assert $page) => $page
                 ->component('welcome')
                 ->where('stats.activeCategoriesCount', 30)
-                ->has('categories', 12)
-                ->missing('marqueeCategories')
-                ->loadDeferredProps('marquee', fn (Assert $reload) => $reload
-                    ->has('marqueeCategories', 24)
+                ->loadDeferredProps('popular-category-shelves', fn (Assert $reload) => $reload
+                    ->has('popularCategoryShelves', 3)
+                    ->where('popularCategoryShelves.0.name', 'Kategori 01')
+                    ->where('popularCategoryShelves.0.books.0.title', 'Buku 01')
                 ),
         );
 });

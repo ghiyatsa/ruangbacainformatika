@@ -27,21 +27,16 @@ export type WelcomeProps = {
         activeCategoriesCount: number;
         searchResultsCount: number;
     };
-    categories: {
+    popularCategoryShelves?: {
         id: number;
         name: string;
         slug: string;
         description: string | null;
         booksCount: number;
-    }[];
-    marqueeCategories?: {
-        id: number;
-        name: string;
-        slug: string;
-        description: string | null;
-        booksCount: number;
+        books: CatalogBook[];
     }[];
     featuredBooks: CatalogBook[];
     popularBooks: CatalogBook[];
+    mostBorrowedBooks: CatalogBook[];
     books: PaginatedBooks;
 };

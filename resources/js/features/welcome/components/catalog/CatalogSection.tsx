@@ -1,25 +1,26 @@
 import CatalogCtaGrid from './CatalogCtaGrid';
 import FeaturedSpotlight from './FeaturedSpotlight';
+import MostBorrowedBooks from './MostBorrowedBooks';
 import NewBooksPreview from './NewBooksPreview';
 import PopularBooks from './PopularBooks';
-import PopularCategories from './PopularCategories';
+import PopularCategoryShelves from './PopularCategoryShelves';
 import SectionHeader from './SectionHeader';
 import type { WelcomeProps } from '@/features/welcome/types';
 
 interface CatalogSectionProps {
-    stats: WelcomeProps['stats'];
     featuredBooks: WelcomeProps['featuredBooks'];
     popularBooks: WelcomeProps['popularBooks'];
+    mostBorrowedBooks: WelcomeProps['mostBorrowedBooks'];
     books: WelcomeProps['books'];
-    categories: WelcomeProps['categories'];
+    popularCategoryShelves: WelcomeProps['popularCategoryShelves'];
 }
 
 export default function CatalogSection({
-    stats,
     featuredBooks,
     popularBooks,
+    mostBorrowedBooks,
     books,
-    categories,
+    popularCategoryShelves,
 }: CatalogSectionProps) {
     const hasFeaturedBooks = (featuredBooks?.length ?? 0) > 0;
 
@@ -38,14 +39,17 @@ export default function CatalogSection({
                         </div>
                     ) : null}
 
-                    <NewBooksPreview
-                        books={books}
-                        totalBooks={stats?.booksCount ?? 0}
-                    />
-
-                    <PopularCategories categories={categories} />
+                    <NewBooksPreview books={books} />
 
                     <PopularBooks popularBooks={popularBooks} />
+
+                    <PopularCategoryShelves
+                        popularCategoryShelves={popularCategoryShelves}
+                    />
+
+                    <MostBorrowedBooks
+                        mostBorrowedBooks={mostBorrowedBooks}
+                    />
 
                     <CatalogCtaGrid />
                 </div>
