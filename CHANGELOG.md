@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.4.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.3.0...v1.4.0) (2026-06-17)
+
+
+### Features
+
+* **blog:** implement approval workflow and resources for dashboard and admin panels ([5e5981c](https://github.com/ghiyatsa/ruangbacainformatika/commit/5e5981c5670b2fd8f3cadc1eacc7d26cb9c756c9))
+* implement blog system, refine book form layout, and update book identifier constraints ([23f65b6](https://github.com/ghiyatsa/ruangbacainformatika/commit/23f65b605496817d96fbededc7a06ac03bc2f93f))
+* **panel:** create dashboard panel for members ([41e8d5a](https://github.com/ghiyatsa/ruangbacainformatika/commit/41e8d5a250aa226a5a5ac70a12a7ee8f2da05d51))
+* **seo:** add google search console verification and dynamic sitemap ([305efed](https://github.com/ghiyatsa/ruangbacainformatika/commit/305efed6111e446810e3f073710eb450b0680bdb))
+
+
+### Bug Fixes
+
+* **catalog:** fix pagination skeleton bug and adjust transition to auto infinite scroll ([e2e0247](https://github.com/ghiyatsa/ruangbacainformatika/commit/e2e0247039251eb4f3cef464e898701beb75f338))
+* **catalog:** remove backdrop blur from dialog overlay to prevent mobile lag ([46c9fcd](https://github.com/ghiyatsa/ruangbacainformatika/commit/46c9fcd3f99a676cbf9069e6bdf0d535a1b0fb90))
+* **catalog:** resolve duplicate cover and enable expand cover on mobile ([b48d9db](https://github.com/ghiyatsa/ruangbacainformatika/commit/b48d9dbfdc9c5bb466aac17b9fb8165b0117620b))
+
+
+### Performance Improvements
+
+* **catalog:** code-split filters for academic-works and internship-reports ([99e6925](https://github.com/ghiyatsa/ruangbacainformatika/commit/99e6925a851bc383a1490353b0d46f05cfcf5634))
+* **catalog:** implement viewport-based lazy loading for home page sections ([ef488ff](https://github.com/ghiyatsa/ruangbacainformatika/commit/ef488ff5e0485ada579b24bf45898155695deeda))
+
 ## [1.3.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.2.0...v1.3.0) (2026-06-13)
 
 
