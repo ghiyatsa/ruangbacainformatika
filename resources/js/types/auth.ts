@@ -20,6 +20,7 @@ export type Auth = {
     requiresWhatsAppVerification?: boolean;
     borrowingAccessMessage?: string | null;
     homeUrl?: string;
+    isMember?: boolean;
 };
 
 export type GoogleAuth = {

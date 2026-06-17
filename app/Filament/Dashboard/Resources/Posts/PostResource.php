@@ -21,7 +21,7 @@ class PostResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static ?string $navigationLabel = 'Artikel Blog';
+    protected static ?string $navigationLabel = 'Artikel';
 
     protected static ?string $modelLabel = 'Artikel';
 
@@ -46,7 +46,8 @@ class PostResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()
+            ->with(['categories:id,name', 'tags:id,name']);
 
         if (auth()->user()?->hasRole('member') && ! auth()->user()?->hasAdministrativeRole()) {
             return $query->where('user_id', auth()->id());

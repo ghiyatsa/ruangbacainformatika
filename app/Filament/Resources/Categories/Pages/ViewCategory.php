@@ -10,10 +10,16 @@ class ViewCategory extends ViewRecord
 {
     protected static string $resource = CategoryResource::class;
 
+    public function getTitle(): string
+    {
+        return "{$this->getRecord()->name}";
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+                ->label('Ubah'),
         ];
     }
 }

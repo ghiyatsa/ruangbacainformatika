@@ -6,6 +6,7 @@ use App\Filament\Resources\Authors\Pages\CreateAuthor;
 use App\Filament\Resources\Authors\Pages\EditAuthor;
 use App\Filament\Resources\Authors\Pages\ListAuthors;
 use App\Filament\Resources\Authors\Pages\ViewAuthor;
+use App\Filament\Resources\Authors\RelationManagers\BooksRelationManager;
 use App\Filament\Resources\Authors\Schemas\AuthorForm;
 use App\Filament\Resources\Authors\Schemas\AuthorInfolist;
 use App\Filament\Resources\Authors\Tables\AuthorsTable;
@@ -70,7 +71,7 @@ class AuthorResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            BooksRelationManager::class,
         ];
     }
 

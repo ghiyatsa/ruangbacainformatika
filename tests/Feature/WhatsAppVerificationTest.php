@@ -105,7 +105,7 @@ it('unapproved non student campus accounts are redirected away from whatsapp ver
 
     actingAs($user)
         ->get(route('register.whatsapp'))
-        ->assertRedirect(route('settings.profile.edit', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('approved non student campus accounts can verify whatsapp and gain borrowing access', function () {
@@ -223,7 +223,7 @@ it('unapproved non teknik informatika student accounts are redirected away from 
 
     actingAs($user)
         ->get(route('register.whatsapp'))
-        ->assertRedirect(route('settings.profile.edit', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('sending whatsapp otp can store the number first for campus users', function () {
@@ -264,7 +264,7 @@ it('public users are redirected away from whatsapp verification', function () {
 
     actingAs($user)
         ->get(route('register.whatsapp'))
-        ->assertRedirect(route('settings.profile.edit', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('escalates the whatsapp otp send cooldown dynamically as send requests increase', function () {
@@ -314,7 +314,7 @@ it('allows verified campus users to access verification page when session has al
     // Without session flag - should redirect
     actingAs($user)
         ->get(route('register.whatsapp'))
-        ->assertRedirect(route('settings.profile.edit', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 
     // With session flag - should load successfully
     actingAs($user)
@@ -346,7 +346,7 @@ it('redirects administrative campus users away from whatsapp onboarding by defau
 
     actingAs($user)
         ->get(route('register.whatsapp'))
-        ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('always redirects non-campus users even with session flag', function () {
@@ -362,7 +362,7 @@ it('always redirects non-campus users even with session flag', function () {
     actingAs($user)
         ->withSession(['allow_whatsapp_change' => true])
         ->get(route('register.whatsapp'))
-        ->assertRedirect(route('settings.profile.edit', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('initiates whatsapp change by setting session and redirecting', function () {

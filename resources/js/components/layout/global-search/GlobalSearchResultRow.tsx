@@ -1,4 +1,4 @@
-import { BookOpen, ClipboardCheck, GraduationCap, Search } from 'lucide-react';
+import { BookOpen, ClipboardCheck, FilePenLine, GraduationCap, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { SearchListItem } from '@/components/layout/global-search/types';
@@ -49,6 +49,35 @@ export function GlobalSearchResultRow({
                         </span>
                     </div>
                     <BookOpen className="ml-auto size-4 text-muted-foreground" />
+                </>
+            ) : item.itemType === 'post' ? (
+                <>
+                    <div className="aspect-2/3 w-9 shrink-0 overflow-hidden rounded-sm border bg-muted shadow-sm">
+                        <img
+                            src={item.coverImageUrl}
+                            alt=""
+                            width={36}
+                            height={54}
+                            className="h-full w-full object-cover"
+                        />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-0.5">
+                        <div className="flex items-center gap-2">
+                            <span className="line-clamp-1 font-semibold tracking-tight">
+                                {item.title}
+                            </span>
+                            <Badge
+                                variant="outline"
+                                className="h-4 px-1 text-[9px] uppercase"
+                            >
+                                Artikel
+                            </Badge>
+                        </div>
+                        <span className="line-clamp-1 text-xs text-muted-foreground">
+                            {item.authorName}
+                        </span>
+                    </div>
+                    <FilePenLine className="ml-auto size-4 text-muted-foreground" />
                 </>
             ) : item.itemType === 'skripsi' ? (
                 <>

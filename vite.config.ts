@@ -95,7 +95,13 @@ export default defineConfig(({ command }) => ({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
-            refresh: true,
+            refresh: [
+                'app/Filament/**/*.php',
+                'app/Providers/Filament/**/*.php',
+                'app/Livewire/**/*.php',
+                'resources/views/**/*.blade.php',
+                'routes/**/*.php',
+            ],
         }),
         inertia({
             ssr: command === 'build' ? undefined : false,

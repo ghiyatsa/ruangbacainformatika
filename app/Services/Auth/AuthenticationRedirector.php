@@ -64,10 +64,6 @@ class AuthenticationRedirector
             return route('register.profile', absolute: false);
         }
 
-        if ($user->canAccessAdminPanel()) {
-            return route('filament.admin.pages.dashboard', absolute: false);
-        }
-
         return route('home', absolute: false);
     }
 

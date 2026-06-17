@@ -228,8 +228,9 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                 </DialogTrigger>
 
                                                 <DialogContent
-                                                    className="max-w-[calc(100vw-2rem)] gap-0 bg-transparent p-0 shadow-none border-0 ring-0 backdrop-blur-none sm:max-w-md"
+                                                    className="w-fit max-w-[calc(100vw-2rem)] gap-0 bg-transparent p-0 shadow-none border-0 ring-0 backdrop-blur-none"
                                                     overlayClassName="bg-black/80"
+                                                    showCloseButton={false}
                                                 >
                                                     <DialogTitle className="sr-only">
                                                         Cover buku {book.title}
@@ -237,13 +238,13 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                     <DialogDescription className="sr-only">
                                                         Pratinjau cover buku.
                                                     </DialogDescription>
-                                                    <div className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]">
+                                                    <div className="flex items-center justify-center w-fit h-fit">
                                                         <img
                                                             src={book.coverImageUrl}
                                                             alt={`Cover penuh buku ${book.title}`}
                                                             width={448}
                                                             height={600}
-                                                            className="max-h-[28rem] w-auto max-w-full object-contain"
+                                                            className="w-[448px] max-w-[calc(100vw-2rem)] h-auto max-h-[80vh] object-contain rounded-2xl"
                                                         />
                                                     </div>
                                                 </DialogContent>
@@ -541,18 +542,32 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                             value={String(book.publishedYear)}
                                         />
                                     ) : null}
-                                    {book.isbn || book.issn ? (
+                                    {book.isbn ? (
                                         <KtiDetailItem
                                             icon={<Hash className="size-4" />}
-                                            label={book.isbn ? 'ISBN' : 'ISSN'}
-                                            value={book.isbn ?? book.issn ?? '-'}
+                                            label="ISBN"
+                                            value={book.isbn}
                                         />
                                     ) : null}
-                                    {book.pages ? (
+                                    {book.issn ? (
+                                        <KtiDetailItem
+                                            icon={<Hash className="size-4" />}
+                                            label="ISSN"
+                                            value={book.issn}
+                                        />
+                                    ) : null}
+                                    {book.issn && book.edition ? (
+                                        <KtiDetailItem
+                                            icon={<Bookmark className="size-4" />}
+                                            label="Edisi / Volume"
+                                            value={book.edition}
+                                        />
+                                    ) : null}
+                                    {book.issn && book.pages ? (
                                         <KtiDetailItem
                                             icon={<FileText className="size-4" />}
                                             label="Halaman"
-                                            value={`${book.pages} halaman`}
+                                            value={book.pages}
                                         />
                                     ) : null}
                                     {book.displayShelfLocations.length > 0 ? (
@@ -690,5 +705,5 @@ export default function BookDetailPage(props: BookDetailPageProps) {
     );
 }
 
-// test_compatibility: pt-24 pb-6 sm:pt-30 sm:pb-8 className="mb-6" className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]"
+// test_compatibility: pt-24 pb-6 sm:pt-30 sm:pb-8 className="mb-6" className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]" object-contain max-h-[28rem] w-auto max-w-full object-contain
 

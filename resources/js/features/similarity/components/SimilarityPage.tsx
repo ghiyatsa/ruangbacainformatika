@@ -356,7 +356,7 @@ export default function SimilarityPage({
 
                 {/* Loading / Scanning Simulator */}
                 {loading && (
-                    <Card className="animate-in overflow-hidden border-primary/20 bg-linear-to-b from-primary/5 to-transparent shadow-md duration-300 fade-in slide-in-from-bottom-4">
+                    <Card className="animate-in overflow-hidden border-primary/20 bg-linear-to-b from-primary/5 to-transparent shadow-md duration-300 fade-in">
                         <CardContent className="flex flex-col items-center space-y-6 p-8 text-center">
                             {/* Scanning radar visual effect */}
                             <div className="relative flex size-24 items-center justify-center">

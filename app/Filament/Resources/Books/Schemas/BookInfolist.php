@@ -7,6 +7,7 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -22,24 +23,9 @@ class BookInfolist
                 ])
                     ->columnSpanFull()
                     ->schema([
-                        // Kolom Sampul Buku
-                        Section::make('Sampul Buku')
+                        Group::make()
                             ->schema([
-                                ImageEntry::make('cover_image')
-                                    ->hiddenLabel()
-                                    ->alignCenter()
-                                    ->defaultImageUrl(app(BookCoverImageService::class)->getDefaultCoverUrl())
-                                    ->disk('public')
-                                    ->extraImgAttributes([
-                                        'class' => 'object-contain rounded-lg shadow-md max-h-80 bg-white p-2',
-                                    ]),
-                            ])
-                            ->columnSpan(1),
-
-                        // Kolom Detail Informasi
-                        Grid::make(1)
-                            ->schema([
-                                Section::make('Informasi Dasar')
+                                Section::make('Identitas Buku')
                                     ->schema([
                                         TextEntry::make('title')
                                             ->label('Judul Buku')
@@ -47,17 +33,30 @@ class BookInfolist
                                             ->size('lg'),
                                         TextEntry::make('subtitle')
                                             ->label('Subjudul')
-                                            ->placeholder('-'),
+                                            ->placeholder('Belum melampirkan subjudul'),
                                         TextEntry::make('slug')
                                             ->label('Slug')
                                             ->copyable(),
                                         TextEntry::make('ddc_code')
                                             ->label('Kode DDC')
-                                            ->placeholder('-'),
+                                            ->placeholder('Belum diklasifikasikan'),
                                         TextEntry::make('description')
                                             ->label('Deskripsi Singkat')
                                             ->placeholder('-')
                                             ->columnSpanFull(),
+                                        TextEntry::make('isbn')
+                                            ->label('ISBN')
+                                            ->visible(fn ($record): bool => filled($record?->isbn))
+                                            ->copyable()
+                                            ->placeholder('-'),
+                                        TextEntry::make('issn')
+                                            ->label('ISSN')
+                                            ->visible(fn ($record): bool => filled($record?->issn))
+                                            ->copyable()
+                                            ->placeholder('-'),
+                                        TextEntry::make('language')
+                                            ->label('Bahasa')
+                                            ->placeholder('-'),
                                     ])
                                     ->columns(2),
 
@@ -70,27 +69,13 @@ class BookInfolist
                                             ->label('Tahun Terbit')
                                             ->placeholder('-'),
                                         TextEntry::make('edition')
-                                            ->label('Edisi')
+                                            ->label('Edisi / Volume')
+                                            ->visible(fn ($record): bool => filled($record?->issn))
                                             ->placeholder('-'),
                                         TextEntry::make('pages')
                                             ->label('Jumlah Halaman')
+                                            ->visible(fn ($record): bool => filled($record?->issn))
                                             ->placeholder('-'),
-                                        TextEntry::make('language')
-                                            ->label('Bahasa')
-                                            ->placeholder('-'),
-                                        TextEntry::make('isbn')
-                                            ->label('ISBN')
-                                            ->copyable()
-                                            ->placeholder('-'),
-                                        TextEntry::make('issn')
-                                            ->label('ISSN')
-                                            ->copyable()
-                                            ->placeholder('-'),
-                                    ])
-                                    ->columns(2),
-
-                                Section::make('Relasi & Meta')
-                                    ->schema([
                                         TextEntry::make('authors.name')
                                             ->label('Penulis')
                                             ->badge()
@@ -101,13 +86,23 @@ class BookInfolist
                                             ->badge()
                                             ->color('success')
                                             ->placeholder('Tidak ada kategori'),
-                                        TextEntry::make('view_count')
-                                            ->label('Jumlah Dilihat')
-                                            ->numeric()
-                                            ->badge()
-                                            ->color('gray'),
                                     ])
                                     ->columns(2),
+                            ])
+                            ->columnSpan(['lg' => 2]),
+
+                        Group::make()
+                            ->schema([
+                                Section::make('Cover Buku')
+                                    ->schema([
+                                        ImageEntry::make('cover_image')
+                                            ->hiddenLabel()
+                                            ->alignCenter()
+                                            ->defaultImageUrl(app(BookCoverImageService::class)->getDefaultCoverUrl())
+                                            ->disk('public')
+                                            ->imageWidth('100%')
+                                            ->imageHeight('auto'),
+                                    ]),
 
                                 Section::make('Status & Visibilitas')
                                     ->schema([
@@ -115,15 +110,18 @@ class BookInfolist
                                             ->label('Dipublikasikan')
                                             ->boolean(),
                                         IconEntry::make('is_featured')
-                                            ->label('Unggulan')
+                                            ->label('Buku Unggulan')
                                             ->boolean(),
                                         IconEntry::make('is_borrowable')
                                             ->label('Boleh Dipinjam')
                                             ->boolean(),
-                                    ])
-                                    ->columns(3),
-                            ])
-                            ->columnSpan(2),
+                                        TextEntry::make('view_count')
+                                            ->label('Jumlah Dilihat')
+                                            ->numeric()
+                                            ->badge()
+                                            ->color('gray'),
+                                    ]),
+                            ]),
                     ]),
             ]);
     }

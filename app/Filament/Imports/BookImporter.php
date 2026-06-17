@@ -12,6 +12,7 @@ use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 
 class BookImporter extends Importer
@@ -159,10 +160,34 @@ class BookImporter extends Importer
         }
     }
 
+    protected function beforeValidate(): void
+    {
+        $isbn = Isbn::normalize((string) ($this->data['isbn'] ?? '')) ?? '';
+        $issn = static::normalizeOptionalString($this->data['issn'] ?? null);
+
+        if (filled($isbn) || blank($issn)) {
+            return;
+        }
+
+        Validator::validate(
+            $this->data,
+            [
+                'edition' => ['required', 'max:255'],
+                'pages' => ['required', 'max:255'],
+            ],
+            [
+                'edition.required' => 'Kolom edisi atau volume wajib diisi saat ISBN kosong dan ISSN digunakan.',
+                'pages.required' => 'Kolom halaman wajib diisi saat ISBN kosong dan ISSN digunakan.',
+            ],
+        );
+    }
+
     public function resolveRecord(): ?Model
     {
         $isbn = Isbn::normalize((string) ($this->data['isbn'] ?? '')) ?? '';
         $issn = static::normalizeOptionalString($this->data['issn'] ?? null);
+        $edition = static::normalizeOptionalString($this->data['edition'] ?? null);
+        $pages = static::normalizeOptionalString($this->data['pages'] ?? null);
 
         if (blank($isbn) && blank($issn)) {
             return new Book;
@@ -176,6 +201,8 @@ class BookImporter extends Importer
 
         return Book::firstOrNew([
             'issn' => $issn,
+            'edition' => $edition,
+            'pages' => $pages,
         ]);
     }
 

@@ -4,15 +4,16 @@ namespace App\Filament\Dashboard\Resources\Posts\Schemas;
 
 use App\Models\Post;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 
 class PostForm
 {
@@ -20,71 +21,102 @@ class PostForm
     {
         return $schema
             ->components([
-                Section::make('Konten Artikel')
+                Grid::make([
+                    'default' => 1,
+                    'lg' => 3,
+                ])
                     ->schema([
-                        TextInput::make('title')
-                            ->label('Judul Artikel')
-                            ->required()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set(
-                                'slug',
-                                Str::slug($state ?? ''),
-                            ))
-                            ->columnSpan(1),
+                        Group::make()
+                            ->schema([
+                                Section::make('Media Utama')
+                                    ->schema([
+                                        FileUpload::make('cover_image')
+                                            ->label('Foto Sampul Artikel')
+                                            ->placeholder('Tarik & lepas gambar di sini atau Pilih Berkas')
+                                            ->image()
+                                            ->disk('public')
+                                            ->directory('posts/covers')
+                                            ->visibility('public')
+                                            ->maxSize(2048)
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
+                                    ]),
 
-                        TextInput::make('slug')
-                            ->label('Slug / URL')
-                            ->required()
-                            ->unique(table: 'posts', column: 'slug', ignoreRecord: true)
-                            ->maxLength(255)
-                            ->columnSpan(1),
+                                Section::make('Isi & Redaksi')
+                                    ->schema([
+                                        TextInput::make('title')
+                                            ->label('Judul Artikel')
+                                            ->required()
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Post::generateSlugPreview($state))),
 
-                        Textarea::make('summary')
-                            ->label('Ringkasan')
-                            ->placeholder('Tulis ringkasan singkat artikel untuk preview dan SEO...')
-                            ->rows(3)
-                            ->maxLength(500)
-                            ->columnSpanFull(),
+                                        TextInput::make('slug')
+                                            ->label('Slug URL')
+                                            ->required()
+                                            ->unique(table: 'posts', column: 'slug', ignoreRecord: true),
 
-                        RichEditor::make('content')
-                            ->label('Isi Artikel')
-                            ->required()
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2),
+                                        Textarea::make('summary')
+                                            ->label('Abstrak / Ringkasan')
+                                            ->rows(3)
+                                            ->columnSpanFull(),
 
-                Section::make('Pengaturan & Status')
-                    ->schema([
-                        FileUpload::make('cover_image')
-                            ->label('Gambar Sampul')
-                            ->image()
-                            ->disk('public')
-                            ->directory('posts/covers')
-                            ->visibility('public')
-                            ->maxSize(2048),
-
-                        Select::make('status')
-                            ->label('Status Artikel')
-                            ->options([
-                                Post::STATUS_DRAFT => 'Simpan sebagai Draf',
-                                Post::STATUS_PENDING => 'Kirim untuk Review',
-                                Post::STATUS_APPROVED => 'Disetujui (Live)',
-                                Post::STATUS_REJECTED => 'Ditolak (Draf)',
+                                        RichEditor::make('content')
+                                            ->label('Badan Artikel')
+                                            ->required()
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->columns(2),
                             ])
-                            ->disableOptionWhen(fn (string $value): bool => in_array($value, [Post::STATUS_APPROVED, Post::STATUS_REJECTED]))
-                            ->default(Post::STATUS_DRAFT)
-                            ->required(),
+                            ->columnSpan(['lg' => 2]),
 
-                        TextInput::make('rejection_reason')
-                            ->label('Catatan Penolakan Staff')
-                            ->placeholder('Tidak ada catatan')
-                            ->readOnly()
-                            ->visible(fn (Get $get): bool => $get('status') === Post::STATUS_REJECTED)
-                            ->extraAttributes([
-                                'class' => 'bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-300 font-medium',
-                            ]),
-                    ]),
+                        Group::make()
+                            ->schema([
+                                Section::make('Klasifikasi')
+                                    ->schema([
+                                        Placeholder::make('author_placeholder')
+                                            ->label('Penulis')
+                                            ->content(fn (): string => auth()->user()?->name ?? '-'),
+
+                                        Select::make('categories')
+                                            ->label('Kategori')
+                                            ->relationship('categories', 'name')
+                                            ->placeholder('Pilih Kategori')
+                                            ->multiple()
+                                            ->preload()
+                                            ->rules(['array'])
+                                            ->nestedRecursiveRules(['exists:post_categories,id'])
+                                            ->searchable(),
+
+                                        Select::make('tags')
+                                            ->label('Tag')
+                                            ->relationship('tags', 'name')
+                                            ->placeholder('Pilih Tag')
+                                            ->multiple()
+                                            ->preload()
+                                            ->rules(['array'])
+                                            ->nestedRecursiveRules(['exists:post_tags,id'])
+                                            ->searchable(),
+                                    ]),
+
+                                Section::make('Penerbitan')
+                                    ->schema([
+                                        Placeholder::make('review_note')
+                                            ->label('Catatan Review Sebelumnya')
+                                            ->content(fn (?Post $record): string => $record?->rejection_reason ?? '-')
+                                            ->visible(fn (?Post $record): bool => filled($record?->rejection_reason)),
+
+                                        Select::make('status')
+                                            ->label('Status')
+                                            ->options([
+                                                Post::STATUS_DRAFT => 'Draf',
+                                                Post::STATUS_PENDING => 'Ajukan Peninjauan',
+                                            ])
+                                            ->required()
+                                            ->default(Post::STATUS_DRAFT),
+                                    ]),
+                            ])
+                            ->columnSpan(['lg' => 1]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 }

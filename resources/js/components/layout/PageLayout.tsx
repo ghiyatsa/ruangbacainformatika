@@ -113,11 +113,11 @@ export function PageLayout({
                         </div>
 
                         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-                            <h1 className="animate-in text-4xl font-extrabold tracking-tight text-foreground duration-700 fade-in slide-in-from-bottom-4 sm:text-5xl lg:text-6xl">
+                            <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                                 {title}
                             </h1>
                             {description && (
-                                <p className="mx-auto mt-6 max-w-2xl animate-in text-lg text-muted-foreground delay-100 duration-700 fade-in slide-in-from-bottom-4">
+                                <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
                                     {description}
                                 </p>
                             )}
@@ -128,7 +128,7 @@ export function PageLayout({
                 <main className={cn('flex-1 py-12', className)}>
                     <div
                         className={cn(
-                            'mx-auto animate-in px-4 delay-200 duration-700 fade-in slide-in-from-bottom-4 sm:px-6 lg:px-8',
+                            'mx-auto px-4 sm:px-6 lg:px-8',
                             maxWidthMap[maxWidth],
                         )}
                     >

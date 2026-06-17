@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { History, KeyRound, Laptop, LogOut, Moon, Settings, Sun } from 'lucide-react';
+import { History, KeyRound, Laptop, LayoutDashboard, LogOut, Moon, Settings, Shield, Sun } from 'lucide-react';
 import { UserInfo } from '@/components/common/UserInfo';
 import {
     DropdownMenuGroup,
@@ -39,6 +39,30 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+                {auth.isMember ? (
+                    <DropdownMenuItem asChild>
+                        <a
+                            className="block w-full cursor-pointer px-2 py-2"
+                            href="/dashboard"
+                            onClick={cleanup}
+                        >
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                        </a>
+                    </DropdownMenuItem>
+                ) : null}
+                {auth.canAccessAdminPanel ? (
+                    <DropdownMenuItem asChild>
+                        <a
+                            className="block w-full cursor-pointer px-2 py-2"
+                            href="/admin"
+                            onClick={cleanup}
+                        >
+                            <Shield className="mr-2 h-4 w-4" />
+                            Admin
+                        </a>
+                    </DropdownMenuItem>
+                ) : null}
                 {auth.canBorrowBooks ? (
                     <DropdownMenuItem asChild>
                         <Link

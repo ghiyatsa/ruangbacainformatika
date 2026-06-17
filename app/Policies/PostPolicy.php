@@ -24,7 +24,7 @@ class PostPolicy
             return true;
         }
 
-        return $post->user_id === $user->id || $post->is_published;
+        return $post->user_id === $user->id;
     }
 
     /**

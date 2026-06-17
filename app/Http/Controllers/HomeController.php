@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Catalog\BuildHomeCatalogSections;
+use App\Http\Resources\BlogPostResource;
 use App\Http\Resources\BookCatalogResource;
+use App\Services\Blog\BlogQueryService;
 use App\Services\CatalogService;
 use App\Support\PageMeta;
 use Illuminate\Http\Request;
@@ -15,6 +17,7 @@ class HomeController extends Controller
     public function __construct(
         protected BuildHomeCatalogSections $buildHomeCatalogSections,
         protected CatalogService $catalogService,
+        protected BlogQueryService $blogQueryService,
         protected PageMeta $pageMeta,
     ) {}
 
@@ -33,6 +36,7 @@ class HomeController extends Controller
             'popularCategoryShelves' => Inertia::optional(
                 fn () => $this->buildHomeCatalogSections->popularCategoryShelves()
             ),
+            'latestPosts' => BlogPostResource::collection($this->blogQueryService->latestForHome())->resolve(),
             'books' => Inertia::optional(function () use ($books) {
                 $paginated = $books->toArray();
                 $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();

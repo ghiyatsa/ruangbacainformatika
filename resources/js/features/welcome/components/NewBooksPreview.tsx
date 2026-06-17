@@ -56,7 +56,7 @@ export default function NewBooksPreview({
             <div className="flex justify-center">
                 <Button asChild size="lg" className="rounded-xl px-8">
                     <Link href={booksRoute.index.url()}>
-                        Buku populer lainnya
+                        Buku terbaru lainnya
                     </Link>
                 </Button>
             </div>

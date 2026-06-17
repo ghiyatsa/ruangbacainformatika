@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class PostResource extends Resource
@@ -25,7 +26,7 @@ class PostResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Manajemen Blog';
 
-    protected static ?string $navigationLabel = 'Artikel Blog';
+    protected static ?string $navigationLabel = 'Artikel';
 
     protected static ?int $navigationSort = 1;
 
@@ -47,7 +48,7 @@ class PostResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Artikel menunggu review';
+        return 'Perlu ditinjau';
     }
 
     public static function form(Schema $schema): Schema
@@ -65,6 +66,12 @@ class PostResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['user:id,name', 'reviewedBy:id,name', 'categories:id,name', 'tags:id,name']);
     }
 
     public static function getPages(): array

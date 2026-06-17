@@ -14,7 +14,7 @@ class ListPosts extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Tulis Artikel'),
+                ->label('Tambah Artikel'),
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\InternshipReport;
+use App\Models\Post;
 use App\Models\Skripsi;
 use App\Models\Thesis;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,6 +32,14 @@ class SearchController extends Controller
             ->search($search)
             ->select(['id', 'title', 'slug', 'cover_image'])
             ->with(['authors:id,name'])
+            ->limit(5)
+            ->get();
+
+        $posts = Post::query()
+            ->published()
+            ->search($search)
+            ->select(['id', 'title', 'slug', 'summary', 'cover_image'])
+            ->with(['user:id,name'])
             ->limit(5)
             ->get();
 
@@ -65,6 +74,19 @@ class SearchController extends Controller
                         ? asset('storage/'.$book->cover_image)
                         : asset('images/book-cover-placeholder.svg'),
                     'authors' => $book->authors->pluck('name')->values()->all(),
+                ])
+                ->values()
+                ->all(),
+            'posts' => $posts
+                ->map(fn (Post $post): array => [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'slug' => $post->slug,
+                    'coverImageUrl' => $post->cover_image
+                        ? asset('storage/'.$post->cover_image)
+                        : asset('images/book-cover-placeholder.svg'),
+                    'authorName' => $post->user?->name,
+                    'summary' => $post->excerpt(120),
                 ])
                 ->values()
                 ->all(),

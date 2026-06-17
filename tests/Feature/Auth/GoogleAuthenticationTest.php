@@ -191,7 +191,7 @@ it('administrative users with complete profiles are redirected to admin after go
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('administrative users are redirected to admin after google login even when member onboarding is incomplete', function () {
@@ -220,7 +220,7 @@ it('administrative users are redirected to admin after google login even when me
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('administrative users with complete profiles receive an inertia location response after google one tap login', function () {
@@ -254,8 +254,7 @@ it('administrative users with complete profiles receive an inertia location resp
         'X-Inertia' => 'true',
         'X-Requested-With' => 'XMLHttpRequest',
     ])
-        ->assertStatus(409)
-        ->assertHeader('X-Inertia-Location', route('filament.admin.pages.dashboard'));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('public users with a valid external google email can still sign in', function () {
@@ -374,14 +373,14 @@ it('google users can access onboarding only once', function () {
             'whatsapp' => '08123456789',
             'address' => 'Jl. Merdeka No. 1',
         ])
-        ->assertRedirect(route('settings.profile.edit', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 
     $user->refresh();
 
     /** @var User $user */
     actingAs($user)
         ->get(route('register.profile'))
-        ->assertRedirect(route('settings.profile.edit', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 });
 
 it('campus users with complete profiles are redirected to whatsapp verification after google login', function () {
@@ -443,7 +442,7 @@ it('legacy users with whatsapp only can complete onboarding by adding an address
             'name' => $user->name,
             'address' => 'Jl. Merdeka No. 1',
         ])
-        ->assertRedirect(route('settings.profile.edit', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 
     assertDatabaseHas('users', [
         'id' => $user->id,

@@ -9,7 +9,7 @@ export type CatalogBook = {
     authors?: string[];
     categories?: { name: string; slug: string }[];
     publishedYear: number | null;
-    pages: number | null;
+    pages: string | null;
     availableItemsCount: number;
     isFeatured: boolean;
     isBorrowable: boolean;
@@ -89,7 +89,8 @@ export interface BookData {
     publisher: string | null;
     publisherData?: { name: string; slug: string } | null;
     publishedYear: number | null;
-    pages: number | null;
+    edition: string | null;
+    pages: string | null;
     language: string | null;
     itemsCount: number;
     availableItemsCount: number;

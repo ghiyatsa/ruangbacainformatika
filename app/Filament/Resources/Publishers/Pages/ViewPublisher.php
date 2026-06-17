@@ -10,10 +10,16 @@ class ViewPublisher extends ViewRecord
 {
     protected static string $resource = PublisherResource::class;
 
+    public function getTitle(): string
+    {
+        return "{$this->getRecord()->name}";
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+                ->label('Ubah'),
         ];
     }
 }

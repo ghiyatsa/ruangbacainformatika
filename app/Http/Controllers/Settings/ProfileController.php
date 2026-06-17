@@ -47,13 +47,11 @@ class ProfileController extends Controller
         }
 
         if ($user->hasRequiredProfileDetails()) {
-            return to_route('settings.profile.edit');
+            return to_route('home');
         }
 
         if (! $this->authenticationRedirector->requiresProfileCompletion($user)) {
-            return $user->canAccessAdminPanel()
-                ? to_route('filament.admin.pages.dashboard')
-                : to_route('home');
+            return to_route('home');
         }
 
         return Inertia::render('auth/register-profile');
@@ -95,9 +93,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if (! $this->authenticationRedirector->requiresProfileCompletion($user)) {
-            return $user->canAccessAdminPanel()
-                ? to_route('filament.admin.pages.dashboard')
-                : to_route('home');
+            return to_route('home');
         }
 
         if ($user->hasRequiredProfileDetails() && ! $user->requiresWhatsAppVerification()) {
@@ -113,8 +109,6 @@ class ProfileController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Onboarding selesai.')]);
 
-        return $user->canAccessAdminPanel()
-            ? to_route('filament.admin.pages.dashboard')
-            : to_route('settings.profile.edit');
+        return to_route('home');
     }
 }

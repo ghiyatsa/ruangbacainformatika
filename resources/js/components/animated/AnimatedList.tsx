@@ -18,7 +18,7 @@ const AnimatedItem: React.FC<AnimatedItemProps> = ({
     onClick,
 }) => {
     const ref = useRef<HTMLDivElement>(null);
-    const inView = useInView(ref, { amount: 0.5, once: false });
+    const inView = useInView(ref, { amount: 0.1, once: true });
 
     return (
         <motion.div
@@ -26,11 +26,11 @@ const AnimatedItem: React.FC<AnimatedItemProps> = ({
             data-index={index}
             onMouseEnter={onMouseEnter}
             onClick={onClick}
-            initial={{ scale: 0.7, opacity: 0 }}
+            initial={{ scale: 0.98, opacity: 0 }}
             animate={
-                inView ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }
+                inView ? { scale: 1, opacity: 1 } : { scale: 0.98, opacity: 0 }
             }
-            transition={{ duration: 0.2, delay }}
+            transition={{ duration: 0.15, ease: 'easeOut', delay }}
             className="cursor-pointer"
         >
             {children}
@@ -187,7 +187,7 @@ function AnimatedList<T>({
                     {items.map((item, index) => (
                         <AnimatedItem
                             key={index}
-                            delay={index * 0.05}
+                            delay={Math.min(index * 0.015, 0.06)}
                             index={index}
                             onMouseEnter={() => handleItemMouseEnter(index)}
                             onClick={() => handleItemClick(item, index)}

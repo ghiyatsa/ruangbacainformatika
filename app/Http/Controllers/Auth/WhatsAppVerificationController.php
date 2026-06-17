@@ -29,17 +29,13 @@ class WhatsAppVerificationController extends Controller
         $allowWhatsAppChange = $request->session()->get('allow_whatsapp_change') === true;
 
         if (! $user->usesCampusEmail()) {
-            return to_route('settings.profile.edit');
+            return to_route('home');
         }
 
         if (! $this->authenticationRedirector->requiresWhatsAppVerification($user) && ! $allowWhatsAppChange) {
-            if ($user->canAccessAdminPanel()) {
-                return to_route('filament.admin.pages.dashboard');
-            }
-
             return $this->authenticationRedirector->requiresProfileCompletion($user)
                 ? to_route('register.profile')
-                : to_route('settings.profile.edit');
+                : to_route('home');
         }
 
         $verification = $this->whatsAppOtpService->status($user);

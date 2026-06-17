@@ -10,6 +10,7 @@ export default function WelcomePage({
     mostBorrowedBooks,
     books,
     popularCategoryShelves,
+    latestPosts,
 }: WelcomeProps) {
     return (
         <>
@@ -38,6 +39,7 @@ export default function WelcomePage({
                     mostBorrowedBooks={mostBorrowedBooks}
                     books={books}
                     popularCategoryShelves={popularCategoryShelves}
+                    latestPosts={latestPosts}
                 />
             </div>
         </>

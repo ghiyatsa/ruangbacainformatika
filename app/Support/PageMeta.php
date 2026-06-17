@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Book;
+use App\Models\Post;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -54,6 +55,47 @@ class PageMeta
             'canonicalUrl' => route('books.show', $book),
             'type' => 'article',
             ...$this->openGraphImage->bookMeta($book),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function forBlogIndex(): array
+    {
+        return [
+            'title' => $this->fullTitle('Artikel'),
+            'description' => 'Kumpulan artikel pilihan dari Ruang Baca Informatika.',
+            'keywords' => 'artikel ruang baca, blog ruang baca, artikel informatika, ruang baca informatika',
+            'robots' => $this->siteRobots(),
+            'canonicalUrl' => route('blog.index'),
+            'type' => 'website',
+            ...$this->openGraphImage->defaultMeta(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function forPost(Post $post): array
+    {
+        $keywords = collect([
+            $post->title,
+            $post->user?->name,
+            ...$post->categories->pluck('name')->all(),
+            ...$post->tags->pluck('name')->all(),
+            'blog ruang baca',
+            'ruang baca informatika',
+        ])->filter()->implode(', ');
+
+        return [
+            'title' => $this->fullTitle($post->title),
+            'description' => $this->excerpt($post->summary ?: strip_tags((string) $post->content)),
+            'keywords' => $keywords,
+            'robots' => $this->siteRobots(),
+            'canonicalUrl' => route('blog.show', $post),
+            'type' => 'article',
+            ...$this->openGraphImage->defaultMeta(),
         ];
     }
 

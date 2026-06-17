@@ -51,6 +51,46 @@ it('book detail page renders correctly with detailed authors and publisher data'
         );
 });
 
+it('book detail page shares issn-specific publication details for journals', function () {
+    $book = Book::factory()->published()->create([
+        'title' => 'Jurnal Informatika',
+        'isbn' => null,
+        'issn' => '1234-5678',
+        'edition' => 'Vol. 12 No. 2',
+        'pages' => '120-145',
+    ]);
+
+    get(route('books.show', $book))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books/show')
+            ->where('book.data.isbn', null)
+            ->where('book.data.issn', '1234-5678')
+            ->where('book.data.edition', 'Vol. 12 No. 2')
+            ->where('book.data.pages', '120-145')
+        );
+});
+
+it('book detail page keeps serial metadata empty for isbn books', function () {
+    $book = Book::factory()->published()->create([
+        'title' => 'Clean Code',
+        'isbn' => '9780132350884',
+        'issn' => null,
+        'edition' => null,
+        'pages' => null,
+    ]);
+
+    get(route('books.show', $book))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books/show')
+            ->where('book.data.isbn', '9780132350884')
+            ->where('book.data.issn', null)
+            ->where('book.data.edition', null)
+            ->where('book.data.pages', null)
+        );
+});
+
 it('book detail page increments view count', function () {
     $book = Book::factory()->published()->create(['view_count' => 5]);
 

@@ -6,10 +6,12 @@ export interface SearchResult {
     authors?: string[];
     authorName?: string;
     studentId?: string;
+    summary?: string;
 }
 
 export interface SearchResponse {
     books: SearchResult[];
+    posts: SearchResult[];
     skripsis: SearchResult[];
     internshipReports: SearchResult[];
     theses: SearchResult[];
@@ -17,6 +19,7 @@ export interface SearchResponse {
 
 export type SearchItemType =
     | 'book'
+    | 'post'
     | 'skripsi'
     | 'internship_report'
     | 'thesis';

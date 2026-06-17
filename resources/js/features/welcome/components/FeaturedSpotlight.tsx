@@ -76,32 +76,50 @@ function CoverImage({
 
 function FeaturedSpotlightSkeleton() {
     return (
-        <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-8">
-            <div className="mx-auto w-48 shrink-0 sm:mx-0 sm:w-40 md:w-44">
-                <Skeleton className="aspect-3/4 w-full rounded-xl" />
+        <div className="flex flex-col">
+            <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-8">
+                {/* Cover image wrapper matching the actual card's borders, shadows, and rings */}
+                <div className="mx-auto w-48 shrink-0 sm:mx-0 sm:w-40 md:w-44">
+                    <div className="aspect-3/4 overflow-hidden rounded-xl border bg-background shadow-lg ring-1 ring-black/5 dark:ring-white/5">
+                        <Skeleton className="h-full w-full rounded-none" />
+                    </div>
+                </div>
+
+                <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">
+                    {/* Authors */}
+                    <div className="flex min-h-4 justify-center sm:justify-start">
+                        <Skeleton className="h-3 w-28" />
+                    </div>
+
+                    {/* Title */}
+                    <div className="flex min-h-[3.5rem] flex-col justify-center gap-1.5">
+                        <Skeleton className="mx-auto h-5 w-11/12 max-w-xl sm:mx-0 sm:h-6" />
+                        <Skeleton className="mx-auto h-5 w-3/4 max-w-md sm:mx-0 sm:h-6" />
+                    </div>
+
+                    {/* Short Description */}
+                    <div className="flex min-h-[3rem] flex-col justify-center gap-1.5">
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-3 w-11/12" />
+                        <Skeleton className="hidden h-3 w-4/5 sm:block" />
+                    </div>
+
+                    {/* Badges */}
+                    <div className="flex min-h-8 flex-wrap items-center justify-center gap-2 sm:justify-start">
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                        <Skeleton className="h-6 w-24 rounded-full" />
+                        <Skeleton className="h-6 w-14 rounded-full" />
+                    </div>
+                </div>
             </div>
 
-            <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">
-                <div className="flex min-h-4 justify-center sm:justify-start">
-                    <Skeleton className="h-4 w-28" />
-                </div>
-
-                <div className="min-h-[3.5rem] space-y-2">
-                    <Skeleton className="mx-auto h-7 w-full max-w-xl sm:mx-0" />
-                    <Skeleton className="mx-auto h-7 w-4/5 max-w-lg sm:mx-0" />
-                </div>
-
-                <div className="min-h-[3rem] space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                    <Skeleton className="hidden h-4 w-2/3 sm:block" />
-                </div>
-
-                <div className="flex min-h-8 flex-wrap items-center justify-center gap-2 sm:justify-start">
-                    <Skeleton className="h-6 w-18 rounded-full" />
-                    <Skeleton className="h-6 w-22 rounded-full" />
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                    <Skeleton className="h-6 w-14 rounded-full" />
+            {/* Navigation Footer placeholder to prevent Cumulative Layout Shift (CLS) */}
+            <div className="flex items-center justify-between border-t border-primary/10 px-5 py-3 sm:px-8">
+                <Skeleton className="h-4 w-8" />
+                <div className="flex items-center gap-1">
+                    <Skeleton className="size-11 rounded-full" />
+                    <Skeleton className="size-11 rounded-full" />
                 </div>
             </div>
         </div>

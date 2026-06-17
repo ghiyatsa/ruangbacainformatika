@@ -5,6 +5,7 @@ use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Publisher;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Validation\ValidationException;
 
 function makeBookImporter(): BookImporter
 {
@@ -204,6 +205,8 @@ it('updates existing books by issn when isbn is blank', function () {
         'title' => 'Jurnal Informatika Lama',
         'issn' => '1234-5678',
         'isbn' => null,
+        'edition' => 'Vol. 1',
+        'pages' => '100',
         'publisher_id' => $publisher->getKey(),
     ]);
 
@@ -231,5 +234,52 @@ it('updates existing books by issn when isbn is blank', function () {
     $book->refresh();
 
     expect($book->title)->toBe('Jurnal Informatika Baru')
-        ->and($book->issn)->toBe('1234-5678');
+        ->and($book->issn)->toBe('1234-5678')
+        ->and($book->edition)->toBe('Vol. 1')
+        ->and($book->pages)->toBe('100');
+});
+
+it('imports journal rows with the same issn when edition and pages differ', function () {
+    $importer = makeBookImporter();
+
+    $importer([
+        'title' => 'Jurnal Informatika Vol. 1',
+        'isbn' => '',
+        'issn' => '1234-5678',
+        'edition' => 'Vol. 1',
+        'pages' => '100-120',
+        'publisher' => 'IT Press',
+        'language' => 'Indonesia',
+        'is_featured' => '0',
+        'is_published' => '1',
+    ]);
+
+    $importer([
+        'title' => 'Jurnal Informatika Vol. 2',
+        'isbn' => '',
+        'issn' => '1234-5678',
+        'edition' => 'Vol. 2',
+        'pages' => '121-145',
+        'publisher' => 'IT Press',
+        'language' => 'Indonesia',
+        'is_featured' => '0',
+        'is_published' => '1',
+    ]);
+
+    expect(Book::query()->where('issn', '1234-5678')->count())->toBe(2)
+        ->and(Book::query()->where('issn', '1234-5678')->pluck('edition')->all())->toBe(['Vol. 1', 'Vol. 2']);
+});
+
+it('requires edition and pages when importing an issn entry without isbn', function () {
+    $importer = makeBookImporter();
+
+    expect(fn () => $importer([
+        'title' => 'Jurnal Tanpa Detail Terbit',
+        'isbn' => '',
+        'issn' => '1234-5678',
+        'publisher' => 'IT Press',
+        'language' => 'Indonesia',
+        'is_featured' => '0',
+        'is_published' => '1',
+    ]))->toThrow(ValidationException::class);
 });

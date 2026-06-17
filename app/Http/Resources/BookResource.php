@@ -43,6 +43,7 @@ class BookResource extends JsonResource
                 'slug' => $this->publisher->slug,
             ] : null),
             'publishedYear' => $this->published_year,
+            'edition' => $this->edition,
             'pages' => $this->pages,
             'language' => $this->language,
             'itemsCount' => $this->items_count ?? 0,

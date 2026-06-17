@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\InternshipReport;
+use App\Models\Post;
 use App\Models\Skripsi;
 use App\Models\StaticPage;
 use App\Models\Thesis;
@@ -30,6 +31,12 @@ class SitemapController extends Controller
             'lastmod' => now()->startOfWeek()->toAtomString(),
             'changefreq' => 'daily',
             'priority' => '0.9',
+        ];
+        $urls[] = [
+            'loc' => route('blog.index'),
+            'lastmod' => now()->startOfWeek()->toAtomString(),
+            'changefreq' => 'daily',
+            'priority' => '0.8',
         ];
         $urls[] = [
             'loc' => route('skripsi.index'),
@@ -81,6 +88,16 @@ class SitemapController extends Controller
                 'lastmod' => $book->updated_at->toAtomString(),
                 'changefreq' => 'weekly',
                 'priority' => '0.8',
+            ];
+        }
+
+        $posts = Post::published()->select('id', 'slug', 'updated_at')->get();
+        foreach ($posts as $post) {
+            $urls[] = [
+                'loc' => route('blog.show', $post->slug),
+                'lastmod' => $post->updated_at->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
             ];
         }
 

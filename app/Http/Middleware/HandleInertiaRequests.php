@@ -61,6 +61,7 @@ class HandleInertiaRequests extends Middleware
             ),
             'auth' => [
                 'user' => $this->serializeUser($user),
+                'isMember' => $user?->hasRole('member') ?? false,
                 'canAccessAdminPanel' => $user?->canAccessAdminPanel() ?? false,
                 'canBorrowBooks' => $user?->canBorrowBooks() ?? false,
                 'canViewNotifications' => $user?->canViewPublicNotifications() ?? false,

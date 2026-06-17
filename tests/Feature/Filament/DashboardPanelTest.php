@@ -78,8 +78,8 @@ it('member users can access the posts resource', function () {
     actingAs($user)
         ->get('/dashboard/posts')
         ->assertOk()
-        ->assertSee('Artikel Blog')
-        ->assertSee('Tulis Artikel');
+        ->assertSee('Artikel')
+        ->assertSee('Artikel Baru');
 });
 
 it('member users only see their own posts in the posts table', function () {
@@ -126,6 +126,50 @@ it('member users can create posts with pending review status', function () {
     ]);
 });
 
+it('member users can create draft posts', function () {
+    $user = makeMemberUser();
+
+    actingAs($user);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'title' => 'Draft Post',
+            'slug' => 'draft-post',
+            'content' => '<p>Draft content</p>',
+            'status' => Post::STATUS_DRAFT,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $this->assertDatabaseHas('posts', [
+        'title' => 'Draft Post',
+        'user_id' => $user->id,
+        'status' => Post::STATUS_DRAFT,
+        'is_published' => false,
+    ]);
+});
+
+it('member users cannot force approved status while creating posts', function () {
+    $user = makeMemberUser();
+
+    actingAs($user);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'title' => 'Tampered Post',
+            'slug' => 'tampered-post',
+            'content' => '<p>Injected content</p>',
+            'status' => Post::STATUS_APPROVED,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['status']);
+
+    $this->assertDatabaseMissing('posts', [
+        'title' => 'Tampered Post',
+        'user_id' => $user->id,
+    ]);
+});
+
 it('member users can edit their own posts', function () {
     $user = makeMemberUser();
     $post = Post::factory()->create([
@@ -158,6 +202,39 @@ it('member users cannot edit other members posts because they are filtered out',
     actingAs($member1)
         ->get("/dashboard/posts/{$post->getRouteKey()}/edit")
         ->assertNotFound();
+});
+
+it('editing an approved post by member resubmits it for review', function () {
+    $user = makeMemberUser();
+    $reviewer = makeStaffUser();
+
+    $post = Post::factory()->published()->create([
+        'user_id' => $user->id,
+        'reviewed_by_user_id' => $reviewer->id,
+        'reviewed_at' => now()->subDay(),
+        'published_at' => now()->subDay(),
+        'title' => 'Already Published',
+    ]);
+
+    actingAs($user);
+
+    Livewire::test(EditPost::class, [
+        'record' => $post->getRouteKey(),
+    ])
+        ->fillForm([
+            'title' => 'Already Published Revised',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $freshPost = $post->fresh();
+
+    expect($freshPost->title)->toBe('Already Published Revised')
+        ->and($freshPost->status)->toBe(Post::STATUS_PENDING)
+        ->and($freshPost->is_published)->toBeFalse()
+        ->and($freshPost->published_at)->toBeNull()
+        ->and($freshPost->reviewed_by_user_id)->toBeNull()
+        ->and($freshPost->reviewed_at)->toBeNull();
 });
 
 it('staff users can approve a post', function () {

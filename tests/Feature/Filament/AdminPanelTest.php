@@ -8,6 +8,7 @@ use App\Filament\Resources\CatalogReports\CatalogReportResource;
 use App\Filament\Resources\ContactMessages\ContactMessageResource;
 use App\Filament\Resources\InternshipReports\InternshipReportResource;
 use App\Filament\Resources\Loans\LoanResource;
+use App\Filament\Resources\PostCategories\PostCategoryResource;
 use App\Filament\Resources\Skripsis\SkripsiResource;
 use App\Filament\Resources\Theses\ThesisResource;
 use App\Filament\Resources\Users\UserResource;
@@ -180,7 +181,9 @@ it('super admin users can render book relation helpers on the create book form',
         ->assertSee('Pilih penerbit atau tambahkan data baru.')
         ->assertSee('Pilih penulis atau tambahkan data baru.')
         ->assertSee('Pilih kategori atau tambahkan data baru.')
-        ->assertSee('Isi jumlah halaman utama.')
+        ->assertSee('Gunakan untuk buku biasa. Saat diisi, jalur ISSN disembunyikan.')
+        ->assertSee('Gunakan untuk jurnal atau serial. Saat diisi, jalur ISBN disembunyikan.')
+        ->assertDontSee('Isi jumlah atau rentang halaman utama.')
         ->assertSee('Gunakan 4 digit tahun.')
         ->assertSee('JPG, PNG, atau WEBP. Maksimal 2 MB.');
 });
@@ -374,6 +377,8 @@ it('filament resources expose consistent navigation metadata', function () {
         ->and(VisitLogResource::getNavigationBadgeColor())->toBe('primary')
         ->and(VisitLogResource::getNavigationBadgeTooltip())->toBe('Kunjungan hari ini')
         ->and(AuthorResource::getNavigationBadgeColor())->toBe('gray')
+        ->and(PostCategoryResource::getNavigationBadgeColor())->toBe('gray')
+        ->and(PostCategoryResource::getNavigationBadgeTooltip())->toBe('Total kategori')
         ->and(SkripsiResource::getNavigationBadgeColor())->toBe('gray')
         ->and(ThesisResource::getNavigationBadgeColor())->toBe('gray')
         ->and(InternshipReportResource::getNavigationBadgeColor())->toBe('gray');
@@ -399,6 +404,7 @@ it('super admin users can access key admin resources', function (string $path) {
     '/admin/catalog-reports',
     '/admin/authors',
     '/admin/categories',
+    '/admin/post-categories',
     '/admin/publishers',
     '/admin/loans',
     '/admin/visit-logs',
@@ -439,6 +445,11 @@ it('super admin users can render concise empty state copy on book management res
         ->assertSee('Daftar kategori akan muncul di sini.');
 
     actingAs($user)
+        ->get('/admin/post-categories')
+        ->assertOk()
+        ->assertSee('Kategori akan tampil di sini.');
+
+    actingAs($user)
         ->get('/admin/publishers')
         ->assertOk()
         ->assertSee('Daftar penerbit akan muncul di sini.');
@@ -469,6 +480,26 @@ it('super admin users can access the books resource when some books have no publ
     actingAs($user)
         ->get('/admin/books')
         ->assertOk();
+});
+
+it('super admin book detail follows the active identifier path', function () {
+    $user = makeSuperAdmin();
+
+    $journal = Book::factory()->create([
+        'title' => 'Jurnal Informatika',
+        'isbn' => null,
+        'issn' => '1234-5678',
+        'edition' => 'Vol. 12 No. 2',
+        'pages' => '120-145',
+    ]);
+
+    actingAs($user)
+        ->get("/admin/books/{$journal->getKey()}")
+        ->assertOk()
+        ->assertSee('ISSN')
+        ->assertSee('Edisi / Volume')
+        ->assertSee('120-145')
+        ->assertDontSee('>ISBN<', false);
 });
 
 it('filament catalog report resource exposes pending navigation badge metadata', function () {

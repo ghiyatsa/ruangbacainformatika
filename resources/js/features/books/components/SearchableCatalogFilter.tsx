@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Command,
-    CommandEmpty,
     CommandInput,
     CommandItem,
     CommandList,
@@ -57,6 +56,50 @@ export function SearchableCatalogFilter({
     const [isDragging, setIsDragging] = useState(false);
     const dragStartYRef = useRef<number | null>(null);
     const dragStartHeightRef = useRef<number | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [limit, setLimit] = useState(50);
+
+    const filteredOptions = useMemo(() => {
+        if (!searchQuery) {
+            return options;
+        }
+
+        const query = searchQuery.toLowerCase();
+
+        return options.filter((option) =>
+            option.name.toLowerCase().includes(query) ||
+            option.slug.toLowerCase().includes(query)
+        );
+    }, [options, searchQuery]);
+
+    const visibleOptions = useMemo(() => {
+        return filteredOptions.slice(0, limit);
+    }, [filteredOptions, limit]);
+
+    const handleOpenChange = (newOpen: boolean) => {
+        setOpen(newOpen);
+
+        if (newOpen) {
+            setLimit(50);
+            setSearchQuery('');
+        }
+    };
+
+    const handleSearchQueryChange = (query: string) => {
+        setSearchQuery(query);
+        setLimit(50);
+    };
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const target = e.currentTarget;
+
+        if (target.scrollHeight - target.scrollTop <= target.clientHeight + 50) {
+            if (limit < filteredOptions.length) {
+                setLimit((prev) => prev + 50);
+            }
+        }
+    };
+
     const selectedOption = useMemo(
         () => options.find((option) => option.slug === value) ?? null,
         [options, value],
@@ -146,7 +189,7 @@ export function SearchableCatalogFilter({
 
         // jika user drag lebih rendah dari titik pertama (low) otomatis sheet nutup ketika user lepas drag
         if (sheetHeight < low) {
-            setOpen(false);
+            handleOpenChange(false);
         } else {
             // snap ke titik terdekat
             const distToLow = Math.abs(sheetHeight - low);
@@ -172,7 +215,7 @@ export function SearchableCatalogFilter({
                 aria-label={triggerAriaLabel}
                 aria-expanded={open}
                 role="combobox"
-                onClick={() => setOpen(true)}
+                onClick={() => handleOpenChange(true)}
             >
                 <span className="truncate">
                     {selectedOption?.name ?? placeholder}
@@ -183,27 +226,41 @@ export function SearchableCatalogFilter({
     );
 
     const commandContent = (
-        <Command className="h-full border-none bg-transparent p-1 **:[[data-slot=command-input-wrapper]]:bg-muted/60 **:[[data-slot=command-input-wrapper]]:rounded-lg **:[[data-slot=command-input-wrapper]]:px-2 **:[[data-slot=command-input-wrapper]]:py-1 **:[[data-slot=command-input-wrapper]]:mb-2">
-            <CommandInput placeholder={searchPlaceholder} />
+        <Command
+            shouldFilter={false}
+            className="h-full border-none bg-transparent p-1 **:[[data-slot=command-input-wrapper]]:bg-muted/60 **:[[data-slot=command-input-wrapper]]:rounded-lg **:[[data-slot=command-input-wrapper]]:px-2 **:[[data-slot=command-input-wrapper]]:py-1 **:[[data-slot=command-input-wrapper]]:mb-2"
+        >
+            <CommandInput
+                value={searchQuery}
+                onValueChange={handleSearchQueryChange}
+                placeholder={searchPlaceholder}
+            />
             <CommandList
+                onScroll={handleScroll}
                 className={
                     isMobile
-                        ? 'h-full max-h-none pb-3'
+                        ? 'flex-1 min-h-0 max-h-none pb-3'
                         : 'max-h-[min(26rem,calc(100svh-10rem))] pb-3'
                 }
             >
-                <CommandEmpty>{emptyMessage}</CommandEmpty>
-                <CommandItem
-                    value={allLabel}
-                    data-checked={value === '' ? 'true' : 'false'}
-                    onSelect={() => {
-                        onValueChange('all');
-                        setOpen(false);
-                    }}
-                >
-                    <span>{allLabel}</span>
-                </CommandItem>
-                {options.map((option) => {
+                {filteredOptions.length === 0 && (
+                    <div className="py-6 text-center text-sm text-muted-foreground">
+                        {emptyMessage}
+                    </div>
+                )}
+                {(!searchQuery || allLabel.toLowerCase().includes(searchQuery.toLowerCase())) && (
+                    <CommandItem
+                        value={allLabel}
+                        data-checked={value === '' ? 'true' : 'false'}
+                        onSelect={() => {
+                            onValueChange('all');
+                            handleOpenChange(false);
+                        }}
+                    >
+                        <span>{allLabel}</span>
+                    </CommandItem>
+                )}
+                {visibleOptions.map((option) => {
                     const isSelected = option.slug === value;
 
                     return (
@@ -213,7 +270,7 @@ export function SearchableCatalogFilter({
                             data-checked={isSelected ? 'true' : 'false'}
                             onSelect={() => {
                                 onValueChange(option.slug);
-                                setOpen(false);
+                                handleOpenChange(false);
                             }}
                         >
                             <span className="truncate">{option.name}</span>
@@ -228,7 +285,7 @@ export function SearchableCatalogFilter({
         return (
             <>
                 {trigger}
-                <Sheet open={open} onOpenChange={setOpen}>
+                <Sheet open={open} onOpenChange={handleOpenChange}>
                     <SheetContent
                         side="bottom"
                         className="gap-0 rounded-t-3xl p-0"
@@ -262,7 +319,7 @@ export function SearchableCatalogFilter({
     return (
         <>
             {trigger}
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogContent 
                     className="max-h-[min(34rem,calc(100svh-4rem))] overflow-hidden p-2 sm:max-w-lg"
                     showCloseButton={false}

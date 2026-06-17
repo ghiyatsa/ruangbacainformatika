@@ -2,6 +2,7 @@
 
 use App\Models\Book;
 use App\Models\InternshipReport;
+use App\Models\Post;
 use App\Models\Publisher;
 use App\Models\Skripsi;
 use App\Models\Thesis;
@@ -44,6 +45,7 @@ it('returns books matching search query', function () {
         ->assertOk()
         ->assertJsonStructure([
             'books',
+            'posts',
             'skripsis',
             'internshipReports',
             'theses',
@@ -51,6 +53,25 @@ it('returns books matching search query', function () {
 
     expect($response->json('books'))->toHaveCount(1)
         ->and($response->json('books.0.title'))->toBe('Pemrograman Laravel untuk Pemula');
+});
+
+it('returns approved blog posts matching search query', function () {
+    Post::factory()->published()->create([
+        'title' => 'Laravel untuk Komunitas Kampus',
+        'summary' => 'Catatan singkat tentang Laravel.',
+    ]);
+
+    Post::factory()->create([
+        'title' => 'Laravel Draft Internal',
+        'summary' => 'Belum boleh tampil.',
+        'status' => Post::STATUS_DRAFT,
+    ]);
+
+    $response = get(route('search', ['q' => 'Laravel']))
+        ->assertOk();
+
+    expect($response->json('posts'))->toHaveCount(1)
+        ->and($response->json('posts.0.title'))->toBe('Laravel untuk Komunitas Kampus');
 });
 
 it('returns only published books in search results', function () {
@@ -188,6 +209,7 @@ it('returns results across all content types simultaneously', function () {
         ->assertOk();
 
     expect($response->json('books'))->toHaveCount(1)
+        ->and($response->json('posts'))->toHaveCount(0)
         ->and($response->json('skripsis'))->toHaveCount(1)
         ->and($response->json('internshipReports'))->toHaveCount(1)
         ->and($response->json('theses'))->toHaveCount(1);

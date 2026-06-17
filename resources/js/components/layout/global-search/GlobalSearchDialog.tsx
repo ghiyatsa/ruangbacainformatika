@@ -9,6 +9,7 @@ import {
     CommandList,
 } from '@/components/ui/command';
 import { Skeleton } from '@/components/ui/skeleton';
+import blogRoute from '@/routes/blog';
 import booksRoute from '@/routes/books';
 import internshipReportsRoute from '@/routes/internship-reports';
 import skripsiRoute from '@/routes/skripsi';
@@ -23,6 +24,7 @@ import type {
 
 const EMPTY_RESULTS: SearchResponse = {
     books: [],
+    posts: [],
     skripsis: [],
     internshipReports: [],
     theses: [],
@@ -54,6 +56,10 @@ function flattenSearchResults(results: SearchResponse): SearchListItem[] {
             ...book,
             itemType: 'book' as const,
         })),
+        ...results.posts.map((post) => ({
+            ...post,
+            itemType: 'post' as const,
+        })),
         ...results.skripsis.map((skripsi) => ({
             ...skripsi,
             itemType: 'skripsi' as const,
@@ -72,6 +78,12 @@ function flattenSearchResults(results: SearchResponse): SearchListItem[] {
 function visitSearchResult(item: SearchResult, type: SearchItemType): void {
     if (type === 'book') {
         router.visit(booksRoute.show.url(item.slug));
+
+        return;
+    }
+
+    if (type === 'post') {
+        router.visit(blogRoute.show.url(item.slug));
 
         return;
     }
@@ -174,7 +186,7 @@ export function GlobalSearchDialog({
             className="top-24 p-2"
         >
             <CommandInput
-                placeholder="Ketik judul, penulis, atau nama dokumen..."
+                placeholder="Cari buku, artikel, atau karya ilmiah..."
                 value={query}
                 onValueChange={handleQueryChange}
             />

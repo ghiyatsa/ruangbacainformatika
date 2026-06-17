@@ -1,4 +1,7 @@
+import { Link } from '@inertiajs/react';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import booksRoute from '@/routes/books';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
 import LazyDeferred from './LazyDeferred';
@@ -49,6 +52,14 @@ export default function PopularBooks({
                     emptyDescription="Daftar buku yang paling sering dilihat akan tampil di sini."
                 />
             </LazyDeferred>
+
+            <div className="flex justify-center">
+                <Button asChild size="lg" className="rounded-xl px-8">
+                    <Link href={booksRoute.index.url()}>
+                        Buku populer lainnya
+                    </Link>
+                </Button>
+            </div>
         </div>
     );
 }
