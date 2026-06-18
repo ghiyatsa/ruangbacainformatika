@@ -61,7 +61,7 @@ export function HeaderActions({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="group hidden h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 md:inline-flex"
+                    className="group hidden h-9 w-9 rounded-xl transition-all duration-300 md:inline-flex"
                     onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
                     aria-label={isDark ? 'Mode terang' : 'Mode gelap'}
                     title={isDark ? 'Mode terang' : 'Mode gelap'}
@@ -92,14 +92,14 @@ export function HeaderActions({
                                 asChild
                                 variant="ghost"
                                 size="icon"
-                                className="group relative hidden h-9 w-9 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 md:inline-flex"
+                                className="group relative hidden h-9 w-9 rounded-xl transition-all duration-300 md:inline-flex"
                             >
                                 <Link
                                     href={loans.request.url()}
                                     aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
                                     title="Keranjang peminjaman"
                                 >
-                                    <ShoppingCart className="h-[14px] w-[14px] text-primary transition-transform duration-300 group-hover:scale-110" />
+                                    <ShoppingCart className="h-[14px] w-[14px] text-primary transition-transform duration-300" />
                                     <span className="sr-only">
                                         Keranjang peminjaman
                                     </span>

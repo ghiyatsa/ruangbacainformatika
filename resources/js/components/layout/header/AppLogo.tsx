@@ -5,8 +5,8 @@ import { home } from '@/routes';
 
 export function AppLogo({ compact = false }: { compact?: boolean }) {
     return (
-        <Link href={home.url()} className="flex items-center gap-2">
-            <RuangBacaLogo className="size-10" />
+        <Link href={home.url()} className="flex items-center">
+            <RuangBacaLogo className="relative -left-2 size-10" />
             <div className="flex flex-col">
                 <span className="text-sm font-bold tracking-wider uppercase">
                     Ruang Baca
