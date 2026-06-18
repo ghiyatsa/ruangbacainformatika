@@ -6,6 +6,7 @@ use App\Http\Resources\BookCatalogResource;
 use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class BuildHomeCatalogSections
 {
@@ -30,14 +31,7 @@ class BuildHomeCatalogSections
      */
     public function paginatedBooks(): LengthAwarePaginator
     {
-        return Book::query()
-            ->published()
-            ->select(self::BOOK_LIST_COLUMNS)
-            ->with(['authors:id,name', 'categories:id,name,slug'])
-            ->withCount([
-                'items',
-                'items as available_items_count' => fn ($query) => $query->available(),
-            ])
+        return $this->bookQuery()
             ->latest()
             ->orderByDesc('id')
             ->orderBy('title')
@@ -49,15 +43,8 @@ class BuildHomeCatalogSections
      */
     public function featuredBooks(): array
     {
-        $books = Book::query()
-            ->published()
+        $books = $this->bookQuery()
             ->featured()
-            ->select(self::BOOK_LIST_COLUMNS)
-            ->with(['authors:id,name', 'categories:id,name,slug'])
-            ->withCount([
-                'items',
-                'items as available_items_count' => fn ($query) => $query->available(),
-            ])
             ->limit(5)
             ->get();
 
@@ -69,14 +56,7 @@ class BuildHomeCatalogSections
      */
     public function popularBooks(): array
     {
-        $books = Book::query()
-            ->published()
-            ->select(self::BOOK_LIST_COLUMNS)
-            ->with(['authors:id,name', 'categories:id,name,slug'])
-            ->withCount([
-                'items',
-                'items as available_items_count' => fn ($query) => $query->available(),
-            ])
+        $books = $this->bookQuery()
             ->orderByDesc('view_count')
             ->orderBy('title')
             ->limit(6)
@@ -90,16 +70,11 @@ class BuildHomeCatalogSections
      */
     public function mostBorrowedBooks(): array
     {
-        $books = Book::query()
-            ->published()
+        $books = $this->bookQuery()
             ->where('is_borrowable', true)
-            ->select(self::BOOK_LIST_COLUMNS)
             ->withCount([
                 'loanItems as borrow_count',
-                'items',
-                'items as available_items_count' => fn ($query) => $query->available(),
             ])
-            ->with(['authors:id,name', 'categories:id,name,slug'])
             ->has('loanItems')
             ->orderByDesc('borrow_count')
             ->orderByDesc('view_count')
@@ -133,15 +108,8 @@ class BuildHomeCatalogSections
             ->limit(3)
             ->get()
             ->map(function (Category $category): array {
-                $books = Book::query()
-                    ->published()
+                $books = $this->bookQuery()
                     ->whereHas('categories', fn ($query) => $query->whereKey($category->id))
-                    ->select(self::BOOK_LIST_COLUMNS)
-                    ->with(['authors:id,name', 'categories:id,name,slug'])
-                    ->withCount([
-                        'items',
-                        'items as available_items_count' => fn ($query) => $query->available(),
-                    ])
                     ->orderByDesc('view_count')
                     ->orderByDesc('published_year')
                     ->orderBy('title')
@@ -158,5 +126,20 @@ class BuildHomeCatalogSections
                 ];
             })
             ->all();
+    }
+
+    /**
+     * @return Builder<Book>
+     */
+    protected function bookQuery(): Builder
+    {
+        return Book::query()
+            ->published()
+            ->select(self::BOOK_LIST_COLUMNS)
+            ->with(['authors:id,name', 'categories:id,name,slug'])
+            ->withCount([
+                'items',
+                'items as available_items_count' => fn (Builder $query): Builder => $query->available(),
+            ]);
     }
 }

@@ -64,30 +64,4 @@ class CatalogService
                 'booksCount' => (int) ($category->books_count ?? 0),
             ]);
     }
-
-    /**
-     * Get a lightweight category set for highlight surfaces.
-     *
-     * @return Collection<int, array{id: int, name: string, slug: string, description: string|null, booksCount: int}>
-     */
-    public function getHighlightCategories(int $limit = 12): Collection
-    {
-        return Category::query()
-            ->select(['id', 'name', 'slug', 'description'])
-            ->whereHas('books', fn ($query) => $query->published())
-            ->withCount([
-                'books as books_count' => fn ($query) => $query->published(),
-            ])
-            ->orderByDesc('books_count')
-            ->orderBy('name')
-            ->limit($limit)
-            ->get()
-            ->map(fn (Category $category) => [
-                'id' => $category->id,
-                'name' => $category->name,
-                'slug' => $category->slug,
-                'description' => $category->description,
-                'booksCount' => (int) ($category->books_count ?? 0),
-            ]);
-    }
 }

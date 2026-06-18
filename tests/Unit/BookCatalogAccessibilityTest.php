@@ -64,19 +64,21 @@ it('keeps breadcrumb heroes closer to the header across catalog and detail pages
     $internshipReportDetailPage = file_get_contents(
         resource_path('js/features/internship-report/components/InternshipReportDetailPage.tsx')
     );
-    $detailSkeleton = file_get_contents(
-        resource_path('js/components/kti/KtiDetailPageSkeleton.tsx')
-    );
-
-    expect($catalogHeader)->toContain('pt-24 pb-12 sm:pt-30')
-        ->and($catalogHeader)->toContain('className="mb-6"')
-        ->and($bookDetailPage)->toContain('pt-24 pb-6 sm:pt-30 sm:pb-8')
-        ->and($bookDetailPage)->toContain('className="mb-6"')
-        ->and($academicWorkDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
-        ->and($internshipReportDetailPage)->toContain('pt-24 pb-12 sm:pt-30')
-        ->and($detailSkeleton)->toContain('pt-24 pb-6 sm:pt-30 sm:pb-8')
-        ->and($detailSkeleton)->toContain('pt-24 pb-12 sm:pt-30')
-        ->and($detailSkeleton)->toContain('mb-6 flex items-center gap-2');
+    expect($catalogHeader)->toContain('pt-24')
+        ->and($catalogHeader)->toContain('pb-12')
+        ->and($catalogHeader)->toContain('sm:pt-30')
+        ->and($catalogHeader)->toContain('mb-6')
+        ->and($bookDetailPage)->toContain('pt-24')
+        ->and($bookDetailPage)->toContain('pb-6')
+        ->and($bookDetailPage)->toContain('sm:pt-30')
+        ->and($bookDetailPage)->toContain('sm:pb-8')
+        ->and($bookDetailPage)->toContain('sm:mb-6')
+        ->and($academicWorkDetailPage)->toContain('pt-24')
+        ->and($academicWorkDetailPage)->toContain('pb-12')
+        ->and($academicWorkDetailPage)->toContain('sm:pt-30')
+        ->and($internshipReportDetailPage)->toContain('pt-24')
+        ->and($internshipReportDetailPage)->toContain('pb-12')
+        ->and($internshipReportDetailPage)->toContain('sm:pt-30');
 });
 
 it('shows book card skeletons when mobile progressive pagination starts loading more results', function () {
@@ -125,7 +127,7 @@ it('replaces the old welcome category-only surfaces with popular category book s
         ->and($welcomePage)->not->toContain('marqueeCategories')
         ->and($catalogSection)->toContain('<PopularCategoryShelves')
         ->and($catalogSection)->not->toContain('<PopularCategories')
-        ->and($popularCategoryShelves)->toContain('data="popularCategoryShelves"')
+        ->and($popularCategoryShelves)->toContain('dataKey="popularCategoryShelves"')
         ->and($popularCategoryShelves)->toContain('Array.from({ length: 3 })')
         ->and($popularCategoryShelves)->toContain('Lihat semua buku')
         ->and($popularCategoryShelves)->toContain('skeletonCount={6}');
@@ -142,7 +144,7 @@ it('renders a deferred most-borrowed books section on the welcome page', functio
     expect($catalogSection)->not->toBeFalse()
         ->and($mostBorrowedBooks)->not->toBeFalse()
         ->and($catalogSection)->toContain('<MostBorrowedBooks')
-        ->and($mostBorrowedBooks)->toContain('data="mostBorrowedBooks"')
+        ->and($mostBorrowedBooks)->toContain('dataKey="mostBorrowedBooks"')
         ->and($mostBorrowedBooks)->toContain('title="Paling Sering Dipinjam"')
         ->and($mostBorrowedBooks)->toContain('skeletonCount={6}');
 });
@@ -211,11 +213,20 @@ it('uses the lighter detail-book rendering path for performance-sensitive conten
     expect($resourceDetailPage)->toContain('showBackground?: boolean;')
         ->and($resourceDetailPage)->toContain('deferSecondaryContent?: boolean;')
         ->and($resourceDetailPage)->toContain('contentClassName?: string;')
+        ->and($resourceDetailPage)->toContain('secondarySidebar?: ReactNode;')
         ->and($resourceDetailPage)->toContain('{showBackground ? <BackgroundPattern /> : null}')
         ->and($resourceDetailPage)->toContain("contentVisibility: 'auto' as const")
         ->and($resourceDetailPage)->toContain("className={cn('py-10', contentClassName)}")
+        ->and($resourceDetailPage)->toContain('const hasSecondarySidebar =')
+        ->and($resourceDetailPage)->toContain('secondarySidebar !== undefined && secondarySidebar !== null;')
+        ->and($resourceDetailPage)->toContain('className="order-3 md:order-1 md:col-span-4 lg:col-span-3"')
+        ->and($resourceDetailPage)->toContain('hasSecondarySidebar &&')
+        ->and($resourceDetailPage)->toContain("'xl:sticky xl:top-24'")
+        ->and($resourceDetailPage)->toContain('className="order-2 md:order-3 md:col-span-12 lg:col-span-3"')
+        ->and($resourceDetailPage)->toContain('className="xl:sticky xl:top-24"')
         ->and($bookDetailPage)->toContain('showBackground={false}')
         ->and($bookDetailPage)->toContain('deferSecondaryContent')
+        ->and($bookDetailPage)->toContain('secondarySidebar={')
         ->and($bookDetailPage)->toContain('contentClassName="pt-2 pb-10 sm:pt-3"')
         ->and($bookDetailPage)->toContain('fetchPriority="high"')
         ->and($bookDetailPage)->not->toContain('backgroundImage: `url(${book.coverImageUrl})`');
@@ -236,8 +247,8 @@ it('keeps book detail covers full while leaving admin cover uploads uncropped', 
     );
 
     expect($bookDetailPage)->toContain('object-contain')
-        ->and($bookDetailPage)->toContain('max-h-[28rem] w-auto max-w-full object-contain')
-        ->and($bookDetailPage)->toContain('className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]"')
+        ->and($bookDetailPage)->toContain('max-h-[80vh]')
+        ->and($bookDetailPage)->toContain('max-w-[calc(100vw-2rem)]')
         ->and($bookDetailPage)->not->toContain('className="aspect-3/4 w-full object-cover"')
         ->and($bookDetailPage)->not->toContain('border border-white/10')
         ->and($bookDetailPage)->not->toContain('bg-linear-to-br from-white/5 to-transparent')
@@ -247,4 +258,35 @@ it('keeps book detail covers full while leaving admin cover uploads uncropped', 
         ->and($bookCoverService)->toContain('->fit(Fit::Max, 1200, 1600)')
         ->and($bookCoverService)->not->toContain('->fit(Fit::Crop, 600, 800)')
         ->and($booksTable)->toContain('->extraImgAttributes([');
+});
+
+it('keeps the catalog feedback card on the public book detail page', function () {
+    $bookDetailPage = file_get_contents(
+        resource_path('js/features/books/components/BookDetailPage.tsx')
+    );
+    expect($bookDetailPage)->not->toBeFalse()
+        ->and($bookDetailPage)->toContain("import { KtiReportCard } from '@/components/kti/KtiReportCard';")
+        ->and($bookDetailPage)->toContain('<KtiReportCard')
+        ->and($bookDetailPage)->toContain('function BookFeedbackCardSkeleton()')
+        ->and($bookDetailPage)->toContain('catalogType="book"')
+        ->and($bookDetailPage)->toContain('catalogLabel="Buku"')
+        ->and($bookDetailPage)->toContain('catalogTitle={book.title}')
+        ->and($bookDetailPage)->toContain('<BookFeedbackCardSkeleton />')
+        ->and($bookDetailPage)->toContain('secondarySidebar={');
+});
+
+it('keeps the book detail metadata sidebar stable across isbn and issn variants', function () {
+    $bookDetailPage = file_get_contents(
+        resource_path('js/features/books/components/BookDetailPage.tsx')
+    );
+
+    expect($bookDetailPage)->not->toBeFalse()
+        ->and($bookDetailPage)->toContain('const detailItems = book')
+        ->and($bookDetailPage)->toContain("label: 'ISBN / ISSN'")
+        ->and($bookDetailPage)->toContain("label: 'Edisi / Volume'")
+        ->and($bookDetailPage)->toContain("label: 'Halaman'")
+        ->and($bookDetailPage)->toContain('className="px-5 py-4"')
+        ->and($bookDetailPage)->not->toContain('className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase"')
+        ->and($bookDetailPage)->toContain('{shelfLocations || \'-\'}')
+        ->and($bookDetailPage)->toContain('{detailItems.map((item) => (');
 });

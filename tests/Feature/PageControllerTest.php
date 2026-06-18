@@ -81,3 +81,11 @@ it('system static pages use the matching static page record when available', fun
                 ->where('pageContent.content', '<h2>About Resource</h2><p>Isi about dari resource.</p>'),
         );
 });
+
+it('inactive system static pages are not displayed', function () {
+    StaticPage::query()
+        ->where('page_key', 'about')
+        ->update(['is_active' => false]);
+
+    get(route('about'))->assertNotFound();
+});
