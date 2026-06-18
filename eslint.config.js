@@ -126,6 +126,7 @@ export default [
             'resources/js/components/ui/*',
             'resources/js/routes/**',
             'resources/js/wayfinder/**',
+            '.agents/**',
         ],
     },
     prettier, // Turn off all rules that might conflict with Prettier
