@@ -52,5 +52,3 @@ export default function MostBorrowedBooks({
         </div>
     );
 }
-
-// test_compatibility: data="mostBorrowedBooks" title="Paling Sering Dipinjam"

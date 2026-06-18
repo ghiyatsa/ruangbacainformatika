@@ -1,6 +1,4 @@
 import { usePage } from '@inertiajs/react';
-import { AppContent } from '@/components/layout/AppContent';
-import { AppShell } from '@/components/layout/AppShell';
 import Footer from '@/components/layout/footer';
 import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { AppHeader } from '@/components/layout/header';
@@ -15,17 +13,19 @@ export default function AppLayout({
     const isWelcome = component === 'welcome' || component === 'welcome/index';
 
     return (
-        <AppShell variant="header">
+        <div className="flex min-h-screen w-full flex-col">
             <GoogleOneTapPrompt />
             <DeferredGlobalContentNotice
                 className="md:hidden"
                 variant="topbar"
             />
             <AppHeader hideSearch={hideSearch} />
-            <AppContent variant={isWelcome ? 'full' : 'header'}>
+            <main
+                className={`flex h-full w-full flex-1 flex-col ${isWelcome ? '' : 'md:pt-24'}`}
+            >
                 {children}
-            </AppContent>
+            </main>
             <Footer />
-        </AppShell>
+        </div>
     );
 }

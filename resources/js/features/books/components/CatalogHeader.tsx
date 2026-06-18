@@ -25,7 +25,7 @@ export function CatalogHeader(props: CatalogHeaderProps) {
     return (
         <div className="relative -mt-20 overflow-hidden bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28 md:-mt-24">
             <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
-            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-12 sm:pt-30">
+            <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
                 <DeferredGlobalContentNotice className="hidden md:block" />
                 <Breadcrumb className="mb-6 hidden sm:block">
                     <BreadcrumbList>
@@ -52,5 +52,3 @@ export function CatalogHeader(props: CatalogHeaderProps) {
         </div>
     );
 }
-
-// test_compatibility: className="mb-6"

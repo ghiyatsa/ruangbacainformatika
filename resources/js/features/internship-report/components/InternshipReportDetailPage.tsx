@@ -189,8 +189,8 @@ export default function InternshipReportDetailPage(
                             <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
                                 <div className="flex flex-1 flex-col justify-center">
                                     <h1 className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                                        <Skeleton className="h-7 w-full max-w-3xl sm:h-8 lg:h-9 animate-pulse" />
-                                        <Skeleton className="mt-2 h-7 w-4/5 max-w-2xl sm:h-8 lg:h-9 animate-pulse" />
+                                        <Skeleton className="h-7 w-full max-w-3xl animate-pulse sm:h-8 lg:h-9" />
+                                        <Skeleton className="mt-2 h-7 w-4/5 max-w-2xl animate-pulse sm:h-8 lg:h-9" />
                                     </h1>
 
                                     <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
@@ -222,7 +222,7 @@ export default function InternshipReportDetailPage(
                                     </div>
 
                                     <div className="mt-5 flex flex-wrap items-center gap-3">
-                                        <Skeleton className="h-10 w-28 rounded-full animate-pulse" />
+                                        <Skeleton className="h-10 w-28 animate-pulse rounded-full" />
                                     </div>
                                 </div>
                             </div>
@@ -254,7 +254,9 @@ export default function InternshipReportDetailPage(
                                     />
                                     {report.year ? (
                                         <KtiDetailItem
-                                            icon={<Calendar className="size-4" />}
+                                            icon={
+                                                <Calendar className="size-4" />
+                                            }
                                             label="Tahun"
                                             value={String(report.year)}
                                         />
@@ -265,17 +267,23 @@ export default function InternshipReportDetailPage(
                                     <KtiDetailItem
                                         icon={<User className="size-4" />}
                                         label="Penulis"
-                                        value={<Skeleton className="h-5 w-32 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-32 animate-pulse" />
+                                        }
                                     />
                                     <KtiDetailItem
                                         icon={<Hash className="size-4" />}
                                         label="NIM"
-                                        value={<Skeleton className="h-5 w-24 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-24 animate-pulse" />
+                                        }
                                     />
                                     <KtiDetailItem
                                         icon={<Calendar className="size-4" />}
                                         label="Tahun"
-                                        value={<Skeleton className="h-5 w-16 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-16 animate-pulse" />
+                                        }
                                     />
                                 </>
                             )}
@@ -314,10 +322,10 @@ export default function InternshipReportDetailPage(
                             </div>
                             <Separator />
                             <div className="flex flex-wrap gap-2 p-4">
-                                <Skeleton className="h-6 w-16 rounded-full animate-pulse" />
-                                <Skeleton className="h-6 w-20 rounded-full animate-pulse" />
-                                <Skeleton className="h-6 w-14 rounded-full animate-pulse" />
-                                <Skeleton className="h-6 w-18 rounded-full animate-pulse" />
+                                <Skeleton className="h-6 w-16 animate-pulse rounded-full" />
+                                <Skeleton className="h-6 w-20 animate-pulse rounded-full" />
+                                <Skeleton className="h-6 w-14 animate-pulse rounded-full" />
+                                <Skeleton className="h-6 w-18 animate-pulse rounded-full" />
                             </div>
                         </div>
                     )}
@@ -333,7 +341,8 @@ export default function InternshipReportDetailPage(
                 </div>
             }
             footer={
-                (props.relatedReports === undefined || props.relatedReports.length > 0) && (
+                (props.relatedReports === undefined ||
+                    props.relatedReports.length > 0) && (
                     <KtiRelatedSection
                         title="Laporan KP Terkait"
                         description="Daftar laporan kerja praktik lainnya dengan topik atau bidang pembahasan serupa."
@@ -410,6 +419,3 @@ export default function InternshipReportDetailPage(
         </KtiDetailPage>
     );
 }
-
-// test_compatibility: pt-24 pb-12 sm:pt-30
-

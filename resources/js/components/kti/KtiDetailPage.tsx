@@ -10,6 +10,7 @@ interface KtiDetailPageProps {
     keywords?: string | string[];
     hero: ReactNode;
     sidebar: ReactNode;
+    secondarySidebar?: ReactNode;
     children: ReactNode;
     footer?: ReactNode;
     showBackground?: boolean;
@@ -24,12 +25,15 @@ export function KtiDetailPage({
     keywords,
     hero,
     sidebar,
+    secondarySidebar,
     children,
     footer,
     showBackground = true,
     deferSecondaryContent = false,
     contentClassName,
 }: KtiDetailPageProps) {
+    const hasSecondarySidebar =
+        secondarySidebar !== undefined && secondarySidebar !== null;
     const deferredSectionStyle = deferSecondaryContent
         ? {
               contentVisibility: 'auto' as const,
@@ -55,18 +59,41 @@ export function KtiDetailPage({
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="grid gap-8 md:grid-cols-12 md:gap-10">
                             <aside
-                                className="order-2 md:order-1 md:col-span-4 lg:col-span-3"
+                                className="order-3 md:order-1 md:col-span-4 lg:col-span-3"
                                 style={deferredSectionStyle}
                             >
-                                {sidebar}
+                                <div
+                                    className={cn(
+                                        hasSecondarySidebar &&
+                                            'xl:sticky xl:top-24',
+                                    )}
+                                >
+                                    {sidebar}
+                                </div>
                             </aside>
 
                             <div
-                                className="order-1 md:order-2 md:col-span-8 lg:col-span-9"
+                                className={cn(
+                                    'order-1 md:order-2 md:col-span-8',
+                                    hasSecondarySidebar
+                                        ? 'lg:col-span-6'
+                                        : 'lg:col-span-9',
+                                )}
                                 style={deferredSectionStyle}
                             >
                                 {children}
                             </div>
+
+                            {hasSecondarySidebar ? (
+                                <aside
+                                    className="order-2 md:order-3 md:col-span-12 lg:col-span-3"
+                                    style={deferredSectionStyle}
+                                >
+                                    <div className="xl:sticky xl:top-24">
+                                        {secondarySidebar}
+                                    </div>
+                                </aside>
+                            ) : null}
                         </div>
 
                         {footer ? <div className="pt-10">{footer}</div> : null}
@@ -76,4 +103,3 @@ export function KtiDetailPage({
         </>
     );
 }
-

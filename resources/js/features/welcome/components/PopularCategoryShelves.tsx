@@ -54,7 +54,10 @@ export default function PopularCategoryShelves({
         >
             <div className="flex flex-col gap-12 sm:gap-14">
                 {shelves.map((shelf) => (
-                    <div key={shelf.id} className="flex flex-col gap-8 sm:gap-10">
+                    <div
+                        key={shelf.id}
+                        className="flex flex-col gap-8 sm:gap-10"
+                    >
                         <SectionHeader
                             title={shelf.name}
                             subtitle={
@@ -78,7 +81,11 @@ export default function PopularCategoryShelves({
                         />
 
                         <div className="flex justify-center">
-                            <Button asChild size="lg" className="rounded-xl px-8">
+                            <Button
+                                asChild
+                                size="lg"
+                                className="rounded-xl px-8"
+                            >
                                 <Link
                                     href={booksRoute.index.url({
                                         query: {
@@ -96,5 +103,3 @@ export default function PopularCategoryShelves({
         </LazyDeferred>
     );
 }
-
-// test_compatibility: data="popularCategoryShelves"

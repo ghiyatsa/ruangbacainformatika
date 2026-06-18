@@ -64,11 +64,6 @@ export default defineConfig(({ command }) => ({
                             priority: 17,
                         },
                         {
-                            name: 'theme-vendor',
-                            test: /node_modules[\\/]next-themes[\\/]/,
-                            priority: 16,
-                        },
-                        {
                             name: 'ui-vendor',
                             test: /node_modules[\\/](?:class-variance-authority|clsx|tailwind-merge)/,
                             priority: 15,

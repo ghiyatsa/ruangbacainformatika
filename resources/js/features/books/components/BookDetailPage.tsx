@@ -22,6 +22,7 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
+import { KtiReportCard } from '@/components/kti/KtiReportCard';
 import { KtiShareButton } from '@/components/kti/KtiShareButton';
 import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { Badge } from '@/components/ui/badge';
@@ -53,8 +54,6 @@ export interface BookDetailPageProps {
     loading?: boolean;
 }
 
-
-
 function BookDescriptionSkeleton() {
     return (
         <div className="space-y-6">
@@ -69,6 +68,25 @@ function BookDescriptionSkeleton() {
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-5/6" />
                 <Skeleton className="h-4 w-2/3" />
+            </div>
+        </div>
+    );
+}
+
+function BookFeedbackCardSkeleton() {
+    return (
+        <div className="rounded-2xl border bg-card shadow-sm">
+            <div className="flex items-start gap-3 p-5">
+                <Skeleton className="size-10 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-4/5" />
+                </div>
+            </div>
+
+            <div className="px-5 pb-5">
+                <Skeleton className="h-10 w-full rounded-xl" />
             </div>
         </div>
     );
@@ -146,8 +164,54 @@ export default function BookDetailPage(props: BookDetailPageProps) {
           ].filter((value): value is string => Boolean(value))
         : ['katalog buku', 'ruang baca informatika'];
     const shelfLocations = book?.displayShelfLocations.join(', ') ?? '';
+    const usesBackupShelfLocations = book?.usesBackupShelfLocations ?? false;
     const authorsData = book?.authorsData;
     const publisherData = book?.publisherData;
+    const detailItems = book
+        ? [
+              {
+                  icon: <Building2 className="size-4" />,
+                  label: 'Penerbit',
+                  value: publisherData ? (
+                      <Link
+                          href={booksRoute.index.url({
+                              query: { publisher: publisherData.slug },
+                          })}
+                          className="text-primary hover:underline"
+                      >
+                          {publisherData.name}
+                      </Link>
+                  ) : (
+                      (book.publisher ?? '-')
+                  ),
+              },
+              {
+                  icon: <Calendar className="size-4" />,
+                  label: 'Tahun',
+                  value: book.publishedYear ? String(book.publishedYear) : '-',
+              },
+              {
+                  icon: <Hash className="size-4" />,
+                  label: 'ISBN / ISSN',
+                  value: book.isbn ?? book.issn ?? '-',
+              },
+              {
+                  icon: <Bookmark className="size-4" />,
+                  label: 'Edisi / Volume',
+                  value: book.edition ?? '-',
+              },
+              {
+                  icon: <FileText className="size-4" />,
+                  label: 'Halaman',
+                  value: book.pages ?? '-',
+              },
+              {
+                  icon: <Globe className="size-4" />,
+                  label: 'Bahasa',
+                  value: book.language ?? '-',
+              },
+          ]
+        : null;
 
     return (
         <KtiDetailPage
@@ -200,20 +264,24 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                         <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
                                 <div className="flex w-full items-center justify-center">
-                                    <div className="relative flex aspect-[3/4] w-full max-w-[16rem] items-center justify-center overflow-hidden rounded-2xl border bg-muted/10 shadow-xs sm:max-w-none sm:h-96 sm:w-72 md:h-[22rem] md:w-[16.5rem]">
+                                    <div className="relative flex aspect-[3/4] w-full max-w-[16rem] items-center justify-center overflow-hidden rounded-2xl border bg-muted/10 shadow-xs sm:h-96 sm:w-72 sm:max-w-none md:h-[22rem] md:w-[16.5rem]">
                                         {book && (
                                             <Dialog>
                                                 <DialogTrigger asChild>
                                                     <button
                                                         type="button"
                                                         className={cn(
-                                                            "bg-transparent text-left transition duration-200 hover:scale-[1.015] focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none w-full h-full flex items-center justify-center transition-opacity duration-300",
-                                                            imageLoaded ? "opacity-100" : "opacity-0 absolute"
+                                                            'flex h-full w-full items-center justify-center bg-transparent text-left transition transition-opacity duration-200 duration-300 hover:scale-[1.015] focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none',
+                                                            imageLoaded
+                                                                ? 'opacity-100'
+                                                                : 'absolute opacity-0',
                                                         )}
                                                         aria-label={`Lihat cover penuh buku ${book.title}`}
                                                     >
                                                         <img
-                                                            src={book.coverImageUrl}
+                                                            src={
+                                                                book.coverImageUrl
+                                                            }
                                                             alt={`Cover buku ${book.title}`}
                                                             fetchPriority="high"
                                                             decoding="async"
@@ -221,14 +289,18 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                             width={288}
                                                             height={384}
                                                             sizes="(min-width: 1024px) 20rem, (min-width: 768px) 28vw, 65vw"
-                                                            onLoad={() => setImageLoaded(true)}
+                                                            onLoad={() =>
+                                                                setImageLoaded(
+                                                                    true,
+                                                                )
+                                                            }
                                                             className="block h-full w-full object-cover transition duration-300"
                                                         />
                                                     </button>
                                                 </DialogTrigger>
 
                                                 <DialogContent
-                                                    className="w-fit max-w-[calc(100vw-2rem)] gap-0 bg-transparent p-0 shadow-none border-0 ring-0 backdrop-blur-none"
+                                                    className="w-fit max-w-[calc(100vw-2rem)] gap-0 border-0 bg-transparent p-0 shadow-none ring-0 backdrop-blur-none"
                                                     overlayClassName="bg-black/80"
                                                     showCloseButton={false}
                                                 >
@@ -238,13 +310,15 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                     <DialogDescription className="sr-only">
                                                         Pratinjau cover buku.
                                                     </DialogDescription>
-                                                    <div className="flex items-center justify-center w-fit h-fit">
+                                                    <div className="flex h-fit w-fit items-center justify-center">
                                                         <img
-                                                            src={book.coverImageUrl}
+                                                            src={
+                                                                book.coverImageUrl
+                                                            }
                                                             alt={`Cover penuh buku ${book.title}`}
                                                             width={448}
                                                             height={600}
-                                                            className="w-[448px] max-w-[calc(100vw-2rem)] h-auto max-h-[80vh] object-contain rounded-2xl"
+                                                            className="h-auto max-h-[80vh] w-[448px] max-w-[calc(100vw-2rem)] rounded-2xl object-contain"
                                                         />
                                                     </div>
                                                 </DialogContent>
@@ -276,12 +350,14 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                             category.slug ??
                                                             `${category.name}-${index}`
                                                         }
-                                                        href={booksRoute.index.url({
-                                                            query: {
-                                                                category:
-                                                                    category.slug,
+                                                        href={booksRoute.index.url(
+                                                            {
+                                                                query: {
+                                                                    category:
+                                                                        category.slug,
+                                                                },
                                                             },
-                                                        })}
+                                                        )}
                                                     >
                                                         <Badge
                                                             variant="secondary"
@@ -306,7 +382,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                     {book ? (
                                         book.title
                                     ) : (
-                                        <div className="space-y-2 max-w-3xl">
+                                        <div className="max-w-3xl space-y-2">
                                             <Skeleton className="h-8 w-11/12 sm:h-10 lg:h-12" />
                                             <Skeleton className="h-8 w-2/3 sm:h-10 lg:h-12" />
                                         </div>
@@ -325,18 +401,25 @@ export default function BookDetailPage(props: BookDetailPageProps) {
 
                                 <div className="mb-6 text-base font-medium text-muted-foreground sm:text-lg">
                                     {book ? (
-                                        authorsData && authorsData.length > 0 ? (
+                                        authorsData &&
+                                        authorsData.length > 0 ? (
                                             authorsData.map((author, index) => (
                                                 <span key={author.slug}>
                                                     <Link
-                                                        href={booksRoute.index.url({
-                                                            query: { author: author.slug },
-                                                        })}
+                                                        href={booksRoute.index.url(
+                                                            {
+                                                                query: {
+                                                                    author: author.slug,
+                                                                },
+                                                            },
+                                                        )}
                                                         className="text-primary hover:underline"
                                                     >
                                                         {author.name}
                                                     </Link>
-                                                    {index < authorsData.length - 1 && ', '}
+                                                    {index <
+                                                        authorsData.length -
+                                                            1 && ', '}
                                                 </span>
                                             ))
                                         ) : book.authors.length > 0 ? (
@@ -369,16 +452,19 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                                     book.availableItemsCount
                                                                 }
                                                             </strong>{' '}
-                                                            dari {book.itemsCount}{' '}
+                                                            dari{' '}
+                                                            {book.itemsCount}{' '}
                                                             eksemplar
                                                         </>
                                                     ) : (
                                                         <>
                                                             <strong className="text-foreground">
-                                                                {book.itemsCount}
+                                                                {
+                                                                    book.itemsCount
+                                                                }
                                                             </strong>{' '}
-                                                            eksemplar tersedia di
-                                                            ruang baca
+                                                            eksemplar tersedia
+                                                            di ruang baca
                                                         </>
                                                     )}
                                                 </span>
@@ -429,10 +515,14 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                         ? 'Hapus bookmark'
                                                         : 'Simpan bookmark'
                                                 }
-                                                aria-pressed={isBookmarkedByUser}
+                                                aria-pressed={
+                                                    isBookmarkedByUser
+                                                }
                                                 onClick={() =>
                                                     bookmarkRecord &&
-                                                    toggleBookmark(bookmarkRecord)
+                                                    toggleBookmark(
+                                                        bookmarkRecord,
+                                                    )
                                                 }
                                             >
                                                 <Bookmark
@@ -506,130 +596,95 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             sidebar={
                 <div className="space-y-4">
                     <div className="rounded-2xl border bg-card shadow-sm">
-                        <div className="p-5">
-                            <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                        <div className="px-5 py-4">
+                            <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Data Buku
                             </h2>
                         </div>
                         <Separator />
                         <div className="p-2">
-                            {book ? (
+                            {detailItems ? (
                                 <>
-                                    {book.publisher ? (
+                                    {detailItems.map((item) => (
                                         <KtiDetailItem
-                                            icon={<Building2 className="size-4" />}
-                                            label="Penerbit"
-                                            value={
-                                                publisherData ? (
-                                                    <Link
-                                                        href={booksRoute.index.url({
-                                                            query: { publisher: publisherData.slug },
-                                                        })}
-                                                        className="text-primary hover:underline"
-                                                    >
-                                                        {publisherData.name}
-                                                    </Link>
-                                                ) : (
-                                                    book.publisher
-                                                )
-                                            }
+                                            key={item.label}
+                                            icon={item.icon}
+                                            label={item.label}
+                                            value={item.value}
                                         />
-                                    ) : null}
-                                    {book.publishedYear ? (
-                                        <KtiDetailItem
-                                            icon={<Calendar className="size-4" />}
-                                            label="Tahun"
-                                            value={String(book.publishedYear)}
-                                        />
-                                    ) : null}
-                                    {book.isbn ? (
-                                        <KtiDetailItem
-                                            icon={<Hash className="size-4" />}
-                                            label="ISBN"
-                                            value={book.isbn}
-                                        />
-                                    ) : null}
-                                    {book.issn ? (
-                                        <KtiDetailItem
-                                            icon={<Hash className="size-4" />}
-                                            label="ISSN"
-                                            value={book.issn}
-                                        />
-                                    ) : null}
-                                    {book.issn && book.edition ? (
-                                        <KtiDetailItem
-                                            icon={<Bookmark className="size-4" />}
-                                            label="Edisi / Volume"
-                                            value={book.edition}
-                                        />
-                                    ) : null}
-                                    {book.issn && book.pages ? (
-                                        <KtiDetailItem
-                                            icon={<FileText className="size-4" />}
-                                            label="Halaman"
-                                            value={book.pages}
-                                        />
-                                    ) : null}
-                                    {book.displayShelfLocations.length > 0 ? (
-                                        <div className="group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-muted/50">
-                                            <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                                <MapPinned className="size-4" />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                                                    Lokasi rak
-                                                </p>
-                                                <p className="mt-0.5 text-sm font-semibold text-foreground">
-                                                    {shelfLocations}
-                                                </p>
-                                                {book.usesBackupShelfLocations ? (
-                                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                                        Rak utama sedang kosong,
-                                                        jadi lokasi ini memakai rak
-                                                        cadangan yang masih
-                                                        tersedia.
-                                                    </p>
-                                                ) : null}
-                                            </div>
+                                    ))}
+                                    <div className="group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-muted/50">
+                                        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                            <MapPinned className="size-4" />
                                         </div>
-                                    ) : null}
-                                    <KtiDetailItem
-                                        icon={<Globe className="size-4" />}
-                                        label="Bahasa"
-                                        value={book.language ?? '-'}
-                                    />
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                                Lokasi rak
+                                            </p>
+                                            <p className="mt-0.5 text-sm font-semibold text-foreground">
+                                                {shelfLocations || '-'}
+                                            </p>
+                                            {usesBackupShelfLocations ? (
+                                                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                                    Rak utama sedang kosong,
+                                                    jadi lokasi ini memakai rak
+                                                    cadangan yang masih
+                                                    tersedia.
+                                                </p>
+                                            ) : null}
+                                        </div>
+                                    </div>
                                 </>
                             ) : (
                                 <>
                                     <KtiDetailItem
                                         icon={<Building2 className="size-4" />}
                                         label="Penerbit"
-                                        value={<Skeleton className="h-5 w-28 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-28 animate-pulse" />
+                                        }
                                     />
                                     <KtiDetailItem
                                         icon={<Calendar className="size-4" />}
                                         label="Tahun"
-                                        value={<Skeleton className="h-5 w-16 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-16 animate-pulse" />
+                                        }
                                     />
                                     <KtiDetailItem
                                         icon={<Hash className="size-4" />}
                                         label="ISBN"
-                                        value={<Skeleton className="h-5 w-32 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-32 animate-pulse" />
+                                        }
+                                    />
+                                    <KtiDetailItem
+                                        icon={<Bookmark className="size-4" />}
+                                        label="Edisi / Volume"
+                                        value={
+                                            <Skeleton className="h-5 w-24 animate-pulse" />
+                                        }
                                     />
                                     <KtiDetailItem
                                         icon={<FileText className="size-4" />}
                                         label="Halaman"
-                                        value={<Skeleton className="h-5 w-20 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-20 animate-pulse" />
+                                        }
                                     />
                                     <KtiDetailItem
                                         icon={<MapPinned className="size-4" />}
                                         label="Lokasi Rak"
-                                        value={<Skeleton className="h-5 w-24 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-24 animate-pulse" />
+                                        }
                                     />
                                     <KtiDetailItem
                                         icon={<Globe className="size-4" />}
                                         label="Bahasa"
-                                        value={<Skeleton className="h-5 w-16 animate-pulse" />}
+                                        value={
+                                            <Skeleton className="h-5 w-16 animate-pulse" />
+                                        }
                                     />
                                 </>
                             )}
@@ -637,8 +692,21 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                     </div>
                 </div>
             }
+            secondarySidebar={
+                book ? (
+                    <KtiReportCard
+                        catalogType="book"
+                        catalogId={book.id}
+                        catalogLabel="Buku"
+                        catalogTitle={book.title}
+                    />
+                ) : (
+                    <BookFeedbackCardSkeleton />
+                )
+            }
             footer={
-                (props.relatedBooks === undefined || props.relatedBooks.length > 0) && (
+                (props.relatedBooks === undefined ||
+                    props.relatedBooks.length > 0) && (
                     <KtiRelatedSection
                         title="Buku Terkait"
                         description="Rekomendasi buku lainnya dengan kategori atau topik serupa."
@@ -704,6 +772,3 @@ export default function BookDetailPage(props: BookDetailPageProps) {
         </KtiDetailPage>
     );
 }
-
-// test_compatibility: pt-24 pb-6 sm:pt-30 sm:pb-8 className="mb-6" className="flex min-h-[18rem] items-center justify-center sm:min-h-[22rem]" object-contain max-h-[28rem] w-auto max-w-full object-contain
-

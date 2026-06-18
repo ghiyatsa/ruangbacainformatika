@@ -26,7 +26,6 @@ declare module '@inertiajs/core' {
             auth: Auth;
             notifications: NotificationSummary;
             loanRequestCart: LoanRequestCart | null;
-            sidebarOpen: boolean;
             [key: string]: unknown;
         };
     }
