@@ -1,5 +1,4 @@
 import { SeoHead } from '@/components/common/SeoHead';
-import { BackgroundPattern } from '@/components/layout/BackgroundPattern';
 import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
@@ -88,10 +87,9 @@ export function PageLayout({
     maxWidth = '5xl',
     className,
     header,
-    showBackground = true,
     showHero = true,
     showDesktopNoticeInContent = true,
-}: PageLayoutProps) {
+}: Omit<PageLayoutProps, 'showBackground'>) {
     return (
         <div className="relative flex min-h-[calc(100vh-(--spacing(20)))] flex-col sm:min-h-[calc(100vh-(--spacing(28)))]">
             <SeoHead
@@ -99,18 +97,11 @@ export function PageLayout({
                 description={metaDescription ?? description}
             />
 
-            {showBackground ? <BackgroundPattern /> : null}
-
             <div className="relative z-10 flex flex-1 flex-col">
                 {header ? (
                     header
                 ) : showHero ? (
-                    <section className="relative overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 py-12 sm:py-20">
-                        {/* Decorative background element */}
-                        <div className="absolute top-0 left-1/2 -z-10 h-full w-full -translate-x-1/2 opacity-30">
-                            <div className="absolute top-0 left-1/4 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-                            <div className="absolute right-1/4 bottom-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
-                        </div>
+                    <section className="relative overflow-hidden border-b bg-background py-12 sm:py-20">
 
                         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                             <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">

@@ -1,3 +1,4 @@
+import { BackgroundPattern } from '@/components/layout/BackgroundPattern';
 import { AppLogo } from '@/components/layout/header/AppLogo';
 import GoogleOneTapPrompt from '@/features/auth/components/GoogleOneTapPrompt';
 import type { ReactNode } from 'react';
@@ -13,6 +14,7 @@ export default function AuthLayout({
 }) {
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+            <BackgroundPattern />
             <GoogleOneTapPrompt />
             <div className="flex w-full max-w-sm flex-col gap-6">
                 <div className="flex w-full justify-center">

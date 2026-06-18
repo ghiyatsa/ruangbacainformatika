@@ -52,11 +52,7 @@ export default function ErrorPage({ status }: { status: number }) {
             <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-10 text-foreground transition-colors duration-300">
                 <BackgroundPattern />
 
-                {/* Decorative background gradients */}
-                <div className="absolute top-0 left-1/2 -z-10 h-full w-full -translate-x-1/2 opacity-30">
-                    <div className="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-primary/20 blur-[120px] dark:bg-primary/10" />
-                    <div className="absolute right-1/4 bottom-0 h-96 w-96 rounded-full bg-cyan-500/10 blur-[120px] dark:bg-cyan-500/5" />
-                </div>
+
 
                 <div className="mx-auto flex w-full max-w-5xl items-center justify-center">
                     <div className="grid w-full gap-10 rounded-[2rem] border border-border/50 bg-card p-8 shadow-[0_30px_80px_-35px_rgba(0,0,0,0.25)] md:grid-cols-[1.1fr_0.9fr] md:p-12 dark:shadow-[0_30px_80px_-35px_rgba(0,0,0,0.5)]">
@@ -115,8 +111,7 @@ export default function ErrorPage({ status }: { status: number }) {
                         </div>
 
                         <div className="relative flex items-center justify-center">
-                            {/* Decorative background for the status number */}
-                            <div className="absolute inset-0 scale-95 -rotate-3 rounded-[2rem] bg-linear-to-br from-primary/20 via-transparent to-cyan-500/20 opacity-50 blur-2xl" />
+
 
                             <div className="relative flex h-full min-h-72 w-full items-center justify-center rounded-[1.75rem] border border-border/50 bg-background p-8 shadow-inner">
                                 <div className="text-center">
