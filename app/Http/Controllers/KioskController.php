@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Kiosk\BorrowBooksFromKiosk;
-use App\Actions\Kiosk\RegisterKioskVisit;
-use App\Actions\Kiosk\ResolveKioskMemberRegistrationClaim;
 use App\Actions\Kiosk\ReturnBooksFromKiosk;
 use App\Actions\Kiosk\SearchKioskBooks;
 use App\Http\Requests\Kiosk\BorrowBookRequest;
@@ -33,7 +31,6 @@ class KioskController extends Controller
         protected KioskPinManager $kioskPinManager,
         protected KioskMemberLookupService $kioskMemberLookupService,
         protected MemberRegistrationClaimService $memberRegistrationClaimService,
-        protected ResolveKioskMemberRegistrationClaim $resolveKioskMemberRegistrationClaim,
     ) {}
 
     public function show(Request $request): Response
@@ -173,12 +170,34 @@ class KioskController extends Controller
      */
     protected function resolveMemberRegistrationClaim(Request $request): ?array
     {
-        return $this->resolveKioskMemberRegistrationClaim->execute($request);
+        $presentedClaim = $request->session()->get('kiosk.member_registration_claim');
+
+        if (! is_array($presentedClaim)) {
+            return null;
+        }
+
+        $claim = $this->memberRegistrationClaimService->syncPresentedClaim($presentedClaim);
+
+        if ($claim === null) {
+            $request->session()->forget('kiosk.member_registration_claim');
+
+            return null;
+        }
+
+        $request->session()->put('kiosk.member_registration_claim', $claim);
+
+        return $claim;
     }
 
-    public function store(SubmitVisitRequest $request, RegisterKioskVisit $registerKioskVisit): RedirectResponse
+    public function store(SubmitVisitRequest $request): RedirectResponse
     {
-        $registerKioskVisit->execute($request, $request->validated());
+        $kioskDevice = $this->kioskPinManager->currentDevice($request);
+
+        VisitLog::query()->create([
+            ...$request->validated(),
+            'kiosk_device_id' => $kioskDevice?->getKey(),
+            'visited_at' => now(),
+        ]);
 
         Inertia::flash('toast', [
             'type' => 'success',

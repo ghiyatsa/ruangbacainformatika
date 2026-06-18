@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Loans\ConsumeLoanDraft;
 use App\Http\Requests\Kiosk\ConsumeLoanDraftRequest;
+use App\Services\LoanDraftService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 
 class KioskLoanDraftController extends Controller
 {
-    public function store(ConsumeLoanDraftRequest $request, ConsumeLoanDraft $consumeLoanDraft): RedirectResponse
+    public function __construct(
+        protected LoanDraftService $loanDraftService,
+    ) {}
+
+    public function store(ConsumeLoanDraftRequest $request): RedirectResponse
     {
-        $loan = $consumeLoanDraft->execute($request->validatedPayload());
+        $loan = $this->loanDraftService->consume($request->validatedPayload());
         $borrowedCount = $loan->items()->count();
 
         Inertia::flash('toast', [

@@ -6,9 +6,9 @@ use App\Models\Book;
 use App\Models\Loan;
 use App\Models\LoanDraft;
 use App\Models\LoanDraftItem;
+use App\Models\LoanItem;
 use App\Models\User;
 use App\Services\Borrowing\BorrowingEligibilityService;
-use App\Services\Borrowing\LoanLimitService;
 use App\Services\Borrowing\LoanQrCodeService;
 use App\Services\Borrowing\LoanTokenService;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,7 +24,6 @@ class LoanDraftService
     public function __construct(
         protected BorrowingEligibilityService $borrowingEligibilityService,
         protected KioskLoanService $kioskLoanService,
-        protected LoanLimitService $loanLimitService,
         protected LoanQrCodeService $loanQrCodeService,
         protected LoanTokenService $loanTokenService,
     ) {}
@@ -325,7 +324,7 @@ class LoanDraftService
 
     public function loanMaxBooks(): int
     {
-        return $this->loanLimitService->loanMaxBooks();
+        return $this->kioskLoanService->loanMaxBooks();
     }
 
     protected function ensureLoanDraftAccess(User $user): void
@@ -340,7 +339,12 @@ class LoanDraftService
 
     protected function activeLoanCount(User $user): int
     {
-        return $this->loanLimitService->activeLoanCount($user);
+        return LoanItem::query()
+            ->whereNull('returned_at', 'and', false)
+            ->whereHas('loan', fn (Builder $query): Builder => $query
+                ->whereBelongsTo($user)
+                ->where('status', Loan::STATUS_BORROWED))
+            ->count();
     }
 
     protected function findCurrentDraft(User $user): ?LoanDraft

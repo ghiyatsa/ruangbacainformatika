@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Loans\GenerateReturnDraftQr;
 use App\Http\Requests\ReturnDraftQrRequest;
+use App\Services\ReturnDraftService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 
 class ReturnDraftController extends Controller
 {
-    public function generateQr(ReturnDraftQrRequest $request, GenerateReturnDraftQr $generateReturnDraftQr): RedirectResponse
+    public function __construct(
+        protected ReturnDraftService $returnDraftService,
+    ) {}
+
+    public function generateQr(ReturnDraftQrRequest $request): RedirectResponse
     {
-        $checkout = $generateReturnDraftQr->execute(
+        $checkout = $this->returnDraftService->generateQr(
             $request->user(),
             $request->validatedLoanItemIds(),
         );

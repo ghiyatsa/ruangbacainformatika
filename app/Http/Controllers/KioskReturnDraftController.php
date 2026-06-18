@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Loans\ConsumeReturnDraft;
 use App\Http\Requests\Kiosk\ConsumeReturnDraftRequest;
+use App\Services\ReturnDraftService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 
 class KioskReturnDraftController extends Controller
 {
-    public function store(ConsumeReturnDraftRequest $request, ConsumeReturnDraft $consumeReturnDraft): RedirectResponse
+    public function __construct(
+        protected ReturnDraftService $returnDraftService,
+    ) {}
+
+    public function store(ConsumeReturnDraftRequest $request): RedirectResponse
     {
-        $returnedCount = $consumeReturnDraft->execute($request->validatedPayload());
+        $returnedCount = $this->returnDraftService->consume($request->validatedPayload());
 
         Inertia::flash('toast', [
             'type' => 'success',
