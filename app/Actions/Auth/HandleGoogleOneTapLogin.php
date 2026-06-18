@@ -26,12 +26,12 @@ class HandleGoogleOneTapLogin
         }
 
         $identity = $this->googleIdTokenVerifier->verify($request->validatedCredential());
-        $googleAccount = $this->resolveGoogleAccount->execute($identity['email']);
+        $email = $this->resolveGoogleAccount->execute($identity['email']);
 
         return $this->authenticateGoogleIdentity->execute(
             request: $request,
             googleId: $identity['sub'],
-            email: $googleAccount->email,
+            email: $email,
             name: $identity['name'],
             avatarUrl: $identity['avatar'] ?? null,
             linkToken: $request->validatedLinkToken(),

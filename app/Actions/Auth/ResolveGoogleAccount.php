@@ -2,18 +2,12 @@
 
 namespace App\Actions\Auth;
 
-use App\Support\CampusEmail;
-use App\Support\GoogleAccountData;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ResolveGoogleAccount
 {
-    public function __construct(
-        protected CampusEmail $campusEmail,
-    ) {}
-
-    public function execute(?string $rawEmail): GoogleAccountData
+    public function execute(?string $rawEmail): string
     {
         if ($rawEmail === null) {
             throw $this->invalidEmailException();
@@ -25,10 +19,7 @@ class ResolveGoogleAccount
             throw $this->invalidEmailException();
         }
 
-        return new GoogleAccountData(
-            email: $normalizedEmail,
-            isApproved: $this->campusEmail->shouldAutoApprove($normalizedEmail),
-        );
+        return $normalizedEmail;
     }
 
     protected function invalidEmailException(): ValidationException

@@ -83,12 +83,12 @@ class GoogleController extends Controller
             }
 
             $googleUser = $this->googleProvider(request())->user();
-            $googleAccount = $this->resolveGoogleAccount->execute($googleUser->getEmail());
+            $email = $this->resolveGoogleAccount->execute($googleUser->getEmail());
 
             return $this->authenticateGoogleIdentity->execute(
                 request: request(),
                 googleId: $googleUser->getId(),
-                email: $googleAccount->email,
+                email: $email,
                 name: $googleUser->getName(),
                 avatarUrl: $googleUser->getAvatar(),
                 linkToken: is_string($linkToken) ? $linkToken : null,

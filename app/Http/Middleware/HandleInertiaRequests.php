@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use App\Models\User;
 use App\Services\Auth\AuthenticationRedirector;
+use App\Services\Auth\GoogleLoginConfiguration;
 use App\Services\LoanDraftService;
-use App\Support\LoginViewData;
 use App\Support\SiteSettings;
 use Filament\Notifications\DatabaseNotification as FilamentDatabaseNotification;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -91,14 +91,13 @@ class HandleInertiaRequests extends Middleware
                     : null,
                 'loginUrl' => route('auth.google', absolute: false),
                 'oneTapUrl' => route('auth.google.one-tap', absolute: false),
-                'enabled' => app(LoginViewData::class)->canLoginWithGoogle(),
-                'oneTapEnabled' => app(LoginViewData::class)->canLoginWithGoogle()
+                'enabled' => app(GoogleLoginConfiguration::class)->isConfigured(),
+                'oneTapEnabled' => app(GoogleLoginConfiguration::class)->isConfigured()
                     && ! $this->shouldDisableGoogleOneTap($request),
             ],
             'loanRequestCart' => fn (): ?array => $user?->canBorrowBooks()
                 ? $this->loanDraftService->summary($user)
                 : null,
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'status' => $session?->get('status'),
         ];
     }

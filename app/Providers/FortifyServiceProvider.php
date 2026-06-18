@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Http\Responses\Auth\LoginResponse;
 use App\Http\Responses\Auth\LogoutResponse;
-use App\Support\LoginViewData;
+use App\Services\Auth\GoogleLoginConfiguration;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -49,7 +49,7 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureViews(): void
     {
         Fortify::loginView(function (Request $request) {
-            if (app(LoginViewData::class)->canLoginWithGoogle()) {
+            if (app(GoogleLoginConfiguration::class)->isConfigured()) {
                 return redirect()->route('auth.google');
             }
 
