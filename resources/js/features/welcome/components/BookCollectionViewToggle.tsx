@@ -13,12 +13,16 @@ export default function BookCollectionViewToggle({
     onChange,
 }: BookCollectionViewToggleProps) {
     return (
-        <div className="hidden items-center gap-1 rounded-xl border bg-muted/50 p-1 sm:inline-flex">
+        <div className="hidden items-center gap-1 rounded-xl border border-border/60 bg-transparent p-1 sm:inline-flex">
             <Button
                 type="button"
-                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                variant="ghost"
                 size="sm"
-                className="h-9 rounded-lg px-3"
+                className={`h-9 rounded-lg px-3 transition-all duration-200 ${
+                    viewMode === 'grid'
+                        ? 'bg-muted text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                }`}
                 onClick={() => onChange('grid')}
                 aria-label="Tampilan grid"
                 title="Tampilan grid"
@@ -28,9 +32,13 @@ export default function BookCollectionViewToggle({
             </Button>
             <Button
                 type="button"
-                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                variant="ghost"
                 size="sm"
-                className="h-9 rounded-lg px-3"
+                className={`h-9 rounded-lg px-3 transition-all duration-200 ${
+                    viewMode === 'list'
+                        ? 'bg-muted text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                }`}
                 onClick={() => onChange('list')}
                 aria-label="Tampilan daftar"
                 title="Tampilan daftar"

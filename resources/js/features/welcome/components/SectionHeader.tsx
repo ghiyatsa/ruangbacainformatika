@@ -13,12 +13,12 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
     return (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex max-w-2xl flex-col gap-1.5">
-                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <div className="flex max-w-2xl flex-col gap-2">
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                     {title}
                 </h2>
                 {subtitle ? (
-                    <p className="text-sm leading-relaxed text-muted-foreground">
+                    <p className="max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
                         {subtitle}
                     </p>
                 ) : null}

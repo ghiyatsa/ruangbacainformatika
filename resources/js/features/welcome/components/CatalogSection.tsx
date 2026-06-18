@@ -31,56 +31,124 @@ export default function CatalogSection({
 }: CatalogSectionProps) {
     const hasFeaturedBooks = stats.featuredCount > 0;
 
-    return (
-        <section className="py-16 sm:py-20 lg:py-28">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col gap-12 lg:gap-16">
-                    {hasFeaturedBooks ? (
-                        <div className="flex flex-col gap-6">
-                            <SectionHeader
-                                title="Buku Unggulan"
-                                subtitle="Pilihan buku unggulan dari ruang baca."
-                            />
+    interface SectionItem {
+        id: string;
+        content: React.ReactNode;
+        isFullWidth?: boolean;
+    }
 
-                            <FeaturedSpotlight featuredBooks={featuredBooks} />
-                        </div>
-                    ) : null}
+    const items: SectionItem[] = [];
 
-                    <NewBooksPreview books={books} />
-
-                    <PopularBooks popularBooks={popularBooks} />
-
-                    <PopularCategoryShelves
-                        popularCategoryShelves={popularCategoryShelves}
-                    />
-
-                    <MostBorrowedBooks
-                        mostBorrowedBooks={mostBorrowedBooks}
-                    />
-
-                    {latestPosts && latestPosts.length > 0 ? (
-                        <div className="flex flex-col gap-6">
-                            <SectionHeader
-                                title="Artikel Terbaru"
-                                subtitle="Pilihan artikel terbaru dari Ruang Baca."
-                                action={
-                                    <Button asChild variant="outline" className="rounded-full">
-                                        <Link href={blog.index.url()}>
-                                            Semua artikel
-                                        </Link>
-                                    </Button>
-                                }
-                            />
-
-                            <div className="grid gap-5 lg:grid-cols-3">
-                                {latestPosts.map((post) => (
-                                    <BlogPostCard key={post.id} post={post} />
-                                ))}
-                            </div>
-                        </div>
-                    ) : null}
+    if (hasFeaturedBooks) {
+        items.push({
+            id: 'featured',
+            isFullWidth: true,
+            content: (
+                <div className="mx-auto max-w-7xl py-8 sm:py-10 lg:py-12">
+                    <div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-8">
+                        <SectionHeader
+                            title="Buku Unggulan"
+                            subtitle="Pilihan buku unggulan dari ruang baca."
+                        />
+                    </div>
+                    <div className="mt-6">
+                        <FeaturedSpotlight featuredBooks={featuredBooks} />
+                    </div>
                 </div>
+            ),
+        });
+    }
+
+    items.push({
+        id: 'new-books',
+        content: <NewBooksPreview books={books} />,
+    });
+
+    items.push({
+        id: 'popular-books',
+        content: <PopularBooks popularBooks={popularBooks} />,
+    });
+
+    items.push({
+        id: 'categories',
+        isFullWidth: true,
+        content: (
+            <PopularCategoryShelves
+                popularCategoryShelves={popularCategoryShelves}
+            />
+        ),
+    });
+
+    items.push({
+        id: 'most-borrowed',
+        content: <MostBorrowedBooks mostBorrowedBooks={mostBorrowedBooks} />,
+    });
+
+    if (latestPosts && latestPosts.length > 0) {
+        items.push({
+            id: 'latest-posts',
+            content: (
+                <div className="flex flex-col gap-6">
+                    <SectionHeader
+                        title="Artikel Terbaru"
+                        subtitle="Pilihan artikel terbaru dari Ruang Baca."
+                        action={
+                            <Button
+                                asChild
+                                variant="outline"
+                                className="rounded-full"
+                            >
+                                <Link href={blog.index.url()}>
+                                    Semua artikel
+                                </Link>
+                            </Button>
+                        }
+                    />
+
+                    <div className="grid gap-5 lg:grid-cols-3">
+                        {latestPosts.map((post) => (
+                            <BlogPostCard key={post.id} post={post} />
+                        ))}
+                    </div>
+                </div>
+            ),
+        });
+    }
+
+    return (
+        <div className="w-full">
+            {/* Divider between Hero and Section 1 */}
+            <div className="w-full border-y border-border/60">
+                <div
+                    className="mx-auto h-6 max-w-7xl px-4 sm:h-8 sm:px-6 lg:px-8"
+                    style={{
+                        backgroundImage:
+                            'repeating-linear-gradient(-45deg, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent 12px)',
+                    }}
+                />
             </div>
-        </section>
+            {items.map((item, index) => (
+                <div key={item.id} className="w-full">
+                    {index > 0 && (
+                        <div className="w-full border-y border-border/60">
+                            <div
+                                className="mx-auto h-6 max-w-7xl px-4 sm:h-8 sm:px-6 lg:px-8"
+                                style={{
+                                    backgroundImage:
+                                        'repeating-linear-gradient(-45deg, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent 12px)',
+                                }}
+                            />
+                        </div>
+                    )}
+                    {item.isFullWidth ? (
+                        item.content
+                    ) : (
+                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+                            {item.content}
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
     );
 }

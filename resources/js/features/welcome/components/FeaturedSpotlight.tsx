@@ -77,10 +77,9 @@ function CoverImage({
 function FeaturedSpotlightSkeleton() {
     return (
         <div className="flex flex-col">
-            <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-8">
-                {/* Cover image wrapper matching the actual card's borders, shadows, and rings */}
+            <div className="flex flex-col gap-5 py-5 px-4 sm:px-6 lg:px-8 sm:flex-row sm:items-center sm:gap-8 sm:py-8">
                 <div className="mx-auto w-48 shrink-0 sm:mx-0 sm:w-40 md:w-44">
-                    <div className="aspect-3/4 overflow-hidden rounded-xl border bg-background shadow-lg ring-1 ring-black/5 dark:ring-white/5">
+                    <div className="aspect-3/4 overflow-hidden rounded-xl bg-background ring-1 ring-black/5 dark:ring-white/5">
                         <Skeleton className="h-full w-full rounded-none" />
                     </div>
                 </div>
@@ -115,7 +114,7 @@ function FeaturedSpotlightSkeleton() {
             </div>
 
             {/* Navigation Footer placeholder to prevent Cumulative Layout Shift (CLS) */}
-            <div className="flex items-center justify-between border-t border-primary/10 px-5 py-3 sm:px-8">
+            <div className="flex items-center justify-between border-t border-border/60 py-3 px-4 sm:px-6 lg:px-8">
                 <Skeleton className="h-4 w-8" />
                 <div className="flex items-center gap-1">
                     <Skeleton className="size-11 rounded-full" />
@@ -176,8 +175,7 @@ export default function FeaturedSpotlight({
     const book = featuredBooks?.[currentIndex] || null;
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-primary/10 bg-card">
-            <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/10 via-transparent to-primary/5 opacity-50 dark:from-primary/20 dark:to-transparent" />
+        <div className="relative overflow-hidden">
             <LazyDeferred
                 dataKey="featuredBooks"
                 isLoaded={!!featuredBooks}
@@ -193,7 +191,7 @@ export default function FeaturedSpotlight({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -12 }}
                             transition={{ duration: 0.4, ease: 'easeInOut' }}
-                            className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-8"
+                            className="flex flex-col gap-5 py-5 px-4 sm:px-6 lg:px-8 sm:flex-row sm:items-center sm:gap-8 sm:py-8"
                             onMouseEnter={() => setIsPaused(true)}
                             onMouseLeave={() => setIsPaused(false)}
                         >
@@ -204,7 +202,7 @@ export default function FeaturedSpotlight({
                                 pageProps={instantLoadingPageProps()}
                                 className="group/cover mx-auto w-48 shrink-0 sm:mx-0 sm:w-40 md:w-44"
                             >
-                                <div className="aspect-3/4 overflow-hidden rounded-xl border bg-background shadow-lg ring-1 ring-black/5 transition-transform duration-300 group-hover/cover:scale-[1.03] dark:ring-white/5">
+                                <div className="aspect-3/4 overflow-hidden rounded-xl bg-background ring-1 ring-black/5 transition-transform duration-300 group-hover/cover:scale-[1.015] dark:ring-white/5">
                                     <CoverImage
                                         src={book.coverImageUrl}
                                         alt={book.title}
@@ -245,13 +243,13 @@ export default function FeaturedSpotlight({
 
                                 <div className="flex min-h-8 flex-wrap items-center justify-center gap-2 sm:justify-start">
                                     {book.publishedYear && (
-                                        <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
                                             <Calendar className="size-3" />
                                             {book.publishedYear}
                                         </span>
                                     )}
                                     <span
-                                        className={`inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-xs font-semibold ${availabilityColor(book)}`}
+                                        className={`inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold ${availabilityColor(book)}`}
                                     >
                                         <BookOpen className="size-3" />
                                         {availabilityLabel(book)}
@@ -267,12 +265,12 @@ export default function FeaturedSpotlight({
                                                     category.slug ||
                                                     `cat-${index}`
                                                 }
-                                                className="rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                                                className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
                                             >
                                                 {category.name}
                                             </span>
                                         ))}
-                                    <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
                                         <Eye className="size-3" />
                                         {book.viewCount}
                                     </span>
@@ -284,7 +282,7 @@ export default function FeaturedSpotlight({
             </LazyDeferred>
 
             {count > 1 && (
-                <div className="flex items-center justify-between border-t border-primary/10 px-5 py-3 sm:px-8">
+                <div className="flex items-center justify-between border-t border-border/60 py-3 px-4 sm:px-6 lg:px-8">
                     <div className="text-xs font-medium text-muted-foreground tabular-nums">
                         {currentIndex + 1}/{count}
                     </div>
