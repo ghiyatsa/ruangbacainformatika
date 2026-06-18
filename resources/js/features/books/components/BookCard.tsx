@@ -163,7 +163,8 @@ function BookCard({
     return (
         <div
             className={cn(
-                'group relative flex h-full overflow-hidden rounded-2xl border bg-card transition-all duration-300',
+                'group relative flex h-full overflow-hidden rounded-2xl border transition-all duration-300',
+                isCompact ? 'bg-transparent border-border/60' : 'bg-card',
                 !isCompact && 'sm:flex-col',
             )}
         >
@@ -179,7 +180,7 @@ function BookCard({
                 className={cn(
                     'relative w-32 shrink-0 overflow-hidden bg-muted',
                     isCompact
-                        ? 'aspect-3/4 self-start sm:w-36 sm:self-stretch'
+                        ? 'aspect-3/4 sm:w-36'
                         : 'aspect-3/4 self-start sm:h-auto sm:w-full sm:self-auto',
                 )}
             >
@@ -187,7 +188,7 @@ function BookCard({
                     src={book.coverImageUrl}
                     alt={book.title}
                     className={cn(
-                        'absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105',
+                        'absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.015]',
                     )}
                 />
 
@@ -227,7 +228,7 @@ function BookCard({
                     >
                         <Bookmark
                             className={cn(
-                                'size-3.5 transition-transform duration-200 group-hover:scale-110',
+                                'size-3.5 transition-transform duration-200 group-hover:scale-105',
                                 isBookmarkedByUser && 'fill-current',
                             )}
                         />
@@ -300,7 +301,7 @@ function BookCard({
                                                 </span>
                                             </>
                                         ) : (
-                                            <LoanRequestIcon className="size-3.5 transition-transform duration-200 group-hover:scale-110" />
+                                            <LoanRequestIcon className="size-3.5 transition-transform duration-200 group-hover:scale-105" />
                                         )}
                                     </Button>
                                 </>

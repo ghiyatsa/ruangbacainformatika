@@ -24,7 +24,6 @@ import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
 import { KtiReportCard } from '@/components/kti/KtiReportCard';
 import { KtiShareButton } from '@/components/kti/KtiShareButton';
-import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,7 +74,7 @@ function BookDescriptionSkeleton() {
 
 function BookFeedbackCardSkeleton() {
     return (
-        <div className="rounded-2xl border bg-card shadow-sm">
+        <div className="rounded-2xl border border-border/60 bg-transparent">
             <div className="flex items-start gap-3 p-5">
                 <Skeleton className="size-10 rounded-xl" />
                 <div className="flex-1 space-y-2">
@@ -230,18 +229,10 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             contentClassName="pt-2 pb-10 sm:pt-3"
             hero={
                 <div className="relative -mt-20 overflow-hidden sm:-mt-28 md:-mt-24">
-                    <div
-                        className="pointer-events-none absolute inset-0"
-                        aria-hidden="true"
-                    >
-                        <div className="absolute top-[8%] left-[10%] h-40 w-40 rounded-full bg-primary/12 blur-3xl" />
-                        <div className="absolute right-[8%] bottom-[12%] h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-                    </div>
-                    <div className="absolute inset-0 bg-linear-to-b from-background/30 via-background/60 to-background" />
+
 
                     <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
-                        <DeferredGlobalContentNotice className="hidden md:block" />
-                        <div className="hidden sm:mb-6 sm:block">
+                        <div className="hidden sm:flex sm:items-center border-y border-border/60 py-3 mb-6 sm:mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-muted/5">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -264,7 +255,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                         <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
                                 <div className="flex w-full items-center justify-center">
-                                    <div className="relative flex aspect-[3/4] w-full max-w-[16rem] items-center justify-center overflow-hidden rounded-2xl border bg-muted/10 shadow-xs sm:h-96 sm:w-72 sm:max-w-none md:h-[22rem] md:w-[16.5rem]">
+                                    <div className="relative flex aspect-[3/4] w-full max-w-[16rem] items-center justify-center overflow-hidden rounded-2xl border bg-muted/10 sm:h-96 sm:w-72 sm:max-w-none md:h-[22rem] md:w-[16.5rem]">
                                         {book && (
                                             <Dialog>
                                                 <DialogTrigger asChild>
@@ -595,7 +586,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border bg-card shadow-sm">
+                    <div className="rounded-2xl border border-border/60 bg-transparent">
                         <div className="px-5 py-4">
                             <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Data Buku

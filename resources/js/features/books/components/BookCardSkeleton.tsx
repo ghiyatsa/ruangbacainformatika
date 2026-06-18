@@ -13,14 +13,15 @@ export default function BookCardSkeleton({
     return (
         <div
             className={cn(
-                'flex h-full overflow-hidden rounded-2xl border bg-card',
+                'flex h-full overflow-hidden rounded-2xl border',
+                isCompact ? 'bg-transparent border-border/60' : 'bg-card',
                 !isCompact && 'sm:flex-col',
             )}
         >
             <Skeleton
                 className={cn(
-                    'aspect-3/4 w-32 shrink-0 self-start rounded-none',
-                    isCompact ? 'sm:w-36' : 'sm:h-auto sm:w-full sm:self-auto',
+                    'aspect-3/4 w-32 shrink-0 rounded-none',
+                    isCompact ? 'sm:w-36' : 'self-start sm:h-auto sm:w-full sm:self-auto',
                 )}
             />
 

@@ -15,7 +15,6 @@ import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
 import { KtiReportCard } from '@/components/kti/KtiReportCard';
 import { KtiShareButton } from '@/components/kti/KtiShareButton';
-import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -77,12 +76,10 @@ export default function InternshipReportDetailPage(
             }
             keywords={seoKeywords}
             hero={
-                <div className="relative -mt-20 overflow-hidden border-b bg-linear-to-br from-primary/5 via-background to-muted/30 sm:-mt-28 md:-mt-24">
-                    <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/40 to-background" />
+                <div className="relative -mt-20 overflow-hidden border-b bg-background sm:-mt-28 md:-mt-24">
 
                     <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
-                        <DeferredGlobalContentNotice className="hidden md:block" />
-                        <div className="hidden sm:mb-6 sm:block">
+                        <div className="hidden sm:flex sm:items-center border-y border-border/60 py-3 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-muted/5">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -232,7 +229,7 @@ export default function InternshipReportDetailPage(
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border bg-card shadow-sm">
+                    <div className="rounded-2xl border border-border/60 bg-transparent">
                         <div className="p-5">
                             <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Informasi Laporan KP
@@ -292,7 +289,7 @@ export default function InternshipReportDetailPage(
 
                     {report ? (
                         report.keywords.length > 0 ? (
-                            <div className="rounded-2xl border bg-card shadow-sm">
+                            <div className="rounded-2xl border border-border/60 bg-transparent">
                                 <div className="p-5">
                                     <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                         Kata Kunci
@@ -314,7 +311,7 @@ export default function InternshipReportDetailPage(
                             </div>
                         ) : null
                     ) : (
-                        <div className="rounded-2xl border bg-card shadow-sm">
+                        <div className="rounded-2xl border border-border/60 bg-transparent">
                             <div className="p-5">
                                 <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                     Kata Kunci

@@ -22,7 +22,7 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
                     alt=""
                     width={640}
                     height={360}
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.015]"
                 />
             </div>
 
