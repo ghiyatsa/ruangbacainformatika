@@ -58,7 +58,7 @@ class HandleInertiaRequests extends Middleware
             ...$siteData,
             'globalNotice' => Inertia::defer(
                 fn (): array => $this->siteSettings->sharedNotice(),
-            ),
+            )->once(),
             'auth' => [
                 'user' => $this->serializeUser($user),
                 'isMember' => $user?->hasRole('member') ?? false,
