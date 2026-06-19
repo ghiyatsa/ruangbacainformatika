@@ -48,7 +48,6 @@ export default function CatalogSection({
                     <div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-8">
                         <SectionHeader
                             title="Buku Unggulan"
-                            subtitle="Pilihan buku unggulan dari ruang baca."
                         />
                     </div>
                     <div className="mt-6">
@@ -143,7 +142,7 @@ export default function CatalogSection({
                     {item.isFullWidth ? (
                         item.content
                     ) : (
-                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+                        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
                             {item.content}
                         </div>
                     )}

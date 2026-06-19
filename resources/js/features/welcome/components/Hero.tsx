@@ -97,8 +97,8 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                     variants={itemVariants}
                                     className="mx-auto max-w-4xl text-4xl font-medium tracking-[-0.03em] text-balance sm:text-5xl lg:mx-0 lg:max-w-3xl lg:text-6xl xl:text-[4.5rem]"
                                 >
-                                    Cari <i>buku</i>, temukan referensi, pinjam
-                                    tanpa ribet.
+                                    Cari buku, temukan referensi, pinjam tanpa
+                                    ribet.
                                 </motion.h1>
 
                                 <motion.p
