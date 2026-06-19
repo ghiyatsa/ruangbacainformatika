@@ -87,27 +87,23 @@ export default function CatalogSection({
         items.push({
             id: 'latest-posts',
             content: (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-8 sm:gap-10">
                     <SectionHeader
                         title="Artikel Terbaru"
-                        subtitle="Pilihan artikel terbaru dari Ruang Baca."
-                        action={
-                            <Button
-                                asChild
-                                variant="outline"
-                                className="rounded-full"
-                            >
-                                <Link href={blog.index.url()}>
-                                    Semua artikel
-                                </Link>
-                            </Button>
-                        }
                     />
 
                     <div className="grid gap-5 lg:grid-cols-3">
                         {latestPosts.map((post) => (
                             <BlogPostCard key={post.id} post={post} />
                         ))}
+                    </div>
+
+                    <div className="flex justify-center">
+                        <Button asChild size="lg" className="rounded-xl px-8">
+                            <Link href={blog.index.url()}>
+                                Semua artikel
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             ),

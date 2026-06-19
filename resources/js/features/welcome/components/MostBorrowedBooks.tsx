@@ -18,7 +18,6 @@ export default function MostBorrowedBooks({
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader
                 title="Paling Sering Dipinjam"
-                subtitle="Pilihan buku yang paling sering dipinjam."
                 action={
                     <BookCollectionViewToggle
                         viewMode={viewMode}

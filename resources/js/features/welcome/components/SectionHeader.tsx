@@ -2,13 +2,11 @@ import type { ReactNode } from 'react';
 
 interface SectionHeaderProps {
     title: string;
-    subtitle?: string;
     action?: ReactNode;
 }
 
 export default function SectionHeader({
     title,
-    subtitle,
     action,
 }: SectionHeaderProps) {
     return (
@@ -17,11 +15,6 @@ export default function SectionHeader({
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                     {title}
                 </h2>
-                {subtitle ? (
-                    <p className="max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
-                        {subtitle}
-                    </p>
-                ) : null}
             </div>
 
             {action ? (

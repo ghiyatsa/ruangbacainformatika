@@ -13,9 +13,7 @@ interface NewBooksPreviewProps {
     books: WelcomeProps['books'];
 }
 
-export default function NewBooksPreview({
-    books,
-}: NewBooksPreviewProps) {
+export default function NewBooksPreview({ books }: NewBooksPreviewProps) {
     const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
     const previewBooks = books?.data?.slice(0, 12) || [];
 
@@ -23,7 +21,6 @@ export default function NewBooksPreview({
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader
                 title="Buku Terbaru"
-                subtitle="Buku terbaru di ruang baca."
                 action={
                     <BookCollectionViewToggle
                         viewMode={viewMode}
@@ -44,7 +41,6 @@ export default function NewBooksPreview({
                     />
                 }
                 rescueTitle="Daftar buku terbaru belum tersedia"
-                rescueDescription="Bagian ini dapat dimuat ulang tanpa memuat ulang seluruh halaman."
             >
                 <BookGrid
                     books={previewBooks}

@@ -43,7 +43,6 @@ export default function PopularCategoryShelves({
                                 <div className="flex flex-col gap-8 sm:gap-10">
                                     <SectionHeader
                                         title="Kategori populer"
-                                        subtitle="Daftar buku pada kategori ini sedang dimuat."
                                         action={
                                             <BookCollectionViewToggle
                                                 viewMode={viewMode}
@@ -85,10 +84,6 @@ export default function PopularCategoryShelves({
                             <div className="flex flex-col gap-8 sm:gap-10">
                                 <SectionHeader
                                     title={shelf.name}
-                                    subtitle={
-                                        shelf.description ||
-                                        `${shelf.booksCount.toLocaleString('id-ID')} judul tersedia pada kategori ini.`
-                                    }
                                     action={
                                         <BookCollectionViewToggle
                                             viewMode={viewMode}

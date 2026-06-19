@@ -21,7 +21,6 @@ export default function PopularBooks({
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader
                 title="Buku Populer"
-                subtitle="Buku yang paling sering dilihat."
                 action={
                     <BookCollectionViewToggle
                         viewMode={viewMode}
