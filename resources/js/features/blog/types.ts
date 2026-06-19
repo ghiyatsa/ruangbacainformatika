@@ -53,18 +53,18 @@ export interface BlogIndexPageProps {
         key: string;
         label: string;
     }>;
-    categories: BlogTaxonomyItem[];
-    tags: BlogTaxonomyItem[];
-    posts: PaginationData<BlogPostItem>;
-    popularPosts: BlogPostItem[];
+    categories?: BlogTaxonomyItem[];
+    tags?: BlogTaxonomyItem[];
+    posts?: PaginationData<BlogPostItem>;
+    popularPosts?: BlogPostItem[];
 }
 
 export interface BlogShowPageProps {
     post: {
         data: BlogPostItem;
     };
-    relatedPosts: BlogPostItem[];
-    popularPosts: BlogPostItem[];
-    categories: BlogTaxonomyItem[];
-    tags: BlogTaxonomyItem[];
+    relatedPosts?: BlogPostItem[];
+    popularPosts?: BlogPostItem[];
+    categories?: BlogTaxonomyItem[];
+    tags?: BlogTaxonomyItem[];
 }

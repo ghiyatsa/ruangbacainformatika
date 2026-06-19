@@ -21,8 +21,10 @@ it('blog index only shows approved posts', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('blog/index')
-            ->has('posts.data', 1)
-            ->where('posts.data.0.title', $approvedPost->title));
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('posts.data', 1)
+                ->where('posts.data.0.title', $approvedPost->title)
+            ));
 });
 
 it('blog detail returns 404 for unpublished posts', function () {
@@ -81,8 +83,10 @@ it('blog index can filter by category and tag', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('blog/index')
-            ->has('posts.data', 1)
-            ->where('posts.data.0.title', $matchingPost->title));
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('posts.data', 1)
+                ->where('posts.data.0.title', $matchingPost->title)
+            ));
 });
 
 it('homepage shares latest approved posts', function () {

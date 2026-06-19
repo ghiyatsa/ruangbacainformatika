@@ -20,18 +20,19 @@ class BlogController extends Controller
     public function index(Request $request): Response
     {
         $filters = $this->blogQueryService->filtersFromRequest($request);
-        $posts = $this->blogQueryService->paginatePosts($filters);
-
-        $paginated = $posts->toArray();
-        $paginated['data'] = BlogPostResource::collection($posts->getCollection())->resolve();
 
         return Inertia::render('blog/index', [
             'filters' => $filters,
             'activeFilterLabels' => $this->blogQueryService->activeFilterLabels($filters),
-            'categories' => $this->blogQueryService->categories(),
-            'tags' => $this->blogQueryService->tags(),
-            'posts' => $paginated,
-            'popularPosts' => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve(),
+            'categories' => Inertia::defer(fn () => $this->blogQueryService->categories()),
+            'tags' => Inertia::defer(fn () => $this->blogQueryService->tags()),
+            'posts' => Inertia::defer(function () use ($filters) {
+                $posts = $this->blogQueryService->paginatePosts($filters);
+                $paginated = $posts->toArray();
+                $paginated['data'] = BlogPostResource::collection($posts->getCollection())->resolve();
+                return $paginated;
+            }),
+            'popularPosts' => Inertia::defer(fn () => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve()),
         ])->withViewData([
             'meta' => $this->pageMeta->forBlogIndex(),
         ]);
@@ -52,10 +53,10 @@ class BlogController extends Controller
 
         return Inertia::render('blog/show', [
             'post' => new BlogPostResource($post->fresh(['user:id,name,avatar_url', 'reviewedBy:id,name', 'categories:id,name,slug', 'tags:id,name,slug'])),
-            'relatedPosts' => BlogPostResource::collection($this->blogQueryService->relatedPosts($post))->resolve(),
-            'popularPosts' => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve(),
-            'categories' => $this->blogQueryService->categories(),
-            'tags' => $this->blogQueryService->tags(),
+            'relatedPosts' => Inertia::defer(fn () => BlogPostResource::collection($this->blogQueryService->relatedPosts($post))->resolve()),
+            'popularPosts' => Inertia::defer(fn () => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve()),
+            'categories' => Inertia::defer(fn () => $this->blogQueryService->categories()),
+            'tags' => Inertia::defer(fn () => $this->blogQueryService->tags()),
         ])->withViewData([
             'meta' => $this->pageMeta->forPost($post),
         ]);

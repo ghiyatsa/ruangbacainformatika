@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Deferred, Link, usePage } from '@inertiajs/react';
 import { Eye, Tag, Bookmark, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -18,6 +18,11 @@ import blog from '@/routes/blog';
 import { BlogLabelsSidebar } from './BlogLabelsSidebar';
 import { BlogPopularPosts } from './BlogPopularPosts';
 import { BlogPostCard } from './BlogPostCard';
+import {
+    BlogPostCardSkeleton,
+    BlogPopularPostsSkeleton,
+    BlogLabelsSidebarSkeleton,
+} from './BlogPostCardSkeleton';
 import type { BlogShowPageProps } from '@/features/blog/types';
 
 export function BlogShowPage({
@@ -157,13 +162,13 @@ export function BlogShowPage({
                                                 className="h-8 w-8 rounded-full border border-border/40 object-cover"
                                             />
                                         ) : (
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                                                 {article.author.name
                                                     .charAt(0)
                                                     .toUpperCase()}
                                             </div>
                                         )}
-                                        <div className="text-sm">
+                                        <div className="flex flex-col text-sm">
                                             <span className="text-muted-foreground">
                                                 Published by{' '}
                                             </span>
@@ -276,21 +281,37 @@ export function BlogShowPage({
                     </div>
 
                     {/* Related posts (Moved below content) */}
-                    {relatedPosts.length > 0 && (
-                        <section className="border-t border-border/60 pt-8">
-                            <h2 className="mb-6 text-xl font-bold text-foreground">
-                                Artikel Terkait
-                            </h2>
-                            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                                {relatedPosts.map((relatedPost) => (
-                                    <BlogPostCard
-                                        key={relatedPost.id}
-                                        post={relatedPost}
-                                    />
-                                ))}
-                            </div>
-                        </section>
-                    )}
+                    <Deferred
+                        data="relatedPosts"
+                        fallback={
+                            <section className="border-t border-border/60 pt-8">
+                                <h2 className="mb-6 text-xl font-bold text-foreground">
+                                    Artikel Terkait
+                                </h2>
+                                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                    {Array.from({ length: 3 }).map((_, idx) => (
+                                        <BlogPostCardSkeleton key={idx} />
+                                    ))}
+                                </div>
+                            </section>
+                        }
+                    >
+                        {relatedPosts && relatedPosts.length > 0 && (
+                            <section className="border-t border-border/60 pt-8">
+                                <h2 className="mb-6 text-xl font-bold text-foreground">
+                                    Artikel Terkait
+                                </h2>
+                                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                    {relatedPosts.map((relatedPost) => (
+                                        <BlogPostCard
+                                            key={relatedPost.id}
+                                            post={relatedPost}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </Deferred>
                 </div>
 
                 {/* ─── RIGHT: Sidebar ─── */}
@@ -331,10 +352,27 @@ export function BlogShowPage({
                     </section>
 
                     {/* Popular Posts */}
-                    <BlogPopularPosts posts={popularPosts} />
+                    <Deferred
+                        data="popularPosts"
+                        fallback={<BlogPopularPostsSkeleton />}
+                    >
+                        {popularPosts && (
+                            <BlogPopularPosts posts={popularPosts} />
+                        )}
+                    </Deferred>
 
                     {/* Labels & Categories */}
-                    <BlogLabelsSidebar categories={categories} tags={tags} />
+                    <Deferred
+                        data={['categories', 'tags']}
+                        fallback={<BlogLabelsSidebarSkeleton />}
+                    >
+                        {categories && tags && (
+                            <BlogLabelsSidebar
+                                categories={categories}
+                                tags={tags}
+                            />
+                        )}
+                    </Deferred>
                 </aside>
             </div>
         </PageLayout>
