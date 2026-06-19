@@ -19,6 +19,7 @@ class LocalDevelopmentSeeder extends Seeder
             SkripsiSeeder::class,
             ThesisSeeder::class,
             InternshipReportSeeder::class,
+            PostSeeder::class,
         ]);
     }
 }

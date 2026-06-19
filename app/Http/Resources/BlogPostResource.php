@@ -27,11 +27,13 @@ class BlogPostResource extends JsonResource
             'contentText' => Str::of(strip_tags((string) $this->content))->squish()->toString(),
             'coverImageUrl' => $this->cover_image
                 ? asset('storage/'.$this->cover_image)
-                : asset('images/book-cover-placeholder.svg'),
+                : asset('images/article-placeholder.svg'),
             'status' => $this->status,
             'publishedAt' => $this->published_at?->toIso8601String(),
             'publishedAtLabel' => $this->published_at?->translatedFormat('d M Y'),
             'reviewedAt' => $this->reviewed_at?->toIso8601String(),
+            'updatedAt' => $this->updated_at?->toIso8601String(),
+            'updatedAtLabel' => $this->updated_at?->translatedFormat('d M Y'),
             'viewCount' => (int) $this->view_count,
             'readingMinutes' => max(1, (int) ceil(str_word_count(strip_tags((string) $this->content)) / 200)),
             'author' => $this->whenLoaded('user', fn (): array => [

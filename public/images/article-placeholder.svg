@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="bp-title bp-desc">
+  <title id="bp-title">Article thumbnail placeholder</title>
+  <desc id="bp-desc">Placeholder image for blog articles without a cover photo.</desc>
+  <style>
+    .bg      { fill: #f0f0f5; }
+    .card    { fill: #e8e8f0; }
+    .accent  { fill: #a5a8e0; }
+    .accent2 { fill: #c0c3ea; }
+    .ln1     { fill: #d4d4e0; }
+    .ln2     { fill: #dadadf; }
+    .ln3     { fill: #e0e0e8; }
+    .dot     { fill: #b4b8dc; }
+    @media (prefers-color-scheme: dark) {
+      .bg      { fill: #191922; }
+      .card    { fill: #22223a; }
+      .accent  { fill: #4e52a0; }
+      .accent2 { fill: #3e4280; }
+      .ln1     { fill: #2e2e48; }
+      .ln2     { fill: #353550; }
+      .ln3     { fill: #3a3a58; }
+      .dot     { fill: #44487a; }
+    }
+  </style>
+
+  <!-- Background -->
+  <rect width="1600" height="900" class="bg"/>
+
+  <!-- Subtle geometric accents (bottom-right) -->
+  <circle cx="1480" cy="820" r="180" class="accent2" opacity="0.35"/>
+  <circle cx="1560" cy="750" r="90"  class="accent"  opacity="0.25"/>
+
+  <!-- Subtle geometric accents (top-left) -->
+  <circle cx="120" cy="80"  r="120" class="accent2" opacity="0.25"/>
+
+  <!-- Centered article card -->
+  <rect x="500" y="230" width="600" height="440" rx="24" class="card"/>
+
+  <!-- Bookmark icon top-right of card -->
+  <path d="M1060 230 L1060 310 L1040 290 L1020 310 L1020 230 Z" class="accent" opacity="0.7"/>
+
+  <!-- Top accent bar on card -->
+  <rect x="500" y="230" width="600" height="6" rx="3" class="accent" opacity="0.6"/>
+
+  <!-- "Headline" line — wide -->
+  <rect x="548" y="286" width="380" height="22" rx="11" class="ln1"/>
+  <!-- "Headline" line 2 — shorter -->
+  <rect x="548" y="318" width="280" height="16" rx="8"  class="ln2"/>
+
+  <!-- Divider -->
+  <rect x="548" y="360" width="504" height="2" rx="1" class="ln1" opacity="0.6"/>
+
+  <!-- Body text lines -->
+  <rect x="548" y="384" width="504" height="12" rx="6" class="ln2"/>
+  <rect x="548" y="408" width="460" height="12" rx="6" class="ln3"/>
+  <rect x="548" y="432" width="490" height="12" rx="6" class="ln2"/>
+  <rect x="548" y="456" width="350" height="12" rx="6" class="ln3"/>
+
+  <!-- Divider 2 -->
+  <rect x="548" y="492" width="504" height="2" rx="1" class="ln1" opacity="0.5"/>
+
+  <!-- Short meta row (dots simulating author + date) -->
+  <circle cx="568" cy="530" r="14" class="dot"/>
+  <rect x="592" y="523" width="120" height="13" rx="6.5" class="ln2"/>
+  <rect x="740" y="523" width="80"  height="13" rx="6.5" class="ln3"/>
+  <rect x="846" y="523" width="60"  height="13" rx="6.5" class="ln2"/>
+
+  <!-- Tag pill -->
+  <rect x="548" y="590" width="110" height="28" rx="14" class="accent" opacity="0.5"/>
+  <rect x="668" y="590" width="90"  height="28" rx="14" class="accent2" opacity="0.5"/>
+</svg>

@@ -155,6 +155,21 @@ class BlogQueryService
     /**
      * @return array<int, Post>
      */
+    public function popularPosts(int $limit = 5): array
+    {
+        return Post::query()
+            ->published()
+            ->with(['user:id,name,avatar_url', 'categories:id,name,slug', 'tags:id,name,slug'])
+            ->orderByDesc('view_count')
+            ->orderByDesc('published_at')
+            ->limit($limit)
+            ->get()
+            ->all();
+    }
+
+    /**
+     * @return array<int, Post>
+     */
     public function relatedPosts(Post $post, int $limit = 3): array
     {
         $categoryIds = $post->categories->pluck('id')->all();

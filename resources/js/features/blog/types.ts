@@ -20,6 +20,8 @@ export interface BlogPostItem {
     publishedAt: string | null;
     publishedAtLabel: string | null;
     reviewedAt: string | null;
+    updatedAt: string | null;
+    updatedAtLabel: string | null;
     viewCount: number;
     readingMinutes: number;
     author?: {
@@ -54,6 +56,7 @@ export interface BlogIndexPageProps {
     categories: BlogTaxonomyItem[];
     tags: BlogTaxonomyItem[];
     posts: PaginationData<BlogPostItem>;
+    popularPosts: BlogPostItem[];
 }
 
 export interface BlogShowPageProps {
@@ -61,4 +64,7 @@ export interface BlogShowPageProps {
         data: BlogPostItem;
     };
     relatedPosts: BlogPostItem[];
+    popularPosts: BlogPostItem[];
+    categories: BlogTaxonomyItem[];
+    tags: BlogTaxonomyItem[];
 }

@@ -31,6 +31,7 @@ class BlogController extends Controller
             'categories' => $this->blogQueryService->categories(),
             'tags' => $this->blogQueryService->tags(),
             'posts' => $paginated,
+            'popularPosts' => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve(),
         ])->withViewData([
             'meta' => $this->pageMeta->forBlogIndex(),
         ]);
@@ -52,6 +53,9 @@ class BlogController extends Controller
         return Inertia::render('blog/show', [
             'post' => new BlogPostResource($post->fresh(['user:id,name,avatar_url', 'reviewedBy:id,name', 'categories:id,name,slug', 'tags:id,name,slug'])),
             'relatedPosts' => BlogPostResource::collection($this->blogQueryService->relatedPosts($post))->resolve(),
+            'popularPosts' => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve(),
+            'categories' => $this->blogQueryService->categories(),
+            'tags' => $this->blogQueryService->tags(),
         ])->withViewData([
             'meta' => $this->pageMeta->forPost($post),
         ]);
