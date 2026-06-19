@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FileCheck } from 'lucide-react';
 import { motion } from 'motion/react';
 import { fadeUp, KOLEKSI_LINKS, LEGAL_LINKS } from './constants';
 
@@ -15,7 +14,6 @@ export function FooterLinks() {
                 viewport={{ once: true, amount: 0.3 }}
             >
                 <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
-                    <BookOpen className="size-3.5 text-primary" />
                     Koleksi
                 </p>
                 <ul className="flex flex-col gap-2.5">
@@ -42,7 +40,6 @@ export function FooterLinks() {
                 viewport={{ once: true, amount: 0.3 }}
             >
                 <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
-                    <FileCheck className="size-3.5 text-primary" />
                     Informasi
                 </p>
                 <ul className="flex flex-col gap-2.5">
