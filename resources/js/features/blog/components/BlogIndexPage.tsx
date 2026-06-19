@@ -117,136 +117,163 @@ export function BlogIndexPage({
             {/* =====================================================
                 MAIN TWO-COLUMN LAYOUT  (content + sidebar)
             ===================================================== */}
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
-                {/* ─── LEFT COLUMN ─── */}
-                <div className="min-w-0 space-y-4">
-                    <Deferred
-                        data="posts"
-                        fallback={
-                            <div className="space-y-6">
-                                {!hasFilters && (
-                                    <BlogPostCardSkeleton variant="featured" />
-                                )}
-                                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                                    {Array.from({ length: 6 }).map((_, idx) => (
-                                        <BlogPostCardSkeleton key={idx} />
-                                    ))}
-                                </div>
+            <Deferred
+                data="posts"
+                fallback={
+                    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                        <div className="min-w-0 space-y-6">
+                            {!hasFilters && (
+                                <BlogPostCardSkeleton variant="featured" />
+                            )}
+                            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                                {Array.from({ length: 6 }).map((_, idx) => (
+                                    <BlogPostCardSkeleton key={idx} />
+                                ))}
                             </div>
-                        }
-                    >
-                        {(() => {
-                            if (!posts) {
-                                return null;
-                            }
+                        </div>
+                        <aside className="space-y-6">
+                            <BlogPopularPostsSkeleton />
+                            <BlogLabelsSidebarSkeleton />
+                        </aside>
+                    </div>
+                }
+            >
+                {(() => {
+                    if (!posts) {
+                        return null;
+                    }
 
-                            const publishedPosts = posts.data;
-                            const featuredPost = publishedPosts[0] ?? null;
-                            const remainingPosts = hasFilters
-                                ? publishedPosts
-                                : publishedPosts.slice(1);
+                    const publishedPosts = posts.data;
+                    const featuredPost = publishedPosts[0] ?? null;
+                    const remainingPosts = hasFilters
+                        ? publishedPosts
+                        : publishedPosts.slice(1);
 
-                            return (
-                                <>
-                                    {/* 1. HERO FEATURED POST (only when not filtering) */}
-                                    {!hasFilters && featuredPost && (
-                                        <section>
-                                            <BlogFeaturedPost
-                                                post={featuredPost}
-                                            />
-                                        </section>
-                                    )}
+                    const isEmpty = publishedPosts.length === 0;
 
-                                    {/* 2. PINNED / FEATURED single-card (1st article when filtering) */}
-                                    {hasFilters && publishedPosts[0] && (
-                                        <h2 className="text-lg font-bold">
-                                            Hasil Pencarian
-                                        </h2>
-                                    )}
+                    if (isEmpty) {
+                        return (
+                            <div className="rounded-2xl border border-dashed border-border/70 bg-card px-6 py-16 text-center max-w-3xl mx-auto w-full my-8">
+                                <p className="text-xl font-bold">
+                                    Artikel tidak ditemukan
+                                </p>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    Coba gunakan kata kunci atau filter yang berbeda.
+                                </p>
+                                {hasFilters && (
+                                    <Link
+                                        href={blog.index.url()}
+                                        className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/95"
+                                    >
+                                        Lihat semua artikel
+                                    </Link>
+                                )}
+                            </div>
+                        );
+                    }
 
-                                    {/* 3. LATEST POSTS GRID */}
-                                    {remainingPosts.length > 0 ? (
-                                        <section className="space-y-4">
-                                            {!hasFilters && (
-                                                <div className="mb-5 flex items-center justify-between">
-                                                    <h2 className="text-lg font-bold text-foreground">
-                                                        Artikel Terbaru
-                                                    </h2>
-                                                </div>
+                    return (
+                        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                            {/* ─── LEFT COLUMN ─── */}
+                            <div className="min-w-0 space-y-4">
+                                {/* 1. HERO FEATURED POST (only when not filtering) */}
+                                {!hasFilters && featuredPost && (
+                                    <section>
+                                        <BlogFeaturedPost
+                                            post={featuredPost}
+                                        />
+                                    </section>
+                                )}
+
+                                {/* 2. PINNED / FEATURED single-card (1st article when filtering) */}
+                                {hasFilters && publishedPosts[0] && (
+                                    <h2 className="text-lg font-bold">
+                                        Hasil Pencarian
+                                    </h2>
+                                )}
+
+                                {/* 3. LATEST POSTS GRID */}
+                                {remainingPosts.length > 0 ? (
+                                    <section className="space-y-4">
+                                        {!hasFilters && (
+                                            <div className="mb-5 flex items-center justify-between">
+                                                <h2 className="text-lg font-bold text-foreground">
+                                                    Artikel Terbaru
+                                                </h2>
+                                            </div>
+                                        )}
+
+                                        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                                            {remainingPosts.map((post) => (
+                                                <BlogPostCard
+                                                    key={post.id}
+                                                    post={post}
+                                                />
+                                            ))}
+                                        </div>
+                                    </section>
+                                ) : (
+                                    !featuredPost && (
+                                        <div className="rounded-2xl border border-dashed border-border/70 bg-card px-6 py-14 text-center">
+                                            <p className="text-lg font-semibold">
+                                                Artikel tidak ditemukan
+                                            </p>
+                                            <p className="mt-2 text-sm text-muted-foreground">
+                                                Coba gunakan kata kunci atau
+                                                filter yang berbeda.
+                                            </p>
+                                            {hasFilters && (
+                                                <Link
+                                                    href={blog.index.url()}
+                                                    className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                                                >
+                                                    Lihat semua artikel
+                                                </Link>
                                             )}
+                                        </div>
+                                    )
+                                )}
 
-                                            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                                                {remainingPosts.map((post) => (
-                                                    <BlogPostCard
-                                                        key={post.id}
-                                                        post={post}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </section>
-                                    ) : (
-                                        !featuredPost && (
-                                            <div className="rounded-2xl border border-dashed border-border/70 bg-card px-6 py-14 text-center">
-                                                <p className="text-lg font-semibold">
-                                                    Artikel tidak ditemukan
-                                                </p>
-                                                <p className="mt-2 text-sm text-muted-foreground">
-                                                    Coba gunakan kata kunci atau
-                                                    filter yang berbeda.
-                                                </p>
-                                                {hasFilters && (
-                                                    <Link
-                                                        href={blog.index.url()}
-                                                        className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                                                    >
-                                                        Lihat semua artikel
-                                                    </Link>
-                                                )}
-                                            </div>
-                                        )
+                                {/* 4. PAGINATION */}
+                                {posts.last_page > 1 && (
+                                    <CatalogPagination
+                                        data={posts}
+                                        resourceName="artikel"
+                                    />
+                                )}
+                            </div>
+
+                            {/* ─── RIGHT SIDEBAR ─── */}
+                            <aside className="space-y-6">
+                                {/* Popular Posts */}
+                                <Deferred
+                                    data="popularPosts"
+                                    fallback={<BlogPopularPostsSkeleton />}
+                                >
+                                    {popularPosts && (
+                                        <BlogPopularPosts posts={popularPosts} />
                                     )}
+                                </Deferred>
 
-                                    {/* 4. PAGINATION */}
-                                    {posts.last_page > 1 && (
-                                        <CatalogPagination
-                                            data={posts}
-                                            resourceName="artikel"
+                                {/* Labels & Categories */}
+                                <Deferred
+                                    data={['categories', 'tags']}
+                                    fallback={<BlogLabelsSidebarSkeleton />}
+                                >
+                                    {categories && tags && (
+                                        <BlogLabelsSidebar
+                                            categories={categories}
+                                            tags={tags}
+                                            activeCategory={filters.category}
+                                            activeTag={filters.tag}
                                         />
                                     )}
-                                </>
-                            );
-                        })()}
-                    </Deferred>
-                </div>
-
-                {/* ─── RIGHT SIDEBAR ─── */}
-                <aside className="space-y-6">
-                    {/* Popular Posts */}
-                    <Deferred
-                        data="popularPosts"
-                        fallback={<BlogPopularPostsSkeleton />}
-                    >
-                        {popularPosts && (
-                            <BlogPopularPosts posts={popularPosts} />
-                        )}
-                    </Deferred>
-
-                    {/* Labels & Categories */}
-                    <Deferred
-                        data={['categories', 'tags']}
-                        fallback={<BlogLabelsSidebarSkeleton />}
-                    >
-                        {categories && tags && (
-                            <BlogLabelsSidebar
-                                categories={categories}
-                                tags={tags}
-                                activeCategory={filters.category}
-                                activeTag={filters.tag}
-                            />
-                        )}
-                    </Deferred>
-                </aside>
-            </div>
+                                </Deferred>
+                            </aside>
+                        </div>
+                    );
+                })()}
+            </Deferred>
         </PageLayout>
     );
 }
