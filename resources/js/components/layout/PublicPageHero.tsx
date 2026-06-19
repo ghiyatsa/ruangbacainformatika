@@ -23,7 +23,7 @@ export function PublicPageHero({
     return (
         <section
             className={cn(
-                'relative -mt-20 overflow-hidden border-b bg-background pt-34 pb-14 sm:-mt-28 sm:pt-48 sm:pb-20 md:-mt-24',
+                'relative overflow-hidden border-b bg-background py-10 sm:py-16',
                 className,
             )}
         >

@@ -80,7 +80,7 @@ class AddSecurityHeaders
             "object-src 'none'",
             "frame-ancestors 'self'",
             "form-action 'self' https://accounts.google.com",
-            "img-src 'self' data: https:",
+            "img-src 'self' data: blob: https:",
             'font-src '.implode(' ', $fontSources),
             'style-src '.implode(' ', $styleSources),
             'script-src '.implode(' ', $scriptSources),

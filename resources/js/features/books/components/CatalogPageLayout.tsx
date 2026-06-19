@@ -49,7 +49,7 @@ export function CatalogPageLayout<T>({
             className="pt-0 pb-16"
             showDesktopNoticeInContent={false}
         >
-            <div className="relative z-10 flex flex-col gap-6 md:gap-8 -mt-6 sm:-mt-8">
+            <div className="relative z-10 flex flex-col gap-6 md:gap-8">
                 {children}
 
                 {paginationData && paginationVisibility !== 'none' && (

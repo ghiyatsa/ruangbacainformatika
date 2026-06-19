@@ -7,12 +7,7 @@ interface StaticPageContentProps {
 
 export function StaticPageContent({ html, className }: StaticPageContentProps) {
     return (
-        <div
-            className={cn(
-                'mx-auto max-w-4xl rounded-3xl border border-border/60 bg-card p-6 shadow-sm sm:p-8',
-                className,
-            )}
-        >
+        <div className={cn('mx-auto max-w-4xl', className)}>
             <div
                 className={cn(
                     'text-sm leading-8 text-muted-foreground sm:text-base',

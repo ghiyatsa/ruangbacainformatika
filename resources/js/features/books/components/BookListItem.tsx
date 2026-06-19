@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { BookOpen, Eye, Star } from 'lucide-react';
+import { useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import type { CatalogBook } from '@/features/welcome/types';
@@ -9,6 +10,7 @@ interface BookListItemProps {
 }
 
 export default function BookListItem({ book }: BookListItemProps) {
+    const [coverErrored, setCoverErrored] = useState(false);
     const categories = Array.isArray(book.categories) ? book.categories : [];
     const visibleCategory = categories[0];
     const hiddenCategoriesCount = Math.max(categories.length - 1, 0);
@@ -35,14 +37,22 @@ export default function BookListItem({ book }: BookListItemProps) {
             className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-muted/40 focus:bg-muted/40 focus:outline-none sm:gap-5 sm:px-5 sm:py-4"
         >
             <div className="relative h-18 w-12 shrink-0 overflow-hidden rounded-lg border bg-muted shadow-sm sm:h-20 sm:w-14">
-                <img
-                    src={book.coverImageUrl}
-                    alt={book.title}
-                    width={56}
-                    height={80}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    loading="lazy"
-                />
+                {coverErrored ? (
+                    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-muted">
+                        <div className="absolute inset-y-0 left-0 w-[2px] rounded-r-full bg-border" />
+                        <BookOpen className="size-3.5 text-muted-foreground/25" />
+                    </div>
+                ) : (
+                    <img
+                        src={book.coverImageUrl}
+                        alt={book.title}
+                        width={56}
+                        height={80}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        loading="lazy"
+                        onError={() => setCoverErrored(true)}
+                    />
+                )}
                 {book.isFeatured ? (
                     <div className="absolute top-0.5 right-0.5">
                         <Star className="size-3 fill-primary text-primary drop-shadow" />

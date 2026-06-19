@@ -129,7 +129,7 @@ export function AboutTeamPage() {
         >
             <div className="space-y-8 sm:space-y-10 lg:space-y-12">
                 {/* Team Photo Container */}
-                <div className="group relative overflow-hidden rounded-[2rem] border border-border/80 bg-card p-3 shadow-xl transition-all duration-300 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 sm:p-4">
+                <div className="group relative overflow-hidden rounded-[2rem] border border-border/80 bg-card p-3 shadow-none transition-all duration-300 hover:border-primary/20 sm:p-4">
                     <div className="relative aspect-video overflow-hidden rounded-[1.5rem] bg-muted sm:rounded-[1.7rem]">
                         <img
                             src="/images/team-photo.jpg"
@@ -224,7 +224,7 @@ export function AboutTeamPage() {
                                 key={`card-${member.id}`}
                                 className={`cursor-pointer rounded-2xl border px-3 py-4 text-center transition-all duration-300 sm:p-4 ${
                                     activeId === member.id
-                                        ? 'border-primary bg-primary/5 shadow-md ring-1 shadow-primary/5 ring-primary'
+                                        ? 'border-primary bg-primary/5 shadow-none ring-1 ring-primary'
                                         : 'border-border bg-card hover:border-primary/30 hover:bg-muted/30'
                                 }`}
                                 onMouseEnter={() => setActiveId(member.id)}
@@ -242,7 +242,7 @@ export function AboutTeamPage() {
                 </div>
 
                 {/* Call to Action (CTA) Section */}
-                <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-linear-to-br from-card via-card to-primary/5 p-6 shadow-sm sm:p-8 lg:p-10">
+                <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-linear-to-br from-card via-card to-primary/5 p-6 shadow-none sm:p-8 lg:p-10">
                     <div className="absolute -right-12 -bottom-12 -z-10 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
                     <div className="absolute -top-12 -left-12 -z-10 h-40 w-40 rounded-full bg-primary/5 blur-2xl" />
 

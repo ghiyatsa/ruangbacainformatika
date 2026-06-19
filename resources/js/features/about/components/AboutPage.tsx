@@ -13,7 +13,6 @@ export function AboutPage({ pageContent }: StaticPageProps) {
             showDesktopNoticeInContent={false}
             header={
                 <PublicPageHero
-                    eyebrow="Tentang Ruang Baca"
                     title={
                         <>
                             Tentang{' '}

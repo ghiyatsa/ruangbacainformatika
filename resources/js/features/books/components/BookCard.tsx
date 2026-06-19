@@ -31,9 +31,16 @@ function CoverImage({
     if (errored) {
         return (
             <div
-                className={`flex items-center justify-center bg-muted ${className ?? ''}`}
+                className={`relative flex flex-col items-center justify-center overflow-hidden bg-muted ${className ?? ''}`}
             >
-                <BookOpen className="size-10 text-muted-foreground/40" />
+                <div className="absolute inset-y-0 left-0 w-[3px] rounded-r-full bg-border" />
+                <div className="flex flex-col items-center gap-2 px-4">
+                    <BookOpen className="size-5 text-muted-foreground/25" />
+                    <div className="flex flex-col items-center gap-1">
+                        <div className="h-px w-10 rounded-full bg-muted-foreground/15" />
+                        <div className="h-px w-7 rounded-full bg-muted-foreground/10" />
+                    </div>
+                </div>
             </div>
         );
     }

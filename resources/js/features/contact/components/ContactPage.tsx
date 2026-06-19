@@ -47,7 +47,7 @@ export function ContactPage() {
         >
             <div className="space-y-10">
                 <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-                    <Card className="h-fit overflow-hidden border-border/60 bg-card/95 py-0! pt-6! pb-0 shadow-sm">
+                    <Card className="h-fit overflow-hidden border-border/60 bg-card/95 py-0! pt-6! pb-0 shadow-none">
                         <CardHeader className="border-b border-border/50 bg-muted/10">
                             <CardTitle>Kirim pesan</CardTitle>
                             <CardDescription>
@@ -196,7 +196,7 @@ export function ContactPage() {
                     </Card>
 
                     <div className="space-y-4">
-                        <div className="rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-card to-card p-6 shadow-sm shadow-primary/5">
+                        <div className="rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-card to-card p-6 shadow-none">
                             <h3 className="mb-3 text-base font-semibold text-foreground">
                                 Alamat layanan
                             </h3>
@@ -211,7 +211,7 @@ export function ContactPage() {
                             </p>
                         </div>
 
-                        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
+                        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-none">
                             <h3 className="mb-3 text-base font-semibold text-foreground">
                                 Email resmi
                             </h3>
@@ -222,7 +222,7 @@ export function ContactPage() {
                             </p>
                         </div>
 
-                        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
+                        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-none">
                             <h3 className="mb-3 text-base font-semibold text-foreground">
                                 Jam layanan
                             </h3>

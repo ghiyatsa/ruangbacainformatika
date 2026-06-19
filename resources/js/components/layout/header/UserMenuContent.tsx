@@ -10,7 +10,7 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useAppearance } from '@/hooks/use-appearance';
-import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
+import { cleanupMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import loans from '@/routes/loans';
 import settings from '@/routes/settings';
@@ -23,10 +23,9 @@ type Props = {
 export function UserMenuContent({ user }: Props) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const { appearance, updateAppearance } = useAppearance();
-    const cleanup = useMobileNavigation();
 
     const handleLogout = () => {
-        cleanup();
+        cleanupMobileNavigation();
         router.flushAll();
     };
 
@@ -44,7 +43,7 @@ export function UserMenuContent({ user }: Props) {
                         <a
                             className="block w-full cursor-pointer px-2 py-2"
                             href="/dashboard"
-                            onClick={cleanup}
+                            onClick={cleanupMobileNavigation}
                         >
                             <LayoutDashboard className="mr-2 h-4 w-4" />
                             Dashboard
@@ -56,7 +55,7 @@ export function UserMenuContent({ user }: Props) {
                         <a
                             className="block w-full cursor-pointer px-2 py-2"
                             href="/admin"
-                            onClick={cleanup}
+                            onClick={cleanupMobileNavigation}
                         >
                             <Shield className="mr-2 h-4 w-4" />
                             Admin
@@ -69,7 +68,7 @@ export function UserMenuContent({ user }: Props) {
                             className="block w-full cursor-pointer px-2 py-2"
                             href={settings.memberKey.show()}
                             prefetch
-                            onClick={cleanup}
+                            onClick={cleanupMobileNavigation}
                         >
                             <KeyRound className="mr-2 h-4 w-4" />
                             Member Key
@@ -82,7 +81,7 @@ export function UserMenuContent({ user }: Props) {
                             className="block w-full cursor-pointer px-2 py-2"
                             href={loans.history.url()}
                             prefetch
-                            onClick={cleanup}
+                            onClick={cleanupMobileNavigation}
                         >
                             <History className="mr-2 h-4 w-4" />
                             Riwayat Peminjaman
@@ -94,7 +93,7 @@ export function UserMenuContent({ user }: Props) {
                         className="block w-full cursor-pointer px-2 py-2"
                         href={settings.profile.edit()}
                         prefetch
-                        onClick={cleanup}
+                        onClick={cleanupMobileNavigation}
                     >
                         <Settings className="mr-2" />
                         Pengaturan

@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, BookOpen, BookText, Search, Tags } from 'lucide-react';
+import { motion } from 'motion/react';
 import CountUp from '@/components/animated/CountUp';
 import { Kbd } from '@/components/ui/kbd';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -33,6 +34,28 @@ const STATS = [
     },
 ];
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.12,
+        },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.8,
+            ease: [0.16, 1, 0.3, 1] as const,
+        },
+    },
+};
+
 export default function Hero({ stats, categoriesCount }: HeroProps) {
     const isMobile = useIsMobile();
 
@@ -47,27 +70,49 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
     };
 
     return (
-        <section className="relative flex min-h-[calc(100svh-var(--header-height,7.5rem))] flex-col justify-center overflow-hidden py-8 sm:py-12 lg:py-16">
+        <motion.section
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }}
+            className="relative flex min-h-[calc(100svh-var(--header-height,7.5rem))] flex-col justify-center overflow-hidden py-8 sm:py-12 lg:py-16"
+        >
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center lg:gap-14">
-                    <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left"
+                    >
                         <div className="flex max-w-3xl flex-col items-center gap-5 lg:items-start">
                             <div className="space-y-4 sm:space-y-5">
-                                <p className="text-sm font-medium text-muted-foreground">
+                                <motion.p
+                                    variants={itemVariants}
+                                    className="text-sm font-medium text-muted-foreground"
+                                >
                                     Teknik Informatika Universitas Malikussaleh
-                                </p>
+                                </motion.p>
 
-                                <h1 className="mx-auto max-w-4xl text-4xl font-medium tracking-[-0.03em] text-balance sm:text-5xl lg:mx-0 lg:max-w-3xl lg:text-6xl xl:text-[4.5rem]">
+                                <motion.h1
+                                    variants={itemVariants}
+                                    className="mx-auto max-w-4xl text-4xl font-medium tracking-[-0.03em] text-balance sm:text-5xl lg:mx-0 lg:max-w-3xl lg:text-6xl xl:text-[4.5rem]"
+                                >
                                     Cari <i>buku</i>, temukan referensi, pinjam
                                     tanpa ribet.
-                                </h1>
+                                </motion.h1>
 
-                                <p className="mx-auto max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg lg:mx-0">
+                                <motion.p
+                                    variants={itemVariants}
+                                    className="mx-auto max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg lg:mx-0"
+                                >
                                     {RUANG_BACA_DESCRIPTION}
-                                </p>
+                                </motion.p>
                             </div>
 
-                            <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-stretch sm:justify-center lg:justify-start">
+                            <motion.div
+                                variants={itemVariants}
+                                className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-stretch sm:justify-center lg:justify-start"
+                            >
                                 <button
                                     onClick={openSearch}
                                     className="group relative w-full transition-all duration-200 sm:max-w-sm sm:self-stretch"
@@ -97,11 +142,20 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                     Jelajahi Katalog
                                     <ArrowRight className="size-4" />
                                 </Link>
-                            </div>
+                            </motion.div>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="w-full pt-2 lg:max-w-sm lg:justify-self-end lg:pt-0">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{
+                            duration: 0.8,
+                            delay: 0.4,
+                            ease: [0.16, 1, 0.3, 1] as const,
+                        }}
+                        className="w-full pt-2 lg:max-w-sm lg:justify-self-end lg:pt-0"
+                    >
                         <div className="mx-auto grid max-w-2xl grid-cols-1 divide-y divide-border/60 rounded-2xl border border-border bg-background p-2">
                             {STATS.map(({ key, label, suffix }) => (
                                 <div
@@ -134,9 +188,9 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
-        </section>
+        </motion.section>
     );
 }

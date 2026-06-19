@@ -16,6 +16,10 @@ export function downloadSvgAsPng(
     filename: string,
     title?: string,
 ) {
+    const now = new Date();
+    const pad = (num: number) => String(num).padStart(2, '0');
+    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    const prefixedFilename = `${timestamp}_${filename}`;
     let processedSvg = svgString;
 
     if (!processedSvg.includes('xmlns=')) {
@@ -39,11 +43,8 @@ export function downloadSvgAsPng(
         'color="#432dd7"',
     );
 
-    const svgBlob = new Blob([processedSvg], {
-        type: 'image/svg+xml;charset=utf-8',
-    });
-    const URL = window.URL || window.webkitURL || window;
-    const blobUrl = URL.createObjectURL(svgBlob);
+    const base64Svg = window.btoa(unescape(encodeURIComponent(processedSvg)));
+    const dataUrl = `data:image/svg+xml;base64,${base64Svg}`;
 
     const img = new Image();
     img.onload = () => {
@@ -78,16 +79,21 @@ export function downloadSvgAsPng(
                 ctx.drawImage(img, 32, 32, 448, 448);
             }
 
-            const pngUrl = canvas.toDataURL('image/png');
-            const downloadLink = document.createElement('a');
-            downloadLink.href = pngUrl;
-            downloadLink.download = filename;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
+            try {
+                const pngUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = prefixedFilename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            } catch (err) {
+                console.error('Failed to export canvas to PNG:', err);
+            }
         }
-
-        URL.revokeObjectURL(blobUrl);
     };
-    img.src = blobUrl;
+    img.onerror = (err) => {
+        console.error('Failed to load SVG into Image:', err);
+    };
+    img.src = dataUrl;
 }
