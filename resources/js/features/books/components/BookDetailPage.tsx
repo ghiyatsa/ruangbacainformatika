@@ -74,7 +74,7 @@ function BookDescriptionSkeleton() {
 
 function BookFeedbackCardSkeleton() {
     return (
-        <div className="rounded-2xl border border-border/60 bg-transparent">
+        <div className="rounded-2xl border border-border/60 bg-card">
             <div className="flex items-start gap-3 p-5">
                 <Skeleton className="size-10 rounded-xl" />
                 <div className="flex-1 space-y-2">
@@ -586,7 +586,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border border-border/60 bg-transparent">
+                    <div className="rounded-2xl border border-border/60 bg-card">
                         <div className="px-5 py-4">
                             <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Data Buku

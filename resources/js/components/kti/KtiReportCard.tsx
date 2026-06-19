@@ -34,9 +34,9 @@ export function KtiReportCard({
     const user = usePage().props.auth?.user;
 
     return (
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-50 dark:bg-amber-950/20">
+        <div className="rounded-2xl border border-[oklch(0.90_0.03_281)] bg-[oklch(0.97_0.015_281)] dark:border-[oklch(0.22_0.04_281)] dark:bg-[oklch(0.16_0.02_281)]">
             <div className="flex items-start gap-3 p-5">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Flag className="size-4" />
                 </div>
                 <div className="space-y-2">
@@ -54,7 +54,6 @@ export function KtiReportCard({
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
                         <Button variant="outline" className="w-full">
-                            <Flag data-icon="inline-start" />
                             Laporkan Data
                         </Button>
                     </DialogTrigger>
@@ -174,4 +173,3 @@ export function KtiReportCard({
         </div>
     );
 }
-

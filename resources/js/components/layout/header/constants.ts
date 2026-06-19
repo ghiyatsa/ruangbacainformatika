@@ -4,10 +4,11 @@ import {
     GraduationCap,
     Home,
     Info,
-    Mail,
+    Newspaper,
     ScanSearch,
 } from 'lucide-react';
-import { about, contact, home } from '@/routes';
+import { about, home } from '@/routes';
+import blog from '@/routes/blog';
 import books from '@/routes/books';
 import internshipReports from '@/routes/internship-reports';
 import similarity from '@/routes/similarity';
@@ -62,11 +63,15 @@ export const NAV_LINKS: NavItem[] = [
             },
         ],
     },
+    {
+        label: 'Blog',
+        href: blog.index.url(),
+        icon: Newspaper,
+    },
     { label: 'Cek Kemiripan', href: similarity.index.url(), icon: ScanSearch },
     {
         label: 'Tentang',
         href: about.url(),
         icon: Info,
     },
-    { label: 'Kontak', href: contact.url(), icon: Mail },
 ];

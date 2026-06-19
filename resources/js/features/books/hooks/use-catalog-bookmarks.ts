@@ -7,7 +7,8 @@ export type CatalogBookmarkType =
     | 'book'
     | 'skripsi'
     | 'thesis'
-    | 'internship_report';
+    | 'internship_report'
+    | 'post';
 
 export interface CatalogBookmarkRecord {
     catalogType: CatalogBookmarkType;

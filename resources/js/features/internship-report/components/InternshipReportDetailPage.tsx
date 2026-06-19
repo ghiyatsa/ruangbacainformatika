@@ -75,6 +75,9 @@ export default function InternshipReportDetailPage(
                       : 'Memuat detail laporan KP dari katalog Ruang Baca Teknik Informatika Universitas Malikussaleh.'
             }
             keywords={seoKeywords}
+            showBackground={false}
+            deferSecondaryContent
+            contentClassName="pt-2 pb-10 sm:pt-3"
             hero={
                 <div className="relative -mt-20 overflow-hidden border-b bg-background sm:-mt-28 md:-mt-24">
 
@@ -229,7 +232,7 @@ export default function InternshipReportDetailPage(
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border border-border/60 bg-transparent">
+                    <div className="rounded-2xl border border-border/60 bg-card">
                         <div className="p-5">
                             <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Informasi Laporan KP
@@ -289,7 +292,7 @@ export default function InternshipReportDetailPage(
 
                     {report ? (
                         report.keywords.length > 0 ? (
-                            <div className="rounded-2xl border border-border/60 bg-transparent">
+                            <div className="rounded-2xl border border-border/60 bg-card">
                                 <div className="p-5">
                                     <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                         Kata Kunci
@@ -311,7 +314,7 @@ export default function InternshipReportDetailPage(
                             </div>
                         ) : null
                     ) : (
-                        <div className="rounded-2xl border border-border/60 bg-transparent">
+                        <div className="rounded-2xl border border-border/60 bg-card">
                             <div className="p-5">
                                 <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                     Kata Kunci
@@ -319,23 +322,35 @@ export default function InternshipReportDetailPage(
                             </div>
                             <Separator />
                             <div className="flex flex-wrap gap-2 p-4">
-                                <Skeleton className="h-6 w-16 animate-pulse rounded-full" />
-                                <Skeleton className="h-6 w-20 animate-pulse rounded-full" />
-                                <Skeleton className="h-6 w-14 animate-pulse rounded-full" />
-                                <Skeleton className="h-6 w-18 animate-pulse rounded-full" />
+                                <Skeleton className="h-6 w-16 rounded-full animate-pulse" />
+                                <Skeleton className="h-6 w-20 rounded-full animate-pulse" />
+                                <Skeleton className="h-6 w-14 rounded-full animate-pulse" />
+                                <Skeleton className="h-6 w-18 rounded-full animate-pulse" />
                             </div>
                         </div>
                     )}
-
-                    {report && (
-                        <KtiReportCard
-                            catalogType="internship_report"
-                            catalogId={report.id}
-                            catalogLabel="Laporan KP"
-                            catalogTitle={report.title}
-                        />
-                    )}
                 </div>
+            }
+            secondarySidebar={
+                report ? (
+                    <KtiReportCard
+                        catalogType="internship_report"
+                        catalogId={report.id}
+                        catalogLabel="Laporan KP"
+                        catalogTitle={report.title}
+                    />
+                ) : (
+                    <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-4 animate-pulse">
+                        <div className="flex gap-3">
+                            <div className="size-10 rounded-xl bg-muted" />
+                            <div className="flex-1 space-y-2 py-1">
+                                <div className="h-3 w-24 rounded bg-muted" />
+                                <div className="h-3 w-full rounded bg-muted" />
+                            </div>
+                        </div>
+                        <div className="h-10 w-full rounded-xl bg-muted" />
+                    </div>
+                )
             }
             footer={
                 (props.relatedReports === undefined ||
