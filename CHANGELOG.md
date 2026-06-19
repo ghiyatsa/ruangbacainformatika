@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.5.0...v1.6.0) (2026-06-19)
+
+
+### Features
+
+* **catalog:** support bookmarks and align layout for detail pages ([f7ec282](https://github.com/ghiyatsa/ruangbacainformatika/commit/f7ec282fb935740bb9a39f2a75d9b6e228639f11))
+* **ui:** implement responsive blog feature with tags and categories ([d8ec756](https://github.com/ghiyatsa/ruangbacainformatika/commit/d8ec7561258ebe21cb5c1cd1eda49fad9572f682))
+
+
+### Bug Fixes
+
+* **ui:** pass fragment to Deferred fallback to prevent runtime exception ([4e09c4b](https://github.com/ghiyatsa/ruangbacainformatika/commit/4e09c4b83e8236197b9776e23fc36280ac90b327))
+* **ui:** restore notice skeleton and align catalog breadcrumbs with details ([425f9d2](https://github.com/ghiyatsa/ruangbacainformatika/commit/425f9d253bf9d637e40091896f32f8df6ece4b32))
+
 ## [1.5.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.4.0...v1.5.0) (2026-06-19)
 
 
