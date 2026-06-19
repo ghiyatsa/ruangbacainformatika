@@ -42,11 +42,11 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             html {
-                background-color: oklch(1 0 0);
+                background-color: oklch(0.99 0.002 277);
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: oklch(0.129 0.006 281);
             }
         </style>
 

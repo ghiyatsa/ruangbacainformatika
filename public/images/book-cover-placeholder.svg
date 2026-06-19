@@ -1,16 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" role="img" aria-labelledby="title desc">
-  <title id="title">Book cover placeholder</title>
-  <desc id="desc">Placeholder image for books without a cover.</desc>
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f4efe6"/>
-      <stop offset="100%" stop-color="#d7c6a5"/>
-    </linearGradient>
-  </defs>
-  <rect width="300" height="400" rx="24" fill="url(#bg)"/>
-  <rect x="28" y="24" width="22" height="352" rx="11" fill="#72583a" opacity="0.85"/>
-  <rect x="64" y="64" width="172" height="232" rx="18" fill="#fffaf1" opacity="0.9"/>
-  <path d="M102 146h96m-96 34h84m-84 34h66" stroke="#8f724a" stroke-linecap="round" stroke-width="12"/>
-  <path d="M150 264c27-19 50-18 68-8v60c-19-9-41-11-68 4-27-15-49-13-68-4v-60c18-10 41-11 68 8Z" fill="#72583a"/>
-  <text x="64" y="344" fill="#5b462d" font-family="Georgia, serif" font-size="28" font-weight="700">No Cover</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" role="img" aria-labelledby="cp-title cp-desc">
+  <title id="cp-title">Book cover placeholder</title>
+  <desc id="cp-desc">Placeholder image for books without a cover.</desc>
+  <style>
+    .bg    { fill: #ededf0; }
+    .spine { fill: #d8d8de; }
+    .panel { fill: #e4e4ea; }
+    .fold  { fill: #c4c4cc; }
+    .ln1   { fill: #d0d0d8; }
+    .ln2   { fill: #d8d8e0; }
+    .ln3   { fill: #dcdce4; }
+    @media (prefers-color-scheme: dark) {
+      .bg    { fill: #1e1e2a; }
+      .spine { fill: #2a2a3a; }
+      .panel { fill: #252535; }
+      .fold  { fill: #3a3a50; }
+      .ln1   { fill: #333348; }
+      .ln2   { fill: #2e2e42; }
+      .ln3   { fill: #2a2a3c; }
+    }
+  </style>
+
+  <!-- Background -->
+  <rect width="300" height="400" class="bg"/>
+
+  <!-- Left spine accent -->
+  <rect x="0" y="0" width="10" height="400" class="spine"/>
+
+  <!-- Center document icon panel -->
+  <rect x="98" y="90" width="104" height="136" rx="10" class="panel"/>
+  <!-- top-right corner fold -->
+  <polygon points="174,90 202,118 174,118" class="fold"/>
+  <!-- text lines on document -->
+  <rect x="114" y="144" width="72" height="7" rx="3.5" class="ln1"/>
+  <rect x="114" y="160" width="58" height="6" rx="3" class="ln2"/>
+  <rect x="114" y="174" width="44" height="5" rx="2.5" class="ln3"/>
+
+  <!-- Bottom caption lines -->
+  <rect x="44" y="282" width="130" height="7" rx="3.5" class="ln1"/>
+  <rect x="44" y="298" width="100" height="6" rx="3" class="ln2"/>
+  <rect x="44" y="312" width="76" height="5" rx="2.5" class="ln3"/>
 </svg>
