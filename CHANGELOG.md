@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.4.0...v1.5.0) (2026-06-19)
+
+
+### Features
+
+* **ui:** add skeleton loading for global content notice and notifications dropdown ([dcfa42f](https://github.com/ghiyatsa/ruangbacainformatika/commit/dcfa42f45f5da6148a0dd7f23763f1793bdbd992))
+
+
+### Bug Fixes
+
+* **admin:** drop unused columns from posts table ([351c888](https://github.com/ghiyatsa/ruangbacainformatika/commit/351c888e702a7b6435584efc596c68dd4aaab5cf))
+
 ## [1.4.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.3.0...v1.4.0) (2026-06-17)
 
 
