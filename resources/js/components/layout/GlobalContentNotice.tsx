@@ -213,7 +213,7 @@ export function DeferredGlobalContentNotice({
     return (
         <Deferred
             data="globalNotice"
-            fallback={null}
+            fallback={<></>}
         >
             <GlobalContentNotice
                 className={className}
