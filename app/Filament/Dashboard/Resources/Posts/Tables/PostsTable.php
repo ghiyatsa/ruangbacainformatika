@@ -41,7 +41,8 @@ class PostsTable
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => static::statusLabel($state))
                     ->color(fn (string $state): string => static::statusColor($state))
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn (Post $record): ?string => $record->status === Post::STATUS_REJECTED && filled($record->rejection_reason) ? "Alasan: {$record->rejection_reason}" : null),
 
                 TextColumn::make('categories.name')
                     ->label('Kategori')

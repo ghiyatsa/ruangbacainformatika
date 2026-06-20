@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -41,6 +42,7 @@ class Post extends Model
         'reviewed_by_user_id',
         'reviewed_at',
         'rejection_reason',
+        'allow_comments',
     ];
 
     protected function casts(): array
@@ -50,6 +52,7 @@ class Post extends Model
             'published_at' => 'datetime',
             'view_count' => 'integer',
             'reviewed_at' => 'datetime',
+            'allow_comments' => 'boolean',
         ];
     }
 
@@ -114,6 +117,14 @@ class Post extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(PostTag::class);
+    }
+
+    /**
+     * Get the comments for this blog post.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(PostComment::class);
     }
 
     public function scopePublished(Builder $query): Builder

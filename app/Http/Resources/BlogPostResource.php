@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Post;
+use App\Support\RichContentSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
@@ -23,7 +24,7 @@ class BlogPostResource extends JsonResource
             'slug' => $this->slug,
             'summary' => $this->summary,
             'excerpt' => $this->excerpt(),
-            'content' => $this->content,
+            'content' => app(RichContentSanitizer::class)->sanitize($this->content),
             'contentText' => Str::of(strip_tags((string) $this->content))->squish()->toString(),
             'coverImageUrl' => $this->cover_image
                 ? asset('storage/'.$this->cover_image)
@@ -36,9 +37,11 @@ class BlogPostResource extends JsonResource
             'updatedAtLabel' => $this->updated_at?->translatedFormat('d M Y'),
             'viewCount' => (int) $this->view_count,
             'readingMinutes' => max(1, (int) ceil(str_word_count(strip_tags((string) $this->content)) / 200)),
+            'allowComments' => (bool) $this->allow_comments,
             'author' => $this->whenLoaded('user', fn (): array => [
                 'name' => $this->user->name,
                 'avatar' => $this->user->avatarUrl(),
+                'initials' => $this->user->initials(),
             ]),
             'reviewer' => $this->whenLoaded('reviewedBy', fn (): ?array => $this->reviewedBy ? [
                 'name' => $this->reviewedBy->name,
@@ -57,6 +60,7 @@ class BlogPostResource extends JsonResource
                 ])
                 ->values()
                 ->all()),
+            'comments' => PostCommentResource::collection($this->whenLoaded('comments')),
         ];
     }
 }

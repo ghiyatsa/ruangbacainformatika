@@ -9,11 +9,13 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class PostForm
 {
@@ -26,6 +28,30 @@ class PostForm
                     'lg' => 3,
                 ])
                     ->schema([
+                        Section::make('Artikel Perlu Perbaikan (Ditolak)')
+                            ->description(fn (?Post $record): string => 'Catatan Peninjau: '.($record?->rejection_reason ?? '').'. Silakan perbaiki artikel sesuai catatan tersebut, lalu ubah status di kanan menjadi "Ajukan Peninjauan" untuk mengirimkan kembali.')
+                            ->icon(Heroicon::OutlinedExclamationTriangle)
+                            ->iconColor('danger')
+                            ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_REJECTED && filled($record->rejection_reason))
+                            ->columnSpanFull()
+                            ->schema([]),
+
+                        Section::make('Artikel Telah Diterbitkan')
+                            ->description('Artikel ini sudah aktif dan dapat dibaca oleh publik. Penting: Jika Anda menyimpan perubahan pada artikel ini, statusnya akan ditarik kembali menjadi "Dalam Peninjauan" (unpublish) untuk ditinjau ulang oleh Admin/Staff.')
+                            ->icon(Heroicon::OutlinedCheckCircle)
+                            ->iconColor('success')
+                            ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_APPROVED)
+                            ->columnSpanFull()
+                            ->schema([]),
+
+                        Section::make('Artikel Sedang Ditinjau')
+                            ->description('Artikel ini sedang dalam antrean peninjauan oleh Admin/Staff dan belum diterbitkan. Anda masih dapat mengubah isi artikel ini sebelum disetujui, namun artikel akan tetap berada dalam status peninjauan.')
+                            ->icon(Heroicon::OutlinedClock)
+                            ->iconColor('warning')
+                            ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_PENDING)
+                            ->columnSpanFull()
+                            ->schema([]),
+
                         Group::make()
                             ->schema([
                                 Section::make('Media Utama')
@@ -99,6 +125,10 @@ class PostForm
 
                                 Section::make('Penerbitan')
                                     ->schema([
+                                        Toggle::make('allow_comments')
+                                            ->label('Izinkan Komentar')
+                                            ->default(true),
+
                                         Placeholder::make('review_note')
                                             ->label('Catatan Review Sebelumnya')
                                             ->content(fn (?Post $record): string => $record?->rejection_reason ?? '-')

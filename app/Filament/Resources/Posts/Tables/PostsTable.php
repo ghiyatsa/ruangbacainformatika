@@ -9,11 +9,13 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class PostsTable
 {
@@ -29,7 +31,9 @@ class PostsTable
                     ->disk('public')
                     ->visibility('public')
                     ->square()
-                    ->size(40),
+                    ->size(40)
+                    ->defaultImageUrl(asset('images/article-placeholder.svg'))
+                    ->toggleable(),
 
                 TextColumn::make('title')
                     ->label('Judul Artikel')
@@ -41,26 +45,30 @@ class PostsTable
                 TextColumn::make('user.name')
                     ->label('Penulis')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => static::statusLabel($state))
                     ->color(fn (string $state): string => static::statusColor($state))
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('categories.name')
                     ->label('Kategori')
                     ->badge()
                     ->separator(', ')
-                    ->limitList(2),
+                    ->limitList(2)
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('tags.name')
                     ->label('Tag')
                     ->badge()
                     ->separator(', ')
-                    ->limitList(2),
+                    ->limitList(2)
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('reviewedBy.name')
                     ->label('Peninjau')
@@ -71,7 +79,8 @@ class PostsTable
                     ->label('Terbit')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->placeholder('-'),
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -93,43 +102,50 @@ class PostsTable
                     ->relationship('reviewedBy', 'name'),
             ])
             ->recordActions([
-                Action::make('approve')
-                    ->label('Terbitkan')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->hidden(fn (Post $record): bool => $record->status === Post::STATUS_APPROVED)
-                    ->action(function (Post $record): void {
-                        $record->update([
-                            'status' => Post::STATUS_APPROVED,
-                            'reviewed_by_user_id' => auth()->id(),
-                            'reviewed_at' => now(),
-                            'rejection_reason' => null,
-                        ]);
-                    }),
-                Action::make('reject')
-                    ->label('Kembalikan')
-                    ->color('danger')
-                    ->hidden(fn (Post $record): bool => $record->status === Post::STATUS_REJECTED)
-                    ->schema([
-                        Textarea::make('rejection_reason')
-                            ->label('Catatan untuk Penulis')
-                            ->required()
-                            ->rows(4)
-                            ->maxLength(500),
-                    ])
-                    ->action(function (Post $record, array $data): void {
-                        $record->update([
-                            'status' => Post::STATUS_REJECTED,
-                            'reviewed_by_user_id' => auth()->id(),
-                            'reviewed_at' => now(),
-                            'rejection_reason' => $data['rejection_reason'],
-                        ]);
-                    }),
                 ActionGroup::make([
+                    Action::make('approve')
+                        ->label('Terbitkan')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->hidden(fn (Post $record): bool => $record->status === Post::STATUS_APPROVED)
+                        ->action(function (Post $record): void {
+                            $record->update([
+                                'status' => Post::STATUS_APPROVED,
+                                'reviewed_by_user_id' => Auth::id(),
+                                'reviewed_at' => now(),
+                                'rejection_reason' => null,
+                            ]);
+                        }),
+                    Action::make('reject')
+                        ->label('Kembalikan')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->hidden(fn (Post $record): bool => $record->status === Post::STATUS_REJECTED)
+                        ->schema([
+                            Textarea::make('rejection_reason')
+                                ->label('Catatan untuk Penulis')
+                                ->required()
+                                ->rows(4)
+                                ->maxLength(500),
+                        ])
+                        ->action(function (Post $record, array $data): void {
+                            $record->update([
+                                'status' => Post::STATUS_REJECTED,
+                                'reviewed_by_user_id' => Auth::id(),
+                                'reviewed_at' => now(),
+                                'rejection_reason' => $data['rejection_reason'],
+                            ]);
+                        }),
+                    ViewAction::make()
+                        ->label('Lihat')
+                        ->icon('heroicon-o-eye'),
                     EditAction::make()
-                        ->label('Tinjau'),
+                        ->label('Tinjau')
+                        ->icon('heroicon-o-pencil'),
                     DeleteAction::make()
-                        ->label('Hapus'),
+                        ->label('Hapus')
+                        ->icon('heroicon-o-trash'),
                 ])->label('Aksi'),
             ])
             ->toolbarActions([

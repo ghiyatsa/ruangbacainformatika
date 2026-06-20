@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -128,6 +129,11 @@ class PostForm
 
                                 Section::make('Peninjauan & Moderasi')
                                     ->schema([
+                                        Toggle::make('allow_comments')
+                                            ->label('Izinkan Komentar')
+                                            ->default(true)
+                                            ->disabled(fn ($record): bool => $record !== null && $record->user_id !== auth()->id()),
+
                                         Select::make('status')
                                             ->label('Status')
                                             ->options([

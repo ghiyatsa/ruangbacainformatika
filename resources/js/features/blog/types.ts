@@ -24,9 +24,11 @@ export interface BlogPostItem {
     updatedAtLabel: string | null;
     viewCount: number;
     readingMinutes: number;
+    allowComments: boolean;
     author?: {
         name: string;
         avatar: string | null;
+        initials?: string;
     };
     reviewer?: {
         name: string;
@@ -39,6 +41,29 @@ export interface BlogPostItem {
         name: string;
         slug: string;
     }>;
+    commentsCount?: number;
+    comments?: PaginationData<BlogPostComment>;
+}
+
+export interface BlogPostComment {
+    id: number;
+    content: string;
+    parentId: number | null;
+    replyToCommentId: number | null;
+    replyToUser: {
+        id: number;
+        name: string;
+    } | null;
+    createdAt: string;
+    createdAtLabel: string;
+    user: {
+        id: number;
+        name: string;
+        avatar: string | null;
+        initials: string;
+    } | null;
+    replies?: BlogPostComment[];
+    canDelete: boolean;
 }
 
 export interface BlogFilters {
@@ -60,9 +85,9 @@ export interface BlogIndexPageProps {
 }
 
 export interface BlogShowPageProps {
-    post: {
+    post?: {
         data: BlogPostItem;
-    };
+    } | null;
     relatedPosts?: BlogPostItem[];
     popularPosts?: BlogPostItem[];
     categories?: BlogTaxonomyItem[];
