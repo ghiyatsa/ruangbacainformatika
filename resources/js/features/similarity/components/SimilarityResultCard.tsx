@@ -182,7 +182,7 @@ export function SimilarityResultCard({
     );
 
     return (
-        <Card className="overflow-hidden border-border/60 bg-card/95 shadow-sm transition-colors hover:bg-card">
+        <Card className="overflow-hidden border border-border bg-card shadow-none hover:bg-muted/5">
             {item.student_id ? (
                 <Link
                     href={`/skripsi/${item.student_id}`}

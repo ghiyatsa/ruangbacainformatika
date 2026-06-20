@@ -7,9 +7,9 @@ import type { SimilarityResult } from '@/features/similarity/types';
 
 function SafeResult() {
     return (
-        <Card className="border-border/60 bg-card/95 shadow-sm">
+        <Card className="border border-border bg-card shadow-none">
             <CardContent className="flex flex-col items-center gap-4 p-8 text-center sm:p-10">
-                <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+                <div className="flex size-12 items-center justify-center rounded-lg border border-emerald-500/15 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
                     <ShieldCheck className="size-5" />
                 </div>
                 <div className="max-w-xl space-y-2">
@@ -65,7 +65,7 @@ function ResultsSummaryBanner({ result }: SimilarityResultsSectionProps) {
 
     return (
         <div className="gap-4">
-            <Card className="border-border/60 bg-card/95 shadow-sm">
+            <Card className="border border-border bg-card shadow-none">
                 <CardContent className="space-y-5 p-5 sm:p-6">
                     <div className="space-y-3">
                         <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">

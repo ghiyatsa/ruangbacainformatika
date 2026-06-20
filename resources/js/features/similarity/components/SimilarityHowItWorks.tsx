@@ -13,19 +13,19 @@ const STEPS = [
         title: 'Input Judul Skripsi',
         desc: 'Ketik judul skripsi yang ingin Anda periksa.',
         icon: FileText,
-        color: 'text-primary bg-primary/10 border-primary/20',
+        color: 'text-muted-foreground bg-muted/5 border-border',
     },
     {
         title: 'Pemindaian Semantik',
         desc: 'Sistem membandingkan judul Anda dengan data skripsi yang tersedia.',
         icon: Search,
-        color: 'text-primary bg-primary/10 border-primary/20',
+        color: 'text-muted-foreground bg-muted/5 border-border',
     },
     {
         title: 'Evaluasi & Tindak Lanjut',
         desc: 'Tinjau hasilnya, lalu sesuaikan judul jika diperlukan.',
         icon: CheckCircle,
-        color: 'text-primary bg-primary/10 border-primary/20',
+        color: 'text-muted-foreground bg-muted/5 border-border',
     },
 ];
 
@@ -55,23 +55,23 @@ export function SimilarityHowItWorks() {
                 {STEPS.map(({ title, desc, icon: Icon, color }, i) => (
                     <div
                         key={i}
-                        className="group relative rounded-2xl border border-border/60 bg-card p-6 shadow-xs transition-all duration-300 hover:border-primary/25 hover:shadow-md"
+                        className="group relative rounded-lg border border-border bg-card p-6 shadow-none"
                     >
                         {/* Connecting line for larger screens */}
                         {i < STEPS.length - 1 && (
-                            <div className="absolute top-10 -right-3 z-10 hidden h-[1px] w-6 bg-border/80 group-hover:bg-primary/20 md:block" />
+                            <div className="absolute top-10 -right-3 z-10 hidden h-[1px] w-6 bg-border md:block" />
                         )}
 
                         <div className="flex items-center justify-between">
                             <span className="text-[10px] font-black tracking-widest text-muted-foreground/60 uppercase">
                                 LANGKAH {String(i + 1).padStart(2, '0')}
                             </span>
-                            <div className={`rounded-xl border p-2 ${color}`}>
+                            <div className={`rounded-lg border p-2 ${color}`}>
                                 <Icon className="size-4" />
                             </div>
                         </div>
 
-                        <h4 className="mt-4 text-sm font-bold text-foreground transition-colors group-hover:text-primary">
+                        <h4 className="mt-4 text-sm font-bold text-foreground">
                             {title}
                         </h4>
 
@@ -83,9 +83,9 @@ export function SimilarityHowItWorks() {
             </div>
 
             {/* Tips Section */}
-            <div className="space-y-4 rounded-2xl border border-primary/15 bg-primary/5 p-6">
-                <h4 className="flex items-center gap-2 text-sm font-bold text-primary">
-                    <Lightbulb className="size-4 animate-pulse text-primary" />
+            <div className="space-y-4 rounded-lg border border-border bg-muted/5 p-6">
+                <h4 className="flex items-center gap-2 text-sm font-bold text-foreground">
+                    <Lightbulb className="size-4 text-primary" />
                     Tips Mengurangi Kemiripan Judul
                 </h4>
 
@@ -94,7 +94,7 @@ export function SimilarityHowItWorks() {
                         <div key={idx} className="space-y-2">
                             <div className="flex items-center gap-2 text-primary">
                                 <Icon className="size-4 shrink-0" />
-                                <h5 className="text-xs font-bold">{title}</h5>
+                                <h5 className="text-xs font-bold text-foreground">{title}</h5>
                             </div>
                             <p className="pl-6 text-[11px] leading-relaxed text-muted-foreground">
                                 {desc}
