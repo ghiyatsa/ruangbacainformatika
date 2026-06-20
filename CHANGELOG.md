@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.7.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.6.0...v1.7.0) (2026-06-20)
+
+
+### Features
+
+* **settings:** add per post comment toggle and dashboard review alerts ([d193556](https://github.com/ghiyatsa/ruangbacainformatika/commit/d193556d62c23f603734e3e39f03c8d26ed6a68b))
+* **ui:** display full-width empty state card on blog index ([36a321c](https://github.com/ghiyatsa/ruangbacainformatika/commit/36a321c20dd9b939ed5d7a73476e5e1b8818dc21))
+* **ui:** implement deferred loading and skeletons for blog list and detail ([aa92925](https://github.com/ghiyatsa/ruangbacainformatika/commit/aa92925b7950a0c4e8910008cd375c665957653c))
+
 ## [1.6.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.5.0...v1.6.0) (2026-06-19)
 
 
