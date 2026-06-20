@@ -58,44 +58,67 @@ Only these scopes are allowed:
 
 ## Required Workflow
 
-### 1. Inspect the PR Changes
+### 1. Identify PR Type and Origin
 
-Review the actual PR content:
-- changed files,
-- diff summary,
-- current PR title,
-- and whether the change is feature, fix, refactor, CI, docs, test, or config.
+First, determine if the PR is an automated release PR or a standard feature/bugfix PR:
+- **Case A: Automated `release-please` PR**
+  - **Indicator**: The branch name matches `release-please--branches--main` and the title is `chore(main): release X.Y.Z`.
+  - **Rule**: **DO NOT** customize or alter the squash commit message or title. Altering it will prevent the release pipeline from creating git tags and changelogs.
+  - **Action**: Merge directly without overriding the subject or body (see step 5).
+- **Case B: Standard Feature / Bugfix / Chore PR**
+  - Proceed to the following steps to construct a high-quality squash commit message.
 
-### 2. Determine the Main Intent
+### 2. Inspect the PR Changes
 
-Choose the single strongest purpose of the PR using the allowed types and scopes.
+For standard PRs, review the changes to summarize the overall impact:
+- View the diff or files changed: `git diff main...<branch-name>` (or use `gh pr diff <pr-number>`).
+- Confirm the PR title matches conventional rules.
+- Identify the primary intent (e.g. `feat`, `fix`, `refactor`) and the correct scope (e.g. `auth`, `loan`, `kiosk`).
 
 ### 3. Draft the Conventional Commit Message
 
-Use:
+Construct the squash commit title:
 ```txt
 type(scope): subject
 ```
+- Example: `feat(loan): add qr code confirmation for book return`
+- If there are breaking changes, add `!` after the scope: `fix(auth)!: enforce secure cookie flags`
+- Write an optional commit body summarizing the changes. Make sure to **manually wrap lines in the body to be under 100 characters** to prevent `commitlint` validation errors.
 
-If there are breaking changes, add `!` after the scope:
-```txt
-feat(loan)!: change qr draft consumption contract
-```
+### 4. Verify Local Commitlint (For Standard PRs)
 
-### 4. Format the Extended Description
+Before executing the merge, verify the drafted message locally using the CMD wrapper:
+`cmd /c "echo type(scope): subject| npx commitlint --verbose"` (make sure there is no trailing space before the pipe `|`).
 
-If the commit has a body, break the lines manually using newlines so that no single line exceeds 100 characters.
+### 5. Execute Squash and Merge
 
-### 5. Verify local commitlint (optional)
+Merge the Pull Request using the GitHub CLI (`gh`):
 
-Verify the message before suggesting it:
-`echo "type(scope): subject" | npx commitlint --verbose`
+- **For Standard PRs** (override the squash commit title and body to keep history clean and lint-compliant):
+  ```bash
+  gh pr merge <pr-number> --squash --subject "type(scope): subject" --body "Extended description or bullet points"
+  ```
+- **For Release PRs** (use the default title and body provided by release-please):
+  ```bash
+  gh pr merge <pr-number> --squash
+  ```
+
+### 6. Synchronize Workspace
+
+After the PR is merged:
+1. Switch back to the main branch:
+   `git checkout main`
+2. Pull the latest merged changes:
+   `git pull origin main`
+3. Prune remote-tracking references and delete the local feature branch:
+   `git remote prune origin`
+   `git branch -d <branch-name>`
 
 ## Output Contract
 
-When running this workflow, the agent should return:
+When completing this workflow, the agent must output:
 
-1. A short summary of the PR.
-2. The recommended squash commit title.
-3. The recommended extended description (with lines manually wrapped to be under 100 characters).
-4. SemVer impact: `MAJOR`, `MINOR`, `PATCH`, or `no release`.
+1. **PR Summary**: The target PR number, title, and type.
+2. **Merge Method**: The exact `gh pr merge` command used or recommended.
+3. **Squash Message**: The conventional commit subject and body applied.
+4. **Workspace Status**: Confirmation that local `main` has been synced and the local feature branch has been deleted.

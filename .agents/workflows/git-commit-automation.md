@@ -58,49 +58,68 @@ Only these scopes are allowed:
 - Always inspect `git status` and `git diff` before touching staging.
 - Never use destructive git commands such as `git reset --hard` on uncommitted user work.
 - Automatically run `vendor/bin/pint --dirty --format agent`, `php artisan test --compact`, `npm run types:check`, and `npm run lint:check` to verify code quality before committing.
-- Commit in logical groups and push to the remote branch.
+- Commit in logical groups, push to remote, and optionally create a Pull Request.
 
 ## Required Workflow
 
 ### 1. Run Quality Checks & Formatting
 
-Before committing:
-- Format modified PHP code: `vendor/bin/pint --dirty --format agent`
-- Run PHP tests: `php artisan test --compact`
-- Run frontend type check: `npm run types:check`
-- Run frontend lint: `npm run lint:check`
+Before staging or committing any code, run all project checks to ensure that the code meets repository standards:
+- **Format PHP Code**: Run `vendor/bin/pint --dirty --format agent` to automatically style any modified PHP files.
+- **Run Backend Tests**: Run `php artisan test --compact` to make sure all existing and new tests pass successfully.
+- **Type Check Frontend**: Run `npm run types:check` to ensure there are no TypeScript compiler errors.
+- **Lint Frontend**: Run `npm run lint:check` to check for ESLint/Prettier issues.
 
-### 2. Inspect Changes
+> [!IMPORTANT]
+> If any formatting, testing, type-checking, or linting step fails, you **MUST** resolve the errors before proceeding.
 
-Review changes in the worktree:
-- `git status --short`
-- `git diff`
+### 2. Verify Branch Context
 
-### 3. Determine Commit Groups
+Check which branch you are on:
+- Run `git branch --show-current` to identify the current branch.
+- **If you are on `main`**:
+  - Do NOT commit feature work or refactors directly to `main` unless it is a minor maintenance chore (e.g., config tweak, workflow fix) that has been explicitly approved.
+  - For features, bugs, or refactors, create and switch to a new branch: `git checkout -b <type>/<short-description>` (e.g., `feat/whatsapp-otp-service` or `fix/loan-qr-validation`).
+- **If you are on a feature branch**:
+  - Ensure the branch is up-to-date with remote `main` before committing:
+    `git pull --rebase origin main`
 
-Produce a commit plan:
-- One logical purpose per commit.
-- Use Conventional Commit messages with allowed types and scopes.
-- Ensure all line lengths in the body are under 100 characters.
+### 3. Inspect and Stage Changes
 
-### 4. Stage & Verify Commit Message
+Review the worktree to ensure only the desired modifications are committed:
+- Run `git status --short` to see modified, created, and deleted files.
+- Run `git diff` or `git diff --cached` to verify the exact changes.
+- Stage changes in logical groups using:
+  `git add <file1> <file2>`
+  Avoid staging unrelated files together.
 
-For each commit group:
-- Stage only the relevant files.
-- Verify the proposed commit message using the local commitlint config:
-  `echo "type(scope): subject" | npx commitlint --verbose`
-- If commitlint passes, commit the files.
+### 4. Draft and Validate the Commit Message
 
-### 5. Push changes
+For each staged group:
+- Compose a Conventional Commit message following the allowed types and scopes.
+- **Verify the message locally** using `commitlint` to prevent CI validation failures.
+  > [!TIP]
+  > On Windows PowerShell, standard piping like `echo "msg" | npx commitlint` can append a BOM (Byte Order Mark) or trailing spaces, causing `commitlint` to fail.
+  > Always run the validation using the following CMD wrapper:
+  > `cmd /c "echo type(scope): message| npx commitlint --verbose"` (make sure there is no trailing space before the pipe `|`).
+- Once verified, commit the changes:
+  `git commit -m "type(scope): subject" -m "Optional body with wrapped lines under 100 chars"`
 
-Once all commits are created:
-- Push commits to the remote branch: `git push origin <branch-name>`
+### 5. Push and Create Pull Request
+
+After all commits are successfully created locally:
+- Push the branch to the remote repository:
+  `git push origin <branch-name>`
+- Create a Pull Request (PR) using the GitHub CLI:
+  `gh pr create --title "type(scope): subject" --body "Detailed description of the changes"`
+- Note: Use `--draft` if the work is still in progress or needs review before merging.
+- Provide the user with the URL of the created PR.
 
 ## Output Contract
 
-When running this workflow, the agent should return:
+When completing this workflow, the agent must output:
 
-1. A short summary of the current worktree.
-2. The results of the tests and lint checks.
-3. The list of commits created (with their commit messages).
-4. The confirmation that the commits have been pushed to GitHub.
+1. **Check Status**: Success/failure of formatting, testing, and linting checks.
+2. **Current Branch**: The branch name and its tracking status.
+3. **Commit Details**: The exact commit hashes and messages created.
+4. **Pull Request Info**: The GitHub PR URL and state (e.g., draft or open).
