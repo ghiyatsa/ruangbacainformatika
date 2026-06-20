@@ -64,6 +64,9 @@ it('keeps breadcrumb heroes closer to the header across catalog and detail pages
     $internshipReportDetailPage = file_get_contents(
         resource_path('js/features/internship-report/components/InternshipReportDetailPage.tsx')
     );
+    $ktiTextWorkHero = file_get_contents(
+        resource_path('js/components/kti/KtiTextWorkHero.tsx')
+    );
     expect($catalogHeader)->toContain('pt-24')
         ->and($catalogHeader)->toContain('pb-12')
         ->and($catalogHeader)->toContain('sm:pt-30')
@@ -73,12 +76,12 @@ it('keeps breadcrumb heroes closer to the header across catalog and detail pages
         ->and($bookDetailPage)->toContain('sm:pt-30')
         ->and($bookDetailPage)->toContain('sm:pb-8')
         ->and($bookDetailPage)->toContain('sm:mb-6')
-        ->and($academicWorkDetailPage)->toContain('pt-24')
-        ->and($academicWorkDetailPage)->toContain('pb-12')
-        ->and($academicWorkDetailPage)->toContain('sm:pt-30')
-        ->and($internshipReportDetailPage)->toContain('pt-24')
-        ->and($internshipReportDetailPage)->toContain('pb-12')
-        ->and($internshipReportDetailPage)->toContain('sm:pt-30');
+        ->and($academicWorkDetailPage)->toContain('KtiTextWorkHero')
+        ->and($internshipReportDetailPage)->toContain('KtiTextWorkHero')
+        ->and($ktiTextWorkHero)->toContain('pt-24')
+        ->and($ktiTextWorkHero)->toContain('pb-6')
+        ->and($ktiTextWorkHero)->toContain('sm:pb-8')
+        ->and($ktiTextWorkHero)->toContain('sm:pt-30');
 });
 
 it('shows book card skeletons when mobile progressive pagination starts loading more results', function () {
@@ -219,15 +222,15 @@ it('uses the lighter detail-book rendering path for performance-sensitive conten
         ->and($resourceDetailPage)->toContain("className={cn('py-10', contentClassName)}")
         ->and($resourceDetailPage)->toContain('const hasSecondarySidebar =')
         ->and($resourceDetailPage)->toContain('secondarySidebar !== undefined && secondarySidebar !== null;')
-        ->and($resourceDetailPage)->toContain('className="order-3 md:order-1 md:col-span-4 lg:col-span-3"')
+        ->and($resourceDetailPage)->toContain('className="order-2 md:order-1 md:col-span-4 lg:col-span-3"')
         ->and($resourceDetailPage)->toContain('hasSecondarySidebar &&')
         ->and($resourceDetailPage)->toContain("'xl:sticky xl:top-24'")
-        ->and($resourceDetailPage)->toContain('className="order-2 md:order-3 md:col-span-12 lg:col-span-3"')
+        ->and($resourceDetailPage)->toContain('className="order-3 md:order-3 md:col-span-12 lg:col-span-3"')
         ->and($resourceDetailPage)->toContain('className="xl:sticky xl:top-24"')
         ->and($bookDetailPage)->toContain('showBackground={false}')
         ->and($bookDetailPage)->toContain('deferSecondaryContent')
         ->and($bookDetailPage)->toContain('secondarySidebar={')
-        ->and($bookDetailPage)->toContain('contentClassName="pt-2 pb-10 sm:pt-3"')
+        ->and($bookDetailPage)->toContain('contentClassName="pt-6 pb-10 sm:pt-8"')
         ->and($bookDetailPage)->toContain('fetchPriority="high"')
         ->and($bookDetailPage)->not->toContain('backgroundImage: `url(${book.coverImageUrl})`');
 });
@@ -265,13 +268,12 @@ it('keeps the catalog feedback card on the public book detail page', function ()
         resource_path('js/features/books/components/BookDetailPage.tsx')
     );
     expect($bookDetailPage)->not->toBeFalse()
-        ->and($bookDetailPage)->toContain("import { KtiReportCard } from '@/components/kti/KtiReportCard';")
+        ->and($bookDetailPage)->toContain("import { KtiReportCard, KtiReportCardSkeleton } from '@/components/kti/KtiReportCard';")
         ->and($bookDetailPage)->toContain('<KtiReportCard')
-        ->and($bookDetailPage)->toContain('function BookFeedbackCardSkeleton()')
         ->and($bookDetailPage)->toContain('catalogType="book"')
         ->and($bookDetailPage)->toContain('catalogLabel="Buku"')
         ->and($bookDetailPage)->toContain('catalogTitle={book.title}')
-        ->and($bookDetailPage)->toContain('<BookFeedbackCardSkeleton />')
+        ->and($bookDetailPage)->toContain('<KtiReportCardSkeleton />')
         ->and($bookDetailPage)->toContain('secondarySidebar={');
 });
 

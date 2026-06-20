@@ -9,6 +9,8 @@ use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 
 function makeMemberUser(): User
@@ -118,7 +120,7 @@ it('member users can create posts with pending review status', function () {
         ->call('create')
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('posts', [
+    assertDatabaseHas('posts', [
         'title' => 'New Awesome Post',
         'user_id' => $user->id,
         'status' => Post::STATUS_PENDING,
@@ -141,7 +143,7 @@ it('member users can create draft posts', function () {
         ->call('create')
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('posts', [
+    assertDatabaseHas('posts', [
         'title' => 'Draft Post',
         'user_id' => $user->id,
         'status' => Post::STATUS_DRAFT,
@@ -164,7 +166,7 @@ it('member users cannot force approved status while creating posts', function ()
         ->call('create')
         ->assertHasFormErrors(['status']);
 
-    $this->assertDatabaseMissing('posts', [
+    assertDatabaseMissing('posts', [
         'title' => 'Tampered Post',
         'user_id' => $user->id,
     ]);

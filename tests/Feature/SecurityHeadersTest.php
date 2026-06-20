@@ -2,8 +2,11 @@
 
 use Inertia\Testing\AssertableInertia as Assert;
 
+use function Pest\Laravel\get;
+use function Pest\Laravel\withHeader;
+
 test('web responses include baseline security headers', function () {
-    $response = $this->get(route('home'));
+    $response = get(route('home'));
     $contentSecurityPolicy = $response->headers->get('Content-Security-Policy');
 
     $response->assertOk()
@@ -27,7 +30,7 @@ test('web responses include baseline security headers', function () {
 });
 
 test('kiosk responses allow camera access for the same origin only', function () {
-    $response = $this->get(route('kiosk.index'));
+    $response = get(route('kiosk.index'));
 
     $response->assertOk()
         ->assertHeader(
@@ -41,7 +44,7 @@ test('lighthouse requests disable google one tap while keeping google login conf
     config()->set('services.google.client_secret', 'google-client-secret');
     config()->set('services.google.redirect', 'https://ruangbacainformatika.unimal.ac.id/auth/google/callback');
 
-    $this->withHeader('User-Agent', 'Mozilla/5.0 Chrome-Lighthouse')
+    withHeader('User-Agent', 'Mozilla/5.0 Chrome-Lighthouse')
         ->get(route('home'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('googleAuth.enabled', true)
