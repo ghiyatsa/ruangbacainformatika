@@ -1,6 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Download, QrCode, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import InputError from '@/components/common/InputError';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCountdown } from '@/hooks/use-countdown';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { downloadSvgAsPng } from '@/lib/utils';
 import type { FormEvent } from 'react';
@@ -43,26 +44,6 @@ interface Props {
     };
 }
 
-function formatCountdown(totalSeconds: number): string {
-    if (totalSeconds <= 0) {
-        return '00:00';
-    }
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-        return [hours, minutes, seconds]
-            .map((value) => String(value).padStart(2, '0'))
-            .join(':');
-    }
-
-    return [minutes, seconds]
-        .map((value) => String(value).padStart(2, '0'))
-        .join(':');
-}
-
 export default function LoanRequestPage({ draft, stats }: Props) {
     const isEmpty = draft.items.length === 0;
     const remainingQuota = Math.max(
@@ -84,19 +65,9 @@ export default function LoanRequestPage({ draft, stats }: Props) {
     const { clearErrors, setData } = qrForm;
     const selectedBookIds = qrForm.data.book_ids;
     const selectedBooksCount = selectedBookIds.length;
-    const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
-    const expiresAtTimestamp = draft.expiresAtIso
-        ? new Date(draft.expiresAtIso).getTime()
-        : null;
-    const remainingSeconds =
-        expiresAtTimestamp === null
-            ? null
-            : Math.max(
-                  Math.ceil((expiresAtTimestamp - currentTimestamp) / 1000),
-                  0,
-              );
-    const countdownLabel =
-        remainingSeconds === null ? null : formatCountdown(remainingSeconds);
+    const { remainingSeconds, countdownLabel } = useCountdown(
+        draft.expiresAtIso,
+    );
     const hasActiveQrCountdown =
         draft.hasActiveQr && remainingSeconds !== null && remainingSeconds > 0;
 
@@ -104,18 +75,6 @@ export default function LoanRequestPage({ draft, stats }: Props) {
         setData('book_ids', defaultSelectedBookIds);
         clearErrors();
     }, [clearErrors, draft.id, defaultSelectedBookIds, setData]);
-
-    useEffect(() => {
-        if (expiresAtTimestamp === null) {
-            return;
-        }
-
-        const interval = window.setInterval(() => {
-            setCurrentTimestamp(Date.now());
-        }, 1000);
-
-        return () => window.clearInterval(interval);
-    }, [expiresAtTimestamp]);
 
     const toggleBookSelection = (bookId: number, checked: boolean) => {
         const currentBookIds = qrForm.data.book_ids;

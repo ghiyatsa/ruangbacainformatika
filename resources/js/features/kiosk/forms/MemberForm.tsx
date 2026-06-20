@@ -14,95 +14,19 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { KioskField } from '@/features/kiosk/components/KioskField';
 import { MemberRegistrationClaimDialog } from '@/features/kiosk/components/MemberRegistrationClaimDialog';
+import {
+    DEFAULT_EMAIL_DOMAIN,
+    INITIAL_FORM_DATA,
+    composeMemberEmail,
+    getMemberEmailError,
+    isInteractiveClaim,
+    splitMemberEmail,
+} from '@/features/kiosk/forms/member-email';
 import type { KioskMemberRegistrationClaim } from '@/features/kiosk/types';
 
 interface MemberFormProps {
     memberRegistrationClaim?: KioskMemberRegistrationClaim | null;
 }
-
-const isInteractiveClaim = (
-    claim: KioskMemberRegistrationClaim | null | undefined,
-): claim is KioskMemberRegistrationClaim =>
-    Boolean(claim && claim.status !== 'claimed' && claim.status !== 'linked');
-
-const ALLOWED_EMAIL_DOMAINS = ['mhs.unimal.ac.id', 'unimal.ac.id'] as const;
-
-const INITIAL_FORM_DATA = {
-    name: '',
-    email: '',
-    whatsapp: '',
-    address: '',
-};
-
-const DEFAULT_EMAIL_DOMAIN = '@mhs.unimal.ac.id';
-
-const normalizeEmailDomain = (domain: string): string =>
-    domain.trim().toLowerCase().replace(/^@+/, '');
-
-const composeMemberEmail = (localPart: string, domain: string): string => {
-    const normalizedLocalPart = localPart.trim().toLowerCase();
-    const normalizedDomain = normalizeEmailDomain(domain);
-
-    if (normalizedLocalPart === '' && normalizedDomain === '') {
-        return '';
-    }
-
-    return `${normalizedLocalPart}@${normalizedDomain}`;
-};
-
-const splitMemberEmail = (
-    email: string,
-): { localPart: string; domain: string } => {
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (normalizedEmail === '') {
-        return {
-            localPart: '',
-            domain: DEFAULT_EMAIL_DOMAIN,
-        };
-    }
-
-    const [localPart = '', domain = DEFAULT_EMAIL_DOMAIN] =
-        normalizedEmail.split('@');
-
-    return {
-        localPart,
-        domain: `@${normalizeEmailDomain(domain || DEFAULT_EMAIL_DOMAIN)}`,
-    };
-};
-
-const getMemberEmailError = (
-    localPart: string,
-    domain: string,
-): string | null => {
-    const normalizedEmail = composeMemberEmail(localPart, domain);
-
-    if (normalizedEmail === '') {
-        return 'Email wajib diisi.';
-    }
-
-    const emailSegments = normalizedEmail.split('@');
-
-    if (emailSegments.length !== 2) {
-        return 'Masukkan email dengan format yang valid.';
-    }
-
-    const [parsedLocalPart, parsedDomain] = emailSegments;
-
-    if (parsedLocalPart.trim() === '') {
-        return 'Masukkan email dengan format yang valid.';
-    }
-
-    if (
-        !ALLOWED_EMAIL_DOMAINS.includes(
-            parsedDomain as (typeof ALLOWED_EMAIL_DOMAINS)[number],
-        )
-    ) {
-        return 'Gunakan email UNIMAL dengan domain @mhs.unimal.ac.id atau @unimal.ac.id.';
-    }
-
-    return null;
-};
 
 export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
     const form = useForm(INITIAL_FORM_DATA);
@@ -157,7 +81,6 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
     const resetMemberForm = () => {
         form.reset();
         form.clearErrors();
-        form.setData(INITIAL_FORM_DATA);
         setEmailParts(splitMemberEmail(INITIAL_FORM_DATA.email));
     };
 
@@ -421,7 +344,7 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
                                 data-lpignore="true"
                                 data-1p-ignore="true"
                                 data-bwignore="true"
-                                placeholder="mhs.unimal.ac.id"
+                                placeholder={DEFAULT_EMAIL_DOMAIN}
                                 value={emailParts.domain}
                                 onChange={(event) =>
                                     updateEmail({

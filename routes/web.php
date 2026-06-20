@@ -12,6 +12,7 @@ use App\Http\Controllers\LoanRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpenGraphImageController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\ReturnDraftController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SimilarityController;
@@ -60,6 +61,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/loans/request/books', [LoanRequestController::class, 'storeBook'])->name('loans.request.books.store');
     Route::delete('/loans/request/books/{book}', [LoanRequestController::class, 'destroyBook'])->name('loans.request.books.destroy');
     Route::post('/loans/request/qr', [LoanRequestController::class, 'generateQr'])->name('loans.request.qr');
+
+    Route::post('/blog/{post:slug}/comments', [PostCommentController::class, 'store'])
+        ->middleware('throttle:blog-comments')
+        ->name('blog.comments.store');
+    Route::delete('/blog/comments/{comment}', [PostCommentController::class, 'destroy'])->name('blog.comments.destroy');
 });
 
 Route::middleware(['auth', 'profile.completed'])->group(function () {

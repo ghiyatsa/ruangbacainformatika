@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { formatCountdown } from '@/lib/format-countdown';
 import { logout } from '@/routes';
 
 interface VerificationProps {
@@ -20,16 +21,6 @@ interface VerificationProps {
     resendAvailableIn: number;
     approvalMode: 'automatic' | 'manual';
     approvalMessage: string;
-}
-
-function formatRemaining(seconds: number): string {
-    const safeSeconds = Math.max(0, seconds);
-    const minutes = Math.floor(safeSeconds / 60);
-    const remainingSeconds = safeSeconds % 60;
-
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds
-        .toString()
-        .padStart(2, '0')}`;
 }
 
 export function VerifyWhatsAppPage() {
@@ -134,7 +125,7 @@ export function VerifyWhatsAppPage() {
                                             <Clock3 className="size-4" />
                                         ) : null}
                                         {resendAvailableIn > 0
-                                            ? formatRemaining(
+                                            ? formatCountdown(
                                                   resendAvailableIn,
                                               )
                                             : hasWhatsapp &&

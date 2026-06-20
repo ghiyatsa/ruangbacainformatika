@@ -1,28 +1,16 @@
 import { Deferred } from '@inertiajs/react';
-import {
-    Bookmark,
-    BookMarked,
-    Calendar,
-    Eye,
-    Hash,
-    Tag,
-    User,
-} from 'lucide-react';
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
+import { BookMarked } from 'lucide-react';
 import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
-import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
+import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
 import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
-import { KtiReportCard } from '@/components/kti/KtiReportCard';
-import { KtiShareButton } from '@/components/kti/KtiShareButton';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import { KtiReportCard, KtiReportCardSkeleton } from '@/components/kti/KtiReportCard';
+import { KtiTextWorkHero } from '@/components/kti/KtiTextWorkHero';
+import { KtiTextWorkSidebar } from '@/components/kti/KtiTextWorkSidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import AcademicWorkCard from '@/features/academic-works/components/AcademicWorkCard';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
-import { cn } from '@/lib/utils';
 import skripsiRoute from '@/routes/skripsi';
 import thesisRoute from '@/routes/thesis';
 import type { AcademicWorkShowProps } from '@/features/academic-works/types';
@@ -86,247 +74,28 @@ export default function AcademicWorkDetailPage(
             keywords={seoKeywords}
             showBackground={false}
             deferSecondaryContent
-            contentClassName="pt-2 pb-10 sm:pt-3"
+            contentClassName="pt-6 pb-10 sm:pt-8"
             hero={
-                <div className="relative -mt-20 overflow-hidden border-b bg-background sm:-mt-28 md:-mt-24">
-
-                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:pt-30 sm:px-6 lg:px-8">
-                        <div className="hidden sm:flex sm:items-center border-y border-border/60 py-3 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-muted/5">
-                            <Breadcrumbs
-                                breadcrumbs={[
-                                    { title: 'Beranda', href: '/' },
-                                    {
-                                        title: label,
-                                        href: route.index.url(),
-                                    },
-                                    {
-                                        title: work?.studentId ?? (
-                                            <Skeleton className="h-4 w-24" />
-                                        ),
-                                        href: work
-                                            ? route.show.url(work.studentId)
-                                            : route.index.url(),
-                                    },
-                                ]}
-                            />
-                        </div>
-
-                        {work ? (
-                            <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
-                                <div className="flex flex-1 flex-col justify-center">
-                                    <h1 className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                                        {work.title}
-                                    </h1>
-
-                                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                                        <span className="flex items-center gap-1.5">
-                                            <User className="size-3.5" />
-                                            {work.authorName}
-                                        </span>
-                                        <span className="text-border">
-                                            &bull;
-                                        </span>
-                                        <span className="flex items-center gap-1.5">
-                                            <Hash className="size-3.5" />
-                                            NIM: {work.studentId}
-                                        </span>
-                                        {work.year ? (
-                                            <>
-                                                <span className="text-border">
-                                                    &bull;
-                                                </span>
-                                                <span className="flex items-center gap-1.5">
-                                                    <Calendar className="size-3.5" />
-                                                    {work.year}
-                                                </span>
-                                            </>
-                                        ) : null}
-                                        <span className="text-border">
-                                            &bull;
-                                        </span>
-                                        <span className="flex items-center gap-1.5">
-                                            <Eye className="size-3.5" />
-                                            {work.viewCount.toLocaleString('id-ID')}
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-5 flex flex-wrap items-center gap-3">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            className={cn(
-                                                'h-auto gap-2 rounded-full px-4 py-2 text-sm font-medium',
-                                                isBookmarkedByUser &&
-                                                    'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15',
-                                            )}
-                                            aria-label={
-                                                isBookmarkedByUser
-                                                    ? 'Hapus bookmark'
-                                                    : 'Simpan bookmark'
-                                            }
-                                            aria-pressed={isBookmarkedByUser}
-                                            onClick={() =>
-                                                bookmarkRecord &&
-                                                toggleBookmark(bookmarkRecord)
-                                            }
-                                        >
-                                            <Bookmark
-                                                className={
-                                                    isBookmarkedByUser
-                                                        ? 'fill-current'
-                                                        : ''
-                                                }
-                                            />
-                                            {isBookmarkedByUser
-                                                ? 'Tersimpan'
-                                                : 'Simpan'}
-                                        </Button>
-
-                                        <KtiShareButton
-                                            title={work.title}
-                                            subtitle={work.authorName}
-                                            kindLabel={label}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
-                                <div className="flex flex-1 flex-col justify-center">
-                                    <h1 className="mb-3 text-2xl leading-tight font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                                        <Skeleton className="h-7 w-full max-w-3xl sm:h-8 lg:h-9 animate-pulse" />
-                                        <Skeleton className="mt-2 h-7 w-4/5 max-w-2xl sm:h-8 lg:h-9 animate-pulse" />
-                                    </h1>
-
-                                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                                        <span className="flex items-center gap-1.5">
-                                            <User className="size-3.5 text-muted-foreground/50" />
-                                            <Skeleton className="h-4 w-32 animate-pulse" />
-                                        </span>
-                                        <span className="text-border">
-                                            &bull;
-                                        </span>
-                                        <span className="flex items-center gap-1.5">
-                                            <Hash className="size-3.5 text-muted-foreground/50" />
-                                            <Skeleton className="h-4 w-24 animate-pulse" />
-                                        </span>
-                                        <span className="text-border">
-                                            &bull;
-                                        </span>
-                                        <span className="flex items-center gap-1.5">
-                                            <Calendar className="size-3.5 text-muted-foreground/50" />
-                                            <Skeleton className="h-4 w-12 animate-pulse" />
-                                        </span>
-                                        <span className="text-border">
-                                            &bull;
-                                        </span>
-                                        <span className="flex items-center gap-1.5">
-                                            <Eye className="size-3.5 text-muted-foreground/50" />
-                                            <Skeleton className="h-4 w-10 animate-pulse" />
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-5 flex flex-wrap items-center gap-3">
-                                        <Skeleton className="h-10 w-28 rounded-full animate-pulse" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <KtiTextWorkHero
+                    record={work}
+                    label={label}
+                    kindLabel={label}
+                    indexUrl={route.index.url()}
+                    detailUrl={
+                        work
+                            ? route.show.url(work.studentId)
+                            : null
+                    }
+                    isBookmarkedByUser={isBookmarkedByUser}
+                    bookmarkRecord={bookmarkRecord}
+                    onToggleBookmark={toggleBookmark}
+                />
             }
             sidebar={
-                <div className="space-y-4">
-                    <div className="rounded-2xl border border-border/60 bg-card">
-                        <div className="p-5">
-                            <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                Informasi {label}
-                            </h2>
-                        </div>
-                        <Separator />
-                        <div className="p-2">
-                            {work ? (
-                                <>
-                                    <KtiDetailItem
-                                        icon={<User className="size-4" />}
-                                        label="Penulis"
-                                        value={work.authorName}
-                                    />
-                                    <KtiDetailItem
-                                        icon={<Hash className="size-4" />}
-                                        label="NIM"
-                                        value={work.studentId}
-                                    />
-                                    {work.year ? (
-                                        <KtiDetailItem
-                                            icon={<Calendar className="size-4" />}
-                                            label="Tahun"
-                                            value={String(work.year)}
-                                        />
-                                    ) : null}
-                                </>
-                            ) : (
-                                <>
-                                    <KtiDetailItem
-                                        icon={<User className="size-4" />}
-                                        label="Penulis"
-                                        value={<Skeleton className="h-5 w-32 animate-pulse" />}
-                                    />
-                                    <KtiDetailItem
-                                        icon={<Hash className="size-4" />}
-                                        label="NIM"
-                                        value={<Skeleton className="h-5 w-24 animate-pulse" />}
-                                    />
-                                    <KtiDetailItem
-                                        icon={<Calendar className="size-4" />}
-                                        label="Tahun"
-                                        value={<Skeleton className="h-5 w-16 animate-pulse" />}
-                                    />
-                                </>
-                            )}
-                        </div>
-                    </div>
-
-                    {work ? (
-                        work.keywords.length > 0 ? (
-                            <div className="rounded-2xl border border-border/60 bg-card">
-                                <div className="p-5">
-                                    <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                        Kata Kunci
-                                    </h2>
-                                </div>
-                                <Separator />
-                                <div className="flex flex-wrap gap-2 p-4">
-                                    {work.keywords.map((keyword) => (
-                                        <Badge
-                                            key={keyword}
-                                            variant="secondary"
-                                            className="gap-1 bg-muted/80"
-                                        >
-                                            <Tag className="size-2.5" />
-                                            {keyword}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : null
-                    ) : (
-                        <div className="rounded-2xl border border-border/60 bg-card">
-                            <div className="p-5">
-                                <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                    Kata Kunci
-                                </h2>
-                            </div>
-                            <Separator />
-                            <div className="flex flex-wrap gap-2 p-4">
-                                <Skeleton className="h-6 w-16 rounded-full animate-pulse" />
-                                <Skeleton className="h-6 w-20 rounded-full animate-pulse" />
-                                <Skeleton className="h-6 w-14 rounded-full animate-pulse" />
-                                <Skeleton className="h-6 w-18 rounded-full animate-pulse" />
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <KtiTextWorkSidebar
+                    record={work}
+                    label={label}
+                />
             }
             secondarySidebar={
                 work ? (
@@ -337,28 +106,18 @@ export default function AcademicWorkDetailPage(
                         catalogTitle={work.title}
                     />
                 ) : (
-                    <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-4 animate-pulse">
-                        <div className="flex gap-3">
-                            <div className="size-10 rounded-xl bg-muted" />
-                            <div className="flex-1 space-y-2 py-1">
-                                <div className="h-3 w-24 rounded bg-muted" />
-                                <div className="h-3 w-full rounded bg-muted" />
-                            </div>
-                        </div>
-                        <div className="h-10 w-full rounded-xl bg-muted" />
-                    </div>
+                    <KtiReportCardSkeleton />
                 )
             }
             footer={
                 (props.relatedWorks === undefined || props.relatedWorks.length > 0) && (
                     <KtiRelatedSection
                         title={`${label} Terkait`}
-                        description={`Daftar ${workType === 'skripsi' ? 'skripsi' : 'tesis'} lainnya dengan topik atau bidang penelitian serupa.`}
                     >
                         <Deferred
                             data={deferredDataKey}
                             fallback={
-                                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                     <KtiCardSkeleton />
                                     <KtiCardSkeleton />
                                     <KtiCardSkeleton />
@@ -373,7 +132,7 @@ export default function AcademicWorkDetailPage(
                                 />
                             )}
                         >
-                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                 {props.relatedWorks?.map((relatedWork) => (
                                     <AcademicWorkCard
                                         key={relatedWork.id}
@@ -402,12 +161,10 @@ export default function AcademicWorkDetailPage(
                             ))}
                     </div>
                 ) : work ? (
-                    <div className="rounded-2xl border border-dashed bg-muted/30 p-10 text-center">
-                        <BookMarked className="mx-auto mb-3 size-10 text-muted-foreground/40" />
-                        <p className="text-sm text-muted-foreground">
-                            Abstrak belum tersedia untuk {workType === 'skripsi' ? 'skripsi' : 'tesis'} ini.
-                        </p>
-                    </div>
+                    <KtiEmptyState
+                        icon={BookMarked}
+                        title={`Abstrak belum tersedia untuk ${workType === 'skripsi' ? 'skripsi' : 'tesis'} ini.`}
+                    />
                 ) : (
                     <div className="space-y-6">
                         <div className="space-y-3">

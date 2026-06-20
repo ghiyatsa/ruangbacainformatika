@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { ArrowUpRight, CalendarDays, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import blog from '@/routes/blog';
 import type { BlogPostItem } from '@/features/blog/types';
 
@@ -41,6 +42,9 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
         return (
             <Link
                 href={blog.show.url(post.slug)}
+                instant
+                component="blog/show"
+                pageProps={instantLoadingPageProps()}
                 className="group flex gap-3 overflow-hidden rounded-xl border border-border/60 bg-card p-3 transition-all duration-200 hover:border-primary/30"
             >
                 <div className="aspect-square size-16 shrink-0 overflow-hidden rounded-lg bg-muted">
@@ -74,6 +78,9 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
     return (
         <Link
             href={blog.show.url(post.slug)}
+            instant
+            component="blog/show"
+            pageProps={instantLoadingPageProps()}
             className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/30"
         >
             {/* Cover */}

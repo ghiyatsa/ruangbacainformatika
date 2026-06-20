@@ -12,6 +12,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { useCountdown } from '@/hooks/use-countdown';
+import { getCsrfToken } from '@/lib/csrf';
+import { formatCountdown } from '@/lib/format-countdown';
 import type { KioskMemberRegistrationClaim } from '@/features/kiosk/types';
 
 interface MemberRegistrationClaimDialogProps {
@@ -26,41 +29,6 @@ interface MemberRegistrationClaimDialogProps {
 const CLAIM_TIMEOUT_SECONDS = 3 * 60;
 const QR_SURFACE_COLOR = 'var(--card)';
 const QR_MODULE_COLOR = 'var(--foreground)';
-
-function getSecondsRemaining(
-    expiresAt: string | null | undefined,
-    currentTimestamp = Date.now(),
-): number {
-    if (!expiresAt) {
-        return 0;
-    }
-
-    const expiresAtMs = new Date(expiresAt).getTime();
-
-    if (Number.isNaN(expiresAtMs)) {
-        return 0;
-    }
-
-    return Math.max(0, Math.ceil((expiresAtMs - currentTimestamp) / 1000));
-}
-
-function formatRemaining(seconds: number): string {
-    const safeSeconds = Math.max(0, seconds);
-    const minutes = Math.floor(safeSeconds / 60);
-    const remainingSeconds = safeSeconds % 60;
-
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds
-        .toString()
-        .padStart(2, '0')}`;
-}
-
-function getCsrfToken(): string | null {
-    return (
-        document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content') ?? null
-    );
-}
 
 function applyQrThemeColors(
     svg: string,
@@ -83,7 +51,6 @@ export function MemberRegistrationClaimDialog({
 }: MemberRegistrationClaimDialogProps) {
     const [activeRegistration, setActiveRegistration] =
         useState<KioskMemberRegistrationClaim>(initialRegistration);
-    const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
 
     const pollingIntervalRef = useRef<number | null>(null);
     const completionTimeoutRef = useRef<number | null>(null);
@@ -96,10 +63,12 @@ export function MemberRegistrationClaimDialog({
     const isClaimed = activeRegistration.status === 'claimed';
     const isExpired = activeRegistration.status === 'expired';
     const isKioskCompleted = isLinkedClaim || isClaimed;
-    const isConnectionCompleted = isLinkedClaim || isClaimed;
-    const secondsRemaining = isPendingClaim
-        ? getSecondsRemaining(activeRegistration.expiresAt, currentTimestamp)
-        : 0;
+    const isConnectionCompleted = isKioskCompleted;
+    // Only run the countdown while the claim is actually pending.
+    const { remainingSeconds } = useCountdown(
+        isPendingClaim ? activeRegistration.expiresAt : null,
+    );
+    const secondsRemaining = remainingSeconds ?? 0;
 
     const countdownProgress = useMemo(() => {
         return Math.max(
@@ -196,7 +165,6 @@ export function MemberRegistrationClaimDialog({
     useEffect(() => {
         window.setTimeout(() => {
             setActiveRegistration(initialRegistration);
-            setCurrentTimestamp(Date.now());
         }, 0);
     }, [initialRegistration]);
 
@@ -276,19 +244,6 @@ export function MemberRegistrationClaimDialog({
             isPollingRef.current = false;
         };
     }, [isOpen, isPendingClaim]);
-
-    // Countdown tick effect
-    useEffect(() => {
-        if (!isOpen || !isPendingClaim) {
-            return;
-        }
-
-        const interval = window.setInterval(() => {
-            setCurrentTimestamp(Date.now());
-        }, 1000);
-
-        return () => window.clearInterval(interval);
-    }, [activeRegistration.expiresAt, isOpen, isPendingClaim]);
 
     // Finalize registration upon completion (linked or claimed)
     useEffect(() => {
@@ -457,7 +412,7 @@ export function MemberRegistrationClaimDialog({
                                     <div
                                         className={`text-4xl font-semibold tracking-[0.18em] tabular-nums sm:text-5xl ${timerColorClass}`}
                                     >
-                                        {formatRemaining(secondsRemaining)}
+                                        {formatCountdown(secondsRemaining)}
                                     </div>
                                     <div
                                         className={`h-2 overflow-hidden rounded-full ${progressBgColorClass}`}

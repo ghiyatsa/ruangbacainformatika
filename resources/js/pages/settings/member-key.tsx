@@ -1,8 +1,10 @@
 import { Head, useForm } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import MemberKeyController from '@/actions/App/Http/Controllers/Settings/MemberKeyController';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCountdown } from '@/hooks/use-countdown';
+import { formatCountdown } from '@/lib/format-countdown';
 import settings from '@/routes/settings';
 
 interface Props {
@@ -14,48 +16,13 @@ interface Props {
     };
 }
 
-function formatCountdown(totalSeconds: number): string {
-    if (totalSeconds <= 0) {
-        return '00:00';
-    }
-
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-
-    return [minutes, seconds]
-        .map((value) => String(value).padStart(2, '0'))
-        .join(':');
-}
-
 export default function MemberKeyPage({ memberKey }: Props) {
     const form = useForm({
         automatic: true,
     });
-    const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
     const autoRegenerateTriggered = useRef(false);
-    const expiresAtTimestamp = memberKey.expiresAtIso
-        ? new Date(memberKey.expiresAtIso).getTime()
-        : null;
-    const remainingSeconds =
-        expiresAtTimestamp === null
-            ? null
-            : Math.max(
-                  Math.ceil((expiresAtTimestamp - currentTimestamp) / 1000),
-                  0,
-              );
+    const { remainingSeconds } = useCountdown(memberKey.expiresAtIso);
     const countdownLabel = formatCountdown(remainingSeconds ?? 0);
-
-    useEffect(() => {
-        if (expiresAtTimestamp === null) {
-            return;
-        }
-
-        const interval = window.setInterval(() => {
-            setCurrentTimestamp(Date.now());
-        }, 1000);
-
-        return () => window.clearInterval(interval);
-    }, [expiresAtTimestamp]);
 
     useEffect(() => {
         if (remainingSeconds === null || remainingSeconds > 0) {

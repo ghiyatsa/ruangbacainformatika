@@ -173,3 +173,22 @@ export function KtiReportCard({
         </div>
     );
 }
+
+export function KtiReportCardSkeleton() {
+    return (
+        <div className="rounded-2xl border border-[oklch(0.90_0.03_281)] bg-[oklch(0.97_0.015_281)] dark:border-[oklch(0.22_0.04_281)] dark:bg-[oklch(0.16_0.02_281)]">
+            <div className="flex items-start gap-3 p-5 animate-pulse">
+                <div className="size-10 rounded-xl bg-muted shrink-0" />
+                <div className="flex-1 space-y-2 py-1">
+                    <div className="h-3.5 w-32 rounded bg-muted" />
+                    <div className="h-3 w-full rounded bg-muted" />
+                    <div className="h-3 w-4/5 rounded bg-muted" />
+                </div>
+            </div>
+
+            <div className="px-5 pb-5 animate-pulse">
+                <div className="h-10 w-full rounded-xl bg-muted" />
+            </div>
+        </div>
+    );
+}

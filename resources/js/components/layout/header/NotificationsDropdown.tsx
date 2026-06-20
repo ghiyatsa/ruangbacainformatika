@@ -24,6 +24,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getCsrfToken } from '@/lib/csrf';
 import { cn } from '@/lib/utils';
 import type { SiteNotification } from '@/types';
 
@@ -35,14 +36,6 @@ type NotificationsResponse = {
     notifications: SiteNotification[];
     unreadCount: number;
 };
-
-function getCsrfToken(): string | null {
-    return (
-        document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content') ?? null
-    );
-}
 
 function formatNotificationTime(value: string): string {
     const date = new Date(value);

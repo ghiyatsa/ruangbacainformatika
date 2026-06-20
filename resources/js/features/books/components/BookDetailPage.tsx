@@ -21,8 +21,9 @@ import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestCon
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
+import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
 import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
-import { KtiReportCard } from '@/components/kti/KtiReportCard';
+import { KtiReportCard, KtiReportCardSkeleton } from '@/components/kti/KtiReportCard';
 import { KtiShareButton } from '@/components/kti/KtiShareButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -72,24 +73,7 @@ function BookDescriptionSkeleton() {
     );
 }
 
-function BookFeedbackCardSkeleton() {
-    return (
-        <div className="rounded-2xl border border-border/60 bg-card">
-            <div className="flex items-start gap-3 p-5">
-                <Skeleton className="size-10 rounded-xl" />
-                <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                </div>
-            </div>
 
-            <div className="px-5 pb-5">
-                <Skeleton className="h-10 w-full rounded-xl" />
-            </div>
-        </div>
-    );
-}
 
 export default function BookDetailPage(props: BookDetailPageProps) {
     const { auth, loanRequestCart } = usePage<{
@@ -226,7 +210,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             keywords={seoKeywords}
             showBackground={false}
             deferSecondaryContent
-            contentClassName="pt-2 pb-10 sm:pt-3"
+            contentClassName="pt-6 pb-10 sm:pt-8"
             hero={
                 <div className="relative -mt-20 overflow-hidden sm:-mt-28 md:-mt-24">
 
@@ -692,7 +676,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                         catalogTitle={book.title}
                     />
                 ) : (
-                    <BookFeedbackCardSkeleton />
+                    <KtiReportCardSkeleton />
                 )
             }
             footer={
@@ -700,7 +684,6 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                     props.relatedBooks.length > 0) && (
                     <KtiRelatedSection
                         title="Buku Terkait"
-                        description="Rekomendasi buku lainnya dengan kategori atau topik serupa."
                     >
                         <Deferred
                             data="relatedBooks"
@@ -750,12 +733,10 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                             ))}
                     </div>
                 ) : book ? (
-                    <div className="rounded-2xl border border-dashed bg-muted/30 p-10 text-center">
-                        <BookOpen className="mx-auto mb-3 size-10 text-muted-foreground/40" />
-                        <p className="text-sm text-muted-foreground">
-                            Sinopsis belum tersedia untuk buku ini.
-                        </p>
-                    </div>
+                    <KtiEmptyState
+                        icon={BookOpen}
+                        title="Sinopsis belum tersedia untuk buku ini."
+                    />
                 ) : (
                     <BookDescriptionSkeleton />
                 )}

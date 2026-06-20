@@ -3,15 +3,8 @@ import { useEffect, useRef } from 'react';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
 import { PinStep } from '@/features/kiosk/components/PinStep';
 import { ReadyStep } from '@/features/kiosk/components/ReadyStep';
+import { getCsrfToken } from '@/lib/csrf';
 import type { KioskProps, KioskSessionConfig } from '@/features/kiosk/types';
-
-function getCsrfToken(): string | null {
-    return (
-        document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content') ?? null
-    );
-}
 
 function shouldLockForOperatingHours(config: KioskSessionConfig): boolean {
     if (config.persistentForDevelopment) {

@@ -56,9 +56,9 @@ export function BlogIndexPage({
             showDesktopNoticeInContent={false}
             header={
                 <div className="relative -mt-20 overflow-hidden bg-background sm:-mt-28 md:-mt-24">
-                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 sm:pt-30 lg:px-8">
+                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
                         {/* Breadcrumbs */}
-                        <div className="-mx-4 mb-6 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
+                        <div className="-mx-4 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -68,13 +68,6 @@ export function BlogIndexPage({
                                     },
                                 ]}
                             />
-                        </div>
-
-                        {/* Title Section */}
-                        <div className="pt-4 pb-2 sm:pt-0">
-                            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                                Artikel
-                            </h1>
                         </div>
                     </div>
                 </div>

@@ -59,7 +59,7 @@ export function KtiDetailPage({
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="grid gap-8 md:grid-cols-12 md:gap-10">
                             <aside
-                                className="order-3 md:order-1 md:col-span-4 lg:col-span-3"
+                                className="order-2 md:order-1 md:col-span-4 lg:col-span-3"
                                 style={deferredSectionStyle}
                             >
                                 <div
@@ -86,7 +86,7 @@ export function KtiDetailPage({
 
                             {hasSecondarySidebar ? (
                                 <aside
-                                    className="order-2 md:order-3 md:col-span-12 lg:col-span-3"
+                                    className="order-3 md:order-3 md:col-span-12 lg:col-span-3"
                                     style={deferredSectionStyle}
                                 >
                                     <div className="xl:sticky xl:top-24">

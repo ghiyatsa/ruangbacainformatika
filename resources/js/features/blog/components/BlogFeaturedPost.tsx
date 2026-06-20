@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, Clock3, Eye } from 'lucide-react';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import blog from '@/routes/blog';
 import type { BlogPostItem } from '@/features/blog/types';
 
@@ -11,6 +12,9 @@ export function BlogFeaturedPost({ post }: BlogFeaturedPostProps) {
     return (
         <Link
             href={blog.show.url(post.slug)}
+            instant
+            component="blog/show"
+            pageProps={instantLoadingPageProps()}
             className="group relative block overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/40"
         >
             {/* Cover image */}

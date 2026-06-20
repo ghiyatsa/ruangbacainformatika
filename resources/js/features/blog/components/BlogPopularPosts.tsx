@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import blog from '@/routes/blog';
 import type { BlogPostItem } from '@/features/blog/types';
 
@@ -24,6 +25,9 @@ export function BlogPopularPosts({ posts }: BlogPopularPostsProps) {
             <div className="relative">
                 <Link
                     href={blog.show.url(posts[0].slug)}
+                    instant
+                    component="blog/show"
+                    pageProps={instantLoadingPageProps()}
                     className="group block"
                 >
                     <div className="aspect-video overflow-hidden bg-muted">
@@ -59,6 +63,9 @@ export function BlogPopularPosts({ posts }: BlogPopularPostsProps) {
                     <Link
                         key={post.id}
                         href={blog.show.url(post.slug)}
+                        instant
+                        component="blog/show"
+                        pageProps={instantLoadingPageProps()}
                         className="group flex gap-3 p-4 transition-colors hover:bg-muted/50"
                     >
                         {/* Rank number */}

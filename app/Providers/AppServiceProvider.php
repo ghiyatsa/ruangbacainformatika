@@ -19,6 +19,7 @@ use App\Services\ActivityLogService;
 use App\Services\KioskPinManager;
 use App\Services\SimilarityApiService;
 use App\Support\AppTimezone;
+use App\Support\RichContentSanitizer;
 use App\Support\SiteSettings;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Imports\Events\ImportCompleted;
@@ -48,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(ActivityLogService::class);
         $this->app->scoped(SimilarityApiService::class);
         $this->app->scoped(SiteSettings::class);
+        $this->app->scoped(RichContentSanitizer::class);
     }
 
     /**
@@ -64,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureTurnstile();
         $this->configureWhatsAppRateLimiter();
         $this->configureContactRateLimiter();
+        $this->configureBlogRateLimiters();
         $this->configureKioskRateLimiters();
         $this->composeRootView();
 
@@ -101,6 +104,19 @@ class AppServiceProvider extends ServiceProvider
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'message' => 'Terlalu banyak percobaan mengirim pesan. Coba lagi sebentar.',
+                    ], 429, $headers);
+                });
+        });
+    }
+
+    protected function configureBlogRateLimiters(): void
+    {
+        RateLimiter::for('blog-comments', function (Request $request): Limit {
+            return Limit::perMinute(5)
+                ->by((string) ($request->user()?->id ?? $request->ip()))
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'message' => 'Terlalu banyak percobaan mengirim komentar. Coba lagi sebentar.',
                     ], 429, $headers);
                 });
         });
