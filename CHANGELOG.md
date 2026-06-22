@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.7.0...v1.8.0) (2026-06-22)
+
+
+### Features
+
+* **ui:** implement global search and UI optimizations ([#14](https://github.com/ghiyatsa/ruangbacainformatika/issues/14)) ([b14153e](https://github.com/ghiyatsa/ruangbacainformatika/commit/b14153e8816060d331ddb898f0e8b904781ceb07))
+
 ## [1.7.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.6.0...v1.7.0) (2026-06-20)
 
 
