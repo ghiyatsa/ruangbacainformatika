@@ -13,7 +13,7 @@ export function AppLogo({ compact = false }: { compact?: boolean }) {
                 </span>
                 <span
                     className={cn(
-                        'text-[10px] font-medium text-muted-foreground',
+                        'text-[10px] font-medium text-foreground/75',
                         compact ? 'hidden xl:block' : 'hidden sm:block',
                     )}
                 >

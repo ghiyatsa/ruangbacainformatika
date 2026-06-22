@@ -59,6 +59,14 @@ interface PageLayoutProps {
      * @default true
      */
     showDesktopNoticeInContent?: boolean;
+    /**
+     * Optional custom image for OG meta tags
+     */
+    image?: string;
+    /**
+     * Optional custom content type for OG meta tags
+     */
+    type?: 'website' | 'article';
 }
 
 const maxWidthMap = {
@@ -89,12 +97,16 @@ export function PageLayout({
     header,
     showHero = true,
     showDesktopNoticeInContent = true,
+    image,
+    type,
 }: Omit<PageLayoutProps, 'showBackground'>) {
     return (
         <div className="relative flex min-h-[calc(100vh-(--spacing(20)))] flex-col sm:min-h-[calc(100vh-(--spacing(28)))]">
             <SeoHead
                 title={title}
                 description={metaDescription ?? description}
+                image={image}
+                type={type}
             />
 
             <div className="relative z-10 flex flex-1 flex-col">

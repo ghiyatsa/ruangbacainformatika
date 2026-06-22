@@ -32,8 +32,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     ];
 
     return (
-        <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-6xl space-y-6">
+        <div className="min-h-screen py-8">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
                 <h1 className="text-2xl font-semibold tracking-tight">
                     Pengaturan
                 </h1>
@@ -55,7 +55,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                             'group flex items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors',
                                             isActive
                                                 ? 'border-primary/30 bg-primary/5 text-foreground'
-                                                : 'border-border/70 bg-card text-muted-foreground hover:bg-accent/60 hover:text-foreground',
+                                                : 'border-border/60 bg-card text-muted-foreground hover:bg-accent/60 hover:text-foreground',
                                         )}
                                     >
                                         {item.icon ? (

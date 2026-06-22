@@ -718,6 +718,38 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                 )
             }
         >
+                        {(() => {
+                const jsonLd = book ? {
+                    '@context': 'https://schema.org',
+                    '@type': 'Book',
+                    'name': book.title,
+                    'image': book.coverImageUrl || undefined,
+                    'description': book.description || undefined,
+                    'isbn': book.isbn || undefined,
+                    'numberOfPages': book.pages || undefined,
+                    'datePublished': book.publishedYear ? `${book.publishedYear}-01-01` : undefined,
+                    'inLanguage': book.language || 'id',
+                    'author': book.authors.map((authorName) => ({
+                        '@type': 'Person',
+                        'name': authorName
+                    })),
+                    'publisher': book.publisher ? {
+                        '@type': 'Organization',
+                        'name': book.publisher
+                    } : undefined
+                } : null;
+
+                if (!jsonLd) {
+return null;
+}
+
+                return (
+                    <script type="application/ld+json">
+                        {JSON.stringify(jsonLd)}
+                    </script>
+                );
+            })()}
+
             <section>
                 <div className="mb-5 flex items-center gap-3">
                     <h2 className="text-xl font-bold">Deskripsi</h2>

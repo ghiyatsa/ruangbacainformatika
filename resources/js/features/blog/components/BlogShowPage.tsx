@@ -102,6 +102,8 @@ export function BlogShowPage({
                 article?.excerpt ??
                 'Memuat detail artikel dari Ruang Baca Informatika.'
             }
+            image={article?.coverImageUrl || undefined}
+            type="article"
             maxWidth="7xl"
             className="pt-6 pb-16 sm:pt-8"
             showDesktopNoticeInContent={false}
@@ -338,6 +340,40 @@ export function BlogShowPage({
                 </div>
             }
         >
+            {(() => {
+                const jsonLd = article ? {
+                    '@context': 'https://schema.org',
+                    '@type': 'BlogPosting',
+                    'headline': article.title,
+                    'image': article.coverImageUrl || undefined,
+                    'datePublished': article.publishedAt || undefined,
+                    'dateModified': article.updatedAt || undefined,
+                    'author': article.author ? {
+                        '@type': 'Person',
+                        'name': article.author.name
+                    } : undefined,
+                    'description': article.summary || article.excerpt || undefined,
+                    'publisher': {
+                        '@type': 'Organization',
+                        'name': page.props.name || 'Ruang Baca Teknik Informatika UNIMAL',
+                        'logo': page.props.site?.logo ? {
+                            '@type': 'ImageObject',
+                            'url': page.props.site.logo
+                        } : undefined
+                    }
+                } : null;
+
+                if (!jsonLd) {
+return null;
+}
+
+                return (
+                    <script type="application/ld+json">
+                        {JSON.stringify(jsonLd)}
+                    </script>
+                );
+            })()}
+
             {/* Two-column: article body + sidebar */}
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
                 {/* ─── LEFT: Article content ─── */}

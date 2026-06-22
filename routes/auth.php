@@ -11,6 +11,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', fn () => redirect()->route('auth.google'))->name('register');
 
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::post('auth/google/popup-session', [GoogleController::class, 'setPopupSession'])->name('auth.google.set-popup');
     Route::post('auth/google/one-tap', [GoogleController::class, 'handleOneTap'])->name('auth.google.one-tap');
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 });

@@ -25,7 +25,7 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
     const hasVerifiedWhatsapp = Boolean(user.whatsapp_verified_at);
 
     return (
-        <section className="rounded-xl border border-border/70 bg-card p-6 shadow-xs">
+        <section className="space-y-6">
             <SettingsSectionHeader title="Detail profil" />
 
             <Form

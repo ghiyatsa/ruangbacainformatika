@@ -22,7 +22,7 @@ export function ProfileSummary({
 
     return (
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <Avatar className="h-18 w-18 rounded-2xl shadow-md shadow-primary/15">
+            <Avatar className="h-18 w-18 rounded-2xl shadow-none">
                 <AvatarImage
                     src={avatar ?? undefined}
                     alt={name}

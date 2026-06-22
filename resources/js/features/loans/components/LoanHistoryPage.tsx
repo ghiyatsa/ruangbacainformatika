@@ -1,16 +1,10 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import { BookOpen, ChevronDown, Search, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import ReturnDraftController from '@/actions/App/Http/Controllers/ReturnDraftController';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import {
     Collapsible,
     CollapsibleContent,
@@ -199,7 +193,7 @@ export default function LoanHistoryPage({
         </>
     );
 
-    // Collapsible "returned" section — deduplicated open expression.
+    // Collapsible "returned" section ? deduplicated open expression.
 
     const returnedSectionOpen =
         filters.filter === 'returned' || showReturnedLoans;
@@ -207,34 +201,48 @@ export default function LoanHistoryPage({
     // ------------------------------------------------------------------------
 
     return (
-        <>
-            <Head title="Riwayat Peminjaman" />
-
-            <div className="container mx-auto max-w-6xl px-4 py-8 pb-16 sm:px-6 lg:px-8">
-                <div className="mb-8">
-                    <h1 className="text-2xl font-bold tracking-tight">
-                        Riwayat Peminjaman
-                    </h1>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                        Riwayat pinjam ditampilkan per buku agar tetap ringkas
-                        saat data bertambah.
-                    </p>
+        <PageLayout
+            title="Riwayat Peminjaman"
+            metaDescription="Riwayat pinjam ditampilkan per buku agar tetap ringkas."
+            maxWidth="7xl"
+            className="pt-0 pb-16"
+            showDesktopNoticeInContent={false}
+            header={
+                <div className="relative -mt-20 overflow-hidden bg-background sm:-mt-28 md:-mt-24">
+                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                                    Riwayat Peminjaman
+                                </h1>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    Riwayat pinjam ditampilkan per buku agar tetap ringkas saat data bertambah.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
+            }
+        >
+            <div className="relative z-10">
                 {loans.data.length > 0 ? (
-                    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)]">
+                    <div className="grid gap-8 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)]">
+                        {/* Left Column: Stats & Lists */}
                         <div className="space-y-6">
                             <LoanHistoryStatsBar stats={stats} />
 
-                            <Card className="border-border/60">
-                                <CardHeader className="gap-1.5">
-                                    <CardTitle>Daftar Peminjaman</CardTitle>
-                                    <CardDescription>
+                            <div className="space-y-6">
+                                <div className="border-b pb-3">
+                                    <h2 className="text-xl font-bold tracking-tight text-foreground">
+                                        Daftar Peminjaman
+                                    </h2>
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         Yang aktif tampil lebih dulu.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/10 p-4">
+                                    </p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-3 border border-border/60 bg-muted/5 p-4">
                                         <div className="flex flex-wrap gap-2">
                                             {FILTER_OPTIONS.map((filter) => (
                                                 <Button
@@ -312,7 +320,7 @@ export default function LoanHistoryPage({
                                     </div>
 
                                     {loans.total === 0 ? (
-                                        <div className="rounded-2xl border border-dashed border-border/70 bg-muted/10 px-5 py-10 text-center">
+                                        <div className="border border-dashed border-border/60 bg-muted/5 px-5 py-10 text-center">
                                             <p className="text-sm font-medium text-foreground">
                                                 Tidak ada hasil
                                             </p>
@@ -324,7 +332,7 @@ export default function LoanHistoryPage({
 
                                     {groupedLoans.overdue.length > 0 ? (
                                         <section className="space-y-3">
-                                            <div className="flex flex-col gap-2 rounded-2xl border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                            <div className="flex flex-col gap-2 border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
                                                 <div className="space-y-1">
                                                     <h3 className="text-sm font-semibold text-foreground">
                                                         Terlambat
@@ -351,14 +359,13 @@ export default function LoanHistoryPage({
 
                                     {groupedLoans.active.length > 0 ? (
                                         <section className="space-y-3">
-                                            <div className="flex flex-col gap-2 rounded-2xl border border-blue-200/60 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/20">
+                                            <div className="flex flex-col gap-2 border border-blue-200/60 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/20">
                                                 <div className="space-y-1">
                                                     <h3 className="text-sm font-semibold text-foreground">
                                                         Masih dipinjam
                                                     </h3>
                                                     <p className="text-sm text-muted-foreground">
-                                                        Pilih buku untuk QR
-                                                        pengembalian.
+                                                        Pilih buku untuk QR pengembalian.
                                                     </p>
                                                 </div>
                                                 <Badge
@@ -380,7 +387,7 @@ export default function LoanHistoryPage({
                                         <Collapsible
                                             open={returnedSectionOpen}
                                             onOpenChange={setShowReturnedLoans}
-                                            className="rounded-2xl border border-border/60"
+                                            className="border border-border/60"
                                         >
                                             <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                                                 <div className="space-y-1">
@@ -388,8 +395,7 @@ export default function LoanHistoryPage({
                                                         Selesai
                                                     </h3>
                                                     <p className="text-sm text-muted-foreground">
-                                                        Riwayat yang sudah
-                                                        selesai.
+                                                        Riwayat yang sudah selesai.
                                                     </p>
                                                 </div>
 
@@ -434,8 +440,8 @@ export default function LoanHistoryPage({
                                             </CollapsibleContent>
                                         </Collapsible>
                                     ) : null}
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
 
                             <div className="pt-2">
                                 <CatalogPagination
@@ -445,6 +451,7 @@ export default function LoanHistoryPage({
                             </div>
                         </div>
 
+                        {/* Right Column: Return Draft Panel */}
                         <ReturnDraftPanel
                             returnDraft={returnDraft}
                             activeLoanCount={stats.active}
@@ -457,13 +464,13 @@ export default function LoanHistoryPage({
                         />
                     </div>
                 ) : (
-                    <Card className="flex h-72 flex-col items-center justify-center border-dashed text-center">
-                        <CardTitle className="text-lg">
+                    <div className="flex h-72 flex-col items-center justify-center border border-dashed border-border/60 bg-muted/5 text-center p-6">
+                        <h2 className="text-lg font-bold">
                             Belum ada riwayat
-                        </CardTitle>
-                        <CardDescription className="mt-2 max-w-xs">
+                        </h2>
+                        <p className="mt-2 text-sm text-muted-foreground max-w-xs">
                             Anda belum pernah meminjam buku.
-                        </CardDescription>
+                        </p>
                         <Button
                             asChild
                             variant="outline"
@@ -474,9 +481,9 @@ export default function LoanHistoryPage({
                                 Buka Katalog
                             </Link>
                         </Button>
-                    </Card>
+                    </div>
                 )}
             </div>
-        </>
+        </PageLayout>
     );
 }

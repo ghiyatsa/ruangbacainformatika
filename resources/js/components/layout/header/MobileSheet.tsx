@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { ChevronDown, Menu, ShoppingCart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +13,7 @@ import {
     SheetHeader,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { openGoogleLoginPopup } from '@/lib/auth';
 import { google } from '@/routes/auth';
 import loans from '@/routes/loans';
 import { AppLogo } from './AppLogo';
@@ -191,10 +192,26 @@ export function MobileSheet({
 
                 {!auth.user ? (
                     <div className="flex flex-col gap-2 border-t border-border/60 p-4">
-                        <Button asChild className="h-11 w-full rounded-xl">
-                            <SheetClose asChild>
-                                <a href={google.url()}>Masuk</a>
-                            </SheetClose>
+                        <Button
+                            className="h-11 w-full rounded-xl"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                openGoogleLoginPopup(google.url())
+                                    .then((url) => {
+                                        setMobileOpen(false);
+
+                                        if (url) {
+                                            router.visit(url);
+                                        } else {
+                                            router.reload();
+                                        }
+                                    })
+                                    .catch((err) => {
+                                        console.error(err);
+                                    });
+                            }}
+                        >
+                            Masuk
                         </Button>
                     </div>
                 ) : null}

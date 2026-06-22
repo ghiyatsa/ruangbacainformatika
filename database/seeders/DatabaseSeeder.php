@@ -12,14 +12,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            ProductionSeeder::class,
-        ]);
-
-        if (app()->environment('local', 'development')) {
-            $this->call([
-                LocalDevelopmentSeeder::class,
-            ]);
+        if (! app()->environment('local', 'development')) {
+            return;
         }
+
+        $this->call([
+            RoleSeeder::class,
+            AppSettingSeeder::class,
+            ShieldSeeder::class,
+            SuperAdminSeeder::class,
+            LocalDevelopmentSeeder::class,
+        ]);
     }
 }
