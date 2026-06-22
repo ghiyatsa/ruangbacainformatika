@@ -12,8 +12,8 @@ export default function ProfilePage() {
             <Head title="Pengaturan profil" />
             <h1 className="sr-only">Pengaturan profil</h1>
 
-            <div className="space-y-6">
-                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-xs">
+            <div className="space-y-10">
+                <div className="pb-8 border-b border-border/60">
                     <ProfileSummary
                         name={user.name}
                         email={user.email}

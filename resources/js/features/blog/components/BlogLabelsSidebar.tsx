@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import blog from '@/routes/blog';
 import type { BlogTaxonomyItem } from '@/features/blog/types';
 
@@ -15,12 +16,18 @@ export function BlogLabelsSidebar({
     activeCategory,
     activeTag,
 }: BlogLabelsSidebarProps) {
+    const [showAllCategories, setShowAllCategories] = useState(false);
+    const [showAllTags, setShowAllTags] = useState(false);
+
     const hasCats = categories.length > 0;
     const hasTags = tags.length > 0;
 
     if (!hasCats && !hasTags) {
         return null;
     }
+
+    const visibleCategories = showAllCategories ? categories : categories.slice(0, 6);
+    const visibleTags = showAllTags ? tags : tags.slice(0, 15);
 
     return (
         <section className="rounded-2xl border border-border/60 bg-card overflow-hidden">
@@ -37,7 +44,7 @@ export function BlogLabelsSidebar({
                             Kategori
                         </p>
                         <div className="grid grid-cols-2 gap-2">
-                            {categories.map((cat) => {
+                            {visibleCategories.map((cat) => {
                                 const isActive = activeCategory === cat.slug;
 
                                 return (
@@ -68,6 +75,14 @@ export function BlogLabelsSidebar({
                                 );
                             })}
                         </div>
+                        {categories.length > 6 && (
+                            <button
+                                onClick={() => setShowAllCategories(!showAllCategories)}
+                                className="mt-2.5 text-xs font-semibold text-primary hover:underline cursor-pointer block text-left"
+                            >
+                                {showAllCategories ? 'Lihat lebih sedikit' : `Lihat semua (${categories.length})`}
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -77,7 +92,7 @@ export function BlogLabelsSidebar({
                             Tag
                         </p>
                         <div className="flex flex-wrap gap-1.5">
-                            {tags.map((tag) => {
+                            {visibleTags.map((tag) => {
                                 const isActive = activeTag === tag.slug;
 
                                 return (
@@ -98,6 +113,14 @@ export function BlogLabelsSidebar({
                                 );
                             })}
                         </div>
+                        {tags.length > 15 && (
+                            <button
+                                onClick={() => setShowAllTags(!showAllTags)}
+                                className="mt-2.5 text-xs font-semibold text-primary hover:underline cursor-pointer block text-left"
+                            >
+                                {showAllTags ? 'Lihat lebih sedikit' : `Lihat semua (${tags.length})`}
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

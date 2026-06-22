@@ -120,24 +120,37 @@ export default function InternshipReportCard({
 
                 <CardContent className="flex flex-1 flex-col gap-3">
                     <div className="min-h-[1.5rem]">
-                        {report.keywords.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                                {report.keywords.slice(0, 3).map((kw, i) => (
-                                    <span
-                                        key={i}
-                                        className="inline-flex items-center gap-0.5 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
-                                    >
-                                        <Tag className="size-2.5" />
-                                        {kw}
-                                    </span>
-                                ))}
-                                {report.keywords.length > 3 && (
-                                    <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                                        +{report.keywords.length - 3}
-                                    </span>
-                                )}
-                            </div>
-                        )}
+                        {(() => {
+                            const rawKeywords = report.keywords as any;
+                            const keywordsList: string[] = Array.isArray(rawKeywords)
+                                ? rawKeywords
+                                : (typeof rawKeywords === 'string' && rawKeywords
+                                    ? rawKeywords.split(',').map((s: string) => s.trim())
+                                    : []);
+
+                            if (keywordsList.length === 0) {
+                                return null;
+                            }
+
+                            return (
+                                <div className="flex flex-wrap gap-1">
+                                    {keywordsList.slice(0, 3).map((kw: string, i: number) => (
+                                        <span
+                                            key={i}
+                                            className="inline-flex items-center gap-0.5 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                        >
+                                            <Tag className="size-2.5" />
+                                            {kw}
+                                        </span>
+                                    ))}
+                                    {keywordsList.length > 3 && (
+                                        <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                            +{keywordsList.length - 3}
+                                        </span>
+                                    )}
+                                </div>
+                            );
+                        })()}
                     </div>
                 </CardContent>
 

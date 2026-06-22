@@ -137,6 +137,43 @@ export default function InternshipReportDetailPage(
                 )
             }
         >
+                        {(() => {
+                const jsonLd = report ? {
+                    '@context': 'https://schema.org',
+                    '@type': 'ScholarlyArticle',
+                    'name': report.title,
+                    'headline': report.title,
+                    'author': {
+                        '@type': 'Person',
+                        'name': report.authorName,
+                        'identifier': report.studentId
+                    },
+                    'datePublished': report.year ? `${report.year}-01-01` : undefined,
+                    'inLanguage': 'id',
+                    'description': report.abstract || undefined,
+                    'keywords': report.keywords ? report.keywords.join(', ') : undefined,
+                    'learningResourceType': 'Laporan Kerja Praktik',
+                    'publisher': {
+                        '@type': 'EducationalOrganization',
+                        'name': 'Program Studi Teknik Informatika Universitas Malikussaleh',
+                        'parentOrganization': {
+                            '@type': 'EducationalOrganization',
+                            'name': 'Universitas Malikussaleh'
+                        }
+                    }
+                } : null;
+
+                if (!jsonLd) {
+return null;
+}
+
+                return (
+                    <script type="application/ld+json">
+                        {JSON.stringify(jsonLd)}
+                    </script>
+                );
+            })()}
+
             <section>
                 <div className="mb-5 flex items-center gap-3">
                     <h2 className="text-xl font-bold">Abstrak</h2>

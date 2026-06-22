@@ -32,7 +32,7 @@ export function DesktopNav({ isActive }: DesktopNavProps) {
                                             isActive(child.href),
                                         )
                                             ? 'text-primary'
-                                            : 'text-muted-foreground hover:text-foreground',
+                                            : 'text-foreground/75 hover:text-foreground',
                                     )}
                                 >
                                     {item.label}
@@ -60,7 +60,7 @@ export function DesktopNav({ isActive }: DesktopNavProps) {
                                     'h-10 bg-transparent px-3 text-sm font-medium transition-colors lg:px-4',
                                     item.href && isActive(item.href)
                                         ? 'text-primary'
-                                        : 'text-muted-foreground hover:text-foreground',
+                                        : 'text-foreground/75 hover:text-foreground',
                                 )}
                             >
                                 <Link href={item.href || '#'}>

@@ -29,8 +29,8 @@ Route::get('/og/internship-reports/{internshipReport:student_id}', [OpenGraphIma
 Route::get('/og/thesis/{thesis:student_id}', [OpenGraphImageController::class, 'thesis'])->name('og.thesis.show');
 Route::get('/books', CatalogController::class)->name('books.index');
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
-Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
-Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/posts', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/posts/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::post('/catalog-reports', [CatalogReportController::class, 'store'])->name('catalog-reports.store');
 Route::get('/skripsi', [SkripsiController::class, 'index'])->name('skripsi.index');
 Route::get('/skripsi/{skripsi:student_id}', [SkripsiController::class, 'show'])->name('skripsi.show');
@@ -40,6 +40,7 @@ Route::get('/thesis', [ThesisController::class, 'index'])->name('thesis.index');
 Route::get('/thesis/{thesis:student_id}', [ThesisController::class, 'show'])->name('thesis.show');
 
 Route::get('/search', SearchController::class)->name('search');
+Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/about/team', [PageController::class, 'aboutTeam'])->name('about-team');
@@ -62,10 +63,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/loans/request/books/{book}', [LoanRequestController::class, 'destroyBook'])->name('loans.request.books.destroy');
     Route::post('/loans/request/qr', [LoanRequestController::class, 'generateQr'])->name('loans.request.qr');
 
-    Route::post('/blog/{post:slug}/comments', [PostCommentController::class, 'store'])
+    Route::post('/posts/{post:slug}/comments', [PostCommentController::class, 'store'])
         ->middleware('throttle:blog-comments')
         ->name('blog.comments.store');
-    Route::delete('/blog/comments/{comment}', [PostCommentController::class, 'destroy'])->name('blog.comments.destroy');
+    Route::delete('/posts/comments/{comment}', [PostCommentController::class, 'destroy'])->name('blog.comments.destroy');
 });
 
 Route::middleware(['auth', 'profile.completed'])->group(function () {

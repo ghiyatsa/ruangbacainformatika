@@ -36,7 +36,7 @@ class HomeController extends Controller
             'popularCategoryShelves' => Inertia::optional(
                 fn () => $this->buildHomeCatalogSections->popularCategoryShelves()
             ),
-            'latestPosts' => BlogPostResource::collection($this->blogQueryService->latestForHome())->resolve(),
+            'latestPosts' => BlogPostResource::collection($this->blogQueryService->latestForHome(4))->resolve(),
             'books' => Inertia::optional(function () use ($books) {
                 $paginated = $books->toArray();
                 $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();

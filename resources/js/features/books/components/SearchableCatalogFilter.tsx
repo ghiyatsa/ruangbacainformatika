@@ -58,6 +58,8 @@ export function SearchableCatalogFilter({
     const dragStartHeightRef = useRef<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [limit, setLimit] = useState(50);
+    const sheetRef = useRef<HTMLDivElement | null>(null);
+    const animationFrameRef = useRef<number | null>(null);
 
     const filteredOptions = useMemo(() => {
         if (!searchQuery) {
@@ -127,10 +129,19 @@ export function SearchableCatalogFilter({
         if (open) {
             timer = window.setTimeout(() => {
                 setSheetHeight(MOBILE_SHEET_MIN_HEIGHT);
+
+                if (sheetRef.current) {
+                    sheetRef.current.style.height = MOBILE_SHEET_MIN_HEIGHT + "px";
+                }
             }, 0);
         } else {
             timer = window.setTimeout(() => {
                 setSheetHeight(MOBILE_SHEET_MIN_HEIGHT);
+
+                if (sheetRef.current) {
+                    sheetRef.current.style.height = MOBILE_SHEET_MIN_HEIGHT + "px";
+                }
+
                 setIsDragging(false);
                 dragStartYRef.current = null;
                 dragStartHeightRef.current = null;
@@ -144,6 +155,14 @@ export function SearchableCatalogFilter({
         };
     }, [open]);
 
+    useEffect(() => {
+        return () => {
+            if (animationFrameRef.current !== null) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+        };
+    }, []);
+
     const getSnapPoints = () => {
         const low = MOBILE_SHEET_MIN_HEIGHT;
         const high = typeof window !== 'undefined'
@@ -156,7 +175,7 @@ export function SearchableCatalogFilter({
     function handleDragStart(event: React.PointerEvent<HTMLDivElement>): void {
         event.currentTarget.setPointerCapture(event.pointerId);
         dragStartYRef.current = event.clientY;
-        dragStartHeightRef.current = sheetHeight;
+        dragStartHeightRef.current = sheetRef.current ? parseFloat(sheetRef.current.style.height) || sheetHeight : sheetHeight;
         setIsDragging(true);
     }
 
@@ -164,17 +183,31 @@ export function SearchableCatalogFilter({
         if (
             !isDragging ||
             dragStartYRef.current === null ||
-            dragStartHeightRef.current === null
+            dragStartHeightRef.current === null ||
+            !sheetRef.current
         ) {
             return;
         }
 
-        const deltaY = event.clientY - dragStartYRef.current;
-        const nextHeight = dragStartHeightRef.current - deltaY;
+        const clientY = event.clientY;
+        const startY = dragStartYRef.current;
+        const startHeight = dragStartHeightRef.current;
 
-        // Allow dragging from 0 up to maxHeight
-        const maxHeight = typeof window !== 'undefined' ? window.innerHeight - 24 : 700;
-        setSheetHeight(Math.max(0, Math.min(maxHeight, nextHeight)));
+        if (animationFrameRef.current !== null) {
+            cancelAnimationFrame(animationFrameRef.current);
+        }
+
+        animationFrameRef.current = requestAnimationFrame(() => {
+            if (!sheetRef.current) {
+return;
+}
+
+            const deltaY = clientY - startY;
+            const nextHeight = startHeight - deltaY;
+            const maxHeight = typeof window !== 'undefined' ? window.innerHeight - 24 : 700;
+            const boundedHeight = Math.max(0, Math.min(maxHeight, nextHeight));
+            sheetRef.current.style.height = boundedHeight + "px";
+        });
     }
 
     function handleDragEnd(event: React.PointerEvent<HTMLDivElement>): void {
@@ -185,20 +218,22 @@ export function SearchableCatalogFilter({
         setIsDragging(false);
         event.currentTarget.releasePointerCapture(event.pointerId);
 
+        const currentDOMHeight = sheetRef.current ? parseFloat(sheetRef.current.style.height) || sheetHeight : sheetHeight;
         const { low, high } = getSnapPoints();
 
         // jika user drag lebih rendah dari titik pertama (low) otomatis sheet nutup ketika user lepas drag
-        if (sheetHeight < low) {
+        if (currentDOMHeight < low - 45) {
             handleOpenChange(false);
         } else {
             // snap ke titik terdekat
-            const distToLow = Math.abs(sheetHeight - low);
-            const distToHigh = Math.abs(sheetHeight - high);
+            const distToLow = Math.abs(currentDOMHeight - low);
+            const distToHigh = Math.abs(currentDOMHeight - high);
+            const targetHeight = distToLow < distToHigh ? low : high;
 
-            if (distToLow < distToHigh) {
-                setSheetHeight(low);
-            } else {
-                setSheetHeight(high);
+            setSheetHeight(targetHeight);
+
+            if (sheetRef.current) {
+                sheetRef.current.style.height = targetHeight + "px";
             }
         }
 
@@ -207,15 +242,13 @@ export function SearchableCatalogFilter({
     }
 
     const trigger = (
-        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-none">
+        <div className="flex flex-1 flex-col gap-1.5 sm:flex-none">
             <Button
-                type="button"
                 variant="outline"
-                className="h-10 w-full justify-between rounded-lg px-3 text-left font-normal shadow-xs sm:w-[220px] sm:flex-none"
-                aria-label={triggerAriaLabel}
-                aria-expanded={open}
-                role="combobox"
                 onClick={() => handleOpenChange(true)}
+                className="h-10 w-full justify-between rounded-lg shadow-xs sm:w-48"
+                aria-label={triggerAriaLabel}
+                role="combobox"
             >
                 <span className="truncate">
                     {selectedOption?.name ?? placeholder}
@@ -266,7 +299,7 @@ export function SearchableCatalogFilter({
                     return (
                         <CommandItem
                             key={option.id}
-                            value={`${option.name} ${option.slug}`}
+                            value={option.name + " " + option.slug}
                             data-checked={isSelected ? 'true' : 'false'}
                             onSelect={() => {
                                 onValueChange(option.slug);
@@ -291,24 +324,29 @@ export function SearchableCatalogFilter({
                         className="gap-0 rounded-t-3xl p-0"
                         showCloseButton={false}
                         onOpenAutoFocus={(event) => event.preventDefault()}
-                        style={{
-                            height: `${sheetHeight}px`,
-                            transition: isDragging ? 'none' : 'height 250ms cubic-bezier(0.16, 1, 0.3, 1)',
-                        }}
                     >
                         <div
-                            className="flex justify-center px-4 pt-3 pb-2 cursor-grab active:cursor-grabbing hover:bg-muted/10 transition-colors"
-                            role="presentation"
-                            onPointerDown={handleDragStart}
-                            onPointerMove={handleDragMove}
-                            onPointerUp={handleDragEnd}
-                            onPointerCancel={handleDragEnd}
-                            style={{ touchAction: 'none' }}
+                            ref={sheetRef}
+                            className="w-full flex flex-col"
+                            style={{
+                                height: `${sheetHeight}px`,
+                                transition: isDragging ? 'none' : 'height 250ms cubic-bezier(0.16, 1, 0.3, 1)',
+                            }}
                         >
-                            <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
-                        </div>
-                        <div className="flex-1 overflow-hidden px-3 pb-3">
-                            {commandContent}
+                            <div
+                                className="w-full flex justify-center px-4 py-3 cursor-grab active:cursor-grabbing hover:bg-muted/10 transition-colors"
+                                role="presentation"
+                                onPointerDown={handleDragStart}
+                                onPointerMove={handleDragMove}
+                                onPointerUp={handleDragEnd}
+                                onPointerCancel={handleDragEnd}
+                                style={{ touchAction: 'none' }}
+                            >
+                                <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+                            </div>
+                            <div className="flex-1 overflow-hidden px-3 pb-3">
+                                {commandContent}
+                            </div>
                         </div>
                     </SheetContent>
                 </Sheet>

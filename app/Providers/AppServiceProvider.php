@@ -61,6 +61,18 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        if (now()->isWeekday() && ! app()->runningUnitTests()) {
+            config(['session.lifetime' => 1440]);
+        }
+
+        Inertia::withoutSsr([
+            'admin*',
+            'kiosk*',
+            'settings*',
+            'auth*',
+            'register*',
+        ]);
+
         $this->configureDefaults();
         $this->configureInertiaExceptionHandling();
         $this->configureTurnstile();

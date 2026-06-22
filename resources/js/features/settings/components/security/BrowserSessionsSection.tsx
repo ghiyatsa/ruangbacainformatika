@@ -17,7 +17,7 @@ export function BrowserSessionsSection({
     );
 
     return (
-        <section className="rounded-xl border border-border/70 bg-card p-6 shadow-xs">
+        <section className="space-y-6">
             <div className="flex flex-col gap-4">
                 <SettingsSectionHeader title="Sesi browser" />
 
@@ -26,9 +26,9 @@ export function BrowserSessionsSection({
                         {otherSessions.map((session) => (
                             <div
                                 key={session.id}
-                                className="flex items-center gap-4 rounded-xl border border-border/70 bg-muted/20 p-4"
+                                className="flex items-center gap-4 border border-border/60 bg-muted/5 p-4"
                             >
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-background text-muted-foreground shadow-xs">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-border/60 bg-background text-muted-foreground shadow-none">
                                     {session.agent.is_desktop ? (
                                         <Monitor className="h-5 w-5" />
                                     ) : (

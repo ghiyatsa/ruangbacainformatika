@@ -146,6 +146,43 @@ export default function AcademicWorkDetailPage(
                 )
             }
         >
+                        {(() => {
+                const jsonLd = work ? {
+                    '@context': 'https://schema.org',
+                    '@type': 'Thesis',
+                    'name': work.title,
+                    'headline': work.title,
+                    'author': {
+                        '@type': 'Person',
+                        'name': work.authorName,
+                        'identifier': work.studentId
+                    },
+                    'datePublished': work.year ? `${work.year}-01-01` : undefined,
+                    'inLanguage': 'id',
+                    'description': work.abstract || undefined,
+                    'keywords': work.keywords ? work.keywords.join(', ') : undefined,
+                    'learningResourceType': label,
+                    'publisher': {
+                        '@type': 'EducationalOrganization',
+                        'name': 'Program Studi Teknik Informatika Universitas Malikussaleh',
+                        'parentOrganization': {
+                            '@type': 'EducationalOrganization',
+                            'name': 'Universitas Malikussaleh'
+                        }
+                    }
+                } : null;
+
+                if (!jsonLd) {
+return null;
+}
+
+                return (
+                    <script type="application/ld+json">
+                        {JSON.stringify(jsonLd)}
+                    </script>
+                );
+            })()}
+
             <section>
                 <div className="mb-5 flex items-center gap-3">
                     <h2 className="text-xl font-bold">Abstrak</h2>

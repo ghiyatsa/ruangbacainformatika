@@ -12,6 +12,7 @@ use App\Services\MemberRegistrationClaimService;
 use GuzzleHttp\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -30,6 +31,13 @@ class GoogleController extends Controller
         protected ResolveGoogleAccount $resolveGoogleAccount,
     ) {}
 
+    public function setPopupSession(Request $request): Response
+    {
+        $request->session()->put('auth.google.popup', true);
+
+        return response()->json(['success' => true]);
+    }
+
     public function redirectToGoogle(Request $request): Response
     {
         if (! $this->googleLoginConfiguration->isConfigured()) {
@@ -42,6 +50,10 @@ class GoogleController extends Controller
         }
 
         $linkToken = $request->string('link_token')->trim()->toString();
+
+        if ($request->has('popup')) {
+            $request->session()->put('auth.google.popup', true);
+        }
 
         if ($linkToken !== '') {
             $claim = $this->memberRegistrationClaimService->findByToken($linkToken);
@@ -68,12 +80,18 @@ class GoogleController extends Controller
         return $redirectResponse;
     }
 
-    public function handleGoogleCallback(): RedirectResponse
+    public function handleGoogleCallback(): Response
     {
         $linkToken = request()->session()->pull('auth.google.link_token');
+        $isPopup = request()->session()->pull('auth.google.popup', false);
 
         try {
             if (! $this->googleLoginConfiguration->isConfigured()) {
+                if ($isPopup) {
+                    $nonce = Vite::cspNonce();
+
+                    return response('<script nonce="'.$nonce.'">window.opener.postMessage({ type: "GOOGLE_AUTH_ERROR", message: "Konfigurasi login Google belum lengkap." }, window.location.origin); window.close();</script>');
+                }
                 Inertia::flash('toast', [
                     'type' => 'error',
                     'message' => 'Konfigurasi login Google belum lengkap.',
@@ -85,7 +103,7 @@ class GoogleController extends Controller
             $googleUser = $this->googleProvider(request())->user();
             $email = $this->resolveGoogleAccount->execute($googleUser->getEmail());
 
-            return $this->authenticateGoogleIdentity->execute(
+            $redirectResponse = $this->authenticateGoogleIdentity->execute(
                 request: request(),
                 googleId: $googleUser->getId(),
                 email: $email,
@@ -93,13 +111,35 @@ class GoogleController extends Controller
                 avatarUrl: $googleUser->getAvatar(),
                 linkToken: is_string($linkToken) ? $linkToken : null,
             );
+
+            if ($isPopup) {
+                $nonce = Vite::cspNonce();
+                $targetUrl = $redirectResponse->getTargetUrl();
+
+                return response('<script nonce="'.$nonce.'">window.opener.postMessage({ type: "GOOGLE_AUTH_SUCCESS", url: "'.addslashes($targetUrl).'" }, window.location.origin); window.close();</script>');
+            }
+
+            return $redirectResponse;
         } catch (ValidationException $exception) {
+            $errorMessage = collect($exception->errors())->flatten()->first() ?: 'Login dengan Google gagal.';
+            if ($isPopup) {
+                $nonce = Vite::cspNonce();
+
+                return response('<script nonce="'.$nonce.'">window.opener.postMessage({ type: "GOOGLE_AUTH_ERROR", message: "'.addslashes($errorMessage).'" }, window.location.origin); window.close();</script>');
+            }
+
             return $this->redirectToEntryWithError(
-                collect($exception->errors())->flatten()->first() ?: 'Login dengan Google gagal.',
+                $errorMessage,
                 is_string($linkToken) ? $linkToken : null,
             );
         } catch (Throwable $exception) {
             report($exception);
+
+            if ($isPopup) {
+                $nonce = Vite::cspNonce();
+
+                return response('<script nonce="'.$nonce.'">window.opener.postMessage({ type: "GOOGLE_AUTH_ERROR", message: "Login dengan Google gagal. Silakan coba lagi." }, window.location.origin); window.close();</script>');
+            }
 
             return $this->redirectToEntryWithError(
                 'Login dengan Google gagal. Silakan coba lagi.',

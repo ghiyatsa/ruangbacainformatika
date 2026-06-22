@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
 
 class SettingRepository
 {
@@ -12,27 +13,37 @@ class SettingRepository
      */
     public function sectionValues(string $section, array $defaults = []): array
     {
-        $storedValues = Setting::query()
-            ->where('section', $section)
-            ->pluck('value', 'key')
-            ->all();
+        if (app()->runningUnitTests()) {
+            $storedValues = Setting::query()
+                ->where('section', $section)
+                ->pluck('value', 'key')
+                ->all();
+
+            return array_replace($defaults, $storedValues);
+        }
+
+        $storedValues = Cache::remember(
+            "site-settings:${section}",
+            now()->addDay(),
+            fn () => Setting::query()
+                ->where('section', $section)
+                ->pluck('value', 'key')
+                ->all()
+        );
 
         return array_replace($defaults, $storedValues);
     }
 
     public function get(string $section, string $key, mixed $default = null): mixed
     {
-        $setting = Setting::query()
-            ->where('section', $section)
-            ->where('key', $key)
-            ->first();
+        $values = $this->sectionValues($section);
 
-        return $setting?->value ?? $default;
+        return $values[$key] ?? $default;
     }
 
     public function put(string $section, string $key, mixed $value): Setting
     {
-        return Setting::query()->updateOrCreate(
+        $setting = Setting::query()->updateOrCreate(
             [
                 'section' => $section,
                 'key' => $key,
@@ -41,6 +52,10 @@ class SettingRepository
                 'value' => filled($value) ? (string) $value : null,
             ],
         );
+
+        Cache::forget("site-settings:${section}");
+
+        return $setting;
     }
 
     public function forget(string $section, string $key): void
@@ -49,6 +64,8 @@ class SettingRepository
             ->where('section', $section)
             ->where('key', $key)
             ->delete();
+
+        Cache::forget("site-settings:${section}");
     }
 
     /**

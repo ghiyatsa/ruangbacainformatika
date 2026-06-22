@@ -23,6 +23,7 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getCsrfToken } from '@/lib/csrf';
 import { cn } from '@/lib/utils';
@@ -283,19 +284,24 @@ export function NotificationsDropdown({
                 className={`max-h-[26rem] overflow-y-auto ${open ? 'motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in-0 motion-safe:slide-in-from-top-1' : ''}`}
             >
                 {isLoading ? (
-                    <div className="space-y-3 px-4 py-4 motion-safe:animate-in motion-safe:duration-150 motion-safe:fade-in-0">
+                    <div className="space-y-2 p-3 motion-safe:animate-in motion-safe:duration-150 motion-safe:fade-in-0">
                         {[0, 1, 2].map((item) => (
                             <div
                                 key={item}
-                                className="animate-pulse rounded-2xl border border-border/60 bg-background/70 p-3.5"
+                                className="rounded-2xl border border-border/60 bg-background/70 p-3.5"
                             >
                                 <div className="flex items-start gap-3">
-                                    <div className="size-10 rounded-2xl bg-muted" />
-                                    <div className="min-w-0 flex-1">
-                                        <div className="h-3.5 w-28 rounded bg-muted" />
-                                        <div className="mt-2 h-3 w-full rounded bg-muted" />
-                                        <div className="mt-1.5 h-3 w-2/3 rounded bg-muted" />
-                                        <div className="mt-3 h-3 w-20 rounded bg-muted" />
+                                    <Skeleton className="size-10 rounded-2xl shrink-0" />
+                                    <div className="min-w-0 flex-1 space-y-2">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <Skeleton className="h-4 w-24 rounded" />
+                                        </div>
+                                        <Skeleton className="h-3.5 w-full rounded" />
+                                        <Skeleton className="h-3.5 w-3/4 rounded" />
+                                        <div className="flex justify-between items-center gap-3 pt-1">
+                                            <Skeleton className="h-3 w-16 rounded" />
+                                            <Skeleton className="h-3 w-12 rounded" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>

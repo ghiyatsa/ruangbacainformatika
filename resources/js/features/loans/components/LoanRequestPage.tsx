@@ -1,14 +1,12 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import { Download, QrCode, Trash2 } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import InputError from '@/components/common/InputError';
-import { Badge } from '@/components/ui/badge';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCountdown } from '@/hooks/use-countdown';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
@@ -109,260 +107,298 @@ export default function LoanRequestPage({ draft, stats }: Props) {
     };
 
     return (
-        <>
-            <Head title="QR Peminjaman" />
+        <PageLayout
+            title="Keranjang Peminjaman"
+            metaDescription="Ajukan peminjaman buku melalui scan QR."
+            maxWidth="7xl"
+            className="pt-0 pb-16"
+            showDesktopNoticeInContent={false}
+            header={
+                <div className="relative -mt-20 overflow-hidden bg-background sm:-mt-28 md:-mt-24">
+                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                                    Keranjang Peminjaman
+                                </h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        >
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.9fr)]">
+                {/* Left Column: Items List */}
+                <div className="space-y-6">
+                    <div className="border-b pb-3">
+                        <h2 className="text-xl font-bold tracking-tight text-foreground">
+                            Buku yang Dipilih
+                        </h2>
+                    </div>
 
-            <div className="container mx-auto max-w-5xl px-4 py-8 pb-16 sm:px-6 lg:px-8">
-                <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.9fr)]">
-                    <Card className="border-border/70">
-                        <CardHeader>
-                            <CardTitle>Keranjang Peminjaman</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {isEmpty ? (
-                                <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 px-5 py-10 text-center">
-                                    <p className="text-sm text-muted-foreground">
-                                        Keranjang masih kosong.
-                                    </p>
-                                </div>
-                            ) : (
-                                <ScrollArea className="h-[28rem] rounded-2xl">
-                                    <div className="space-y-4 p-1.5 pr-3">
-                                        {draft.items.map((item) => {
-                                            const isSelected =
-                                                selectedBookIds.includes(
-                                                    item.bookId,
-                                                );
-                                            const disableUncheckedSelection =
-                                                !isSelected &&
-                                                selectedBooksCount >=
-                                                    remainingQuota;
+                    <div className="space-y-4">
+                        {isEmpty ? (
+                            <div className="border border-dashed border-border/60 bg-muted/10 px-5 py-12 text-center">
+                                <p className="text-sm text-muted-foreground">
+                                    Keranjang masih kosong.
+                                </p>
+                            </div>
+                        ) : (
+                            <ScrollArea className="h-[32rem] pr-3">
+                                <div className="divide-y divide-border/60">
+                                    {draft.items.map((item) => {
+                                        const isSelected =
+                                            selectedBookIds.includes(
+                                                item.bookId,
+                                            );
+                                        const isSelectionDisabled =
+                                            !isSelected &&
+                                            selectedBookIds.length >=
+                                                remainingQuota;
 
-                                            return (
-                                                <div
-                                                    key={item.id}
-                                                    className="rounded-2xl border border-border/60 bg-card/70 p-4"
-                                                >
-                                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                                        <div className="flex min-w-0 items-start gap-3">
-                                                            <div className="pt-0.5">
-                                                                <Checkbox
-                                                                    id={`loan-request-book-${item.id}`}
-                                                                    checked={
-                                                                        isSelected
-                                                                    }
-                                                                    disabled={
-                                                                        remainingQuota <
-                                                                            1 ||
-                                                                        disableUncheckedSelection
-                                                                    }
-                                                                    onCheckedChange={(
-                                                                        checked,
-                                                                    ) =>
-                                                                        toggleBookSelection(
-                                                                            item.bookId,
-                                                                            checked ===
-                                                                                true,
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </div>
-                                                            <div className="min-w-0 space-y-1.5">
-                                                                <Label
-                                                                    htmlFor={`loan-request-book-${item.id}`}
-                                                                    className="cursor-pointer p-0 text-left text-sm font-medium"
-                                                                >
-                                                                    Pilih buku
-                                                                </Label>
-                                                                <Link
-                                                                    href={BookController.show(
-                                                                        item.slug,
-                                                                    )}
-                                                                    instant
-                                                                    component="books/show"
-                                                                    pageProps={instantLoadingPageProps()}
-                                                                    className="line-clamp-2 text-base font-semibold text-foreground transition-colors hover:text-primary"
-                                                                >
-                                                                    {item.title}
-                                                                </Link>
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    {item.authors.join(
-                                                                        ', ',
-                                                                    ) ||
-                                                                        'Penulis belum tersedia'}{' '}
-                                                                    :{' '}
-                                                                    {item.isbn
-                                                                        ? `ISBN ${item.isbn}`
-                                                                        : item.issn
-                                                                          ? `ISSN ${item.issn}`
-                                                                          : 'Tanpa ISBN/ISSN'}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2">
-                                                            {isSelected ? (
-                                                                <Badge>
-                                                                    Dipilih
-                                                                </Badge>
-                                                            ) : null}
-                                                            <Badge variant="secondary">
-                                                                {
-                                                                    item.availableItemsCount
-                                                                }{' '}
-                                                                tersedia
-                                                            </Badge>
-                                                            <Link
-                                                                href={LoanRequestController.destroyBook(
-                                                                    item.bookId,
-                                                                )}
-                                                                method="delete"
-                                                                as="button"
-                                                                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-                                                            >
-                                                                <Trash2 className="size-4" />
-                                                                Hapus
-                                                            </Link>
-                                                        </div>
+                                        return (
+                                            <div
+                                                key={item.id}
+                                                className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <Checkbox
+                                                        id={"book-" + item.bookId}
+                                                        checked={isSelected}
+                                                        disabled={
+                                                            isSelectionDisabled ||
+                                                            hasActiveQrCountdown
+                                                        }
+                                                        onCheckedChange={(
+                                                            checked,
+                                                        ) =>
+                                                            toggleBookSelection(
+                                                                item.bookId,
+                                                                !!checked,
+                                                            )
+                                                        }
+                                                    />
+                                                    <div className="min-w-0">
+                                                        <Link
+                                                            href={BookController.show.url(
+                                                                item.slug,
+                                                            )}
+                                                            instant
+                                                            component="books/show"
+                                                            pageProps={instantLoadingPageProps()}
+                                                            className="text-sm font-bold text-foreground hover:text-primary transition-colors block truncate"
+                                                        >
+                                                            {item.title}
+                                                        </Link>
+                                                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                                            {item.authors.join(
+                                                                ', ',
+                                                            )}
+                                                        </p>
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                </ScrollArea>
-                            )}
-                        </CardContent>
-                    </Card>
 
-                    <Card className="border-border/70">
-                        <CardHeader>
-                            <CardTitle>QR</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-5">
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-                                        Pilihan
+                                                <Link
+                                                    href={LoanRequestController.destroyBook.url(
+                                                        item.bookId,
+                                                    )}
+                                                    method="delete"
+                                                    as="button"
+                                                    type="button"
+                                                    preserveScroll
+                                                    className="text-muted-foreground hover:text-destructive transition-colors shrink-0 p-1.5 hover:bg-destructive/10 rounded-lg cursor-pointer"
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                    <span className="sr-only">
+                                                        Hapus dari keranjang
+                                                    </span>
+                                                </Link>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </ScrollArea>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Column: QR Code Panel */}
+                <div className="space-y-6">
+                    <div className="border-b pb-3">
+                        <h2 className="text-xl font-bold tracking-tight text-foreground">
+                            QR Peminjaman
+                        </h2>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="space-y-3.5 text-sm">
+                            <div className="flex justify-between border-b pb-2">
+                                <span className="text-muted-foreground">
+                                    Buku di keranjang:
+                                </span>
+                                <span className="font-bold text-foreground">
+                                    {draft.items.length} buku
+                                </span>
+                            </div>
+
+                            <div className="flex justify-between border-b pb-2">
+                                <span className="text-muted-foreground">
+                                    Sisa kuota pinjam:
+                                </span>
+                                <span className="font-bold text-foreground">
+                                    {remainingQuota} buku
+                                </span>
+                            </div>
+                            <div className="flex justify-between border-b pb-2">
+                                <span className="text-muted-foreground">
+                                    Dipilih untuk QR:
+                                </span>
+                                <span className="font-bold text-primary">
+                                    {selectedBooksCount} buku
+                                </span>
+                            </div>
+                        </div>
+
+                        {qrForm.errors.book_ids && (
+                            <InputError
+                                message={qrForm.errors.book_ids}
+                                className="mt-1"
+                            />
+                        )}
+
+                        <InputError
+                            message={
+                                (qrForm.errors as any)[
+                                    "book_ids." + selectedBookIds.indexOf(
+                                        (qrForm.errors &&
+                                            Object.keys(qrForm.errors)
+                                                .filter((key) =>
+                                                    key.startsWith(
+                                                        'book_ids.',
+                                                    ),
+                                                )
+                                                .map((key) =>
+                                                    parseInt(
+                                                        key.replace(
+                                                            'book_ids.',
+                                                            '',
+                                                        ),
+                                                    ),
+                                                )
+                                                .map(
+                                                    (index) =>
+                                                        selectedBookIds[index],
+                                                )
+                                                .shift()) ?? -1,
+                                    )
+                                ]
+                            }
+                            className="mt-1"
+                        />
+
+                        <InputError
+                            message={
+                                qrForm.errors &&
+                                Object.keys(qrForm.errors)
+                                    .filter((key) => key.startsWith('draft.'))
+                                    .map(
+                                        (key) =>
+                                            (qrForm.errors &&
+                                                (qrForm.errors[
+                                                    key as any
+                                                ] as string)) ??
+                                            '',
+                                    )
+                                    .shift()
+                            }
+                            className="mt-1"
+                        />
+
+                        <div className="border border-border/60 bg-muted/5 p-6">
+                            {draft.qrCodeSvg && countdownLabel ? (
+                                <div className="mb-5 text-center">
+                                    <p className="text-[11px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                                        Berlaku dalam
                                     </p>
-                                    <p className="mt-2 text-sm font-medium text-foreground">
-                                        {selectedBooksCount} dari{' '}
-                                        {draft.itemsCount} buku dipilih
+                                    <p
+                                        className="mt-2 text-4xl font-semibold tracking-tight text-foreground tabular-nums"
+                                        title={
+                                            draft.expiresAt
+                                                ? "Berlaku sampai " + draft.expiresAt
+                                                : undefined
+                                        }
+                                    >
+                                        {countdownLabel}
                                     </p>
                                 </div>
+                            ) : null}
 
-                                <Badge variant="secondary">
-                                    Kuota {remainingQuota}
-                                </Badge>
-                            </div>
+                            {draft.qrCodeSvg ? (
+                                <div className="space-y-4">
+                                    <div className="mx-auto w-max border border-border/60 bg-white p-4 text-primary dark:bg-zinc-900 dark:text-white">
+                                        <div
+                                            className="flex justify-center [&_svg]:mx-auto"
+                                            dangerouslySetInnerHTML={{
+                                                __html: draft.qrCodeSvg,
+                                            }}
+                                        />
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="mx-auto flex items-center gap-2"
+                                        onClick={() =>
+                                            downloadSvgAsPng(
+                                                draft.qrCodeSvg!,
+                                                "qr-peminjaman-" + draft.id + ".png",
+                                                'QR PEMINJAMAN',
+                                            )
+                                        }
+                                    >
+                                        <Download className="size-4" />
+                                        Unduh QR
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="bg-muted/10 border border-dashed border-border/60 p-12 text-center text-sm text-muted-foreground">
+                                    QR siap dibuat.
+                                </div>
+                            )}
+                        </div>
 
-                            <InputError
-                                message={
-                                    typeof qrForm.errors.book_ids === 'string'
-                                        ? qrForm.errors.book_ids
-                                        : undefined
+                        <form
+                            onSubmit={submitQrRequest}
+                            className="space-y-3"
+                        >
+                            {selectedBookIds.map((bookId) => (
+                                <input
+                                    key={bookId}
+                                    type="hidden"
+                                    name="book_ids[]"
+                                    value={bookId}
+                                />
+                            ))}
+
+                            <Button
+                                type="submit"
+                                size="lg"
+                                className="w-full"
+                                disabled={
+                                    qrForm.processing ||
+                                    isEmpty ||
+                                    hasActiveQrCountdown ||
+                                    remainingQuota < 1 ||
+                                    selectedBooksCount === 0
                                 }
-                            />
-                            <InputError
-                                message={
-                                    typeof (
-                                        qrForm.errors as Record<string, unknown>
-                                    ).draft === 'string'
-                                        ? ((
-                                              qrForm.errors as Record<
-                                                  string,
-                                                  unknown
-                                              >
-                                          ).draft as string)
-                                        : undefined
-                                }
-                            />
-
-                            <div className="mt-5 rounded-[1.75rem] border border-border/70 bg-card px-5 py-6 shadow-sm">
-                                {draft.qrCodeSvg && countdownLabel ? (
-                                    <div className="mb-5 text-center">
-                                        <p className="text-[11px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                                            Berlaku dalam
-                                        </p>
-                                        <p
-                                            className="mt-2 text-4xl font-semibold tracking-tight text-foreground tabular-nums"
-                                            title={
-                                                draft.expiresAt
-                                                    ? `Berlaku sampai ${draft.expiresAt}`
-                                                    : undefined
-                                            }
-                                        >
-                                            {countdownLabel}
-                                        </p>
-                                    </div>
-                                ) : null}
-
-                                {draft.qrCodeSvg ? (
-                                    <div className="space-y-4">
-                                        <div className="mx-auto w-max rounded-3xl border border-border/50 bg-white p-4 text-primary shadow-sm dark:bg-card dark:text-white">
-                                            <div
-                                                className="flex justify-center [&_svg]:mx-auto"
-                                                dangerouslySetInnerHTML={{
-                                                    __html: draft.qrCodeSvg,
-                                                }}
-                                            />
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            className="mx-auto flex items-center gap-2"
-                                            onClick={() =>
-                                                downloadSvgAsPng(
-                                                    draft.qrCodeSvg!,
-                                                    `qr-peminjaman-${draft.id}.png`,
-                                                    'QR PEMINJAMAN',
-                                                )
-                                            }
-                                        >
-                                            <Download className="size-4" />
-                                            Unduh QR
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="rounded-2xl bg-muted/20 px-5 py-12 text-center text-sm text-muted-foreground">
-                                        QR siap dibuat.
-                                    </div>
-                                )}
-                            </div>
-
-                            <form
-                                onSubmit={submitQrRequest}
-                                className="space-y-3"
                             >
-                                {selectedBookIds.map((bookId) => (
-                                    <input
-                                        key={bookId}
-                                        type="hidden"
-                                        name="book_ids[]"
-                                        value={bookId}
-                                    />
-                                ))}
-
-                                <Button
-                                    type="submit"
-                                    size="lg"
-                                    className="w-full"
-                                    disabled={
-                                        qrForm.processing ||
-                                        isEmpty ||
-                                        hasActiveQrCountdown ||
-                                        remainingQuota < 1 ||
-                                        selectedBooksCount === 0
-                                    }
-                                >
-                                    <QrCode className="size-4" />
-                                    Buat QR Peminjaman
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
+                                <QrCode className="size-4" />
+                                Buat QR Peminjaman
+                            </Button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </>
+        </PageLayout>
     );
 }
