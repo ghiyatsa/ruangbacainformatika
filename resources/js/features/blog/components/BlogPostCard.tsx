@@ -84,7 +84,7 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
             className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/30"
         >
             {/* Cover */}
-            <div className="relative aspect-16/10 overflow-hidden bg-muted">
+            <div className="relative aspect-video overflow-hidden bg-muted">
                 <img
                     src={post.coverImageUrl}
                     alt=""

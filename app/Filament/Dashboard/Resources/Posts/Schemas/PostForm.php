@@ -3,19 +3,23 @@
 namespace App\Filament\Dashboard\Resources\Posts\Schemas;
 
 use App\Models\Post;
+use App\Services\PostThumbnailImageService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PostForm
 {
@@ -64,7 +68,18 @@ class PostForm
                                             ->directory('posts/covers')
                                             ->visibility('public')
                                             ->maxSize(2048)
-                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                            ->imagePreviewHeight('320')
+                                            ->saveUploadedFileUsing(
+                                                fn (TemporaryUploadedFile $file, Get $get): string => app(PostThumbnailImageService::class)->storeFromUploadedFile($file, baseName: $get('slug') ?: $get('title')),
+                                            )
+                                            ->deleteUploadedFileUsing(function (string $file) {
+                                                if (
+                                                    Storage::disk('public')->exists($file)
+                                                ) {
+                                                    Storage::disk('public')->delete($file);
+                                                }
+                                            }),
                                     ]),
 
                                 Section::make('Isi & Redaksi')
@@ -78,17 +93,31 @@ class PostForm
                                         TextInput::make('slug')
                                             ->label('Slug URL')
                                             ->required()
+                                            ->live(onBlur: true)
                                             ->unique(table: 'posts', column: 'slug', ignoreRecord: true),
-
-                                        Textarea::make('summary')
-                                            ->label('Abstrak / Ringkasan')
-                                            ->rows(3)
-                                            ->columnSpanFull(),
 
                                         RichEditor::make('content')
                                             ->label('Badan Artikel')
                                             ->required()
-                                            ->columnSpanFull(),
+                                            ->columnSpanFull()
+                                            ->fileAttachmentsDisk('public')
+                                            ->fileAttachmentsDirectory('posts/attachments')
+                                            ->fileAttachmentsVisibility('public')
+                                            ->toolbarButtons([
+                                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+                                                [
+                                                    ToolbarButtonGroup::make('Heading', ['h2', 'h3'])
+                                                        ->icon('heroicon-o-hashtag'),
+                                                ],
+                                                [
+                                                    ToolbarButtonGroup::make('Alignment', ['alignStart', 'alignCenter', 'alignEnd'])
+                                                        ->icon('heroicon-o-bars-3-bottom-left'),
+                                                ],
+                                                ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
+                                                ['table', 'attachFiles'],
+                                                ['undo', 'redo'],
+                                            ])
+                                            ->live(onBlur: true),
                                     ])
                                     ->columns(2),
                             ])

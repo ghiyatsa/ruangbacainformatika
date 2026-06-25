@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { formatViewCount } from '@/lib/utils';
 import { ArrowRight, Clock3, Eye } from 'lucide-react';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import blog from '@/routes/blog';
@@ -80,7 +81,7 @@ export function BlogFeaturedPost({ post }: BlogFeaturedPostProps) {
                     </span>
                     <span className="inline-flex items-center gap-1">
                         <Eye className="size-3" />
-                        {post.viewCount.toLocaleString('id-ID')}
+                        {formatViewCount(post.viewCount)}
                     </span>
                     <span className="ml-auto inline-flex items-center gap-1 font-semibold text-primary-foreground/90 transition group-hover:gap-2">
                         Baca

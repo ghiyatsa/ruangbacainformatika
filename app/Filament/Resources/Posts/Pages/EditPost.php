@@ -7,6 +7,7 @@ use App\Models\Post;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Cache;
 
 class EditPost extends EditRecord
 {
@@ -24,6 +25,18 @@ class EditPost extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('preview')
+                ->label('Pratinjau')
+                ->icon('heroicon-o-eye')
+                ->color('info')
+                ->action(function () {
+                    Cache::put(
+                        'post_preview_'.$this->record->preview_token,
+                        $this->data,
+                        now()->addMinutes(10)
+                    );
+                    $this->js("window.open('".route('blog.preview', $this->record->preview_token)."', '_blank')");
+                }),
             DeleteAction::make()
                 ->label('Hapus'),
         ];
@@ -62,5 +75,22 @@ class EditPost extends EditRecord
     {
         return parent::getCancelFormAction()
             ->label('Batal');
+    }
+
+    public function updated($property): void
+    {
+
+        if (str_starts_with($property, 'data.')) {
+            Cache::put(
+                'post_preview_'.$this->record->preview_token,
+                $this->data,
+                now()->addHours(2)
+            );
+        }
+    }
+
+    protected function afterSave(): void
+    {
+        Cache::forget('post_preview_'.$this->record->preview_token);
     }
 }

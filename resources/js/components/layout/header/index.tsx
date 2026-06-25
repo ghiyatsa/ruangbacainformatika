@@ -39,7 +39,7 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
 
     return (
         <>
-            <header className="sticky top-0 z-60 w-full border-b border-border/60 bg-background">
+            <header className="w-full border-b border-border/60 bg-background">
                 <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-2 border-x border-border/60 px-4 sm:px-6 lg:gap-4 lg:px-8 xl:gap-6">
                     <div className="flex min-w-0 flex-1 items-center gap-0 md:gap-4 lg:gap-5">
                         <MobileSheet

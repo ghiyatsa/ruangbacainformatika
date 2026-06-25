@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { formatViewCount } from '@/lib/utils';
 import { BookOpen, Eye, Star } from 'lucide-react';
 import { useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
@@ -104,7 +105,7 @@ export default function BookListItem({ book }: BookListItemProps) {
                 </div>
                 <div className="flex items-center gap-1">
                     <Eye className="size-3" />
-                    <span>{book.viewCount.toLocaleString('id-ID')}</span>
+                    <span>{formatViewCount(book.viewCount)}</span>
                 </div>
             </div>
         </Link>
