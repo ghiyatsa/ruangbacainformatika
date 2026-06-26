@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
-import { formatViewCount } from '@/lib/utils';
 import { ArrowRight, Clock3, Eye } from 'lucide-react';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
+import { formatViewCount } from '@/lib/utils';
 import blog from '@/routes/blog';
 import type { BlogPostItem } from '@/features/blog/types';
 

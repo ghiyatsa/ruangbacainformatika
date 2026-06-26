@@ -103,6 +103,7 @@ class PostForm
                                             ->fileAttachmentsDisk('public')
                                             ->fileAttachmentsDirectory('posts/attachments')
                                             ->fileAttachmentsVisibility('public')
+                                            ->resizableImages()
                                             ->toolbarButtons([
                                                 ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
                                                 [

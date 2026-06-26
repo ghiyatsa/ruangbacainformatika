@@ -12,9 +12,12 @@ use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Tiptap\Editor;
+use Tiptap\Extensions\StarterKit;
+use Tiptap\Nodes\Image;
 
 class BlogController extends Controller
 {
@@ -95,7 +98,7 @@ class BlogController extends Controller
         ]);
     }
 
-    public function preview(Request $request, Post $post): Response
+    public function preview(Request $request, Post $post)
     {
         $previewData = Cache::get('post_preview_'.$post->preview_token);
 
@@ -113,7 +116,12 @@ class BlogController extends Controller
                 if (is_array($content)) {
                     if (isset($content['type']) && $content['type'] === 'doc') {
                         try {
-                            $content = (new Editor)->setContent($content)->getHTML();
+                            $content = (new Editor([
+                                'extensions' => [
+                                    new StarterKit,
+                                    new Image,
+                                ],
+                            ]))->setContent($content)->getHTML();
                         } catch (\Exception $e) {
                             $content = json_encode($content);
                         }
@@ -126,6 +134,45 @@ class BlogController extends Controller
                         }
                     }
                 }
+
+                // Scan content for livewire preview URLs or uploaded files, and copy them to previews folder if temporary
+                if (is_string($content) && preg_match_all('/src="([^"]+)"/', $content, $matches)) {
+                    foreach ($matches[1] as $rawImgUrl) {
+                        $imgUrl = html_entity_decode($rawImgUrl);
+                        // Extract filename from livewire preview route or raw query param
+                        $filename = null;
+                        if (str_contains($imgUrl, 'preview-file/')) {
+                            $filename = basename(parse_url($imgUrl, PHP_URL_PATH));
+                        } elseif (str_contains($imgUrl, 'livewire-file-preview')) {
+                            // Sometimes it is query param
+                            $parsed = parse_url($imgUrl);
+                            parse_str($parsed['query'] ?? '', $query);
+                            if (isset($query['file'])) {
+                                $filename = basename($query['file']);
+                            }
+                        }
+
+                        if ($filename) {
+                            // Search in Livewire temporary directory
+                            $tempDisk = Storage::disk('local');
+                            $files = $tempDisk->allFiles('livewire-tmp');
+                            foreach ($files as $file) {
+                                if (str_contains($file, $filename)) {
+                                    $previewPath = 'posts/previews/'.$filename;
+                                    Storage::disk('public')->put(
+                                        $previewPath,
+                                        $tempDisk->get($file)
+                                    );
+                                    // Replace both raw encoded and decoded url
+                                    $content = str_replace($rawImgUrl, asset('storage/'.$previewPath), $content);
+                                    $content = str_replace($imgUrl, asset('storage/'.$previewPath), $content);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 $post->content = (string) $content;
             }
 
