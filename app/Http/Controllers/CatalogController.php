@@ -46,7 +46,7 @@ class CatalogController extends Controller
                 $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
 
                 return $paginated;
-            })->merge()->append('data'),
+            }, 'books')->merge()->append('data'),
         ]);
     }
 }

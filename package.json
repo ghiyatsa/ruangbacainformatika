@@ -7,7 +7,7 @@
     },
     "scripts": {
         "build": "vite build",
-        "build:plesk": "PATH=/opt/plesk/php/8.3/bin:$PATH npm run build:ssr",
+        "build:plesk": "PATH=/opt/plesk/php/8.3/bin:$PATH npm run build",
         "build:ssr": "vite build && vite build --ssr",
         "commitlint": "commitlint --last --verbose",
         "dev": "vite",
