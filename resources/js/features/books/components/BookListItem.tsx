@@ -1,9 +1,9 @@
 import { Link } from '@inertiajs/react';
-import { formatViewCount } from '@/lib/utils';
 import { BookOpen, Eye, Star } from 'lucide-react';
 import { useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
+import { formatViewCount } from '@/lib/utils';
 import type { CatalogBook } from '@/features/welcome/types';
 
 interface BookListItemProps {
