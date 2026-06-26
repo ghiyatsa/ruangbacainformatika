@@ -13,19 +13,16 @@ const STEPS = [
         title: 'Input Judul Skripsi',
         desc: 'Ketik judul skripsi yang ingin Anda periksa.',
         icon: FileText,
-        color: 'text-muted-foreground bg-muted/5 border-border',
     },
     {
         title: 'Pemindaian Semantik',
         desc: 'Sistem membandingkan judul Anda dengan data skripsi yang tersedia.',
         icon: Search,
-        color: 'text-muted-foreground bg-muted/5 border-border',
     },
     {
         title: 'Evaluasi & Tindak Lanjut',
         desc: 'Tinjau hasilnya, lalu sesuaikan judul jika diperlukan.',
         icon: CheckCircle,
-        color: 'text-muted-foreground bg-muted/5 border-border',
     },
 ];
 
@@ -41,7 +38,7 @@ const TIPS = [
         icon: Target,
     },
     {
-        title: 'Terapkan Variasi/Kombinasi Metode',
+        title: 'Terapkan Variasi/Metode Baru',
         desc: 'Gunakan metode yang berbeda agar judul Anda lebih jelas dan tidak terlalu mirip.',
         icon: Layers,
     },
@@ -50,53 +47,46 @@ const TIPS = [
 export function SimilarityHowItWorks() {
     return (
         <div className="space-y-8">
-            {/* Steps Timeline Grid */}
-            <div className="relative grid gap-6 md:grid-cols-3">
-                {STEPS.map(({ title, desc, icon: Icon, color }, i) => (
-                    <div
-                        key={i}
-                        className="group relative rounded-lg border border-border bg-card p-6 shadow-none"
-                    >
-                        {/* Connecting line for larger screens */}
-                        {i < STEPS.length - 1 && (
-                            <div className="absolute top-10 -right-3 z-10 hidden h-[1px] w-6 bg-border md:block" />
-                        )}
-
-                        <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black tracking-widest text-muted-foreground/60 uppercase">
-                                LANGKAH {String(i + 1).padStart(2, '0')}
-                            </span>
-                            <div className={`rounded-lg border p-2 ${color}`}>
-                                <Icon className="size-4" />
+            {/* Steps Timeline */}
+            <div className="space-y-6">
+                <h4 className="text-xs font-bold tracking-widest text-muted-foreground/90 uppercase">
+                    Alur Pemeriksaan
+                </h4>
+                <div className="relative pl-4 border-l border-border/60 space-y-6">
+                    {STEPS.map(({ title, desc, icon: Icon }, i) => (
+                        <div key={i} className="relative space-y-1">
+                            {/* Dot on the timeline */}
+                            <div className="absolute -left-[21px] top-1 flex size-2.5 items-center justify-center rounded-full bg-background border border-border" />
+                            
+                            <div className="flex items-center gap-2">
+                                <Icon className="size-3.5 text-primary/70" />
+                                <h5 className="text-xs font-bold text-foreground">
+                                    {title}
+                                </h5>
                             </div>
+                            <p className="text-[11px] leading-relaxed text-muted-foreground/90 pl-5.5">
+                                {desc}
+                            </p>
                         </div>
-
-                        <h4 className="mt-4 text-sm font-bold text-foreground">
-                            {title}
-                        </h4>
-
-                        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                            {desc}
-                        </p>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
             {/* Tips Section */}
-            <div className="space-y-4 rounded-lg border border-border bg-muted/5 p-6">
-                <h4 className="flex items-center gap-2 text-sm font-bold text-foreground">
-                    <Lightbulb className="size-4 text-primary" />
-                    Tips Mengurangi Kemiripan Judul
+            <div className="space-y-4 pt-4 border-t border-border/60">
+                <h4 className="flex items-center gap-2 text-xs font-bold tracking-widest text-muted-foreground/90 uppercase">
+                    <Lightbulb className="size-3.5 text-yellow-500" />
+                    Tips Reduksi Kemiripan
                 </h4>
 
-                <div className="grid gap-5 pt-1 sm:grid-cols-3">
+                <div className="space-y-4">
                     {TIPS.map(({ title, desc, icon: Icon }, idx) => (
-                        <div key={idx} className="space-y-2">
-                            <div className="flex items-center gap-2 text-primary">
-                                <Icon className="size-4 shrink-0" />
+                        <div key={idx} className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <Icon className="size-3.5 text-primary/70" />
                                 <h5 className="text-xs font-bold text-foreground">{title}</h5>
                             </div>
-                            <p className="pl-6 text-[11px] leading-relaxed text-muted-foreground">
+                            <p className="pl-5.5 text-[11px] leading-relaxed text-muted-foreground/90">
                                 {desc}
                             </p>
                         </div>
