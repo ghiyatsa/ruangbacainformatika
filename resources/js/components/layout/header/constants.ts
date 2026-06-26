@@ -8,7 +8,7 @@ import {
     ScanSearch,
 } from 'lucide-react';
 import { about, home } from '@/routes';
-import blog from '@/routes/blog/index';
+import blog from '@/routes/blog';
 import books from '@/routes/books';
 import internshipReports from '@/routes/internship-reports';
 import similarity from '@/routes/similarity';

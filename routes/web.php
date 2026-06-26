@@ -31,7 +31,6 @@ Route::get('/books', CatalogController::class)->name('books.index');
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
 Route::get('/posts', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/posts/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
-Route::get('/preview/posts/{post:preview_token}', [BlogController::class, 'preview'])->name('blog.preview');
 Route::post('/catalog-reports', [CatalogReportController::class, 'store'])->name('catalog-reports.store');
 Route::get('/skripsi', [SkripsiController::class, 'index'])->name('skripsi.index');
 Route::get('/skripsi/{skripsi:student_id}', [SkripsiController::class, 'show'])->name('skripsi.show');

@@ -78,12 +78,10 @@ export default function CatalogSection({
         ),
     });
 
-    if (mostBorrowedBooks === undefined || mostBorrowedBooks.length > 0) {
-        items.push({
-            id: 'most-borrowed',
-            content: <MostBorrowedBooks mostBorrowedBooks={mostBorrowedBooks} />,
-        });
-    }
+    items.push({
+        id: 'most-borrowed',
+        content: <MostBorrowedBooks mostBorrowedBooks={mostBorrowedBooks} />,
+    });
 
     if (latestPosts && latestPosts.length > 0) {
         items.push({

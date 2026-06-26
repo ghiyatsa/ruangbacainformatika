@@ -12,7 +12,6 @@ import BookController from '@/actions/App/Http/Controllers/BookController';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
-import { formatViewCount } from '@/lib/utils';
 import LazyDeferred from './LazyDeferred';
 import type { CatalogBook } from '@/features/welcome/types';
 
@@ -280,7 +279,7 @@ export default function FeaturedSpotlight({
                                         ))}
                                     <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
                                         <Eye className="size-3" />
-                                        {formatViewCount(book.viewCount)}
+                                        {book.viewCount}
                                     </span>
                                 </div>
                             </div>

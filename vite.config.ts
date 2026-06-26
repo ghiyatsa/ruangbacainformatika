@@ -99,7 +99,7 @@ export default defineConfig(({ command }) => ({
             ],
         }),
         inertia({
-            ssr: false,
+            ssr: command === 'build' ? undefined : false,
         }),
         react(),
         babel({

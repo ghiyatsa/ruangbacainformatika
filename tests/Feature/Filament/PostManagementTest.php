@@ -57,6 +57,7 @@ it('member can render the create post page with correct titles and labels', func
         ->assertSee('Isi & Redaksi')
         ->assertSee('Judul Artikel')
         ->assertSee('Slug URL')
+        ->assertSee('Abstrak / Ringkasan')
         ->assertSee('Badan Artikel')
         ->assertSee('Klasifikasi')
         ->assertSee('Penulis')

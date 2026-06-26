@@ -128,6 +128,7 @@ export default function BookCatalogPage({
                 propKey="books"
                 resourceLabel="judul buku"
                 className="hidden md:block"
+                buttonLabel="Tampilkan lebih banyak"
                 completeLabel="Semua judul buku telah ditampilkan."
                 loadingFallback={
                     <div

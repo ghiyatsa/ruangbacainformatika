@@ -96,9 +96,11 @@ it('shows book card skeletons when mobile progressive pagination starts loading 
     );
 
     expect($mobileProgressivePagination)->toContain('loadingFallback?: ReactNode;')
-        ->and($mobileProgressivePagination)->toContain("import { InfiniteScroll } from '@inertiajs/react';")
-        ->and($mobileProgressivePagination)->toContain('<InfiniteScroll data={propKey}>')
-        ->and($mobileProgressivePagination)->toContain('{loadingFallback}')
+        ->and($mobileProgressivePagination)->toContain("type ProgressivePaginationMode = 'auto' | 'manual-then-auto';")
+        ->and($mobileProgressivePagination)->toContain("mode = 'manual-then-auto'")
+        ->and($mobileProgressivePagination)->toContain('const [isAutoLoadEnabled, setIsAutoLoadEnabled] = useState(mode === \'auto\');')
+        ->and($mobileProgressivePagination)->toContain("setIsAutoLoadEnabled(mode === 'auto');")
+        ->and($mobileProgressivePagination)->toContain('const loadingSkeleton = loadingFallback ?? (')
         ->and($bookCatalogPage)->toContain('loadingFallback={')
         ->and($bookCatalogPage)->toContain('fallback={<BookCatalogFiltersSkeleton />}')
         ->and($bookCatalogPage)->toContain("data={['categories', 'authors', 'publishers', 'years']}")
@@ -107,6 +109,8 @@ it('shows book card skeletons when mobile progressive pagination starts loading 
         ->and($bookCatalogPage)->toContain('Array.from({ length: 4 })')
         ->and($bookCatalogPage)->toContain("viewMode === 'list' ? 'compact' : 'grid'")
         ->and($bookCatalogPage)->toContain('className="hidden md:block"')
+        ->and($bookCatalogPage)->toContain('buttonLabel="Tampilkan lebih banyak"')
+        ->and($bookCatalogPage)->toContain('paginationVisibility="none"')
         ->and($filtersSkeleton)->toContain('aria-hidden="true"');
 });
 

@@ -54,11 +54,9 @@ class SkripsiController extends Controller
         ]);
     }
 
-    public function show(Request $request, Skripsi $skripsi): Response
+    public function show(Skripsi $skripsi): Response
     {
-        if (! $request->prefetch() && ! $request->hasHeader('X-Inertia-Partial-Component')) {
-            $skripsi->increment('view_count');
-        }
+        $skripsi->increment('view_count');
 
         return Inertia::render('skripsi/show', [
             'skripsi' => new SkripsiResource($skripsi->fresh()),

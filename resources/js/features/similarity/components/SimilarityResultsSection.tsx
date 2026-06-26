@@ -3,21 +3,20 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { SimilarityResultCard } from '@/features/similarity/components/SimilarityResultCard';
 import { getLevelConfig } from '@/features/similarity/types';
-import { cn } from '@/lib/utils';
 import type { SimilarityResult } from '@/features/similarity/types';
 
 function SafeResult() {
     return (
-        <Card className="border border-border bg-card rounded-none shadow-none">
+        <Card className="border border-border bg-card shadow-none">
             <CardContent className="flex flex-col items-center gap-4 p-8 text-center sm:p-10">
-                <div className="flex size-10 items-center justify-center rounded-none border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
-                    <ShieldCheck className="size-4" />
+                <div className="flex size-12 items-center justify-center rounded-lg border border-emerald-500/15 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
+                    <ShieldCheck className="size-5" />
                 </div>
                 <div className="max-w-xl space-y-2">
-                    <h3 className="text-sm font-bold text-foreground">
+                    <h3 className="text-lg font-semibold text-foreground">
                         Tidak ada kemiripan yang menonjol
                     </h3>
-                    <p className="text-xs leading-relaxed text-muted-foreground/90">
+                    <p className="text-sm leading-6 text-muted-foreground">
                         Tidak ditemukan judul yang sangat dekat pada data yang
                         sedang diperiksa. Tetap tinjau fokus, objek, dan metode
                         penelitian sebelum diajukan.
@@ -65,44 +64,43 @@ function ResultsSummaryBanner({ result }: SimilarityResultsSectionProps) {
         'Kemiripan rendah. Judul relatif aman untuk dilanjutkan.';
 
     return (
-        <Card className="border border-border bg-card rounded-none shadow-none">
-            <CardContent className="space-y-4 p-4 sm:p-5">
-                <div className="space-y-2">
-                    <p className="text-[10px] font-bold tracking-widest text-muted-foreground/80 uppercase">
-                        Ringkasan Hasil
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-3xl font-extrabold text-foreground tracking-tight">
-                            {maxPercent}%
-                        </span>
-                        <Badge
-                            variant="outline"
-                            className={cn(
-                                'h-6 rounded-full px-2.5 text-[9px] font-bold uppercase transition-none shadow-none',
-                                topLevelConfig.badgeClass
-                            )}
-                        >
-                            {topLevelConfig.label}
-                        </Badge>
+        <div className="gap-4">
+            <Card className="border border-border bg-card shadow-none">
+                <CardContent className="space-y-5 p-5 sm:p-6">
+                    <div className="space-y-3">
+                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                            Ringkasan hasil
+                        </p>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-4xl font-semibold text-foreground">
+                                {maxPercent}%
+                            </span>
+                            <Badge
+                                variant="outline"
+                                className={`h-7 rounded-full px-3 text-[11px] font-semibold uppercase ${topLevelConfig.badgeClass}`}
+                            >
+                                {topLevelConfig.label}
+                            </Badge>
+                        </div>
+                        <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+                            {maxDescription}
+                        </p>
                     </div>
-                    <p className="max-w-xl text-xs leading-relaxed text-muted-foreground/90">
-                        {maxDescription}
-                    </p>
-                </div>
 
-                <div className="space-y-1.5">
-                    <div className="text-[9px] font-bold tracking-widest text-muted-foreground/80 uppercase">
-                        Kemiripan Tertinggi
+                    <div className="space-y-2">
+                        <div className="text-xs text-muted-foreground">
+                            Kemiripan tertinggi
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                                className="h-full rounded-full bg-foreground/80"
+                                style={{ width: `${maxPercent}%` }}
+                            />
+                        </div>
                     </div>
-                    <div className="h-1.5 overflow-hidden bg-muted rounded-none">
-                        <div
-                            className={cn('h-full', topLevelConfig.bg)}
-                            style={{ width: `${maxPercent}%` }}
-                        />
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </div>
     );
 }
 
@@ -115,18 +113,20 @@ export function SimilarityResultsSection({
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <ResultsSummaryBanner result={result} />
-            <div className="grid gap-3">
-                {result.results.map((item, index) => (
-                    <SimilarityResultCard
-                        key={index}
-                        item={item}
-                        index={index}
-                        userTitle={userTitle}
-                    />
-                ))}
-            </div>
+            <section>
+                <div className="grid gap-3">
+                    {result.results.map((item, index) => (
+                        <SimilarityResultCard
+                            key={index}
+                            item={item}
+                            index={index}
+                            userTitle={userTitle}
+                        />
+                    ))}
+                </div>
+            </section>
         </div>
     );
 }

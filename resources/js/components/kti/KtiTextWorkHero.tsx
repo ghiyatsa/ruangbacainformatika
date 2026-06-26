@@ -3,7 +3,7 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { KtiShareButton } from '@/components/kti/KtiShareButton';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn, formatViewCount } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 
 export interface TextWorkRecord {
@@ -85,7 +85,7 @@ export function KtiTextWorkHero({
                                 <span className="text-border">&bull;</span>
                                 <span className="flex items-center gap-1.5">
                                     <Eye className="size-3.5" />
-                                    {formatViewCount(record.viewCount)}
+                                    {record.viewCount.toLocaleString('id-ID')}
                                 </span>
                             </div>
 

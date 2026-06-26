@@ -97,15 +97,3 @@ export function downloadSvgAsPng(
     };
     img.src = dataUrl;
 }
-
-
-export function formatViewCount(count: number): string {
-    if (count < 1000) {
-        return count.toLocaleString('id-ID');
-    }
-
-    const thousands = count / 1000;
-    const rounded = Math.round(thousands * 10) / 10;
-
-    return rounded + 'k';
-}

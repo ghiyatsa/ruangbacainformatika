@@ -63,15 +63,15 @@ class AddSecurityHeaders
         ];
 
         if (app()->isLocal()) {
-            array_push($scriptSources, 'http://127.0.0.1:*', 'http://localhost:*');
-            array_push($styleSources, 'http://127.0.0.1:*', 'http://localhost:*');
-            array_push($connectSources, 'http://127.0.0.1:*', 'http://localhost:*', 'ws://127.0.0.1:*', 'ws://localhost:*');
+            array_push($scriptSources, 'http://127.0.0.1:5173', 'http://localhost:5173');
+            array_push($styleSources, 'http://127.0.0.1:5173', 'http://localhost:5173');
+            array_push($connectSources, 'http://127.0.0.1:5173', 'http://localhost:5173', 'ws://127.0.0.1:5173', 'ws://localhost:5173');
         }
 
         $fontSources = ["'self'", 'data:', 'https://fonts.bunny.net'];
 
         if (app()->isLocal()) {
-            array_push($fontSources, 'http://127.0.0.1:*', 'http://localhost:*');
+            array_push($fontSources, 'http://127.0.0.1:5173', 'http://localhost:5173');
         }
 
         $directives = [

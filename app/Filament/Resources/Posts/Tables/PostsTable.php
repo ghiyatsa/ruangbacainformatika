@@ -137,15 +137,9 @@ class PostsTable
                                 'rejection_reason' => $data['rejection_reason'],
                             ]);
                         }),
-                    Action::make('preview')
-                        ->label('Pratinjau')
-                        ->icon('heroicon-o-eye')
-                        ->color('info')
-                        ->url(fn (Post $record): string => route('blog.preview', $record->preview_token))
-                        ->openUrlInNewTab(),
                     ViewAction::make()
                         ->label('Lihat')
-                        ->icon('heroicon-o-document-text'),
+                        ->icon('heroicon-o-eye'),
                     EditAction::make()
                         ->label('Tinjau')
                         ->icon('heroicon-o-pencil'),

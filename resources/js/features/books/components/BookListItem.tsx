@@ -3,7 +3,6 @@ import { BookOpen, Eye, Star } from 'lucide-react';
 import { useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
-import { formatViewCount } from '@/lib/utils';
 import type { CatalogBook } from '@/features/welcome/types';
 
 interface BookListItemProps {
@@ -105,7 +104,7 @@ export default function BookListItem({ book }: BookListItemProps) {
                 </div>
                 <div className="flex items-center gap-1">
                     <Eye className="size-3" />
-                    <span>{formatViewCount(book.viewCount)}</span>
+                    <span>{book.viewCount.toLocaleString('id-ID')}</span>
                 </div>
             </div>
         </Link>

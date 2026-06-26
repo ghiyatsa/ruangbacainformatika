@@ -3,7 +3,6 @@
 namespace App\Filament\Dashboard\Resources\Posts\Tables;
 
 use App\Models\Post;
-use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -75,12 +74,6 @@ class PostsTable
             ])
             ->recordActions([
                 ActionGroup::make([
-                    Action::make('preview')
-                        ->label('Pratinjau')
-                        ->icon('heroicon-o-eye')
-                        ->color('info')
-                        ->url(fn (Post $record): string => route('blog.preview', $record->preview_token))
-                        ->openUrlInNewTab(),
                     EditAction::make()
                         ->label('Ubah'),
                     DeleteAction::make()

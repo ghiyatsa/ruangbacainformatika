@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
-import { cn, formatViewCount } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 import type { CatalogBook } from '@/features/welcome/types';
@@ -319,7 +319,7 @@ function BookCard({
 
                 <div className="absolute bottom-2 left-2 z-20">
                     <div className="inline-flex h-7 items-center rounded-full bg-black/55 px-2.5 text-[10px] font-semibold text-white shadow-sm">
-                        {formatViewCount(book.viewCount)} dilihat
+                        {book.viewCount.toLocaleString('id-ID')} dilihat
                     </div>
                 </div>
             </div>

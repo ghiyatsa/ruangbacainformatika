@@ -40,7 +40,7 @@ import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
-import { cn, formatViewCount } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 
 import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
@@ -456,7 +456,9 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                 <Eye className="mt-0.5 size-4 shrink-0 sm:mt-0" />
                                                 <span className="min-w-0 text-left leading-relaxed sm:leading-normal">
                                                     <strong className="text-foreground">
-                                                        {formatViewCount(book.viewCount)}
+                                                        {book.viewCount.toLocaleString(
+                                                            'id-ID',
+                                                        )}
                                                     </strong>{' '}
                                                     kali dilihat
                                                 </span>

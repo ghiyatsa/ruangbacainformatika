@@ -54,11 +54,9 @@ class InternshipReportController extends Controller
         ]);
     }
 
-    public function show(Request $request, InternshipReport $internshipReport): Response
+    public function show(InternshipReport $internshipReport): Response
     {
-        if (! $request->prefetch() && ! $request->hasHeader('X-Inertia-Partial-Component')) {
-            $internshipReport->increment('view_count');
-        }
+        $internshipReport->increment('view_count');
 
         return Inertia::render('internship-report/show', [
             'report' => new InternshipReportResource($internshipReport->fresh()),
