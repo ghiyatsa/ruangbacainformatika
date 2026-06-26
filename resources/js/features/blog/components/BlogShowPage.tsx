@@ -592,10 +592,9 @@ export function BlogShowPage({
                     </Deferred>
                 </aside>
             </div>
-            {/* Floating Watermark for Preview Mode */}
             {isPreview && (
-                <div className="pointer-events-none fixed right-6 bottom-6 z-100 select-none">
-                    <div className="flex animate-pulse items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/90 px-4 py-2 text-xs font-bold text-black shadow-lg backdrop-blur-sm dark:bg-yellow-400 dark:text-black">
+                <div className="pointer-events-none fixed right-6 bottom-6 z-9999 select-none">
+                    <div className="flex animate-pulse items-center gap-2 rounded-full bg-yellow-500 px-4 py-2 text-xs font-bold text-black shadow-lg dark:bg-yellow-400 dark:text-black">
                         <span className="relative flex h-2 w-2">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-black opacity-75"></span>
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-black"></span>

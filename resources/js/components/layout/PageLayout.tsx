@@ -109,7 +109,7 @@ export function PageLayout({
                 type={type}
             />
 
-            <div className="relative z-10 flex flex-1 flex-col">
+            <div className="relative z-30 flex flex-1 flex-col">
                 {header ? (
                     header
                 ) : showHero ? (
