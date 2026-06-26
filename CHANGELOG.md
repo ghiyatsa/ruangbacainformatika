@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.8.0...v1.9.0) (2026-06-26)
+
+
+### Features
+
+* **pwa,blog:** implement PWA support & fix blog OG image thumbnail mapping ([4809fa9](https://github.com/ghiyatsa/ruangbacainformatika/commit/4809fa91ab17e669890f4d34b1bdc438586df784))
+
+
+### Bug Fixes
+
+* **ui:** increase z-index and remove border from preview watermark badge ([56dba0f](https://github.com/ghiyatsa/ruangbacainformatika/commit/56dba0f2ca491b2b4f7ec426b3c46b4281e3773a))
+
 ## [1.8.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.7.0...v1.8.0) (2026-06-22)
 
 
