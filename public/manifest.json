@@ -1,7 +1,14 @@
 {
-  "name": "Your App Name",
-  "short_name": "Your App",
+  "name": "Ruang Baca Teknik Informatika UNIMAL",
+  "short_name": "Ruang Baca",
+  "description": "Layanan Mandiri & Perpustakaan Digital Teknik Informatika Universitas Malikussaleh",
+  "start_url": "/",
   "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
     {
       "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
@@ -13,7 +20,8 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#ffffff",
+  "theme_color": "#2563EB",
   "background_color": "#ffffff",
-  "display": "standalone"
+  "display": "standalone",
+  "orientation": "portrait"
 }

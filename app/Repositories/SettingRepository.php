@@ -22,16 +22,18 @@ class SettingRepository
             return array_replace($defaults, $storedValues);
         }
 
-        $storedValues = Cache::remember(
-            "site-settings:${section}",
-            now()->addDay(),
-            fn () => Setting::query()
-                ->where('section', $section)
-                ->pluck('value', 'key')
-                ->all()
-        );
+        return once(function () use ($section, $defaults) {
+            $storedValues = Cache::remember(
+                "site-settings:${section}",
+                now()->addDay(),
+                fn () => Setting::query()
+                    ->where('section', $section)
+                    ->pluck('value', 'key')
+                    ->all()
+            );
 
-        return array_replace($defaults, $storedValues);
+            return array_replace($defaults, $storedValues);
+        });
     }
 
     public function get(string $section, string $key, mixed $default = null): mixed

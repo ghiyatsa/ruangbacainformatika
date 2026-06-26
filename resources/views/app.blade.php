@@ -57,6 +57,7 @@
         <link rel="apple-touch-icon" sizes="180x180" href="{{ $siteMeta['appleTouchIcon'] ?? asset('apple-touch-icon.png') }}">
         <link rel="icon" type="image/png" sizes="192x192" href="{{ $siteMeta['favicon'] ?? asset('android-chrome-192x192.png') }}">
         <link rel="icon" type="image/png" sizes="512x512" href="{{ $siteMeta['favicon'] ?? asset('android-chrome-512x512.png') }}">
+        <link rel="manifest" href="/manifest.json">
         <meta name="theme-color" content="{{ $siteMeta['themeColor'] ?? '#ffffff' }}">
 
 
@@ -92,5 +93,14 @@
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then((reg) => console.log('ServiceWorker registered', reg))
+                        .catch((err) => console.error('ServiceWorker registration failed', err));
+                });
+            }
+        </script>
     </body>
 </html>

@@ -95,7 +95,10 @@ class PageMeta
             'robots' => $this->siteRobots(),
             'canonicalUrl' => route('blog.show', $post),
             'type' => 'article',
-            ...$this->openGraphImage->defaultMeta(),
+            'ogImage' => $post->cover_image ? asset('storage/'.$post->cover_image) : route('og.site'),
+            'ogImageType' => 'image/png',
+            'ogImageWidth' => 1200,
+            'ogImageHeight' => 600,
         ];
     }
 
