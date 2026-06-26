@@ -54,9 +54,11 @@ class ThesisController extends Controller
         ]);
     }
 
-    public function show(Thesis $thesis): Response
+    public function show(Request $request, Thesis $thesis): Response
     {
-        $thesis->increment('view_count');
+        if (! $request->prefetch() && ! $request->hasHeader('X-Inertia-Partial-Component')) {
+            $thesis->increment('view_count');
+        }
 
         return Inertia::render('thesis/show', [
             'thesis' => new ThesisResource($thesis->fresh()),

@@ -32,9 +32,6 @@ class PostInfolist
                                         TextEntry::make('slug')
                                             ->label('Slug')
                                             ->copyable(),
-                                        TextEntry::make('summary')
-                                            ->label('Ringkasan')
-                                            ->placeholder('-'),
                                         TextEntry::make('content')
                                             ->label('Isi Artikel')
                                             ->html()

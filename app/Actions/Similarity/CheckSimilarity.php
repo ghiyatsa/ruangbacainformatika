@@ -79,13 +79,13 @@ class CheckSimilarity
             ->values()
             ->all();
 
-        $skripsisById = Skripsi::whereIn('id', $skripsiIds)
-            ->get(['id', 'title', 'author_name', 'student_id'])
-            ->keyBy('id');
+        $skripsis = Skripsi::query()
+            ->whereIn('id', $skripsiIds)
+            ->orWhereIn('student_id', $studentIds)
+            ->get(['id', 'title', 'author_name', 'student_id']);
 
-        $skripsisByStudentId = Skripsi::whereIn('student_id', $studentIds)
-            ->get(['id', 'title', 'author_name', 'student_id'])
-            ->keyBy('student_id');
+        $skripsisById = $skripsis->keyBy('id');
+        $skripsisByStudentId = $skripsis->whereNotNull('student_id')->keyBy('student_id');
 
         $result['results'] = array_map(function ($item) use ($skripsisById, $skripsisByStudentId) {
             $skripsiId = match (true) {

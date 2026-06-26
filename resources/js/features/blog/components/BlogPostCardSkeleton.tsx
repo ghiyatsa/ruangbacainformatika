@@ -47,7 +47,7 @@ export function BlogPostCardSkeleton({ variant = 'card' }: BlogPostCardSkeletonP
     // Standard card
     return (
         <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card">
-            <div className="relative aspect-16/10">
+            <div className="relative aspect-video">
                 <Skeleton className="h-full w-full" />
             </div>
             <div className="flex flex-1 flex-col gap-3 p-4">

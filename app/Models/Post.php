@@ -35,6 +35,7 @@ class Post extends Model
         'summary',
         'content',
         'cover_image',
+        'preview_token',
         'is_published',
         'published_at',
         'view_count',
@@ -58,6 +59,12 @@ class Post extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (Post $post): void {
+            if (blank($post->preview_token)) {
+                $post->preview_token = (string) Str::uuid();
+            }
+        });
+
         static::saving(function (Post $post): void {
             if ($post->status === self::STATUS_APPROVED) {
                 $post->is_published = true;
@@ -195,5 +202,20 @@ class Post extends Model
             ->squish()
             ->limit($limit)
             ->toString();
+    }
+
+    public function getPreviewTokenAttribute(): string
+    {
+        if (blank($this->attributes['preview_token'] ?? null)) {
+            $token = (string) Str::uuid();
+            $this->preview_token = $token;
+            if ($this->exists) {
+                $this->saveQuietly();
+            }
+
+            return $token;
+        }
+
+        return $this->attributes['preview_token'];
     }
 }

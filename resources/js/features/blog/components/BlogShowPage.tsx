@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BlogCommentsSection } from '@/features/blog/components/comments/BlogCommentsSection';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
-import { cn } from '@/lib/utils';
+import { cn, formatViewCount } from '@/lib/utils';
 import blog from '@/routes/blog';
 import { BlogLabelsSidebar } from './BlogLabelsSidebar';
 import { BlogPopularPosts } from './BlogPopularPosts';
@@ -35,6 +35,7 @@ export function BlogShowPage({
     popularPosts,
     categories,
     tags,
+    isPreview = false,
 }: BlogShowPageProps) {
     const [imageLoaded, setImageLoaded] = useState(false);
     const article = post?.data ?? null;
@@ -164,22 +165,15 @@ export function BlogShowPage({
                                 )
                             ) : (
                                 <div className="mb-3 flex flex-wrap gap-2">
-                                    <Skeleton className="h-6 w-16 rounded-full animate-pulse" />
-                                    <Skeleton className="h-6 w-20 rounded-full animate-pulse" />
+                                    <Skeleton className="h-6 w-16 animate-pulse rounded-full" />
+                                    <Skeleton className="h-6 w-20 animate-pulse rounded-full" />
                                 </div>
                             )}
-
                             {article ? (
                                 <>
                                     <h1 className="text-wrap-balance text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                                         {article.title}
                                     </h1>
-
-                                    {article.summary && (
-                                        <p className="mt-3 max-w-3xl text-base text-muted-foreground sm:text-lg">
-                                            {article.summary}
-                                        </p>
-                                    )}
                                 </>
                             ) : (
                                 <>
@@ -187,10 +181,8 @@ export function BlogShowPage({
                                         <Skeleton className="h-8 w-11/12 animate-pulse sm:h-10 lg:h-12" />
                                         <Skeleton className="h-8 w-2/3 animate-pulse sm:h-10 lg:h-12" />
                                     </div>
-                                    <Skeleton className="mt-3 h-5 w-4/5 animate-pulse max-w-2xl" />
                                 </>
                             )}
-
                             {/* Author & Action buttons section */}
                             <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                                 {article ? (
@@ -222,12 +214,12 @@ export function BlogShowPage({
                                     )
                                 ) : (
                                     <div className="flex items-center gap-2.5">
-                                        <Skeleton className="h-8 w-8 rounded-full animate-pulse" />
+                                        <Skeleton className="h-8 w-8 animate-pulse rounded-full" />
                                         <div className="flex flex-col text-sm">
                                             <span className="text-muted-foreground">
                                                 Published by{' '}
                                             </span>
-                                            <Skeleton className="h-4 w-24 animate-pulse mt-0.5" />
+                                            <Skeleton className="mt-0.5 h-4 w-24 animate-pulse" />
                                         </div>
                                     </div>
                                 )}
@@ -258,7 +250,7 @@ export function BlogShowPage({
                                             />
                                         </Button>
                                     ) : (
-                                        <Skeleton className="h-8 w-8 rounded-xl animate-pulse" />
+                                        <Skeleton className="h-8 w-8 animate-pulse rounded-xl" />
                                     )}
 
                                     {/* Share Button */}
@@ -274,10 +266,11 @@ export function BlogShowPage({
                                             <Share2 className="size-4 text-primary" />
                                         </Button>
                                     ) : (
-                                        <Skeleton className="h-8 w-8 rounded-xl animate-pulse" />
+                                        <Skeleton className="h-8 w-8 animate-pulse rounded-xl" />
                                     )}
                                 </div>
-                            </div>                             {/* Meta info section */}
+                            </div>{' '}
+                            {/* Meta info section */}
                             {article ? (
                                 <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                                     <span>
@@ -308,30 +301,29 @@ export function BlogShowPage({
                                     </span>
                                     <span className="inline-flex items-center gap-1">
                                         <Eye className="size-3.5" />
-                                        {article.viewCount.toLocaleString(
-                                            'id-ID',
-                                        )}
+                                        {formatViewCount(article.viewCount)}
                                     </span>
                                 </div>
                             ) : (
                                 <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                                     <span>
                                         Diterbitkan:{' '}
-                                        <Skeleton className="inline-block h-3 w-16 align-middle animate-pulse" />
+                                        <Skeleton className="inline-block h-3 w-16 animate-pulse align-middle" />
                                     </span>
                                     <span className="text-muted-foreground/30">
                                         •
                                     </span>
                                     <span>
                                         Waktu baca:{' '}
-                                        <Skeleton className="inline-block h-3 w-6 align-middle animate-pulse" /> menit
+                                        <Skeleton className="inline-block h-3 w-6 animate-pulse align-middle" />{' '}
+                                        menit
                                     </span>
                                     <span className="text-muted-foreground/30">
                                         •
                                     </span>
                                     <span className="inline-flex items-center gap-1">
                                         <Eye className="size-3.5" />
-                                        <Skeleton className="inline-block h-3 w-10 align-middle animate-pulse" />
+                                        <Skeleton className="inline-block h-3 w-10 animate-pulse align-middle" />
                                     </span>
                                 </div>
                             )}
@@ -341,31 +333,40 @@ export function BlogShowPage({
             }
         >
             {(() => {
-                const jsonLd = article ? {
-                    '@context': 'https://schema.org',
-                    '@type': 'BlogPosting',
-                    'headline': article.title,
-                    'image': article.coverImageUrl || undefined,
-                    'datePublished': article.publishedAt || undefined,
-                    'dateModified': article.updatedAt || undefined,
-                    'author': article.author ? {
-                        '@type': 'Person',
-                        'name': article.author.name
-                    } : undefined,
-                    'description': article.summary || article.excerpt || undefined,
-                    'publisher': {
-                        '@type': 'Organization',
-                        'name': page.props.name || 'Ruang Baca Teknik Informatika UNIMAL',
-                        'logo': page.props.site?.logo ? {
-                            '@type': 'ImageObject',
-                            'url': page.props.site.logo
-                        } : undefined
-                    }
-                } : null;
+                const jsonLd = article
+                    ? {
+                          '@context': 'https://schema.org',
+                          '@type': 'BlogPosting',
+                          headline: article.title,
+                          image: article.coverImageUrl || undefined,
+                          datePublished: article.publishedAt || undefined,
+                          dateModified: article.updatedAt || undefined,
+                          author: article.author
+                              ? {
+                                    '@type': 'Person',
+                                    name: article.author.name,
+                                }
+                              : undefined,
+                          description:
+                              article.summary || article.excerpt || undefined,
+                          publisher: {
+                              '@type': 'Organization',
+                              name:
+                                  page.props.name ||
+                                  'Ruang Baca Teknik Informatika UNIMAL',
+                              logo: page.props.site?.logo
+                                  ? {
+                                        '@type': 'ImageObject',
+                                        url: page.props.site.logo,
+                                    }
+                                  : undefined,
+                          },
+                      }
+                    : null;
 
                 if (!jsonLd) {
-return null;
-}
+                    return null;
+                }
 
                 return (
                     <script type="application/ld+json">
@@ -378,10 +379,30 @@ return null;
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
                 {/* ─── LEFT: Article content ─── */}
                 <div className="space-y-8">
+                    {article && article.status !== 'approved' && (
+                        <div className="text-yellow-850 flex items-center gap-2 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm dark:text-yellow-400">
+                            <span className="relative flex h-2 w-2 shrink-0">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75"></span>
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-500"></span>
+                            </span>
+                            <span>
+                                <strong>Mode Pratinjau:</strong> Artikel ini
+                                masih berstatus{' '}
+                                <strong>
+                                    {article.status === 'draft'
+                                        ? 'Draf'
+                                        : article.status === 'pending'
+                                          ? 'Dalam Peninjauan'
+                                          : 'Perlu Perbaikan'}
+                                </strong>{' '}
+                                dan belum terbit publik.
+                            </span>
+                        </div>
+                    )}
                     <div className="space-y-6">
                         {/* Cover image */}
                         <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-                            <div className="relative aspect-16/8 bg-muted">
+                            <div className="relative aspect-video bg-muted">
                                 {article && (
                                     <img
                                         src={article.coverImageUrl}
@@ -391,7 +412,9 @@ return null;
                                         onLoad={() => setImageLoaded(true)}
                                         className={cn(
                                             'h-full w-full object-cover transition-opacity duration-300',
-                                            imageLoaded ? 'opacity-100' : 'absolute opacity-0',
+                                            imageLoaded
+                                                ? 'opacity-100'
+                                                : 'absolute opacity-0',
                                         )}
                                     />
                                 )}
@@ -408,7 +431,7 @@ return null;
                                 className="max-w-none"
                             />
                         ) : (
-                            <div className="space-y-4 max-w-none pt-4">
+                            <div className="max-w-none space-y-4 pt-4">
                                 <Skeleton className="h-4 w-full animate-pulse" />
                                 <Skeleton className="h-4 w-11/12 animate-pulse" />
                                 <Skeleton className="h-4 w-10/12 animate-pulse" />
@@ -537,9 +560,9 @@ return null;
                                 )
                             ) : (
                                 <div className="flex flex-wrap gap-2">
-                                    <Skeleton className="h-6 w-16 rounded-full animate-pulse" />
-                                    <Skeleton className="h-6 w-12 rounded-full animate-pulse" />
-                                    <Skeleton className="h-6 w-20 rounded-full animate-pulse" />
+                                    <Skeleton className="h-6 w-16 animate-pulse rounded-full" />
+                                    <Skeleton className="h-6 w-12 animate-pulse rounded-full" />
+                                    <Skeleton className="h-6 w-20 animate-pulse rounded-full" />
                                 </div>
                             )}
                         </div>
@@ -569,6 +592,18 @@ return null;
                     </Deferred>
                 </aside>
             </div>
+            {/* Floating Watermark for Preview Mode */}
+            {isPreview && (
+                <div className="pointer-events-none fixed right-6 bottom-6 z-100 select-none">
+                    <div className="flex animate-pulse items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/90 px-4 py-2 text-xs font-bold text-black shadow-lg backdrop-blur-sm dark:bg-yellow-400 dark:text-black">
+                        <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-black opacity-75"></span>
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-black"></span>
+                        </span>
+                        MODE PRATINJAU
+                    </div>
+                </div>
+            )}
         </PageLayout>
     );
 }

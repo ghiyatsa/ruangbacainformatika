@@ -92,4 +92,5 @@ export interface BlogShowPageProps {
     popularPosts?: BlogPostItem[];
     categories?: BlogTaxonomyItem[];
     tags?: BlogTaxonomyItem[];
+    isPreview?: boolean;
 }
