@@ -60,6 +60,35 @@ export function GlobalContentNotice({
         string | null
     >(null);
 
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const textRef = React.useRef<HTMLDivElement>(null);
+    const [isOverflowing, setIsOverflowing] = React.useState(false);
+
+    React.useEffect(() => {
+        const container = containerRef.current;
+        const text = textRef.current;
+
+        if (!container || !text || !notice) {
+            return;
+        }
+
+        const checkOverflow = () => {
+            setIsOverflowing(text.scrollWidth > container.clientWidth);
+        };
+
+        checkOverflow();
+        
+        // Wait a brief moment to ensure layouts have settled
+        const timer = window.setTimeout(checkOverflow, 50);
+
+        window.addEventListener('resize', checkOverflow);
+
+        return () => {
+            window.clearTimeout(timer);
+            window.removeEventListener('resize', checkOverflow);
+        };
+    }, [notice?.text]);
+
     const closeNotice = React.useCallback(() => {
         if (noticeStorageKey) {
             window.localStorage.setItem(noticeStorageKey, '1');
@@ -82,14 +111,48 @@ export function GlobalContentNotice({
         return null;
     }
 
+    const marqueeStyle = isOverflowing ? (
+        <style
+            dangerouslySetInnerHTML={{
+                __html: `
+                    @keyframes notice-marquee {
+                        0% { transform: translate3d(0, 0, 0); }
+                        100% { transform: translate3d(-50%, 0, 0); }
+                    }
+                    .animate-notice-marquee {
+                        display: inline-flex;
+                        white-space: nowrap;
+                        animation: notice-marquee 20s linear infinite;
+                    }
+                `,
+            }}
+        />
+    ) : null;
+
+    const textContent = (
+        <span className="inline-flex items-center gap-2 whitespace-nowrap">
+            <span>{notice.text}</span>
+        </span>
+    );
+
+    const linkContent = notice.url ? (
+        <a
+            href={notice.url}
+            className={`inline-flex text-xs font-semibold leading-tight transition-colors ${noticeStyle.link}`}
+        >
+            {notice.linkLabel ?? 'Lihat detail'}
+        </a>
+    ) : null;
+
     if (variant === 'topbar') {
         return (
             <div
                 className={cn(
-                    'relative z-50 rounded-none border-b border-border/60 bg-background/95',
+                    'relative z-50 rounded-none border-b border-border/60 bg-background',
                     className,
                 )}
             >
+                {marqueeStyle}
                 <div className="mx-auto flex max-w-7xl items-center gap-3 border-x border-border/60 px-4 py-2 sm:px-6">
                     <span
                         className={`relative mt-0.5 flex size-7 shrink-0 items-center justify-center ${noticeStyle.icon}`}
@@ -105,18 +168,20 @@ export function GlobalContentNotice({
                         </span>
                     </span>
 
-                    <div className="min-w-0 flex-1">
-                        <p className="text-sm leading-relaxed font-medium text-foreground">
-                            {notice.text}
-                        </p>
-                        {notice.url ? (
-                            <a
-                                href={notice.url}
-                                className={`inline-flex text-sm font-semibold transition-colors ${noticeStyle.link}`}
+                    <div className="min-w-0 flex-1 flex flex-col justify-center">
+                        <div ref={containerRef} className="w-full overflow-hidden">
+                            <div
+                                ref={textRef}
+                                className={cn(
+                                    'text-sm font-medium text-foreground',
+                                    isOverflowing ? 'animate-notice-marquee gap-8 pr-8' : 'flex items-center'
+                                )}
                             >
-                                {notice.linkLabel ?? 'Lihat detail'}
-                            </a>
-                        ) : null}
+                                {textContent}
+                                {isOverflowing && textContent}
+                            </div>
+                        </div>
+                        {linkContent}
                     </div>
 
                     <button
@@ -135,10 +200,11 @@ export function GlobalContentNotice({
     return (
         <div
             className={cn(
-                'mb-6 rounded-2xl border border-border/70 bg-card/95 p-3 shadow-sm sm:p-4',
+                'mb-6 rounded-2xl border border-border/70 bg-card p-3 shadow-sm sm:p-4',
                 className,
             )}
         >
+            {marqueeStyle}
             <div className="flex items-center gap-3">
                 <span
                     className={`relative mt-0.5 flex size-8 shrink-0 items-center justify-center ${noticeStyle.icon}`}
@@ -154,18 +220,20 @@ export function GlobalContentNotice({
                     </span>
                 </span>
 
-                <div className="min-w-0 flex-1">
-                    <p className="text-sm leading-relaxed font-medium text-foreground">
-                        {notice.text}
-                    </p>
-                    {notice.url ? (
-                        <a
-                            href={notice.url}
-                            className={`inline-flex text-sm font-semibold transition-colors ${noticeStyle.link}`}
+                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                    <div ref={containerRef} className="w-full overflow-hidden">
+                        <div
+                            ref={textRef}
+                            className={cn(
+                                'text-sm font-medium text-foreground',
+                                isOverflowing ? 'animate-notice-marquee gap-8 pr-8' : 'flex items-center'
+                            )}
                         >
-                            {notice.linkLabel ?? 'Lihat detail'}
-                        </a>
-                    ) : null}
+                            {textContent}
+                            {isOverflowing && textContent}
+                        </div>
+                    </div>
+                    {linkContent}
                 </div>
 
                 <button
@@ -181,14 +249,19 @@ export function GlobalContentNotice({
     );
 }
 
-function isNoticeActiveAndNotDismissed(notice: GlobalNoticeData | null | undefined): boolean {
+function isNoticeActiveAndNotDismissed(
+    notice: GlobalNoticeData | null | undefined,
+): boolean {
     if (!notice || !notice.isActive) {
         return false;
     }
 
     const key = getNoticeStorageKey(notice);
 
-    if (typeof window !== 'undefined' && window.localStorage.getItem(key) === '1') {
+    if (
+        typeof window !== 'undefined' &&
+        window.localStorage.getItem(key) === '1'
+    ) {
         return false;
     }
 
@@ -237,43 +310,31 @@ export function GlobalContentNoticeSkeleton({
     className,
     variant = 'card',
 }: GlobalContentNoticeSkeletonProps) {
-    const [shouldShow, setShouldShow] = React.useState(false);
-
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setShouldShow(true);
-        }, 200);
-
-        return () => {
-            clearTimeout(timer);
-        };
-    }, []);
-
-    if (!shouldShow) {
-        return null;
-    }
-
     const style = {
-        animation: 'fadeInNoticeSkeleton 0.25s ease-out forwards',
+        animation: 'fadeInNoticeSkeleton 0.15s ease-out forwards',
     };
 
     if (variant === 'topbar') {
         return (
             <>
-                <style dangerouslySetInnerHTML={{ __html: `
+                <style
+                    dangerouslySetInnerHTML={{
+                        __html: `
                     @keyframes fadeInNoticeSkeleton {
                         from { opacity: 0; transform: translateY(-4px); }
                         to { opacity: 1; transform: translateY(0); }
                     }
-                `}} />
+                `,
+                    }}
+                />
                 <div
                     style={style}
                     className={cn(
-                        'rounded-none border-b border-border/60 bg-background/95',
+                        'rounded-none border-b border-border/60 bg-background',
                         className,
                     )}
                 >
-                    <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6">
+                    <div className="mx-auto flex max-w-7xl items-center gap-3 border-x border-border/60 px-4 py-2 sm:px-6">
                         <span className="relative mt-0.5 flex size-7 shrink-0 items-center justify-center text-muted-foreground/40">
                             <Bell className="size-4 animate-pulse" />
                         </span>
@@ -283,7 +344,7 @@ export function GlobalContentNoticeSkeleton({
                             <div className="h-2.5 w-24 animate-pulse rounded-full bg-muted/60" />
                         </div>
 
-                        <div className="size-7 shrink-0 rounded-full bg-muted/40 animate-pulse" />
+                        <div className="size-7 shrink-0 animate-pulse rounded-full bg-muted/40" />
                     </div>
                 </div>
             </>
@@ -292,16 +353,20 @@ export function GlobalContentNoticeSkeleton({
 
     return (
         <>
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style
+                dangerouslySetInnerHTML={{
+                    __html: `
                 @keyframes fadeInNoticeSkeleton {
                     from { opacity: 0; transform: scale(0.98); }
                     to { opacity: 1; transform: scale(1); }
                 }
-            `}} />
+            `,
+                }}
+            />
             <div
                 style={style}
                 className={cn(
-                    'mb-6 rounded-2xl border border-border/70 bg-card/95 p-3 shadow-sm sm:p-4',
+                    'mb-6 rounded-2xl border border-border/70 bg-card p-3 shadow-sm sm:p-4',
                     className,
                 )}
             >
@@ -315,7 +380,7 @@ export function GlobalContentNoticeSkeleton({
                         <div className="h-2.5 w-1/4 animate-pulse rounded-full bg-muted/60" />
                     </div>
 
-                    <div className="size-8 shrink-0 rounded-full bg-muted/40 animate-pulse" />
+                    <div className="size-8 shrink-0 animate-pulse rounded-full bg-muted/40" />
                 </div>
             </div>
         </>
@@ -331,8 +396,11 @@ function DeferredGlobalContentNoticeContent({
     }>();
 
     const notice = page.props.globalNotice;
-    const [prevNotice, setPrevNotice] = React.useState<GlobalNoticeData | null | undefined>(notice);
-    const [activeNotice, setActiveNotice] = React.useState<GlobalNoticeData | null>(notice ?? null);
+    const [prevNotice, setPrevNotice] = React.useState<
+        GlobalNoticeData | null | undefined
+    >(notice);
+    const [activeNotice, setActiveNotice] =
+        React.useState<GlobalNoticeData | null>(notice ?? null);
 
     if (notice !== prevNotice) {
         setPrevNotice(notice);
@@ -354,4 +422,3 @@ function DeferredGlobalContentNoticeContent({
         />
     );
 }
-

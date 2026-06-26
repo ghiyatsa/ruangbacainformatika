@@ -22,7 +22,6 @@ class BlogPostResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
-            'summary' => $this->summary,
             'excerpt' => $this->excerpt(),
             'content' => app(RichContentSanitizer::class)->sanitize($this->content),
             'contentText' => Str::of(strip_tags((string) $this->content))->squish()->toString(),

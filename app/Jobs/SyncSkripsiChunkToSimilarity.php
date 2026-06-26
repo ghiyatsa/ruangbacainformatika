@@ -16,9 +16,9 @@ class SyncSkripsiChunkToSimilarity implements ShouldQueue, ShouldQueueAfterCommi
     use Batchable;
     use Queueable;
 
-    public int $tries = 1;
+    public int $tries = 2;
 
-    public int $timeout = 55;
+    public int $timeout = 90;
 
     public bool $failOnTimeout = true;
 

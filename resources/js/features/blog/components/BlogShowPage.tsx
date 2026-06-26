@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BlogCommentsSection } from '@/features/blog/components/comments/BlogCommentsSection';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
-import { cn } from '@/lib/utils';
+import { cn, formatViewCount } from '@/lib/utils';
 import blog from '@/routes/blog';
 import { BlogLabelsSidebar } from './BlogLabelsSidebar';
 import { BlogPopularPosts } from './BlogPopularPosts';
@@ -35,6 +35,7 @@ export function BlogShowPage({
     popularPosts,
     categories,
     tags,
+    isPreview = false,
 }: BlogShowPageProps) {
     const [imageLoaded, setImageLoaded] = useState(false);
     const article = post?.data ?? null;
@@ -175,11 +176,7 @@ export function BlogShowPage({
                                         {article.title}
                                     </h1>
 
-                                    {article.summary && (
-                                        <p className="mt-3 max-w-3xl text-base text-muted-foreground sm:text-lg">
-                                            {article.summary}
-                                        </p>
-                                    )}
+
                                 </>
                             ) : (
                                 <>
@@ -187,7 +184,7 @@ export function BlogShowPage({
                                         <Skeleton className="h-8 w-11/12 animate-pulse sm:h-10 lg:h-12" />
                                         <Skeleton className="h-8 w-2/3 animate-pulse sm:h-10 lg:h-12" />
                                     </div>
-                                    <Skeleton className="mt-3 h-5 w-4/5 animate-pulse max-w-2xl" />
+
                                 </>
                             )}
 
@@ -308,9 +305,7 @@ export function BlogShowPage({
                                     </span>
                                     <span className="inline-flex items-center gap-1">
                                         <Eye className="size-3.5" />
-                                        {article.viewCount.toLocaleString(
-                                            'id-ID',
-                                        )}
+                                        {formatViewCount(article.viewCount)}
                                     </span>
                                 </div>
                             ) : (
@@ -378,10 +373,21 @@ return null;
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
                 {/* ─── LEFT: Article content ─── */}
                 <div className="space-y-8">
+                    {article && article.status !== 'approved' && (
+                        <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-850 dark:text-yellow-400 flex items-center gap-2">
+                            <span className="relative flex h-2 w-2 shrink-0">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                            </span>
+                            <span>
+                                <strong>Mode Pratinjau:</strong> Artikel ini masih berstatus <strong>{article.status === 'draft' ? 'Draf' : article.status === 'pending' ? 'Dalam Peninjauan' : 'Perlu Perbaikan'}</strong> dan belum terbit publik.
+                            </span>
+                        </div>
+                    )}
                     <div className="space-y-6">
                         {/* Cover image */}
                         <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
-                            <div className="relative aspect-16/8 bg-muted">
+                            <div className="relative aspect-video bg-muted">
                                 {article && (
                                     <img
                                         src={article.coverImageUrl}
@@ -569,6 +575,18 @@ return null;
                     </Deferred>
                 </aside>
             </div>
+            {/* Floating Watermark for Preview Mode */}
+            {isPreview && (
+                <div className="fixed bottom-6 right-6 z-50 pointer-events-none select-none">
+                    <div className="flex items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/90 px-4 py-2 text-xs font-bold text-black shadow-lg backdrop-blur-sm animate-pulse dark:bg-yellow-400 dark:text-black">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+                        </span>
+                        MODE PRATINJAU
+                    </div>
+                </div>
+            )}
         </PageLayout>
     );
 }

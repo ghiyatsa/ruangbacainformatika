@@ -218,6 +218,11 @@ return;
         setIsDragging(false);
         event.currentTarget.releasePointerCapture(event.pointerId);
 
+        if (animationFrameRef.current !== null) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+        }
+
         const currentDOMHeight = sheetRef.current ? parseFloat(sheetRef.current.style.height) || sheetHeight : sheetHeight;
         const { low, high } = getSnapPoints();
 
@@ -233,6 +238,7 @@ return;
             setSheetHeight(targetHeight);
 
             if (sheetRef.current) {
+                sheetRef.current.style.transition = 'height 250ms cubic-bezier(0.16, 1, 0.3, 1)';
                 sheetRef.current.style.height = targetHeight + "px";
             }
         }

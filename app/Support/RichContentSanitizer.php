@@ -21,8 +21,15 @@ class RichContentSanitizer
     {
         $config = (new HtmlSanitizerConfig)
             ->allowSafeElements()
-            ->forceHttpsUrls()
-            ->allowRelativeLinks();
+            ->allowElement('img', ['src', 'alt', 'title', 'width', 'height', 'class', 'style'])
+            ->allowElement('figure', ['class', 'data-trix-attachment', 'data-trix-attributes', 'style'])
+            ->allowElement('figcaption', ['class', 'style'])
+            ->allowRelativeLinks()
+            ->allowRelativeMedias();
+
+        if (! app()->isLocal()) {
+            $config = $config->forceHttpsUrls();
+        }
 
         $this->sanitizer = new HtmlSanitizer($config);
     }
@@ -30,12 +37,25 @@ class RichContentSanitizer
     /**
      * Sanitize raw HTML content. Null-safe: returns null for null input.
      */
-    public function sanitize(?string $html): ?string
+    public function sanitize(mixed $html): ?string
     {
         if ($html === null) {
             return null;
         }
 
-        return $this->sanitizer->sanitize($html);
+        if (is_array($html)) {
+            $resolved = $html['html'] ?? $html['content'] ?? null;
+            if ($resolved !== null && ! is_array($resolved)) {
+                $html = $resolved;
+            } else {
+                $html = json_encode($html);
+            }
+        }
+
+        if (is_object($html)) {
+            $html = json_encode($html);
+        }
+
+        return $this->sanitizer->sanitize((string) $html);
     }
 }
