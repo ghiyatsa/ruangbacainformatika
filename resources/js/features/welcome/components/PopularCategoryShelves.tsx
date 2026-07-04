@@ -15,7 +15,13 @@ export default function PopularCategoryShelves({
     popularCategoryShelves: WelcomeProps['popularCategoryShelves'];
 }) {
     const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
-    const shelves = popularCategoryShelves ?? [];
+    const shelves = (popularCategoryShelves ?? []).filter(
+        (shelf) => shelf.books && shelf.books.length > 0
+    );
+
+    if (popularCategoryShelves !== undefined && shelves.length === 0) {
+        return null;
+    }
 
     return (
         <LazyDeferred

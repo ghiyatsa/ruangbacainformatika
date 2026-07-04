@@ -103,43 +103,49 @@ export function BookCatalogFilters({
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-start">
-                <SearchableCatalogFilter
-                    label="Kategori"
-                    value={filters.category || ''}
-                    placeholder="Pilih Kategori"
-                    allLabel="Semua Kategori"
-                    searchPlaceholder="Cari kategori..."
-                    emptyMessage="Kategori tidak ditemukan."
-                    triggerAriaLabel="Filter kategori buku"
-                    options={categories}
-                    onValueChange={(val) => applyFilters({ category: val })}
-                />
+                <div className="w-[calc(50%-6px)] sm:w-auto sm:flex-none">
+                    <SearchableCatalogFilter
+                        label="Kategori"
+                        value={filters.category || ''}
+                        placeholder="Pilih Kategori"
+                        allLabel="Semua Kategori"
+                        searchPlaceholder="Cari kategori..."
+                        emptyMessage="Kategori tidak ditemukan."
+                        triggerAriaLabel="Filter kategori buku"
+                        options={categories}
+                        onValueChange={(val) => applyFilters({ category: val })}
+                    />
+                </div>
 
-                <SearchableCatalogFilter
-                    label="Penulis"
-                    value={filters.author || ''}
-                    placeholder="Pilih Penulis"
-                    allLabel="Semua Penulis"
-                    searchPlaceholder="Cari penulis..."
-                    emptyMessage="Penulis tidak ditemukan."
-                    triggerAriaLabel="Filter penulis buku"
-                    options={authors}
-                    onValueChange={(val) => applyFilters({ author: val })}
-                />
+                <div className="w-[calc(50%-6px)] sm:w-auto sm:flex-none">
+                    <SearchableCatalogFilter
+                        label="Penulis"
+                        value={filters.author || ''}
+                        placeholder="Pilih Penulis"
+                        allLabel="Semua Penulis"
+                        searchPlaceholder="Cari penulis..."
+                        emptyMessage="Penulis tidak ditemukan."
+                        triggerAriaLabel="Filter penulis buku"
+                        options={authors}
+                        onValueChange={(val) => applyFilters({ author: val })}
+                    />
+                </div>
 
-                <SearchableCatalogFilter
-                    label="Penerbit"
-                    value={filters.publisher || ''}
-                    placeholder="Pilih Penerbit"
-                    allLabel="Semua Penerbit"
-                    searchPlaceholder="Cari penerbit..."
-                    emptyMessage="Penerbit tidak ditemukan."
-                    triggerAriaLabel="Filter penerbit buku"
-                    options={publishers}
-                    onValueChange={(val) => applyFilters({ publisher: val })}
-                />
+                <div className="w-[calc(50%-6px)] sm:w-auto sm:flex-none">
+                    <SearchableCatalogFilter
+                        label="Penerbit"
+                        value={filters.publisher || ''}
+                        placeholder="Pilih Penerbit"
+                        allLabel="Semua Penerbit"
+                        searchPlaceholder="Cari penerbit..."
+                        emptyMessage="Penerbit tidak ditemukan."
+                        triggerAriaLabel="Filter penerbit buku"
+                        options={publishers}
+                        onValueChange={(val) => applyFilters({ publisher: val })}
+                    />
+                </div>
 
-                <div className="flex flex-1 items-center gap-2 sm:flex-none">
+                <div className="flex w-[calc(50%-6px)] items-center gap-2 sm:w-auto sm:flex-none">
                     <Select
                         value={filters.year ? String(filters.year) : 'all'}
                         onValueChange={(val) =>
@@ -165,7 +171,7 @@ export function BookCatalogFilters({
                     </Select>
                 </div>
 
-                <div className="flex flex-1 items-center justify-center gap-3 rounded-xl border bg-background/70 px-3 py-2 sm:flex-none sm:justify-start">
+                <div className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border bg-background/70 px-2 py-2 sm:w-auto sm:flex-none sm:gap-3 sm:px-3 sm:justify-start">
                     <div className="flex items-center gap-2">
                         <Checkbox
                             id="featured-filter"
@@ -176,7 +182,7 @@ export function BookCatalogFilters({
                         />
                         <Label
                             htmlFor="featured-filter"
-                            className="cursor-pointer text-xs font-medium text-muted-foreground select-none"
+                            className="cursor-pointer text-xs font-medium text-muted-foreground select-none whitespace-nowrap"
                         >
                             Unggulan
                         </Label>
@@ -194,7 +200,7 @@ export function BookCatalogFilters({
                         />
                         <Label
                             htmlFor="availability-filter"
-                            className="cursor-pointer text-xs font-medium text-muted-foreground select-none"
+                            className="cursor-pointer text-xs font-medium text-muted-foreground select-none whitespace-nowrap"
                         >
                             Tersedia
                         </Label>

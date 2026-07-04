@@ -138,4 +138,18 @@ class WhatsAppVerificationController extends Controller
 
         return $this->authenticationRedirector->redirectResponse($request, $freshUser);
     }
+
+    public function skip(Request $request): RedirectResponse
+    {
+        $request->session()->put('whatsapp_verification_skipped', true);
+
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($this->authenticationRedirector->requiresProfileCompletion($user)) {
+            return to_route('register.profile');
+        }
+
+        return redirect()->to($this->authenticationRedirector->destinationFor($user));
+    }
 }

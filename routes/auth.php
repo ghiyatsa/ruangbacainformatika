@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('register/whatsapp', [WhatsAppVerificationController::class, 'show'])->name('register.whatsapp');
     Route::post('register/whatsapp/send', [WhatsAppVerificationController::class, 'send'])->name('register.whatsapp.send');
     Route::post('register/whatsapp/verify', [WhatsAppVerificationController::class, 'verify'])->name('register.whatsapp.verify');
+    Route::post('register/whatsapp/skip', [WhatsAppVerificationController::class, 'skip'])->name('register.whatsapp.skip');
 
     Route::redirect('/profile', '/settings/profile')->name('settings.profile.show');
 });

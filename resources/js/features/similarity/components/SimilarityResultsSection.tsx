@@ -8,13 +8,13 @@ import type { SimilarityResult } from '@/features/similarity/types';
 
 function SafeResult() {
     return (
-        <Card className="border border-border bg-card rounded-none shadow-none">
-            <CardContent className="flex flex-col items-center gap-4 p-8 text-center sm:p-10">
-                <div className="flex size-10 items-center justify-center rounded-none border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
+        <Card className="border border-border bg-card rounded-2xl shadow-sm">
+            <CardContent className="flex flex-col items-center gap-4 p-6 sm:p-8 text-center">
+                <div className="flex size-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
                     <ShieldCheck className="size-4" />
                 </div>
                 <div className="max-w-xl space-y-2">
-                    <h3 className="text-sm font-bold text-foreground">
+                    <h3 className="text-sm font-medium text-foreground">
                         Tidak ada kemiripan yang menonjol
                     </h3>
                     <p className="text-xs leading-relaxed text-muted-foreground/90">
@@ -65,20 +65,20 @@ function ResultsSummaryBanner({ result }: SimilarityResultsSectionProps) {
         'Kemiripan rendah. Judul relatif aman untuk dilanjutkan.';
 
     return (
-        <Card className="border border-border bg-card rounded-none shadow-none">
-            <CardContent className="space-y-4 p-4 sm:p-5">
+        <Card className="border border-border bg-card rounded-2xl shadow-sm">
+            <CardContent className="space-y-4 p-5 sm:p-6">
                 <div className="space-y-2">
-                    <p className="text-[10px] font-bold tracking-widest text-muted-foreground/80 uppercase">
+                    <p className="text-[10px] font-medium tracking-widest text-muted-foreground/75 uppercase">
                         Ringkasan Hasil
                     </p>
                     <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-3xl font-extrabold text-foreground tracking-tight">
+                        <span className="text-3xl font-semibold text-foreground tracking-tight">
                             {maxPercent}%
                         </span>
                         <Badge
                             variant="outline"
                             className={cn(
-                                'h-6 rounded-full px-2.5 text-[9px] font-bold uppercase transition-none shadow-none',
+                                'h-6 rounded-full px-2.5 text-[9px] font-medium uppercase transition-none shadow-none',
                                 topLevelConfig.badgeClass
                             )}
                         >
@@ -91,10 +91,10 @@ function ResultsSummaryBanner({ result }: SimilarityResultsSectionProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                    <div className="text-[9px] font-bold tracking-widest text-muted-foreground/80 uppercase">
+                    <div className="text-[9px] font-medium tracking-widest text-muted-foreground/75 uppercase">
                         Kemiripan Tertinggi
                     </div>
-                    <div className="h-1.5 overflow-hidden bg-muted rounded-none">
+                    <div className="h-1.5 overflow-hidden bg-muted rounded-full">
                         <div
                             className={cn('h-full', topLevelConfig.bg)}
                             style={{ width: `${maxPercent}%` }}

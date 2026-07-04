@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\InternshipReport;
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
 use App\Services\SimilaritySyncStatusService;
@@ -35,16 +36,19 @@ class SyncSkripsiCommand extends Command
             $this->statusService->markAllQueuedForFullSync();
         }
 
-        $total = Skripsi::count();
+        $totalSkripsi = Skripsi::count();
+        $totalInternship = InternshipReport::count();
+        $total = $totalSkripsi + $totalInternship;
         $mode = $reset ? 'reset + rebuild' : 'upsert bertahap';
 
-        $this->info("Memulai sinkronisasi {$total} skripsi (batch size: {$chunk}, mode: {$mode}) ...");
+        $this->info("Memulai sinkronisasi {$total} dokumen ({$totalSkripsi} skripsi, {$totalInternship} laporan kerja praktek) (batch size: {$chunk}, mode: {$mode}) ...");
         $bar = $this->output->createProgressBar($total);
         $bar->start();
 
         $success = 0;
         $failed = 0;
 
+        // 1. Sync Skripsi
         Skripsi::select([
             'id',
             'title',
@@ -59,7 +63,8 @@ class SyncSkripsiCommand extends Command
             }
 
             $items = $skripsis->map(fn ($s) => [
-                'skripsi_id' => $s->id,
+                'document_id' => "skripsi_{$s->id}",
+                'document_type' => 'skripsi',
                 'judul' => $s->title,
                 'abstrak' => $s->abstract,
                 'kata_kunci' => $s->keywords,
@@ -85,6 +90,37 @@ class SyncSkripsiCommand extends Command
                     );
                 }
 
+                $failed += count($items);
+            }
+
+            $bar->advance(count($items));
+        });
+
+        // 2. Sync InternshipReport
+        InternshipReport::select([
+            'id',
+            'title',
+            'abstract',
+            'keywords',
+            'year',
+            'student_id',
+            'author_name',
+        ])->chunkById($chunk, function ($internships) use ($bar, &$success, &$failed) {
+            $items = $internships->map(fn ($i) => [
+                'document_id' => "internship_report_{$i->id}",
+                'document_type' => 'internship_report',
+                'judul' => $i->title,
+                'abstrak' => $i->abstract,
+                'kata_kunci' => $i->keywords,
+                'tahun' => $i->year,
+                'program_studi' => null,
+                'nim' => $i->student_id,
+                'nama_mahasiswa' => $i->author_name,
+            ])->values()->toArray();
+
+            if ($this->api->bulkUpsert($items, false)) {
+                $success += count($items);
+            } else {
                 $failed += count($items);
             }
 

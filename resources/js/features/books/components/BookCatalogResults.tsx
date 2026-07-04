@@ -46,7 +46,7 @@ export function BookCatalogResults({
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-4">
                         {books.data.map((book) => (
                             <BookCard
                                 key={book.id}

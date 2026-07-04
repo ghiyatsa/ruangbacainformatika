@@ -55,13 +55,20 @@ export default function InternshipReportDetailPage(
     return (
         <KtiDetailPage
             title={report?.title ?? 'Detail Laporan KP'}
-            description={
-                report?.abstract
-                    ? report.abstract.slice(0, 160)
-                    : report
-                      ? `${report.title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.`
-                      : 'Memuat detail laporan KP dari katalog Ruang Baca Teknik Informatika Universitas Malikussaleh.'
-            }
+            description={(() => {
+                if (report?.abstract) {
+                    if (report.abstract.length >= 120) {
+                        return report.abstract.slice(0, 160);
+                    }
+                    return `${report.abstract} Temukan abstrak lengkap, nama mahasiswa, NIM, lokasi KP, dan tahun laporan kerja praktik untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                }
+                if (report) {
+                    const authorStr = report.authorName ? ` disusun oleh ${report.authorName}` : '';
+                    const nimStr = report.studentId ? ` (NIM: ${report.studentId})` : '';
+                    return `Akses detail laporan Kerja Praktik (KP) "${report.title}"${authorStr}${nimStr}. Temukan lokasi perusahaan, abstrak, dan tahun untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                }
+                return 'Cari detail laporan Kerja Praktik (KP), abstrak, nama penulis, lokasi instansi, dan tahun laporan secara mandiri di katalog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.';
+            })()}
             keywords={seoKeywords}
             showBackground={false}
             deferSecondaryContent
@@ -155,10 +162,14 @@ export default function InternshipReportDetailPage(
                     'learningResourceType': 'Laporan Kerja Praktik',
                     'publisher': {
                         '@type': 'EducationalOrganization',
+                        '@id': 'https://ruangbacainformatika.unimal.ac.id/#department',
                         'name': 'Program Studi Teknik Informatika Universitas Malikussaleh',
+                        'url': 'https://ruangbacainformatika.unimal.ac.id',
                         'parentOrganization': {
                             '@type': 'EducationalOrganization',
-                            'name': 'Universitas Malikussaleh'
+                            '@id': 'https://unimal.ac.id/#university',
+                            'name': 'Universitas Malikussaleh',
+                            'url': 'https://unimal.ac.id'
                         }
                     }
                 } : null;

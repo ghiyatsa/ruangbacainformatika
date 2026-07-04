@@ -144,6 +144,10 @@ export default function FeaturedSpotlight({
 
     const count = featuredBooks?.length ?? 0;
 
+    if (featuredBooks !== undefined && count === 0) {
+        return null;
+    }
+
     const goTo = useCallback((index: number) => {
         setCurrentIndex(index);
     }, []);

@@ -225,6 +225,7 @@ class SimilarityApiService
         string $judul,
         ?int $topK = null,
         ?float $threshold = null,
+        ?string $documentType = null,
     ): ?array {
         $topK ??= $this->getTopK();
         $threshold ??= $this->getThreshold();
@@ -234,6 +235,7 @@ class SimilarityApiService
                 'judul' => $judul,
                 'top_k' => $topK,
                 'threshold' => $threshold,
+                'document_type' => $documentType,
             ]));
 
             if ($response->successful()) {

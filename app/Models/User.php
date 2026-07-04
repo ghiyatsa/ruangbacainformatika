@@ -74,7 +74,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         });
 
         static::saved(function (User $user): void {
-            $user->assignMemberRoleIfAvailable();
+            $user->syncMemberRoleState();
         });
     }
 
@@ -93,24 +93,25 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->hasRole(['super_admin', 'staff']);
     }
 
-    public function shouldReceiveMemberRole(): bool
-    {
-        return ! $this->hasAdministrativeRole()
-            && ! $this->hasRole('member')
-            && $this->canReceiveMemberRole();
-    }
-
-    public function assignMemberRoleIfAvailable(): void
+    public function syncMemberRoleState(): void
     {
         if (! Role::query()->where('name', 'member')->exists()) {
             return;
         }
 
-        if (! $this->shouldReceiveMemberRole()) {
+        if ($this->hasAdministrativeRole()) {
             return;
         }
 
-        $this->assignRole('member');
+        if ($this->canReceiveMemberRole()) {
+            if (! $this->hasRole('member')) {
+                $this->assignRole('member');
+            }
+        } else {
+            if ($this->hasRole('member')) {
+                $this->removeRole('member');
+            }
+        }
     }
 
     public function canAccessAdminPanel(): bool
@@ -121,13 +122,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function canReceiveMemberRole(): bool
     {
         return $this->is_approved
-            && $this->hasVerifiedWhatsApp()
             && $this->usesCampusEmail();
     }
 
     public function canBorrowBooks(): bool
     {
-        return $this->hasRole('member') && $this->canReceiveMemberRole();
+        return $this->hasRole('member')
+            && $this->canReceiveMemberRole()
+            && $this->hasVerifiedWhatsApp();
     }
 
     public function canViewPublicNotifications(): bool

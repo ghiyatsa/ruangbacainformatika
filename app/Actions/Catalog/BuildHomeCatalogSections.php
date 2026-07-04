@@ -32,6 +32,7 @@ class BuildHomeCatalogSections
     public function paginatedBooks(): LengthAwarePaginator
     {
         return $this->bookQuery()
+            ->orderByRaw('CASE WHEN cover_image IS NOT NULL THEN 0 ELSE 1 END')
             ->latest()
             ->orderByDesc('id')
             ->orderBy('title')

@@ -14,6 +14,10 @@ export default function MostBorrowedBooks({
     const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
     const previewBooks = mostBorrowedBooks?.slice(0, 6) || [];
 
+    if (mostBorrowedBooks !== undefined && previewBooks.length === 0) {
+        return null;
+    }
+
     return (
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader

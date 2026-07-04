@@ -17,6 +17,10 @@ export default function NewBooksPreview({ books }: NewBooksPreviewProps) {
     const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
     const previewBooks = books?.data?.slice(0, 12) || [];
 
+    if (books !== undefined && previewBooks.length === 0) {
+        return null;
+    }
+
     return (
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader

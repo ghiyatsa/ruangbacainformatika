@@ -29,8 +29,6 @@ export default function CatalogSection({
     popularCategoryShelves,
     latestPosts,
 }: CatalogSectionProps) {
-    const hasFeaturedBooks = stats.featuredCount > 0;
-
     interface SectionItem {
         id: string;
         content: React.ReactNode;
@@ -39,7 +37,7 @@ export default function CatalogSection({
 
     const items: SectionItem[] = [];
 
-    if (hasFeaturedBooks) {
+    if (stats.featuredCount > 0 && (featuredBooks === undefined || featuredBooks.length > 0)) {
         items.push({
             id: 'featured',
             isFullWidth: true,
@@ -58,27 +56,41 @@ export default function CatalogSection({
         });
     }
 
-    items.push({
-        id: 'new-books',
-        content: <NewBooksPreview books={books} />,
-    });
+    if (stats.booksCount > 0) {
+        if (books === undefined || (books.data && books.data.length > 0)) {
+            items.push({
+                id: 'new-books',
+                content: <NewBooksPreview books={books} />,
+            });
+        }
 
-    items.push({
-        id: 'popular-books',
-        content: <PopularBooks popularBooks={popularBooks} />,
-    });
+        if (popularBooks === undefined || popularBooks.length > 0) {
+            items.push({
+                id: 'popular-books',
+                content: <PopularBooks popularBooks={popularBooks} />,
+            });
+        }
+    }
 
-    items.push({
-        id: 'categories',
-        isFullWidth: true,
-        content: (
-            <PopularCategoryShelves
-                popularCategoryShelves={popularCategoryShelves}
-            />
-        ),
-    });
+    if (stats.activeCategoriesCount > 0) {
+        const activeShelves = (popularCategoryShelves ?? []).filter(
+            (shelf) => shelf.books && shelf.books.length > 0
+        );
 
-    if (mostBorrowedBooks === undefined || mostBorrowedBooks.length > 0) {
+        if (popularCategoryShelves === undefined || activeShelves.length > 0) {
+            items.push({
+                id: 'categories',
+                isFullWidth: true,
+                content: (
+                    <PopularCategoryShelves
+                        popularCategoryShelves={popularCategoryShelves}
+                    />
+                ),
+            });
+        }
+    }
+
+    if ((stats.mostBorrowedCount ?? 0) > 0 && (mostBorrowedBooks === undefined || mostBorrowedBooks.length > 0)) {
         items.push({
             id: 'most-borrowed',
             content: <MostBorrowedBooks mostBorrowedBooks={mostBorrowedBooks} />,

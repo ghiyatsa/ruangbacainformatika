@@ -75,6 +75,7 @@ class CatalogQueryService
                 'items',
                 'items as available_items_count' => fn ($query) => $query->available(),
             ])
+            ->orderByRaw('CASE WHEN cover_image IS NOT NULL THEN 0 ELSE 1 END')
             ->orderByDesc('is_featured')
             ->orderByDesc('published_year')
             ->orderBy('title');

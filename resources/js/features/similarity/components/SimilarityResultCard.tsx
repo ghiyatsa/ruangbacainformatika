@@ -15,7 +15,7 @@ function SimilarityBar({ persen, level }: { persen: number; level: string }) {
                 <Badge
                     variant="outline"
                     className={cn(
-                        'h-5 rounded-full px-2 text-[9px] font-bold uppercase transition-none shadow-none',
+                        'h-5 rounded-full px-2 text-[9px] font-medium uppercase transition-none shadow-none',
                         cfg.badgeClass
                     )}
                 >
@@ -23,15 +23,15 @@ function SimilarityBar({ persen, level }: { persen: number; level: string }) {
                     {cfg.label}
                 </Badge>
                 <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-bold tracking-widest text-muted-foreground/80 uppercase">
+                    <span className="text-[9px] font-medium tracking-widest text-muted-foreground/75 uppercase">
                         Kecocokan
                     </span>
-                    <span className={cn('text-xs font-bold tabular-nums', cfg.color)}>
+                    <span className={cn('text-xs font-medium tabular-nums', cfg.color)}>
                         {persen}%
                     </span>
                 </div>
             </div>
-            <div className="h-1.5 w-full bg-muted rounded-none overflow-hidden">
+            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                 <div
                     className={cn('h-full', cfg.bg)}
                     style={{ width: `${persen}%` }}
@@ -105,19 +105,41 @@ export function SimilarityResultCard({
     index,
     userTitle,
 }: ResultCardProps) {
+    const isInternship = item.document_type === 'internship_report';
+    const detailUrl = isInternship
+        ? `/internship-reports/${item.student_id}`
+        : `/skripsi/${item.student_id}`;
+
     const content = (
-        <CardContent className="p-4 sm:p-5 flex flex-col gap-4">
+        <CardContent className="p-5 sm:p-6 flex flex-col gap-4">
             <div className="flex gap-3">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-none bg-muted text-[10px] font-bold text-muted-foreground/90">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-muted text-[10px] font-medium text-muted-foreground/75">
                     {index + 1}
                 </span>
                 <div className="min-w-0 flex-1 space-y-1">
                     <h3 className="text-xs sm:text-sm leading-relaxed">
                         {highlightMatchingWords(item.judul, userTitle)}
                     </h3>
-                    <div className="text-[10px] text-muted-foreground/90 font-medium">
-                        {item.nama_mahasiswa || '—'}
-                        {item.student_id ? ` | ${item.student_id}` : ''}
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground/90 font-medium">
+                        <Badge
+                            variant="outline"
+                            className={cn(
+                                'h-4 rounded-md px-1.5 text-[8px] font-medium uppercase transition-none shadow-none',
+                                isInternship
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50'
+                                    : 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/50'
+                            )}
+                        >
+                            {isInternship ? 'Laporan Kerja Praktek' : 'Skripsi'}
+                        </Badge>
+                        <span>•</span>
+                        <span>{item.nama_mahasiswa || '—'}</span>
+                        {item.student_id ? (
+                            <>
+                                <span>|</span>
+                                <span>{item.student_id}</span>
+                            </>
+                        ) : null}
                     </div>
                 </div>
             </div>
@@ -129,10 +151,10 @@ export function SimilarityResultCard({
     );
 
     return (
-        <Card className="overflow-hidden border border-border bg-card rounded-none shadow-none hover:bg-muted/5 transition-colors">
+        <Card className="overflow-hidden border border-border bg-card rounded-2xl shadow-sm hover:bg-muted/5 transition-colors">
             {item.student_id ? (
                 <Link
-                    href={`/skripsi/${item.student_id}`}
+                    href={detailUrl}
                     className="block outline-none focus-visible:ring-1 focus-visible:ring-primary"
                 >
                     {content}

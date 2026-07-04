@@ -17,6 +17,10 @@ export default function PopularBooks({
     const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
     const previewBooks = popularBooks?.slice(0, 6) || [];
 
+    if (popularBooks !== undefined && previewBooks.length === 0) {
+        return null;
+    }
+
     return (
         <div className="flex flex-col gap-8 sm:gap-10">
             <SectionHeader

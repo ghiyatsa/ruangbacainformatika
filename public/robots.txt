@@ -1,4 +1,8 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /kiosk/
+Disallow: /login
+Disallow: /register
+Disallow: /search
 
-Sitemap: /sitemap.xml
+Sitemap: https://ruangbacainformatika.unimal.ac.id/sitemap.xml

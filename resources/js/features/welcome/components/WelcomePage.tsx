@@ -19,17 +19,58 @@ export default function WelcomePage({
 
     const websiteJsonLd = {
         '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        'name': siteName,
-        'url': siteUrl,
-        'potentialAction': {
-            '@type': 'SearchAction',
-            'target': {
-                '@type': 'EntryPoint',
-                'urlTemplate': `${siteUrl}/search?q={search_term_string}`
+        '@graph': [
+            {
+                '@type': 'WebSite',
+                '@id': `${siteUrl}/#website`,
+                'name': siteName,
+                'url': siteUrl,
+                'potentialAction': {
+                    '@type': 'SearchAction',
+                    'target': {
+                        '@type': 'EntryPoint',
+                        'urlTemplate': `${siteUrl}/search?q={search_term_string}`
+                    },
+                    'query-input': 'required name=search_term_string'
+                }
             },
-            'query-input': 'required name=search_term_string'
-        }
+            {
+                '@type': 'SiteNavigationElement',
+                '@id': `${siteUrl}/#nav-books`,
+                'name': 'Katalog Buku',
+                'url': `${siteUrl}/books`
+            },
+            {
+                '@type': 'SiteNavigationElement',
+                '@id': `${siteUrl}/#nav-skripsi`,
+                'name': 'Arsip Skripsi',
+                'url': `${siteUrl}/skripsi`
+            },
+            {
+                '@type': 'SiteNavigationElement',
+                '@id': `${siteUrl}/#nav-thesis`,
+                'name': 'Arsip Tesis',
+                'url': `${siteUrl}/thesis`
+            },
+            {
+                '@type': 'SiteNavigationElement',
+                '@id': `${siteUrl}/#nav-kp`,
+                'name': 'Laporan Kerja Praktik',
+                'url': `${siteUrl}/internship-reports`
+            },
+            {
+                '@type': 'SiteNavigationElement',
+                '@id': `${siteUrl}/#nav-blog`,
+                'name': 'Blog & Berita',
+                'url': `${siteUrl}/posts`
+            },
+            {
+                '@type': 'SiteNavigationElement',
+                '@id': `${siteUrl}/#nav-about`,
+                'name': 'Tentang Kami',
+                'url': `${siteUrl}/about`
+            }
+        ]
     };
 
     return (

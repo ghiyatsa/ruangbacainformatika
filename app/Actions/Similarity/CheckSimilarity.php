@@ -2,6 +2,7 @@
 
 namespace App\Actions\Similarity;
 
+use App\Models\InternshipReport;
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
 use Illuminate\Http\JsonResponse;
@@ -14,10 +15,11 @@ class CheckSimilarity
         protected SimilarityApiService $api,
     ) {}
 
-    public function execute(string $title, ?int $userId = null): JsonResponse
+    public function execute(string $title, ?string $documentType = null, ?int $userId = null): JsonResponse
     {
         Log::info('Similarity check requested', [
             'user_id' => $userId,
+            'document_type' => $documentType,
             'title_words' => str_word_count($title),
         ]);
 
@@ -27,11 +29,11 @@ class CheckSimilarity
             ], 422);
         }
 
-        $cacheKey = 'similarity_check_'.hash('sha256', mb_strtolower($title));
+        $cacheKey = 'similarity_check_'.hash('sha256', mb_strtolower($title).'_'.($documentType ?? 'all'));
         $result = Cache::get($cacheKey);
 
         if ($result === null) {
-            $result = $this->api->checkSimilarity($title);
+            $result = $this->api->checkSimilarity($title, documentType: $documentType);
 
             if ($result === null) {
                 if (! $this->api->isHealthy()) {
@@ -63,49 +65,67 @@ class CheckSimilarity
             return $result;
         }
 
-        $skripsiIds = collect($result['results'])
-            ->map(fn (array $item): ?int => match (true) {
-                isset($item['id']) && is_numeric($item['id']) => (int) $item['id'],
-                isset($item['skripsi_id']) && is_numeric($item['skripsi_id']) => (int) $item['skripsi_id'],
-                default => null,
-            })
-            ->filter()
-            ->values()
-            ->all();
+        $results = $result['results'];
 
-        $studentIds = collect($result['results'])
-            ->pluck('nim')
-            ->filter(fn ($nim) => is_string($nim) && filled($nim))
-            ->values()
-            ->all();
+        // Extract IDs and student IDs for each type
+        $skripsiIds = [];
+        $internshipIds = [];
+        $skripsiNims = [];
+        $internshipNims = [];
 
+        foreach ($results as $item) {
+            $type = $item['document_type'] ?? 'skripsi';
+            $docId = $item['document_id'] ?? $item['skripsi_id'] ?? $item['id'] ?? null;
+            $nim = $item['nim'] ?? $item['student_id'] ?? null;
+
+            if ($type === 'internship_report') {
+                if (is_numeric($docId)) {
+                    $internshipIds[] = (int) $docId;
+                }
+                if ($nim) {
+                    $internshipNims[] = $nim;
+                }
+            } else {
+                if (is_numeric($docId)) {
+                    $skripsiIds[] = (int) $docId;
+                }
+                if ($nim) {
+                    $skripsiNims[] = $nim;
+                }
+            }
+        }
+
+        // Query Skripsi
         $skripsis = Skripsi::query()
             ->whereIn('id', $skripsiIds)
-            ->orWhereIn('student_id', $studentIds)
+            ->orWhereIn('student_id', $skripsiNims)
             ->get(['id', 'title', 'author_name', 'student_id']);
-
         $skripsisById = $skripsis->keyBy('id');
         $skripsisByStudentId = $skripsis->whereNotNull('student_id')->keyBy('student_id');
 
-        $result['results'] = array_map(function ($item) use ($skripsisById, $skripsisByStudentId) {
-            $skripsiId = match (true) {
-                isset($item['id']) && is_numeric($item['id']) => (int) $item['id'],
-                isset($item['skripsi_id']) && is_numeric($item['skripsi_id']) => (int) $item['skripsi_id'],
-                default => null,
-            };
+        // Query InternshipReport
+        $internships = InternshipReport::query()
+            ->whereIn('id', $internshipIds)
+            ->orWhereIn('student_id', $internshipNims)
+            ->get(['id', 'title', 'author_name', 'student_id']);
+        $internshipsById = $internships->keyBy('id');
+        $internshipsByStudentId = $internships->whereNotNull('student_id')->keyBy('student_id');
 
-            $studentId = isset($item['nim']) && is_string($item['nim'])
-                ? $item['nim']
-                : (isset($item['student_id']) && is_string($item['student_id'])
-                    ? $item['student_id']
-                    : null);
+        $result['results'] = array_map(function ($item) use ($skripsisById, $skripsisByStudentId, $internshipsById, $internshipsByStudentId) {
+            $type = $item['document_type'] ?? 'skripsi';
+            $docId = $item['document_id'] ?? $item['skripsi_id'] ?? $item['id'] ?? null;
+            $studentId = $item['nim'] ?? $item['student_id'] ?? null;
 
-            $skripsi = $skripsiId !== null
-                ? $skripsisById->get($skripsiId)
-                : null;
-
-            if ($skripsi === null && $studentId !== null) {
-                $skripsi = $skripsisByStudentId->get($studentId);
+            if ($type === 'internship_report') {
+                $record = is_numeric($docId) ? $internshipsById->get((int) $docId) : null;
+                if ($record === null && $studentId !== null) {
+                    $record = $internshipsByStudentId->get($studentId);
+                }
+            } else {
+                $record = is_numeric($docId) ? $skripsisById->get((int) $docId) : null;
+                if ($record === null && $studentId !== null) {
+                    $record = $skripsisByStudentId->get($studentId);
+                }
             }
 
             $similarityPercent = $item['similarity_persen']
@@ -126,12 +146,14 @@ class CheckSimilarity
                 $similarityPercent = 0.0;
             }
 
-            $item['skripsi_id'] = $skripsi?->id ?? $skripsiId;
-            $item['judul'] = $skripsi?->title ?? ($item['judul'] ?? $item['title'] ?? 'Data skripsi tidak ditemukan');
-            $item['nama_mahasiswa'] = $skripsi?->author_name ?? ($item['nama_mahasiswa'] ?? $item['author_name'] ?? 'Tidak diketahui');
-            $item['student_id'] = $skripsi?->student_id ?? $studentId;
+            $item['document_id'] = $record?->id ?? $docId;
+            $item['skripsi_id'] = $type === 'skripsi' ? ($record?->id ?? $docId) : null;
+            $item['document_type'] = $type;
+            $item['judul'] = $record?->title ?? ($item['judul'] ?? $item['title'] ?? 'Data tidak ditemukan');
+            $item['nama_mahasiswa'] = $record?->author_name ?? ($item['nama_mahasiswa'] ?? $item['author_name'] ?? 'Tidak diketahui');
+            $item['student_id'] = $record?->student_id ?? $studentId;
             $item['similarity_persen'] = $similarityPercent;
-            $item['is_local_record_found'] = $skripsi !== null;
+            $item['is_local_record_found'] = $record !== null;
 
             if (isset($item['level']) && is_string($item['level'])) {
                 $item['level'] = strtoupper($item['level']);

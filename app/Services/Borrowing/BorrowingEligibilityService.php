@@ -14,7 +14,7 @@ class BorrowingEligibilityService
 
     public function ensureLoanDraftAccess(User $user): void
     {
-        $user->assignMemberRoleIfAvailable();
+        $user->syncMemberRoleState();
 
         if (! $user->canBorrowBooks()) {
             throw ValidationException::withMessages([

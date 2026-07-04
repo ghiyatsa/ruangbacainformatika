@@ -137,8 +137,7 @@ it('super admin users can render concise integration settings copy', function ()
         ->assertSee('Pengaturan Integrasi')
         ->assertSee('Pengaturan WhatsApp untuk notifikasi rutin.')
         ->assertSee('Isi 0 jika jeda tidak diperlukan.')
-        ->assertSee('Sinkronkan Ulang Semua Skripsi')
-        ->assertSee('Samakan Status dari Index API');
+        ->assertSee('Sinkronkan Ulang Semua Skripsi');
 });
 
 it('super admin users can render the create user form for google accounts', function () {

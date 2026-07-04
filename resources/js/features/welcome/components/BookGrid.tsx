@@ -19,7 +19,7 @@ interface BookGridProps {
 }
 
 const GRID_CLASS =
-    'grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6';
+    'grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-4';
 const LIST_CLASS = 'grid grid-cols-1 gap-3 lg:grid-cols-2';
 
 export default function BookGrid({

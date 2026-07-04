@@ -3,7 +3,6 @@
 namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\SettingsCluster;
-use App\Jobs\ReconcileSimilarityIndexStatuses;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
 use App\Services\SimilarityFullSyncDispatcher;
@@ -224,36 +223,6 @@ class IntegrationSettings extends Page
                                             : 'Proses sedang berjalan di antrean. Pastikan worker queue tetap aktif.')
                                         : ($result['error_message'] ?? 'Periksa koneksi Similarity API lalu coba lagi.'))
                                     ->persistent($result['mode'] === 'queued')
-                                    ->send();
-                            }),
-                        Action::make('reconcileSimilarityIndex')
-                            ->label('Samakan Status dari Index API')
-                            ->icon(Heroicon::OutlinedCheckBadge)
-                            ->color('gray')
-                            ->requiresConfirmation()
-                            ->modalHeading('Samakan Status Similarity dari Index API')
-                            ->modalDescription('Gunakan jika status di dashboard belum sama dengan index API. Proses tetap berjalan di antrean.')
-                            ->modalSubmitActionLabel('Mulai Rekonsiliasi')
-                            ->action(function (): void {
-                                ReconcileSimilarityIndexStatuses::dispatch(
-                                    initiatedByUserId: auth()->id(),
-                                );
-
-                                try {
-                                    app(ActivityLogService::class)->log(
-                                        'integration.skripsi_reconcile.triggered',
-                                        'Rekonsiliasi status similarity dipicu',
-                                        'Integrasi',
-                                        ['page_size' => 500],
-                                    );
-                                } catch (Throwable) {
-                                }
-
-                                Notification::make()
-                                    ->success()
-                                    ->title('Penyelarasan similarity dimulai')
-                                    ->body('Proses sedang berjalan di antrean.')
-                                    ->persistent()
                                     ->send();
                             }),
                         Action::make('save')

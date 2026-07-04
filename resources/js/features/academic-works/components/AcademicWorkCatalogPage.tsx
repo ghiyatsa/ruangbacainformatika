@@ -78,7 +78,7 @@ export default function AcademicWorkCatalogPage({
             }
             deferredData={dataProp}
             loadingFallback={
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
                     {Array.from({ length: 10 }).map((_, index) => (
                         <KtiCardSkeleton key={index} />
                     ))}
@@ -92,7 +92,7 @@ export default function AcademicWorkCatalogPage({
                 propKey={dataProp}
                 resourceLabel={workType}
                 loadingFallback={
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-hidden="true">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))]" aria-hidden="true">
                         {Array.from({ length: 4 }).map((_, index) => (
                             <KtiCardSkeleton key={`load-more-${index}`} />
                         ))}

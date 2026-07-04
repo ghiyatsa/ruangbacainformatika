@@ -3,6 +3,8 @@ import type { ElementType } from 'react';
 
 export interface SimilarityItem {
     skripsi_id?: number | null;
+    document_id?: number | string | null;
+    document_type?: string | null;
     student_id?: string;
     judul: string;
     nama_mahasiswa: string;

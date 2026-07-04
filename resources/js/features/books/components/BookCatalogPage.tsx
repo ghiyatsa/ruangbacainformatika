@@ -112,7 +112,7 @@ export default function BookCatalogPage({
                             ))}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-4">
                             {Array.from({ length: 12 }).map((_, index) => (
                                 <BookCardSkeleton key={index} />
                             ))}
@@ -135,7 +135,7 @@ export default function BookCatalogPage({
                         className={
                             viewMode === 'list'
                                 ? 'grid w-full grid-cols-1 gap-3 lg:grid-cols-2'
-                                : 'grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6'
+                                : 'grid w-full grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-4'
                         }
                         aria-hidden="true"
                     >
@@ -162,7 +162,7 @@ export default function BookCatalogPage({
                         className={
                             viewMode === 'list'
                                 ? 'grid w-full grid-cols-1 gap-3'
-                                : 'grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6'
+                                : 'grid w-full grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-4'
                         }
                         aria-hidden="true"
                     >

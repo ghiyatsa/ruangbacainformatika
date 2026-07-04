@@ -25,6 +25,7 @@ class CheckSimilarityRequest extends FormRequest
     {
         $rules = [
             'judul' => ['required', 'string', 'min:5'],
+            'document_type' => ['nullable', 'string', 'in:skripsi,internship_report'],
         ];
 
         if (config('services.turnstile.enabled', false)) {
@@ -53,5 +54,13 @@ class CheckSimilarityRequest extends FormRequest
     public function validatedJudul(): string
     {
         return trim((string) $this->validated('judul'));
+    }
+
+    /**
+     * Get the validated document type.
+     */
+    public function validatedDocumentType(): ?string
+    {
+        return $this->validated('document_type');
     }
 }

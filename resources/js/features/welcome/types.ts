@@ -10,6 +10,7 @@ export type WelcomeProps = {
         availableItemsCount: number;
         activeCategoriesCount: number;
         searchResultsCount: number;
+        mostBorrowedCount?: number;
     };
     popularCategoryShelves?: {
         id: number;

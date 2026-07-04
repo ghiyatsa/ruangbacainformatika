@@ -87,15 +87,6 @@ it('integration settings page shows the full skripsi resync action', function ()
         ->assertSee('Sinkronkan Ulang Semua Skripsi');
 });
 
-it('integration settings page shows the similarity reconciliation action', function () {
-    $user = makeIntegrationSuperAdmin();
-
-    actingAs($user);
-
-    Livewire::test(IntegrationSettings::class)
-        ->assertSee('Samakan Status dari Index API');
-});
-
 it('integration settings clears cached turnstile status after saving', function () {
     $user = makeIntegrationSuperAdmin();
 

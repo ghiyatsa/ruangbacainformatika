@@ -193,7 +193,16 @@ export function VerifyWhatsAppPage() {
                 </Form>
             </div>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 flex flex-col items-center gap-3 text-center">
+                <Link
+                    href={WhatsAppVerificationController.skip.url()}
+                    method="post"
+                    as="button"
+                    className="text-sm font-semibold text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+                >
+                    Lewati verifikasi untuk sekarang
+                </Link>
+
                 <Link
                     href={logout().url}
                     method="post"

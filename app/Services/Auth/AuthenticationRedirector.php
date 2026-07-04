@@ -74,6 +74,10 @@ class AuthenticationRedirector
 
     public function requiresWhatsAppVerification(User $user): bool
     {
+        if (session()->get('whatsapp_verification_skipped') === true) {
+            return false;
+        }
+
         return $this->requiresMemberOnboarding($user) && $user->requiresWhatsAppVerification();
     }
 

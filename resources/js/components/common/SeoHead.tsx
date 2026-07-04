@@ -37,9 +37,10 @@ interface SeoHeadProps {
 
 function normalizeUrl(baseUrl: string, currentPath: string): string {
     const trimmedBaseUrl = baseUrl.replace(/\/+$/, '');
-    const normalizedPath = currentPath.startsWith('/')
-        ? currentPath
-        : `/${currentPath}`;
+    const pathWithoutQuery = currentPath.split('?')[0];
+    const normalizedPath = pathWithoutQuery.startsWith('/')
+        ? pathWithoutQuery
+        : `/${pathWithoutQuery}`;
 
     return `${trimmedBaseUrl}${normalizedPath}`;
 }

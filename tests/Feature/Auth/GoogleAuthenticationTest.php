@@ -73,7 +73,7 @@ it('eligible users can authenticate with google one tap', function () {
         'auth_provider' => 'google',
         'is_approved' => true,
     ]);
-    expect(User::query()->where('email', '230170007@mhs.unimal.ac.id')->firstOrFail()->hasRole('member'))->toBeFalse();
+    expect(User::query()->where('email', '230170007@mhs.unimal.ac.id')->firstOrFail()->hasRole('member'))->toBeTrue();
 });
 
 it('users are redirected to google', function () {
@@ -121,7 +121,7 @@ it('eligible users can authenticate with google', function () {
 
     expect($user->whatsapp)->toBeNull();
     expect($user->address)->toBeNull();
-    expect($user->hasRole('member'))->toBeFalse();
+    expect($user->hasRole('member'))->toBeTrue();
 });
 
 it('unknown users can create a new account through direct google login', function () {
@@ -147,7 +147,7 @@ it('unknown users can create a new account through direct google login', functio
         'is_approved' => true,
     ]);
 
-    expect(User::query()->where('email', '230170999@mhs.unimal.ac.id')->firstOrFail()->hasRole('member'))->toBeFalse();
+    expect(User::query()->where('email', '230170999@mhs.unimal.ac.id')->firstOrFail()->hasRole('member'))->toBeTrue();
 });
 
 it('non student campus accounts require manual approval after google login', function () {

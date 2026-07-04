@@ -20,6 +20,10 @@ class SimilarityController extends Controller
 
     public function check(CheckSimilarityRequest $request, CheckSimilarity $checkSimilarity): JsonResponse
     {
-        return $checkSimilarity->execute($request->validatedJudul(), $request->user()?->id);
+        return $checkSimilarity->execute(
+            $request->validatedJudul(),
+            $request->validatedDocumentType(),
+            $request->user()?->id,
+        );
     }
 }

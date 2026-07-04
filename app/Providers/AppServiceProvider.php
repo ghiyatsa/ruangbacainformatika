@@ -2,18 +2,18 @@
 
 namespace App\Providers;
 
-use App\Listeners\DispatchSimilaritySyncAfterSkripsiImport;
 use App\Models\Author;
 use App\Models\Book;
+use App\Models\BookItem;
 use App\Models\Category;
 use App\Models\InternshipReport;
+use App\Models\LoanItem;
 use App\Models\Post;
 use App\Models\Publisher;
 use App\Models\Skripsi;
 use App\Models\Thesis;
 use App\Observers\CatalogActivityObserver;
 use App\Observers\PostObserver;
-use App\Observers\SkripsiObserver;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
 use App\Services\KioskPinManager;
@@ -22,13 +22,12 @@ use App\Support\AppTimezone;
 use App\Support\RichContentSanitizer;
 use App\Support\SiteSettings;
 use Carbon\CarbonImmutable;
-use Filament\Actions\Imports\Events\ImportCompleted;
 use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -89,13 +88,18 @@ class AppServiceProvider extends ServiceProvider
         Post::observe(PostObserver::class);
         Publisher::observe(CatalogActivityObserver::class);
         Skripsi::observe(CatalogActivityObserver::class);
-        Skripsi::observe(SkripsiObserver::class);
         Thesis::observe(CatalogActivityObserver::class);
 
-        Event::listen(
-            ImportCompleted::class,
-            DispatchSimilaritySyncAfterSkripsiImport::class,
-        );
+        // Clear catalog stats cache on database changes
+        $clearCatalogCache = fn () => Cache::forget('catalog:stats');
+        Book::saved($clearCatalogCache);
+        Book::deleted($clearCatalogCache);
+        BookItem::saved($clearCatalogCache);
+        BookItem::deleted($clearCatalogCache);
+        Category::saved($clearCatalogCache);
+        Category::deleted($clearCatalogCache);
+        LoanItem::created($clearCatalogCache);
+        LoanItem::deleted($clearCatalogCache);
     }
 
     protected function configureWhatsAppRateLimiter(): void

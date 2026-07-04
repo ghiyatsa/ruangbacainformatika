@@ -68,7 +68,7 @@ export default function InternshipReportCatalogPage({
             }
             deferredData="reports"
             loadingFallback={
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
                     {Array.from({ length: 10 }).map((_, index) => (
                         <KtiCardSkeleton key={index} />
                     ))}
@@ -82,7 +82,7 @@ export default function InternshipReportCatalogPage({
                 propKey="reports"
                 resourceLabel="laporan"
                 loadingFallback={
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5" aria-hidden="true">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]" aria-hidden="true">
                         {Array.from({ length: 5 }).map((_, index) => (
                             <KtiCardSkeleton key={`load-more-${index}`} />
                         ))}
