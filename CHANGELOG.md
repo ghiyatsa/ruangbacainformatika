@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.11.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.10.0...v1.11.0) (2026-07-04)
+
+
+### Features
+
+* **auth:** implement dedicated login page with google identity services ([282fdaa](https://github.com/ghiyatsa/ruangbacainformatika/commit/282fdaa8984a2f3ffae8e971b664092240818b14))
+* **similarity:** implement polymorphic sync for Skripsi and Laporan KP & resolve welcome page SEO issues ([ff22eab](https://github.com/ghiyatsa/ruangbacainformatika/commit/ff22eabc4b78d09ea62192f6f3913739cbdf2c0a))
+
 ## [1.10.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.9.0...v1.10.0) (2026-07-04)
 
 
