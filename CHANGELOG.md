@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.10.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.9.0...v1.10.0) (2026-07-04)
+
+
+### Features
+
+* **ui,catalog:** revise similarity page UI, fix robots.txt crawl, and align book catalog mobile filters skeleton ([2325aef](https://github.com/ghiyatsa/ruangbacainformatika/commit/2325aef2c6ad2be883f416f207fc3404b926eabd))
+
+
+### Bug Fixes
+
+* **eslint:** resolve react hook rules & padding stylistic errors in detail pages ([7426730](https://github.com/ghiyatsa/ruangbacainformatika/commit/7426730054fd69d091ee691421d2773a4860232e))
+
 ## [1.9.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.8.0...v1.9.0) (2026-06-26)
 
 
