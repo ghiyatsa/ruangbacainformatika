@@ -27,11 +27,17 @@ beforeEach(function () {
 });
 
 it('google login button is enabled when google is configured', function () {
-    get(route('login'))->assertRedirect(route('auth.google', absolute: false));
+    get(route('login'))
+        ->assertOk()
+        ->assertInertia(
+            fn (AssertableInertia $page) => $page
+                ->component('auth/login')
+                ->where('googleLoginUrl', route('auth.google'))
+        );
 });
 
-it('register route redirects directly to google when google is configured', function () {
-    get(route('register'))->assertRedirect(route('auth.google', absolute: false));
+it('register route redirects to login when google is configured', function () {
+    get(route('register'))->assertRedirect(route('login', absolute: false));
 });
 
 it('eligible users can authenticate with google one tap', function () {

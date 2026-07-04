@@ -1,4 +1,4 @@
-import { Link, usePage, router } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { MoonIcon, Search, ShoppingCart, SunIcon } from 'lucide-react';
 import { GlobalSearch } from '@/components/layout/global-search/GlobalSearch';
 import { Badge } from '@/components/ui/badge';
@@ -8,8 +8,7 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { openGoogleLoginPopup } from '@/lib/auth';
-import { google } from '@/routes/auth';
+import { login } from '@/routes';
 import loans from '@/routes/loans';
 import { BookmarksDropdown } from './BookmarksDropdown';
 import { NotificationsDropdown } from './NotificationsDropdown';
@@ -116,24 +115,11 @@ export function HeaderActions({
                     </>
                 ) : (
                     <Button
+                        asChild
                         size="sm"
                         className="hidden rounded-xl text-sm shadow-md shadow-primary/15 md:inline-flex"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            openGoogleLoginPopup(google.url())
-                                .then((url) => {
-                                    if (url) {
-                                        router.visit(url);
-                                    } else {
-                                        router.reload();
-                                    }
-                                })
-                                .catch((err) => {
-                                    console.error(err);
-                                });
-                        }}
                     >
-                        Masuk
+                        <Link href={login.url()}>Masuk</Link>
                     </Button>
                 )}
 

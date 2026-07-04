@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
 Route::middleware('guest')->group(function () {
-    Route::get('/register', fn () => redirect()->route('auth.google'))->name('register');
+    Route::get('/register', fn () => redirect()->route('login'))->name('register');
 
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
     Route::post('auth/google/popup-session', [GoogleController::class, 'setPopupSession'])->name('auth.google.set-popup');

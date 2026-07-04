@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Fortify;
@@ -49,11 +50,20 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureViews(): void
     {
         Fortify::loginView(function (Request $request) {
-            if (app(GoogleLoginConfiguration::class)->isConfigured()) {
-                return redirect()->route('auth.google');
+            if (! app(GoogleLoginConfiguration::class)->isConfigured()) {
+                return redirect()->route('home');
             }
 
-            return redirect()->route('home');
+            if (! session()->has('url.intended')) {
+                $referer = $request->headers->get('referer');
+                if ($referer && Str::startsWith($referer, $request->schemeAndHttpHost())) {
+                    session()->put('url.intended', $referer);
+                }
+            }
+
+            return Inertia::render('auth/login', [
+                'googleLoginUrl' => route('auth.google'),
+            ]);
         });
     }
 

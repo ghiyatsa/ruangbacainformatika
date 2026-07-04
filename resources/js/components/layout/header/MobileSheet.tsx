@@ -1,4 +1,4 @@
-import { Link, usePage, router } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, Menu, ShoppingCart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,8 +13,7 @@ import {
     SheetHeader,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { openGoogleLoginPopup } from '@/lib/auth';
-import { google } from '@/routes/auth';
+import { login } from '@/routes';
 import loans from '@/routes/loans';
 import { AppLogo } from './AppLogo';
 import { NAV_LINKS } from './constants';
@@ -192,27 +191,14 @@ export function MobileSheet({
 
                 {!auth.user ? (
                     <div className="flex flex-col gap-2 border-t border-border/60 p-4">
-                        <Button
-                            className="h-11 w-full rounded-xl"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                openGoogleLoginPopup(google.url())
-                                    .then((url) => {
-                                        setMobileOpen(false);
-
-                                        if (url) {
-                                            router.visit(url);
-                                        } else {
-                                            router.reload();
-                                        }
-                                    })
-                                    .catch((err) => {
-                                        console.error(err);
-                                    });
-                            }}
-                        >
-                            Masuk
-                        </Button>
+                        <SheetClose asChild>
+                            <Button
+                                asChild
+                                className="h-11 w-full rounded-xl"
+                            >
+                                <Link href={login.url()}>Masuk</Link>
+                            </Button>
+                        </SheetClose>
                     </div>
                 ) : null}
             </SheetContent>
