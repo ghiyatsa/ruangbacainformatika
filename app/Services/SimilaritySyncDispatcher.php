@@ -4,24 +4,25 @@ namespace App\Services;
 
 use App\Jobs\RemoveSkripsiFromSimilarity;
 use App\Jobs\SyncSkripsiToSimilarity;
+use App\Models\Skripsi;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class SimilaritySyncDispatcher
 {
-    public function dispatchUpsert(int $skripsiId): void
+    public function dispatchUpsert(int $id, string $modelClass = Skripsi::class): void
     {
         $this->dispatchJob(
-            new SyncSkripsiToSimilarity($skripsiId),
-            fn (): mixed => SyncSkripsiToSimilarity::dispatch($skripsiId),
+            new SyncSkripsiToSimilarity($id, $modelClass),
+            fn (): mixed => SyncSkripsiToSimilarity::dispatch($id, $modelClass),
         );
     }
 
-    public function dispatchDelete(int $skripsiId): void
+    public function dispatchDelete(int $id, string $modelClass = Skripsi::class): void
     {
         $this->dispatchJob(
-            new RemoveSkripsiFromSimilarity($skripsiId),
-            fn (): mixed => RemoveSkripsiFromSimilarity::dispatch($skripsiId),
+            new RemoveSkripsiFromSimilarity($id, $modelClass),
+            fn (): mixed => RemoveSkripsiFromSimilarity::dispatch($id, $modelClass),
         );
     }
 

@@ -358,13 +358,13 @@ class SimilarityApiService
     }
 
     /**
-     * Hapus skripsi dari vector store berdasarkan ID Laravel.
+     * Hapus dokumen dari vector store berdasarkan ID.
      */
-    public function delete(int $laravelId): bool
+    public function delete(string|int $id): bool
     {
         try {
             $response = $this->sendWithRetry(
-                fn (PendingRequest $request): Response => $request->delete("/api/v1/sync/{$laravelId}"),
+                fn (PendingRequest $request): Response => $request->delete("/api/v1/sync/{$id}"),
             );
 
             if ($response->successful() || $response->notFound()) {

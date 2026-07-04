@@ -84,7 +84,7 @@ it('integration settings page shows the full skripsi resync action', function ()
     actingAs($user);
 
     Livewire::test(IntegrationSettings::class)
-        ->assertSee('Sinkronkan Ulang Semua Skripsi');
+        ->assertSee('Sinkronkan Ulang Semua Dokumen');
 });
 
 it('integration settings clears cached turnstile status after saving', function () {

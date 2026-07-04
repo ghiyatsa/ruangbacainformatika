@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
 
 class SimilaritySyncStatus extends Model
@@ -27,7 +28,8 @@ class SimilaritySyncStatus extends Model
     public const OPERATION_DELETE = 'delete';
 
     protected $fillable = [
-        'source_skripsi_id',
+        'syncable_id',
+        'syncable_type',
         'status',
         'last_operation',
         'attempts',
@@ -54,9 +56,19 @@ class SimilaritySyncStatus extends Model
         ];
     }
 
+    public function syncable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
     public function skripsi(): BelongsTo
     {
-        return $this->belongsTo(Skripsi::class, 'source_skripsi_id', 'id');
+        return $this->belongsTo(Skripsi::class, 'syncable_id', 'id');
+    }
+
+    public function scopeForExistingRecords(Builder $query): Builder
+    {
+        return $query->whereHas('syncable');
     }
 
     public function scopeForExistingSkripsi(Builder $query): Builder

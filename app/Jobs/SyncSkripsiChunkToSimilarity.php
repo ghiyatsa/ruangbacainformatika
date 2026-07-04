@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
 use App\Services\SimilaritySyncStatusService;
@@ -28,11 +29,12 @@ class SyncSkripsiChunkToSimilarity implements ShouldQueue, ShouldQueueAfterCommi
     public function __construct(
         public readonly array $skripsiIds,
         public readonly bool $resetIndex = false,
+        public readonly string $modelClass = Skripsi::class,
     ) {}
 
     public function handle(SimilarityApiService $api, SimilaritySyncStatusService $statusService): void
     {
-        $skripsis = Skripsi::query()
+        $records = $this->modelClass::query()
             ->select([
                 'id',
                 'title',
@@ -46,37 +48,43 @@ class SyncSkripsiChunkToSimilarity implements ShouldQueue, ShouldQueueAfterCommi
             ->orderBy('id')
             ->get();
 
-        if ($skripsis->isEmpty()) {
+        if ($records->isEmpty()) {
             return;
         }
 
-        foreach ($skripsis as $skripsi) {
-            $statusService->markProcessing($skripsi->id);
+        foreach ($records as $record) {
+            $statusService->markProcessing($record->id, SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);
         }
 
-        $items = $skripsis->map(fn (Skripsi $skripsi): array => [
-            'skripsi_id' => $skripsi->id,
-            'judul' => $skripsi->title,
-            'abstrak' => $skripsi->abstract,
-            'kata_kunci' => $skripsi->keywords,
-            'tahun' => $skripsi->year,
+        $documentType = $this->modelClass === Skripsi::class ? 'skripsi' : 'internship_report';
+
+        $items = $records->map(fn ($record): array => [
+            'document_id' => "{$documentType}_{$record->id}",
+            'document_type' => $documentType,
+            'skripsi_id' => $record->id,
+            'judul' => $record->title,
+            'abstrak' => $record->abstract,
+            'kata_kunci' => $record->keywords,
+            'tahun' => $record->year,
             'program_studi' => null,
-            'nim' => $skripsi->student_id,
-            'nama_mahasiswa' => $skripsi->author_name,
+            'nim' => $record->student_id,
+            'nama_mahasiswa' => $record->author_name,
         ])->values()->all();
 
         if ($api->bulkUpsert($items, $this->resetIndex)) {
-            foreach ($skripsis as $skripsi) {
-                $statusService->markSynced($skripsi->id);
+            foreach ($records as $record) {
+                $statusService->markSynced($record->id, SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);
             }
 
             return;
         }
 
-        foreach ($skripsis as $skripsi) {
+        foreach ($records as $record) {
             $statusService->markFailed(
-                $skripsi->id,
+                $record->id,
                 'Bulk sinkronisasi ke Similarity API gagal.',
+                SimilaritySyncStatus::OPERATION_UPSERT,
+                $this->modelClass,
             );
         }
 

@@ -137,7 +137,7 @@ class SiteSettings
         return [
             'site_name' => (string) config('app.name'),
             'site_tagline' => 'Layanan perpustakaan yang rapi dan mudah diakses',
-            'site_description' => 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.',
+            'site_description' => 'Ruang Baca Teknik Informatika Universitas Malikussaleh: perpustakaan digital untuk mendukung riset, pembelajaran, dan akses koleksi akademik secara mudah.',
             'department' => 'Program Studi Teknik Informatika Universitas Malikussaleh',
             'contact_email' => 'informatika@unimal.ac.id',
             'support_whatsapp' => '',

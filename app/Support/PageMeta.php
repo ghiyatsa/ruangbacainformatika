@@ -21,7 +21,7 @@ class PageMeta
     {
         return [
             'title' => $this->siteTitle(),
-            'description' => 'Daftar buku dan arsip akademik Ruang Baca Teknik Informatika Universitas Malikussaleh.',
+            'description' => $this->siteDescription(),
             'keywords' => $this->siteKeywords(),
             'robots' => $this->siteRobots(),
             'canonicalUrl' => url('/'),
@@ -161,6 +161,11 @@ class PageMeta
     protected function siteRobots(): string
     {
         return strval($this->siteMeta()['robots'] ?? 'index,follow');
+    }
+
+    protected function siteDescription(): string
+    {
+        return strval($this->siteMeta()['description'] ?? 'Ruang Baca Teknik Informatika Universitas Malikussaleh: perpustakaan digital untuk mendukung riset, pembelajaran, dan akses koleksi akademik secara mudah.');
     }
 
     protected function excerpt(string $content): string

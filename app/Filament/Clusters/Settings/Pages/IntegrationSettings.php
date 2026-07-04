@@ -188,16 +188,16 @@ class IntegrationSettings extends Page
                 ->footer([
                     Actions::make([
                         Action::make('resyncAllSkripsi')
-                            ->label('Sinkronkan Ulang Semua Skripsi')
+                            ->label('Sinkronkan Ulang Semua Dokumen')
                             ->icon(Heroicon::OutlinedArrowPath)
                             ->color('warning')
                             ->requiresConfirmation()
-                            ->modalHeading('Sinkronkan Ulang Semua Skripsi')
+                            ->modalHeading('Sinkronkan Ulang Semua Dokumen')
                             ->modalDescription('Gunakan setelah bobot similarity berubah agar seluruh data diperbarui ulang. Proses tetap berjalan di antrean.')
                             ->modalSubmitActionLabel('Mulai Sinkron Ulang')
                             ->action(function (): void {
                                 $result = app(SimilarityFullSyncDispatcher::class)->dispatch(
-                                    chunk: 10,
+                                    chunk: 200,
                                     forceSync: false,
                                     initiatedByUserId: auth()->id(),
                                 );

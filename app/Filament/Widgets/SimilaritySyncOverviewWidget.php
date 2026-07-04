@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Skripsis\SkripsiResource;
+use App\Models\InternshipReport;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use Filament\Support\Enums\IconPosition;
@@ -33,16 +34,19 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $totalSkripsi = Skripsi::query()->count();
+        $totalInternship = InternshipReport::query()->count();
+        $totalDoc = $totalSkripsi + $totalInternship;
+
         $syncedCount = SimilaritySyncStatus::query()
-            ->forExistingSkripsi()
+            ->forExistingRecords()
             ->where('status', SimilaritySyncStatus::STATUS_SYNCED)
             ->count();
         $failedCount = SimilaritySyncStatus::query()
-            ->forExistingSkripsi()
+            ->forExistingRecords()
             ->where('status', SimilaritySyncStatus::STATUS_FAILED)
             ->count();
         $pendingCount = SimilaritySyncStatus::query()
-            ->forExistingSkripsi()
+            ->forExistingRecords()
             ->whereIn('status', [
                 SimilaritySyncStatus::STATUS_PENDING,
                 SimilaritySyncStatus::STATUS_SYNCING,
@@ -50,11 +54,13 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
             ->count();
         $unscheduledCount = Skripsi::query()
             ->whereDoesntHave('similaritySyncStatus')
+            ->count() + InternshipReport::query()
+            ->whereDoesntHave('similaritySyncStatus')
             ->count();
 
         return [
             Stat::make('Sinkron Berhasil', $syncedCount)
-                ->description($totalSkripsi > 0 ? "{$totalSkripsi} skripsi tercatat" : 'Belum ada data')
+                ->description($totalDoc > 0 ? "{$totalDoc} dokumen tercatat" : 'Belum ada data')
                 ->descriptionIcon(Heroicon::OutlinedCheckCircle, IconPosition::Before)
                 ->color('success')
                 ->icon(Heroicon::OutlinedCheckBadge)

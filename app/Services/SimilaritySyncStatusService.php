@@ -2,23 +2,33 @@
 
 namespace App\Services;
 
+use App\Models\InternshipReport;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class SimilaritySyncStatusService
 {
-    public function deleteStatus(int $skripsiId): void
+    public function deleteStatus(Model|int $model, ?string $type = null): void
     {
+        $id = $model instanceof Model ? $model->getKey() : $model;
+        $type = $model instanceof Model ? $model->getMorphClass() : ($type ?? Skripsi::class);
+
         SimilaritySyncStatus::query()
-            ->where('source_skripsi_id', $skripsiId)
+            ->where('syncable_type', $type)
+            ->where('syncable_id', $id)
             ->delete();
     }
 
-    public function markQueued(Skripsi $skripsi, string $operation = SimilaritySyncStatus::OPERATION_UPSERT): SimilaritySyncStatus
+    public function markQueued(Model $model, string $operation = SimilaritySyncStatus::OPERATION_UPSERT): SimilaritySyncStatus
     {
         return SimilaritySyncStatus::query()->updateOrCreate(
-            ['source_skripsi_id' => $skripsi->id],
+            [
+                'syncable_type' => $model->getMorphClass(),
+                'syncable_id' => $model->getKey(),
+            ],
             [
                 'status' => SimilaritySyncStatus::STATUS_PENDING,
                 'last_operation' => $operation,
@@ -27,10 +37,14 @@ class SimilaritySyncStatusService
         );
     }
 
-    public function markProcessing(int $skripsiId, string $operation = SimilaritySyncStatus::OPERATION_UPSERT): SimilaritySyncStatus
+    public function markProcessing(Model|int $model, string $operation = SimilaritySyncStatus::OPERATION_UPSERT, ?string $type = null): SimilaritySyncStatus
     {
+        $id = $model instanceof Model ? $model->getKey() : $model;
+        $type = $model instanceof Model ? $model->getMorphClass() : ($type ?? Skripsi::class);
+
         $status = SimilaritySyncStatus::query()->firstOrNew([
-            'source_skripsi_id' => $skripsiId,
+            'syncable_type' => $type,
+            'syncable_id' => $id,
         ]);
 
         $status->fill([
@@ -46,10 +60,14 @@ class SimilaritySyncStatusService
         return $status;
     }
 
-    public function markSynced(int $skripsiId, string $operation = SimilaritySyncStatus::OPERATION_UPSERT): SimilaritySyncStatus
+    public function markSynced(Model|int $model, string $operation = SimilaritySyncStatus::OPERATION_UPSERT, ?string $type = null): SimilaritySyncStatus
     {
+        $id = $model instanceof Model ? $model->getKey() : $model;
+        $type = $model instanceof Model ? $model->getMorphClass() : ($type ?? Skripsi::class);
+
         $status = SimilaritySyncStatus::query()->firstOrNew([
-            'source_skripsi_id' => $skripsiId,
+            'syncable_type' => $type,
+            'syncable_id' => $id,
         ]);
 
         $status->fill([
@@ -65,12 +83,17 @@ class SimilaritySyncStatusService
     }
 
     public function markFailed(
-        int $skripsiId,
+        Model|int $model,
         string $errorMessage,
         string $operation = SimilaritySyncStatus::OPERATION_UPSERT,
+        ?string $type = null,
     ): SimilaritySyncStatus {
+        $id = $model instanceof Model ? $model->getKey() : $model;
+        $type = $model instanceof Model ? $model->getMorphClass() : ($type ?? Skripsi::class);
+
         $status = SimilaritySyncStatus::query()->firstOrNew([
-            'source_skripsi_id' => $skripsiId,
+            'syncable_type' => $type,
+            'syncable_id' => $id,
         ]);
 
         $status->fill([
@@ -92,7 +115,7 @@ class SimilaritySyncStatusService
         $this->deleteOrphanStatuses();
 
         SimilaritySyncStatus::query()
-            ->forExistingSkripsi()
+            ->forExistingRecords()
             ->update([
                 'status' => SimilaritySyncStatus::STATUS_PENDING,
                 'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
@@ -101,11 +124,13 @@ class SimilaritySyncStatusService
                 'updated_at' => $timestamp,
             ]);
 
+        // Sync Skripsi
         Skripsi::query()
             ->select('id')
             ->chunkById(500, function ($skripsis) use ($timestamp): void {
                 $rows = $skripsis->map(fn (Skripsi $skripsi): array => [
-                    'source_skripsi_id' => $skripsi->id,
+                    'syncable_type' => Skripsi::class,
+                    'syncable_id' => $skripsi->id,
                     'status' => SimilaritySyncStatus::STATUS_PENDING,
                     'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
                     'attempts' => 0,
@@ -118,7 +143,31 @@ class SimilaritySyncStatusService
 
                 SimilaritySyncStatus::query()->upsert(
                     $rows,
-                    ['source_skripsi_id'],
+                    ['syncable_type', 'syncable_id'],
+                    ['status', 'last_operation', 'last_synced_at', 'last_error', 'updated_at'],
+                );
+            });
+
+        // Sync InternshipReport
+        InternshipReport::query()
+            ->select('id')
+            ->chunkById(500, function ($internships) use ($timestamp): void {
+                $rows = $internships->map(fn (InternshipReport $internship): array => [
+                    'syncable_type' => InternshipReport::class,
+                    'syncable_id' => $internship->id,
+                    'status' => SimilaritySyncStatus::STATUS_PENDING,
+                    'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+                    'attempts' => 0,
+                    'last_attempt_at' => null,
+                    'last_synced_at' => null,
+                    'last_error' => null,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ])->all();
+
+                SimilaritySyncStatus::query()->upsert(
+                    $rows,
+                    ['syncable_type', 'syncable_id'],
                     ['status', 'last_operation', 'last_synced_at', 'last_error', 'updated_at'],
                 );
             });
@@ -127,21 +176,38 @@ class SimilaritySyncStatusService
     public function deleteOrphanStatuses(): void
     {
         SimilaritySyncStatus::query()
-            ->whereDoesntHave('skripsi')
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->where('syncable_type', Skripsi::class)
+                        ->whereNotExists(function ($sub) {
+                            $sub->select(DB::raw(1))
+                                ->from('skripsis')
+                                ->whereColumn('skripsis.id', 'similarity_sync_statuses.syncable_id');
+                        });
+                })->orWhere(function ($q) {
+                    $q->where('syncable_type', InternshipReport::class)
+                        ->whereNotExists(function ($sub) {
+                            $sub->select(DB::raw(1))
+                                ->from('internship_reports')
+                                ->whereColumn('internship_reports.id', 'similarity_sync_statuses.syncable_id');
+                        });
+                })->orWhereNotIn('syncable_type', [Skripsi::class, InternshipReport::class]);
+            })
             ->delete();
     }
 
     /**
      * @param  array<int, int>  $skripsiIds
      */
-    public function markIndexedIdsAsSynced(array $skripsiIds, CarbonInterface $syncedAt): void
+    public function markIndexedIdsAsSynced(array $skripsiIds, CarbonInterface $syncedAt, string $type = Skripsi::class): void
     {
         if ($skripsiIds === []) {
             return;
         }
 
         SimilaritySyncStatus::query()
-            ->whereIn('source_skripsi_id', $skripsiIds)
+            ->where('syncable_type', $type)
+            ->whereIn('syncable_id', $skripsiIds)
             ->update([
                 'status' => SimilaritySyncStatus::STATUS_SYNCED,
                 'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
@@ -151,8 +217,9 @@ class SimilaritySyncStatusService
             ]);
 
         $rows = collect($skripsiIds)
-            ->map(fn (int $skripsiId): array => [
-                'source_skripsi_id' => $skripsiId,
+            ->map(fn (int $id): array => [
+                'syncable_type' => $type,
+                'syncable_id' => $id,
                 'status' => SimilaritySyncStatus::STATUS_SYNCED,
                 'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
                 'attempts' => 0,
@@ -166,7 +233,7 @@ class SimilaritySyncStatusService
 
         SimilaritySyncStatus::query()->upsert(
             $rows,
-            ['source_skripsi_id'],
+            ['syncable_type', 'syncable_id'],
             ['status', 'last_operation', 'last_synced_at', 'last_error', 'updated_at'],
         );
     }
@@ -174,7 +241,7 @@ class SimilaritySyncStatusService
     /**
      * @param  array<int, int>  $skripsiIds
      */
-    public function markIdsMissingFromIndex(array $skripsiIds, string $errorMessage, CarbonInterface $timestamp): void
+    public function markIdsMissingFromIndex(array $skripsiIds, string $errorMessage, CarbonInterface $timestamp, string $type = Skripsi::class): void
     {
         if ($skripsiIds === []) {
             return;
@@ -183,7 +250,8 @@ class SimilaritySyncStatusService
         $errorMessage = mb_substr($errorMessage, 0, 2000);
 
         SimilaritySyncStatus::query()
-            ->whereIn('source_skripsi_id', $skripsiIds)
+            ->where('syncable_type', $type)
+            ->whereIn('syncable_id', $skripsiIds)
             ->update([
                 'status' => SimilaritySyncStatus::STATUS_FAILED,
                 'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
@@ -194,8 +262,9 @@ class SimilaritySyncStatusService
             ]);
 
         $rows = collect($skripsiIds)
-            ->map(fn (int $skripsiId): array => [
-                'source_skripsi_id' => $skripsiId,
+            ->map(fn (int $id): array => [
+                'syncable_type' => $type,
+                'syncable_id' => $id,
                 'status' => SimilaritySyncStatus::STATUS_FAILED,
                 'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
                 'attempts' => 0,
@@ -209,7 +278,7 @@ class SimilaritySyncStatusService
 
         SimilaritySyncStatus::query()->upsert(
             $rows,
-            ['source_skripsi_id'],
+            ['syncable_type', 'syncable_id'],
             ['status', 'last_operation', 'last_attempt_at', 'last_synced_at', 'last_error', 'updated_at'],
         );
     }

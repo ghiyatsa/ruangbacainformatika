@@ -88,7 +88,8 @@ it('counts similarity overview stats from active skripsi records only', function
     $activeSkripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
 
     SimilaritySyncStatus::query()->create([
-        'source_skripsi_id' => $activeSkripsi->id,
+        'syncable_id' => $activeSkripsi->id,
+        'syncable_type' => Skripsi::class,
         'status' => SimilaritySyncStatus::STATUS_FAILED,
         'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
         'attempts' => 1,
@@ -96,7 +97,8 @@ it('counts similarity overview stats from active skripsi records only', function
     ]);
 
     SimilaritySyncStatus::query()->create([
-        'source_skripsi_id' => 999999,
+        'syncable_id' => 999999,
+        'syncable_type' => Skripsi::class,
         'status' => SimilaritySyncStatus::STATUS_FAILED,
         'last_operation' => SimilaritySyncStatus::OPERATION_DELETE,
         'attempts' => 1,

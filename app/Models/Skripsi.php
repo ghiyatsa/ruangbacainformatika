@@ -7,7 +7,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Str;
 
 class Skripsi extends Model
@@ -75,9 +75,9 @@ class Skripsi extends Model
             ->implode(' ');
     }
 
-    public function similaritySyncStatus(): HasOne
+    public function similaritySyncStatus(): MorphOne
     {
-        return $this->hasOne(SimilaritySyncStatus::class, 'source_skripsi_id', 'id');
+        return $this->morphOne(SimilaritySyncStatus::class, 'syncable');
     }
 
     public function similaritySyncStatusLabel(): string

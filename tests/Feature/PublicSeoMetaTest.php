@@ -29,7 +29,7 @@ beforeEach(function () {
 it('renders configured seo meta on the welcome page', function () {
     get('/')
         ->assertOk()
-        ->assertSee('name="description" content="Daftar buku dan arsip akademik Ruang Baca Teknik Informatika Universitas Malikussaleh."', false)
+        ->assertSee('name="description" content="Deskripsi SEO kustom untuk pengujian halaman publik."', false)
         ->assertSee('name="robots" content="noindex,nofollow"', false)
         ->assertSee('name="keywords" content="seo, katalog, ruang baca"', false)
         ->assertSee('property="og:title" content="Ruang Baca Custom"', false)

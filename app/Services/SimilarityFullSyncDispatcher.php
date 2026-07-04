@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Jobs\SyncSkripsiChunkToSimilarity;
+use App\Models\InternshipReport;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Models\User;
@@ -93,6 +94,7 @@ class SimilarityFullSyncDispatcher
         $jobs = [];
         $shouldResetIndex = true;
 
+        // 1. Chunk Skripsi
         Skripsi::query()
             ->select('id')
             ->orderBy('id')
@@ -100,6 +102,21 @@ class SimilarityFullSyncDispatcher
                 $jobs[] = new SyncSkripsiChunkToSimilarity(
                     skripsiIds: $skripsis->pluck('id')->all(),
                     resetIndex: $shouldResetIndex,
+                    modelClass: Skripsi::class,
+                );
+
+                $shouldResetIndex = false;
+            });
+
+        // 2. Chunk InternshipReport
+        InternshipReport::query()
+            ->select('id')
+            ->orderBy('id')
+            ->chunkById($chunk, function ($internships) use (&$jobs, &$shouldResetIndex): void {
+                $jobs[] = new SyncSkripsiChunkToSimilarity(
+                    skripsiIds: $internships->pluck('id')->all(),
+                    resetIndex: $shouldResetIndex,
+                    modelClass: InternshipReport::class,
                 );
 
                 $shouldResetIndex = false;
@@ -121,15 +138,15 @@ class SimilarityFullSyncDispatcher
         }
 
         $syncedCount = SimilaritySyncStatus::query()
-            ->forExistingSkripsi()
+            ->forExistingRecords()
             ->where('status', SimilaritySyncStatus::STATUS_SYNCED)
             ->count();
         $failedCount = SimilaritySyncStatus::query()
-            ->forExistingSkripsi()
+            ->forExistingRecords()
             ->where('status', SimilaritySyncStatus::STATUS_FAILED)
             ->count();
         $pendingCount = SimilaritySyncStatus::query()
-            ->forExistingSkripsi()
+            ->forExistingRecords()
             ->whereIn('status', [
                 SimilaritySyncStatus::STATUS_PENDING,
                 SimilaritySyncStatus::STATUS_SYNCING,

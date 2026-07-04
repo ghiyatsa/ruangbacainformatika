@@ -92,6 +92,10 @@
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">
+        <div style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;" aria-hidden="true">
+            <h1>Ruang Baca Teknik Informatika Universitas Malikussaleh</h1>
+            <p>Ruang Baca Teknik Informatika Universitas Malikussaleh adalah layanan perpustakaan digital resmi Program Studi Teknik Informatika Unimal. Kami menyediakan katalog buku cetak, arsip tugas akhir mahasiswa (skripsi), laporan kerja praktek (KP), jurnal penelitian, serta artikel ilmiah lainnya secara terbuka dan mudah diakses oleh mahasiswa, dosen, maupun civitas akademika lainnya.</p>
+        </div>
         <x-inertia::app />
         <script>
             if ('serviceWorker' in navigator) {

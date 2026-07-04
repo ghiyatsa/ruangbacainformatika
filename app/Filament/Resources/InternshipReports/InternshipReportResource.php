@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class InternshipReportResource extends Resource
@@ -65,6 +66,12 @@ class InternshipReportResource extends Resource
     public static function table(Table $table): Table
     {
         return InternshipReportsTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with('similaritySyncStatus');
     }
 
     public static function getRelations(): array

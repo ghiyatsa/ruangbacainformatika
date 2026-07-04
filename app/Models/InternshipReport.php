@@ -7,6 +7,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Str;
 
 class InternshipReport extends Model
@@ -72,5 +73,20 @@ class InternshipReport extends Model
             ->filter()
             ->map(fn (string $term): string => sprintf('%s*', $term))
             ->implode(' ');
+    }
+
+    public function similaritySyncStatus(): MorphOne
+    {
+        return $this->morphOne(SimilaritySyncStatus::class, 'syncable');
+    }
+
+    public function similaritySyncStatusLabel(): string
+    {
+        return $this->similaritySyncStatus?->statusLabel() ?? 'Belum';
+    }
+
+    public function similaritySyncStatusColor(): string
+    {
+        return $this->similaritySyncStatus?->statusColor() ?? 'gray';
     }
 }

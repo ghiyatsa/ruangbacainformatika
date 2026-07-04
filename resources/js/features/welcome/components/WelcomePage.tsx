@@ -73,9 +73,11 @@ export default function WelcomePage({
         ]
     };
 
+    const siteDescription = page.props.site?.description || 'Ruang Baca Teknik Informatika Universitas Malikussaleh: perpustakaan digital untuk mendukung riset, pembelajaran, dan akses koleksi akademik secara mudah.';
+
     return (
         <>
-            <SeoHead description="Daftar buku dan arsip akademik Ruang Baca Teknik Informatika Universitas Malikussaleh." />
+            <SeoHead description={siteDescription} />
             
             <script type="application/ld+json">
                 {JSON.stringify(websiteJsonLd)}

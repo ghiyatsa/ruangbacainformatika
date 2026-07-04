@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\SimilaritySyncStatus;
+use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
 use App\Services\SimilaritySyncStatusService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +20,10 @@ class RemoveSkripsiFromSimilarity implements ShouldQueue, ShouldQueueAfterCommit
 
     public int $timeout = 30;
 
-    public function __construct(public readonly int $skripsiId) {}
+    public function __construct(
+        public readonly int $skripsiId,
+        public readonly string $modelClass = Skripsi::class,
+    ) {}
 
     /**
      * @return array<int, int>
@@ -31,13 +35,16 @@ class RemoveSkripsiFromSimilarity implements ShouldQueue, ShouldQueueAfterCommit
 
     public function handle(SimilarityApiService $api, SimilaritySyncStatusService $statusService): void
     {
-        $statusService->markProcessing($this->skripsiId, SimilaritySyncStatus::OPERATION_DELETE);
+        $statusService->markProcessing($this->skripsiId, SimilaritySyncStatus::OPERATION_DELETE, $this->modelClass);
 
-        if (! $api->delete($this->skripsiId)) {
-            throw new RuntimeException("Gagal menghapus skripsi {$this->skripsiId} dari Similarity API.");
+        $documentType = $this->modelClass === Skripsi::class ? 'skripsi' : 'internship_report';
+        $documentId = "{$documentType}_{$this->skripsiId}";
+
+        if (! $api->delete($documentId)) {
+            throw new RuntimeException("Gagal menghapus dokumen {$documentId} dari Similarity API.");
         }
 
-        $statusService->deleteStatus($this->skripsiId);
+        $statusService->deleteStatus($this->skripsiId, $this->modelClass);
     }
 
     public function failed(?Throwable $exception): void
@@ -46,6 +53,7 @@ class RemoveSkripsiFromSimilarity implements ShouldQueue, ShouldQueueAfterCommit
             $this->skripsiId,
             $exception?->getMessage() ?? 'Penghapusan sinkronisasi gagal tanpa pesan error.',
             SimilaritySyncStatus::OPERATION_DELETE,
+            $this->modelClass,
         );
     }
 }

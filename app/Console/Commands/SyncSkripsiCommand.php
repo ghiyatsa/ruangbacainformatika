@@ -59,7 +59,7 @@ class SyncSkripsiCommand extends Command
             'author_name',
         ])->chunkById($chunk, function ($skripsis) use ($bar, &$success, &$failed, $reset) {
             foreach ($skripsis as $skripsi) {
-                $this->statusService->markProcessing($skripsi->id);
+                $this->statusService->markProcessing($skripsi);
             }
 
             $items = $skripsis->map(fn ($s) => [
@@ -78,14 +78,14 @@ class SyncSkripsiCommand extends Command
 
             if ($this->api->bulkUpsert($items, $shouldResetThisBatch)) {
                 foreach ($skripsis as $skripsi) {
-                    $this->statusService->markSynced($skripsi->id);
+                    $this->statusService->markSynced($skripsi);
                 }
 
                 $success += count($items);
             } else {
                 foreach ($skripsis as $skripsi) {
                     $this->statusService->markFailed(
-                        $skripsi->id,
+                        $skripsi,
                         'Bulk sinkronisasi ke Similarity API gagal.',
                     );
                 }
@@ -106,6 +106,10 @@ class SyncSkripsiCommand extends Command
             'student_id',
             'author_name',
         ])->chunkById($chunk, function ($internships) use ($bar, &$success, &$failed) {
+            foreach ($internships as $internship) {
+                $this->statusService->markProcessing($internship);
+            }
+
             $items = $internships->map(fn ($i) => [
                 'document_id' => "internship_report_{$i->id}",
                 'document_type' => 'internship_report',
@@ -119,8 +123,19 @@ class SyncSkripsiCommand extends Command
             ])->values()->toArray();
 
             if ($this->api->bulkUpsert($items, false)) {
+                foreach ($internships as $internship) {
+                    $this->statusService->markSynced($internship);
+                }
+
                 $success += count($items);
             } else {
+                foreach ($internships as $internship) {
+                    $this->statusService->markFailed(
+                        $internship,
+                        'Bulk sinkronisasi ke Similarity API gagal.',
+                    );
+                }
+
                 $failed += count($items);
             }
 

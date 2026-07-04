@@ -20,7 +20,10 @@ class SyncSkripsiToSimilarity implements ShouldQueue, ShouldQueueAfterCommit
 
     public int $timeout = 30;
 
-    public function __construct(public readonly int $skripsiId) {}
+    public function __construct(
+        public readonly int $skripsiId,
+        public readonly string $modelClass = Skripsi::class,
+    ) {}
 
     /**
      * @return array<int, int>
@@ -32,32 +35,37 @@ class SyncSkripsiToSimilarity implements ShouldQueue, ShouldQueueAfterCommit
 
     public function handle(SimilarityApiService $api, SimilaritySyncStatusService $statusService): void
     {
-        $statusService->markProcessing($this->skripsiId);
+        $statusService->markProcessing($this->skripsiId, SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);
 
-        $skripsi = Skripsi::query()->find($this->skripsiId);
+        $model = $this->modelClass::query()->find($this->skripsiId);
 
-        if (! $skripsi) {
-            $statusService->markFailed($this->skripsiId, 'Data skripsi tidak lagi tersedia untuk disinkronkan.');
+        if (! $model) {
+            $statusService->markFailed($this->skripsiId, 'Data tidak lagi tersedia untuk disinkronkan.', SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);
 
             return;
         }
 
+        $documentType = $this->modelClass === Skripsi::class ? 'skripsi' : 'internship_report';
+        $documentId = "{$documentType}_{$model->id}";
+
         $synced = $api->upsert([
-            'skripsi_id' => $skripsi->id,
-            'judul' => $skripsi->title,
-            'abstrak' => $skripsi->abstract,
-            'kata_kunci' => $skripsi->keywords,
-            'tahun' => $skripsi->year,
+            'document_id' => $documentId,
+            'document_type' => $documentType,
+            'skripsi_id' => $model->id,
+            'judul' => $model->title,
+            'abstrak' => $model->abstract,
+            'kata_kunci' => $model->keywords,
+            'tahun' => $model->year,
             'program_studi' => 'Teknik Informatika',
-            'nim' => $skripsi->student_id,
-            'nama_mahasiswa' => $skripsi->author_name,
+            'nim' => $model->student_id,
+            'nama_mahasiswa' => $model->author_name,
         ]);
 
         if (! $synced) {
-            throw new RuntimeException("Gagal menyinkronkan skripsi {$this->skripsiId} ke Similarity API.");
+            throw new RuntimeException("Gagal menyinkronkan data {$this->modelClass} ID {$this->skripsiId} ke Similarity API.");
         }
 
-        $statusService->markSynced($this->skripsiId);
+        $statusService->markSynced($this->skripsiId, SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);
     }
 
     public function failed(?Throwable $exception): void
@@ -66,6 +74,7 @@ class SyncSkripsiToSimilarity implements ShouldQueue, ShouldQueueAfterCommit
             $this->skripsiId,
             $exception?->getMessage() ?? 'Sinkronisasi gagal tanpa pesan error.',
             SimilaritySyncStatus::OPERATION_UPSERT,
+            $this->modelClass,
         );
     }
 }

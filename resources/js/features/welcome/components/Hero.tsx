@@ -93,13 +93,12 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
                                     Teknik Informatika Universitas Malikussaleh
                                 </motion.p>
 
-                                <motion.h1
-                                    variants={itemVariants}
-                                    className="mx-auto max-w-4xl text-4xl font-medium tracking-[-0.03em] text-balance sm:text-5xl lg:mx-0 lg:max-w-3xl lg:text-6xl xl:text-[4.5rem]"
-                                >
-                                    Cari buku, temukan referensi, pinjam tanpa
-                                    ribet.
-                                </motion.h1>
+                                <motion.div variants={itemVariants}>
+                                    <h1 className="mx-auto max-w-4xl text-4xl font-medium tracking-[-0.03em] text-balance sm:text-5xl lg:mx-0 lg:max-w-3xl lg:text-6xl xl:text-[4.5rem]">
+                                        Cari buku, temukan referensi, pinjam tanpa
+                                        ribet.
+                                    </h1>
+                                </motion.div>
 
                                 <motion.p
                                     variants={itemVariants}

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\SimilaritySyncStatus;
+use App\Models\Skripsi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,8 @@ class SimilaritySyncStatusFactory extends Factory
     public function definition(): array
     {
         return [
-            'source_skripsi_id' => fake()->unique()->numberBetween(1, 999999),
+            'syncable_id' => fake()->unique()->numberBetween(1, 999999),
+            'syncable_type' => Skripsi::class,
             'status' => SimilaritySyncStatus::STATUS_PENDING,
             'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
             'attempts' => 0,
