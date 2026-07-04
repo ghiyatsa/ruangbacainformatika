@@ -144,10 +144,6 @@ export default function FeaturedSpotlight({
 
     const count = featuredBooks?.length ?? 0;
 
-    if (featuredBooks !== undefined && count === 0) {
-        return null;
-    }
-
     const goTo = useCallback((index: number) => {
         setCurrentIndex(index);
     }, []);
@@ -185,6 +181,10 @@ export default function FeaturedSpotlight({
     }, [count, isPaused]);
 
     const book = featuredBooks?.[currentIndex] || null;
+
+    if (featuredBooks !== undefined && count === 0) {
+        return null;
+    }
 
     return (
         <div className="relative overflow-hidden">

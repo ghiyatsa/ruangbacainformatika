@@ -204,13 +204,17 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                     if (book.description.length >= 120) {
                         return book.description.slice(0, 160);
                     }
+
                     return `${book.description} Temukan detail, ketersediaan eksemplar, lokasi rak, dan ajukan peminjaman buku ini di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
                 }
+
                 if (book) {
                     const authorStr = book.authors?.length ? ` karya ${book.authors.join(', ')}` : '';
                     const publisherStr = book.publisher ? ` diterbitkan oleh ${book.publisher}` : '';
+
                     return `Akses detail buku "${book.title}"${authorStr}${publisherStr}. Cari lokasi rak, ketersediaan, dan ajukan peminjaman online di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
                 }
+
                 return 'Cari detail buku, nomor rak, status ketersediaan eksemplar, dan ajukan peminjaman buku secara mandiri di katalog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.';
             })()}
             image={book?.coverImageUrl}

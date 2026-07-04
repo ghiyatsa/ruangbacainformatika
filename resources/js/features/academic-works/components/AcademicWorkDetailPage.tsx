@@ -69,13 +69,17 @@ export default function AcademicWorkDetailPage(
                     if (work.abstract.length >= 120) {
                         return work.abstract.slice(0, 160);
                     }
+
                     return `${work.abstract} Temukan abstrak lengkap, penulis, NIM, tahun terbit, dan dosen pembimbing untuk referensi akademik di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
                 }
+
                 if (work) {
                     const authorStr = work.authorName ? ` yang disusun oleh ${work.authorName}` : '';
                     const nimStr = work.studentId ? ` (NIM: ${work.studentId})` : '';
+
                     return `Akses detail ${label.toLowerCase()} "${work.title}"${authorStr}${nimStr}. Cari metadata lengkap, abstrak, dan tahun terbit untuk referensi ilmiah di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
                 }
+
                 return `Cari detail ${label.toLowerCase()}, abstrak, nama penulis, dosen pembimbing, dan tahun terbit karya ilmiah secara mandiri di katalog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.`;
             })()}
             keywords={seoKeywords}

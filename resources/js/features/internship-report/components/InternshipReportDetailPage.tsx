@@ -60,13 +60,17 @@ export default function InternshipReportDetailPage(
                     if (report.abstract.length >= 120) {
                         return report.abstract.slice(0, 160);
                     }
+
                     return `${report.abstract} Temukan abstrak lengkap, nama mahasiswa, NIM, lokasi KP, dan tahun laporan kerja praktik untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
                 }
+
                 if (report) {
                     const authorStr = report.authorName ? ` disusun oleh ${report.authorName}` : '';
                     const nimStr = report.studentId ? ` (NIM: ${report.studentId})` : '';
+
                     return `Akses detail laporan Kerja Praktik (KP) "${report.title}"${authorStr}${nimStr}. Temukan lokasi perusahaan, abstrak, dan tahun untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
                 }
+
                 return 'Cari detail laporan Kerja Praktik (KP), abstrak, nama penulis, lokasi instansi, dan tahun laporan secara mandiri di katalog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.';
             })()}
             keywords={seoKeywords}
