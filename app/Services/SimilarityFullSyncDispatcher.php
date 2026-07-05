@@ -15,7 +15,7 @@ use Throwable;
 
 class SimilarityFullSyncDispatcher
 {
-    private const DEFAULT_CHUNK_SIZE = 100;
+    private const DEFAULT_CHUNK_SIZE = 50;
 
     public function __construct(
         private readonly SimilaritySyncStatusService $statusService,

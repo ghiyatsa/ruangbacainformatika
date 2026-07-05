@@ -118,7 +118,7 @@ class SimilarityApiService
     private function client(): PendingRequest
     {
         $request = Http::baseUrl($this->getBaseUrl())
-            ->connectTimeout(3)
+            ->connectTimeout(15)
             ->timeout($this->getTimeout())
             ->acceptJson();
 

@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 
 class SyncSkripsiCommand extends Command
 {
-    protected $signature = 'skripsi:sync {--chunk=100 : Jumlah per batch} {--reset : Reset data Python dan vector index sebelum sync penuh}';
+    protected $signature = 'skripsi:sync {--chunk=50 : Jumlah per batch} {--reset : Reset data Python dan vector index sebelum sync penuh}';
 
     protected $description = 'Sinkronisasi seluruh data skripsi ke Similarity API';
 
