@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.11.0...v1.11.1) (2026-07-05)
+
+
+### Bug Fixes
+
+* optimize similarity sync timeout and chunk size for HF space ([4eacef8](https://github.com/ghiyatsa/ruangbacainformatika/commit/4eacef85582417237ade7c53d4d8fc8c83ae0a8c))
+
 ## [1.11.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.10.0...v1.11.0) (2026-07-04)
 
 
