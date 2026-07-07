@@ -34,7 +34,7 @@ export interface CommentUser {
 }
 
 const REPLIES_WRAPPER_CLASS =
-    'ml-5 pl-4 border-l border-border/80 sm:ml-[3.25rem]';
+    'ml-5 sm:ml-[3.25rem]';
 
 type CommentKind = 'komentar' | 'balasan';
 
@@ -42,6 +42,22 @@ const KIND_LABEL: Record<CommentKind, string> = {
     komentar: 'Komentar',
     balasan: 'Balasan',
 };
+
+if (typeof window !== 'undefined') {
+    try {
+        const keysToRemove: string[] = [];
+
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+
+            if (key && key.startsWith('expanded_comments_')) {
+                keysToRemove.push(key);
+            }
+        }
+
+        keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+    } catch (e) {}
+}
 
 export function CommentItem({
     comment,
@@ -51,16 +67,72 @@ export function CommentItem({
     allowComments = true,
 }: CommentItemProps) {
     const [isReplying, setIsReplying] = useState(false);
-    const [showReplies, setShowReplies] = useState(false);
+    const storageKey = `expanded_comments_${articleSlug}`;
+    const [showReplies, setShowRepliesState] = useState<boolean>(() => {
+        try {
+            const saved = sessionStorage.getItem(storageKey);
+
+            if (saved) {
+                const ids = JSON.parse(saved);
+
+                return Array.isArray(ids) && ids.includes(comment.id);
+            }
+        } catch (e) {}
+
+        return false;
+    });
+
+    const setShowReplies = (value: boolean | ((current: boolean) => boolean)) => {
+        setShowRepliesState((current) => {
+            const next = typeof value === 'function' ? value(current) : value;
+
+            try {
+                const saved = sessionStorage.getItem(storageKey);
+                let ids = saved ? JSON.parse(saved) : [];
+
+                if (!Array.isArray(ids)) {
+                    ids = [];
+                }
+
+                if (next) {
+                    if (!ids.includes(comment.id)) {
+                        ids.push(comment.id);
+                    }
+                } else {
+                    ids = ids.filter((id: number) => id !== comment.id);
+                }
+
+                sessionStorage.setItem(storageKey, JSON.stringify(ids));
+            } catch (e) {}
+
+            return next;
+        });
+    };
     const [replyTargetId, setReplyTargetId] = useState<number>(comment.id);
     const [commentToDelete, setCommentToDelete] = useState<{
         id: number;
         kind: CommentKind;
     } | null>(null);
+    const [isLoadingReplies, setIsLoadingReplies] = useState(false);
 
-    const replies = comment.replies ?? [];
-    const firstReply = replies[0];
-    const remainingReplies = replies.slice(1);
+    const replies = (comment.replies ?? []).filter(
+        (reply, index, self) => self.findIndex((r) => r.id === reply.id) === index
+    );
+
+    const handleToggleReplies = () => {
+        setShowReplies((current) => {
+            const next = !current;
+
+            if (next) {
+                setIsLoadingReplies(true);
+                setTimeout(() => {
+                    setIsLoadingReplies(false);
+                }, 400);
+            }
+
+            return next;
+        });
+    };
 
     const confirmDelete = () => {
         if (!commentToDelete) {
@@ -95,7 +167,7 @@ export function CommentItem({
         comment;
 
     const renderReply = (reply: BlogPostComment) => (
-        <div key={reply.id} className="relative mt-3 flex gap-3">
+        <div key={reply.id} className="relative flex gap-3">
             <CommentAvatar
                 avatarUrl={reply.user?.avatar}
                 initials={reply.user?.initials}
@@ -126,14 +198,33 @@ export function CommentItem({
                     )}
                 </div>
 
-                {reply.replyToUser && (
-                    <p className="text-xs font-medium text-muted-foreground">
-                        Membalas @{reply.replyToUser.name}
-                    </p>
-                )}
-
                 <p className="text-sm whitespace-pre-line text-foreground">
-                    {reply.content}
+                    {(() => {
+                        if (!reply.replyToUser) {
+                            return reply.content;
+                        }
+
+                        const mention = `@${reply.replyToUser.name}`;
+                        const parts = reply.content.split(mention);
+
+                        if (parts.length <= 1) {
+                            return reply.content;
+                        }
+
+                        return parts.reduce((acc: any[], part: string, index: number) => {
+                            if (index === 0) {
+                                return [part];
+                            }
+
+                            return [
+                                ...acc,
+                                <span key={index} className="font-semibold text-primary">
+                                    {mention}
+                                </span>,
+                                part,
+                            ];
+                        }, []);
+                    })()}
                 </p>
 
                 {allowComments !== false && (
@@ -194,79 +285,105 @@ export function CommentItem({
                         {comment.content}
                     </p>
 
-                    {allowComments !== false && (
-                        <div className="pt-1">
+                    <div className="flex items-center gap-2 pt-1">
+                        {allowComments !== false && (
                             <button
                                 onClick={() => openReplyForm(comment)}
                                 className="cursor-pointer text-xs font-semibold text-primary hover:underline"
                             >
                                 Balas
                             </button>
-                        </div>
-                    )}
+                        )}
+
+                        {replies.length > 0 && (
+                            <>
+                                {allowComments !== false && (
+                                    <span className="text-xs text-muted-foreground/40">•</span>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={handleToggleReplies}
+                                    className="flex cursor-pointer items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                                >
+                                    {showReplies ? (
+                                        <span>Sembunyikan balasan</span>
+                                    ) : (
+                                        <span>
+                                            Lihat {replies.length} balasan
+                                        </span>
+                                    )}
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* Single reply displayed directly under the comment */}
-            {firstReply ? (
-                <div className={`space-y-3 ${REPLIES_WRAPPER_CLASS}`}>
-                    {renderReply(firstReply)}
-                </div>
-            ) : null}
-
-            {/* Toggle button for remaining replies */}
-            {replies.length > 1 ? (
-                <div className={REPLIES_WRAPPER_CLASS}>
-                    <button
-                        type="button"
-                        onClick={() => setShowReplies((current) => !current)}
-                        className="flex cursor-pointer items-center gap-1 py-1 text-xs font-semibold text-primary hover:underline"
-                    >
-                        {showReplies ? (
-                            <span>Sembunyikan balasan</span>
-                        ) : (
-                            <span>
-                                Lihat {replies.length - 1} balasan lainnya
-                            </span>
-                        )}
-                    </button>
-                </div>
-            ) : null}
-
-            {/* Remaining replies if expanded */}
-            {showReplies && remainingReplies.length > 0 ? (
-                <div className={`space-y-4 ${REPLIES_WRAPPER_CLASS}`}>
-                    {remainingReplies.map((reply) => renderReply(reply))}
-                </div>
-            ) : null}
-
-            {/* Reply Input Form */}
-            {isReplying && allowComments !== false ? (
-                <div className={`pt-2 ${REPLIES_WRAPPER_CLASS}`}>
-                    {currentUser ? (
-                        <div className="space-y-3">
-                            <p className="text-xs text-muted-foreground">
-                                Membalas{' '}
-                                <span className="font-semibold text-foreground">
-                                    {replyTarget.user?.name ?? 'komentar ini'}
-                                </span>
-                            </p>
-                            <CommentInput
-                                // Reset internal form state when switching reply targets.
-                                key={`${comment.id}-${replyTargetId}`}
-                                articleSlug={articleSlug}
-                                parentId={comment.id}
-                                replyToCommentId={replyTargetId}
-                                placeholder={`Balas ${replyTarget.user?.name ?? 'komentar ini'}...`}
-                                onSuccess={() => setIsReplying(false)}
-                                autoFocus
-                            />
+            {/* Thread children (replies and/or reply input form) */}
+            {(showReplies && replies.length > 0) || (isReplying && allowComments !== false) ? (
+                <div className={`mt-3 space-y-4 ${REPLIES_WRAPPER_CLASS}`}>
+                    {/* Replies list */}
+                    {showReplies && replies.length > 0 && (
+                        <div className="space-y-4">
+                            {isLoadingReplies ? (
+                                <div className="space-y-4">
+                                    {replies.map((reply) => (
+                                        <div key={reply.id} className="flex gap-3 animate-pulse">
+                                            <div className="size-8 rounded-full bg-muted" />
+                                            <div className="flex-1 space-y-2 py-1">
+                                                <div className="h-3 w-1/4 rounded bg-muted" />
+                                                <div className="h-4 w-3/4 rounded bg-muted" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                replies.map((reply) => renderReply(reply))
+                            )}
                         </div>
-                    ) : (
-                        <GuestCommentPrompt
-                            googleLoginUrl={googleLoginUrl}
-                            size="xs"
-                        />
+                    )}
+
+                    {/* Reply Input Form */}
+                    {isReplying && allowComments !== false && (
+                        <div className="pt-2">
+                            {currentUser ? (
+                                <div className="space-y-2">
+                                    <p className="text-xs text-muted-foreground">
+                                        Membalas{' '}
+                                        <span className="font-semibold text-foreground">
+                                            {replyTarget.user?.name ?? 'komentar ini'}
+                                        </span>
+                                    </p>
+                                    <CommentInput
+                                        // Reset internal form state when switching reply targets.
+                                        key={`${comment.id}-${replyTargetId}`}
+                                        articleSlug={articleSlug}
+                                        parentId={comment.id}
+                                        replyToCommentId={replyTargetId}
+                                        placeholder={`Balas ${replyTarget.user?.name ?? 'komentar ini'}...`}
+                                        onSuccess={() => {
+                                            setIsReplying(false);
+                                            setShowReplies(true);
+                                            setIsLoadingReplies(true);
+                                            setTimeout(() => {
+                                                setIsLoadingReplies(false);
+                                            }, 400);
+                                        }}
+                                        mention={
+                                            replyTarget.user && replyTarget.user.id !== currentUser?.id
+                                                ? `@${replyTarget.user.name}`
+                                                : undefined
+                                        }
+                                        autoFocus
+                                    />
+                                </div>
+                            ) : (
+                                <GuestCommentPrompt
+                                    googleLoginUrl={googleLoginUrl}
+                                    size="xs"
+                                />
+                            )}
+                        </div>
                     )}
                 </div>
             ) : null}

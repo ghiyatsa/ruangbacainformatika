@@ -62,7 +62,7 @@ export function UserMenuContent({ user }: Props) {
                         </a>
                     </DropdownMenuItem>
                 ) : null}
-                {auth.canBorrowBooks ? (
+                {auth.isMember ? (
                     <DropdownMenuItem asChild>
                         <Link
                             className="block w-full cursor-pointer px-2 py-2"
@@ -75,7 +75,7 @@ export function UserMenuContent({ user }: Props) {
                         </Link>
                     </DropdownMenuItem>
                 ) : null}
-                {auth.canBorrowBooks ? (
+                {auth.isMember ? (
                     <DropdownMenuItem asChild>
                         <Link
                             className="block w-full cursor-pointer px-2 py-2"

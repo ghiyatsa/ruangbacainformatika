@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class PostComment extends Model
 {
@@ -58,6 +59,30 @@ class PostComment extends Model
      */
     public function replies(): HasMany
     {
-        return $this->hasMany(PostComment::class, 'parent_id')->latest();
+        return $this->hasMany(PostComment::class, 'parent_id')->oldest();
+    }
+
+    /**
+     * Boot the model to attach cache invalidation listeners.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (PostComment $comment) {
+            static::clearCommentCache((int) $comment->post_id);
+        });
+
+        static::deleted(function (PostComment $comment) {
+            static::clearCommentCache((int) $comment->post_id);
+        });
+    }
+
+    /**
+     * Clear cached comment pages for a post.
+     */
+    public static function clearCommentCache(int $postId): void
+    {
+        for ($page = 1; $page <= 20; $page++) {
+            Cache::forget("post_comments_{$postId}_page_{$page}");
+        }
     }
 }

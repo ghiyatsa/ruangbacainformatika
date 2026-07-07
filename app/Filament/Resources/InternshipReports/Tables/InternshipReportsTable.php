@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\InternshipReports\Tables;
 
+use App\Filament\Exports\InternshipReportExporter;
 use App\Filament\Imports\InternshipReportImporter;
 use App\Models\InternshipReport;
 use App\Models\SimilaritySyncStatus;
@@ -15,6 +16,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -185,6 +187,11 @@ class InternshipReportsTable
                     ->label('Impor')
                     ->icon(Heroicon::OutlinedDocumentArrowDown)
                     ->color('info'),
+                ExportAction::make('exportInternshipReport')
+                    ->exporter(InternshipReportExporter::class)
+                    ->label('Ekspor')
+                    ->icon(Heroicon::OutlinedDocumentArrowUp)
+                    ->color('success'),
                 BulkActionGroup::make([
                     BulkAction::make('retrySelectedSync')
                         ->label('Sinkronkan Terpilih')
@@ -194,13 +201,11 @@ class InternshipReportsTable
                         ->deselectRecordsAfterCompletion()
                         ->chunkSelectedRecords(100)
                         ->action(function (LazyCollection $records): void {
-                            $queuedCount = 0;
+                            $ids = $records->map(fn (InternshipReport $record): int => $record->getKey())->all();
+                            $queuedCount = count($ids);
 
-                            foreach ($records as $record) {
-                                app(SimilaritySyncStatusService::class)->markQueued($record);
-                                app(SimilaritySyncDispatcher::class)->dispatchUpsert($record->getKey(), InternshipReport::class);
-                                $queuedCount++;
-                            }
+                            app(SimilaritySyncStatusService::class)->markQueuedMultiple($ids, SimilaritySyncStatus::OPERATION_UPSERT, InternshipReport::class);
+                            app(SimilaritySyncDispatcher::class)->dispatchBulkUpsert($ids, InternshipReport::class);
 
                             Notification::make()
                                 ->success()

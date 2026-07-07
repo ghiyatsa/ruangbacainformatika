@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Models\PostComment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class PostCommentController extends Controller
@@ -33,7 +34,9 @@ class PostCommentController extends Controller
                 ->first();
 
             if (! $parent) {
-                abort(400, 'Komentar induk tidak valid.');
+                throw ValidationException::withMessages([
+                    'content' => 'Komentar induk tidak valid.',
+                ]);
             }
 
             $replyTargetId = $validated['reply_to_comment_id'] ?? $parent->id;
@@ -42,13 +45,17 @@ class PostCommentController extends Controller
                 ->first();
 
             if (! $replyTarget) {
-                abort(400, 'Komentar tujuan balasan tidak valid.');
+                throw ValidationException::withMessages([
+                    'content' => 'Komentar tujuan balasan tidak valid.',
+                ]);
             }
 
             $threadRootId = $parent->parent_id ?? $parent->id;
 
             if ($replyTarget->id !== $threadRootId && $replyTarget->parent_id !== $threadRootId) {
-                abort(400, 'Komentar tujuan balasan tidak valid.');
+                throw ValidationException::withMessages([
+                    'content' => 'Komentar tujuan balasan tidak valid.',
+                ]);
             }
 
             $parentId = $threadRootId;

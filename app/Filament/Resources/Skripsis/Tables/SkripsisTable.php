@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Skripsis\Tables;
 
+use App\Filament\Exports\SkripsiExporter;
 use App\Filament\Imports\SkripsiImporter;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
@@ -13,6 +14,7 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -181,6 +183,11 @@ class SkripsisTable
                     ->label('Impor')
                     ->icon(Heroicon::OutlinedDocumentArrowDown)
                     ->color('info'),
+                ExportAction::make('exportSkripsi')
+                    ->exporter(SkripsiExporter::class)
+                    ->label('Ekspor')
+                    ->icon(Heroicon::OutlinedDocumentArrowUp)
+                    ->color('success'),
                 BulkActionGroup::make([
                     BulkAction::make('retrySelectedSync')
                         ->label('Sinkronkan Terpilih')
@@ -190,13 +197,11 @@ class SkripsisTable
                         ->deselectRecordsAfterCompletion()
                         ->chunkSelectedRecords(100)
                         ->action(function (LazyCollection $records): void {
-                            $queuedCount = 0;
+                            $ids = $records->map(fn (Skripsi $record): int => $record->getKey())->all();
+                            $queuedCount = count($ids);
 
-                            foreach ($records as $record) {
-                                app(SimilaritySyncStatusService::class)->markQueued($record);
-                                app(SimilaritySyncDispatcher::class)->dispatchUpsert($record->getKey());
-                                $queuedCount++;
-                            }
+                            app(SimilaritySyncStatusService::class)->markQueuedMultiple($ids, SimilaritySyncStatus::OPERATION_UPSERT, Skripsi::class);
+                            app(SimilaritySyncDispatcher::class)->dispatchBulkUpsert($ids, Skripsi::class);
 
                             Notification::make()
                                 ->success()

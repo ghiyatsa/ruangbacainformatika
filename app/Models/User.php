@@ -90,7 +90,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function hasAdministrativeRole(): bool
     {
-        return $this->hasRole(['super_admin', 'staff']);
+        return $this->roles()->whereIn('name', ['super_admin', 'staff'])->exists();
     }
 
     public function syncMemberRoleState(): void
@@ -103,13 +103,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             return;
         }
 
+        $hasMember = $this->roles()->where('name', 'member')->exists();
+
         if ($this->canReceiveMemberRole()) {
-            if (! $this->hasRole('member')) {
+            if (! $hasMember) {
                 $this->assignRole('member');
+                $this->unsetRelation('roles');
             }
         } else {
-            if ($this->hasRole('member')) {
+            if ($hasMember) {
                 $this->removeRole('member');
+                $this->unsetRelation('roles');
             }
         }
     }

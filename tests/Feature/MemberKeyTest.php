@@ -10,7 +10,7 @@ use Spatie\Permission\Models\Role;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\withoutMiddleware;
 
-it('members can open the member key page', function () {
+it('members can view the member key on their profile page', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 
     $member = User::factory()->create([
@@ -27,12 +27,6 @@ it('members can open the member key page', function () {
             ->where('memberKey.qrCodeSvg', fn (?string $value): bool => filled($value))
             ->where('memberKey.expiresAtIso', fn (?string $value): bool => filled($value))
         );
-
-    expect(session('member_qr.payload'))
-        ->toBeString()
-        ->toHaveLength(51)
-        ->toStartWith(KioskBorrowVerificationService::SHORT_TOKEN_PREFIX)
-        ->not->toStartWith(KioskBorrowVerificationService::TOKEN_PREFIX);
 });
 
 it('members can generate a member key from their account page', function () {
@@ -53,15 +47,11 @@ it('members can generate a member key from their account page', function () {
             'Member key berhasil diperbarui.',
         );
 
-    expect(session('member_qr.payload'))
-        ->toBeString()
-        ->toHaveLength(51)
-        ->toStartWith(KioskBorrowVerificationService::SHORT_TOKEN_PREFIX)
-        ->not->toStartWith(KioskBorrowVerificationService::TOKEN_PREFIX);
-
     $summary = app(KioskBorrowVerificationService::class)->current($member);
 
-    expect($summary)->not->toBeNull();
+    expect($summary)->not->toBeNull()
+        ->toHaveKey('qrCodeSvg')
+        ->toHaveKey('expiresAtIso');
 
     actingAs($member)
         ->get(route('settings.member-key.show'))

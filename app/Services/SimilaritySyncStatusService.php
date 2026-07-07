@@ -37,6 +37,39 @@ class SimilaritySyncStatusService
         );
     }
 
+    /**
+     * @param  array<int, int>  $ids
+     */
+    public function markQueuedMultiple(array $ids, string $operation = SimilaritySyncStatus::OPERATION_UPSERT, string $type = Skripsi::class): void
+    {
+        if ($ids === []) {
+            return;
+        }
+
+        $timestamp = now();
+
+        $rows = collect($ids)
+            ->map(fn (int $id): array => [
+                'syncable_type' => $type,
+                'syncable_id' => $id,
+                'status' => SimilaritySyncStatus::STATUS_PENDING,
+                'last_operation' => $operation,
+                'attempts' => 0,
+                'last_attempt_at' => null,
+                'last_synced_at' => null,
+                'last_error' => null,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ])
+            ->all();
+
+        SimilaritySyncStatus::query()->upsert(
+            $rows,
+            ['syncable_type', 'syncable_id'],
+            ['status', 'last_operation', 'last_synced_at', 'last_error', 'updated_at'],
+        );
+    }
+
     public function markProcessing(Model|int $model, string $operation = SimilaritySyncStatus::OPERATION_UPSERT, ?string $type = null): SimilaritySyncStatus
     {
         $id = $model instanceof Model ? $model->getKey() : $model;

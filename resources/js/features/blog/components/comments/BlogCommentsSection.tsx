@@ -89,42 +89,52 @@ export function BlogCommentsSection({
             )}
 
             {/* Comments List */}
-            {comments.length > 0 ? (
-                <div className="space-y-4">
-                    <div className="divide-y divide-border/60">
-                        {comments.map((comment) => (
-                            <CommentItem
-                                key={comment.id}
-                                comment={comment}
-                                articleSlug={articleSlug}
-                                currentUser={currentUser}
-                                googleLoginUrl={googleLoginUrl}
-                                allowComments={allowComments}
-                            />
-                        ))}
-                    </div>
+            {(() => {
+                const uniqueComments = comments.filter(
+                    (comment, index, self) => self.findIndex((c) => c.id === comment.id) === index
+                );
 
-                    {pagination && pagination.current_page < pagination.last_page && (
-                        <div className="pt-2 flex justify-center">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                disabled={loadingMore}
-                                onClick={handleLoadMore}
-                                className="rounded-full px-6"
-                            >
-                                {loadingMore ? 'Memuat...' : 'Muat Komentar Lainnya'}
-                            </Button>
+                if (uniqueComments.length === 0) {
+                    return (
+                        <div className="rounded-lg border border-dashed border-border bg-muted/5 p-8 text-center text-muted-foreground">
+                            Belum ada komentar. Jadilah yang pertama memberikan
+                            komentar!
                         </div>
-                    )}
-                </div>
-            ) : (
-                <div className="rounded-lg border border-dashed border-border bg-muted/5 p-8 text-center text-muted-foreground">
-                    Belum ada komentar. Jadilah yang pertama memberikan
-                    komentar!
-                </div>
-            )}
+                    );
+                }
+
+                return (
+                    <div className="space-y-4">
+                        <div className="divide-y divide-border/60">
+                            {uniqueComments.map((comment) => (
+                                <CommentItem
+                                    key={comment.id}
+                                    comment={comment}
+                                    articleSlug={articleSlug}
+                                    currentUser={currentUser}
+                                    googleLoginUrl={googleLoginUrl}
+                                    allowComments={allowComments}
+                                />
+                            ))}
+                        </div>
+
+                        {pagination && pagination.current_page < pagination.last_page && (
+                            <div className="pt-2 flex justify-center">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={loadingMore}
+                                    onClick={handleLoadMore}
+                                    className="rounded-full px-6"
+                                >
+                                    {loadingMore ? 'Memuat...' : 'Muat Komentar Lainnya'}
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
         </section>
     );
 }

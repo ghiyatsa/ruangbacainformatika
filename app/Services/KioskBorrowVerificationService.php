@@ -35,9 +35,12 @@ class KioskBorrowVerificationService
 
         $payload = $this->makeToken();
         $expiresAt = now()->addMinutes(self::EXPIRY_MINUTES);
+        $qrSvg = $this->generateQrSvg($payload);
 
         Cache::put($this->userCacheKey($user), [
             'token_hash' => hash('sha256', $payload),
+            'payload' => $payload,
+            'qr_svg' => $qrSvg,
             'expires_at' => $expiresAt->toIso8601String(),
         ], $expiresAt);
 
@@ -48,13 +51,13 @@ class KioskBorrowVerificationService
 
         return [
             'payload' => $payload,
-            'qr_svg' => $this->generateQrSvg($payload),
+            'qr_svg' => $qrSvg,
             'expires_at' => $expiresAt,
         ];
     }
 
     /**
-     * @return array{expiresAt: string, expiresAtIso: string}|null
+     * @return array{expiresAt: string, expiresAtIso: string, qrCodeSvg: string|null}|null
      */
     public function current(User $user): ?array
     {
@@ -75,6 +78,7 @@ class KioskBorrowVerificationService
         return [
             'expiresAt' => $expiresAt->format('d F Y H:i'),
             'expiresAtIso' => $expiresAt->toIso8601String(),
+            'qrCodeSvg' => $cached['qr_svg'] ?? null,
         ];
     }
 

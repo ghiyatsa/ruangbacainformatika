@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\KioskBorrowVerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,13 +19,13 @@ class MemberKeyController extends Controller
     public function show(Request $request): Response
     {
         return Inertia::render('settings/member-key', [
-            'memberKey' => $this->ensureMemberKeyPayload($request),
+            'memberKey' => $this->getMemberKeyPayload($request->user()),
         ]);
     }
 
     public function generate(Request $request): RedirectResponse
     {
-        $this->storeMemberKeySession($request);
+        $this->kioskBorrowVerificationService->generate($request->user());
 
         if (! $request->boolean('automatic')) {
             Inertia::flash('toast', [
@@ -39,46 +40,26 @@ class MemberKeyController extends Controller
     /**
      * @return array<string, mixed>
      */
-    protected function ensureMemberKeyPayload(Request $request): array
+    public function getMemberKeyPayload(User $user): array
     {
-        $summary = $this->kioskBorrowVerificationService->current($request->user());
-        $qr = session('member_qr');
+        $summary = $this->kioskBorrowVerificationService->current($user);
 
-        if (
-            $summary === null
-            || ! is_array($qr)
-            || blank($qr['svg'] ?? null)
-        ) {
-            return $this->storeMemberKeySession($request);
+        if ($summary === null || blank($summary['qrCodeSvg'] ?? null)) {
+            $verification = $this->kioskBorrowVerificationService->generate($user);
+
+            return [
+                'hasActiveQr' => true,
+                'expiresAt' => $verification['expires_at']->format('d F Y H:i'),
+                'expiresAtIso' => $verification['expires_at']->toIso8601String(),
+                'qrCodeSvg' => $verification['qr_svg'],
+            ];
         }
 
         return [
             'hasActiveQr' => true,
             'expiresAt' => $summary['expiresAt'],
             'expiresAtIso' => $summary['expiresAtIso'],
-            'qrCodeSvg' => is_array($qr) ? ($qr['svg'] ?? null) : null,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function storeMemberKeySession(Request $request): array
-    {
-        $verification = $this->kioskBorrowVerificationService->generate(
-            $request->user(),
-        );
-
-        $request->session()->put('member_qr', [
-            'payload' => $verification['payload'],
-            'svg' => $verification['qr_svg'],
-        ]);
-
-        return [
-            'hasActiveQr' => true,
-            'expiresAt' => $verification['expires_at']->format('d F Y H:i'),
-            'expiresAtIso' => $verification['expires_at']->toIso8601String(),
-            'qrCodeSvg' => $verification['qr_svg'],
+            'qrCodeSvg' => $summary['qrCodeSvg'],
         ];
     }
 }

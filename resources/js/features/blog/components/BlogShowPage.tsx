@@ -1,4 +1,4 @@
-import { Deferred, Link, usePage } from '@inertiajs/react';
+import { Deferred, Link, usePage, WhenVisible } from '@inertiajs/react';
 import { Eye, Tag, Bookmark, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -454,7 +454,7 @@ export function BlogShowPage({
 
                     {/* Comments Section */}
                     {article && (
-                        <Deferred
+                        <WhenVisible
                             data="post.data.comments"
                             fallback={
                                 <section className="border-t border-border/60 pt-8">
@@ -492,7 +492,7 @@ export function BlogShowPage({
                                 }
                                 pagination={article.comments}
                             />
-                        </Deferred>
+                        </WhenVisible>
                     )}
 
                     {/* Related posts (Moved below content) */}

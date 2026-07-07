@@ -11,6 +11,7 @@ use App\Filament\Resources\Loans\LoanResource;
 use App\Filament\Resources\PostCategories\PostCategoryResource;
 use App\Filament\Resources\Skripsis\SkripsiResource;
 use App\Filament\Resources\Theses\ThesisResource;
+use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\VisitLogs\VisitLogResource;
 use App\Models\Author;
@@ -169,6 +170,103 @@ it('super admin users see verified whatsapp as locked on the edit user form', fu
 
     expect($content)->toContain('wire:model="data.whatsapp"')
         ->and($content)->toMatch('/wire:model="data\\.whatsapp"[^>]*disabled|disabled[^>]*wire:model="data\\.whatsapp"/');
+});
+
+it('super admin users can update a user role', function () {
+    $admin = makeSuperAdmin();
+
+    $staffRole = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+    $memberRole = Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $managedUser = User::factory()->create([
+        'email' => 'student@mhs.unimal.ac.id',
+        'is_approved' => true,
+    ]);
+    $managedUser->assignRole($memberRole);
+
+    expect($managedUser->hasRole('member'))->toBeTrue()
+        ->and($managedUser->hasRole('staff'))->toBeFalse();
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, [
+        'record' => $managedUser->getKey(),
+    ])
+        ->fillForm([
+            'roles' => [$staffRole->id],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $managedUser->refresh();
+
+    expect($managedUser->hasRole('staff'))->toBeTrue()
+        ->and($managedUser->hasRole('member'))->toBeFalse();
+});
+
+it('super admin users can update a user role with gmail', function () {
+    $admin = makeSuperAdmin();
+
+    $staffRole = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+    $memberRole = Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $managedUser = User::factory()->create([
+        'email' => 'admin@gmail.com',
+        'is_approved' => true,
+    ]);
+    $managedUser->assignRole($memberRole);
+
+    expect($managedUser->hasRole('member'))->toBeTrue()
+        ->and($managedUser->hasRole('staff'))->toBeFalse();
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, [
+        'record' => $managedUser->getKey(),
+    ])
+        ->fillForm([
+            'roles' => [$staffRole->id],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $managedUser->refresh();
+
+    expect($managedUser->hasRole('staff'))->toBeTrue()
+        ->and($managedUser->hasRole('member'))->toBeFalse();
+});
+
+it('super admin users can update staff user role back to member', function () {
+    $admin = makeSuperAdmin();
+
+    $staffRole = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+    $memberRole = Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $managedUser = User::factory()->create([
+        'email' => 'student@mhs.unimal.ac.id',
+        'is_approved' => true,
+    ]);
+    $managedUser->assignRole($staffRole);
+    $managedUser->removeRole($memberRole);
+
+    expect($managedUser->hasRole('staff'))->toBeTrue()
+        ->and($managedUser->hasRole('member'))->toBeFalse();
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, [
+        'record' => $managedUser->getKey(),
+    ])
+        ->fillForm([
+            'roles' => [$memberRole->id],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $managedUser->refresh();
+
+    expect($managedUser->hasRole('member'))->toBeTrue()
+        ->and($managedUser->hasRole('staff'))->toBeFalse();
 });
 
 it('super admin users can render book relation helpers on the create book form', function () {

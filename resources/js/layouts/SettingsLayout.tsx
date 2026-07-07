@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { KeyRound, ShieldCheck, User } from 'lucide-react';
+import { KeyRound, User } from 'lucide-react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import settings from '@/routes/settings';
@@ -15,12 +15,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             href: settings.profile.edit(),
             icon: User,
         },
-        {
-            title: 'Keamanan',
-            href: settings.security.edit(),
-            icon: ShieldCheck,
-        },
-        ...(auth.canBorrowBooks
+        ...(auth.isMember
             ? [
                   {
                       title: 'Member Key',

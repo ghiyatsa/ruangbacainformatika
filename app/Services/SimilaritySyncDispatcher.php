@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Jobs\RemoveSkripsiFromSimilarity;
+use App\Jobs\SyncSkripsiChunkToSimilarity;
 use App\Jobs\SyncSkripsiToSimilarity;
 use App\Models\Skripsi;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,21 @@ class SimilaritySyncDispatcher
         $this->dispatchJob(
             new SyncSkripsiToSimilarity($id, $modelClass),
             fn (): mixed => SyncSkripsiToSimilarity::dispatch($id, $modelClass),
+        );
+    }
+
+    /**
+     * @param  array<int, int>  $ids
+     */
+    public function dispatchBulkUpsert(array $ids, string $modelClass = Skripsi::class): void
+    {
+        if ($ids === []) {
+            return;
+        }
+
+        $this->dispatchJob(
+            new SyncSkripsiChunkToSimilarity($ids, false, $modelClass),
+            fn (): mixed => SyncSkripsiChunkToSimilarity::dispatch($ids, false, $modelClass),
         );
     }
 

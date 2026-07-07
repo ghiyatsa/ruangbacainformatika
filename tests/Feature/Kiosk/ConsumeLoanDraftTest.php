@@ -243,6 +243,9 @@ it('rejects qr loan draft consumption when member already reached the loan limit
 });
 
 it('rejects qr loan draft consumption while a late return cooldown is still active', function () {
+    $now = now();
+    $this->travelTo($now);
+
     withoutMiddleware(PreventRequestForgery::class);
 
     ensureMemberRole();
@@ -264,7 +267,7 @@ it('rejects qr loan draft consumption while a late return cooldown is still acti
 
     $member = User::factory()->create([
         'whatsapp' => '081234567893',
-        'whatsapp_verified_at' => now(),
+        'whatsapp_verified_at' => $now,
         'address' => 'Jl. Pendingin',
     ]);
     $member->assignRole('member');
@@ -277,15 +280,15 @@ it('rejects qr loan draft consumption while a late return cooldown is still acti
     $returnedLoan = Loan::query()->create([
         'user_id' => $member->id,
         'status' => Loan::STATUS_RETURNED,
-        'borrowed_at' => now()->subDays(8),
-        'due_at' => now()->subDays(4),
-        'returned_at' => now()->subDay(),
+        'borrowed_at' => $now->copy()->subDays(8),
+        'due_at' => $now->copy()->subDays(4),
+        'returned_at' => $now->copy()->subDay(),
     ]);
 
     LoanItem::query()->create([
         'loan_id' => $returnedLoan->id,
         'book_item_id' => $previousItem->id,
-        'returned_at' => now()->subDay(),
+        'returned_at' => $now->copy()->subDay(),
     ]);
 
     $draftBook = makeBorrowableBook($publisher, 'Buku Cooldown', 'buku-cooldown', '9786020000213');
@@ -296,7 +299,7 @@ it('rejects qr loan draft consumption while a late return cooldown is still acti
         'user_id' => $member->id,
         'status' => LoanDraft::STATUS_PENDING,
         'token_hash' => hash('sha256', $payload),
-        'expires_at' => now()->addMinutes(10),
+        'expires_at' => $now->copy()->addMinutes(10),
     ]);
 
     LoanDraftItem::query()->create([
@@ -312,7 +315,7 @@ it('rejects qr loan draft consumption while a late return cooldown is still acti
         ])
         ->assertRedirect(route('kiosk.index', ['menu' => 'borrow']))
         ->assertSessionHasErrors([
-            'member_identifier' => 'Akun ini sedang dibatasi karena pengembalian buku terlambat. Peminjaman dapat dilakukan kembali mulai '.AppTimezone::format(now()->subDay()->addDays(3), 'd F Y H:i').'.',
+            'member_identifier' => 'Akun ini sedang dibatasi karena pengembalian buku terlambat. Peminjaman dapat dilakukan kembali mulai '.AppTimezone::format($now->copy()->subDay()->addDays(3), 'd F Y H:i').'.',
         ]);
 
     $draft->refresh();

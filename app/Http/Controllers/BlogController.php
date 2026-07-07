@@ -48,11 +48,13 @@ class BlogController extends Controller
         ]);
     }
 
-    public function show(Post $post): Response
+    public function show(Request $request, Post $post): Response
     {
         abort_unless($post->status === Post::STATUS_APPROVED, 404);
 
-        $post->increment('view_count');
+        if (! $request->prefetch() && ! $request->hasHeader('X-Inertia-Partial-Component')) {
+            $post->increment('view_count');
+        }
 
         $post->load([
             'user:id,name,avatar_url',
@@ -75,16 +77,18 @@ class BlogController extends Controller
                     [
                         'commentsCount' => $post->comments()->count(),
                         'comments' => Inertia::defer(function () use ($post, $commentsPage) {
-                            $commentsQuery = $post->comments()
-                                ->whereNull('parent_id')
-                                ->with(['user', 'replies.user', 'replies.replyToComment.user'])
-                                ->latest()
-                                ->paginate(10, ['*'], 'comments_page', $commentsPage);
+                            return Cache::remember("post_comments_{$post->id}_page_{$commentsPage}", now()->addMinutes(10), function () use ($post, $commentsPage) {
+                                $commentsQuery = $post->comments()
+                                    ->whereNull('parent_id')
+                                    ->with(['user', 'replies.user', 'replies.replyToComment.user'])
+                                    ->latest()
+                                    ->paginate(10, ['*'], 'comments_page', $commentsPage);
 
-                            $paginated = $commentsQuery->toArray();
-                            $paginated['data'] = PostCommentResource::collection($commentsQuery->getCollection())->resolve();
+                                $paginated = $commentsQuery->toArray();
+                                $paginated['data'] = PostCommentResource::collection($commentsQuery->getCollection())->resolve();
 
-                            return $paginated;
+                                return $paginated;
+                            });
                         })->merge()->append('data'),
                     ]
                 ),

@@ -217,3 +217,20 @@ it('sync dispatcher queues single model upsert and delete', function () {
         return $job->skripsiId === $skripsi->id && $job->modelClass === Skripsi::class;
     });
 });
+
+it('sync dispatcher queues multiple model bulk upsert', function () {
+    Queue::fake();
+    config()->set('services.similarity_api.dispatch', 'queued');
+
+    $skripsis = Skripsi::withoutEvents(fn () => Skripsi::factory()->count(3)->create());
+    $ids = $skripsis->pluck('id')->all();
+
+    app(SimilaritySyncStatusService::class)->markQueuedMultiple($ids, SimilaritySyncStatus::OPERATION_UPSERT, Skripsi::class);
+    expect(SimilaritySyncStatus::query()->where('status', SimilaritySyncStatus::STATUS_PENDING)->count())->toBe(3);
+
+    app(SimilaritySyncDispatcher::class)->dispatchBulkUpsert($ids, Skripsi::class);
+
+    Queue::assertPushed(SyncSkripsiChunkToSimilarity::class, function (SyncSkripsiChunkToSimilarity $job) use ($ids) {
+        return $job->skripsiIds === $ids && $job->modelClass === Skripsi::class;
+    });
+});

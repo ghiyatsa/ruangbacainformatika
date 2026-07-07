@@ -8,8 +8,8 @@ import type { SimilarityResult } from '@/features/similarity/types';
 
 function SafeResult() {
     return (
-        <Card className="border border-border bg-card rounded-2xl shadow-sm">
-            <CardContent className="flex flex-col items-center gap-4 p-6 sm:p-8 text-center">
+        <Card className="rounded-2xl bg-card shadow-sm">
+            <CardContent className="flex flex-col items-center gap-4 p-6 text-center sm:p-8">
                 <div className="flex size-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
                     <ShieldCheck className="size-4" />
                 </div>
@@ -65,21 +65,21 @@ function ResultsSummaryBanner({ result }: SimilarityResultsSectionProps) {
         'Kemiripan rendah. Judul relatif aman untuk dilanjutkan.';
 
     return (
-        <Card className="border border-border bg-card rounded-2xl shadow-sm">
+        <Card className="rounded-2xl bg-card py-0">
             <CardContent className="space-y-4 p-5 sm:p-6">
                 <div className="space-y-2">
                     <p className="text-[10px] font-medium tracking-widest text-muted-foreground/75 uppercase">
                         Ringkasan Hasil
                     </p>
                     <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-3xl font-semibold text-foreground tracking-tight">
+                        <span className="text-3xl font-semibold tracking-tight text-foreground">
                             {maxPercent}%
                         </span>
                         <Badge
                             variant="outline"
                             className={cn(
-                                'h-6 rounded-full px-2.5 text-[9px] font-medium uppercase transition-none shadow-none',
-                                topLevelConfig.badgeClass
+                                'h-6 rounded-full px-2.5 text-[9px] font-medium uppercase shadow-none transition-none',
+                                topLevelConfig.badgeClass,
                             )}
                         >
                             {topLevelConfig.label}
@@ -94,7 +94,7 @@ function ResultsSummaryBanner({ result }: SimilarityResultsSectionProps) {
                     <div className="text-[9px] font-medium tracking-widest text-muted-foreground/75 uppercase">
                         Kemiripan Tertinggi
                     </div>
-                    <div className="h-1.5 overflow-hidden bg-muted rounded-full">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                         <div
                             className={cn('h-full', topLevelConfig.bg)}
                             style={{ width: `${maxPercent}%` }}

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Theses\Tables;
 
+use App\Filament\Exports\ThesisExporter;
 use App\Filament\Imports\ThesisImporter;
 use App\Models\Thesis;
 use App\Support\AppTimezone;
@@ -10,6 +11,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -107,6 +109,11 @@ class ThesesTable
                     ->label('Impor')
                     ->icon(Heroicon::OutlinedDocumentArrowDown)
                     ->color('info'),
+                ExportAction::make('exportThesis')
+                    ->exporter(ThesisExporter::class)
+                    ->label('Ekspor')
+                    ->icon(Heroicon::OutlinedDocumentArrowUp)
+                    ->color('success'),
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Hapus Terpilih'),
