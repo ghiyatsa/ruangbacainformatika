@@ -56,7 +56,9 @@ if (typeof window !== 'undefined') {
         }
 
         keysToRemove.forEach((key) => sessionStorage.removeItem(key));
-    } catch (e) {}
+    } catch {
+        // Ignored
+    }
 }
 
 export function CommentItem({
@@ -77,7 +79,9 @@ export function CommentItem({
 
                 return Array.isArray(ids) && ids.includes(comment.id);
             }
-        } catch (e) {}
+        } catch {
+            // Ignored
+        }
 
         return false;
     });
@@ -103,7 +107,9 @@ export function CommentItem({
                 }
 
                 sessionStorage.setItem(storageKey, JSON.stringify(ids));
-            } catch (e) {}
+            } catch {
+                // Ignored
+            }
 
             return next;
         });

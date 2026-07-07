@@ -1,8 +1,6 @@
 import { useForm } from '@inertiajs/react';
-import { RefreshCw } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import MemberKeyController from '@/actions/App/Http/Controllers/Settings/MemberKeyController';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCountdown } from '@/hooks/use-countdown';
 import { formatCountdown } from '@/lib/format-countdown';
@@ -20,9 +18,6 @@ export function MemberKeySection({ memberKey }: Props) {
     const form = useForm({
         automatic: true,
     });
-    const manualForm = useForm({
-        automatic: false,
-    });
     const autoRegenerateTriggered = useRef(false);
     const { remainingSeconds } = useCountdown(memberKey.expiresAtIso);
     const countdownLabel = formatCountdown(remainingSeconds ?? 0);
@@ -36,7 +31,6 @@ export function MemberKeySection({ memberKey }: Props) {
 
         if (
             form.processing ||
-            manualForm.processing ||
             autoRegenerateTriggered.current
         ) {
             return;
@@ -47,18 +41,12 @@ export function MemberKeySection({ memberKey }: Props) {
         form.post(MemberKeyController.generate.url(), {
             preserveScroll: true,
         });
-    }, [form.processing, manualForm.processing, form, remainingSeconds]);
+    }, [form.processing, form, remainingSeconds]);
 
-    const handleRefresh = () => {
-        manualForm.post(MemberKeyController.generate.url(), {
-            preserveScroll: true,
-        });
-    };
-
-    const isProcessing = form.processing || manualForm.processing;
+    const isProcessing = form.processing;
 
     return (
-        <section className="p-6">
+        <section className="rounded-xl border border-border/70 bg-card p-6 shadow-xs">
             <div className="flex flex-col items-center justify-center space-y-4">
                 <div className="flex flex-col items-center justify-center gap-1.5 text-center">
                     <p className="text-sm font-medium text-muted-foreground">

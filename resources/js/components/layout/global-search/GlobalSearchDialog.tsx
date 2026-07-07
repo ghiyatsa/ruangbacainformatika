@@ -158,7 +158,7 @@ export function GlobalSearchDialog({
             clearTimeout(timeoutId);
             http.cancel();
         };
-    }, [query]);
+    }, [query, http]);
 
     const handleSelect = React.useCallback(
         (targetQuery: string) => {

@@ -87,7 +87,7 @@ export function GlobalContentNotice({
             window.clearTimeout(timer);
             window.removeEventListener('resize', checkOverflow);
         };
-    }, [notice?.text]);
+    }, [notice?.text, notice]);
 
     const closeNotice = React.useCallback(() => {
         if (noticeStorageKey) {
