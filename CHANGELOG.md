@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.12.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.11.1...v1.12.0) (2026-07-07)
+
+
+### Features
+
+* restore member key settings page and fix Filament user role update ([5097e6f](https://github.com/ghiyatsa/ruangbacainformatika/commit/5097e6f0c9cb09d17b3c64dd1850988eb82fbc2b))
+
+
+### Bug Fixes
+
+* **ui:** resolve eslint errors and warnings on settings and search ([32d0f95](https://github.com/ghiyatsa/ruangbacainformatika/commit/32d0f950599779909e5ed673a58fc0716d3fd12d))
+
 ## [1.11.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.11.0...v1.11.1) (2026-07-05)
 
 
