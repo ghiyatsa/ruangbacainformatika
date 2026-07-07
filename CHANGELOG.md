@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.12.0...v1.12.1) (2026-07-07)
+
+
+### Bug Fixes
+
+* **ui:** trust all proxies to resolve absolute URL scheme correctly ([278fc6e](https://github.com/ghiyatsa/ruangbacainformatika/commit/278fc6e0c45f0ed9680dc862bb384ff6107b3e44))
+
 ## [1.12.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.11.1...v1.12.0) (2026-07-07)
 
 
