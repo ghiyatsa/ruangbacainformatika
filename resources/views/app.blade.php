@@ -11,7 +11,17 @@
             $metaDescription = $pageMeta['description'] ?? ($siteMeta['description'] ?? 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.');
             $metaKeywords = $pageMeta['keywords'] ?? ($siteMeta['keywords'] ?? null);
             $metaRobots = $pageMeta['robots'] ?? ($siteMeta['robots'] ?? 'index,follow');
-            $canonicalUrl = $pageMeta['canonicalUrl'] ?? url()->current();
+
+            $baseUrl = rtrim(config('app.url', 'https://ruangbacainformatika.unimal.ac.id'), '/');
+            if (app()->isLocal()) {
+                $canonicalUrl = $pageMeta['canonicalUrl'] ?? url()->current();
+            } else {
+                $path = request()->getBaseUrl() . request()->getPathInfo();
+                $path = '/' . ltrim($path, '/');
+                $page = request()->query('page');
+                $canonicalUrl = $pageMeta['canonicalUrl'] ?? ($baseUrl . ($path === '/' ? '' : $path) . ($page ? '?page=' . $page : ''));
+            }
+
             $metaOgType = $pageMeta['type'] ?? 'website';
             $metaOgImage = $pageMeta['ogImage'] ?? ($siteMeta['ogImage'] ?? route('og.site'));
             $metaOgImageType = $pageMeta['ogImageType'] ?? ($siteMeta['ogImageType'] ?? 'image/png');
