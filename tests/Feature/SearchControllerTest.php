@@ -7,6 +7,8 @@ use App\Models\SearchHistory;
 use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 
 beforeEach(function () {
@@ -53,10 +55,39 @@ it('returns suggestions matching query from search history', function () {
     get(route('search.suggestions', ['q' => 'Laravel']))
         ->assertOk()
         ->assertJsonCount(2)
-        // Ordered by hits desc
         ->assertExactJson([
-            'Laravel untuk Komunitas Kampus',
-            'Pemrograman Laravel untuk Pemula',
+            'laravel untuk komunitas kampus',
+            'laravel untuk pemula',
+        ]);
+});
+
+it('formats suggestions like Google Autocomplete', function () {
+    $publisher = Publisher::factory()->create();
+    Book::factory()->create([
+        'title' => 'Sistem: Monitoring & Kontrol $u#u! Kelembapan Dan Gas Amonia',
+        'is_published' => true,
+        'publisher_id' => $publisher->id,
+    ]);
+
+    get(route('search.suggestions', ['q' => 'kon']))
+        ->assertOk()
+        ->assertExactJson([
+            'kontrol uu kelembapan dan',
+        ]);
+});
+
+it('handles multi-word non-contiguous autocomplete search queries', function () {
+    $publisher = Publisher::factory()->create();
+    Book::factory()->create([
+        'title' => 'Code a Handbook for developers of laravel',
+        'is_published' => true,
+        'publisher_id' => $publisher->id,
+    ]);
+
+    get(route('search.suggestions', ['q' => 'code handbook']))
+        ->assertOk()
+        ->assertExactJson([
+            'code a handbook for developers of',
         ]);
 });
 
@@ -84,8 +115,39 @@ it('returns search results matching query on index page and records history', fu
                 ->has('results.posts', 1)
         );
 
-    $this->assertDatabaseHas('search_histories', [
+    assertDatabaseHas('search_histories', [
         'query' => 'Laravel',
         'hits' => 1,
+    ]);
+});
+
+it('increments search history hits when query is clicked', function () {
+    $publisher = Publisher::factory()->create();
+    Book::factory()->create([
+        'title' => 'Pemrograman Laravel untuk Pemula',
+        'is_published' => true,
+        'publisher_id' => $publisher->id,
+    ]);
+
+    // Initial search
+    get(route('search', ['q' => 'Laravel']));
+    assertDatabaseHas('search_histories', [
+        'query' => 'Laravel',
+        'hits' => 1,
+    ]);
+
+    // Clicked search
+    get(route('search', ['q' => 'Laravel']), ['X-Search-Clicked' => '1']);
+    assertDatabaseHas('search_histories', [
+        'query' => 'Laravel',
+        'hits' => 2,
+    ]);
+});
+
+it('does not record search history when no results found', function () {
+    get(route('search', ['q' => 'dkanlknda']));
+
+    assertDatabaseMissing('search_histories', [
+        'query' => 'dkanlknda',
     ]);
 });

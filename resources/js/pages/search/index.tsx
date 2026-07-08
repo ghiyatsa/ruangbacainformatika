@@ -113,12 +113,27 @@ export default function SearchIndex({ query, results }: SearchProps) {
                     {results && totalCount === 0 ? (
                         <Card className="border-dashed py-12 rounded-2xl bg-card">
                             <CardContent className="flex flex-col items-center justify-center text-center">
-                                <p className="text-lg font-bold text-muted-foreground">
-                                    Tidak ada hasil yang cocok untuk pencarian Anda.
-                                </p>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                    Silakan coba kata kunci lain atau periksa ejaan Anda.
-                                </p>
+                                {query ? (
+                                    // Query ada tapi tidak ada hasil
+                                    <>
+                                        <p className="text-lg font-bold text-muted-foreground">
+                                            Tidak ada hasil yang cocok untuk &ldquo;{query}&rdquo;.
+                                        </p>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                            Silakan coba kata kunci lain atau periksa ejaan Anda.
+                                        </p>
+                                    </>
+                                ) : (
+                                    // Tidak ada query sama sekali
+                                    <>
+                                        <p className="text-lg font-bold text-muted-foreground">
+                                            Ketik kata kunci untuk mulai mencari.
+                                        </p>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                            Gunakan tombol pencarian atau tekan <kbd className="rounded border px-1.5 py-0.5 text-xs font-mono">Ctrl K</kbd> untuk membuka pencarian.
+                                        </p>
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
                     ) : results ? (
@@ -128,7 +143,7 @@ export default function SearchIndex({ query, results }: SearchProps) {
                             if (results.books.length > 0) {
                                 activeSections.push({
                                     id: 'books',
-                                    title: `Buku (${results.books.length})`,
+                                    title: 'Buku',
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {results.books.map((book) => (
@@ -148,7 +163,7 @@ export default function SearchIndex({ query, results }: SearchProps) {
                             if (results.posts.length > 0) {
                                 activeSections.push({
                                     id: 'posts',
-                                    title: `Artikel (${results.posts.length})`,
+                                    title: 'Artikel',
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {results.posts.map((post) => (
@@ -165,7 +180,7 @@ export default function SearchIndex({ query, results }: SearchProps) {
                             if (results.skripsis.length > 0) {
                                 activeSections.push({
                                     id: 'skripsis',
-                                    title: `Skripsi (${results.skripsis.length})`,
+                                    title: 'Skripsi',
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {results.skripsis.map((skripsi) => (
@@ -180,17 +195,16 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                 });
                             }
 
-                            if (results.theses.length > 0) {
+                            if (results.internshipReports.length > 0) {
                                 activeSections.push({
-                                    id: 'theses',
-                                    title: `Tesis (${results.theses.length})`,
+                                    id: 'internship-reports',
+                                    title: 'Laporan Kerja Praktik',
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                            {results.theses.map((thesis) => (
-                                                <AcademicWorkCard
-                                                    key={`thesis-${thesis.id}`}
-                                                    work={thesis}
-                                                    workType="thesis"
+                                            {results.internshipReports.map((report) => (
+                                                <InternshipReportCard
+                                                    key={`report-${report.id}`}
+                                                    report={report}
                                                 />
                                             ))}
                                         </div>
@@ -198,16 +212,17 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                 });
                             }
 
-                            if (results.internshipReports.length > 0) {
+                            if (results.theses.length > 0) {
                                 activeSections.push({
-                                    id: 'internship-reports',
-                                    title: `Laporan Kerja Praktik (${results.internshipReports.length})`,
+                                    id: 'theses',
+                                    title: 'Tesis',
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                            {results.internshipReports.map((report) => (
-                                                <InternshipReportCard
-                                                    key={`report-${report.id}`}
-                                                    report={report}
+                                            {results.theses.map((thesis) => (
+                                                <AcademicWorkCard
+                                                    key={`thesis-${thesis.id}`}
+                                                    work={thesis}
+                                                    workType="thesis"
                                                 />
                                             ))}
                                         </div>

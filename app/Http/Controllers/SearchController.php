@@ -35,13 +35,6 @@ class SearchController extends Controller
         $theses = collect();
 
         if ($search !== '') {
-            // Track search history
-            SearchHistory::query()->upsert(
-                [['query' => $search, 'hits' => 1]],
-                ['query'],
-                ['hits' => DB::raw('search_histories.hits + 1')]
-            );
-
             $books = Book::query()
                 ->published()
                 ->search($search)
@@ -74,7 +67,7 @@ class SearchController extends Controller
                 ->published()
                 ->search($search)
                 ->select(['posts.id', 'posts.title', 'posts.slug', 'posts.summary', 'posts.cover_image', 'posts.user_id', 'posts.published_at'])
-                ->with(['user:id,name', 'categories:id,name,slug'])
+                ->with(['user:id,name,avatar_url', 'categories:id,name,slug'])
                 ->limit(15)
                 ->get()
                 ->map(fn (Post $post): array => [
@@ -84,7 +77,11 @@ class SearchController extends Controller
                     'coverImageUrl' => $post->cover_image
                         ? asset('storage/'.$post->cover_image)
                         : asset('images/book-cover-placeholder.svg'),
-                    'author' => $post->user ? ['name' => $post->user->name] : null,
+                    'author' => $post->user ? [
+                        'name' => $post->user->name,
+                        'avatar' => $post->user->avatarUrl(),
+                        'initials' => $post->user->initials(),
+                    ] : null,
                     'summary' => $post->summary,
                     'excerpt' => $post->excerpt(120),
                     'categories' => $post->categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug])->all(),
@@ -94,7 +91,7 @@ class SearchController extends Controller
 
             $skripsis = Skripsi::query()
                 ->search($search)
-                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords'])
+                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
                 ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
                 ->limit(15)
                 ->get()
@@ -104,6 +101,8 @@ class SearchController extends Controller
                     'authorName' => $skripsi->author_name,
                     'studentId' => $skripsi->student_id,
                     'year' => $skripsi->year,
+                    'abstract' => $skripsi->abstract,
+                    'viewCount' => (int) $skripsi->view_count,
                     'keywords' => filled($skripsi->keywords)
                         ? array_map('trim', explode(',', $skripsi->keywords))
                         : [],
@@ -111,7 +110,7 @@ class SearchController extends Controller
 
             $internshipReports = InternshipReport::query()
                 ->search($search)
-                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords'])
+                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
                 ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
                 ->limit(15)
                 ->get()
@@ -121,6 +120,8 @@ class SearchController extends Controller
                     'authorName' => $internshipReport->author_name,
                     'studentId' => $internshipReport->student_id,
                     'year' => $internshipReport->year,
+                    'abstract' => $internshipReport->abstract,
+                    'viewCount' => (int) $internshipReport->view_count,
                     'keywords' => filled($internshipReport->keywords)
                         ? array_map('trim', explode(',', $internshipReport->keywords))
                         : [],
@@ -128,7 +129,7 @@ class SearchController extends Controller
 
             $theses = Thesis::query()
                 ->search($search)
-                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords'])
+                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
                 ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
                 ->limit(15)
                 ->get()
@@ -138,10 +139,36 @@ class SearchController extends Controller
                     'authorName' => $thesis->author_name,
                     'studentId' => $thesis->student_id,
                     'year' => $thesis->year,
+                    'abstract' => $thesis->abstract,
+                    'viewCount' => (int) $thesis->view_count,
                     'keywords' => filled($thesis->keywords)
                         ? array_map('trim', explode(',', $thesis->keywords))
                         : [],
                 ]);
+
+            $hasResults = $books->isNotEmpty() || $posts->isNotEmpty() || $skripsis->isNotEmpty() || $internshipReports->isNotEmpty() || $theses->isNotEmpty();
+
+            if ($hasResults) {
+                if ($request->hasHeader('X-Search-Clicked')) {
+                    // Cache-based deduplication: prevent the same IP from inflating
+                    // the hit counter for the same query within a 5-minute window.
+                    $cacheKey = 'search_hit_'.sha1($request->ip().'|'.$search);
+
+                    if (! cache()->has($cacheKey)) {
+                        cache()->put($cacheKey, true, now()->addMinutes(5));
+                        SearchHistory::query()->upsert(
+                            [['query' => $search, 'hits' => 1]],
+                            ['query'],
+                            ['hits' => DB::raw('search_histories.hits + 1')]
+                        );
+                    }
+                } else {
+                    SearchHistory::query()->firstOrCreate(
+                        ['query' => $search],
+                        ['hits' => 1]
+                    );
+                }
+            }
         }
 
         return Inertia::render('search/index', [
@@ -178,9 +205,17 @@ class SearchController extends Controller
             return response()->json([]);
         }
 
+        $queryWords = preg_split('/\s+/', mb_strtolower($q), -1, PREG_SPLIT_NO_EMPTY);
+        if (empty($queryWords)) {
+            return response()->json([]);
+        }
+
         $suggestions = SearchHistory::query()
-            ->where('query', 'like', "{$q}%")
-            ->orWhere('query', 'like', "% {$q}%")
+            ->where(function (Builder $inner) use ($queryWords) {
+                foreach ($queryWords as $word) {
+                    $inner->where('query', 'like', "%{$word}%");
+                }
+            })
             ->orderByDesc('hits')
             ->limit(8)
             ->pluck('query')
@@ -191,7 +226,11 @@ class SearchController extends Controller
         if ($needed > 0) {
             $bookTitles = Book::query()
                 ->published()
-                ->where('title', 'like', "%{$q}%")
+                ->where(function (Builder $inner) use ($queryWords) {
+                    foreach ($queryWords as $word) {
+                        $inner->where('title', 'like', "%{$word}%");
+                    }
+                })
                 ->limit($needed)
                 ->pluck('title')
                 ->all();
@@ -202,7 +241,11 @@ class SearchController extends Controller
         if ($needed > 0) {
             $postTitles = Post::query()
                 ->published()
-                ->where('title', 'like', "%{$q}%")
+                ->where(function (Builder $inner) use ($queryWords) {
+                    foreach ($queryWords as $word) {
+                        $inner->where('title', 'like', "%{$word}%");
+                    }
+                })
                 ->limit($needed)
                 ->pluck('title')
                 ->all();
@@ -212,7 +255,11 @@ class SearchController extends Controller
         $needed = 8 - count($suggestions);
         if ($needed > 0) {
             $skripsiTitles = Skripsi::query()
-                ->where('title', 'like', "%{$q}%")
+                ->where(function (Builder $inner) use ($queryWords) {
+                    foreach ($queryWords as $word) {
+                        $inner->where('title', 'like', "%{$word}%");
+                    }
+                })
                 ->limit($needed)
                 ->pluck('title')
                 ->all();
@@ -222,18 +269,48 @@ class SearchController extends Controller
         $needed = 8 - count($suggestions);
         if ($needed > 0) {
             $thesisTitles = Thesis::query()
-                ->where('title', 'like', "%{$q}%")
+                ->where(function (Builder $inner) use ($queryWords) {
+                    foreach ($queryWords as $word) {
+                        $inner->where('title', 'like', "%{$word}%");
+                    }
+                })
                 ->limit($needed)
                 ->pluck('title')
                 ->all();
             $suggestions = array_merge($suggestions, $thesisTitles);
         }
 
-        $suggestions = array_slice(array_values(array_unique($suggestions)), 0, 8);
+        $needed = 8 - count($suggestions);
+        if ($needed > 0) {
+            $internshipReportTitles = InternshipReport::query()
+                ->where(function (Builder $inner) use ($queryWords) {
+                    foreach ($queryWords as $word) {
+                        $inner->where('title', 'like', "%{$word}%");
+                    }
+                })
+                ->limit($needed)
+                ->pluck('title')
+                ->all();
+            $suggestions = array_merge($suggestions, $internshipReportTitles);
+        }
+
+        $formattedSuggestions = [];
+        foreach ($suggestions as $suggestion) {
+            $formattedSuggestions[] = $this->formatSuggestion($suggestion, $q);
+        }
+        $suggestions = array_slice(array_values(array_unique($formattedSuggestions)), 0, 8);
 
         return response()->json($suggestions);
     }
 
+    /**
+     * Apply field-priority ordering for academic search results.
+     *
+     * Uses a CASE-based score (title > author > student_id > keywords/abstract)
+     * for deterministic ordering. The full-text relevance score from
+     * scopeSearch (WHERE clause) already handles the filtering; adding a
+     * second MATCH in SELECT would evaluate the FTS index twice unnecessarily.
+     */
     protected function applyAcademicSearchRanking(Builder $query, string $search): void
     {
         $wildcardSearch = "%{$search}%";
@@ -256,35 +333,52 @@ class SearchController extends Controller
                     $wildcardSearch,
                 ]
             )
-            ->orderByDesc('search_priority');
+            ->orderByDesc('search_priority')
+            ->orderBy('title');
+    }
 
-        if ($this->supportsAcademicFullText($query)) {
-            $query
-                ->selectRaw(
-                    'MATCH(title, author_name, abstract, keywords) AGAINST (? IN BOOLEAN MODE) as search_relevance',
-                    [$this->toBooleanFullTextQuery($search)]
-                )
-                ->orderByDesc('search_relevance');
+    /**
+     * Format a search suggestion like Google Autocomplete.
+     */
+    protected function formatSuggestion(string $text, string $query): string
+    {
+        $textLower = mb_strtolower($text);
+        // Remove special characters except letters, numbers, spaces, and hyphens
+        $textClean = preg_replace('/[^\p{L}\p{N}\s\-]/u', '', $textLower);
+
+        $queryLower = mb_strtolower($query);
+        $queryWords = preg_split('/\s+/', $queryLower, -1, PREG_SPLIT_NO_EMPTY);
+        if (empty($queryWords)) {
+            return $textClean;
         }
 
-        $query->orderBy('title');
-    }
+        $words = preg_split('/\s+/', $textClean, -1, PREG_SPLIT_NO_EMPTY);
+        if ($words === false) {
+            return $textClean;
+        }
 
-    protected function supportsAcademicFullText(Builder $query): bool
-    {
-        return in_array(
-            $query->getConnection()->getDriverName(),
-            ['mysql', 'mariadb'],
-            true
-        );
-    }
+        $firstMatchIndex = -1;
+        $lastMatchIndex = -1;
 
-    protected function toBooleanFullTextQuery(string $search): string
-    {
-        return str($search)
-            ->explode(' ')
-            ->filter()
-            ->map(fn (string $term): string => sprintf('%s*', $term))
-            ->implode(' ');
+        foreach ($words as $index => $word) {
+            foreach ($queryWords as $qWord) {
+                if (mb_strpos($word, $qWord) !== false) {
+                    if ($firstMatchIndex === -1) {
+                        $firstMatchIndex = $index;
+                    }
+                    $lastMatchIndex = $index;
+                }
+            }
+        }
+
+        if ($firstMatchIndex !== -1 && $lastMatchIndex !== -1) {
+            // Take from the first match to the last match, plus 3 words after the last match
+            $length = ($lastMatchIndex - $firstMatchIndex) + 4;
+            $slice = array_slice($words, $firstMatchIndex, $length);
+
+            return implode(' ', $slice);
+        }
+
+        return $textClean;
     }
 }
