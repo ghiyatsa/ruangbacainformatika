@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.12.1...v1.12.2) (2026-07-08)
+
+
+### Bug Fixes
+
+* **ui:** optimize global search query matching, autocomplete suggestions and display ([#23](https://github.com/ghiyatsa/ruangbacainformatika/issues/23)) ([bded533](https://github.com/ghiyatsa/ruangbacainformatika/commit/bded5332fc0a1812f52461b8bd602746924bc7bd))
+
 ## [1.12.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.12.0...v1.12.1) (2026-07-07)
 
 
