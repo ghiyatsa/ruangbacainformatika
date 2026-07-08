@@ -47,7 +47,7 @@ it('generates the sitemap correctly', function () {
     // Send request to /sitemap.xml
     $response = get(route('sitemap'))
         ->assertStatus(200)
-        ->assertHeader('Content-Type', 'application/xml');
+        ->assertHeader('Content-Type', 'application/xml; charset=utf-8');
 
     $content = $response->getContent();
 

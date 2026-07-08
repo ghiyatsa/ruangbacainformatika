@@ -147,8 +147,7 @@ class SitemapController extends Controller
         $xml .= '</urlset>';
 
         return response($xml, 200, [
-            'Content-Type' => 'application/xml',
-            'X-Robots-Tag' => 'noindex',
+            'Content-Type' => 'application/xml; charset=utf-8',
         ]);
     }
 }
