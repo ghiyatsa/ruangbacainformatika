@@ -21,14 +21,9 @@ export function GlobalSearch() {
         const down = (event: KeyboardEvent) => {
             if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
                 event.preventDefault();
-
-                if (open) {
-                    closeDialog();
-
-                    return;
-                }
-
-                openDialog();
+                // Functional update avoids reading 'open' via closure,
+                // so the listener is registered only once (stable deps).
+                setOpen((prev) => !prev);
             }
         };
 
@@ -39,7 +34,7 @@ export function GlobalSearch() {
             document.removeEventListener('keydown', down);
             window.removeEventListener('open-global-search', openDialog);
         };
-    }, [closeDialog, open, openDialog]);
+    }, [openDialog]);
 
     const handleOpenChange = React.useCallback(
         (nextOpen: boolean) => {

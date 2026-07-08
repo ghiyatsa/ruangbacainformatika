@@ -27,15 +27,24 @@ function getHighlightedText(text: string, highlight: string) {
     if (!highlight.trim()) {
         return <span>{text}</span>;
     }
-    
-    const escapedHighlight = highlight.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`(${escapedHighlight})`, 'gi');
+
+    const words = highlight.trim().split(/\s+/).filter(Boolean);
+
+    if (words.length === 0) {
+        return <span>{text}</span>;
+    }
+
+    const patterns = words.map(w => w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'));
+    const regex = new RegExp(`(${patterns.join('|')})`, 'gi');
     const parts = text.split(regex);
-    
+
     return (
         <span>
             {parts.map((part, index) =>
-                regex.test(part) ? (
+                // split() with a capture group places matched text at odd indices.
+                // Using index parity avoids calling regex.test(), which mutates
+                // lastIndex on a /g regex and produces inconsistent results.
+                index % 2 === 1 ? (
                     <strong key={index} className="font-extrabold text-foreground">
                         {part}
                     </strong>
@@ -60,6 +69,11 @@ export function GlobalSearchDialog({
     const [isDebouncing, setIsDebouncing] = React.useState(false);
 
     const http = useHttp();
+    const httpRef = React.useRef(http);
+    React.useEffect(() => {
+        httpRef.current = http;
+    }, [http]);
+
     const isLoading = http.processing || isDebouncing;
 
     React.useEffect(() => {
@@ -141,7 +155,7 @@ export function GlobalSearchDialog({
 
         const timeoutId = setTimeout(() => {
             setIsDebouncing(false);
-            http.get(
+            httpRef.current.get(
                 `${SEARCH_SUGGESTIONS_ENDPOINT}?q=${encodeURIComponent(query)}`,
                 {
                     onSuccess: (data: unknown) => {
@@ -156,18 +170,19 @@ export function GlobalSearchDialog({
 
         return () => {
             clearTimeout(timeoutId);
-            http.cancel();
+            httpRef.current.cancel();
         };
-    }, [query, http]);
+    }, [query]);
 
     const handleSelect = React.useCallback(
         (targetQuery: string) => {
             onOpenChange(false);
-            const actualQuery = targetQuery.startsWith('Cari semua untuk "') || targetQuery.startsWith('Cari "')
-            ? query
-            : targetQuery;
+            const isDirectSearch = targetQuery === query || targetQuery.startsWith('Cari semua untuk "');
+            const actualQuery = isDirectSearch ? query : targetQuery;
             saveToHistory(actualQuery);
-            router.visit(`/search?q=${encodeURIComponent(actualQuery)}`);
+            router.visit(`/search?q=${encodeURIComponent(actualQuery)}`, {
+                headers: !isDirectSearch ? { 'X-Search-Clicked': '1' } : undefined,
+            });
         },
         [onOpenChange, query, saveToHistory],
     );
@@ -209,9 +224,10 @@ export function GlobalSearchDialog({
             </DialogHeader>
             <DialogContent
                 className="top-[15%]! sm:top-[20%]! translate-y-0! overflow-hidden rounded-xl! p-0! gap-0! w-full sm:max-w-2xl! border bg-popover shadow-lg"
+                overlayClassName="bg-black/60"
                 showCloseButton={false}
             >
-                <div className={`flex items-center px-3 ${query.length > 0 ? 'border-b' : history.length > 0 ? 'border-b' : ''}`}>
+                <div className={`flex items-center px-3 ${query.length > 0 || history.length > 0 ? 'border-b' : ''}`}>
                     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                     <input
                         className="h-12 w-full bg-transparent text-sm outline-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 px-0 placeholder:text-muted-foreground"
