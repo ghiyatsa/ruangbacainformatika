@@ -36,30 +36,35 @@ class ServerInfoWidget extends StatsOverviewWidget
         return [
             Stat::make('Mode Aplikasi', $environment)
                 ->description($isDebug ? 'Debug aktif' : 'Debug dimatikan')
+                ->descriptionColor($isDebug ? 'warning' : 'success')
                 ->descriptionIcon($isDebug ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle)
-                ->color($isDebug ? 'warning' : 'success')
+                ->color('primary')
                 ->icon(Heroicon::OutlinedShieldCheck),
 
             Stat::make('Runtime', 'PHP '.PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION)
                 ->description('Laravel '.app()->version())
+                ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedCodeBracket)
                 ->color('info')
                 ->icon(Heroicon::OutlinedCpuChip),
 
             Stat::make('Driver Layanan', "{$databaseDriver} / {$queueDriver}")
                 ->description("Cache {$cacheDriver}")
+                ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedCircleStack)
-                ->color('primary')
+                ->color('info')
                 ->icon(Heroicon::OutlinedServerStack),
 
             Stat::make('Penyimpanan', $this->formatBytes($diskFree).' bebas')
                 ->description($this->formatBytes($diskTotal)." total, {$diskUsagePercent}% terpakai")
+                ->descriptionColor($diskUsagePercent >= 85 ? 'danger' : ($diskUsagePercent >= 70 ? 'warning' : 'success'))
                 ->descriptionIcon(Heroicon::OutlinedArchiveBox)
-                ->color($diskUsagePercent >= 85 ? 'danger' : ($diskUsagePercent >= 70 ? 'warning' : 'success'))
+                ->color('primary')
                 ->icon(Heroicon::OutlinedArchiveBox),
 
             Stat::make('Waktu Server', $serverTime)
                 ->description("Zona waktu {$timezone}")
+                ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedClock)
                 ->color('gray')
                 ->icon(Heroicon::OutlinedClock),
