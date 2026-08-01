@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.12.2...v1.13.0) (2026-08-01)
+
+
+### Features
+
+* **catalog:** metadata completeness, standardization, and dashboard polish ([#25](https://github.com/ghiyatsa/ruangbacainformatika/issues/25)) ([54de4ef](https://github.com/ghiyatsa/ruangbacainformatika/commit/54de4ef9711c68b483df234d9dd274a41edc273e))
+
 ## [1.12.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.12.1...v1.12.2) (2026-07-08)
 
 
