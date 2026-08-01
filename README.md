@@ -1,7 +1,7 @@
 # 📖 Ruang Baca Informatika
 
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php)](https://php.net)
+[![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=for-the-badge&logo=php)](https://php.net)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
 [![Inertia.js](https://img.shields.io/badge/Inertia.js-v3-9553E9?style=for-the-badge&logo=inertia)](https://inertiajs.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
@@ -37,7 +37,7 @@ Berikut adalah kombinasi teknologi premium yang digunakan dalam proyek ini:
 | Komponen | Teknologi | Keterangan |
 | :--- | :--- | :--- |
 | **Backend Framework** | Laravel 13 | Framework PHP modern untuk backend & routing aman |
-| **Bahasa Backend** | PHP 8.3 | Dukungan pengetikan statis, constructor promotion, & efisiensi memori |
+| **Bahasa Backend** | PHP 8.4 | Dukungan pengetikan statis, constructor promotion, & efisiensi memori |
 | **Frontend Framework** | React 19 + TypeScript | Library UI dinamis dengan pengetikan aman (static typing) |
 | **Glue Layer** | Inertia.js v3 | Menghubungkan Laravel & React tanpa kerumitan REST API tradisional |
 | **Styling Engine** | Tailwind CSS v4 | Utilitas CSS modern super cepat dengan performa optimal |
@@ -69,7 +69,7 @@ Ikuti langkah-langkah di bawah ini untuk menyiapkan lingkungan pengembangan loka
 
 ### 1. Prasyarat Sistem
 Pastikan perangkat Anda sudah terinstal:
-- **PHP >= 8.3**
+- **PHP >= 8.4**
 - **Composer** (untuk dependensi PHP)
 - **Node.js >= 24** & **NPM** (untuk dependensi frontend)
 - **MySQL** / MariaDB database server
