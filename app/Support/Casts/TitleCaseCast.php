@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class TitleCaseCast implements CastsAttributes
 {
-    public function get(Model $model, string $key, mixed $value, array $attributes): ?string
+    public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        return TextStandardizer::titleCase($value);
+        return $value;
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string

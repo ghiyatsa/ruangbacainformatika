@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class IssnCast implements CastsAttributes
 {
-    public function get(Model $model, string $key, mixed $value, array $attributes): ?string
+    public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        return static::normalize($value);
+        return $value;
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string
