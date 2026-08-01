@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class SquishCast implements CastsAttributes
 {
-    public function get(Model $model, string $key, mixed $value, array $attributes): ?string
+    public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        return TextStandardizer::squish($value);
+        return $value;
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string
