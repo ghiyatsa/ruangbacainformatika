@@ -5,8 +5,8 @@ namespace App\Filament\Resources\Books\Tables;
 use App\Filament\Exports\BookExporter;
 use App\Filament\Imports\BookImporter;
 use App\Models\Book;
-use App\Models\BookItem;
 use App\Services\BookCoverImageService;
+use App\Support\MetadataCompleteness;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -129,6 +129,21 @@ class BooksTable
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
 
+            TextColumn::make('metadata_score')
+                ->label('Kelengkapan')
+                ->badge()
+                ->color(fn (Book $record): string => match ($record->metadata_level) {
+                    MetadataCompleteness::LEVEL_LENGKAP => 'success',
+                    MetadataCompleteness::LEVEL_SEBAGIAN => 'warning',
+                    default => 'danger',
+                })
+                ->formatStateUsing(fn (int $state): string => "{$state}%")
+                ->description(fn (Book $record): ?string => match ($record->metadata_level) {
+                    MetadataCompleteness::LEVEL_LENGKAP => 'Semua elemen terisi',
+                    default => 'Kurang: '.implode(', ', array_slice($record->metadata_missing, 0, 3)),
+                })
+                ->toggleable(isToggledHiddenByDefault: true),
+
             TextColumn::make('created_at')
                 ->label('Dibuat')
                 ->dateTime('d/m/Y H:i')
@@ -164,6 +179,13 @@ class BooksTable
             Filter::make('without_cover')
                 ->label('Tanpa sampul')
                 ->query(fn (Builder $query): Builder => $query->whereNull('cover_image')),
+            SelectFilter::make('metadata_level')
+                ->label('Kelengkapan Metadata')
+                ->options(MetadataCompleteness::levelOptions())
+                ->query(fn (Builder $query, array $data): Builder => $query->when(
+                    isset($data['value']) && $data['value'] !== '',
+                    fn (Builder $query): Builder => $query->metadataLevel($data['value']),
+                )),
             SelectFilter::make('publisher')
                 ->label('Penerbit')
                 ->relationship(
@@ -201,22 +223,6 @@ class BooksTable
                     ->pluck('published_year', 'published_year')
                     ->mapWithKeys(fn ($year): array => [(string) $year => (string) $year])
                     ->all()),
-            SelectFilter::make('shelf_location')
-                ->label('Lokasi Rak')
-                ->options(fn (): array => BookItem::query()
-                    ->whereNotNull('shelf_location')
-                    ->where('shelf_location', '!=', '')
-                    ->orderBy('shelf_location')
-                    ->distinct()
-                    ->pluck('shelf_location', 'shelf_location')
-                    ->all())
-                ->query(fn (Builder $query, array $data): Builder => $query->when(
-                    $data['value'] ?? null,
-                    fn (Builder $query, $value): Builder => $query->whereHas(
-                        'items',
-                        fn (Builder $q): Builder => $q->where('shelf_location', $value)
-                    )
-                )),
         ];
     }
 

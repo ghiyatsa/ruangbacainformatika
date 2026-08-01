@@ -3,7 +3,11 @@
 namespace App\Models;
 
 use App\Models\Concerns\GeneratesSlug;
+use App\Support\Casts\IssnCast;
+use App\Support\Casts\SquishCast;
+use App\Support\Casts\TitleCaseCast;
 use App\Support\Isbn;
+use App\Support\MetadataCompleteness;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -61,12 +65,18 @@ class Book extends Model
     protected function casts(): array
     {
         return [
+            'title' => TitleCaseCast::class,
+            'subtitle' => TitleCaseCast::class,
+            'description' => SquishCast::class,
+            'edition' => SquishCast::class,
+            'pages' => SquishCast::class,
+            'ddc_code' => SquishCast::class,
+            'issn' => IssnCast::class,
             'is_featured' => 'boolean',
             'is_borrowable' => 'boolean',
             'is_published' => 'boolean',
             'cover_image_editor_state' => 'array',
             'published_year' => 'integer',
-            'pages' => 'string',
             'view_count' => 'integer',
         ];
     }
@@ -128,6 +138,38 @@ class Book extends Model
     public function scopeFeatured(Builder $query): Builder
     {
         return $query->where('is_featured', true);
+    }
+
+    public function getMetadataCompletenessAttribute(): array
+    {
+        return MetadataCompleteness::evaluate($this);
+    }
+
+    public function getMetadataScoreAttribute(): int
+    {
+        return $this->metadata_completeness['score'];
+    }
+
+    public function getMetadataLevelAttribute(): string
+    {
+        return $this->metadata_completeness['level'];
+    }
+
+    public function getMetadataMissingAttribute(): array
+    {
+        return $this->metadata_completeness['missing'];
+    }
+
+    public function scopeMetadataLevel(Builder $query, string $level): Builder
+    {
+        $scoreSql = 'ROUND(('.MetadataCompleteness::filledSql().') / '.MetadataCompleteness::total().' * 100)';
+
+        return match ($level) {
+            MetadataCompleteness::LEVEL_LENGKAP => $query->whereRaw("{$scoreSql} >= 100"),
+            MetadataCompleteness::LEVEL_SEBAGIAN => $query->whereRaw("{$scoreSql} >= 50 AND {$scoreSql} < 100"),
+            MetadataCompleteness::LEVEL_KURANG => $query->whereRaw("{$scoreSql} < 50"),
+            default => $query,
+        };
     }
 
     public function scopeSearch(Builder $query, string $search): Builder

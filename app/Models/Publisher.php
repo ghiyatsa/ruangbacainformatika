@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\GeneratesSlug;
+use App\Support\Casts\TitleCaseCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,6 +19,14 @@ class Publisher extends Model
         'city',
         'description',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'name' => TitleCaseCast::class,
+            'city' => TitleCaseCast::class,
+        ];
+    }
 
     protected static function slugSourceAttribute(): string
     {

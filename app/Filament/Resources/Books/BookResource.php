@@ -72,6 +72,7 @@ class BookResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with(['authors', 'categories'])
             ->withCount([
                 'items as available_stock' => fn (Builder $query) => $query->where('status', 'available'),
             ]);
