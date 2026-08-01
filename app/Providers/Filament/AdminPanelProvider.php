@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use AchyutN\FilamentLogViewer\FilamentLogViewer;
 use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
+use App\Filament\Widgets\MetadataCompletenessWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
 use App\Filament\Widgets\PendingMemberApprovalsWidget;
@@ -58,6 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 OperationsOverviewWidget::class,
                 PendingMemberApprovalsWidget::class,
+                MetadataCompletenessWidget::class,
                 SimilaritySyncOverviewWidget::class,
                 LoanActivityChartWidget::class,
                 TodayVisitorsWidget::class,

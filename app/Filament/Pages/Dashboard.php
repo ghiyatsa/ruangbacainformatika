@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
+use App\Filament\Widgets\MetadataCompletenessWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
 use App\Filament\Widgets\PendingMemberApprovalsWidget;
@@ -109,6 +110,7 @@ class Dashboard extends \Filament\Pages\Dashboard
         return [
             'overview' => [
                 OperationsOverviewWidget::class,
+                MetadataCompletenessWidget::class,
                 PendingMemberApprovalsWidget::class,
                 SimilaritySyncOverviewWidget::class,
             ],

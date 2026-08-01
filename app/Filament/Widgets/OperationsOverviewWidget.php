@@ -68,33 +68,36 @@ class OperationsOverviewWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Peminjaman Aktif', $activeLoans)
-                ->description($overdueLoans > 0 ? "{$overdueLoans} melewati jatuh tempo" : 'Tidak ada keterlambatan')
+                ->description($overdueLoans > 0 ? "{$overdueLoans} terlambat" : 'Semua tepat waktu')
+                ->descriptionColor($overdueLoans > 0 ? 'danger' : 'success')
                 ->descriptionIcon($overdueLoans > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle)
-                ->color($overdueLoans > 0 ? 'danger' : 'success')
+                ->color('primary')
                 ->icon(Heroicon::OutlinedRectangleStack)
                 ->url(LoanResource::getUrl('index', ['filters' => ['active_borrowers' => ['isActive' => true]]])),
 
             Stat::make('Kunjungan Hari Ini', $todayVisitors)
                 ->description(match ($visitorTrend) {
-                    'increase' => "+{$visitorDiff} dibanding kemarin",
-                    'decrease' => "{$visitorDiff} dibanding kemarin",
+                    'increase' => "+{$visitorDiff} dari kemarin",
+                    'decrease' => "{$visitorDiff} dari kemarin",
                     default => 'Sama seperti kemarin',
+                })
+                ->descriptionColor(match ($visitorTrend) {
+                    'increase' => 'success',
+                    'decrease' => 'danger',
+                    default => 'gray',
                 })
                 ->descriptionIcon(match ($visitorTrend) {
                     'increase' => Heroicon::OutlinedArrowTrendingUp,
                     'decrease' => Heroicon::OutlinedArrowTrendingDown,
                     default => Heroicon::OutlinedMinus,
                 })
-                ->color(match ($visitorTrend) {
-                    'increase' => 'success',
-                    'decrease' => 'warning',
-                    default => 'info',
-                })
+                ->color('primary')
                 ->icon(Heroicon::OutlinedUserGroup)
                 ->url(VisitLogResource::getUrl('index', ['filters' => ['today' => ['isActive' => true]]])),
 
             Stat::make('Koleksi Buku', $totalBooks)
-                ->description("{$availableItems}/{$totalItems} tersedia untuk dipinjam")
+                ->description("{$availableItems}/{$totalItems} tersedia")
+                ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedBookOpen)
                 ->color('info')
                 ->icon(Heroicon::OutlinedBookOpen)
@@ -102,8 +105,9 @@ class OperationsOverviewWidget extends StatsOverviewWidget
 
             Stat::make('Anggota Baru Bulan Ini', $newMembersThisMonth)
                 ->description("{$newMembersThisMonth} pendaftaran bulan ini")
+                ->descriptionColor($pendingApproval > 0 ? 'warning' : 'gray')
                 ->descriptionIcon(Heroicon::OutlinedCalendarDays)
-                ->color($pendingApproval > 0 ? 'warning' : 'success')
+                ->color('info')
                 ->icon(Heroicon::OutlinedUserPlus)
                 ->url(UserResource::getUrl('index', [
                     'filters' => [

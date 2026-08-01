@@ -6,6 +6,7 @@ use App\Models\Book;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
@@ -53,12 +54,24 @@ class BookExporter extends Exporter
             ExportColumn::make('publisher.name')
                 ->label('Penerbit')
                 ->formatStateUsing(fn (?string $state): string => static::sanitizeForSpreadsheet($state)),
+            ExportColumn::make('cover_image')
+                ->label('Sampul (URL)')
+                ->state(fn (Book $record): string => $record->cover_image
+                    ? asset('storage/'.$record->cover_image)
+                    : asset('images/book-cover-placeholder.svg')),
             ExportColumn::make('authors')
                 ->label('Penulis')
                 ->state(fn (Book $record): string => $record->authors->pluck('name')->implode(' | ')),
             ExportColumn::make('categories')
                 ->label('Kategori')
                 ->state(fn (Book $record): string => $record->categories->pluck('name')->implode(' | ')),
+            ExportColumn::make('shelf_locations')
+                ->label('Lokasi Rak')
+                ->state(fn (Book $record): string => $record->items
+                    ->pluck('shelf_location')
+                    ->filter()
+                    ->unique()
+                    ->implode(' | ')),
             ExportColumn::make('is_featured')
                 ->label('Unggulan')
                 ->formatStateUsing(fn (bool $state): string => $state ? 'Ya' : 'Tidak'),
@@ -72,7 +85,7 @@ class BookExporter extends Exporter
                 ->label('Jumlah Dilihat'),
             ExportColumn::make('items_count')
                 ->label('Stok')
-                ->state(fn (Book $record): int => $record->items()->count()),
+                ->state(fn (Book $record): int => $record->items->count()),
         ];
     }
 
@@ -85,6 +98,11 @@ class BookExporter extends Exporter
         }
 
         return $body;
+    }
+
+    public static function modifyQuery(Builder $query): Builder
+    {
+        return $query->with(['authors', 'categories', 'items']);
     }
 
     protected static function sanitizeForSpreadsheet(?string $value): string

@@ -121,6 +121,26 @@ class BookInfolist
                                             ->badge()
                                             ->color('gray'),
                                     ]),
+
+                                Section::make('Kelengkapan Metadata')
+                                    ->description('Elemen metadata standar yang belum terisi pada rekaman ini.')
+                                    ->schema([
+                                        TextEntry::make('metadata_score')
+                                            ->label('Skor Kelengkapan')
+                                            ->badge()
+                                            ->color(fn ($state): string => match (true) {
+                                                $state >= 100 => 'success',
+                                                $state >= 50 => 'warning',
+                                                default => 'danger',
+                                            })
+                                            ->formatStateUsing(fn (int $state): string => "{$state}%"),
+                                        TextEntry::make('metadata_missing')
+                                            ->label('Belum Terisi')
+                                            ->badge()
+                                            ->color('danger')
+                                            ->listWithLineBreaks()
+                                            ->placeholder('Seluruh elemen metadata telah terisi'),
+                                    ]),
                             ]),
                     ]),
             ]);

@@ -47,6 +47,7 @@ class TodayVisitorsWidget extends StatsOverviewWidget
         return [
             Stat::make('Total Hari Ini', $total)
                 ->description("Tujuan utama: {$topPurposeLabel}")
+                ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedMapPin)
                 ->color('primary')
                 ->icon(Heroicon::OutlinedUserGroup)
@@ -54,6 +55,7 @@ class TodayVisitorsWidget extends StatsOverviewWidget
 
             Stat::make('Mahasiswa', $mahasiswa)
                 ->description("{$dosen} dosen hari ini")
+                ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedAcademicCap)
                 ->color('info')
                 ->icon(Heroicon::OutlinedAcademicCap)
@@ -66,8 +68,9 @@ class TodayVisitorsWidget extends StatsOverviewWidget
 
             Stat::make('Staf dan Umum', $staff + $umum)
                 ->description("{$staff} staf, {$umum} umum")
+                ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedBriefcase)
-                ->color('warning')
+                ->color('info')
                 ->icon(Heroicon::OutlinedBriefcase)
                 ->url(VisitLogResource::getUrl('index', ['filters' => ['today' => ['isActive' => true]]])),
 
@@ -75,8 +78,9 @@ class TodayVisitorsWidget extends StatsOverviewWidget
                 ->whereBetween('visited_at', [$weekStart, $weekEnd])
                 ->count())
                 ->description('Total kunjungan minggu ini')
+                ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedCalendarDays)
-                ->color('success')
+                ->color('primary')
                 ->icon(Heroicon::OutlinedCalendarDays)
                 ->url(VisitLogResource::getUrl('index', [
                     'filters' => [
