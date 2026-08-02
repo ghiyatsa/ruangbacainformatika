@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Loan;
-use App\Notifications\LoanReminderDatabaseNotification;
-use App\Notifications\LoanReminderNotification;
+use App\Services\LoanReminderService;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -16,20 +14,11 @@ class RemindReturnCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(LoanReminderService $reminderService): int
     {
         $maxOverdueDays = max((int) $this->option('max-overdue-days'), 0);
 
-        $loans = Loan::query()
-            ->where('status', Loan::STATUS_BORROWED)
-            ->whereNull('returned_at')
-            ->where('due_at', '<=', now()->addDay()->endOfDay())
-            ->where('due_at', '>=', now()->subDays($maxOverdueDays)->startOfDay())
-            ->where(function ($query): void {
-                $query
-                    ->whereNull('reminder_sent_at')
-                    ->orWhere('reminder_sent_at', '<', now()->startOfDay());
-            })
+        $loans = $reminderService->eligibleLoansQuery($maxOverdueDays)
             ->with('user', 'items.bookItem.book')
             ->get();
 
@@ -42,10 +31,7 @@ class RemindReturnCommand extends Command
         $this->info("Mengirim reminder untuk {$loans->count()} pinjaman...");
 
         foreach ($loans as $loan) {
-            $loan->user->notify(new LoanReminderDatabaseNotification($loan));
-            $loan->user->notify(new LoanReminderNotification($loan));
-            $loan->reminder_sent_at = now();
-            $loan->save();
+            $reminderService->remind($loan);
         }
 
         $this->info('Reminder berhasil dikirim.');
