@@ -5,7 +5,9 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\Loans\LoanResource;
 use App\Models\Loan;
 use App\Models\LoanItem;
+use App\Services\LoanReminderService;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -80,6 +82,23 @@ class OverdueLoanTableWidget extends BaseTableWidget
                     ->icon(Heroicon::OutlinedEye)
                     ->url(fn (Loan $record): string => LoanResource::getUrl('view', ['record' => $record->user]))
                     ->openUrlInNewTab(),
+                Action::make('remindReturn')
+                    ->label('Kirim Reminder')
+                    ->icon(Heroicon::OutlinedBellAlert)
+                    ->color('info')
+                    ->disabled(fn (Loan $record): bool => $record->reminder_sent_at !== null && $record->reminder_sent_at->isToday())
+                    ->tooltip(fn (Loan $record): ?string => $record->reminder_sent_at !== null && $record->reminder_sent_at->isToday() ? 'Sudah diingatkan hari ini' : null)
+                    ->requiresConfirmation()
+                    ->modalHeading('Kirim Reminder Pengembalian')
+                    ->modalDescription('Reminder akan dikirim ke WhatsApp dan notifikasi akun untuk pinjaman ini.')
+                    ->action(function (Loan $record): void {
+                        $sent = app(LoanReminderService::class)->remind($record);
+
+                        Notification::make()
+                            ->title($sent ? 'Reminder terkirim' : 'Tidak perlu diingatkan (sudah dikirim hari ini)')
+                            ->{$sent ? 'success' : 'warning'}()
+                            ->send();
+                    }),
             ])
             ->recordUrl(fn (Loan $record): string => LoanResource::getUrl('view', ['record' => $record->user]))
             ->emptyStateIcon(Heroicon::OutlinedCheckCircle)
