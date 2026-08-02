@@ -19,7 +19,7 @@ class PostCategoryResource extends Resource
 {
     protected static ?string $model = PostCategory::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Blog';
+    protected static string|UnitEnum|null $navigationGroup = 'Konten & Blog';
 
     protected static ?string $navigationLabel = 'Kategori Artikel';
 

@@ -16,6 +16,7 @@ use App\Observers\CatalogActivityObserver;
 use App\Observers\PostObserver;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
+use App\Services\Catalog\CatalogPageCache;
 use App\Services\KioskPinManager;
 use App\Services\SimilarityApiService;
 use App\Support\AppTimezone;
@@ -78,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureWhatsAppRateLimiter();
         $this->configureContactRateLimiter();
         $this->configureBlogRateLimiters();
+        $this->configureGlobalSearchRateLimiters();
         $this->configureKioskRateLimiters();
         $this->composeRootView();
 
@@ -90,8 +92,11 @@ class AppServiceProvider extends ServiceProvider
         Skripsi::observe(CatalogActivityObserver::class);
         Thesis::observe(CatalogActivityObserver::class);
 
-        // Clear catalog stats cache on database changes
-        $clearCatalogCache = fn () => Cache::forget('catalog:stats');
+        // Clear catalog stats & page caches on database changes
+        $clearCatalogCache = function (): void {
+            Cache::forget('catalog:stats');
+            app(CatalogPageCache::class)->invalidate();
+        };
         Book::saved($clearCatalogCache);
         Book::deleted($clearCatalogCache);
         BookItem::saved($clearCatalogCache);
@@ -122,6 +127,19 @@ class AppServiceProvider extends ServiceProvider
                         'message' => 'Terlalu banyak percobaan mengirim pesan. Coba lagi sebentar.',
                     ], 429, $headers);
                 });
+        });
+    }
+
+    protected function configureGlobalSearchRateLimiters(): void
+    {
+        RateLimiter::for('global-search', function (Request $request): Limit {
+            return Limit::perMinute(60)
+                ->by((string) $request->ip());
+        });
+
+        RateLimiter::for('search-suggestions', function (Request $request): Limit {
+            return Limit::perMinute(120)
+                ->by((string) $request->ip());
         });
     }
 

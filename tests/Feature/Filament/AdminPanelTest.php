@@ -63,7 +63,7 @@ it('super admin users can access the admin dashboard', function () {
         ->assertOk()
         ->assertSee('Ringkasan')
         ->assertSee('Aktivitas')
-        ->assertSee('Pesan')
+        ->assertSee('Komunikasi')
         ->assertSee('Server');
 });
 
@@ -94,7 +94,7 @@ it('super admin users can render the general settings form', function () {
         ->assertSee('Deskripsi Situs')
         ->assertSee('Kata Kunci SEO')
         ->assertSee('WhatsApp Bantuan')
-        ->assertSee('Nomor kontak layanan.')
+        ->assertSee('Nomor kontak layanan')
         ->assertDontSee('Branding & Icon')
         ->assertDontSee('Logo Situs')
         ->assertDontSee('Open Graph Image')
@@ -110,8 +110,8 @@ it('super admin users can render the library settings form', function () {
         ->assertOk()
         ->assertSee('Maksimal Buku Dipinjam')
         ->assertSee('Durasi Peminjaman (Hari Kerja)')
-        ->assertSee('Batas pinjaman aktif per anggota.')
-        ->assertSee('Durasi dihitung dalam hari kerja.')
+        ->assertSee('Batas pinjaman aktif per anggota')
+        ->assertSee('Durasi dihitung dalam hari kerja')
         ->assertSee('Simpan');
 });
 
@@ -125,7 +125,7 @@ it('super admin users can render the kiosk settings actions', function () {
         ->assertSee('Reset Sesi Perangkat')
         ->assertSee('Perangkat Aktif')
         ->assertSee('PIN Kios')
-        ->assertSee('Kosongkan jika PIN tidak diubah.')
+        ->assertSee('Kosongkan jika PIN tidak diubah')
         ->assertSee('Kosongkan untuk membuka akses ke semua jaringan. Pisahkan IP atau CIDR dengan baris baru atau koma.');
 });
 
@@ -136,8 +136,8 @@ it('super admin users can render concise integration settings copy', function ()
         ->get('/admin/settings/integrasi')
         ->assertOk()
         ->assertSee('Pengaturan Integrasi')
-        ->assertSee('Pengaturan WhatsApp untuk notifikasi rutin.')
-        ->assertSee('Isi 0 jika jeda tidak diperlukan.')
+        ->assertSee('Pengaturan WhatsApp untuk notifikasi rutin')
+        ->assertSee('Isi 0 jika jeda tidak diperlukan')
         ->assertSee('Sinkronkan Ulang Semua Dokumen');
 });
 
@@ -151,7 +151,7 @@ it('super admin users can render the create user form for google accounts', func
         ->assertSee('WhatsApp')
         ->assertSee('Alamat')
         ->assertSee('Peran')
-        ->assertSee('Pilih peran sesuai kewenangan akun.')
+        ->assertSee('Pilih peran sesuai kewenangan akun')
         ->assertSee('Tandai jika akun sudah lolos review awal. Akses pinjam tetap menunggu verifikasi WhatsApp dan peran anggota.');
 });
 
@@ -269,20 +269,75 @@ it('super admin users can update staff user role back to member', function () {
         ->and($managedUser->hasRole('staff'))->toBeFalse();
 });
 
+it('super admin users can toggle a member whatsapp verification on the edit form', function () {
+    $admin = makeSuperAdmin();
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => null,
+    ]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, [
+        'record' => $member->getKey(),
+    ])
+        ->fillForm([
+            'whatsapp_verified_at' => true,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($member->fresh()?->hasVerifiedWhatsApp())->toBeTrue();
+});
+
+it('super admin users can revoke a member whatsapp verification on the edit form', function () {
+    $admin = makeSuperAdmin();
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+    ]);
+
+    actingAs($admin);
+
+    Livewire::test(EditUser::class, [
+        'record' => $member->getKey(),
+    ])
+        ->fillForm([
+            'whatsapp_verified_at' => false,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($member->fresh()?->hasVerifiedWhatsApp())->toBeFalse();
+});
+
+it('renders the whatsapp verification toggle on the edit user form', function () {
+    $admin = makeSuperAdmin();
+    $managedUser = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => null,
+    ]);
+
+    actingAs($admin)
+        ->get("/admin/users/{$managedUser->getKey()}/edit")
+        ->assertOk()
+        ->assertSee('WhatsApp Terverifikasi');
+});
+
 it('super admin users can render book relation helpers on the create book form', function () {
     $user = makeSuperAdmin();
 
     actingAs($user)
         ->get('/admin/books/create')
         ->assertOk()
-        ->assertSee('Pilih penerbit atau tambahkan data baru.')
-        ->assertSee('Pilih penulis atau tambahkan data baru.')
-        ->assertSee('Pilih kategori atau tambahkan data baru.')
+        ->assertSee('Pilih penerbit atau tambahkan data baru')
+        ->assertSee('Pilih penulis atau tambahkan data baru')
+        ->assertSee('Pilih kategori atau tambahkan data baru')
         ->assertSee('Gunakan untuk buku biasa. Saat diisi, jalur ISSN disembunyikan.')
         ->assertSee('Gunakan untuk jurnal atau serial. Saat diisi, jalur ISBN disembunyikan.')
-        ->assertDontSee('Isi jumlah atau rentang halaman utama.')
-        ->assertSee('Gunakan 4 digit tahun.')
-        ->assertSee('JPG, PNG, atau WEBP. Maksimal 2 MB.');
+        ->assertDontSee('Isi jumlah atau rentang halaman utama')
+        ->assertSee('Gunakan 4 digit tahun')
+        ->assertSee('Format JPG, PNG, atau WEBP, maksimal 2 MB');
 });
 
 it('super admin users can render concise table filter and bulk action labels', function () {
@@ -401,7 +456,7 @@ it('super admin users can monitor similarity sync status from skripsi admin page
     actingAs($user)
         ->get('/admin/skripsis')
         ->assertOk()
-        ->assertSee('Status Similarity')
+        ->assertSee('Status Kemiripan')
         ->assertSee('Gagal')
         ->assertSee('Perlu diproses')
         ->assertSee('Belum dijadwalkan')
@@ -411,7 +466,7 @@ it('super admin users can monitor similarity sync status from skripsi admin page
         ->get("/admin/skripsis/{$skripsi->getKey()}")
         ->assertOk()
         ->assertSee('Data Skripsi')
-        ->assertSee('Sinkronisasi Similarity')
+        ->assertSee('Sinkronisasi Kemiripan')
         ->assertSee('Proses terakhir')
         ->assertSee('Catatan error terakhir')
         ->assertSee('Token similarity tidak valid.');
@@ -523,8 +578,8 @@ it('super admin users can render concise empty state copy on book management res
     actingAs($user)
         ->get('/admin/catalog-reports')
         ->assertOk()
-        ->assertSee('Belum ada laporan katalog')
-        ->assertSee('Laporan katalog akan muncul di sini.');
+        ->assertSee('Belum ada umpan balik')
+        ->assertSee('Umpan balik katalog akan muncul di sini.');
 
     actingAs($user)
         ->get('/admin/books')
@@ -613,7 +668,7 @@ it('super admin users can see the contact messages and catalog reports widgets o
         ->assertSee('Pesan Kontak Terbaru')
         ->assertSee('Laporan Umpan Balik Katalog')
         ->assertSee('Pesan kontak akan muncul di sini.')
-        ->assertSee('Laporan katalog akan muncul di sini.');
+        ->assertSee('Umpan balik katalog akan muncul di sini.');
 });
 
 it('super admin users can see the server info widget on the dashboard', function () {

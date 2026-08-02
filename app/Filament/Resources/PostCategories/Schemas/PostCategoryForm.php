@@ -28,7 +28,7 @@ class PostCategoryForm
         return $schema
             ->components([
                 Section::make('Informasi Dasar')
-                    ->description('Nama dan identitas kategori.')
+                    ->description('Nama dan identitas kategori')
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
@@ -45,7 +45,7 @@ class PostCategoryForm
                     ->columns(2),
 
                 Section::make('Deskripsi')
-                    ->description('Keterangan tambahan bila diperlukan.')
+                    ->description('Keterangan tambahan bila diperlukan')
                     ->schema([
                         static::descriptionField(),
                     ]),

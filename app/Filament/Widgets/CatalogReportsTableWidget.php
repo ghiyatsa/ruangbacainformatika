@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-// Wait, let's use the correct resource CatalogReportResource!
 use App\Filament\Resources\CatalogReports\CatalogReportResource;
 use App\Models\CatalogReport;
 use Filament\Actions\Action;
@@ -63,8 +62,8 @@ class CatalogReportsTableWidget extends BaseTableWidget
             ])
             ->recordUrl(fn (CatalogReport $record): string => CatalogReportResource::getUrl('view', ['record' => $record]))
             ->emptyStateIcon(Heroicon::OutlinedFlag)
-            ->emptyStateHeading('Belum ada laporan katalog')
-            ->emptyStateDescription('Laporan katalog akan muncul di sini.')
+            ->emptyStateHeading('Belum ada umpan balik')
+            ->emptyStateDescription('Umpan balik katalog akan muncul di sini.')
             ->paginated([5, 10]);
     }
 }

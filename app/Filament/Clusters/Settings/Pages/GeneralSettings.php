@@ -54,7 +54,7 @@ class GeneralSettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Identitas Situs')
-                    ->description('Informasi utama yang tampil di halaman publik.')
+                    ->description('Informasi utama yang tampil di halaman publik')
                     ->schema([
                         TextInput::make('site_name')
                             ->label('Nama Situs')
@@ -81,7 +81,7 @@ class GeneralSettings extends Page
                             ->tel()
                             ->maxLength(255)
                             ->placeholder('0812xxxxxx')
-                            ->helperText('Nomor kontak layanan.'),
+                            ->helperText('Nomor kontak layanan'),
                         Textarea::make('address')
                             ->label('Alamat')
                             ->rows(3)
@@ -91,7 +91,7 @@ class GeneralSettings extends Page
                     ])
                     ->columns(2),
                 Section::make('SEO & Metadata')
-                    ->description('Nilai default untuk deskripsi halaman, preview tautan, dan metadata publik.')
+                    ->description('Nilai default untuk deskripsi halaman, preview tautan, dan metadata publik')
                     ->schema([
                         Textarea::make('site_description')
                             ->label('Deskripsi Situs')
@@ -104,7 +104,7 @@ class GeneralSettings extends Page
                             ->rows(4)
                             ->maxLength(500)
                             ->placeholder('perpustakaan digital, teknik informatika, unimal, katalog buku')
-                            ->helperText('Pisahkan dengan koma.'),
+                            ->helperText('Pisahkan dengan koma'),
                         Select::make('seo_robots')
                             ->label('Aturan Index')
                             ->options([
@@ -120,15 +120,15 @@ class GeneralSettings extends Page
                             ->required()
                             ->default('#ffffff')
                             ->regex('/^#[0-9A-Fa-f]{6}$/')
-                            ->helperText('Gunakan format hex, misalnya #FFFFFF.'),
+                            ->helperText('Gunakan format hex, misalnya #FFFFFF'),
                     ])
                     ->columns(2),
                 Section::make('Notifikasi Global')
-                    ->description('Pesan singkat yang tampil di bagian atas beranda.')
+                    ->description('Pesan singkat yang tampil di bagian atas beranda')
                     ->schema([
                         Toggle::make('hero_notice_enabled')
                             ->label('Tampilkan notifikasi')
-                            ->helperText('Tampilkan pesan di beranda.')
+                            ->helperText('Tampilkan pesan di beranda')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')

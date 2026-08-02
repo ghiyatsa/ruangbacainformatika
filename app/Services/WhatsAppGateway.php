@@ -55,7 +55,7 @@ class WhatsAppGateway
                         'connectOnly' => true,
                     ])
                     ->throw();
-            }, $message->bypassPacing);
+            }, $message);
 
             $payload = $this->responsePayload($response);
             $status = $payload['status'] ?? $payload['Status'] ?? null;
@@ -112,7 +112,7 @@ class WhatsAppGateway
 
     protected function ensureRoutineDeliveryIsHealthy(WhatsAppMessage $message): void
     {
-        if ($message->bypassPacing || $message->category === 'otp') {
+        if ($message->bypassPacing) {
             return;
         }
 
@@ -134,7 +134,6 @@ class WhatsAppGateway
 
         $recentFailures = WhatsAppMessageLog::query()
             ->where('status', WhatsAppMessageLog::StatusFailed)
-            ->where('category', '!=', 'otp')
             ->where('created_at', '>=', now()->subMinutes($windowMinutes))
             ->count();
 
@@ -156,19 +155,25 @@ class WhatsAppGateway
     /**
      * @param  callable(): Response  $callback
      */
-    protected function sendWithPacing(callable $callback, bool $bypassPacing = false): Response
+    protected function sendWithPacing(callable $callback, WhatsAppMessage $message): Response
     {
-        $intervalSeconds = max((int) config('services.fonnte.send_interval_seconds', 15), 0);
+        $isOtp = $message->category === 'otp';
 
-        if ($bypassPacing || $intervalSeconds === 0 || app()->runningUnitTests()) {
+        $intervalSeconds = $isOtp
+            ? max((int) config('services.fonnte.otp_send_interval_seconds', 5), 0)
+            : max((int) config('services.fonnte.send_interval_seconds', 15), 0);
+
+        if ($message->bypassPacing || $intervalSeconds === 0 || app()->runningUnitTests()) {
             return $callback();
         }
 
+        $lockKey = $isOtp ? 'whatsapp-gateway:otp-send-lock' : 'whatsapp-gateway:send-lock';
+        $lastSentKey = $isOtp ? 'whatsapp-gateway:otp-last-sent-at' : 'whatsapp-gateway:last-sent-at';
         $lockSeconds = max($intervalSeconds * 2, 10);
 
         try {
-            return Cache::lock('whatsapp-gateway:send-lock', $lockSeconds)->block($lockSeconds, function () use ($callback, $intervalSeconds): Response {
-                $lastSentAt = Cache::get('whatsapp-gateway:last-sent-at');
+            return Cache::lock($lockKey, $lockSeconds)->block($lockSeconds, function () use ($callback, $intervalSeconds, $lastSentKey): Response {
+                $lastSentAt = Cache::get($lastSentKey);
 
                 if (is_numeric($lastSentAt)) {
                     $remainingDelay = $intervalSeconds - (now()->timestamp - (int) $lastSentAt);
@@ -180,7 +185,7 @@ class WhatsAppGateway
 
                 $response = $callback();
 
-                Cache::put('whatsapp-gateway:last-sent-at', now()->timestamp, now()->addDay());
+                Cache::put($lastSentKey, now()->timestamp, now()->addDay());
 
                 return $response;
             });

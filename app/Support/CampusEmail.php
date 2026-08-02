@@ -36,11 +36,6 @@ class CampusEmail
             || str_ends_with($email, '@unimal.ac.id');
     }
 
-    public function requiresWhatsAppVerification(string $email): bool
-    {
-        return $this->isEligibleEmail($this->normalize($email));
-    }
-
     public function isMahasiswaEmail(string $email): bool
     {
         return str_ends_with($email, '@mhs.unimal.ac.id');

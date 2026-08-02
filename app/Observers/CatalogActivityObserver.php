@@ -10,6 +10,7 @@ use App\Models\Publisher;
 use App\Models\Skripsi;
 use App\Models\Thesis;
 use App\Services\ActivityLogService;
+use App\Services\Catalog\CatalogPageCache;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -20,6 +21,8 @@ class CatalogActivityObserver implements ShouldHandleEventsAfterCommit
 {
     public function created(Model $model): void
     {
+        $this->invalidateCatalogCache();
+
         $this->activityLog()->log(
             'catalog.'.$this->subjectKey($model).'.created',
             $this->modelLabel($model).' ditambahkan',
@@ -40,6 +43,8 @@ class CatalogActivityObserver implements ShouldHandleEventsAfterCommit
             return;
         }
 
+        $this->invalidateCatalogCache();
+
         $this->activityLog()->log(
             'catalog.'.$this->subjectKey($model).'.updated',
             $this->modelLabel($model).' diperbarui',
@@ -53,6 +58,8 @@ class CatalogActivityObserver implements ShouldHandleEventsAfterCommit
 
     public function deleted(Model $model): void
     {
+        $this->invalidateCatalogCache();
+
         $this->activityLog()->log(
             'catalog.'.$this->subjectKey($model).'.deleted',
             $this->modelLabel($model).' dihapus',
@@ -61,6 +68,11 @@ class CatalogActivityObserver implements ShouldHandleEventsAfterCommit
                 'record' => $this->recordSummary($model),
             ],
         );
+    }
+
+    protected function invalidateCatalogCache(): void
+    {
+        app(CatalogPageCache::class)->invalidate();
     }
 
     protected function activityLog(): ActivityLogService

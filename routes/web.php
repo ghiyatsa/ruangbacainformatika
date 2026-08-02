@@ -40,8 +40,12 @@ Route::get('/internship-reports/{internshipReport:student_id}', [InternshipRepor
 Route::get('/thesis', [ThesisController::class, 'index'])->name('thesis.index');
 Route::get('/thesis/{thesis:student_id}', [ThesisController::class, 'show'])->name('thesis.show');
 
-Route::get('/search', SearchController::class)->name('search');
-Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
+Route::get('/search', SearchController::class)
+    ->middleware('throttle:global-search')
+    ->name('search');
+Route::get('/search/suggestions', [SearchController::class, 'suggestions'])
+    ->middleware('throttle:search-suggestions')
+    ->name('search.suggestions');
 
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/about/team', [PageController::class, 'aboutTeam'])->name('about-team');

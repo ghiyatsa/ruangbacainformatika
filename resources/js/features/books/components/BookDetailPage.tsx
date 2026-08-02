@@ -92,6 +92,15 @@ export default function BookDetailPage(props: BookDetailPageProps) {
         containsBook: false,
         hasActiveQr: false,
     };
+    const canRequestBorrow = user !== null && auth.borrowingAccess?.canBorrow === true;
+    const borrowBlockReason =
+        book && book.isBorrowable && book.isAvailable && user && !canRequestBorrow
+            ? auth.borrowingAccess?.canBorrow
+                ? requestSummary.activeLoansCount >= requestSummary.maxBooks
+                    ? 'Kuota pinjam Anda penuh. Kembalikan sebagian buku untuk meminjam lagi.'
+                    : null
+                : (auth.borrowingAccess?.reason?.message ?? null)
+            : null;
     const isBookmarkedByUser = book
         ? isBookmarked({
               catalogType: 'book',
@@ -532,36 +541,51 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                             />
 
                                             {user &&
-                                            auth.canBorrowBooks &&
                                             book.isBorrowable &&
                                             book.isAvailable ? (
-                                                <Form
-                                                    action={LoanRequestController.storeBook()}
-                                                >
-                                                    {({ processing }) => (
-                                                        <>
-                                                            <input
-                                                                type="hidden"
-                                                                name="book_id"
-                                                                value={book.id}
-                                                            />
-                                                            <Button
-                                                                type="submit"
-                                                                variant="outline"
-                                                                className="inline-flex h-auto items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-medium"
-                                                                disabled={
-                                                                    processing ||
-                                                                    requestSummary.containsBook
-                                                                }
-                                                            >
-                                                                <ShoppingCart className="size-4" />
-                                                                {requestSummary.containsBook
-                                                                    ? 'Di keranjang'
-                                                                    : 'Pinjam'}
-                                                            </Button>
-                                                        </>
-                                                    )}
-                                                </Form>
+                                                canRequestBorrow ? (
+                                                    <Form
+                                                        action={LoanRequestController.storeBook()}
+                                                    >
+                                                        {({ processing }) => (
+                                                            <>
+                                                                <input
+                                                                    type="hidden"
+                                                                    name="book_id"
+                                                                    value={book.id}
+                                                                />
+                                                                <Button
+                                                                    type="submit"
+                                                                    variant="outline"
+                                                                    className="inline-flex h-auto items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-medium"
+                                                                    disabled={
+                                                                        processing ||
+                                                                        requestSummary.containsBook
+                                                                    }
+                                                                >
+                                                                    <ShoppingCart className="size-4" />
+                                                                    {requestSummary.containsBook
+                                                                        ? 'Di keranjang'
+                                                                        : 'Pinjam'}
+                                                                </Button>
+                                                            </>
+                                                        )}
+                                                    </Form>
+                                                ) : (
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        disabled
+                                                        title={
+                                                            borrowBlockReason ??
+                                                            undefined
+                                                        }
+                                                        className="inline-flex h-auto cursor-not-allowed items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-medium"
+                                                    >
+                                                        <ShoppingCart className="size-4" />
+                                                        Pinjam
+                                                    </Button>
+                                                )
                                             ) : null}
                                         </>
                                     ) : (

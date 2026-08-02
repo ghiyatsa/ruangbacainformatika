@@ -26,7 +26,7 @@ class PostResource extends Resource
 
     protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::DocumentText;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Blog';
+    protected static string|UnitEnum|null $navigationGroup = 'Konten & Blog';
 
     protected static ?string $navigationLabel = 'Artikel';
 

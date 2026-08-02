@@ -127,7 +127,7 @@ it('users without member borrowing access cannot add books to the cart', functio
             'book_id' => $book->id,
         ])
         ->assertSessionHasErrors([
-            'draft' => 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.',
+            'draft' => 'Akun kampus Anda sedang menunggu persetujuan admin sebelum dapat meminjam buku.',
         ]);
 
     expect($user->fresh()->hasRole('member'))->toBeFalse();
@@ -147,7 +147,7 @@ it('authenticated public users are redirected away from the loan request page', 
     actingAs($user)
         ->get(route('loans.request'))
         ->assertRedirect(route('home'))
-        ->assertSessionHas('inertia.flash_data.toast.message', 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.');
+        ->assertSessionHas('inertia.flash_data.toast.message', 'Peminjaman buku hanya untuk pengguna dengan email @mhs.unimal.ac.id atau @unimal.ac.id.');
 });
 
 it('users can add books to cart before profile is complete but cannot generate qr yet', function () {

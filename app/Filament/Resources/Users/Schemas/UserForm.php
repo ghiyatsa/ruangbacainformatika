@@ -6,7 +6,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 class UserForm
 {
@@ -33,7 +35,7 @@ class UserForm
                     ->multiple()
                     ->relationship('roles', 'name')
                     ->preload()
-                    ->helperText('Pilih peran sesuai kewenangan akun.'),
+                    ->helperText('Pilih peran sesuai kewenangan akun'),
                 Toggle::make('is_approved')
                     ->label('Lolos Review Awal')
                     ->helperText('Tandai jika akun sudah lolos review awal. Akses pinjam tetap menunggu verifikasi WhatsApp dan peran anggota.')
@@ -46,8 +48,14 @@ class UserForm
                     ->tel()
                     ->nullable()
                     ->unique(ignoreRecord: true)
-                    ->disabled(fn ($record): bool => filled($record?->whatsapp_verified_at))
+                    ->disabled(fn (Get $get, ?Model $record): bool => filled($record?->whatsapp_verified_at) && ($get('whatsapp_verified_at') ?? true))
                     ->placeholder('0812xxxxxx'),
+                Toggle::make('whatsapp_verified_at')
+                    ->label('WhatsApp Terverifikasi')
+                    ->formatStateUsing(fn (?Model $record): bool => $record?->hasVerifiedWhatsApp() ?? false)
+                    ->dehydrateStateUsing(fn (bool $state) => $state ? now() : null)
+                    ->live()
+                    ->helperText('Tandai jika nomor WhatsApp sudah diverifikasi oleh petugas tanpa OTP'),
                 Textarea::make('address')
                     ->label('Alamat')
                     ->nullable()

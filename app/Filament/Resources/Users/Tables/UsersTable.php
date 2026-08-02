@@ -41,7 +41,8 @@ class UsersTable
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->copyMessage('WhatsApp berhasil disalin'),
+                    ->copyMessage('WhatsApp berhasil disalin')
+                    ->description(fn (User $record): string => $record->hasVerifiedWhatsApp() ? 'Terverifikasi' : 'Belum diverifikasi'),
                 TextColumn::make('address')
                     ->label('Alamat')
                     ->searchable()

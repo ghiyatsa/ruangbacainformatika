@@ -72,6 +72,43 @@ it('api service handles bulk upsert job polling and deletes', function () {
     expect($deleteResult)->toBeTrue();
 });
 
+it('bulk upsert throws with the job failure reason', function () {
+    Setting::query()->create(['section' => 'integration', 'key' => 'similarity_api_url', 'value' => 'https://similarity.test']);
+    Setting::query()->create(['section' => 'integration', 'key' => 'similarity_api_secret', 'value' => encrypt('sync-secret')]);
+
+    Http::fake([
+        'https://similarity.test/api/v1/sync/bulk-upsert' => Http::response(['status' => 'accepted', 'job_id' => 'job-fail'], 202),
+        'https://similarity.test/api/v1/sync/jobs/job-fail' => Http::response(['status' => 'failed', 'error' => 'model not loaded'], 200),
+    ]);
+
+    expect(fn () => app(SimilarityApiService::class)->bulkUpsert([['judul' => 'Test']]))
+        ->toThrow(RuntimeException::class, 'Bulk job Similarity API gagal');
+});
+
+it('chunk job records the real failure reason', function () {
+    $skripsis = Skripsi::withoutEvents(fn () => Skripsi::factory()->count(2)->create());
+
+    $api = Mockery::mock(SimilarityApiService::class);
+    $api->shouldReceive('bulkUpsert')
+        ->once()
+        ->andThrow(new RuntimeException('Koneksi ke Similarity API gagal: connection refused'));
+
+    $job = new SyncSkripsiChunkToSimilarity($skripsis->pluck('id')->all(), false, Skripsi::class);
+
+    expect(fn () => $job->handle($api, app(SimilaritySyncStatusService::class)))
+        ->toThrow(RuntimeException::class, 'Koneksi ke Similarity API gagal');
+
+    $statuses = SimilaritySyncStatus::query()
+        ->where('status', SimilaritySyncStatus::STATUS_FAILED)
+        ->get();
+
+    expect($statuses)->toHaveCount(2);
+
+    foreach ($statuses as $status) {
+        expect($status->last_error)->toContain('Koneksi ke Similarity API gagal');
+    }
+});
+
 // =========================================================================
 // SECTION 2: Controller & Checker Tests
 // =========================================================================

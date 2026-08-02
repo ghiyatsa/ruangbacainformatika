@@ -136,6 +136,74 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             && $this->hasVerifiedWhatsApp();
     }
 
+    /**
+     * Alasan pertama yang memblokir peminjaman, atau null bila tidak ada.
+     *
+     * @param  bool  $includeCheckoutGates  Sertakan profil & pembatasan keterlambatan
+     * @return array{title: string, message: string, actionUrl: string|null}|null
+     */
+    public function borrowingBlockReason(bool $includeCheckoutGates = false): ?array
+    {
+        if (! $this->usesCampusEmail()) {
+            return [
+                'title' => 'Email bukan domain kampus',
+                'message' => 'Peminjaman buku hanya untuk pengguna dengan email @mhs.unimal.ac.id atau @unimal.ac.id.',
+                'actionUrl' => null,
+            ];
+        }
+
+        if (! $this->is_approved) {
+            return [
+                'title' => 'Menunggu persetujuan admin',
+                'message' => 'Akun kampus Anda sedang menunggu persetujuan admin sebelum dapat meminjam buku.',
+                'actionUrl' => null,
+            ];
+        }
+
+        if (! $this->hasVerifiedWhatsApp()) {
+            return [
+                'title' => 'Verifikasi WhatsApp',
+                'message' => 'Verifikasi nomor WhatsApp Anda untuk mengaktifkan layanan anggota.',
+                'actionUrl' => route('register.whatsapp', absolute: false),
+            ];
+        }
+
+        if (! $this->hasRole('member')) {
+            return [
+                'title' => 'Peran anggota belum aktif',
+                'message' => 'Peran anggota akan aktif otomatis saat seluruh syarat terpenuhi.',
+                'actionUrl' => null,
+            ];
+        }
+
+        if ($includeCheckoutGates) {
+            if (! $this->hasRequiredProfileDetails()) {
+                return [
+                    'title' => 'Profil belum lengkap',
+                    'message' => 'Nomor WhatsApp dan alamat wajib diisi pada profil sebelum meminjam buku.',
+                    'actionUrl' => route('settings.profile.edit', absolute: false),
+                ];
+            }
+
+            $restrictionMessage = app(LoanConsequenceService::class)->borrowingRestrictionMessage($this);
+
+            if ($restrictionMessage !== null) {
+                return [
+                    'title' => 'Peminjaman dibatasi sementara',
+                    'message' => $restrictionMessage,
+                    'actionUrl' => null,
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    public function canStartLoanRequest(): bool
+    {
+        return $this->borrowingBlockReason(true) === null;
+    }
+
     public function canViewPublicNotifications(): bool
     {
         return $this->hasRole('member');
@@ -177,10 +245,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function scopePendingMemberApproval(Builder $query): Builder
     {
-        return $query
+        $pendingIds = $query->getModel()->newQuery()
             ->where('is_approved', false)
-            ->where('email', 'like', '%@unimal.ac.id')
-            ->where('email', 'not like', '%@mhs.unimal.ac.id');
+            ->get(['id', 'email', 'is_approved'])
+            ->filter(fn (User $user): bool => $user->requiresManualApproval())
+            ->pluck('id');
+
+        return $query->whereKey($pendingIds);
     }
 
     public function routeNotificationForWhatsApp(): ?string

@@ -20,7 +20,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustProxies(at: '*');
+        // Hanya percayai proxy yang benar-benar ada (CDN/LB). Default aman:
+        // tanpa TRUSTED_PROXIES, header X-Forwarded-For diabaikan sehingga
+        // rate limit per-IP & log tidak bisa dipalsukan.
+        $trustedProxies = env('TRUSTED_PROXIES');
+        $middleware->trustProxies(
+            at: filled($trustedProxies)
+                ? (strtolower($trustedProxies) === '*' ? '*' : array_map('trim', explode(',', $trustedProxies)))
+                : null,
+        );
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
         $middleware->redirectUsersTo(function (Request $request): string {
             $user = $request->user();

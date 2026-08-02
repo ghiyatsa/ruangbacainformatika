@@ -21,41 +21,66 @@ interface GlobalSearchDialogProps {
 }
 
 /**
- * Highlights matches of query query inside text with HTML <strong> tag.
+ * Highlights the part of the text the user actually typed (greedy left-to-right
+ * alignment), leaving auto-completed / corrected characters un-highlighted.
  */
 function getHighlightedText(text: string, highlight: string) {
-    if (!highlight.trim()) {
+    const query = highlight.trim().toLowerCase();
+
+    if (!query) {
         return <span>{text}</span>;
     }
 
-    const words = highlight.trim().split(/\s+/).filter(Boolean);
+    const source = text.toLowerCase();
+    const parts: React.ReactNode[] = [];
+    let queryIndex = 0;
+    let run: string[] = [];
+    let runIsMatch = false;
 
-    if (words.length === 0) {
-        return <span>{text}</span>;
+    const flush = () => {
+        if (run.length === 0) {
+            return;
+        }
+
+        const chunk = run.join('');
+        const key = parts.length;
+
+        if (runIsMatch) {
+            parts.push(
+                <strong key={key} className="font-extrabold text-foreground">
+                    {chunk}
+                </strong>,
+            );
+        } else {
+            parts.push(
+                <span key={key} className="text-muted-foreground">
+                    {chunk}
+                </span>,
+            );
+        }
+
+        run = [];
+    };
+
+    for (let i = 0; i < text.length; i++) {
+        const isMatch =
+            queryIndex < query.length && source[i] === query[queryIndex];
+
+        if (isMatch) {
+            queryIndex++;
+        }
+
+        if (isMatch !== runIsMatch) {
+            flush();
+            runIsMatch = isMatch;
+        }
+
+        run.push(text[i]);
     }
 
-    const patterns = words.map(w => w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'));
-    const regex = new RegExp(`(${patterns.join('|')})`, 'gi');
-    const parts = text.split(regex);
+    flush();
 
-    return (
-        <span>
-            {parts.map((part, index) =>
-                // split() with a capture group places matched text at odd indices.
-                // Using index parity avoids calling regex.test(), which mutates
-                // lastIndex on a /g regex and produces inconsistent results.
-                index % 2 === 1 ? (
-                    <strong key={index} className="font-extrabold text-foreground">
-                        {part}
-                    </strong>
-                ) : (
-                    <span key={index} className="text-muted-foreground">
-                        {part}
-                    </span>
-                )
-            )}
-        </span>
-    );
+    return <span>{parts}</span>;
 }
 
 export function GlobalSearchDialog({
@@ -67,6 +92,7 @@ export function GlobalSearchDialog({
     const [history, setHistory] = React.useState<string[]>([]);
     const [selectedIndex, setSelectedIndex] = React.useState(-1);
     const [isDebouncing, setIsDebouncing] = React.useState(false);
+    const historyRef = React.useRef<string[]>([]);
 
     const http = useHttp();
     const httpRef = React.useRef(http);
@@ -80,9 +106,11 @@ export function GlobalSearchDialog({
         if (typeof window !== 'undefined') {
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
+                const parsed = stored ? (JSON.parse(stored) as string[]) : [];
 
-                if (stored) {
-                    setHistory(JSON.parse(stored));
+                if (Array.isArray(parsed)) {
+                    historyRef.current = parsed;
+                    setHistory(parsed);
                 }
             } catch (e) {
                 console.error('Failed to load search history', e);
@@ -97,42 +125,69 @@ export function GlobalSearchDialog({
             return;
         }
 
-        setHistory((prev) => {
-            const filtered = prev.filter((item) => item !== trimmed);
-            const updated = [trimmed, ...filtered].slice(0, MAX_HISTORY);
+        // Tulis localStorage secara sinkron di luar updater state.
+        // Menulis di dalam setHistory(prev => ...) bisa terlewat saat
+        // komponen langsung unmount (Enter -> dialog ditutup -> navigasi).
+        const updated = [
+            trimmed,
+            ...historyRef.current.filter((item) => item !== trimmed),
+        ].slice(0, MAX_HISTORY);
 
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-            } catch (e) {
-                console.error('Failed to save search history', e);
-            }
+        historyRef.current = updated;
 
-            return updated;
-        });
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        } catch (e) {
+            console.error('Failed to save search history', e);
+        }
+
+        setHistory(updated);
     }, []);
 
     const deleteHistoryItem = React.useCallback((itemToDelete: string, e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        setHistory((prev) => {
-            const updated = prev.filter((item) => item !== itemToDelete);
 
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-            } catch (err) {
-                console.error('Failed to delete search history item', err);
-            }
+        const updated = historyRef.current.filter(
+            (item) => item !== itemToDelete,
+        );
 
-            return updated;
-        });
+        historyRef.current = updated;
+
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        } catch (err) {
+            console.error('Failed to delete search history item', err);
+        }
+
+        setHistory(updated);
     }, []);
 
     const items = React.useMemo(() => {
-        if (query.trim() === '') {
+        const trimmed = query.trim();
+
+        if (trimmed === '') {
             return history;
         }
 
-        return [...suggestions, `Cari semua untuk "${query}"`];
+        const recentMatches = history.filter((item) =>
+            item.toLowerCase().includes(trimmed.toLowerCase()),
+        );
+
+        const seen = new Set<string>();
+        const merged = [...recentMatches, ...suggestions].filter((item) => {
+            const key = item.toLowerCase();
+
+            if (seen.has(key)) {
+                return false;
+            }
+
+            seen.add(key);
+
+            return true;
+        });
+
+        return [...merged, `Cari semua untuk "${trimmed}"`];
     }, [suggestions, query, history]);
 
     const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -316,8 +371,11 @@ export function GlobalSearchDialog({
                                         {/* Sticky Bottom "Cari semua..." button */}
                                         <div className="sticky bottom-0 bg-popover p-1.5 border-t border-dashed border-border mt-auto">
                                             {(() => {
-                                                const searchAllIndex = suggestions.length;
-                                                const isSelected = selectedIndex === searchAllIndex;
+                                                const searchAllIndex =
+                                                    items.length - 1;
+                                                const isSelected =
+                                                    selectedIndex ===
+                                                    searchAllIndex;
                                                 const label = `Cari semua untuk "${query}"`;
 
                                                 return (

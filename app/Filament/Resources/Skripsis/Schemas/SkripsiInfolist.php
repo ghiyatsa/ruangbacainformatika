@@ -49,7 +49,7 @@ class SkripsiInfolist
                             ]),
                     ])
                     ->columnSpanFull(),
-                Section::make('Sinkronisasi Similarity')
+                Section::make('Sinkronisasi Kemiripan')
                     ->schema([
                         Grid::make([
                             'default' => 1,

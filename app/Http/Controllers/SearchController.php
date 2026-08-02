@@ -8,9 +8,11 @@ use App\Models\Post;
 use App\Models\SearchHistory;
 use App\Models\Skripsi;
 use App\Models\Thesis;
+use App\Services\Search\SearchTermCorrector;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -28,167 +30,237 @@ class SearchController extends Controller
             ->limit(100, '')
             ->toString();
 
-        $books = collect();
-        $posts = collect();
-        $skripsis = collect();
-        $internshipReports = collect();
-        $theses = collect();
+        $results = [
+            'books' => collect(),
+            'posts' => collect(),
+            'skripsis' => collect(),
+            'internshipReports' => collect(),
+            'theses' => collect(),
+        ];
+
+        $totals = [
+            'books' => null,
+            'posts' => null,
+            'skripsis' => null,
+            'internshipReports' => null,
+            'theses' => null,
+        ];
 
         if ($search !== '') {
-            $books = Book::query()
-                ->published()
-                ->search($search)
-                ->select(['books.id', 'books.title', 'books.slug', 'books.cover_image', 'books.is_featured', 'books.is_borrowable', 'books.view_count', 'books.published_year', 'books.pages', 'books.description'])
-                ->with(['authors:id,name', 'categories:id,name,slug'])
-                ->withCount([
-                    'items as available_items_count' => fn (Builder $query): Builder => $query->available(),
-                ])
-                ->limit(15)
-                ->get()
-                ->map(fn (Book $book): array => [
-                    'id' => $book->id,
-                    'title' => $book->title,
-                    'slug' => $book->slug,
-                    'coverImageUrl' => $book->cover_image
-                        ? asset('storage/'.$book->cover_image)
-                        : asset('images/book-cover-placeholder.svg'),
-                    'authors' => $book->authors->pluck('name')->values()->all(),
-                    'categories' => $book->categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug])->all(),
-                    'isFeatured' => $book->is_featured,
-                    'isBorrowable' => $book->is_borrowable,
-                    'isAvailable' => $book->is_borrowable && ($book->available_items_count ?? 0) > 0,
-                    'viewCount' => $book->view_count,
-                    'publishedYear' => $book->published_year,
-                    'pages' => $book->pages,
-                    'shortDescription' => Str::limit($book->description ?: 'Deskripsi buku belum tersedia.', 160),
-                ]);
+            $results = $this->performSearch($search);
 
-            $posts = Post::query()
-                ->published()
-                ->search($search)
-                ->select(['posts.id', 'posts.title', 'posts.slug', 'posts.summary', 'posts.cover_image', 'posts.user_id', 'posts.published_at'])
-                ->with(['user:id,name,avatar_url', 'categories:id,name,slug'])
-                ->limit(15)
-                ->get()
-                ->map(fn (Post $post): array => [
-                    'id' => $post->id,
-                    'title' => $post->title,
-                    'slug' => $post->slug,
-                    'coverImageUrl' => $post->cover_image
-                        ? asset('storage/'.$post->cover_image)
-                        : asset('images/book-cover-placeholder.svg'),
-                    'author' => $post->user ? [
-                        'name' => $post->user->name,
-                        'avatar' => $post->user->avatarUrl(),
-                        'initials' => $post->user->initials(),
-                    ] : null,
-                    'summary' => $post->summary,
-                    'excerpt' => $post->excerpt(120),
-                    'categories' => $post->categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug])->all(),
-                    'publishedAt' => $post->published_at?->toIso8601String(),
-                    'publishedAtLabel' => $post->published_at?->translatedFormat('d F Y'),
-                ]);
+            // Fallback koreksi typo: hanya saat hasil benar-benar kosong (tanpa biaya tambahan di jalur normal).
+            if ($this->totalDisplayed($results) === 0) {
+                $corrected = app(SearchTermCorrector::class)->correctQuery($search);
 
-            $skripsis = Skripsi::query()
-                ->search($search)
-                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
-                ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
-                ->limit(15)
-                ->get()
-                ->map(fn (Skripsi $skripsi): array => [
-                    'id' => $skripsi->id,
-                    'title' => $skripsi->title,
-                    'authorName' => $skripsi->author_name,
-                    'studentId' => $skripsi->student_id,
-                    'year' => $skripsi->year,
-                    'abstract' => $skripsi->abstract,
-                    'viewCount' => (int) $skripsi->view_count,
-                    'keywords' => filled($skripsi->keywords)
-                        ? array_map('trim', explode(',', $skripsi->keywords))
-                        : [],
-                ]);
+                if ($corrected !== null) {
+                    $results = $this->mergeSearchResults($results, $this->performSearch($corrected));
+                }
+            }
 
-            $internshipReports = InternshipReport::query()
-                ->search($search)
-                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
-                ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
-                ->limit(15)
-                ->get()
-                ->map(fn (InternshipReport $internshipReport): array => [
-                    'id' => $internshipReport->id,
-                    'title' => $internshipReport->title,
-                    'authorName' => $internshipReport->author_name,
-                    'studentId' => $internshipReport->student_id,
-                    'year' => $internshipReport->year,
-                    'abstract' => $internshipReport->abstract,
-                    'viewCount' => (int) $internshipReport->view_count,
-                    'keywords' => filled($internshipReport->keywords)
-                        ? array_map('trim', explode(',', $internshipReport->keywords))
-                        : [],
-                ]);
+            // Hitung total sebenarnya hanya jika hasil mentok limit (dipotong).
+            $totals = [
+                'books' => $results['books']->count() >= 15 ? Book::query()->published()->search($search)->count() : null,
+                'posts' => $results['posts']->count() >= 15 ? Post::query()->published()->search($search)->count() : null,
+                'skripsis' => $results['skripsis']->count() >= 15 ? Skripsi::query()->search($search)->count() : null,
+                'internshipReports' => $results['internshipReports']->count() >= 15 ? InternshipReport::query()->search($search)->count() : null,
+                'theses' => $results['theses']->count() >= 15 ? Thesis::query()->search($search)->count() : null,
+            ];
 
-            $theses = Thesis::query()
-                ->search($search)
-                ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
-                ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
-                ->limit(15)
-                ->get()
-                ->map(fn (Thesis $thesis): array => [
-                    'id' => $thesis->id,
-                    'title' => $thesis->title,
-                    'authorName' => $thesis->author_name,
-                    'studentId' => $thesis->student_id,
-                    'year' => $thesis->year,
-                    'abstract' => $thesis->abstract,
-                    'viewCount' => (int) $thesis->view_count,
-                    'keywords' => filled($thesis->keywords)
-                        ? array_map('trim', explode(',', $thesis->keywords))
-                        : [],
-                ]);
+            $hasResults = $this->totalDisplayed($results) > 0;
 
-            $hasResults = $books->isNotEmpty() || $posts->isNotEmpty() || $skripsis->isNotEmpty() || $internshipReports->isNotEmpty() || $theses->isNotEmpty();
+            if ($request->hasHeader('X-Search-Clicked') && $hasResults) {
+                // Cache-based deduplication: prevent the same IP from inflating
+                // the hit counter for the same query within a 5-minute window.
+                $cacheKey = 'search_hit_'.sha1($request->ip().'|'.$search);
 
-            if ($hasResults) {
-                if ($request->hasHeader('X-Search-Clicked')) {
-                    // Cache-based deduplication: prevent the same IP from inflating
-                    // the hit counter for the same query within a 5-minute window.
-                    $cacheKey = 'search_hit_'.sha1($request->ip().'|'.$search);
-
-                    if (! cache()->has($cacheKey)) {
-                        cache()->put($cacheKey, true, now()->addMinutes(5));
-                        SearchHistory::query()->upsert(
-                            [['query' => $search, 'hits' => 1]],
-                            ['query'],
-                            ['hits' => DB::raw('search_histories.hits + 1')]
-                        );
-                    }
-                } else {
-                    SearchHistory::query()->firstOrCreate(
-                        ['query' => $search],
-                        ['hits' => 1]
+                if (! cache()->has($cacheKey)) {
+                    cache()->put($cacheKey, true, now()->addMinutes(5));
+                    SearchHistory::query()->upsert(
+                        [['query' => $search, 'hits' => 1]],
+                        ['query'],
+                        ['hits' => DB::raw('search_histories.hits + 1')]
                     );
                 }
+            } elseif (mb_strlen($search) >= 2) {
+                SearchHistory::query()->firstOrCreate(
+                    ['query' => $search],
+                    ['hits' => 1]
+                );
             }
         }
 
+        $payload = [
+            'books' => $results['books']->values()->all(),
+            'posts' => $results['posts']->values()->all(),
+            'skripsis' => $results['skripsis']->values()->all(),
+            'internshipReports' => $results['internshipReports']->values()->all(),
+            'theses' => $results['theses']->values()->all(),
+            'totals' => $totals,
+        ];
+
         return Inertia::render('search/index', [
             'query' => $search,
-            'results' => app()->runningUnitTests()
-                ? [
-                    'books' => $books->values()->all(),
-                    'posts' => $posts->values()->all(),
-                    'skripsis' => $skripsis->values()->all(),
-                    'internshipReports' => $internshipReports->values()->all(),
-                    'theses' => $theses->values()->all(),
-                ]
-                : Inertia::defer(fn () => [
-                    'books' => $books->values()->all(),
-                    'posts' => $posts->values()->all(),
-                    'skripsis' => $skripsis->values()->all(),
-                    'internshipReports' => $internshipReports->values()->all(),
-                    'theses' => $theses->values()->all(),
-                ]),
+            'results' => app()->runningUnitTests() ? $payload : Inertia::defer(fn (): array => $payload),
         ]);
+    }
+
+    /**
+     * Jalankan pencarian 5 tipe dan kembalikan koleksi hasil (sudah di-map ke array).
+     *
+     * @return array{books: Collection<int, array<string, mixed>>, posts: Collection<int, array<string, mixed>>, skripsis: Collection<int, array<string, mixed>>, internshipReports: Collection<int, array<string, mixed>>, theses: Collection<int, array<string, mixed>>}
+     */
+    protected function performSearch(string $search): array
+    {
+        $books = Book::query()
+            ->published()
+            ->search($search)
+            ->select(['books.id', 'books.title', 'books.slug', 'books.cover_image', 'books.is_featured', 'books.is_borrowable', 'books.view_count', 'books.published_year', 'books.pages', 'books.description'])
+            ->with(['authors:id,name', 'categories:id,name,slug'])
+            ->withCount([
+                'items as available_items_count' => fn (Builder $query): Builder => $query->available(),
+            ])
+            ->limit(15)
+            ->get()
+            ->map(fn (Book $book): array => [
+                'id' => $book->id,
+                'title' => $book->title,
+                'slug' => $book->slug,
+                'coverImageUrl' => $book->cover_image
+                    ? asset('storage/'.$book->cover_image)
+                    : asset('images/book-cover-placeholder.svg'),
+                'authors' => $book->authors->pluck('name')->values()->all(),
+                'categories' => $book->categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug])->all(),
+                'isFeatured' => $book->is_featured,
+                'isBorrowable' => $book->is_borrowable,
+                'isAvailable' => $book->is_borrowable && ($book->available_items_count ?? 0) > 0,
+                'viewCount' => $book->view_count,
+                'publishedYear' => $book->published_year,
+                'pages' => $book->pages,
+                'shortDescription' => Str::limit($book->description ?: 'Deskripsi buku belum tersedia.', 160),
+            ]);
+
+        $posts = Post::query()
+            ->published()
+            ->search($search)
+            ->select(['posts.id', 'posts.title', 'posts.slug', 'posts.summary', 'posts.cover_image', 'posts.user_id', 'posts.published_at'])
+            ->with(['user:id,name,avatar_url', 'categories:id,name,slug'])
+            ->limit(15)
+            ->get()
+            ->map(fn (Post $post): array => [
+                'id' => $post->id,
+                'title' => $post->title,
+                'slug' => $post->slug,
+                'coverImageUrl' => $post->cover_image
+                    ? asset('storage/'.$post->cover_image)
+                    : asset('images/book-cover-placeholder.svg'),
+                'author' => $post->user ? [
+                    'name' => $post->user->name,
+                    'avatar' => $post->user->avatarUrl(),
+                    'initials' => $post->user->initials(),
+                ] : null,
+                'summary' => $post->summary,
+                'excerpt' => $post->excerpt(120),
+                'categories' => $post->categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug])->all(),
+                'publishedAt' => $post->published_at?->toIso8601String(),
+                'publishedAtLabel' => $post->published_at?->translatedFormat('d F Y'),
+            ]);
+
+        $skripsis = Skripsi::query()
+            ->search($search)
+            ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
+            ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
+            ->limit(15)
+            ->get()
+            ->map(fn (Skripsi $skripsi): array => [
+                'id' => $skripsi->id,
+                'title' => $skripsi->title,
+                'authorName' => $skripsi->author_name,
+                'studentId' => $skripsi->student_id,
+                'year' => $skripsi->year,
+                'abstract' => $skripsi->abstract,
+                'viewCount' => (int) $skripsi->view_count,
+                'keywords' => filled($skripsi->keywords)
+                    ? array_map('trim', explode(',', $skripsi->keywords))
+                    : [],
+            ]);
+
+        $internshipReports = InternshipReport::query()
+            ->search($search)
+            ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
+            ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
+            ->limit(15)
+            ->get()
+            ->map(fn (InternshipReport $internshipReport): array => [
+                'id' => $internshipReport->id,
+                'title' => $internshipReport->title,
+                'authorName' => $internshipReport->author_name,
+                'studentId' => $internshipReport->student_id,
+                'year' => $internshipReport->year,
+                'abstract' => $internshipReport->abstract,
+                'viewCount' => (int) $internshipReport->view_count,
+                'keywords' => filled($internshipReport->keywords)
+                    ? array_map('trim', explode(',', $internshipReport->keywords))
+                    : [],
+            ]);
+
+        $theses = Thesis::query()
+            ->search($search)
+            ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
+            ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
+            ->limit(15)
+            ->get()
+            ->map(fn (Thesis $thesis): array => [
+                'id' => $thesis->id,
+                'title' => $thesis->title,
+                'authorName' => $thesis->author_name,
+                'studentId' => $thesis->student_id,
+                'year' => $thesis->year,
+                'abstract' => $thesis->abstract,
+                'viewCount' => (int) $thesis->view_count,
+                'keywords' => filled($thesis->keywords)
+                    ? array_map('trim', explode(',', $thesis->keywords))
+                    : [],
+            ]);
+
+        return [
+            'books' => $books,
+            'posts' => $posts,
+            'skripsis' => $skripsis,
+            'internshipReports' => $internshipReports,
+            'theses' => $theses,
+        ];
+    }
+
+    /**
+     * @param  array<string, Collection<int, array<string, mixed>>>  $results
+     */
+    protected function totalDisplayed(array $results): int
+    {
+        return $results['books']->count()
+            + $results['posts']->count()
+            + $results['skripsis']->count()
+            + $results['internshipReports']->count()
+            + $results['theses']->count();
+    }
+
+    /**
+     * Gabungkan dua kumpulan hasil, dedup berdasarkan id per tipe.
+     *
+     * @param  array<string, Collection<int, array<string, mixed>>>  $primary
+     * @param  array<string, Collection<int, array<string, mixed>>>  $secondary
+     * @return array<string, Collection<int, array<string, mixed>>>
+     */
+    protected function mergeSearchResults(array $primary, array $secondary): array
+    {
+        foreach ($primary as $key => $collection) {
+            $primary[$key] = collect($collection)
+                ->keyBy('id')
+                ->merge(collect($secondary[$key])->keyBy('id'))
+                ->values();
+        }
+
+        return $primary;
     }
 
     /**
@@ -205,7 +277,11 @@ class SearchController extends Controller
             return response()->json([]);
         }
 
-        $queryWords = preg_split('/\s+/', mb_strtolower($q), -1, PREG_SPLIT_NO_EMPTY);
+        $queryWords = collect(preg_split('/\s+/', mb_strtolower($q), -1, PREG_SPLIT_NO_EMPTY))
+            ->map(fn (string $word): string => $this->sanitizeLikeTerm($word))
+            ->filter()
+            ->values()
+            ->all();
         if (empty($queryWords)) {
             return response()->json([]);
         }
@@ -221,84 +297,70 @@ class SearchController extends Controller
             ->pluck('query')
             ->all();
 
-        // Fallback: If suggestions count is less than 8, get matching titles from Books, Posts, Skripsi, Thesis
-        $needed = 8 - count($suggestions);
-        if ($needed > 0) {
-            $bookTitles = Book::query()
-                ->published()
-                ->where(function (Builder $inner) use ($queryWords) {
-                    foreach ($queryWords as $word) {
-                        $inner->where('title', 'like', "%{$word}%");
-                    }
-                })
-                ->limit($needed)
-                ->pluck('title')
-                ->all();
-            $suggestions = array_merge($suggestions, $bookTitles);
-        }
+        $suggestions = SearchHistory::query()
+            ->where(function (Builder $inner) use ($queryWords) {
+                foreach ($queryWords as $word) {
+                    $inner->where('query', 'like', "%{$word}%");
+                }
+            })
+            ->orderByDesc('hits')
+            ->limit(8)
+            ->pluck('query')
+            ->all();
 
-        $needed = 8 - count($suggestions);
-        if ($needed > 0) {
-            $postTitles = Post::query()
-                ->published()
-                ->where(function (Builder $inner) use ($queryWords) {
-                    foreach ($queryWords as $word) {
-                        $inner->where('title', 'like', "%{$word}%");
-                    }
-                })
-                ->limit($needed)
-                ->pluck('title')
-                ->all();
-            $suggestions = array_merge($suggestions, $postTitles);
-        }
+        $suggestions = array_merge(
+            $suggestions,
+            $this->collectTitleSuggestions($queryWords, 8 - count($suggestions)),
+        );
 
-        $needed = 8 - count($suggestions);
-        if ($needed > 0) {
-            $skripsiTitles = Skripsi::query()
-                ->where(function (Builder $inner) use ($queryWords) {
-                    foreach ($queryWords as $word) {
-                        $inner->where('title', 'like', "%{$word}%");
-                    }
-                })
-                ->limit($needed)
-                ->pluck('title')
-                ->all();
-            $suggestions = array_merge($suggestions, $skripsiTitles);
-        }
+        // Koreksi typo: bila saran masih kurang, coba query terkoreksi.
+        if (count($suggestions) < 8) {
+            $corrected = app(SearchTermCorrector::class)->correctQuery($q);
 
-        $needed = 8 - count($suggestions);
-        if ($needed > 0) {
-            $thesisTitles = Thesis::query()
-                ->where(function (Builder $inner) use ($queryWords) {
-                    foreach ($queryWords as $word) {
-                        $inner->where('title', 'like', "%{$word}%");
-                    }
-                })
-                ->limit($needed)
-                ->pluck('title')
-                ->all();
-            $suggestions = array_merge($suggestions, $thesisTitles);
-        }
+            if ($corrected !== null) {
+                $correctedWords = collect(preg_split('/\s+/', $corrected, -1, PREG_SPLIT_NO_EMPTY))
+                    ->map(fn (string $word): string => $this->sanitizeLikeTerm($word))
+                    ->filter()
+                    ->values()
+                    ->all();
 
-        $needed = 8 - count($suggestions);
-        if ($needed > 0) {
-            $internshipReportTitles = InternshipReport::query()
-                ->where(function (Builder $inner) use ($queryWords) {
-                    foreach ($queryWords as $word) {
-                        $inner->where('title', 'like', "%{$word}%");
-                    }
-                })
-                ->limit($needed)
-                ->pluck('title')
-                ->all();
-            $suggestions = array_merge($suggestions, $internshipReportTitles);
+                $needed = 8 - count($suggestions);
+
+                if ($needed > 0 && $correctedWords !== []) {
+                    $suggestions = array_merge($suggestions, SearchHistory::query()
+                        ->where(function (Builder $inner) use ($correctedWords) {
+                            foreach ($correctedWords as $word) {
+                                $inner->where('query', 'like', "%{$word}%");
+                            }
+                        })
+                        ->orderByDesc('hits')
+                        ->limit($needed)
+                        ->pluck('query')
+                        ->all());
+                }
+
+                $suggestions = array_merge(
+                    $suggestions,
+                    $this->collectTitleSuggestions($correctedWords, 8 - count($suggestions)),
+                );
+            }
         }
 
         $formattedSuggestions = [];
+        $seen = [];
+
         foreach ($suggestions as $suggestion) {
-            $formattedSuggestions[] = $this->formatSuggestion($suggestion, $q);
+            $formatted = $this->formatSuggestion($suggestion, $q);
+            $normalized = mb_strtolower($formatted);
+
+            if (isset($seen[$normalized])) {
+                continue;
+            }
+
+            $seen[$normalized] = true;
+            $formattedSuggestions[] = $formatted;
         }
-        $suggestions = array_slice(array_values(array_unique($formattedSuggestions)), 0, 8);
+        $suggestions = array_slice(array_values($formattedSuggestions), 0, 8);
 
         return response()->json($suggestions);
     }
@@ -335,6 +397,57 @@ class SearchController extends Controller
             )
             ->orderByDesc('search_priority')
             ->orderBy('title');
+    }
+
+    /**
+     * Buang wildcard LIKE yang bisa mengubah semantik pencarian.
+     */
+    protected function sanitizeLikeTerm(string $term): string
+    {
+        return str_replace(['\\', '%', '_'], '', $term);
+    }
+
+    /**
+     * Kumpulkan judul yang cocok dengan seluruh kata, dari 5 tipe, hingga kuota terpenuhi.
+     *
+     * @param  list<string>  $words
+     * @return list<string>
+     */
+    protected function collectTitleSuggestions(array $words, int $needed): array
+    {
+        if ($needed <= 0 || $words === []) {
+            return [];
+        }
+
+        $titles = [];
+        $remaining = $needed;
+
+        $collectFrom = function (Builder $query) use (&$titles, &$remaining, $words): void {
+            if ($remaining <= 0) {
+                return;
+            }
+
+            $matched = $query
+                ->where(function (Builder $inner) use ($words) {
+                    foreach ($words as $word) {
+                        $inner->where('title', 'like', "%{$word}%");
+                    }
+                })
+                ->limit($remaining)
+                ->pluck('title')
+                ->all();
+
+            $titles = array_merge($titles, $matched);
+            $remaining -= count($matched);
+        };
+
+        $collectFrom(Book::query()->published());
+        $collectFrom(Post::query()->published());
+        $collectFrom(Skripsi::query());
+        $collectFrom(Thesis::query());
+        $collectFrom(InternshipReport::query());
+
+        return $titles;
     }
 
     /**

@@ -144,10 +144,76 @@ it('increments search history hits when query is clicked', function () {
     ]);
 });
 
-it('does not record search history when no results found', function () {
+it('records search history even when no results found', function () {
     get(route('search', ['q' => 'dkanlknda']));
 
-    assertDatabaseMissing('search_histories', [
+    assertDatabaseHas('search_histories', [
         'query' => 'dkanlknda',
+        'hits' => 1,
     ]);
+});
+
+it('does not record search history for queries shorter than two characters', function () {
+    get(route('search', ['q' => 'a']));
+
+    assertDatabaseMissing('search_histories', [
+        'query' => 'a',
+    ]);
+});
+
+it('does not treat like wildcards as search terms', function () {
+    $publisher = Publisher::factory()->create();
+    Book::factory()->create([
+        'title' => 'Buku ABC Pemrograman',
+        'is_published' => true,
+        'publisher_id' => $publisher->id,
+    ]);
+
+    get(route('search', ['q' => '%']))
+        ->assertOk()
+        ->assertInertia(
+            fn (AssertableInertia $page) => $page
+                ->component('search/index')
+                ->where('results.books', [])
+        );
+
+    assertDatabaseMissing('search_histories', [
+        'query' => '%',
+    ]);
+});
+
+it('returns empty suggestions when query is only a like wildcard', function () {
+    get(route('search.suggestions', ['q' => '%']))
+        ->assertOk()
+        ->assertExactJson([]);
+});
+
+it('returns corrected results for queries with typos', function () {
+    $publisher = Publisher::factory()->create();
+    Book::factory()->create([
+        'title' => 'Buku Metode Penelitian',
+        'is_published' => true,
+        'publisher_id' => $publisher->id,
+    ]);
+
+    get(route('search', ['q' => 'metde']))
+        ->assertOk()
+        ->assertInertia(
+            fn (AssertableInertia $page) => $page
+                ->component('search/index')
+                ->where('results.books.0.title', 'Buku Metode Penelitian')
+        );
+});
+
+it('suggests corrected titles for queries with typos', function () {
+    $publisher = Publisher::factory()->create();
+    Book::factory()->create([
+        'title' => 'Buku Metode Penelitian',
+        'is_published' => true,
+        'publisher_id' => $publisher->id,
+    ]);
+
+    get(route('search.suggestions', ['q' => 'metde']))
+        ->assertOk()
+        ->assertExactJson(['buku metode penelitian']);
 });

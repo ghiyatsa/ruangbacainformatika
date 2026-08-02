@@ -9,8 +9,8 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('app:remind-return')]
-#[Description('Send WhatsApp reminders for books due tomorrow')]
+#[Signature('app:remind-return {--max-overdue-days=7 : Berhenti kirim reminder setelah sekian hari telat}')]
+#[Description('Send WhatsApp reminders from H-1 until books are returned or overdue cap is reached')]
 class RemindReturnCommand extends Command
 {
     /**
@@ -18,24 +18,28 @@ class RemindReturnCommand extends Command
      */
     public function handle(): int
     {
-        $tomorrow = now()->addDay()->startOfDay();
-        $tomorrowEnd = now()->addDay()->endOfDay();
+        $maxOverdueDays = max((int) $this->option('max-overdue-days'), 0);
 
         $loans = Loan::query()
-            ->where('status', '=', Loan::STATUS_BORROWED)
-            ->whereNull('returned_at', 'and', false)
-            ->whereNull('reminder_sent_at', 'and', false)
-            ->whereBetween('due_at', [$tomorrow, $tomorrowEnd], 'and')
+            ->where('status', Loan::STATUS_BORROWED)
+            ->whereNull('returned_at')
+            ->where('due_at', '<=', now()->addDay()->endOfDay())
+            ->where('due_at', '>=', now()->subDays($maxOverdueDays)->startOfDay())
+            ->where(function ($query): void {
+                $query
+                    ->whereNull('reminder_sent_at')
+                    ->orWhere('reminder_sent_at', '<', now()->startOfDay());
+            })
             ->with('user', 'items.bookItem.book')
             ->get();
 
         if ($loans->isEmpty()) {
-            $this->info('No loans are due tomorrow.');
+            $this->info('Tidak ada pinjaman yang perlu diingatkan hari ini.');
 
             return self::SUCCESS;
         }
 
-        $this->info("Sending reminder notifications for {$loans->count()} loans...");
+        $this->info("Mengirim reminder untuk {$loans->count()} pinjaman...");
 
         foreach ($loans as $loan) {
             $loan->user->notify(new LoanReminderDatabaseNotification($loan));
@@ -44,7 +48,7 @@ class RemindReturnCommand extends Command
             $loan->save();
         }
 
-        $this->info('Reminder notifications sent successfully!');
+        $this->info('Reminder berhasil dikirim.');
 
         return self::SUCCESS;
     }

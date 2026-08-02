@@ -1,4 +1,4 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import { Download, QrCode, Trash2 } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
@@ -12,6 +12,7 @@ import { useCountdown } from '@/hooks/use-countdown';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { downloadSvgAsPng } from '@/lib/utils';
 import type { FormEvent } from 'react';
+import type { Auth } from '@/types';
 
 interface LoanRequestItem {
     id: number;
@@ -43,6 +44,7 @@ interface Props {
 }
 
 export default function LoanRequestPage({ draft, stats }: Props) {
+    const { auth } = usePage<{ auth: Auth }>().props;
     const isEmpty = draft.items.length === 0;
     const remainingQuota = Math.max(
         stats.loanMaxBooks - stats.activeLoansCount,
@@ -379,6 +381,31 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                     value={bookId}
                                 />
                             ))}
+
+                            {auth.borrowingAccess &&
+                            !auth.borrowingAccess.canBorrow &&
+                            auth.borrowingAccess.reason ? (
+                                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+                                    <p className="font-semibold">
+                                        {
+                                            auth.borrowingAccess.reason
+                                                .title
+                                        }
+                                    </p>
+                                    <p className="mt-0.5">
+                                        {
+                                            auth.borrowingAccess.reason
+                                                .message
+                                        }
+                                    </p>
+                                </div>
+                            ) : remainingQuota < 1 ? (
+                                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+                                    Kuota pinjam Anda penuh (
+                                    {stats.loanMaxBooks} buku). Kembalikan
+                                    sebagian buku untuk meminjam lagi.
+                                </div>
+                            ) : null}
 
                             <Button
                                 type="submit"

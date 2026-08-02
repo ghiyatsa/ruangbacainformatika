@@ -51,8 +51,10 @@ return [
         'url' => env('FONNTE_API_URL'),
         'token' => env('FONNTE_API_TOKEN'),
         'send_interval_seconds' => env('FONNTE_SEND_INTERVAL_SECONDS', 15),
+        'otp_send_interval_seconds' => env('FONNTE_OTP_SEND_INTERVAL_SECONDS', 5),
         'failure_pause_threshold' => env('FONNTE_FAILURE_PAUSE_THRESHOLD', 5),
         'failure_pause_window_minutes' => env('FONNTE_FAILURE_PAUSE_WINDOW_MINUTES', 15),
+        'daily_limit' => env('FONNTE_DAILY_LIMIT', 10),
     ],
 
     'huggingface' => [

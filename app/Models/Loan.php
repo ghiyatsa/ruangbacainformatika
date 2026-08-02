@@ -18,6 +18,12 @@ class Loan extends Model
 
     public const STATUS_RETURNED = 'returned';
 
+    public const REMINDER_STAGE_H_MINUS_ONE = 'h-1';
+
+    public const REMINDER_STAGE_DUE_TODAY = 'due-today';
+
+    public const REMINDER_STAGE_OVERDUE = 'overdue';
+
     protected $fillable = [
         'user_id',
         'status',
@@ -63,6 +69,30 @@ class Loan extends Model
     public function isOverdue(): bool
     {
         return $this->lateDays() > 0;
+    }
+
+    public function reminderStage(): string
+    {
+        if (! $this->due_at instanceof CarbonInterface) {
+            return self::REMINDER_STAGE_H_MINUS_ONE;
+        }
+
+        $today = now()->startOfDay();
+        $dueDay = $this->due_at->copy()->startOfDay();
+
+        if ($dueDay->equalTo($today->copy()->addDay())) {
+            return self::REMINDER_STAGE_H_MINUS_ONE;
+        }
+
+        if ($dueDay->equalTo($today)) {
+            return self::REMINDER_STAGE_DUE_TODAY;
+        }
+
+        if ($dueDay->lessThan($today)) {
+            return self::REMINDER_STAGE_OVERDUE;
+        }
+
+        return self::REMINDER_STAGE_H_MINUS_ONE;
     }
 
     public function lateDays(?CarbonInterface $reference = null): int

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\FullTextSearchable;
 use App\Models\Concerns\GeneratesSlug;
 use App\Support\Casts\IssnCast;
 use App\Support\Casts\SquishCast;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Book extends Model
 {
+    use FullTextSearchable;
     use GeneratesSlug;
     use HasFactory;
 
@@ -178,7 +180,38 @@ class Book extends Model
             return $query;
         }
 
-        $terms = collect(explode(' ', $search))->filter()->values();
+        $terms = collect(explode(' ', $search))
+            ->filter()
+            ->map(fn (string $term): string => $this->sanitizeLikeTerm($term))
+            ->filter()
+            ->values();
+
+        if ($terms->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($this->supportsFullText($query->getConnection())) {
+            return $query->where(function (Builder $q) use ($search, $terms) {
+                $q->whereRaw(
+                    'MATCH(title, subtitle, description, isbn, issn, ddc_code) AGAINST (? IN BOOLEAN MODE)',
+                    [$this->toBooleanFullTextQuery($search)]
+                );
+
+                foreach ($terms as $term) {
+                    $q->orWhere(function (Builder $inner) use ($term) {
+                        $inner->where('title', 'like', "%{$term}%")
+                            ->orWhere('subtitle', 'like', "%{$term}%")
+                            ->orWhere('isbn', 'like', "%{$term}%")
+                            ->orWhere('issn', 'like', "%{$term}%")
+                            ->orWhere('ddc_code', 'like', "%{$term}%")
+                            ->orWhere('description', 'like', "%{$term}%")
+                            ->orWhereHas('publisher', fn (Builder $p) => $p->where('name', 'like', "%{$term}%"))
+                            ->orWhereHas('authors', fn (Builder $a) => $a->where('name', 'like', "%{$term}%"))
+                            ->orWhereHas('categories', fn (Builder $c) => $c->where('name', 'like', "%{$term}%"));
+                    });
+                }
+            });
+        }
 
         return $query->where(function (Builder $q) use ($terms) {
             foreach ($terms as $term) {

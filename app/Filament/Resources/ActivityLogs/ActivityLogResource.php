@@ -23,11 +23,11 @@ class ActivityLogResource extends Resource
 
     protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::ClipboardDocumentList;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Operasional';
+    protected static string|UnitEnum|null $navigationGroup = 'Sistem';
 
     protected static ?string $navigationLabel = 'Log Aktivitas';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $modelLabel = 'Log Aktivitas';
 

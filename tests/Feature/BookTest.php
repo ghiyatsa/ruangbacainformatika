@@ -243,7 +243,8 @@ it('book detail page hides loan request summary for authenticated users without 
         ->assertInertia(fn (Assert $page) => $page
             ->component('books/show')
             ->where('auth.canBorrowBooks', false)
-            ->where('auth.borrowingAccessMessage', 'Layanan peminjaman tersedia setelah status anggota Anda lengkap.')
+            ->where('auth.borrowingAccess.canBorrow', false)
+            ->where('auth.borrowingAccess.reason.title', 'Email bukan domain kampus')
             ->where('loanRequest', null)
             ->where('loanRequestCart', null)
         );
@@ -270,7 +271,8 @@ it('book detail page explains manual approval status for campus users who still 
         ->assertInertia(fn (Assert $page) => $page
             ->component('books/show')
             ->where('auth.canBorrowBooks', false)
-            ->where('auth.borrowingAccessMessage', 'Akun kampus Anda sedang menunggu persetujuan admin.')
+            ->where('auth.borrowingAccess.canBorrow', false)
+            ->where('auth.borrowingAccess.reason.title', 'Menunggu persetujuan admin')
         );
 });
 
