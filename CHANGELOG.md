@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.13.0...v1.13.1) (2026-08-01)
+
+
+### Bug Fixes
+
+* **catalog:** only normalize metadata casts on set ([#28](https://github.com/ghiyatsa/ruangbacainformatika/issues/28)) ([259a1b8](https://github.com/ghiyatsa/ruangbacainformatika/commit/259a1b8ae57c27a1d0613ef0e79c9f74f0fe90b9))
+
 ## [1.13.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.12.2...v1.13.0) (2026-08-01)
 
 
