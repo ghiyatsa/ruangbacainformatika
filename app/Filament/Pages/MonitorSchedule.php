@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\ScheduledTasksTableWidget;
 use App\Filament\Widgets\ScheduleOverviewWidget;
 use App\Filament\Widgets\ScheduleRunLogTableWidget;
 use App\Models\User;
@@ -42,6 +43,10 @@ class MonitorSchedule extends Page
                 ])
                     ->schema(fn (): array => $this->getWidgetsSchemaComponents([
                         ScheduleOverviewWidget::class,
+                    ])),
+                Grid::make(1)
+                    ->schema(fn (): array => $this->getWidgetsSchemaComponents([
+                        ScheduledTasksTableWidget::class,
                     ])),
                 Grid::make(1)
                     ->schema(fn (): array => $this->getWidgetsSchemaComponents([
