@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.14.0...v1.15.0) (2026-08-02)
+
+
+### Features
+
+* **admin:** add cron and queue monitor pages to sistem group ([#33](https://github.com/ghiyatsa/ruangbacainformatika/issues/33)) ([5d68c8b](https://github.com/ghiyatsa/ruangbacainformatika/commit/5d68c8bb83307efb763a3fb54199d1ce6d856541))
+
 ## [1.14.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.13.1...v1.14.0) (2026-08-02)
 
 
