@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.15.0...v1.16.0) (2026-08-02)
+
+
+### Features
+
+* **admin:** list scheduled tasks with next run and run actions ([#35](https://github.com/ghiyatsa/ruangbacainformatika/issues/35)) ([3c6d9c1](https://github.com/ghiyatsa/ruangbacainformatika/commit/3c6d9c108747fe95c713bbea45e49684ad806692))
+
 ## [1.15.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.14.0...v1.15.0) (2026-08-02)
 
 
