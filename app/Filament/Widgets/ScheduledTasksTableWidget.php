@@ -93,6 +93,8 @@ class ScheduledTasksTableWidget extends BaseTableWidget
 
     protected function runTaskNow(MonitoredScheduledTask $record): void
     {
+        $this->ensureConsoleScheduleLoaded();
+
         $event = collect(app(Schedule::class)->events())
             ->first(function ($event) use ($record): bool {
                 return ScheduledTaskFactory::createForEvent($event)->name() === $record->name;
@@ -122,6 +124,15 @@ class ScheduledTasksTableWidget extends BaseTableWidget
             ->title("Task {$record->name} telah dijalankan")
             ->success()
             ->send();
+    }
+
+    protected function ensureConsoleScheduleLoaded(): void
+    {
+        if (count(app(Schedule::class)->events()) > 0) {
+            return;
+        }
+
+        require base_path('routes/console.php');
     }
 
     protected function resolveLastRunStatus(MonitoredScheduledTask $record): string

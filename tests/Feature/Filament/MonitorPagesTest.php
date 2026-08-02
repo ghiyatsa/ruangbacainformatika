@@ -4,7 +4,10 @@ use App\Filament\Widgets\FailedJobsTableWidget;
 use App\Filament\Widgets\ScheduledTasksTableWidget;
 use App\Models\FailedJob;
 use App\Models\User;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Spatie\ScheduleMonitor\Models\MonitoredScheduledTask;
@@ -215,6 +218,28 @@ it('super admin users can run a scheduled task now', function () {
         'timezone' => 'Asia/Jakarta',
         'grace_time_in_minutes' => 5,
     ]);
+
+    actingAs($user);
+
+    Livewire::test(ScheduledTasksTableWidget::class)
+        ->assertCanSeeTableRecords([$task])
+        ->callTableAction('runNow', $task)
+        ->assertNotified('Task app:prune-notifications telah dijalankan');
+});
+
+it('can run a scheduled task now when the schedule is not loaded yet', function () {
+    $user = createMonitorAdmin();
+
+    $task = MonitoredScheduledTask::create([
+        'name' => 'app:prune-notifications',
+        'type' => 'command',
+        'cron_expression' => '0 3 * * *',
+        'timezone' => 'Asia/Jakarta',
+        'grace_time_in_minutes' => 5,
+    ]);
+
+    App::instance(Schedule::class, new Schedule('Asia/Jakarta'));
+    ScheduleFacade::clearResolvedInstance(Schedule::class);
 
     actingAs($user);
 
