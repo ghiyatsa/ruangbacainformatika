@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Widgets\FailedJobsTableWidget;
+use App\Filament\Widgets\ScheduledTasksTableWidget;
 use App\Models\FailedJob;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -181,4 +182,54 @@ it('super admin users can purge all failed jobs', function () {
 
     expect(FailedJob::count())->toBe(0)
         ->and(DB::table('jobs')->count())->toBe(0);
+});
+
+it('schedule monitor page lists scheduled tasks with next run', function () {
+    $user = createMonitorAdmin();
+
+    MonitoredScheduledTask::create([
+        'name' => 'app:prune-notifications',
+        'type' => 'command',
+        'cron_expression' => '0 3 * * *',
+        'timezone' => 'Asia/Jakarta',
+        'grace_time_in_minutes' => 5,
+    ]);
+
+    actingAs($user)
+        ->get('/admin/monitor-schedule')
+        ->assertOk()
+        ->assertSee('app:prune-notifications')
+        ->assertSee('0 3 * * *')
+        ->assertSee('Belum pernah')
+        ->assertSee('Sinkronkan Jadwal')
+        ->assertSee('Jalankan Sekarang');
+});
+
+it('super admin users can run a scheduled task now', function () {
+    $user = createMonitorAdmin();
+
+    $task = MonitoredScheduledTask::create([
+        'name' => 'app:prune-notifications',
+        'type' => 'command',
+        'cron_expression' => '0 3 * * *',
+        'timezone' => 'Asia/Jakarta',
+        'grace_time_in_minutes' => 5,
+    ]);
+
+    actingAs($user);
+
+    Livewire::test(ScheduledTasksTableWidget::class)
+        ->assertCanSeeTableRecords([$task])
+        ->callTableAction('runNow', $task)
+        ->assertNotified('Task app:prune-notifications telah dijalankan');
+});
+
+it('super admin users can sync the schedule from the widget', function () {
+    $user = createMonitorAdmin();
+
+    actingAs($user);
+
+    Livewire::test(ScheduledTasksTableWidget::class)
+        ->callTableAction('syncSchedule')
+        ->assertNotified('Jadwal disinkronkan');
 });
