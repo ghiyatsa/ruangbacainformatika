@@ -29,7 +29,7 @@ class AuthorForm
         return $schema
             ->components([
                 Section::make('Informasi Dasar')
-                    ->description('Data utama penulis.')
+                    ->description('Data utama penulis')
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
@@ -48,7 +48,7 @@ class AuthorForm
                     ->columns(2),
 
                 Section::make('Biografi')
-                    ->description('Keterangan tambahan penulis.')
+                    ->description('Keterangan tambahan penulis')
                     ->schema([
                         static::bioField(),
                     ]),

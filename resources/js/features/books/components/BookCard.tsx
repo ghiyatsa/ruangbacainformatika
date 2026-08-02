@@ -121,11 +121,22 @@ function BookCard({
     const categories = Array.isArray(book.categories) ? book.categories : [];
     const authors = Array.isArray(book.authors) ? book.authors : [];
     const authorsLabel = authors.join(', ') || 'Penulis tidak tersedia';
+    const isBorrowableAndAvailable = book.isBorrowable && book.isAvailable;
+    const quotaFull =
+        (loanRequestCart?.activeLoansCount ?? 0) >=
+        (loanRequestCart?.maxBooks ?? 0);
     const canAddToCart =
         auth.user !== null &&
-        auth.canBorrowBooks === true &&
-        book.isBorrowable &&
-        book.isAvailable;
+        auth.borrowingAccess?.canBorrow === true &&
+        isBorrowableAndAvailable;
+    const borrowBlockReason =
+        isBorrowableAndAvailable && auth.user && !canAddToCart
+            ? auth.borrowingAccess?.canBorrow
+                ? quotaFull
+                    ? 'Kuota pinjam Anda penuh. Kembalikan sebagian buku untuk meminjam lagi.'
+                    : null
+                : (auth.borrowingAccess?.reason?.message ?? null)
+            : null;
     const isBookmarkedByUser = isBookmarked({
         catalogType: 'book',
         id: book.id,
@@ -314,6 +325,16 @@ function BookCard({
                                 </>
                             )}
                         </Form>
+                    ) : borrowBlockReason ? (
+                        <button
+                            type="button"
+                            disabled
+                            title={borrowBlockReason}
+                            aria-label={borrowBlockReason}
+                            className="inline-flex size-7 shrink-0 cursor-not-allowed items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/60 shadow-sm"
+                        >
+                            <LoanRequestIcon className="size-3.5" />
+                        </button>
                     ) : null}
                 </div>
 

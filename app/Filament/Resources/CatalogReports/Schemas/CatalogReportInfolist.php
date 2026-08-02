@@ -58,8 +58,8 @@ class CatalogReportInfolist
                                     ->dateTime('d M Y H:i')
                                     ->placeholder('-'),
                                 TextEntry::make('admin_notes')
-                                    ->label('Catatan admin')
-                                    ->placeholder('Belum ada catatan admin')
+                                    ->label('Catatan Petugas')
+                                    ->placeholder('Belum ada catatan petugas')
                                     ->columnSpanFull(),
                             ])
                             ->columnSpan(1),

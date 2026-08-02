@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\BookCatalogResource;
+use App\Services\Catalog\CatalogPageCache;
 use App\Services\Catalog\CatalogQueryService;
 use App\Services\CatalogService;
 use Illuminate\Http\Request;
@@ -12,6 +12,7 @@ use Inertia\Response;
 class CatalogController extends Controller
 {
     public function __construct(
+        protected CatalogPageCache $catalogPageCache,
         protected CatalogQueryService $catalogQueryService,
         protected CatalogService $catalogService,
     ) {}
@@ -19,33 +20,24 @@ class CatalogController extends Controller
     public function __invoke(Request $request): Response
     {
         $filters = $this->catalogQueryService->filtersFromRequest($request);
-        $booksQuery = $this->catalogQueryService->booksQuery($filters);
-
-        $searchResultsCount = (clone $booksQuery)->count();
+        $page = max($request->integer('page', 1), 1);
 
         return Inertia::render('books/index', [
             'filters' => $filters,
             'stats' => array_merge(
                 $this->catalogService->getStats(),
-                ['searchResultsCount' => $searchResultsCount]
+                ['searchResultsCount' => $this->catalogPageCache->searchResultsCount($filters)]
             ),
             'activeFilterLabels' => $this->catalogQueryService->activeFilterLabels($filters),
-            'years' => Inertia::defer(fn () => $this->catalogQueryService->years(), 'catalog-filters'),
+            'years' => Inertia::defer(fn () => $this->catalogPageCache->years(), 'catalog-filters'),
             'categories' => Inertia::defer(
-                fn () => $this->catalogService->getCategoriesWithCounts()->all(),
+                fn () => $this->catalogPageCache->categories(),
                 'catalog-filters',
             ),
-            'authors' => Inertia::defer(fn () => $this->catalogQueryService->authors(), 'catalog-filters'),
-            'publishers' => Inertia::defer(fn () => $this->catalogQueryService->publishers(), 'catalog-filters'),
-            'books' => Inertia::defer(function () use ($booksQuery) {
-                $books = (clone $booksQuery)
-                    ->paginate(12)
-                    ->withQueryString();
-
-                $paginated = $books->toArray();
-                $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
-
-                return $paginated;
+            'authors' => Inertia::defer(fn () => $this->catalogPageCache->authors(), 'catalog-filters'),
+            'publishers' => Inertia::defer(fn () => $this->catalogPageCache->publishers(), 'catalog-filters'),
+            'books' => Inertia::defer(function () use ($filters, $page) {
+                return $this->catalogPageCache->booksIndex($filters, $page, 12);
             }, 'books')->merge()->append('data'),
         ]);
     }

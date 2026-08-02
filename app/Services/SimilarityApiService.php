@@ -8,6 +8,8 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 class SimilarityApiService
 {
@@ -16,7 +18,7 @@ class SimilarityApiService
      */
     private const RETRY_DELAYS_MS = [200, 500, 1000];
 
-    private const BULK_JOB_MAX_POLLS = 120;
+    private const BULK_JOB_MAX_POLLS = 600;
 
     private const BULK_JOB_POLL_DELAY_US = 500000;
 
@@ -153,7 +155,7 @@ class SimilarityApiService
         ]);
     }
 
-    private function waitForBulkJob(string $jobId): bool
+    private function waitForBulkJob(string $jobId): void
     {
         for ($poll = 0; $poll < self::BULK_JOB_MAX_POLLS; $poll++) {
             $response = $this->client()->get("/api/v1/sync/jobs/{$jobId}");
@@ -161,14 +163,18 @@ class SimilarityApiService
             if (! $response->successful()) {
                 $this->logFailedResponse('bulk-upsert status', $response);
 
-                return false;
+                throw new RuntimeException(sprintf(
+                    'Gagal memeriksa status bulk job Similarity API (HTTP %d): %s',
+                    $response->status(),
+                    Str::limit($response->body(), 500, ''),
+                ));
             }
 
             $payload = $response->json();
             $status = $payload['status'] ?? null;
 
             if ($status === 'completed') {
-                return true;
+                return;
             }
 
             if ($status === 'failed') {
@@ -177,7 +183,11 @@ class SimilarityApiService
                     'payload' => $payload,
                 ]);
 
-                return false;
+                throw new RuntimeException(sprintf(
+                    'Bulk job Similarity API gagal (job %s): %s',
+                    $jobId,
+                    Str::limit((string) json_encode($payload, JSON_UNESCAPED_UNICODE), 500, ''),
+                ));
             }
 
             usleep(self::BULK_JOB_POLL_DELAY_US);
@@ -187,7 +197,10 @@ class SimilarityApiService
             'job_id' => $jobId,
         ]);
 
-        return false;
+        throw new RuntimeException(sprintf(
+            'Bulk job Similarity API melebihi batas waktu (%d detik). Perbesar jendela polling atau periksa server Similarity API.',
+            (int) ceil((self::BULK_JOB_MAX_POLLS * self::BULK_JOB_POLL_DELAY_US) / 1_000_000),
+        ));
     }
 
     /**
@@ -276,6 +289,8 @@ class SimilarityApiService
      * Kirim banyak skripsi sekaligus.
      *
      * @param  array  $items  Array of associative arrays (same structure as upsert)
+     *
+     * @throws RuntimeException
      */
     public function bulkUpsert(array $items, bool $resetIndex = false): bool
     {
@@ -300,10 +315,12 @@ class SimilarityApiService
                         'body' => $response->json(),
                     ]);
 
-                    return false;
+                    throw new RuntimeException('Respon bulk-upsert tidak mengembalikan job_id: '.Str::limit($response->body(), 500, ''));
                 }
 
-                return $this->waitForBulkJob($jobId);
+                $this->waitForBulkJob($jobId);
+
+                return true;
             }
 
             if ($response->successful()) {
@@ -311,11 +328,19 @@ class SimilarityApiService
             }
 
             $this->logFailedResponse('bulk-upsert', $response);
-        } catch (\Exception $e) {
-            Log::error('Similarity API: bulk-upsert gagal', ['error' => $e->getMessage()]);
-        }
 
-        return false;
+            throw new RuntimeException(sprintf(
+                'Similarity API menolak bulk-upsert (HTTP %d): %s',
+                $response->status(),
+                Str::limit($response->body(), 500, ''),
+            ));
+        } catch (ConnectionException $exception) {
+            throw new RuntimeException('Koneksi ke Similarity API gagal: '.$exception->getMessage(), previous: $exception);
+        } catch (RuntimeException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            throw new RuntimeException('Bulk-upsert ke Similarity API gagal: '.$exception->getMessage(), previous: $exception);
+        }
     }
 
     /**

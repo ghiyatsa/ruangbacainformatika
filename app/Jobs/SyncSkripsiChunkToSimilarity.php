@@ -10,18 +10,26 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Foundation\Queue\Queueable;
-use RuntimeException;
+use Throwable;
 
 class SyncSkripsiChunkToSimilarity implements ShouldQueue, ShouldQueueAfterCommit
 {
     use Batchable;
     use Queueable;
 
-    public int $tries = 2;
+    public int $tries = 3;
 
-    public int $timeout = 90;
+    public int $timeout = 300;
 
     public bool $failOnTimeout = true;
+
+    /**
+     * @return list<int>
+     */
+    public function backoff(): array
+    {
+        return [30, 120];
+    }
 
     /**
      * @param  array<int, int>  $skripsiIds
@@ -71,23 +79,25 @@ class SyncSkripsiChunkToSimilarity implements ShouldQueue, ShouldQueueAfterCommi
             'nama_mahasiswa' => $record->author_name,
         ])->values()->all();
 
-        if ($api->bulkUpsert($items, $this->resetIndex)) {
+        try {
+            $api->bulkUpsert($items, $this->resetIndex);
+        } catch (Throwable $exception) {
+            $message = $exception->getMessage() ?: 'Bulk sinkronisasi ke Similarity API gagal.';
+
             foreach ($records as $record) {
-                $statusService->markSynced($record->id, SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);
+                $statusService->markFailed(
+                    $record->id,
+                    $message,
+                    SimilaritySyncStatus::OPERATION_UPSERT,
+                    $this->modelClass,
+                );
             }
 
-            return;
+            throw $exception;
         }
 
         foreach ($records as $record) {
-            $statusService->markFailed(
-                $record->id,
-                'Bulk sinkronisasi ke Similarity API gagal.',
-                SimilaritySyncStatus::OPERATION_UPSERT,
-                $this->modelClass,
-            );
+            $statusService->markSynced($record->id, SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);
         }
-
-        throw new RuntimeException('Bulk sinkronisasi ke Similarity API gagal.');
     }
 }

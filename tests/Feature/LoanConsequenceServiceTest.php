@@ -65,8 +65,15 @@ it('returns a restricted access summary for members with overdue active loans', 
         ->and($summary['detail'])->toContain('terlambat 2 hari');
 });
 
-it('returns a normal access summary for members without active restrictions', function () {
-    $member = User::factory()->create();
+it('returns a normal access summary for eligible members without active restrictions', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+        'is_approved' => true,
+    ]);
+    $member->assignRole('member');
 
     $summary = app(LoanConsequenceService::class)->borrowingAccessSummary($member);
 
@@ -75,4 +82,32 @@ it('returns a normal access summary for members without active restrictions', fu
         'color' => 'success',
         'detail' => 'Anggota dapat melakukan peminjaman baru.',
     ]);
+});
+
+it('reports members that have not met all borrowing requirements as ineligible', function () {
+    $member = User::factory()->create([
+        'is_approved' => false,
+        'whatsapp_verified_at' => null,
+    ]);
+
+    $summary = app(LoanConsequenceService::class)->borrowingAccessSummary($member);
+
+    expect($summary['label'])->toBe('Belum Memenuhi Syarat')
+        ->and($summary['color'])->toBe('warning')
+        ->and($summary['detail'])->toContain('belum lolos review awal');
+});
+
+it('reports members without verified whatsapp as ineligible', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    $member = User::factory()->create([
+        'is_approved' => true,
+        'whatsapp_verified_at' => null,
+    ]);
+    $member->assignRole('member');
+
+    $summary = app(LoanConsequenceService::class)->borrowingAccessSummary($member);
+
+    expect($summary['label'])->toBe('Belum Memenuhi Syarat')
+        ->and($summary['detail'])->toContain('WhatsApp belum diverifikasi');
 });

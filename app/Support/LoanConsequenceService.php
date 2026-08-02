@@ -82,11 +82,48 @@ class LoanConsequenceService
             ];
         }
 
+        if (! $user->canBorrowBooks() || ! $user->hasRequiredProfileDetails()) {
+            return [
+                'label' => 'Belum Memenuhi Syarat',
+                'color' => 'warning',
+                'detail' => $this->resolveEligibilityDetailMessage($user),
+            ];
+        }
+
         return [
             'label' => 'Normal',
             'color' => 'success',
             'detail' => 'Anggota dapat melakukan peminjaman baru.',
         ];
+    }
+
+    protected function resolveEligibilityDetailMessage(User $user): string
+    {
+        $reasons = [];
+
+        if (! $user->canReceiveMemberRole()) {
+            $reasons[] = $user->is_approved
+                ? 'email tidak memenuhi syarat'
+                : 'akun belum lolos review awal';
+        }
+
+        if (! $user->hasRole('member')) {
+            $reasons[] = 'belum memiliki peran anggota';
+        }
+
+        if (! $user->hasVerifiedWhatsApp()) {
+            $reasons[] = 'WhatsApp belum diverifikasi';
+        }
+
+        if (! filled($user->whatsapp)) {
+            $reasons[] = 'nomor WhatsApp belum diisi';
+        }
+
+        if (! filled($user->address)) {
+            $reasons[] = 'alamat belum diisi';
+        }
+
+        return 'Akun belum memenuhi seluruh syarat peminjaman: '.implode(', ', $reasons).'.';
     }
 
     protected function resolveBorrowingRestrictionMessage(User $user): ?string

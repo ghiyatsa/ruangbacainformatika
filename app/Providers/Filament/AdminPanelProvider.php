@@ -3,19 +3,12 @@
 namespace App\Providers\Filament;
 
 use AchyutN\FilamentLogViewer\FilamentLogViewer;
-use App\Filament\Widgets\ContactMessagesTableWidget;
-use App\Filament\Widgets\LoanActivityChartWidget;
-use App\Filament\Widgets\MetadataCompletenessWidget;
-use App\Filament\Widgets\OperationsOverviewWidget;
-use App\Filament\Widgets\OverdueLoanTableWidget;
-use App\Filament\Widgets\PendingMemberApprovalsWidget;
-use App\Filament\Widgets\SimilaritySyncOverviewWidget;
-use App\Filament\Widgets\TodayVisitorsWidget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -56,15 +49,14 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                OperationsOverviewWidget::class,
-                PendingMemberApprovalsWidget::class,
-                MetadataCompletenessWidget::class,
-                SimilaritySyncOverviewWidget::class,
-                LoanActivityChartWidget::class,
-                TodayVisitorsWidget::class,
-                ContactMessagesTableWidget::class,
-                OverdueLoanTableWidget::class,
+            ->navigationGroups([
+                NavigationGroup::make('Manajemen Buku'),
+                NavigationGroup::make('Manajemen Tugas Akhir'),
+                NavigationGroup::make('Konten & Blog'),
+                NavigationGroup::make('Layanan Anggota'),
+                NavigationGroup::make('Komunikasi'),
+                NavigationGroup::make('Manajemen Pengguna'),
+                NavigationGroup::make('Sistem'),
             ])
             ->middleware([
                 EncryptCookies::class,

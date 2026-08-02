@@ -41,6 +41,8 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static ?string $navigationLabel = 'Peran';
+
     protected static ?int $navigationSort = 2;
 
     #[Override]

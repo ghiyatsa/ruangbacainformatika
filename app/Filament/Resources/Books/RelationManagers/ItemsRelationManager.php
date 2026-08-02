@@ -213,7 +213,7 @@ class ItemsRelationManager extends RelationManager
                 DeleteAction::make()
                     ->label('Hapus')
                     ->modalHeading('Hapus Eksemplar')
-                    ->modalDescription('Eksemplar ini akan dihapus dari daftar.')
+                    ->modalDescription('Eksemplar ini akan dihapus dari daftar')
                     ->modalSubmitActionLabel('Hapus')
                     ->hidden(fn ($livewire) => $livewire->isReadOnly())
                     ->before(function (DeleteAction $action, Model $record): void {
@@ -235,7 +235,7 @@ class ItemsRelationManager extends RelationManager
                     DeleteBulkAction::make()
                         ->label('Hapus Terpilih')
                         ->modalHeading('Hapus Eksemplar Terpilih')
-                        ->modalDescription('Eksemplar terpilih akan dihapus dari daftar.')
+                        ->modalDescription('Eksemplar terpilih akan dihapus dari daftar')
                         ->modalSubmitActionLabel('Hapus')
                         ->before(function (DeleteBulkAction $action, Collection $records): void {
                             $blockedRecord = $records->first(fn (Model $record): bool => method_exists($record, 'deletionBlockedReason') && filled($record->deletionBlockedReason()));
@@ -256,7 +256,7 @@ class ItemsRelationManager extends RelationManager
                         ->label('Ubah Lokasi Rak')
                         ->icon(Heroicon::OutlinedRectangleGroup)
                         ->modalHeading('Ubah Lokasi Rak')
-                        ->modalDescription('Lokasi baru akan diterapkan ke eksemplar terpilih.')
+                        ->modalDescription('Lokasi baru akan diterapkan ke eksemplar terpilih')
                         ->modalSubmitActionLabel('Simpan')
                         ->schema([
                             TextInput::make('shelf_location')

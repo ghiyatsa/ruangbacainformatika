@@ -7,6 +7,7 @@ use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
 use App\Services\SimilaritySyncStatusService;
 use Illuminate\Console\Command;
+use Throwable;
 
 class SyncSkripsiCommand extends Command
 {
@@ -76,22 +77,7 @@ class SyncSkripsiCommand extends Command
 
             $shouldResetThisBatch = $reset && $success === 0 && $failed === 0;
 
-            if ($this->api->bulkUpsert($items, $shouldResetThisBatch)) {
-                foreach ($skripsis as $skripsi) {
-                    $this->statusService->markSynced($skripsi);
-                }
-
-                $success += count($items);
-            } else {
-                foreach ($skripsis as $skripsi) {
-                    $this->statusService->markFailed(
-                        $skripsi,
-                        'Bulk sinkronisasi ke Similarity API gagal.',
-                    );
-                }
-
-                $failed += count($items);
-            }
+            $this->syncBatch($skripsis, $items, $shouldResetThisBatch, $success, $failed);
 
             $bar->advance(count($items));
         });
@@ -122,22 +108,7 @@ class SyncSkripsiCommand extends Command
                 'nama_mahasiswa' => $i->author_name,
             ])->values()->toArray();
 
-            if ($this->api->bulkUpsert($items, false)) {
-                foreach ($internships as $internship) {
-                    $this->statusService->markSynced($internship);
-                }
-
-                $success += count($items);
-            } else {
-                foreach ($internships as $internship) {
-                    $this->statusService->markFailed(
-                        $internship,
-                        'Bulk sinkronisasi ke Similarity API gagal.',
-                    );
-                }
-
-                $failed += count($items);
-            }
+            $this->syncBatch($internships, $items, false, $success, $failed);
 
             $bar->advance(count($items));
         });
@@ -148,5 +119,32 @@ class SyncSkripsiCommand extends Command
         $this->info("Berhasil: {$success} | Gagal: {$failed}");
 
         return $failed === 0 ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * @param  iterable<Skripsi|InternshipReport>  $records
+     * @param  array<int, array<string, mixed>>  $items
+     */
+    protected function syncBatch(iterable $records, array $items, bool $resetIndex, int &$success, int &$failed): void
+    {
+        try {
+            $this->api->bulkUpsert($items, $resetIndex);
+        } catch (Throwable $exception) {
+            $message = $exception->getMessage() ?: 'Bulk sinkronisasi ke Similarity API gagal.';
+
+            foreach ($records as $record) {
+                $this->statusService->markFailed($record, $message);
+            }
+
+            $failed += count($items);
+
+            return;
+        }
+
+        foreach ($records as $record) {
+            $this->statusService->markSynced($record);
+        }
+
+        $success += count($items);
     }
 }

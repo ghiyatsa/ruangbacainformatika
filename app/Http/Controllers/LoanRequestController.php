@@ -22,20 +22,20 @@ class LoanRequestController extends Controller
 
     public function show(Request $request): Response|RedirectResponse
     {
-        if (! $request->user()->canBorrowBooks()) {
-            if ($request->user()->usesCampusEmail() && ! $request->user()->hasVerifiedWhatsApp()) {
-                Inertia::flash('toast', [
-                    'type' => 'warning',
-                    'message' => 'Silakan verifikasi nomor WhatsApp Anda untuk mulai meminjam buku.',
-                ]);
+        $user = $request->user();
 
-                return redirect()->route('register.whatsapp');
-            }
+        if (! $user->canStartLoanRequest()) {
+            $reason = $user->borrowingBlockReason(true);
+            $message = $reason['message'] ?? 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.';
 
             Inertia::flash('toast', [
-                'type' => 'info',
-                'message' => 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.',
+                'type' => $user->requiresWhatsAppVerification() ? 'warning' : 'info',
+                'message' => $message,
             ]);
+
+            if ($reason !== null && filled($reason['actionUrl'])) {
+                return redirect()->to($reason['actionUrl']);
+            }
 
             return redirect()->route('home');
         }

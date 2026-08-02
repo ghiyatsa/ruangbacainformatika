@@ -41,7 +41,7 @@ class PostForm
                             ->schema([]),
 
                         Section::make('Artikel Telah Diterbitkan')
-                            ->description('Artikel ini sudah aktif dan dapat dibaca oleh publik. Penting: Jika Anda menyimpan perubahan pada artikel ini, statusnya akan ditarik kembali menjadi "Dalam Peninjauan" (unpublish) untuk ditinjau ulang oleh Admin/Staff.')
+                            ->description('Artikel ini sudah aktif dan dapat dibaca oleh publik. Penting: Jika Anda menyimpan perubahan pada artikel ini, statusnya akan ditarik kembali menjadi "Dalam Peninjauan" (tidak diterbitkan) untuk ditinjau ulang oleh petugas.')
                             ->icon(Heroicon::OutlinedCheckCircle)
                             ->iconColor('success')
                             ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_APPROVED)
@@ -49,7 +49,7 @@ class PostForm
                             ->schema([]),
 
                         Section::make('Artikel Sedang Ditinjau')
-                            ->description('Artikel ini sedang dalam antrean peninjauan oleh Admin/Staff dan belum diterbitkan. Anda masih dapat mengubah isi artikel ini sebelum disetujui, namun artikel akan tetap berada dalam status peninjauan.')
+                            ->description('Artikel ini sedang dalam antrean peninjauan oleh petugas dan belum diterbitkan. Anda masih dapat mengubah isi artikel ini sebelum disetujui, namun artikel akan tetap berada dalam status peninjauan.')
                             ->icon(Heroicon::OutlinedClock)
                             ->iconColor('warning')
                             ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_PENDING)

@@ -28,7 +28,7 @@ class CategoryForm
         return $schema
             ->components([
                 Section::make('Informasi Dasar')
-                    ->description('Data utama kategori.')
+                    ->description('Data utama kategori')
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
@@ -45,7 +45,7 @@ class CategoryForm
                     ->columns(2),
 
                 Section::make('Deskripsi')
-                    ->description('Keterangan singkat kategori.')
+                    ->description('Keterangan singkat kategori')
                     ->schema([
                         static::descriptionField(),
                     ]),

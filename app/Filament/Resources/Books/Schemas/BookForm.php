@@ -55,7 +55,7 @@ class BookForm
     protected static function getIdentitasBukuSection(): Section
     {
         return Section::make('Identitas Buku')
-            ->description('Isi informasi utama dan identitas resmi buku.')
+            ->description('Isi informasi utama dan identitas resmi buku')
             ->schema([
                 TextInput::make('title')
                     ->label('Judul Buku')
@@ -65,7 +65,6 @@ class BookForm
                     ->live(onBlur: true)
                     ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Book::generateSlugPreview($state)))
                     ->placeholder('Judul buku'),
-
                 TextInput::make('slug')
                     ->label('Slug')
                     ->disabled()
@@ -89,6 +88,7 @@ class BookForm
                 TextInput::make('isbn')
                     ->label('ISBN')
                     ->unique('books', 'isbn', ignoreRecord: true)
+                    ->nullable()
                     ->minLength(8)
                     ->maxLength(13)
                     ->placeholder('9786020000001')
@@ -103,8 +103,7 @@ class BookForm
                             $set('issn', null);
                         }
                     })
-                    ->disabled(fn (Get $get): bool => ! blank($get('issn')))
-                    ->rule('regex:/^(?:[0-9]{8}|[0-9]{10}|[0-9]{13}|[0-9]{9}X)$/i')
+                    ->dehydrateStateUsing(fn (mixed $state): ?string => blank($state) ? null : (string) $state)
                     ->rules([
                         fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
                             if (blank($value)) {
@@ -115,13 +114,11 @@ class BookForm
                                 $fail('ISBN harus berupa 8 digit, ISBN-10, atau ISBN-13 tanpa spasi.');
                             }
                         },
-                    ])
-                    ->validationMessages([
-                        'regex' => 'ISBN harus 8, 10, atau 13 karakter tanpa spasi. Gunakan X hanya di akhir ISBN-10.',
                     ]),
 
                 TextInput::make('issn')
                     ->label('ISSN')
+                    ->nullable()
                     ->maxLength(20)
                     ->placeholder('1234-5678')
                     ->helperText('Gunakan untuk jurnal atau serial. Saat diisi, jalur ISBN disembunyikan.')
@@ -135,9 +132,17 @@ class BookForm
                             $set('isbn', null);
                         }
                     })
-                    ->disabled(fn (Get $get): bool => ! blank($get('isbn')))
-                    ->rule('regex:/^[0-9]{4}[-\s]?[0-9]{3}[0-9Xx]$/')
+                    ->dehydrateStateUsing(fn (mixed $state): ?string => blank($state) ? null : (string) $state)
                     ->rules([
+                        fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
+                            if (blank($value)) {
+                                return;
+                            }
+
+                            if (! preg_match('/^[0-9]{4}[-\s]?[0-9]{3}[0-9Xx]$/', (string) $value)) {
+                                $fail('ISSN harus terdiri dari 8 karakter (contoh: 1234-5678 atau 1234-567X).');
+                            }
+                        },
                         fn (Get $get, ?Book $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $record): void {
                             if (blank($value)) {
                                 return;
@@ -159,9 +164,6 @@ class BookForm
                                 $fail('ISSN ini sudah dipakai untuk edisi dan halaman yang sama.');
                             }
                         },
-                    ])
-                    ->validationMessages([
-                        'regex' => 'ISSN harus terdiri dari 8 karakter (contoh: 1234-5678 atau 1234-567X).',
                     ]),
 
                 TextInput::make('ddc_code')
@@ -180,7 +182,7 @@ class BookForm
     protected static function getDetailPublikasiSection(): Section
     {
         return Section::make('Detail Publikasi')
-            ->description('Lengkapi detail penerbitan untuk mempermudah pencarian katalog.')
+            ->description('Lengkapi detail penerbitan untuk mempermudah pencarian katalog')
             ->schema([
                 Select::make('publisher_id')
                     ->label('Penerbit')
@@ -189,12 +191,12 @@ class BookForm
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->helperText('Pilih penerbit atau tambahkan data baru.')
+                    ->helperText('Pilih penerbit atau tambahkan data baru')
                     ->createOptionForm(PublisherForm::optionFormSchema())
                     ->createOptionUsing(fn (array $data): int => static::createPublisher($data))
                     ->createOptionModalHeading('Tambah Penerbit')
                     ->createOptionAction(fn (Action $action): Action => $action
-                        ->modalDescription('Tambahkan data penerbit baru.')
+                        ->modalDescription('Tambahkan data penerbit baru')
                         ->modalSubmitActionLabel('Simpan'))
                     ->editOptionForm(PublisherForm::optionFormSchema())
                     ->updateOptionUsing(function (array $data, Schema $schema): void {
@@ -202,7 +204,7 @@ class BookForm
                     })
                     ->editOptionModalHeading('Ubah Penerbit')
                     ->editOptionAction(fn (Action $action): Action => $action
-                        ->modalDescription('Perbarui data penerbit.')
+                        ->modalDescription('Perbarui data penerbit')
                         ->modalSubmitActionLabel('Simpan')),
 
                 TextInput::make('edition')
@@ -218,14 +220,14 @@ class BookForm
                     ->minValue(1000)
                     ->maxValue(now()->year)
                     ->placeholder((string) now()->year)
-                    ->helperText('Gunakan 4 digit tahun.'),
+                    ->helperText('Gunakan 4 digit tahun'),
 
                 TextInput::make('pages')
                     ->label('Jumlah Halaman')
                     ->visible(fn (Get $get): bool => filled($get('issn')))
                     ->maxLength(255)
                     ->placeholder('250 atau 120-145')
-                    ->helperText('Isi jumlah atau rentang halaman utama.'),
+                    ->helperText('Isi jumlah atau rentang halaman utama'),
 
                 Select::make('authors')
                     ->label('Penulis')
@@ -234,12 +236,12 @@ class BookForm
                     ->multiple()
                     ->searchable()
                     ->preload()
-                    ->helperText('Pilih penulis atau tambahkan data baru.')
+                    ->helperText('Pilih penulis atau tambahkan data baru')
                     ->createOptionForm(AuthorForm::optionFormSchema())
                     ->createOptionUsing(fn (array $data): int => static::createAuthor($data))
                     ->createOptionModalHeading('Tambah Penulis')
                     ->createOptionAction(fn (Action $action): Action => $action
-                        ->modalDescription('Tambahkan data penulis baru.')
+                        ->modalDescription('Tambahkan data penulis baru')
                         ->modalSubmitActionLabel('Simpan')),
 
                 Select::make('categories')
@@ -249,12 +251,12 @@ class BookForm
                     ->multiple()
                     ->searchable()
                     ->preload()
-                    ->helperText('Pilih kategori atau tambahkan data baru.')
+                    ->helperText('Pilih kategori atau tambahkan data baru')
                     ->createOptionForm(CategoryForm::optionFormSchema())
                     ->createOptionUsing(fn (array $data): int => static::createCategory($data))
                     ->createOptionModalHeading('Tambah Kategori')
                     ->createOptionAction(fn (Action $action): Action => $action
-                        ->modalDescription('Tambahkan kategori baru.')
+                        ->modalDescription('Tambahkan kategori baru')
                         ->modalSubmitActionLabel('Simpan')),
             ])
             ->columns(2);
@@ -263,11 +265,11 @@ class BookForm
     protected static function getCoverBukuSection(): Section
     {
         return Section::make('Cover Buku')
-            ->description('Unggah cover buku.')
+            ->description('Unggah cover buku')
             ->schema([
                 FileUpload::make('cover_image')
                     ->hiddenLabel()
-                    ->placeholder('Tarik & lepas berkas di sini atau Pilih Berkas')
+                    ->placeholder('Tarik & lepas berkas di sini atau pilih berkas')
                     ->image()
                     ->directory('books/covers')
                     ->disk('public')
@@ -282,7 +284,7 @@ class BookForm
                     })
                     ->imageEditor()
                     ->maxSize(2048)
-                    ->helperText('JPG, PNG, atau WEBP. Maksimal 2 MB.')
+                    ->helperText('Format JPG, PNG, atau WEBP, maksimal 2 MB')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->extraAlpineAttributes([
                         'x-on:paste.window' => <<<'JS'
@@ -308,7 +310,7 @@ class BookForm
     protected static function getStatusVisibilitasSection(): Section
     {
         return Section::make('Status & Visibilitas')
-            ->description('Atur visibilitas dan penggunaan buku.')
+            ->description('Atur visibilitas dan penggunaan buku')
             ->schema([
                 Toggle::make('is_published')
                     ->label('Dipublikasikan')

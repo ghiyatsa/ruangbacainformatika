@@ -56,7 +56,7 @@ class StaticPageForm
                                     ->default(true)
                                     ->onColor('success')
                                     ->offColor('gray')
-                                    ->helperText('Jika dimatikan, halaman kustom tidak tampil di publik.'),
+                                    ->helperText('Jika dimatikan, halaman kustom tidak tampil di publik'),
                                 Placeholder::make('public_url')
                                     ->label('URL Publik')
                                     ->content(fn (?StaticPage $record): string => $record?->publicUrl() ?? 'URL tersedia setelah halaman disimpan.'),

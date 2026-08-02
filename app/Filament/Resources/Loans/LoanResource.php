@@ -21,7 +21,7 @@ class LoanResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Operasional';
+    protected static string|UnitEnum|null $navigationGroup = 'Layanan Anggota';
 
     protected static ?string $navigationLabel = 'Peminjaman';
 

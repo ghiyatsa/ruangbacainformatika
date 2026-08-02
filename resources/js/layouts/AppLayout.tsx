@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { BackgroundPattern } from '@/components/layout/BackgroundPattern';
+import { BorrowAccessBanner } from '@/components/layout/BorrowAccessBanner';
 import Footer from '@/components/layout/footer';
 import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { AppHeader } from '@/components/layout/header';
@@ -75,6 +76,7 @@ export default function AppLayout({
             >
                 <DeferredGlobalContentNotice variant="topbar" />
                 <AppHeader hideSearch={hideSearch} />
+                <BorrowAccessBanner />
             </div>
             <main className="flex h-full w-full flex-1 flex-col">
                 {children}

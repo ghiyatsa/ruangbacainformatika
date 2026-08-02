@@ -80,7 +80,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                 ->icon(Heroicon::OutlinedChartBar)
                 ->badge(fn (): ?int => $this->overdueLoansCount())
                 ->badgeColor('danger'),
-            'messages' => Tab::make('Pesan')
+            'messages' => Tab::make('Komunikasi')
                 ->icon(Heroicon::OutlinedEnvelope)
                 ->badge(fn (): ?int => $this->newMessagesCount())
                 ->badgeColor('info'),

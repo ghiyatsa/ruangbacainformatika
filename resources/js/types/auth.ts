@@ -11,6 +11,17 @@ export type User = {
     [key: string]: unknown;
 };
 
+export type BorrowingAccessReason = {
+    title: string;
+    message: string;
+    actionUrl: string | null;
+};
+
+export type BorrowingAccess = {
+    canBorrow: boolean;
+    reason: BorrowingAccessReason | null;
+};
+
 export type Auth = {
     user: User | null;
     canAccessAdminPanel?: boolean;
@@ -18,7 +29,7 @@ export type Auth = {
     canViewNotifications?: boolean;
     hasVerifiedWhatsApp?: boolean;
     requiresWhatsAppVerification?: boolean;
-    borrowingAccessMessage?: string | null;
+    borrowingAccess?: BorrowingAccess;
     homeUrl?: string;
     isMember?: boolean;
 };

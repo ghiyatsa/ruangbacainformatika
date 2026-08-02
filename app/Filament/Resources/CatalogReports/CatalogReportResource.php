@@ -25,11 +25,11 @@ class CatalogReportResource extends Resource
 
     protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::Flag;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Operasional';
+    protected static string|UnitEnum|null $navigationGroup = 'Komunikasi';
 
     protected static ?string $navigationLabel = 'Umpan Balik';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $modelLabel = 'Umpan balik';
 

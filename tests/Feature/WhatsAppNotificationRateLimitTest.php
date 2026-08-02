@@ -49,14 +49,14 @@ it('does not add whatsapp rate limiting middleware for non whatsapp channels', f
     expect($middleware)->toBe([]);
 });
 
-it('marks whatsapp otp messages to bypass global pacing', function () {
+it('marks whatsapp otp messages for dedicated pacing instead of global pacing', function () {
     $user = User::factory()->make([
         'name' => 'OTP User',
     ]);
 
     $message = (new WhatsAppOtpNotification('123456'))->toWhatsApp($user);
 
-    expect($message->bypassPacing)->toBeTrue()
+    expect($message->bypassPacing)->toBeFalse()
         ->and($message->category)->toBe('otp')
         ->and($message->content)->toContain('123456');
 });
@@ -123,7 +123,7 @@ it('marks disconnected fonnte devices as failed and lets queued loan notificatio
     ]);
 });
 
-it('pauses routine whatsapp delivery after recent failures but keeps otp exempt', function () {
+it('pauses all whatsapp delivery after recent failures including otp', function () {
     config()->set('services.fonnte.url', 'https://api.fonnte.com/send');
     config()->set('services.fonnte.token', 'plain-token-value');
     config()->set('services.fonnte.failure_pause_threshold', 1);
@@ -147,10 +147,77 @@ it('pauses routine whatsapp delivery after recent failures but keeps otp exempt'
         new WhatsAppMessage('Pengingat rutin', category: 'loan_reminder'),
     ))->toThrow(RuntimeException::class, 'dijeda sementara');
 
-    $gateway->sendMessage(
+    expect(fn () => $gateway->sendMessage(
         '08123456789',
-        new WhatsAppMessage('Kode OTP: 123456', bypassPacing: true, category: 'otp'),
+        new WhatsAppMessage('Kode OTP: 123456', category: 'otp'),
+    ))->toThrow(RuntimeException::class, 'dijeda sementara');
+
+    Http::assertSentCount(0);
+});
+
+it('skips routine whatsapp delivery when the daily cap is reached', function () {
+    config()->set('services.fonnte.url', 'https://api.fonnte.com/send');
+    config()->set('services.fonnte.token', 'plain-token-value');
+    config()->set('services.fonnte.daily_limit', 1);
+
+    Http::fake();
+
+    $user = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+    ]);
+
+    WhatsAppMessageLog::query()->create([
+        'user_id' => $user->id,
+        'category' => 'loan_return',
+        'status' => WhatsAppMessageLog::StatusSent,
+        'phone_number_hash' => hash('sha256', '08123456789'),
+        'phone_number_masked' => '0812*****89',
+        'sent_at' => now(),
+    ]);
+
+    app(WhatsAppChannel::class)->send(
+        $user,
+        new LoanReturnNotification(['Buku Laravel'], now()->translatedFormat('d F Y H:i')),
+    );
+
+    Http::assertSentCount(0);
+
+    assertDatabaseHas('whats_app_message_logs', [
+        'user_id' => $user->id,
+        'category' => 'loan_return',
+        'status' => WhatsAppMessageLog::StatusSkipped,
+        'error_message' => 'Melebihi batas harian pengiriman WhatsApp untuk nomor ini.',
+    ]);
+});
+
+it('sends routine whatsapp delivery when below the daily cap', function () {
+    config()->set('services.fonnte.url', 'https://api.fonnte.com/send');
+    config()->set('services.fonnte.token', 'plain-token-value');
+    config()->set('services.fonnte.daily_limit', 10);
+
+    Http::fake([
+        'https://api.fonnte.com/send' => Http::response([
+            'status' => true,
+            'id' => 'wa-1',
+        ], 200),
+    ]);
+
+    $user = User::factory()->create([
+        'whatsapp' => '08123456789',
+        'whatsapp_verified_at' => now(),
+    ]);
+
+    app(WhatsAppChannel::class)->send(
+        $user,
+        new LoanReturnNotification(['Buku Laravel'], now()->translatedFormat('d F Y H:i')),
     );
 
     Http::assertSentCount(1);
+
+    assertDatabaseHas('whats_app_message_logs', [
+        'user_id' => $user->id,
+        'category' => 'loan_return',
+        'status' => WhatsAppMessageLog::StatusSent,
+    ]);
 });

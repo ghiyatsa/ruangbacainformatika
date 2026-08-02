@@ -19,11 +19,11 @@ class StaticPageResource extends Resource
 {
     protected static ?string $model = StaticPage::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Konten Situs';
+    protected static string|UnitEnum|null $navigationGroup = 'Konten & Blog';
 
     protected static ?string $navigationLabel = 'Halaman Statis';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $modelLabel = 'Halaman statis';
 

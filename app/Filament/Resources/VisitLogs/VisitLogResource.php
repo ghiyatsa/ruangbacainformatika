@@ -20,7 +20,7 @@ class VisitLogResource extends Resource
 {
     protected static ?string $model = VisitLog::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Operasional';
+    protected static string|UnitEnum|null $navigationGroup = 'Layanan Anggota';
 
     protected static ?string $navigationLabel = 'Kunjungan';
 

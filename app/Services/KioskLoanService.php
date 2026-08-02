@@ -37,7 +37,7 @@ class KioskLoanService
 
         if (! $member || ! $member->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'member_identifier' => 'Anggota tidak ditemukan atau tidak memiliki akses peminjaman.',
+                'member_identifier' => $this->memberBlockedMessage($member),
             ]);
         }
 
@@ -132,7 +132,7 @@ class KioskLoanService
 
         if (! $member || ! $member->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'member_identifier' => 'Member tidak ditemukan atau tidak memiliki akses peminjaman.',
+                'member_identifier' => $this->memberBlockedMessage($member),
             ]);
         }
 
@@ -183,7 +183,7 @@ class KioskLoanService
 
         if (! $member || ! $member->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'member_identifier' => 'Member tidak ditemukan atau tidak memiliki akses peminjaman.',
+                'member_identifier' => $this->memberBlockedMessage($member),
             ]);
         }
 
@@ -234,7 +234,7 @@ class KioskLoanService
 
         if (! $member || ! $member->canBorrowBooks()) {
             throw ValidationException::withMessages([
-                'member_identifier' => 'Member tidak ditemukan atau tidak memiliki akses peminjaman.',
+                'member_identifier' => $this->memberBlockedMessage($member),
             ]);
         }
 
@@ -317,6 +317,17 @@ class KioskLoanService
     public function borrowingRestrictionMessage(User $user): ?string
     {
         return $this->loanConsequenceService->borrowingRestrictionMessage($user);
+    }
+
+    protected function memberBlockedMessage(?User $member): string
+    {
+        if ($member === null) {
+            return 'Anggota tidak ditemukan.';
+        }
+
+        $reason = $member->borrowingBlockReason();
+
+        return 'Member tidak memiliki akses peminjaman: '.($reason['message'] ?? 'syarat anggota belum lengkap.');
     }
 
     protected function activeLoanCount(User $user): int

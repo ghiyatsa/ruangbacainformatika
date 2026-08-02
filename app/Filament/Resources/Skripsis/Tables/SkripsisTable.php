@@ -59,7 +59,7 @@ class SkripsisTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('similarity_sync_status')
-                    ->label('Status Similarity')
+                    ->label('Status Kemiripan')
                     ->state(fn (Skripsi $record): string => $record->similaritySyncStatusLabel())
                     ->badge()
                     ->color(fn (Skripsi $record): string => $record->similaritySyncStatusColor()),
@@ -104,7 +104,7 @@ class SkripsisTable
                     ->label('Tahun')
                     ->options(fn (): array => static::yearOptions()),
                 SelectFilter::make('similarity_status')
-                    ->label('Status sync')
+                    ->label('Status Sinkronisasi')
                     ->options(SimilaritySyncStatus::statusOptions())
                     ->query(fn ($query, array $data) => $query->when(
                         filled($data['value'] ?? null),

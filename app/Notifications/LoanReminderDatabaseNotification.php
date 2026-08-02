@@ -37,6 +37,24 @@ class LoanReminderDatabaseNotification extends Notification
     {
         $this->loan->loadMissing('items.bookItem.book');
 
+        $stage = $this->loan->reminderStage();
+        $lateDays = $this->loan->lateDays();
+
+        [$title, $message] = match ($stage) {
+            Loan::REMINDER_STAGE_DUE_TODAY => [
+                'Batas pengembalian hari ini',
+                sprintf('Buku harus dikembalikan hari ini. Batas akhir %s.', AppTimezone::format($this->loan->due_at, 'd F Y')),
+            ],
+            Loan::REMINDER_STAGE_OVERDUE => [
+                "Pengembalian sudah telat {$lateDays} hari",
+                sprintf('Buku belum dikembalikan hingga %s. Segera kembalikan untuk menghindari konsekuensi.', AppTimezone::format($this->loan->due_at, 'd F Y')),
+            ],
+            default => [
+                'Batas pengembalian hampir tiba',
+                sprintf('Pinjaman Anda jatuh tempo pada %s. Pastikan buku dikembalikan tepat waktu.', AppTimezone::format($this->loan->due_at, 'd F Y')),
+            ],
+        };
+
         $bookTitles = $this->loan->items
             ->map(fn ($item): string => $item->bookItem->book->title ?? 'Buku Tanpa Judul')
             ->values()
@@ -44,11 +62,8 @@ class LoanReminderDatabaseNotification extends Notification
 
         return [
             'kind' => 'loan_reminder',
-            'title' => 'Batas pengembalian hampir tiba',
-            'message' => sprintf(
-                'Pinjaman Anda jatuh tempo pada %s. Pastikan buku dikembalikan tepat waktu.',
-                AppTimezone::format($this->loan->due_at, 'd F Y'),
-            ),
+            'title' => $title,
+            'message' => $message,
             'action_label' => 'Buka riwayat',
             'action_url' => route('loans.history', absolute: false),
             'icon' => 'bell-ring',

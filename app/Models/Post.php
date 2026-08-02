@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\FullTextSearchable;
 use App\Models\Concerns\GeneratesSlug;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 
 class Post extends Model
 {
+    use FullTextSearchable;
     use GeneratesSlug;
 
     /** @use HasFactory<PostFactory> */
@@ -153,7 +155,34 @@ class Post extends Model
         $terms = collect(explode(' ', $search))
             ->map(fn (string $term): string => trim($term))
             ->filter()
+            ->map(fn (string $term): string => $this->sanitizeLikeTerm($term))
+            ->filter()
             ->values();
+
+        if ($terms->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($this->supportsFullText($query->getConnection())) {
+            return $query->where(function (Builder $searchQuery) use ($search, $terms): void {
+                $searchQuery->whereRaw(
+                    'MATCH(title, summary, content) AGAINST (? IN BOOLEAN MODE)',
+                    [$this->toBooleanFullTextQuery($search)]
+                );
+
+                foreach ($terms as $term) {
+                    $searchQuery->orWhere(function (Builder $termQuery) use ($term): void {
+                        $termQuery
+                            ->where('title', 'like', "%{$term}%")
+                            ->orWhere('summary', 'like', "%{$term}%")
+                            ->orWhere('content', 'like', "%{$term}%")
+                            ->orWhereHas('user', fn (Builder $userQuery): Builder => $userQuery->where('name', 'like', "%{$term}%"))
+                            ->orWhereHas('categories', fn (Builder $categoryQuery): Builder => $categoryQuery->where('name', 'like', "%{$term}%"))
+                            ->orWhereHas('tags', fn (Builder $tagQuery): Builder => $tagQuery->where('name', 'like', "%{$term}%"));
+                    });
+                }
+            });
+        }
 
         return $query->where(function (Builder $searchQuery) use ($terms): void {
             foreach ($terms as $term) {

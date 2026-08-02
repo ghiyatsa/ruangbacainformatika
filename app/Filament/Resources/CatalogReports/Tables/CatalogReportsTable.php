@@ -21,6 +21,9 @@ class CatalogReportsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->searchPlaceholder('Cari judul, pelapor, atau email')
+            ->defaultPaginationPageOption(25)
+            ->paginated([10, 25, 50, 100])
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Masuk')
@@ -40,12 +43,13 @@ class CatalogReportsTable
                     ->label('URL')
                     ->url(fn (CatalogReport $record): ?string => $record->publicUrl(), shouldOpenInNewTab: true)
                     ->searchable()
-                    ->toggleable()
-                    ->limit(45),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->limit(45)
+                    ->placeholder('-'),
                 TextColumn::make('reporter_display_name')
                     ->label('Pelapor')
                     ->searchable(['reporter_name', 'reporter_email'])
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn (CatalogReport $record): string => $record->statusLabel())
@@ -55,7 +59,8 @@ class CatalogReportsTable
                 TextColumn::make('message')
                     ->label('Laporan')
                     ->limit(60)
-                    ->toggleable(),
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('catalog_type')
@@ -64,6 +69,9 @@ class CatalogReportsTable
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options(CatalogReport::statusOptions()),
+                Filter::make('pending_only')
+                    ->label('Hanya menunggu tindak lanjut')
+                    ->query(fn (Builder $query): Builder => $query->where('status', CatalogReport::STATUS_PENDING)),
                 Filter::make('created_at')
                     ->label('Tanggal Masuk')
                     ->form([
@@ -101,7 +109,7 @@ class CatalogReportsTable
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('Belum ada laporan katalog')
-            ->emptyStateDescription('Laporan katalog akan muncul di sini.');
+            ->emptyStateHeading('Belum ada umpan balik')
+            ->emptyStateDescription('Umpan balik katalog akan muncul di sini.');
     }
 }

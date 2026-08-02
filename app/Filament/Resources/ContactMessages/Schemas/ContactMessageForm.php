@@ -22,7 +22,7 @@ class ContactMessageForm
                             ->required()
                             ->native(false),
                         Textarea::make('admin_notes')
-                            ->label('Catatan admin')
+                            ->label('Catatan Petugas')
                             ->rows(6)
                             ->placeholder('Tambahkan ringkasan balasan atau tindak lanjut.')
                             ->columnSpanFull(),

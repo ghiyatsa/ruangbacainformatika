@@ -26,12 +26,12 @@ class BookImporter extends Importer
                 ->label('Judul')
                 ->requiredMapping()
                 ->rules(['required', 'max:255'])
-                ->helperText('Gunakan judul utama buku.')
+                ->helperText('Gunakan judul utama buku')
                 ->castStateUsing(fn ($state): string => static::normalizeRequiredString($state))
                 ->fillRecordUsing(fn ($record, $state) => $record->title = $state),
             ImportColumn::make('subtitle')
                 ->label('Subjudul')
-                ->helperText('Kosongkan jika tidak ada subjudul.')
+                ->helperText('Kosongkan jika tidak ada subjudul')
                 ->rules(['nullable', 'max:255'])
                 ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
             ImportColumn::make('isbn')
@@ -49,7 +49,7 @@ class BookImporter extends Importer
                         }
                     },
                 ])
-                ->helperText('Boleh dengan atau tanpa tanda hubung.')
+                ->helperText('Boleh dengan atau tanpa tanda hubung')
                 ->fillRecordUsing(function ($record, $state) {
                     $record->isbn = Isbn::normalize((string) $state);
                 }),
@@ -61,7 +61,7 @@ class BookImporter extends Importer
                     'max:20',
                     'regex:/^[0-9\-\s]+$/',
                 ])
-                ->helperText('Isi jika tersedia.')
+                ->helperText('Isi jika tersedia')
                 ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state)),
             ImportColumn::make('authors')
                 ->label('Penulis')
@@ -96,19 +96,19 @@ class BookImporter extends Importer
             ImportColumn::make('stock')
                 ->label('Stok')
                 ->numeric()
-                ->helperText('Jika lebih besar dari stok saat ini, eksemplar akan ditambahkan sesuai kebutuhan.')
+                ->helperText('Jika lebih besar dari stok saat ini, eksemplar akan ditambahkan sesuai kebutuhan')
                 ->rules(['nullable', 'integer', 'min:0'])
                 ->fillRecordUsing(function ($record, $state) {}),
             ImportColumn::make('rack')
                 ->label('Lokasi Rak')
-                ->helperText('Dipakai untuk mengisi lokasi rak eksemplar, misalnya R-01-A.')
+                ->helperText('Dipakai untuk mengisi lokasi rak eksemplar, misalnya R-01-A')
                 ->rules(['nullable', 'max:255'])
                 ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state))
                 ->fillRecordUsing(function ($record, $state) {}),
             ImportColumn::make('publisher')
                 ->label('Penerbit')
                 ->requiredMapping()
-                ->helperText('Nama penerbit baru akan ditambahkan otomatis jika belum tersedia.')
+                ->helperText('Nama penerbit baru akan ditambahkan otomatis jika belum tersedia')
                 ->castStateUsing(fn ($state): string => static::normalizeRequiredString($state))
                 ->fillRecordUsing(function ($record, $state) {
                     $publisher = Publisher::firstOrCreate(

@@ -123,7 +123,7 @@ class BookInfolist
                                     ]),
 
                                 Section::make('Kelengkapan Metadata')
-                                    ->description('Elemen metadata standar yang belum terisi pada rekaman ini.')
+                                    ->description('Elemen metadata standar yang belum terisi pada rekaman ini')
                                     ->schema([
                                         TextEntry::make('metadata_score')
                                             ->label('Skor Kelengkapan')

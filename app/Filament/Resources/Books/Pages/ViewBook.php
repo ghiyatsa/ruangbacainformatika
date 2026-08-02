@@ -19,7 +19,7 @@ class ViewBook extends ViewRecord
     {
         return [
             EditAction::make()
-                ->label('Edit'),
+                ->label('Ubah'),
         ];
     }
 }

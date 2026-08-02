@@ -1,4 +1,4 @@
-import { Deferred, usePage } from '@inertiajs/react';
+import { Deferred, Link, usePage } from '@inertiajs/react';
 import * as React from 'react';
 import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,11 +9,24 @@ import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import { CatalogPageLayout } from '@/features/books/components/CatalogPageLayout';
 import InternshipReportCard from '@/features/internship-report/components/InternshipReportCard';
+import blogRoute from '@/routes/blog';
+import booksRoute from '@/routes/books';
+import internshipReportsRoute from '@/routes/internship-reports';
+import skripsiRoute from '@/routes/skripsi';
+import thesisRoute from '@/routes/thesis';
 import type { AcademicWorkData } from '@/features/academic-works/types';
 import type { BlogPostItem } from '@/features/blog/types';
 import type { InternshipReportData } from '@/features/internship-report/types';
 import type { CatalogBook } from '@/features/welcome/types';
 import type { Auth, LoanRequestCart } from '@/types';
+
+interface SearchTotals {
+    books: number | null;
+    posts: number | null;
+    skripsis: number | null;
+    internshipReports: number | null;
+    theses: number | null;
+}
 
 interface SearchProps {
     query: string;
@@ -23,6 +36,7 @@ interface SearchProps {
         skripsis: AcademicWorkData[];
         internshipReports: InternshipReportData[];
         theses: AcademicWorkData[];
+        totals?: SearchTotals;
     };
 }
 
@@ -138,12 +152,20 @@ export default function SearchIndex({ query, results }: SearchProps) {
                         </Card>
                     ) : results ? (
                         (() => {
-                            const activeSections: { id: string; title: string; content: React.ReactNode }[] = [];
+                            const activeSections: {
+                                id: string;
+                                title: string;
+                                content: React.ReactNode;
+                                total: number | null;
+                                seeAllUrl: string | null;
+                            }[] = [];
 
                             if (results.books.length > 0) {
                                 activeSections.push({
                                     id: 'books',
                                     title: 'Buku',
+                                    total: results.totals?.books ?? null,
+                                    seeAllUrl: booksRoute.index.url(),
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {results.books.map((book) => (
@@ -164,6 +186,8 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                 activeSections.push({
                                     id: 'posts',
                                     title: 'Artikel',
+                                    total: results.totals?.posts ?? null,
+                                    seeAllUrl: blogRoute.index.url(),
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {results.posts.map((post) => (
@@ -181,6 +205,8 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                 activeSections.push({
                                     id: 'skripsis',
                                     title: 'Skripsi',
+                                    total: results.totals?.skripsis ?? null,
+                                    seeAllUrl: skripsiRoute.index.url(),
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {results.skripsis.map((skripsi) => (
@@ -199,6 +225,10 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                 activeSections.push({
                                     id: 'internship-reports',
                                     title: 'Laporan Kerja Praktik',
+                                    total:
+                                        results.totals?.internshipReports ??
+                                        null,
+                                    seeAllUrl: internshipReportsRoute.index.url(),
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {results.internshipReports.map((report) => (
@@ -216,6 +246,8 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                 activeSections.push({
                                     id: 'theses',
                                     title: 'Tesis',
+                                    total: results.totals?.theses ?? null,
+                                    seeAllUrl: thesisRoute.index.url(),
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {results.theses.map((thesis) => (
@@ -251,7 +283,20 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                                         <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                                                             {section.title}
                                                         </h2>
+                                                        {section.total !== null ? (
+                                                            <p className="text-sm text-muted-foreground">
+                                                                Menampilkan 15 dari {section.total} hasil
+                                                            </p>
+                                                        ) : null}
                                                     </div>
+                                                    {section.seeAllUrl ? (
+                                                        <Link
+                                                            href={section.seeAllUrl}
+                                                            className="shrink-0 text-sm font-semibold text-primary hover:underline"
+                                                        >
+                                                            Lihat semua {section.title.toLowerCase()}
+                                                        </Link>
+                                                    ) : null}
                                                 </div>
                                                 {section.content}
                                             </section>

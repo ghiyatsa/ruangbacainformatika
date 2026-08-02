@@ -22,7 +22,7 @@ class CatalogReportForm
                             ->required()
                             ->native(false),
                         Textarea::make('admin_notes')
-                            ->label('Catatan admin')
+                            ->label('Catatan Petugas')
                             ->rows(6)
                             ->placeholder('Tambahkan ringkasan hasil pengecekan atau tindak lanjut.')
                             ->columnSpanFull(),

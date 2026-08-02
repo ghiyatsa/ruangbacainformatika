@@ -67,13 +67,13 @@ class KioskSettings extends Page implements HasTable
         return $schema->components([
             Form::make([
                 Section::make('Akses Kios')
-                    ->description('Pengaturan akses perangkat kios.')
+                    ->description('Pengaturan akses perangkat kios')
                     ->schema([
                         FormTextInput::make('pin')
                             ->label('PIN Kios')
                             ->password()
                             ->revealable()
-                            ->helperText('Kosongkan jika PIN tidak diubah.')
+                            ->helperText('Kosongkan jika PIN tidak diubah')
                             ->required(fn (): bool => ! $this->kioskPinManager()->isConfigured())
                             ->minLength(4)
                             ->maxLength(8),
@@ -106,7 +106,7 @@ class KioskSettings extends Page implements HasTable
                     ]),
 
                 Section::make('Perangkat Aktif')
-                    ->description('Perangkat yang masih memiliki sesi kios aktif.')
+                    ->description('Perangkat yang masih memiliki sesi kios aktif')
                     ->schema([
                         EmbeddedTable::make(),
                     ]),
@@ -120,7 +120,7 @@ class KioskSettings extends Page implements HasTable
                             ->icon(Heroicon::OutlinedArrowPath)
                             ->requiresConfirmation()
                             ->modalHeading('Reset Semua Sesi Kios')
-                            ->modalDescription('Semua perangkat harus memasukkan PIN kembali.')
+                            ->modalDescription('Semua perangkat harus memasukkan PIN kembali')
                             ->modalSubmitActionLabel('Reset Sesi')
                             ->action('rotateSessions'),
                         Action::make('save')
@@ -253,7 +253,7 @@ class KioskSettings extends Page implements HasTable
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Keluarkan Perangkat')
-                    ->modalDescription('Perangkat ini perlu memasukkan PIN kembali sebelum digunakan.')
+                    ->modalDescription('Perangkat ini perlu memasukkan PIN kembali sebelum digunakan')
                     ->modalSubmitActionLabel('Keluarkan')
                     ->action(function (Action $action): void {
                         /** @var KioskDevice $device */

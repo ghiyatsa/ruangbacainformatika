@@ -49,7 +49,7 @@ class InternshipReportInfolist
                                     ->placeholder('-'),
                             ]),
                     ]),
-                Section::make('Sinkronisasi Similarity')
+                Section::make('Sinkronisasi Kemiripan')
                     ->columnSpanFull()
                     ->collapsed()
                     ->schema([

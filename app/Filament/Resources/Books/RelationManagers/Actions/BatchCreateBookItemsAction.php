@@ -18,7 +18,7 @@ class BatchCreateBookItemsAction
             ->icon(Heroicon::OutlinedRectangleStack)
             ->color(Color::Yellow)
             ->modalHeading('Tambah Beberapa Eksemplar')
-            ->modalDescription('Eksemplar baru akan ditambahkan secara berurutan.')
+            ->modalDescription('Eksemplar baru akan ditambahkan secara berurutan')
             ->modalSubmitActionLabel('Simpan')
             ->schema([
                 TextInput::make('quantity')

@@ -16,9 +16,11 @@ class BorrowingEligibilityService
     {
         $user->syncMemberRoleState();
 
-        if (! $user->canBorrowBooks()) {
+        $reason = $user->borrowingBlockReason();
+
+        if ($reason !== null) {
             throw ValidationException::withMessages([
-                'draft' => 'Layanan peminjaman tersedia untuk anggota yang sudah memenuhi syarat.',
+                'draft' => $reason['message'],
             ]);
         }
     }

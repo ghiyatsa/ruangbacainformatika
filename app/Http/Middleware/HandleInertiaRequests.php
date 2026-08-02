@@ -69,13 +69,7 @@ class HandleInertiaRequests extends Middleware
                 'requiresWhatsAppVerification' => $user !== null
                     ? $authenticationRedirector->requiresWhatsAppVerification($user)
                     : false,
-                'borrowingAccessMessage' => $user !== null && ! $user->canBorrowBooks() && ! $user->canAccessAdminPanel()
-                    ? ($user->requiresWhatsAppVerification()
-                        ? 'Verifikasi WhatsApp diperlukan sebelum layanan anggota dapat digunakan.'
-                        : ($user->requiresManualApproval()
-                            ? 'Akun kampus Anda sedang menunggu persetujuan admin.'
-                            : 'Layanan peminjaman tersedia setelah status anggota Anda lengkap.'))
-                    : null,
+                'borrowingAccess' => $this->borrowingAccessPayload($user),
                 'homeUrl' => $user === null
                     ? route('home', absolute: false)
                     : $authenticationRedirector->pathFor($user),
@@ -122,6 +116,24 @@ class HandleInertiaRequests extends Middleware
             'address' => $user->address,
             'created_at' => $user->created_at?->toIso8601String(),
             'updated_at' => $user->updated_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @return array{canBorrow: bool, reason: array{title: string, message: string, actionUrl: string|null}|null}
+     */
+    protected function borrowingAccessPayload(?User $user): array
+    {
+        if ($user === null || $user->canAccessAdminPanel()) {
+            return [
+                'canBorrow' => $user?->canBorrowBooks() ?? false,
+                'reason' => null,
+            ];
+        }
+
+        return [
+            'canBorrow' => $user->canStartLoanRequest(),
+            'reason' => $user->canStartLoanRequest() ? null : $user->borrowingBlockReason(true),
         ];
     }
 

@@ -20,7 +20,7 @@ use Filament\Support\Icons\Heroicon;
 
 class LibrarySettings extends Page
 {
-    protected static ?string $navigationLabel = 'Aturan Sirkulasi';
+    protected static ?string $navigationLabel = 'Pengaturan Peminjaman';
 
     protected static ?int $navigationSort = 2;
 
@@ -53,7 +53,7 @@ class LibrarySettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Aturan Peminjaman')
-                    ->description('Aturan dasar peminjaman untuk layanan anggota.')
+                    ->description('Aturan dasar peminjaman untuk layanan anggota')
                     ->schema([
                         TextInput::make('loan_max_books')
                             ->label('Maksimal Buku Dipinjam')
@@ -61,22 +61,22 @@ class LibrarySettings extends Page
                             ->required()
                             ->minValue(1)
                             ->maxValue(10)
-                            ->helperText('Batas pinjaman aktif per anggota.'),
+                            ->helperText('Batas pinjaman aktif per anggota'),
                         TextInput::make('loan_duration_days')
                             ->label('Durasi Peminjaman (Hari Kerja)')
                             ->numeric()
                             ->required()
                             ->minValue(1)
                             ->maxValue(30)
-                            ->helperText('Durasi dihitung dalam hari kerja.'),
+                            ->helperText('Durasi dihitung dalam hari kerja'),
                     ])
                     ->columns(2),
                 Section::make('Pembatasan Keterlambatan')
-                    ->description('Aturan ini membatasi peminjaman saat ada keterlambatan.')
+                    ->description('Aturan ini membatasi peminjaman saat ada keterlambatan')
                     ->schema([
                         Toggle::make('late_return_suspension_enabled')
                             ->label('Aktifkan pembatasan peminjaman')
-                            ->helperText('Anggota yang terlambat akan dibatasi sementara.')
+                            ->helperText('Anggota yang terlambat akan dibatasi sementara')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
@@ -90,7 +90,7 @@ class LibrarySettings extends Page
                             ->maxValue(30)
                             ->default(1)
                             ->visible(fn (Get $get): bool => (bool) $get('late_return_suspension_enabled'))
-                            ->helperText('Contoh: isi 1 jika pembatasan mulai berlaku setelah telat 1 hari.'),
+                            ->helperText('Contoh: isi 1 jika pembatasan mulai berlaku setelah telat 1 hari'),
                         TextInput::make('late_return_cooldown_days')
                             ->label('Masa Pembatasan Setelah Pengembalian (Hari)')
                             ->numeric()
@@ -99,7 +99,7 @@ class LibrarySettings extends Page
                             ->maxValue(30)
                             ->default(3)
                             ->visible(fn (Get $get): bool => (bool) $get('late_return_suspension_enabled'))
-                            ->helperText('Isi 0 jika pembatasan berhenti saat buku dikembalikan.'),
+                            ->helperText('Isi 0 jika pembatasan berhenti saat buku dikembalikan'),
                     ])
                     ->columns(3),
             ])

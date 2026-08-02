@@ -38,6 +38,12 @@ class WhatsAppChannel
 
         $log = $this->createLog($notifiable, $notification, $phoneNumber, $message);
 
+        if ($this->dailyLimitExceeded($phoneNumber, $message)) {
+            $log->markSkipped('Melebihi batas harian pengiriman WhatsApp untuk nomor ini.');
+
+            return;
+        }
+
         try {
             $this->gateway->sendMessage($phoneNumber, $message, $log);
         } catch (Throwable $exception) {
@@ -47,6 +53,28 @@ class WhatsAppChannel
 
             report($exception);
         }
+    }
+
+    protected function dailyLimitExceeded(string $phoneNumber, WhatsAppMessage $message): bool
+    {
+        if ($message->bypassPacing || $message->category === 'otp') {
+            return false;
+        }
+
+        $dailyLimit = max((int) config('services.fonnte.daily_limit', 10), 0);
+
+        if ($dailyLimit === 0) {
+            return false;
+        }
+
+        $sentToday = WhatsAppMessageLog::query()
+            ->where('phone_number_hash', hash('sha256', $phoneNumber))
+            ->where('status', WhatsAppMessageLog::StatusSent)
+            ->where('category', '!=', 'otp')
+            ->where('created_at', '>=', now()->startOfDay())
+            ->count();
+
+        return $sentToday >= $dailyLimit;
     }
 
     protected function createLog(

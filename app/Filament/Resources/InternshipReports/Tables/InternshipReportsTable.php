@@ -55,7 +55,7 @@ class InternshipReportsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('similarity_sync_status')
-                    ->label('Status Similarity')
+                    ->label('Status Kemiripan')
                     ->state(fn (InternshipReport $record): string => $record->similaritySyncStatusLabel())
                     ->badge()
                     ->color(fn (InternshipReport $record): string => $record->similaritySyncStatusColor()),
@@ -100,7 +100,7 @@ class InternshipReportsTable
                     ->label('Tahun')
                     ->options(fn (): array => static::yearOptions()),
                 SelectFilter::make('similarity_status')
-                    ->label('Status Similarity')
+                    ->label('Status Kemiripan')
                     ->options(SimilaritySyncStatus::statusOptions())
                     ->query(function ($query, array $data) {
                         if (blank($data['value'])) {
