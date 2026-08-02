@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.13.1...v1.14.0) (2026-08-02)
+
+
+### Features
+
+* **admin:** polish admin panel, search, whatsapp, reminders, and similarity sync ([d9ebe9c](https://github.com/ghiyatsa/ruangbacainformatika/commit/d9ebe9c9e2ca7eab3794aa2a45be6534df0bcfa4))
+* **loan:** add manual return reminder actions on loans table and overdue widget ([#31](https://github.com/ghiyatsa/ruangbacainformatika/issues/31)) ([d1de9c0](https://github.com/ghiyatsa/ruangbacainformatika/commit/d1de9c08a7a26999628fb5c8d215a749beedcf71))
+
 ## [1.13.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.13.0...v1.13.1) (2026-08-01)
 
 
