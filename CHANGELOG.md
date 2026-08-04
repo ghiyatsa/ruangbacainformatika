@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.17.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.16.0...v1.17.0) (2026-08-04)
+
+
+### Features
+
+* **similarity:** wire up Turnstile siteverify ([#37](https://github.com/ghiyatsa/ruangbacainformatika/issues/37)) ([65c4716](https://github.com/ghiyatsa/ruangbacainformatika/commit/65c47161c663fc1e2b0b2f650248dc50c922aabf))
+
 ## [1.16.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.15.0...v1.16.0) (2026-08-02)
 
 
