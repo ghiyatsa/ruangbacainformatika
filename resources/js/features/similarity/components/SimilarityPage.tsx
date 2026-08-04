@@ -352,6 +352,7 @@ export default function SimilarityPage({
                                                         options={{
                                                             size: 'normal',
                                                             theme: 'dark',
+                                                            action: 'turnstile-spin-v2',
                                                         }}
                                                     />
                                                 </div>
