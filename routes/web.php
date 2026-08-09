@@ -27,7 +27,9 @@ Route::get('/og/books/{book:slug}', [OpenGraphImageController::class, 'book'])->
 Route::get('/og/skripsi/{skripsi:student_id}', [OpenGraphImageController::class, 'skripsi'])->name('og.skripsi.show');
 Route::get('/og/internship-reports/{internshipReport:student_id}', [OpenGraphImageController::class, 'internshipReport'])->name('og.internship-reports.show');
 Route::get('/og/thesis/{thesis:student_id}', [OpenGraphImageController::class, 'thesis'])->name('og.thesis.show');
-Route::get('/books', CatalogController::class)->name('books.index');
+Route::get('/books', CatalogController::class)
+    ->middleware('cache.headers:public;max_age=300;etag')
+    ->name('books.index');
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
 Route::get('/posts', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/posts/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -56,7 +58,9 @@ Route::post('/contact', [ContactMessageController::class, 'store'])
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service');
 Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
-Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])
+    ->middleware('cache.headers:public;max_age=86400;etag')
+    ->name('sitemap');
 Route::middleware('auth')->group(function () {
     Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
     Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');

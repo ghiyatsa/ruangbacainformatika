@@ -9,13 +9,24 @@ use App\Models\Skripsi;
 use App\Models\StaticPage;
 use App\Models\Thesis;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 class SitemapController extends Controller
 {
     /**
-     * Generate the XML sitemap.
+     * Generate the XML sitemap, cached for 24 hours.
      */
     public function index(): Response
+    {
+        $xml = Cache::remember('sitemap:xml', 86400, fn () => $this->buildXml());
+
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml',
+            'X-Robots-Tag' => 'noindex',
+        ]);
+    }
+
+    protected function buildXml(): string
     {
         $urls = [];
 
@@ -146,9 +157,6 @@ class SitemapController extends Controller
         }
         $xml .= '</urlset>';
 
-        return response($xml, 200, [
-            'Content-Type' => 'application/xml',
-            'X-Robots-Tag' => 'noindex',
-        ]);
+        return $xml;
     }
 }

@@ -50,6 +50,7 @@ class PostThumbnailImageService
 
         Image::load($sourcePath)
             ->fit(Fit::Crop, 1280, 720)
+            ->quality(80)
             ->save($targetPath);
 
         return $relativePath;

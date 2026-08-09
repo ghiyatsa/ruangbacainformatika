@@ -1,21 +1,12 @@
 import { Link } from '@inertiajs/react';
 import { Mail, MapPin } from 'lucide-react';
-import { motion } from 'motion/react';
 import { RuangBacaLogo } from '@/components/common/RuangBacaLogo';
 import { RUANG_BACA_DESCRIPTION } from '@/lib/brand';
 import { home } from '@/routes';
-import { fadeUp } from './constants';
 
 export function FooterBrand() {
     return (
-        <motion.div
-            className="lg:col-span-4"
-            custom={0}
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-        >
+        <div className="lg:col-span-4">
             <Link
                 href={home.url()}
                 className="group mb-5 inline-flex items-center gap-3"
@@ -50,6 +41,6 @@ export function FooterBrand() {
                     </a>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }

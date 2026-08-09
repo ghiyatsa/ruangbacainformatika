@@ -7,6 +7,7 @@ use App\Models\Skripsi;
 use App\Services\RelatedCatalogService;
 use App\Support\PageMeta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,13 +31,16 @@ class SkripsiController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $years = Skripsi::query()
-            ->whereNotNull('year')
-            ->distinct()
-            ->orderByDesc('year')
-            ->pluck('year')
-            ->map(fn ($y) => (int) $y)
-            ->values();
+        $years = Cache::remember('academic:skripsi:years', 86400, function () {
+            return Skripsi::query()
+                ->whereNotNull('year')
+                ->distinct()
+                ->orderByDesc('year')
+                ->pluck('year')
+                ->map(fn ($y) => (int) $y)
+                ->values()
+                ->all();
+        });
 
         return Inertia::render('skripsi/index', [
             'filters' => [

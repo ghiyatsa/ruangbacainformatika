@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
 class BuildHomeCatalogSections
 {
@@ -44,12 +45,14 @@ class BuildHomeCatalogSections
      */
     public function featuredBooks(): array
     {
-        $books = $this->bookQuery()
-            ->featured()
-            ->limit(5)
-            ->get();
+        return Cache::remember('catalog:home:featured', 3600, function () {
+            $books = $this->bookQuery()
+                ->featured()
+                ->limit(5)
+                ->get();
 
-        return BookCatalogResource::collection($books)->resolve();
+            return BookCatalogResource::collection($books)->resolve();
+        });
     }
 
     /**
@@ -57,13 +60,15 @@ class BuildHomeCatalogSections
      */
     public function popularBooks(): array
     {
-        $books = $this->bookQuery()
-            ->orderByDesc('view_count')
-            ->orderBy('title')
-            ->limit(6)
-            ->get();
+        return Cache::remember('catalog:home:popular', 3600, function () {
+            $books = $this->bookQuery()
+                ->orderByDesc('view_count')
+                ->orderBy('title')
+                ->limit(6)
+                ->get();
 
-        return BookCatalogResource::collection($books)->resolve();
+            return BookCatalogResource::collection($books)->resolve();
+        });
     }
 
     /**
@@ -71,19 +76,21 @@ class BuildHomeCatalogSections
      */
     public function mostBorrowedBooks(): array
     {
-        $books = $this->bookQuery()
-            ->where('is_borrowable', true)
-            ->withCount([
-                'loanItems as borrow_count',
-            ])
-            ->has('loanItems')
-            ->orderByDesc('borrow_count')
-            ->orderByDesc('view_count')
-            ->orderBy('title')
-            ->limit(6)
-            ->get();
+        return Cache::remember('catalog:home:most_borrowed', 3600, function () {
+            $books = $this->bookQuery()
+                ->where('is_borrowable', true)
+                ->withCount([
+                    'loanItems as borrow_count',
+                ])
+                ->has('loanItems')
+                ->orderByDesc('borrow_count')
+                ->orderByDesc('view_count')
+                ->orderBy('title')
+                ->limit(6)
+                ->get();
 
-        return BookCatalogResource::collection($books)->resolve();
+            return BookCatalogResource::collection($books)->resolve();
+        });
     }
 
     /**
@@ -98,35 +105,37 @@ class BuildHomeCatalogSections
      */
     public function popularCategoryShelves(): array
     {
-        return Category::query()
-            ->select(['id', 'name', 'slug', 'description'])
-            ->whereHas('books', fn ($query) => $query->published())
-            ->withCount([
-                'books as books_count' => fn ($query) => $query->published(),
-            ])
-            ->orderByDesc('books_count')
-            ->orderBy('name')
-            ->limit(3)
-            ->get()
-            ->map(function (Category $category): array {
-                $books = $this->bookQuery()
-                    ->whereHas('categories', fn ($query) => $query->whereKey($category->id))
-                    ->orderByDesc('view_count')
-                    ->orderByDesc('published_year')
-                    ->orderBy('title')
-                    ->limit(6)
-                    ->get();
+        return Cache::remember('catalog:home:category_shelves', 3600, function () {
+            return Category::query()
+                ->select(['id', 'name', 'slug', 'description'])
+                ->whereHas('books', fn ($query) => $query->published())
+                ->withCount([
+                    'books as books_count' => fn ($query) => $query->published(),
+                ])
+                ->orderByDesc('books_count')
+                ->orderBy('name')
+                ->limit(3)
+                ->get()
+                ->map(function (Category $category): array {
+                    $books = $this->bookQuery()
+                        ->whereHas('categories', fn ($query) => $query->whereKey($category->id))
+                        ->orderByDesc('view_count')
+                        ->orderByDesc('published_year')
+                        ->orderBy('title')
+                        ->limit(6)
+                        ->get();
 
-                return [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                    'slug' => $category->slug,
-                    'description' => $category->description,
-                    'booksCount' => (int) ($category->books_count ?? 0),
-                    'books' => BookCatalogResource::collection($books)->resolve(),
-                ];
-            })
-            ->all();
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug,
+                        'description' => $category->description,
+                        'booksCount' => (int) ($category->books_count ?? 0),
+                        'books' => BookCatalogResource::collection($books)->resolve(),
+                    ];
+                })
+                ->all();
+        });
     }
 
     /**

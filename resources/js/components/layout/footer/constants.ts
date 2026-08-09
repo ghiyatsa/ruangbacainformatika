@@ -20,7 +20,6 @@ import books from '@/routes/books';
 import internshipReports from '@/routes/internship-reports';
 import skripsi from '@/routes/skripsi';
 import thesis from '@/routes/thesis';
-import type { Variants } from 'motion/react';
 
 export const KOLEKSI_LINKS = [
     {
@@ -91,16 +90,3 @@ export const GUEST_SERVICE_LINKS = [
         internal: true,
     },
 ] as const;
-
-export const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 18 },
-    show: (i: number) => ({
-        opacity: 1,
-        y: 0,
-        transition: {
-            duration: 0.45,
-            ease: 'easeOut' as const,
-            delay: i * 0.08,
-        },
-    }),
-};

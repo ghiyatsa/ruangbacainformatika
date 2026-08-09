@@ -36,3 +36,6 @@ jobs:
 
       - name: Run Pint Check
         run: composer lint:check
+
+      - name: Run Larastan Static Analysis
+        run: vendor/bin/phpstan analyse --no-progress
