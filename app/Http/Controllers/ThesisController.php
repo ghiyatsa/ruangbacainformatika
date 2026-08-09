@@ -7,6 +7,7 @@ use App\Models\Thesis;
 use App\Services\RelatedCatalogService;
 use App\Support\PageMeta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,13 +31,16 @@ class ThesisController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $years = Thesis::query()
-            ->whereNotNull('year')
-            ->distinct()
-            ->orderByDesc('year')
-            ->pluck('year')
-            ->map(fn ($y) => (int) $y)
-            ->values();
+        $years = Cache::remember('academic:thesis:years', 86400, function () {
+            return Thesis::query()
+                ->whereNotNull('year')
+                ->distinct()
+                ->orderByDesc('year')
+                ->pluck('year')
+                ->map(fn ($y) => (int) $y)
+                ->values()
+                ->all();
+        });
 
         return Inertia::render('thesis/index', [
             'filters' => [

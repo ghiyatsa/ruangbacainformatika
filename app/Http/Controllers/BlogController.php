@@ -56,16 +56,14 @@ class BlogController extends Controller
             $post->increment('view_count');
         }
 
-        $post->load([
+        $post->loadMissing([
             'user:id,name,avatar_url',
             'reviewedBy:id,name',
             'categories:id,name,slug',
             'tags:id,name,slug',
-        ]);
+        ])->loadCount('comments');
 
-        $postResource = new BlogPostResource(
-            $post->fresh(['user:id,name,avatar_url', 'reviewedBy:id,name', 'categories:id,name,slug', 'tags:id,name,slug'])
-        );
+        $postResource = new BlogPostResource($post);
 
         $commentsPage = request()->integer('comments_page', 1);
 
@@ -75,7 +73,7 @@ class BlogController extends Controller
                 'data' => array_merge(
                     $postResource->resolve(),
                     [
-                        'commentsCount' => $post->comments()->count(),
+                        'commentsCount' => $post->comments_count,
                         'comments' => Inertia::defer(function () use ($post, $commentsPage) {
                             return Cache::remember("post_comments_{$post->id}_page_{$commentsPage}", now()->addMinutes(10), function () use ($post, $commentsPage) {
                                 $commentsQuery = $post->comments()
@@ -210,7 +208,7 @@ class BlogController extends Controller
             'reviewedBy:id,name',
             'categories:id,name,slug',
             'tags:id,name,slug',
-        ]);
+        ])->loadCount('comments');
 
         $postResource = new BlogPostResource($post);
 
@@ -222,7 +220,7 @@ class BlogController extends Controller
                 'data' => array_merge(
                     $postResource->resolve(),
                     [
-                        'commentsCount' => $post->comments()->count(),
+                        'commentsCount' => $post->comments_count,
                         'comments' => Inertia::defer(function () use ($post, $commentsPage) {
                             $commentsQuery = $post->comments()
                                 ->whereNull('parent_id')

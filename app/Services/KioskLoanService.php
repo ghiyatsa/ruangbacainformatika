@@ -333,8 +333,11 @@ class KioskLoanService
     protected function activeLoanCount(User $user): int
     {
         return LoanItem::query()
-            ->whereNull('returned_at', 'and', false)
-            ->whereHas('loan', fn ($query) => $query->whereBelongsTo($user))
+            ->whereNull('returned_at')
+            ->whereRelation('loan', function ($query) use ($user): void {
+                $query->where('user_id', $user->id)
+                    ->where('status', Loan::STATUS_BORROWED);
+            })
             ->count();
     }
 

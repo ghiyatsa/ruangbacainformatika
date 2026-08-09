@@ -99,7 +99,9 @@ export default defineConfig(({ command }) => ({
             ],
         }),
         inertia({
-            ssr: false,
+            // SSR diaktifkan via env VITE_SSR=true (Production 2 only).
+            // Production 1 tidak support SSR — biarkan false atau hapus var ini dari .env.
+            ssr: process.env.VITE_SSR === 'true',
         }),
         react(),
         babel({

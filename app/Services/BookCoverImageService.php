@@ -41,6 +41,7 @@ class BookCoverImageService
 
         Image::load($sourcePath)
             ->fit(Fit::Max, 1200, 1600)
+            ->quality(80)
             ->save($targetPath);
 
         return $relativePath;

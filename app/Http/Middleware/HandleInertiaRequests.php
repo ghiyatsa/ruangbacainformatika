@@ -131,9 +131,11 @@ class HandleInertiaRequests extends Middleware
             ];
         }
 
+        $canStart = $user->canStartLoanRequest();
+
         return [
-            'canBorrow' => $user->canStartLoanRequest(),
-            'reason' => $user->canStartLoanRequest() ? null : $user->borrowingBlockReason(true),
+            'canBorrow' => $canStart,
+            'reason' => $canStart ? null : $user->borrowingBlockReason(true),
         ];
     }
 

@@ -1,18 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { motion } from 'motion/react';
-import { fadeUp, KOLEKSI_LINKS, LEGAL_LINKS } from './constants';
+import { KOLEKSI_LINKS, LEGAL_LINKS } from './constants';
 
 export function FooterLinks() {
     return (
         <>
-            <motion.div
-                className="lg:col-span-2 lg:col-start-9"
-                custom={1}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.3 }}
-            >
+            <div className="lg:col-span-2 lg:col-start-9">
                 <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
                     Koleksi
                 </p>
@@ -29,16 +21,9 @@ export function FooterLinks() {
                         </li>
                     ))}
                 </ul>
-            </motion.div>
+            </div>
 
-            <motion.div
-                className="lg:col-span-2"
-                custom={4}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.3 }}
-            >
+            <div className="lg:col-span-2">
                 <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-foreground/80 uppercase">
                     Informasi
                 </p>
@@ -55,7 +40,7 @@ export function FooterLinks() {
                         </li>
                     ))}
                 </ul>
-            </motion.div>
+            </div>
         </>
     );
 }

@@ -1,0 +1,23 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+
+    # Level 4: Menengah, cocok untuk framework dengan dynamic magic methods seperti Laravel
+    level: 4
+
+    # Matikan strict PHPDoc check untuk Carbon/String casts di Laravel
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # Abaikan warning property access karena Eloquent Magic Properties
+        - '#Access to an undefined property App\\Models\\.*#'
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::.*#'
+        - '#Cannot call method .* on string\.#'
+        - '#Instanceof between string\|null and Carbon\\CarbonInterface will always evaluate to false\.#'
+
+    excludePaths:
+        # Exclude Filament configuration classes/pages yang dinamis
+        - app/Filament/*

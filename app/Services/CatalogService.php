@@ -44,7 +44,7 @@ class CatalogService
                 'mostBorrowedCount' => Book::query()
                     ->published()
                     ->where('is_borrowable', true)
-                    ->has('loanItems')
+                    ->whereHas('items.loanItems')
                     ->count(),
             ];
         });

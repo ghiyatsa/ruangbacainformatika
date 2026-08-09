@@ -12,8 +12,10 @@ use App\Models\Post;
 use App\Models\Publisher;
 use App\Models\Skripsi;
 use App\Models\Thesis;
+use App\Observers\AcademicCacheObserver;
 use App\Observers\CatalogActivityObserver;
 use App\Observers\PostObserver;
+use App\Observers\SitemapCacheObserver;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
 use App\Services\Catalog\CatalogPageCache;
@@ -84,17 +86,21 @@ class AppServiceProvider extends ServiceProvider
         $this->composeRootView();
 
         Author::observe(CatalogActivityObserver::class);
-        Book::observe(CatalogActivityObserver::class);
+        Book::observe([CatalogActivityObserver::class, SitemapCacheObserver::class]);
         Category::observe(CatalogActivityObserver::class);
-        InternshipReport::observe(CatalogActivityObserver::class);
-        Post::observe(PostObserver::class);
+        InternshipReport::observe([CatalogActivityObserver::class, SitemapCacheObserver::class, AcademicCacheObserver::class]);
+        Post::observe([PostObserver::class, SitemapCacheObserver::class]);
         Publisher::observe(CatalogActivityObserver::class);
-        Skripsi::observe(CatalogActivityObserver::class);
-        Thesis::observe(CatalogActivityObserver::class);
+        Skripsi::observe([CatalogActivityObserver::class, SitemapCacheObserver::class, AcademicCacheObserver::class]);
+        Thesis::observe([CatalogActivityObserver::class, SitemapCacheObserver::class, AcademicCacheObserver::class]);
 
         // Clear catalog stats & page caches on database changes
         $clearCatalogCache = function (): void {
             Cache::forget('catalog:stats');
+            Cache::forget('catalog:home:featured');
+            Cache::forget('catalog:home:popular');
+            Cache::forget('catalog:home:most_borrowed');
+            Cache::forget('catalog:home:category_shelves');
             app(CatalogPageCache::class)->invalidate();
         };
         Book::saved($clearCatalogCache);
