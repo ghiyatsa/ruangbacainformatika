@@ -75,6 +75,7 @@ class CatalogReport extends Model
         return $this->morphTo();
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -113,6 +114,6 @@ class CatalogReport extends Model
 
     protected function reporterDisplayName(): Attribute
     {
-        return Attribute::get(fn (): string => $this->reporter_name ?? $this->user?->name ?? 'Anonim');
+        return Attribute::get(fn (): string => $this->reporter_name ?? $this->user->name ?? 'Anonim');
     }
 }

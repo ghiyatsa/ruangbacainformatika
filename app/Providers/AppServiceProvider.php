@@ -127,7 +127,7 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('contact-messages', function (Request $request): Limit {
             return Limit::perMinute(5)
-                ->by((string) ($request->user()?->id ?? $request->ip()))
+                ->by((string) ($request->user()->id ?? $request->ip()))
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'message' => 'Terlalu banyak percobaan mengirim pesan. Coba lagi sebentar.',
@@ -153,7 +153,7 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('blog-comments', function (Request $request): Limit {
             return Limit::perMinute(5)
-                ->by((string) ($request->user()?->id ?? $request->ip()))
+                ->by((string) ($request->user()->id ?? $request->ip()))
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'message' => 'Terlalu banyak percobaan mengirim komentar. Coba lagi sebentar.',

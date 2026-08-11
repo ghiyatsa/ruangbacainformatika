@@ -108,7 +108,7 @@ class SearchController extends Controller
     /**
      * Jalankan pencarian 5 tipe dan kembalikan koleksi hasil (sudah di-map ke array).
      *
-     * @return array{books: Collection<int, array<string, mixed>>, posts: Collection<int, array<string, mixed>>, skripsis: Collection<int, array<string, mixed>>, internshipReports: Collection<int, array<string, mixed>>, theses: Collection<int, array<string, mixed>>}
+     * @return array<string, Collection<int, array<string, mixed>>>
      */
     protected function performSearch(string $search): array
     {
@@ -326,7 +326,7 @@ class SearchController extends Controller
 
                 $needed = 8 - count($suggestions);
 
-                if ($needed > 0 && $correctedWords !== []) {
+                if ($correctedWords !== []) {
                     $suggestions = array_merge($suggestions, SearchHistory::query()
                         ->where(function (Builder $inner) use ($correctedWords) {
                             foreach ($correctedWords as $word) {

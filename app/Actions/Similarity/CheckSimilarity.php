@@ -146,12 +146,12 @@ class CheckSimilarity
                 $similarityPercent = 0.0;
             }
 
-            $item['document_id'] = $record?->id ?? $docId;
-            $item['skripsi_id'] = $type === 'skripsi' ? ($record?->id ?? $docId) : null;
+            $item['document_id'] = $record->id ?? $docId;
+            $item['skripsi_id'] = $type === 'skripsi' ? ($record->id ?? $docId) : null;
             $item['document_type'] = $type;
-            $item['judul'] = $record?->title ?? ($item['judul'] ?? $item['title'] ?? 'Data tidak ditemukan');
-            $item['nama_mahasiswa'] = $record?->author_name ?? ($item['nama_mahasiswa'] ?? $item['author_name'] ?? 'Tidak diketahui');
-            $item['student_id'] = $record?->student_id ?? $studentId;
+            $item['judul'] = $record->title ?? ($item['judul'] ?? $item['title'] ?? 'Data tidak ditemukan');
+            $item['nama_mahasiswa'] = $record->author_name ?? ($item['nama_mahasiswa'] ?? $item['author_name'] ?? 'Tidak diketahui');
+            $item['student_id'] = $record->student_id ?? $studentId;
             $item['similarity_persen'] = $similarityPercent;
             $item['is_local_record_found'] = $record !== null;
 

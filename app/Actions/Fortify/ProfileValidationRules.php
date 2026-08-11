@@ -14,7 +14,7 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate user profiles.
      *
-     * @return array<string, array<int, ValidationRule|array<mixed>|string>>
+     * @return array<string, array<int, ValidationRule|array<mixed>|string|\Closure|\Stringable>>
      */
     protected function profileRules(?int $userId = null): array
     {
@@ -29,7 +29,7 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate user names.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array<mixed>|string|\Closure|\Stringable>
      */
     protected function nameRules(bool $required = true, int $max = 255): array
     {
@@ -61,7 +61,7 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate user emails.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array<mixed>|string|\Closure|\Stringable>
      */
     protected function emailRules(?int $userId = null): array
     {
@@ -88,7 +88,7 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate user WhatsApp numbers.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array<mixed>|string|\Closure|\Stringable>
      */
     protected function whatsappRules(bool $required = false, ?int $ignoreId = null): array
     {
@@ -115,7 +115,7 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate general phone numbers.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array<mixed>|string|\Closure|\Stringable>
      */
     protected function phoneRules(bool $required = false): array
     {
@@ -139,7 +139,7 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate user addresses.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array<mixed>|string|\Closure|\Stringable>
      */
     protected function addressRules(bool $required = false): array
     {
@@ -171,7 +171,7 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate institution names.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array<mixed>|string|\Closure|\Stringable>
      */
     protected function institutionRules(bool $required = false): array
     {
@@ -197,7 +197,7 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate free-form text fields.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array<mixed>|string|\Closure|\Stringable>
      */
     protected function meaningfulTextRules(
         string $label,

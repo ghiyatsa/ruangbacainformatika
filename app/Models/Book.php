@@ -115,6 +115,7 @@ class Book extends Model
         return $this->belongsToMany(Category::class);
     }
 
+    /** @return HasMany<BookItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(BookItem::class);
@@ -132,6 +133,7 @@ class Book extends Model
         );
     }
 
+    /** @return Builder<Book> */
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('is_published', true);

@@ -5,8 +5,8 @@ namespace App\Actions\Catalog;
 use App\Http\Resources\BookCatalogResource;
 use App\Models\Book;
 use App\Models\Category;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 
 class BuildHomeCatalogSections

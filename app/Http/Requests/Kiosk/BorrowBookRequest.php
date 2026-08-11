@@ -10,7 +10,7 @@ use Illuminate\Validation\Rule;
 class BorrowBookRequest extends KioskBookActionRequest
 {
     /**
-     * @return array<string, ValidationRule|array<int, ValidationRule|string>|string>
+     * @return array<string, ValidationRule|array<int, ValidationRule|string|\Closure|\Stringable>|string>
      */
     public function rules(): array
     {

@@ -153,7 +153,7 @@ class SimilarityFullSyncDispatcher
             ])
             ->count();
 
-        $finishedWithIssues = $failedCount > 0 || $pendingCount > 0 || (($batch?->failedJobs ?? 0) > 0);
+        $finishedWithIssues = $failedCount > 0 || $pendingCount > 0 || (($batch->failedJobs ?? 0) > 0);
 
         Notification::make()
             ->title($finishedWithIssues ? 'Sinkronisasi similarity selesai dengan catatan' : 'Sinkronisasi similarity selesai')

@@ -65,8 +65,7 @@ class CatalogReportController extends Controller
 
     private function catalogTitle(Model $reportable): string
     {
-        /** @var object{title:string} $reportable */
-        return $reportable->title;
+        return (string) $reportable->title;
     }
 
     private function catalogUrl(Model $reportable): string

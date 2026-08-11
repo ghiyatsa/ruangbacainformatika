@@ -6,6 +6,7 @@ use App\Models\Concerns\GeneratesSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class Category extends Model
 {
@@ -28,6 +29,7 @@ class Category extends Model
         return 'kategori';
     }
 
+    /** @return BelongsToMany<Book, $this, Pivot, 'pivot'> */
     public function books(): BelongsToMany
     {
         return $this->belongsToMany(Book::class);

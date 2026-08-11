@@ -44,7 +44,15 @@ class RelatedCatalogService
      */
     public function forSkripsi(Skripsi $skripsi, int $limit = self::RESULT_LIMIT): Collection
     {
-        return $this->relatedAcademicDocuments($skripsi, $limit);
+        $query = Skripsi::query()->whereKeyNot($skripsi->getKey());
+
+        $this->applyAcademicMatches($query, $skripsi);
+
+        $related = $this->skripsiResults($query, $limit);
+
+        return $related->isNotEmpty()
+            ? $related
+            : $this->skripsiResults(Skripsi::query()->whereKeyNot($skripsi->getKey()), $limit);
     }
 
     /**
@@ -52,7 +60,15 @@ class RelatedCatalogService
      */
     public function forThesis(Thesis $thesis, int $limit = self::RESULT_LIMIT): Collection
     {
-        return $this->relatedAcademicDocuments($thesis, $limit);
+        $query = Thesis::query()->whereKeyNot($thesis->getKey());
+
+        $this->applyAcademicMatches($query, $thesis);
+
+        $related = $this->thesisResults($query, $limit);
+
+        return $related->isNotEmpty()
+            ? $related
+            : $this->thesisResults(Thesis::query()->whereKeyNot($thesis->getKey()), $limit);
     }
 
     /**
@@ -60,7 +76,18 @@ class RelatedCatalogService
      */
     public function forInternshipReport(InternshipReport $report, int $limit = self::RESULT_LIMIT): Collection
     {
-        return $this->relatedAcademicDocuments($report, $limit);
+        $query = InternshipReport::query()->whereKeyNot($report->getKey());
+
+        $this->applyAcademicMatches($query, $report);
+
+        $related = $this->internshipReportResults($query, $limit);
+
+        return $related->isNotEmpty()
+            ? $related
+            : $this->internshipReportResults(
+                InternshipReport::query()->whereKeyNot($report->getKey()),
+                $limit,
+            );
     }
 
     /**
@@ -93,6 +120,7 @@ class RelatedCatalogService
     }
 
     /**
+     * @param  Builder<Book>  $query
      * @return Collection<int, Book>
      */
     private function bookResults(Builder $query, int $limit): Collection
@@ -111,12 +139,48 @@ class RelatedCatalogService
     }
 
     /**
-     * @template TModel of Model
-     *
-     * @param  TModel  $document
-     * @return Collection<int, TModel>
+     * @param  Builder<Skripsi>  $query
+     * @return Collection<int, Skripsi>
      */
-    private function relatedAcademicDocuments(Model $document, int $limit): Collection
+    private function skripsiResults(Builder $query, int $limit): Collection
+    {
+        return $query
+            ->orderByDesc('view_count')
+            ->orderByDesc('year')
+            ->orderBy('title')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * @param  Builder<Thesis>  $query
+     * @return Collection<int, Thesis>
+     */
+    private function thesisResults(Builder $query, int $limit): Collection
+    {
+        return $query
+            ->orderByDesc('view_count')
+            ->orderByDesc('year')
+            ->orderBy('title')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * @param  Builder<InternshipReport>  $query
+     * @return Collection<int, InternshipReport>
+     */
+    private function internshipReportResults(Builder $query, int $limit): Collection
+    {
+        return $query
+            ->orderByDesc('view_count')
+            ->orderByDesc('year')
+            ->orderBy('title')
+            ->limit($limit)
+            ->get();
+    }
+
+    private function applyAcademicMatches(Builder $query, Model $document): void
     {
         $terms = array_slice([
             ...$this->extractTerms((string) $document->getAttribute('keywords')),
@@ -124,9 +188,6 @@ class RelatedCatalogService
         ], 0, 6);
         $authorName = (string) $document->getAttribute('author_name');
         $year = $document->getAttribute('year');
-
-        /** @var Builder<TModel> $query */
-        $query = $document::query()->whereKeyNot($document->getKey());
 
         $query->where(function (Builder $matches) use ($terms, $authorName, $year): void {
             $matches
@@ -142,33 +203,6 @@ class RelatedCatalogService
                     ->orWhere('abstract', 'like', "%{$term}%");
             }
         });
-
-        $related = $this->academicResults($query, $limit);
-
-        if ($related->isNotEmpty()) {
-            return $related;
-        }
-
-        /** @var Builder<TModel> $fallback */
-        $fallback = $document::query()->whereKeyNot($document->getKey());
-
-        return $this->academicResults($fallback, $limit);
-    }
-
-    /**
-     * @template TModel of Model
-     *
-     * @param  Builder<TModel>  $query
-     * @return Collection<int, TModel>
-     */
-    private function academicResults(Builder $query, int $limit): Collection
-    {
-        return $query
-            ->orderByDesc('view_count')
-            ->orderByDesc('year')
-            ->orderBy('title')
-            ->limit($limit)
-            ->get();
     }
 
     /**
