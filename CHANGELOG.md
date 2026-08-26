@@ -3,6 +3,23 @@
 ## [1.19.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.18.0...v1.19.0) (2026-08-26)
 
 
+### Features
+
+* **admin:** add registration claims and whatsapp log viewers ([ef299e2](https://github.com/ghiyatsa/ruangbacainformatika/commit/ef299e2ee3a056cc60445ab0ad513d4141a39709))
+* **ui:** add notifications page and polish public experience ([405b779](https://github.com/ghiyatsa/ruangbacainformatika/commit/405b7798d346da63ab1caafaa4e439d7f4f0fe13))
+
+
+### Bug Fixes
+
+* **auth:** fix google auth and blog homepage tests with phpstan errors ([a740d7f](https://github.com/ghiyatsa/ruangbacainformatika/commit/a740d7fad82b86db56289fb04bd1bde7fb181f98))
+* **auth:** guard member key and expire whatsapp skip flag ([30dfe04](https://github.com/ghiyatsa/ruangbacainformatika/commit/30dfe04db7f26310b4c7d98046d24584dca8f30c))
+* **catalog:** optimize database queries, sitemap caching, and asset bundling ([b946e3b](https://github.com/ghiyatsa/ruangbacainformatika/commit/b946e3b37a39948a4b391deab2dc5bff2cc23c43))
+* **loan:** enforce return token uniqueness and simplify qr errors ([8829555](https://github.com/ghiyatsa/ruangbacainformatika/commit/8829555ccb6654de053f03fb5d056e9c13262a90))
+* **similarity:** wire delete observer, invalidate check cache on sync, remove dead code ([dd5981e](https://github.com/ghiyatsa/ruangbacainformatika/commit/dd5981e0d1058d497ab9da0389cf8072befd252d))
+
+## [1.19.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.18.0...v1.19.0) (2026-08-26)
+
+
 ### Bug Fixes
 
 * **similarity:** wire delete observer, invalidate check cache on sync, remove dead code ([dd5981e](https://github.com/ghiyatsa/ruangbacainformatika/commit/dd5981e0d1058d497ab9da0389cf8072befd252d))
