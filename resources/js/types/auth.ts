@@ -28,9 +28,7 @@ export type Auth = {
     canBorrowBooks?: boolean;
     canViewNotifications?: boolean;
     hasVerifiedWhatsApp?: boolean;
-    requiresWhatsAppVerification?: boolean;
     borrowingAccess?: BorrowingAccess;
-    homeUrl?: string;
     isMember?: boolean;
 };
 

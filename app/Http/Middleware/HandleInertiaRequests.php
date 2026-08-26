@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
-use App\Services\Auth\AuthenticationRedirector;
 use App\Services\Auth\GoogleLoginConfiguration;
 use App\Services\LoanDraftService;
 use App\Support\SiteSettings;
@@ -51,7 +50,6 @@ class HandleInertiaRequests extends Middleware
         $session = $request->hasSession() ? $request->session() : null;
         $user = $request->user();
         $siteData = $this->siteSettings->shared();
-        $authenticationRedirector = app(AuthenticationRedirector::class);
 
         return [
             ...parent::share($request),
@@ -66,13 +64,7 @@ class HandleInertiaRequests extends Middleware
                 'canBorrowBooks' => $user?->canBorrowBooks() ?? false,
                 'canViewNotifications' => $user?->canViewPublicNotifications() ?? false,
                 'hasVerifiedWhatsApp' => $user?->hasVerifiedWhatsApp() ?? false,
-                'requiresWhatsAppVerification' => $user !== null
-                    ? $authenticationRedirector->requiresWhatsAppVerification($user)
-                    : false,
                 'borrowingAccess' => $this->borrowingAccessPayload($user),
-                'homeUrl' => $user === null
-                    ? route('home', absolute: false)
-                    : $authenticationRedirector->pathFor($user),
             ],
             'notifications' => fn (): array => [
                 'unreadCount' => $user?->canViewPublicNotifications()

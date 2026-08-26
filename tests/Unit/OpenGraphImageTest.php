@@ -1,10 +1,9 @@
 <?php
 
-use App\Support\OpenGraphImage;
-use App\Support\SiteSettings;
+use App\Support\OpenGraph\FontResolver;
 
 it('ignores font candidates outside open basedir restrictions', function () {
-    $image = new class(app(SiteSettings::class)) extends OpenGraphImage
+    $resolver = new class extends FontResolver
     {
         public function pathAccessibleForRead(string $path, ?string $openBaseDir = null): bool
         {
@@ -16,6 +15,6 @@ it('ignores font candidates outside open basedir restrictions', function () {
     $blockedPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
     $allowedPath = base_path('composer.json');
 
-    expect($image->pathAccessibleForRead($blockedPath, $allowedDirectory))->toBeFalse()
-        ->and($image->pathAccessibleForRead($allowedPath, $allowedDirectory))->toBeTrue();
+    expect($resolver->pathAccessibleForRead($blockedPath, $allowedDirectory))->toBeFalse()
+        ->and($resolver->pathAccessibleForRead($allowedPath, $allowedDirectory))->toBeTrue();
 });
