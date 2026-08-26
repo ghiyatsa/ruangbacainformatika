@@ -7,6 +7,7 @@ use App\Support\AppTimezone;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Loan */
 class LoanResource extends JsonResource
 {
     /**

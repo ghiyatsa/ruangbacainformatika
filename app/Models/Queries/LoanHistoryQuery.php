@@ -5,9 +5,9 @@ namespace App\Models\Queries;
 use App\Models\Loan;
 use App\Models\LoanItem;
 use App\Models\User;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class LoanHistoryQuery
 {
@@ -51,15 +51,15 @@ class LoanHistoryQuery
             ->first();
 
         return [
-            'total' => (int) ($stats?->total ?? 0),
-            'active' => (int) ($stats?->active ?? 0),
-            'overdue' => (int) ($stats?->overdue ?? 0),
-            'returned' => (int) ($stats?->returned ?? 0),
+            'total' => (int) ($stats->total ?? 0),
+            'active' => (int) ($stats->active ?? 0),
+            'overdue' => (int) ($stats->overdue ?? 0),
+            'returned' => (int) ($stats->returned ?? 0),
         ];
     }
 
     /**
-     * @param  HasManyThrough<LoanItem, covariant User, *, *>  $loanItemsQuery
+     * @param  HasManyThrough<LoanItem, Loan, User>  $loanItemsQuery
      * @param  array{filter: string, search: string}  $filters
      */
     protected function applyFilters(HasManyThrough $loanItemsQuery, array $filters): void

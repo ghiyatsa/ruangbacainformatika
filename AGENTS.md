@@ -50,9 +50,7 @@
 
 ### Documentation In Repo
 
-- contributor-facing overview: `README.md`
-- product spec untuk pengujian: `TESTSPRITE_PRODUCT_SPEC.md`
-- local TestSprite summary: `testsprite_tests/tmp/code_summary.yaml`
+- contributor-facing overview: `README.md` (termasuk panduan instalasi, aturan bisnis, dan operasional harian)
 
 ### Working Preferences For This Repo
 

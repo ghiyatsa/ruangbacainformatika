@@ -14,7 +14,7 @@ class SearchBooksRequest extends FormRequest
     }
 
     /**
-     * @return array<string, ValidationRule|array<int, ValidationRule|string>|string>
+     * @return array<string, ValidationRule|array<int, ValidationRule|string|\Closure>|string>
      */
     public function rules(): array
     {

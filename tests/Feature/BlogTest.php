@@ -92,6 +92,9 @@ it('blog index can filter by category and tag', function () {
 });
 
 it('homepage shares latest approved posts', function () {
+    config(['app.asset_url' => 'test-asset-url']);
+    $expectedVersion = hash('xxh128', 'test-asset-url');
+
     $latestPost = Post::factory()->published()->create([
         'title' => 'Artikel Beranda',
         'published_at' => now(),
@@ -102,12 +105,14 @@ it('homepage shares latest approved posts', function () {
         'status' => Post::STATUS_DRAFT,
     ]);
 
-    get(route('home'))
+    get(route('home'), [
+        'X-Inertia' => 'true',
+        'X-Inertia-Version' => $expectedVersion,
+        'X-Inertia-Partial-Component' => 'welcome/index',
+        'X-Inertia-Partial-Data' => 'latestPosts',
+    ])
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('welcome/index')
-            ->has('latestPosts', 1)
-            ->where('latestPosts.0.title', $latestPost->title));
+        ->assertJsonPath('props.latestPosts.0.title', $latestPost->title);
 });
 
 it('popular posts are ordered by view_count descending', function () {

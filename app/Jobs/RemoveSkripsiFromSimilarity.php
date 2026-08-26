@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Actions\Similarity\CheckSimilarity;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
@@ -43,6 +44,8 @@ class RemoveSkripsiFromSimilarity implements ShouldQueue, ShouldQueueAfterCommit
         if (! $api->delete($documentId)) {
             throw new RuntimeException("Gagal menghapus dokumen {$documentId} dari Similarity API.");
         }
+
+        CheckSimilarity::invalidateCache();
 
         $statusService->deleteStatus($this->skripsiId, $this->modelClass);
     }

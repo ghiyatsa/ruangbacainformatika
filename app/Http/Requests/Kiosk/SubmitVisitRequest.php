@@ -19,7 +19,7 @@ class SubmitVisitRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, ValidationRule|string>|string>
+     * @return array<string, array<int, ValidationRule|string|\Closure|\Stringable>|string>
      */
     public function rules(): array
     {

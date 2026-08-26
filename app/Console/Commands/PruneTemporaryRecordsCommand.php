@@ -6,9 +6,9 @@ use App\Models\KioskDevice;
 use App\Models\LoanDraft;
 use App\Models\ReturnDraft;
 use Carbon\CarbonInterface;
-use Illuminate\Console\Attributes\AsCommand;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'app:prune-temporary-records')]
 #[Description('Prune stale temporary drafts and inactive kiosk device sessions')]

@@ -11,7 +11,7 @@ use BaconQrCode\Renderer\Module\RoundnessModule;
 use BaconQrCode\Renderer\RendererStyle\Fill;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -27,7 +27,7 @@ class KioskBorrowVerificationService
     protected const EXPIRY_MINUTES = 1;
 
     /**
-     * @return array{payload: string, qr_svg: string, expires_at: Carbon}
+     * @return array{payload: string, qr_svg: string, expires_at: CarbonImmutable}
      */
     public function generate(User $user): array
     {
@@ -67,7 +67,7 @@ class KioskBorrowVerificationService
             return null;
         }
 
-        $expiresAt = Carbon::parse((string) ($cached['expires_at'] ?? ''));
+        $expiresAt = CarbonImmutable::parse((string) ($cached['expires_at'] ?? ''));
 
         if ($expiresAt->isPast()) {
             $this->clearExistingForUser($user);
@@ -112,7 +112,7 @@ class KioskBorrowVerificationService
             ]);
         }
 
-        $expiresAt = Carbon::parse((string) ($cached['expires_at'] ?? ''));
+        $expiresAt = CarbonImmutable::parse((string) ($cached['expires_at'] ?? ''));
 
         if ($expiresAt->isPast()) {
             $this->forgetToken($token, (int) ($cached['user_id'] ?? 0));

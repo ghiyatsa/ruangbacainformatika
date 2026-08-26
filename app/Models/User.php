@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\CampusEmail;
 use App\Support\LoanConsequenceService;
 use App\Support\WhatsAppPhoneNumber;
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;

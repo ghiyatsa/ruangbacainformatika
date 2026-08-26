@@ -30,8 +30,8 @@ class CatalogService
                 ->first();
 
             return [
-                'booksCount' => (int) ($bookStats?->books_count ?? 0),
-                'featuredCount' => (int) ($bookStats?->featured_count ?? 0),
+                'booksCount' => (int) ($bookStats->books_count ?? 0),
+                'featuredCount' => (int) ($bookStats->featured_count ?? 0),
                 'availableItemsCount' => BookItem::query()
                     ->available()
                     ->join('books', 'books.id', '=', 'book_items.book_id')
@@ -53,7 +53,7 @@ class CatalogService
     /**
      * Get categories with their book counts.
      *
-     * @return Collection<int, array{id: int, name: string, slug: string, booksCount: int}>
+     * @return Collection<int, array{id: int, name: string, slug: string, description: string|null, booksCount: int}>
      */
     public function getCategoriesWithCounts(): Collection
     {

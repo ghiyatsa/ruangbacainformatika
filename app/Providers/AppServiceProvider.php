@@ -15,6 +15,7 @@ use App\Models\Thesis;
 use App\Observers\AcademicCacheObserver;
 use App\Observers\CatalogActivityObserver;
 use App\Observers\PostObserver;
+use App\Observers\SimilaritySyncObserver;
 use App\Observers\SitemapCacheObserver;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
@@ -88,10 +89,10 @@ class AppServiceProvider extends ServiceProvider
         Author::observe(CatalogActivityObserver::class);
         Book::observe([CatalogActivityObserver::class, SitemapCacheObserver::class]);
         Category::observe(CatalogActivityObserver::class);
-        InternshipReport::observe([CatalogActivityObserver::class, SitemapCacheObserver::class, AcademicCacheObserver::class]);
+        InternshipReport::observe([CatalogActivityObserver::class, SitemapCacheObserver::class, AcademicCacheObserver::class, SimilaritySyncObserver::class]);
         Post::observe([PostObserver::class, SitemapCacheObserver::class]);
         Publisher::observe(CatalogActivityObserver::class);
-        Skripsi::observe([CatalogActivityObserver::class, SitemapCacheObserver::class, AcademicCacheObserver::class]);
+        Skripsi::observe([CatalogActivityObserver::class, SitemapCacheObserver::class, AcademicCacheObserver::class, SimilaritySyncObserver::class]);
         Thesis::observe([CatalogActivityObserver::class, SitemapCacheObserver::class, AcademicCacheObserver::class]);
 
         // Clear catalog stats & page caches on database changes
@@ -127,7 +128,7 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('contact-messages', function (Request $request): Limit {
             return Limit::perMinute(5)
-                ->by((string) ($request->user()?->id ?? $request->ip()))
+                ->by((string) ($request->user()->id ?? $request->ip()))
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'message' => 'Terlalu banyak percobaan mengirim pesan. Coba lagi sebentar.',
@@ -153,7 +154,7 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('blog-comments', function (Request $request): Limit {
             return Limit::perMinute(5)
-                ->by((string) ($request->user()?->id ?? $request->ip()))
+                ->by((string) ($request->user()->id ?? $request->ip()))
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'message' => 'Terlalu banyak percobaan mengirim komentar. Coba lagi sebentar.',

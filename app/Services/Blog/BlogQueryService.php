@@ -5,9 +5,9 @@ namespace App\Services\Blog;
 use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\PostTag;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class BlogQueryService
 {

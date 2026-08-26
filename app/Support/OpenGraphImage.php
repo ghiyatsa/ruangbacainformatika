@@ -399,10 +399,6 @@ class OpenGraphImage
         $sourceWidth = imagesx($source);
         $sourceHeight = imagesy($source);
 
-        if ($sourceWidth < 1 || $sourceHeight < 1) {
-            return;
-        }
-
         $scale = min($width / $sourceWidth, $height / $sourceHeight);
         $targetWidth = max(1, (int) round($sourceWidth * $scale));
         $targetHeight = max(1, (int) round($sourceHeight * $scale));

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Actions\Similarity\CheckSimilarity;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
@@ -64,6 +65,8 @@ class SyncSkripsiToSimilarity implements ShouldQueue, ShouldQueueAfterCommit
         if (! $synced) {
             throw new RuntimeException("Gagal menyinkronkan data {$this->modelClass} ID {$this->skripsiId} ke Similarity API.");
         }
+
+        CheckSimilarity::invalidateCache();
 
         $statusService->markSynced($this->skripsiId, SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);
     }

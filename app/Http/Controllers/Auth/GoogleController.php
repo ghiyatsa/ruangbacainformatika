@@ -18,6 +18,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -203,10 +204,15 @@ class GoogleController extends Controller
 
     protected function googleProvider(Request $request): Provider
     {
-        return Socialite::driver('google')
-            ->setRequest($request)
-            ->setHttpClient(new Client([
-                'proxy' => null,
-            ]));
+        $provider = Socialite::driver('google');
+
+        if ($provider instanceof AbstractProvider) {
+            $provider->setRequest($request)
+                ->setHttpClient(new Client([
+                    'proxy' => null,
+                ]));
+        }
+
+        return $provider;
     }
 }

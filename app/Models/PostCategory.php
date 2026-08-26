@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PostCategory extends Model
 {
-    /** @use HasFactory<PostCategoryFactory> */
     use GeneratesSlug;
 
+    /** @use HasFactory<PostCategoryFactory> */
     use HasFactory;
 
     protected $fillable = [
