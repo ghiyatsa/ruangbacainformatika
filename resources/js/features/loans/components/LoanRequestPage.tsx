@@ -59,6 +59,7 @@ export default function LoanRequestPage({ draft, stats }: Props) {
     }, [draft.items, draft.selectedBookIds, remainingQuota]);
     const qrForm = useForm<{
         book_ids: number[];
+        draft?: string;
     }>({
         book_ids: defaultSelectedBookIds,
     });
@@ -163,9 +164,12 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                                 key={item.id}
                                                 className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
                                             >
-                                                <div className="flex items-center gap-3 min-w-0">
+                                                <div className="flex min-w-0 items-center gap-3">
                                                     <Checkbox
-                                                        id={"book-" + item.bookId}
+                                                        id={
+                                                            'book-' +
+                                                            item.bookId
+                                                        }
                                                         checked={isSelected}
                                                         disabled={
                                                             isSelectionDisabled ||
@@ -188,11 +192,11 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                                             instant
                                                             component="books/show"
                                                             pageProps={instantLoadingPageProps()}
-                                                            className="text-sm font-bold text-foreground hover:text-primary transition-colors block truncate"
+                                                            className="block truncate text-sm font-bold text-foreground transition-colors hover:text-primary"
                                                         >
                                                             {item.title}
                                                         </Link>
-                                                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
                                                             {item.authors.join(
                                                                 ', ',
                                                             )}
@@ -208,7 +212,7 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                                     as="button"
                                                     type="button"
                                                     preserveScroll
-                                                    className="text-muted-foreground hover:text-destructive transition-colors shrink-0 p-1.5 hover:bg-destructive/10 rounded-lg cursor-pointer"
+                                                    className="shrink-0 cursor-pointer rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                                                 >
                                                     <Trash2 className="size-4" />
                                                     <span className="sr-only">
@@ -261,55 +265,21 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                             </div>
                         </div>
 
-                        {qrForm.errors.book_ids && (
-                            <InputError
-                                message={qrForm.errors.book_ids}
-                                className="mt-1"
-                            />
-                        )}
-
                         <InputError
-                            message={
-                                (qrForm.errors as any)[
-                                    "book_ids." + selectedBookIds.indexOf(
-                                        (qrForm.errors &&
-                                            Object.keys(qrForm.errors)
-                                                .filter((key) =>
-                                                    key.startsWith(
-                                                        'book_ids.',
-                                                    ),
-                                                )
-                                                .map((key) =>
-                                                    parseInt(
-                                                        key.replace(
-                                                            'book_ids.',
-                                                            '',
-                                                        ),
-                                                    ),
-                                                )
-                                                .map(
-                                                    (index) =>
-                                                        selectedBookIds[index],
-                                                )
-                                                .shift()) ?? -1,
-                                    )
-                                ]
-                            }
+                            message={qrForm.errors.book_ids}
                             className="mt-1"
                         />
 
                         <InputError
                             message={
-                                qrForm.errors &&
+                                qrForm.errors.draft ??
                                 Object.keys(qrForm.errors)
                                     .filter((key) => key.startsWith('draft.'))
                                     .map(
                                         (key) =>
-                                            (qrForm.errors &&
-                                                (qrForm.errors[
-                                                    key as any
-                                                ] as string)) ??
-                                            '',
+                                            qrForm.errors[
+                                                key as keyof typeof qrForm.errors
+                                            ],
                                     )
                                     .shift()
                             }
@@ -326,7 +296,8 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                         className="mt-2 text-4xl font-semibold tracking-tight text-foreground tabular-nums"
                                         title={
                                             draft.expiresAt
-                                                ? "Berlaku sampai " + draft.expiresAt
+                                                ? 'Berlaku sampai ' +
+                                                  draft.expiresAt
                                                 : undefined
                                         }
                                     >
@@ -353,7 +324,9 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                         onClick={() =>
                                             downloadSvgAsPng(
                                                 draft.qrCodeSvg!,
-                                                "qr-peminjaman-" + draft.id + ".png",
+                                                'qr-peminjaman-' +
+                                                    draft.id +
+                                                    '.png',
                                                 'QR PEMINJAMAN',
                                             )
                                         }
@@ -363,16 +336,13 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                                     </Button>
                                 </div>
                             ) : (
-                                <div className="bg-muted/10 border border-dashed border-border/60 p-12 text-center text-sm text-muted-foreground">
+                                <div className="border border-dashed border-border/60 bg-muted/10 p-12 text-center text-sm text-muted-foreground">
                                     QR siap dibuat.
                                 </div>
                             )}
                         </div>
 
-                        <form
-                            onSubmit={submitQrRequest}
-                            className="space-y-3"
-                        >
+                        <form onSubmit={submitQrRequest} className="space-y-3">
                             {selectedBookIds.map((bookId) => (
                                 <input
                                     key={bookId}
@@ -387,16 +357,10 @@ export default function LoanRequestPage({ draft, stats }: Props) {
                             auth.borrowingAccess.reason ? (
                                 <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
                                     <p className="font-semibold">
-                                        {
-                                            auth.borrowingAccess.reason
-                                                .title
-                                        }
+                                        {auth.borrowingAccess.reason.title}
                                     </p>
                                     <p className="mt-0.5">
-                                        {
-                                            auth.borrowingAccess.reason
-                                                .message
-                                        }
+                                        {auth.borrowingAccess.reason.message}
                                     </p>
                                 </div>
                             ) : remainingQuota < 1 ? (

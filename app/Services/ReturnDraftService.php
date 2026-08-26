@@ -60,7 +60,7 @@ class ReturnDraftService
         $selectedLoanItems = LoanItem::query()
             ->with(['loan', 'bookItem.book'])
             ->whereIn('id', $normalizedLoanItemIds->all())
-            ->whereNull('returned_at', 'and', false)
+            ->whereNull('returned_at')
             ->whereHas('loan', fn ($query) => $query
                 ->whereBelongsTo($user))
             ->get();
