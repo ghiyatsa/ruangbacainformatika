@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Actions\Similarity\CheckSimilarity;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Services\SimilarityApiService;
@@ -95,6 +96,8 @@ class SyncSkripsiChunkToSimilarity implements ShouldQueue, ShouldQueueAfterCommi
 
             throw $exception;
         }
+
+        CheckSimilarity::invalidateCache();
 
         foreach ($records as $record) {
             $statusService->markSynced($record->id, SimilaritySyncStatus::OPERATION_UPSERT, $this->modelClass);

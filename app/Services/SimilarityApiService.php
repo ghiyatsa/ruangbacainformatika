@@ -344,45 +344,6 @@ class SimilarityApiService
     }
 
     /**
-     * @return array{ids: array<int, int>, total_indexed: int, next_offset: int|null}|null
-     */
-    public function indexedIds(int $limit = 500, int $offset = 0): ?array
-    {
-        try {
-            $response = $this->sendWithRetry(
-                fn (PendingRequest $request): Response => $request->get('/api/v1/sync/indexed-ids', [
-                    'limit' => $limit,
-                    'offset' => $offset,
-                ]),
-            );
-
-            if ($response->successful()) {
-                $ids = array_values(array_map(
-                    static fn (mixed $id): int => (int) $id,
-                    array_filter(
-                        $response->json('ids', []),
-                        static fn (mixed $id): bool => is_numeric($id),
-                    ),
-                ));
-
-                return [
-                    'ids' => $ids,
-                    'total_indexed' => (int) $response->json('total_indexed', count($ids)),
-                    'next_offset' => is_numeric($response->json('next_offset'))
-                        ? (int) $response->json('next_offset')
-                        : null,
-                ];
-            }
-
-            $this->logFailedResponse('indexed-ids', $response);
-        } catch (\Exception $e) {
-            Log::error('Similarity API: indexed-ids gagal', ['error' => $e->getMessage()]);
-        }
-
-        return null;
-    }
-
-    /**
      * Hapus dokumen dari vector store berdasarkan ID.
      */
     public function delete(string|int $id): bool

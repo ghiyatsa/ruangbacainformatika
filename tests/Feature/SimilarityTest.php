@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Similarity\CheckSimilarity;
 use App\Jobs\RemoveSkripsiFromSimilarity;
 use App\Jobs\SyncSkripsiChunkToSimilarity;
 use App\Jobs\SyncSkripsiToSimilarity;
@@ -14,6 +15,7 @@ use App\Services\SimilaritySyncDispatcher;
 use App\Services\SimilaritySyncStatusService;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -145,6 +147,35 @@ it('normalizes similarity results from api for both skripsi and internship_repor
         ->assertJsonFragment(['judul' => 'Laporan KP Magang', 'document_type' => 'internship_report']);
 });
 
+it('caches check results and serves fresh data after sync invalidates the cache', function () {
+    $service = Mockery::mock(SimilarityApiService::class);
+    $service->shouldReceive('checkSimilarity')->twice()->andReturn(
+        ['total_found' => 0, 'results' => []],
+        ['total_found' => 1, 'results' => [['document_type' => 'skripsi', 'document_id' => 5, 'similarity_score' => 0.9]]],
+    );
+    app()->instance(SimilarityApiService::class, $service);
+
+    $payload = ['judul' => 'Analisis sentimen ulasan aplikasi mobile'];
+
+    actingAs(User::factory()->create())
+        ->postJson(route('similarity.check'), $payload)
+        ->assertOk()
+        ->assertJsonFragment(['total_found' => 0]);
+
+    // Hasil kedua sebelum invalidation masih dari cache (API hanya dipanggil 2x total).
+    actingAs(User::factory()->create())
+        ->postJson(route('similarity.check'), $payload)
+        ->assertOk()
+        ->assertJsonFragment(['total_found' => 0]);
+
+    CheckSimilarity::invalidateCache();
+
+    actingAs(User::factory()->create())
+        ->postJson(route('similarity.check'), $payload)
+        ->assertOk()
+        ->assertJsonFragment(['total_found' => 1]);
+});
+
 // =========================================================================
 // SECTION 3: Sync Status & Job Tests
 // =========================================================================
@@ -270,4 +301,49 @@ it('sync dispatcher queues multiple model bulk upsert', function () {
     Queue::assertPushed(SyncSkripsiChunkToSimilarity::class, function (SyncSkripsiChunkToSimilarity $job) use ($ids) {
         return $job->skripsiIds === $ids && $job->modelClass === Skripsi::class;
     });
+});
+
+// =========================================================================
+// SECTION 6: Delete Observer & Cache Invalidation Tests
+// =========================================================================
+
+it('deleting skripsi or internship report dispatches removal from similarity api', function () {
+    Queue::fake();
+    config()->set('services.similarity_api.dispatch', 'queued');
+
+    $skripsi = Skripsi::withoutEvents(fn () => Skripsi::factory()->create());
+    $report = InternshipReport::withoutEvents(fn () => InternshipReport::factory()->create());
+
+    $skripsi->delete();
+    $report->delete();
+
+    Queue::assertPushed(RemoveSkripsiFromSimilarity::class, 2);
+
+    Queue::assertPushed(RemoveSkripsiFromSimilarity::class, function (RemoveSkripsiFromSimilarity $job) use ($skripsi) {
+        return $job->skripsiId === $skripsi->id && $job->modelClass === Skripsi::class;
+    });
+
+    Queue::assertPushed(RemoveSkripsiFromSimilarity::class, function (RemoveSkripsiFromSimilarity $job) use ($report) {
+        return $job->skripsiId === $report->id && $job->modelClass === InternshipReport::class;
+    });
+});
+
+it('sync and delete jobs invalidate the similarity check cache version', function () {
+    $versionKey = 'similarity_check_version';
+
+    expect(Cache::get($versionKey))->toBeNull();
+
+    $skripsi = Skripsi::withoutEvents(fn () => Skripsi::factory()->create());
+
+    $api = Mockery::mock(SimilarityApiService::class);
+    $api->shouldReceive('upsert')->once()->andReturn(true);
+
+    (new SyncSkripsiToSimilarity($skripsi->id, Skripsi::class))->handle($api, app(SimilaritySyncStatusService::class));
+    expect(Cache::get($versionKey))->toBe(1);
+
+    $apiDelete = Mockery::mock(SimilarityApiService::class);
+    $apiDelete->shouldReceive('delete')->once()->with("skripsi_{$skripsi->id}")->andReturn(true);
+
+    (new RemoveSkripsiFromSimilarity($skripsi->id, Skripsi::class))->handle($apiDelete, app(SimilaritySyncStatusService::class));
+    expect(Cache::get($versionKey))->toBe(2);
 });
