@@ -89,6 +89,33 @@ it('users are redirected to google', function () {
         ->assertRedirect();
 });
 
+it('a fresh google login clears the whatsapp skip flag from the session', function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+
+    User::factory()->create([
+        'email' => '230170002@mhs.unimal.ac.id',
+        'whatsapp' => null,
+        'address' => null,
+        'profile_completed_at' => now(),
+        'whatsapp_verified_at' => now(),
+        'is_approved' => true,
+    ]);
+
+    $socialiteUser = (new SocialiteUser)->map([
+        'id' => 'google-124',
+        'name' => 'Mahasiswa TI Dua',
+        'email' => '230170002@mhs.unimal.ac.id',
+        'avatar' => 'https://lh3.googleusercontent.com/google-124',
+    ]);
+
+    Socialite::fake('google', $socialiteUser);
+
+    $this->withSession(['whatsapp_verification_skipped' => true]);
+
+    get(route('auth.google.callback'))
+        ->assertSessionMissing('whatsapp_verification_skipped');
+});
+
 it('eligible users can authenticate with google', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 

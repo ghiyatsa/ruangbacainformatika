@@ -57,6 +57,7 @@ class WhatsAppVerificationController extends Controller
 
         return Inertia::render('auth/verify-whatsapp', [
             'verification' => $verification,
+            'meta' => ['robots' => 'noindex, nofollow'],
         ]);
     }
 
@@ -122,6 +123,7 @@ class WhatsAppVerificationController extends Controller
         );
 
         $request->session()->forget('allow_whatsapp_change');
+        $request->session()->forget('whatsapp_verification_skipped');
 
         Inertia::flash('toast', [
             'type' => 'success',

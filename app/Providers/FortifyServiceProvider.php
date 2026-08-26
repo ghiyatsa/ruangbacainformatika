@@ -63,6 +63,7 @@ class FortifyServiceProvider extends ServiceProvider
 
             return Inertia::render('auth/login', [
                 'googleLoginUrl' => route('auth.google'),
+                'meta' => ['robots' => 'noindex, nofollow'],
             ]);
         });
     }

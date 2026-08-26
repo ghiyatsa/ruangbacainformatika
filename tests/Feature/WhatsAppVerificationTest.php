@@ -455,3 +455,53 @@ it('shows a friendly error when whatsapp otp delivery cannot reach the gateway',
     expect(Cache::has('whatsapp-otp:challenge:'.$user->id))->toBeFalse()
         ->and(RateLimiter::attempts('whatsapp-otp:hourly:'.$user->id))->toBe(0);
 });
+
+it('skipping whatsapp verification sets a session flag and continues onboarding', function () {
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => null,
+        'address' => null,
+        'profile_completed_at' => null,
+        'whatsapp_verified_at' => null,
+        'is_approved' => true,
+    ]);
+
+    actingAs($user)
+        ->post(route('register.whatsapp.skip'))
+        ->assertRedirect(route('register.profile', absolute: false))
+        ->assertSessionHas('whatsapp_verification_skipped', true);
+});
+
+it('verifying whatsapp clears the whatsapp skip flag', function () {
+    Notification::fake();
+
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus',
+        'profile_completed_at' => now(),
+        'whatsapp_verified_at' => null,
+        'is_approved' => true,
+    ]);
+
+    actingAs($user)
+        ->withSession(['allow_whatsapp_change' => true, 'whatsapp_verification_skipped' => true])
+        ->get(route('register.whatsapp'));
+
+    $notification = null;
+
+    Notification::assertSentTo($user, WhatsAppOtpNotification::class, function (WhatsAppOtpNotification $sentNotification) use (&$notification): bool {
+        $notification = $sentNotification;
+
+        return true;
+    });
+
+    preg_match('/\b(\d{6})\b/', $notification?->toWhatsApp($user)->content ?? '', $matches);
+    $code = $matches[1] ?? null;
+
+    expect($code)->not->toBeNull();
+
+    actingAs($user)
+        ->post(route('register.whatsapp.verify'), ['code' => $code])
+        ->assertSessionMissing('whatsapp_verification_skipped');
+});

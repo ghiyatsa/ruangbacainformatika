@@ -77,14 +77,16 @@ export default function KioskPage(props: KioskProps) {
                         ? 'PIN Kios'
                         : 'Layanan Mandiri Perpustakaan'
                 }
-            />
+            >
+                <meta
+                    head-key="robots"
+                    name="robots"
+                    content="noindex, nofollow"
+                />
+            </Head>
 
             <main className="container mx-auto flex min-h-dvh max-w-7xl items-center px-4 py-4 sm:px-6 lg:px-8">
-                {props.step === 'pin' ? (
-                    <PinStep />
-                ) : (
-                    <ReadyStep {...props} />
-                )}
+                {props.step === 'pin' ? <PinStep /> : <ReadyStep {...props} />}
             </main>
         </div>
     );

@@ -51,6 +51,7 @@ class KioskController extends Controller
                 'purposeOptions' => VisitLog::purposeOptions(),
                 'kioskSession' => $kioskSession,
                 'memberRegistrationClaim' => $memberRegistrationClaim,
+                'meta' => ['robots' => 'noindex, nofollow'],
             ]);
         }
 
@@ -68,6 +69,7 @@ class KioskController extends Controller
             'purposeOptions' => VisitLog::purposeOptions(),
             'kioskSession' => $kioskSession,
             'memberRegistrationClaim' => $memberRegistrationClaim,
+            'meta' => ['robots' => 'noindex, nofollow'],
         ]);
     }
 

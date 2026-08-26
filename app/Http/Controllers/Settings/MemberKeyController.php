@@ -16,15 +16,24 @@ class MemberKeyController extends Controller
         protected KioskBorrowVerificationService $kioskBorrowVerificationService,
     ) {}
 
-    public function show(Request $request): Response
+    public function show(Request $request): Response|RedirectResponse
     {
+        if ($redirect = $this->redirectIfIneligible($request->user())) {
+            return $redirect;
+        }
+
         return Inertia::render('settings/member-key', [
             'memberKey' => $this->getMemberKeyPayload($request->user()),
+            'meta' => ['robots' => 'noindex, nofollow'],
         ]);
     }
 
     public function generate(Request $request): RedirectResponse
     {
+        if ($redirect = $this->redirectIfIneligible($request->user())) {
+            return $redirect;
+        }
+
         $this->kioskBorrowVerificationService->generate($request->user());
 
         if (! $request->boolean('automatic')) {
@@ -61,5 +70,20 @@ class MemberKeyController extends Controller
             'expiresAtIso' => $summary['expiresAtIso'],
             'qrCodeSvg' => $summary['qrCodeSvg'],
         ];
+    }
+
+    protected function redirectIfIneligible(User $user): ?RedirectResponse
+    {
+        if ($user->canStartLoanRequest()) {
+            return null;
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'warning',
+            'message' => $user->borrowingBlockReason(true)['message']
+                ?? 'Member key hanya tersedia untuk anggota yang memenuhi syarat peminjaman.',
+        ]);
+
+        return redirect()->route('settings.profile.edit');
     }
 }

@@ -4,7 +4,13 @@ import { VerifyWhatsAppPage } from '@/features/auth/components/VerifyWhatsAppPag
 export default function VerifyWhatsApp() {
     return (
         <>
-            <Head title="Verifikasi WhatsApp" />
+            <Head title="Verifikasi WhatsApp">
+                <meta
+                    head-key="robots"
+                    name="robots"
+                    content="noindex, nofollow"
+                />
+            </Head>
             <VerifyWhatsAppPage />
         </>
     );

@@ -84,3 +84,32 @@ it('member key expires after one minute', function () {
 
     Carbon::setTestNow();
 });
+
+it('users without the member role cannot view the member key page', function () {
+    $user = User::factory()->create([
+        'whatsapp_verified_at' => now(),
+    ]);
+
+    actingAs($user)
+        ->get(route('settings.member-key.show'))
+        ->assertRedirect(route('settings.profile.edit'));
+
+    expect(app(KioskBorrowVerificationService::class)->current($user))->toBeNull();
+});
+
+it('users without the member role cannot generate a member key', function () {
+    withoutMiddleware(PreventRequestForgery::class);
+
+    Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+
+    $admin = User::factory()->create([
+        'whatsapp_verified_at' => now(),
+    ]);
+    $admin->assignRole('admin');
+
+    actingAs($admin)
+        ->post(route('settings.member-key.generate'))
+        ->assertRedirect(route('settings.profile.edit'));
+
+    expect(app(KioskBorrowVerificationService::class)->current($admin))->toBeNull();
+});

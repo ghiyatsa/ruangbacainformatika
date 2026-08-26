@@ -68,6 +68,7 @@ class AuthenticateGoogleIdentity
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
+        $request->session()->forget('whatsapp_verification_skipped');
 
         return $this->authenticationRedirector->redirectResponse($request, $user);
     }

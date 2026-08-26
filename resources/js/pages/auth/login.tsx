@@ -4,7 +4,13 @@ import { LoginPage } from '@/features/auth/components/LoginPage';
 export default function Login({ googleLoginUrl }: { googleLoginUrl: string }) {
     return (
         <>
-            <Head title="Masuk" />
+            <Head title="Masuk">
+                <meta
+                    head-key="robots"
+                    name="robots"
+                    content="noindex, nofollow"
+                />
+            </Head>
             <LoginPage googleLoginUrl={googleLoginUrl} />
         </>
     );

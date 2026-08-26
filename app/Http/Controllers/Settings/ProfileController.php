@@ -23,7 +23,9 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('settings/profile');
+        return Inertia::render('settings/profile', [
+            'meta' => ['robots' => 'noindex, nofollow'],
+        ]);
     }
 
     public function initiateWhatsAppChange(Request $request): RedirectResponse
@@ -54,7 +56,9 @@ class ProfileController extends Controller
             return to_route('home');
         }
 
-        return Inertia::render('auth/register-profile');
+        return Inertia::render('auth/register-profile', [
+            'meta' => ['robots' => 'noindex, nofollow'],
+        ]);
     }
 
     /**

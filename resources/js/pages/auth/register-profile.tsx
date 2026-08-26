@@ -4,7 +4,13 @@ import { RegisterProfilePage } from '@/features/auth/components/RegisterProfileP
 export default function RegisterProfile() {
     return (
         <>
-            <Head title="Lengkapi Profil" />
+            <Head title="Lengkapi Profil">
+                <meta
+                    head-key="robots"
+                    name="robots"
+                    content="noindex, nofollow"
+                />
+            </Head>
             <RegisterProfilePage />
         </>
     );
