@@ -560,6 +560,8 @@ it('super admin users can access key admin resources', function (string $path) {
     '/admin/publishers',
     '/admin/loans',
     '/admin/visit-logs',
+    '/admin/member-registration-claims',
+    '/admin/whats-app-message-logs',
     '/admin/logs',
     '/admin/activity-logs',
     '/admin/settings/kiosk',
