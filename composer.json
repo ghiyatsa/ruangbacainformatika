@@ -55,6 +55,7 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
+            "@wayfinder",
             "npm install",
             "npm run build"
         ],
@@ -68,16 +69,25 @@
         "lint:check": [
             "pint --parallel --test"
         ],
+        "analyse": [
+            "@php artisan wayfinder:generate --with-form --quiet",
+            "phpstan"
+        ],
+        "wayfinder": [
+            "@php artisan wayfinder:generate --with-form"
+        ],
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
             "npm run lint:check",
             "npm run format:check",
             "npm run types:check",
+            "@analyse",
             "@test"
         ],
         "test": [
             "@php artisan config:clear --ansi",
             "@lint:check",
+            "@analyse",
             "@php artisan test"
         ],
         "post-autoload-dump": [

@@ -7,7 +7,7 @@
 ### Core Stack
 
 - Laravel 13
-- PHP 8.3
+- PHP 8.4
 - Inertia.js v3 + React 19 + TypeScript
 - Tailwind CSS v4
 - Filament v5

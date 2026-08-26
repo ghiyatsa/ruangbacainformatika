@@ -84,6 +84,7 @@ composer setup
 - Menyalin `.env.example` menjadi `.env` (jika belum ada)
 - Membuat kunci aplikasi baru (`php artisan key:generate`)
 - Menjalankan migrasi database (`php artisan migrate --force`)
+- Membangkitkan route TypeScript Wayfinder (`composer wayfinder`)
 - Menginstal dependensi NPM (`npm install`)
 - Melakukan kompilasi aset frontend awal (`npm run build`)
 
@@ -106,7 +107,7 @@ FONNTE_API_TOKEN=your_fonnte_token
 
 # Cloudflare Turnstile CAPTCHA (Untuk keamanan form Kiosk)
 TURNSTILE_SITE_KEY=your_turnstile_site_key
-TURNSTILE_SECRET_KEY=your_turnstile_secret_key
+TURNSTILE_SECRET=your_turnstile_secret
 
 # Super Admin Awal
 APP_SUPER_ADMIN_NAME="Administrator Utama"
@@ -120,6 +121,34 @@ php artisan db:seed
 ```
 > [!NOTE]
 > Jika environment Anda bernilai `local` atau `development`, seeder secara otomatis akan mengisikan katalog buku contoh, skripsi, tesis, dan penulis fiktif untuk membantu pengujian UI.
+>
+> [!WARNING]
+> Di luar environment `local`/`development`, seeder **tidak melakukan apa-apa** (no-op) demi keamanan — perintah tetap sukses tanpa mengisi data.
+
+### 5. Route TypeScript (Wayfinder)
+Fungsi route/controller TypeScript (`resources/js/routes`, `resources/js/actions`) di-gitignore dan dibangkitkan dari definisi route Laravel. Setelah clone atau setiap menambah/mengubah route, jalankan:
+```bash
+composer wayfinder
+```
+Tanpa langkah ini, `npm run types:check` dan navigasi IDE akan gagal karena modul belum ada. Saat produksi, plugin Vite (`wayfinder()` di `vite.config.ts`) membangkitkan ulang otomatis pada `npm run build`.
+
+---
+
+## 🧰 Alur Kerja Development
+
+- **Satu perintah untuk semua pemeriksaan** (pint, eslint, prettier, tsc, phpstan, pest):
+  ```bash
+  composer ci:check
+  ```
+- **Static analysis PHP (PHPStan/Larastan level 4)**:
+  ```bash
+  composer analyse
+  ```
+- **Git hooks**: Husky menjalankan lint-staged pada pre-commit (Pint untuk `*.php`, ESLint+Prettier untuk TS/TSX). Pesan commit wajib Conventional Commits dengan scope terdaftar — lihat `commitlint.config.js`.
+- **Parallel testing** (lebih cepat di mesin multi-core):
+  ```bash
+  php artisan test --parallel --compact
+  ```
 
 ---
 
