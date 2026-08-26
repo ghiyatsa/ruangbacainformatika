@@ -14,10 +14,7 @@ export function useLoanHistoryFilters({
 }: UseLoanHistoryFiltersOptions) {
     const [searchQuery, setSearchQuery] = useState(currentSearch);
 
-    const applyFilters = (
-        nextFilter: LoanFilter,
-        nextSearch: string,
-    ): void => {
+    const applyFilters = (nextFilter: LoanFilter, nextSearch: string): void => {
         router.get(
             loansRoute.history.url(),
             {

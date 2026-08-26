@@ -63,7 +63,9 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
                 whatsapp: memberRegistrationClaim.whatsapp || '',
                 address: memberRegistrationClaim.address || '',
             });
-            setEmailParts(splitMemberEmail(memberRegistrationClaim.email || ''));
+            setEmailParts(
+                splitMemberEmail(memberRegistrationClaim.email || ''),
+            );
         }
     }
 
@@ -193,7 +195,10 @@ export function MemberForm({ memberRegistrationClaim }: MemberFormProps) {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
                             {!isPendingClaim && (
-                                <Badge variant="outline" className="w-fit shrink-0">
+                                <Badge
+                                    variant="outline"
+                                    className="w-fit shrink-0"
+                                >
                                     {isLinkedClaim
                                         ? 'Terhubung'
                                         : isExpired

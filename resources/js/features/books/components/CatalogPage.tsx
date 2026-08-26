@@ -94,7 +94,9 @@ export function CatalogPage<T>({
                                         <button
                                             type="button"
                                             aria-label="Hapus filter pencarian"
-                                            onClick={() => onRemoveFilter('search')}
+                                            onClick={() =>
+                                                onRemoveFilter('search')
+                                            }
                                             className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
                                         >
                                             <X className="size-3" />
@@ -163,7 +165,8 @@ export function CatalogPage<T>({
                                     <span className="text-muted-foreground">
                                         Penerbit:
                                     </span>
-                                    {filterLabels?.publisher ?? filters.publisher}
+                                    {filterLabels?.publisher ??
+                                        filters.publisher}
                                     {onRemoveFilter && (
                                         <button
                                             type="button"
@@ -194,7 +197,9 @@ export function CatalogPage<T>({
                                         <button
                                             type="button"
                                             aria-label="Hapus filter tahun"
-                                            onClick={() => onRemoveFilter('year')}
+                                            onClick={() =>
+                                                onRemoveFilter('year')
+                                            }
                                             className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted"
                                         >
                                             <X className="size-3" />

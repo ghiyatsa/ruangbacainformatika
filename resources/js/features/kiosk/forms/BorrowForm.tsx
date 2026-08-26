@@ -23,7 +23,6 @@ const QrCameraScanner = lazy(() =>
     })),
 );
 
-
 function getQrErrorMessage(
     errors: Record<string, string | undefined>,
 ): string | null {
@@ -287,7 +286,9 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                         !qrForm.processing &&
                         !qrErrorMessage ? (
                             <Alert>
-                                <AlertTitle>Member key sudah terbaca</AlertTitle>
+                                <AlertTitle>
+                                    Member key sudah terbaca
+                                </AlertTitle>
                                 <AlertDescription>
                                     Jika dialog belum tertutup, silakan scan
                                     ulang.

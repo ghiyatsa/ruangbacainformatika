@@ -33,8 +33,7 @@ export interface CommentUser {
     initials: string;
 }
 
-const REPLIES_WRAPPER_CLASS =
-    'ml-5 sm:ml-[3.25rem]';
+const REPLIES_WRAPPER_CLASS = 'ml-5 sm:ml-[3.25rem]';
 
 type CommentKind = 'komentar' | 'balasan';
 
@@ -86,7 +85,9 @@ export function CommentItem({
         return false;
     });
 
-    const setShowReplies = (value: boolean | ((current: boolean) => boolean)) => {
+    const setShowReplies = (
+        value: boolean | ((current: boolean) => boolean),
+    ) => {
         setShowRepliesState((current) => {
             const next = typeof value === 'function' ? value(current) : value;
 
@@ -122,7 +123,8 @@ export function CommentItem({
     const [isLoadingReplies, setIsLoadingReplies] = useState(false);
 
     const replies = (comment.replies ?? []).filter(
-        (reply, index, self) => self.findIndex((r) => r.id === reply.id) === index
+        (reply, index, self) =>
+            self.findIndex((r) => r.id === reply.id) === index,
     );
 
     const handleToggleReplies = () => {
@@ -194,7 +196,10 @@ export function CommentItem({
                     {reply.canDelete && (
                         <button
                             onClick={() =>
-                                setCommentToDelete({ id: reply.id, kind: 'balasan' })
+                                setCommentToDelete({
+                                    id: reply.id,
+                                    kind: 'balasan',
+                                })
                             }
                             className="cursor-pointer text-muted-foreground transition-colors hover:text-destructive"
                             title="Hapus balasan"
@@ -217,19 +222,25 @@ export function CommentItem({
                             return reply.content;
                         }
 
-                        return parts.reduce((acc: any[], part: string, index: number) => {
-                            if (index === 0) {
-                                return [part];
-                            }
+                        return parts.reduce(
+                            (acc: any[], part: string, index: number) => {
+                                if (index === 0) {
+                                    return [part];
+                                }
 
-                            return [
-                                ...acc,
-                                <span key={index} className="font-semibold text-primary">
-                                    {mention}
-                                </span>,
-                                part,
-                            ];
-                        }, []);
+                                return [
+                                    ...acc,
+                                    <span
+                                        key={index}
+                                        className="font-semibold text-primary"
+                                    >
+                                        {mention}
+                                    </span>,
+                                    part,
+                                ];
+                            },
+                            [],
+                        );
                     })()}
                 </p>
 
@@ -304,7 +315,9 @@ export function CommentItem({
                         {replies.length > 0 && (
                             <>
                                 {allowComments !== false && (
-                                    <span className="text-xs text-muted-foreground/40">•</span>
+                                    <span className="text-xs text-muted-foreground/40">
+                                        •
+                                    </span>
                                 )}
                                 <button
                                     type="button"
@@ -326,7 +339,8 @@ export function CommentItem({
             </div>
 
             {/* Thread children (replies and/or reply input form) */}
-            {(showReplies && replies.length > 0) || (isReplying && allowComments !== false) ? (
+            {(showReplies && replies.length > 0) ||
+            (isReplying && allowComments !== false) ? (
                 <div className={`mt-3 space-y-4 ${REPLIES_WRAPPER_CLASS}`}>
                     {/* Replies list */}
                     {showReplies && replies.length > 0 && (
@@ -334,7 +348,10 @@ export function CommentItem({
                             {isLoadingReplies ? (
                                 <div className="space-y-4">
                                     {replies.map((reply) => (
-                                        <div key={reply.id} className="flex gap-3 animate-pulse">
+                                        <div
+                                            key={reply.id}
+                                            className="flex animate-pulse gap-3"
+                                        >
                                             <div className="size-8 rounded-full bg-muted" />
                                             <div className="flex-1 space-y-2 py-1">
                                                 <div className="h-3 w-1/4 rounded bg-muted" />
@@ -357,7 +374,8 @@ export function CommentItem({
                                     <p className="text-xs text-muted-foreground">
                                         Membalas{' '}
                                         <span className="font-semibold text-foreground">
-                                            {replyTarget.user?.name ?? 'komentar ini'}
+                                            {replyTarget.user?.name ??
+                                                'komentar ini'}
                                         </span>
                                     </p>
                                     <CommentInput
@@ -376,7 +394,9 @@ export function CommentItem({
                                             }, 400);
                                         }}
                                         mention={
-                                            replyTarget.user && replyTarget.user.id !== currentUser?.id
+                                            replyTarget.user &&
+                                            replyTarget.user.id !==
+                                                currentUser?.id
                                                 ? `@${replyTarget.user.name}`
                                                 : undefined
                                         }

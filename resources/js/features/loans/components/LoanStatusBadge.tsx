@@ -1,8 +1,4 @@
-import {
-    AlertTriangle,
-    CheckCircle2,
-    Clock,
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { LoanHistoryRow } from '@/features/loans/types';
 

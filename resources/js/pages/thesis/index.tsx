@@ -1,5 +1,8 @@
 import AcademicWorkCatalogPage from '@/features/academic-works/components/AcademicWorkCatalogPage';
-import type { PaginatedAcademicWorks, AcademicWorkFilters } from '@/features/academic-works/types';
+import type {
+    PaginatedAcademicWorks,
+    AcademicWorkFilters,
+} from '@/features/academic-works/types';
 
 interface ThesisIndexProps {
     filters: AcademicWorkFilters;
@@ -9,6 +12,11 @@ interface ThesisIndexProps {
 }
 
 export default function ThesisIndex({ theses, ...props }: ThesisIndexProps) {
-    return <AcademicWorkCatalogPage workType="thesis" academicWorks={theses} {...props} />;
+    return (
+        <AcademicWorkCatalogPage
+            workType="thesis"
+            academicWorks={theses}
+            {...props}
+        />
+    );
 }
-

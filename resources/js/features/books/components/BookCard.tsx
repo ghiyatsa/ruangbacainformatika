@@ -182,7 +182,7 @@ function BookCard({
         <div
             className={cn(
                 'group relative flex h-full overflow-hidden rounded-2xl border transition-all duration-300',
-                isCompact ? 'bg-card border-border/60' : 'bg-card',
+                isCompact ? 'border-border/60 bg-card' : 'bg-card',
                 !isCompact && 'sm:flex-col',
             )}
         >

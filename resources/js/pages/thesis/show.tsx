@@ -8,7 +8,11 @@ interface ThesisShowProps {
     relatedTheses?: AcademicWorkData[];
 }
 
-export default function ThesisShow({ thesis, relatedTheses, ...props }: ThesisShowProps) {
+export default function ThesisShow({
+    thesis,
+    relatedTheses,
+    ...props
+}: ThesisShowProps) {
     return (
         <AcademicWorkDetailPage
             workType="thesis"
@@ -18,4 +22,3 @@ export default function ThesisShow({ thesis, relatedTheses, ...props }: ThesisSh
         />
     );
 }
-

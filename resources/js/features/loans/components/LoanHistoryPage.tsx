@@ -21,7 +21,10 @@ import { useCountdown } from '@/hooks/use-countdown';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import type { FormEvent } from 'react';
-import type { LoanHistoryPageProps, LoanHistoryRow } from '@/features/loans/types';
+import type {
+    LoanHistoryPageProps,
+    LoanHistoryRow,
+} from '@/features/loans/types';
 
 const FILTER_OPTIONS = [
     { key: 'all' as const, label: 'Semua' },
@@ -42,11 +45,12 @@ export default function LoanHistoryPage({
             (stats.active === 0 && stats.overdue === 0),
     );
 
-    const { searchQuery, setSearchQuery, applyFilters } =
-        useLoanHistoryFilters({
+    const { searchQuery, setSearchQuery, applyFilters } = useLoanHistoryFilters(
+        {
             currentFilter: filters.filter,
             currentSearch: filters.search,
-        });
+        },
+    );
 
     // Selection state ---------------------------------------------------------
 
@@ -216,7 +220,8 @@ export default function LoanHistoryPage({
                                     Riwayat Peminjaman
                                 </h1>
                                 <p className="mt-2 text-sm text-muted-foreground">
-                                    Riwayat pinjam ditampilkan per buku agar tetap ringkas saat data bertambah.
+                                    Riwayat pinjam ditampilkan per buku agar
+                                    tetap ringkas saat data bertambah.
                                 </p>
                             </div>
                         </div>
@@ -236,7 +241,7 @@ export default function LoanHistoryPage({
                                     <h2 className="text-xl font-bold tracking-tight text-foreground">
                                         Daftar Peminjaman
                                     </h2>
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="mt-1 text-xs text-muted-foreground">
                                         Yang aktif tampil lebih dulu.
                                     </p>
                                 </div>
@@ -346,7 +351,10 @@ export default function LoanHistoryPage({
                                                     variant="destructive"
                                                     className="w-fit"
                                                 >
-                                                    {groupedLoans.overdue.length}{' '}
+                                                    {
+                                                        groupedLoans.overdue
+                                                            .length
+                                                    }{' '}
                                                     buku
                                                 </Badge>
                                             </div>
@@ -365,7 +373,8 @@ export default function LoanHistoryPage({
                                                         Masih dipinjam
                                                     </h3>
                                                     <p className="text-sm text-muted-foreground">
-                                                        Pilih buku untuk QR pengembalian.
+                                                        Pilih buku untuk QR
+                                                        pengembalian.
                                                     </p>
                                                 </div>
                                                 <Badge
@@ -395,7 +404,8 @@ export default function LoanHistoryPage({
                                                         Selesai
                                                     </h3>
                                                     <p className="text-sm text-muted-foreground">
-                                                        Riwayat yang sudah selesai.
+                                                        Riwayat yang sudah
+                                                        selesai.
                                                     </p>
                                                 </div>
 
@@ -464,11 +474,9 @@ export default function LoanHistoryPage({
                         />
                     </div>
                 ) : (
-                    <div className="flex h-72 flex-col items-center justify-center border border-dashed border-border/60 bg-muted/5 text-center p-6">
-                        <h2 className="text-lg font-bold">
-                            Belum ada riwayat
-                        </h2>
-                        <p className="mt-2 text-sm text-muted-foreground max-w-xs">
+                    <div className="flex h-72 flex-col items-center justify-center border border-dashed border-border/60 bg-muted/5 p-6 text-center">
+                        <h2 className="text-lg font-bold">Belum ada riwayat</h2>
+                        <p className="mt-2 max-w-xs text-sm text-muted-foreground">
                             Anda belum pernah meminjam buku.
                         </p>
                         <Button

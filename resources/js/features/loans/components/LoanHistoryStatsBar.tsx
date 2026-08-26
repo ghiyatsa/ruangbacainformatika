@@ -1,13 +1,5 @@
-import {
-    AlertTriangle,
-    BookOpen,
-    CheckCircle2,
-    Library,
-} from 'lucide-react';
-import {
-    Card,
-    CardContent,
-} from '@/components/ui/card';
+import { AlertTriangle, BookOpen, CheckCircle2, Library } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface StatsBarProps {
@@ -65,9 +57,7 @@ export function LoanHistoryStatsBar({ stats }: StatsBarProps) {
                                 stat.bg,
                             )}
                         >
-                            <stat.icon
-                                className={cn('size-4', stat.color)}
-                            />
+                            <stat.icon className={cn('size-4', stat.color)} />
                         </div>
                         <div className="min-w-0">
                             <p className="truncate text-[11px] font-medium tracking-wider text-muted-foreground uppercase">

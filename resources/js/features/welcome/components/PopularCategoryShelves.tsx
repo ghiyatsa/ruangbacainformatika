@@ -16,7 +16,7 @@ export default function PopularCategoryShelves({
 }) {
     const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
     const shelves = (popularCategoryShelves ?? []).filter(
-        (shelf) => shelf.books && shelf.books.length > 0
+        (shelf) => shelf.books && shelf.books.length > 0,
     );
 
     if (popularCategoryShelves !== undefined && shelves.length === 0) {
@@ -45,7 +45,7 @@ export default function PopularCategoryShelves({
                                     />
                                 </div>
                             )}
-                            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+                            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
                                 <div className="flex flex-col gap-8 sm:gap-10">
                                     <SectionHeader
                                         title="Kategori populer"
@@ -86,7 +86,7 @@ export default function PopularCategoryShelves({
                                 />
                             </div>
                         )}
-                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+                        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
                             <div className="flex flex-col gap-8 sm:gap-10">
                                 <SectionHeader
                                     title={shelf.name}

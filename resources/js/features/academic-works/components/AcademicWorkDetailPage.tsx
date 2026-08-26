@@ -4,7 +4,10 @@ import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
 import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
-import { KtiReportCard, KtiReportCardSkeleton } from '@/components/kti/KtiReportCard';
+import {
+    KtiReportCard,
+    KtiReportCardSkeleton,
+} from '@/components/kti/KtiReportCard';
 import { KtiTextWorkHero } from '@/components/kti/KtiTextWorkHero';
 import { KtiTextWorkSidebar } from '@/components/kti/KtiTextWorkSidebar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,7 +20,10 @@ import type { AcademicWorkShowProps } from '@/features/academic-works/types';
 import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 
 export default function AcademicWorkDetailPage(
-    props: AcademicWorkShowProps & { workType: 'skripsi' | 'thesis'; loading?: boolean },
+    props: AcademicWorkShowProps & {
+        workType: 'skripsi' | 'thesis';
+        loading?: boolean;
+    },
 ) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const { workType } = props;
@@ -33,7 +39,8 @@ export default function AcademicWorkDetailPage(
 
     const route = workType === 'skripsi' ? skripsiRoute : thesisRoute;
     const label = workType === 'skripsi' ? 'Skripsi' : 'Tesis';
-    const deferredDataKey = workType === 'skripsi' ? 'relatedSkripsis' : 'relatedTheses';
+    const deferredDataKey =
+        workType === 'skripsi' ? 'relatedSkripsis' : 'relatedTheses';
 
     const bookmarkRecord: CatalogBookmarkRecord | null = work
         ? {
@@ -70,14 +77,24 @@ export default function AcademicWorkDetailPage(
                         return work.abstract.slice(0, 160);
                     }
 
-                    return `${work.abstract} Temukan abstrak lengkap, penulis, NIM, tahun terbit, dan dosen pembimbing untuk referensi akademik di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                    return `${work.abstract} Temukan abstrak lengkap, penulis, NIM, tahun terbit, dan dosen pembimbing untuk referensi akademik di Ruang Baca Teknik Informatika Unimal.`.slice(
+                        0,
+                        160,
+                    );
                 }
 
                 if (work) {
-                    const authorStr = work.authorName ? ` yang disusun oleh ${work.authorName}` : '';
-                    const nimStr = work.studentId ? ` (NIM: ${work.studentId})` : '';
+                    const authorStr = work.authorName
+                        ? ` yang disusun oleh ${work.authorName}`
+                        : '';
+                    const nimStr = work.studentId
+                        ? ` (NIM: ${work.studentId})`
+                        : '';
 
-                    return `Akses detail ${label.toLowerCase()} "${work.title}"${authorStr}${nimStr}. Cari metadata lengkap, abstrak, dan tahun terbit untuk referensi ilmiah di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                    return `Akses detail ${label.toLowerCase()} "${work.title}"${authorStr}${nimStr}. Cari metadata lengkap, abstrak, dan tahun terbit untuk referensi ilmiah di Ruang Baca Teknik Informatika Unimal.`.slice(
+                        0,
+                        160,
+                    );
                 }
 
                 return `Cari detail ${label.toLowerCase()}, abstrak, nama penulis, dosen pembimbing, dan tahun terbit karya ilmiah secara mandiri di katalog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.`;
@@ -92,22 +109,13 @@ export default function AcademicWorkDetailPage(
                     label={label}
                     kindLabel={label}
                     indexUrl={route.index.url()}
-                    detailUrl={
-                        work
-                            ? route.show.url(work.studentId)
-                            : null
-                    }
+                    detailUrl={work ? route.show.url(work.studentId) : null}
                     isBookmarkedByUser={isBookmarkedByUser}
                     bookmarkRecord={bookmarkRecord}
                     onToggleBookmark={toggleBookmark}
                 />
             }
-            sidebar={
-                <KtiTextWorkSidebar
-                    record={work}
-                    label={label}
-                />
-            }
+            sidebar={<KtiTextWorkSidebar record={work} label={label} />}
             secondarySidebar={
                 work ? (
                     <KtiReportCard
@@ -121,10 +129,9 @@ export default function AcademicWorkDetailPage(
                 )
             }
             footer={
-                (props.relatedWorks === undefined || props.relatedWorks.length > 0) && (
-                    <KtiRelatedSection
-                        title={`${label} Terkait`}
-                    >
+                (props.relatedWorks === undefined ||
+                    props.relatedWorks.length > 0) && (
+                    <KtiRelatedSection title={`${label} Terkait`}>
                         <Deferred
                             data={deferredDataKey}
                             fallback={
@@ -157,39 +164,45 @@ export default function AcademicWorkDetailPage(
                 )
             }
         >
-                        {(() => {
-                const jsonLd = work ? {
-                    '@context': 'https://schema.org',
-                    '@type': 'Thesis',
-                    'name': work.title,
-                    'headline': work.title,
-                    'author': {
-                        '@type': 'Person',
-                        'name': work.authorName,
-                        'identifier': work.studentId
-                    },
-                    'datePublished': work.year ? `${work.year}-01-01` : undefined,
-                    'inLanguage': 'id',
-                    'description': work.abstract || undefined,
-                    'keywords': work.keywords ? work.keywords.join(', ') : undefined,
-                    'learningResourceType': label,
-                    'publisher': {
-                        '@type': 'EducationalOrganization',
-                        '@id': 'https://ruangbacainformatika.unimal.ac.id/#department',
-                        'name': 'Program Studi Teknik Informatika Universitas Malikussaleh',
-                        'url': 'https://ruangbacainformatika.unimal.ac.id',
-                        'parentOrganization': {
-                            '@type': 'EducationalOrganization',
-                            '@id': 'https://unimal.ac.id/#university',
-                            'name': 'Universitas Malikussaleh',
-                            'url': 'https://unimal.ac.id'
-                        }
-                    }
-                } : null;
+            {(() => {
+                const jsonLd = work
+                    ? {
+                          '@context': 'https://schema.org',
+                          '@type': 'Thesis',
+                          name: work.title,
+                          headline: work.title,
+                          author: {
+                              '@type': 'Person',
+                              name: work.authorName,
+                              identifier: work.studentId,
+                          },
+                          datePublished: work.year
+                              ? `${work.year}-01-01`
+                              : undefined,
+                          inLanguage: 'id',
+                          description: work.abstract || undefined,
+                          keywords: work.keywords
+                              ? work.keywords.join(', ')
+                              : undefined,
+                          learningResourceType: label,
+                          publisher: {
+                              '@type': 'EducationalOrganization',
+                              '@id': 'https://ruangbacainformatika.unimal.ac.id/#department',
+                              name: 'Program Studi Teknik Informatika Universitas Malikussaleh',
+                              url: 'https://ruangbacainformatika.unimal.ac.id',
+                              parentOrganization: {
+                                  '@type': 'EducationalOrganization',
+                                  '@id': 'https://unimal.ac.id/#university',
+                                  name: 'Universitas Malikussaleh',
+                                  url: 'https://unimal.ac.id',
+                              },
+                          },
+                      }
+                    : null;
 
                 if (!jsonLd) {
-return null;
-}
+                    return null;
+                }
 
                 return (
                     <script type="application/ld+json">

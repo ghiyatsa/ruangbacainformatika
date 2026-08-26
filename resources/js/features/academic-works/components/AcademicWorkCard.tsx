@@ -30,7 +30,10 @@ interface AcademicWorkCardProps {
     workType: 'skripsi' | 'thesis';
 }
 
-export default function AcademicWorkCard({ work, workType }: AcademicWorkCardProps) {
+export default function AcademicWorkCard({
+    work,
+    workType,
+}: AcademicWorkCardProps) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const isBookmarkedByUser = isBookmarked({
         catalogType: workType,

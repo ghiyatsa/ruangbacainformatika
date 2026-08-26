@@ -98,7 +98,6 @@ export function downloadSvgAsPng(
     img.src = dataUrl;
 }
 
-
 export function formatViewCount(count: number): string {
     if (count < 1000) {
         return count.toLocaleString('id-ID');

@@ -68,9 +68,10 @@ export function SearchableCatalogFilter({
 
         const query = searchQuery.toLowerCase();
 
-        return options.filter((option) =>
-            option.name.toLowerCase().includes(query) ||
-            option.slug.toLowerCase().includes(query)
+        return options.filter(
+            (option) =>
+                option.name.toLowerCase().includes(query) ||
+                option.slug.toLowerCase().includes(query),
         );
     }, [options, searchQuery]);
 
@@ -95,7 +96,10 @@ export function SearchableCatalogFilter({
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const target = e.currentTarget;
 
-        if (target.scrollHeight - target.scrollTop <= target.clientHeight + 50) {
+        if (
+            target.scrollHeight - target.scrollTop <=
+            target.clientHeight + 50
+        ) {
             if (limit < filteredOptions.length) {
                 setLimit((prev) => prev + 50);
             }
@@ -108,7 +112,7 @@ export function SearchableCatalogFilter({
     );
 
     useEffect(() => {
-        if (! open || isMobile) {
+        if (!open || isMobile) {
             return;
         }
 
@@ -131,7 +135,8 @@ export function SearchableCatalogFilter({
                 setSheetHeight(MOBILE_SHEET_MIN_HEIGHT);
 
                 if (sheetRef.current) {
-                    sheetRef.current.style.height = MOBILE_SHEET_MIN_HEIGHT + "px";
+                    sheetRef.current.style.height =
+                        MOBILE_SHEET_MIN_HEIGHT + 'px';
                 }
             }, 0);
         } else {
@@ -139,7 +144,8 @@ export function SearchableCatalogFilter({
                 setSheetHeight(MOBILE_SHEET_MIN_HEIGHT);
 
                 if (sheetRef.current) {
-                    sheetRef.current.style.height = MOBILE_SHEET_MIN_HEIGHT + "px";
+                    sheetRef.current.style.height =
+                        MOBILE_SHEET_MIN_HEIGHT + 'px';
                 }
 
                 setIsDragging(false);
@@ -165,9 +171,10 @@ export function SearchableCatalogFilter({
 
     const getSnapPoints = () => {
         const low = MOBILE_SHEET_MIN_HEIGHT;
-        const high = typeof window !== 'undefined'
-            ? Math.max(low + 120, Math.min(720, window.innerHeight * 0.8))
-            : 600;
+        const high =
+            typeof window !== 'undefined'
+                ? Math.max(low + 120, Math.min(720, window.innerHeight * 0.8))
+                : 600;
 
         return { low, high };
     };
@@ -175,7 +182,9 @@ export function SearchableCatalogFilter({
     function handleDragStart(event: React.PointerEvent<HTMLDivElement>): void {
         event.currentTarget.setPointerCapture(event.pointerId);
         dragStartYRef.current = event.clientY;
-        dragStartHeightRef.current = sheetRef.current ? parseFloat(sheetRef.current.style.height) || sheetHeight : sheetHeight;
+        dragStartHeightRef.current = sheetRef.current
+            ? parseFloat(sheetRef.current.style.height) || sheetHeight
+            : sheetHeight;
         setIsDragging(true);
     }
 
@@ -199,14 +208,15 @@ export function SearchableCatalogFilter({
 
         animationFrameRef.current = requestAnimationFrame(() => {
             if (!sheetRef.current) {
-return;
-}
+                return;
+            }
 
             const deltaY = clientY - startY;
             const nextHeight = startHeight - deltaY;
-            const maxHeight = typeof window !== 'undefined' ? window.innerHeight - 24 : 700;
+            const maxHeight =
+                typeof window !== 'undefined' ? window.innerHeight - 24 : 700;
             const boundedHeight = Math.max(0, Math.min(maxHeight, nextHeight));
-            sheetRef.current.style.height = boundedHeight + "px";
+            sheetRef.current.style.height = boundedHeight + 'px';
         });
     }
 
@@ -223,7 +233,9 @@ return;
             animationFrameRef.current = null;
         }
 
-        const currentDOMHeight = sheetRef.current ? parseFloat(sheetRef.current.style.height) || sheetHeight : sheetHeight;
+        const currentDOMHeight = sheetRef.current
+            ? parseFloat(sheetRef.current.style.height) || sheetHeight
+            : sheetHeight;
         const { low, high } = getSnapPoints();
 
         // jika user drag lebih rendah dari titik pertama (low) otomatis sheet nutup ketika user lepas drag
@@ -238,8 +250,9 @@ return;
             setSheetHeight(targetHeight);
 
             if (sheetRef.current) {
-                sheetRef.current.style.transition = 'height 250ms cubic-bezier(0.16, 1, 0.3, 1)';
-                sheetRef.current.style.height = targetHeight + "px";
+                sheetRef.current.style.transition =
+                    'height 250ms cubic-bezier(0.16, 1, 0.3, 1)';
+                sheetRef.current.style.height = targetHeight + 'px';
             }
         }
 
@@ -267,7 +280,7 @@ return;
     const commandContent = (
         <Command
             shouldFilter={false}
-            className="h-full border-none bg-transparent p-1 **:[[data-slot=command-input-wrapper]]:bg-muted/60 **:[[data-slot=command-input-wrapper]]:rounded-lg **:[[data-slot=command-input-wrapper]]:px-2 **:[[data-slot=command-input-wrapper]]:py-1 **:[[data-slot=command-input-wrapper]]:mb-2"
+            className="h-full border-none bg-transparent p-1 **:[[data-slot=command-input-wrapper]]:mb-2 **:[[data-slot=command-input-wrapper]]:rounded-lg **:[[data-slot=command-input-wrapper]]:bg-muted/60 **:[[data-slot=command-input-wrapper]]:px-2 **:[[data-slot=command-input-wrapper]]:py-1"
         >
             <CommandInput
                 value={searchQuery}
@@ -278,7 +291,7 @@ return;
                 onScroll={handleScroll}
                 className={
                     isMobile
-                        ? 'flex-1 min-h-0 max-h-none pb-3'
+                        ? 'max-h-none min-h-0 flex-1 pb-3'
                         : 'max-h-[min(26rem,calc(100svh-10rem))] pb-3'
                 }
             >
@@ -287,7 +300,10 @@ return;
                         {emptyMessage}
                     </div>
                 )}
-                {(!searchQuery || allLabel.toLowerCase().includes(searchQuery.toLowerCase())) && (
+                {(!searchQuery ||
+                    allLabel
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase())) && (
                     <CommandItem
                         value={allLabel}
                         data-checked={value === '' ? 'true' : 'false'}
@@ -305,7 +321,7 @@ return;
                     return (
                         <CommandItem
                             key={option.id}
-                            value={option.name + " " + option.slug}
+                            value={option.name + ' ' + option.slug}
                             data-checked={isSelected ? 'true' : 'false'}
                             onSelect={() => {
                                 onValueChange(option.slug);
@@ -333,14 +349,16 @@ return;
                     >
                         <div
                             ref={sheetRef}
-                            className="w-full flex flex-col"
+                            className="flex w-full flex-col"
                             style={{
                                 height: `${sheetHeight}px`,
-                                transition: isDragging ? 'none' : 'height 250ms cubic-bezier(0.16, 1, 0.3, 1)',
+                                transition: isDragging
+                                    ? 'none'
+                                    : 'height 250ms cubic-bezier(0.16, 1, 0.3, 1)',
                             }}
                         >
                             <div
-                                className="w-full flex justify-center px-4 py-3 cursor-grab active:cursor-grabbing hover:bg-muted/10 transition-colors"
+                                className="flex w-full cursor-grab justify-center px-4 py-3 transition-colors hover:bg-muted/10 active:cursor-grabbing"
                                 role="presentation"
                                 onPointerDown={handleDragStart}
                                 onPointerMove={handleDragMove}
@@ -364,7 +382,7 @@ return;
         <>
             {trigger}
             <Dialog open={open} onOpenChange={handleOpenChange}>
-                <DialogContent 
+                <DialogContent
                     className="max-h-[min(34rem,calc(100svh-4rem))] overflow-hidden p-2 sm:max-w-lg"
                     showCloseButton={false}
                 >

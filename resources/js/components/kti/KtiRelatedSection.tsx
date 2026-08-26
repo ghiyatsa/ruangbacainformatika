@@ -16,7 +16,7 @@ export function KtiRelatedSection({
 }: KtiRelatedSectionProps) {
     return (
         <section className={cn('space-y-5', className)}>
-            <div className="-mx-4 border-y border-border/60 my-6 sm:-mx-6 lg:-mx-8">
+            <div className="-mx-4 my-6 border-y border-border/60 sm:-mx-6 lg:-mx-8">
                 <div
                     className="h-6 sm:h-8"
                     style={{
@@ -39,4 +39,3 @@ export function KtiRelatedSection({
         </section>
     );
 }
-

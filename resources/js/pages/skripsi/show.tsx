@@ -8,7 +8,11 @@ interface SkripsiShowProps {
     relatedSkripsis?: AcademicWorkData[];
 }
 
-export default function SkripsiShow({ skripsi, relatedSkripsis, ...props }: SkripsiShowProps) {
+export default function SkripsiShow({
+    skripsi,
+    relatedSkripsis,
+    ...props
+}: SkripsiShowProps) {
     return (
         <AcademicWorkDetailPage
             workType="skripsi"
@@ -18,4 +22,3 @@ export default function SkripsiShow({ skripsi, relatedSkripsis, ...props }: Skri
         />
     );
 }
-

@@ -28,7 +28,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
     return (
         <div className="min-h-screen py-8">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+            <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <h1 className="text-2xl font-semibold tracking-tight">
                     Pengaturan
                 </h1>
@@ -40,7 +40,9 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                             aria-label="Navigasi pengaturan"
                         >
                             {sidebarNavItems.map((item, index) => {
-                                const isActive = isCurrentOrParentUrl(item.href);
+                                const isActive = isCurrentOrParentUrl(
+                                    item.href,
+                                );
 
                                 return (
                                     <Link

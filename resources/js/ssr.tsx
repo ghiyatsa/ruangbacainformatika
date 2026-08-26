@@ -55,5 +55,5 @@ createServer((page) =>
 
             return <AppProviders>{app}</AppProviders>;
         },
-    })
+    }),
 );

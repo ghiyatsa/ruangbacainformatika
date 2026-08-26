@@ -65,7 +65,9 @@ export function LoanHistoryDesktopTable({
                         <TableCell className="align-top whitespace-normal">
                             <div className="min-w-[240px] space-y-1">
                                 <Link
-                                    href={BookController.show.url(loan.bookSlug)}
+                                    href={BookController.show.url(
+                                        loan.bookSlug,
+                                    )}
                                     instant
                                     component="books/show"
                                     pageProps={instantLoadingPageProps()}

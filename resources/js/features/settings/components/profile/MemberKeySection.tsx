@@ -29,10 +29,7 @@ export function MemberKeySection({ memberKey }: Props) {
             return;
         }
 
-        if (
-            form.processing ||
-            autoRegenerateTriggered.current
-        ) {
+        if (form.processing || autoRegenerateTriggered.current) {
             return;
         }
 

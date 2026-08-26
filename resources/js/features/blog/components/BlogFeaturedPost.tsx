@@ -19,7 +19,7 @@ export function BlogFeaturedPost({ post }: BlogFeaturedPostProps) {
             className="group relative block overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/40"
         >
             {/* Cover image */}
-            <div className="aspect-square sm:aspect-video overflow-hidden bg-muted">
+            <div className="aspect-square overflow-hidden bg-muted sm:aspect-video">
                 <img
                     src={post.coverImageUrl}
                     alt={post.title}

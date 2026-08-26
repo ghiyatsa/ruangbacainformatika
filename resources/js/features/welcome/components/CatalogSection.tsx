@@ -37,16 +37,17 @@ export default function CatalogSection({
 
     const items: SectionItem[] = [];
 
-    if (stats.featuredCount > 0 && (featuredBooks === undefined || featuredBooks.length > 0)) {
+    if (
+        stats.featuredCount > 0 &&
+        (featuredBooks === undefined || featuredBooks.length > 0)
+    ) {
         items.push({
             id: 'featured',
             isFullWidth: true,
             content: (
                 <div className="mx-auto max-w-7xl py-8 sm:py-10 lg:py-12">
                     <div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-8">
-                        <SectionHeader
-                            title="Buku Unggulan"
-                        />
+                        <SectionHeader title="Buku Unggulan" />
                     </div>
                     <div className="mt-6">
                         <FeaturedSpotlight featuredBooks={featuredBooks} />
@@ -74,7 +75,7 @@ export default function CatalogSection({
 
     if (stats.activeCategoriesCount > 0) {
         const activeShelves = (popularCategoryShelves ?? []).filter(
-            (shelf) => shelf.books && shelf.books.length > 0
+            (shelf) => shelf.books && shelf.books.length > 0,
         );
 
         if (popularCategoryShelves === undefined || activeShelves.length > 0) {
@@ -90,10 +91,15 @@ export default function CatalogSection({
         }
     }
 
-    if ((stats.mostBorrowedCount ?? 0) > 0 && (mostBorrowedBooks === undefined || mostBorrowedBooks.length > 0)) {
+    if (
+        (stats.mostBorrowedCount ?? 0) > 0 &&
+        (mostBorrowedBooks === undefined || mostBorrowedBooks.length > 0)
+    ) {
         items.push({
             id: 'most-borrowed',
-            content: <MostBorrowedBooks mostBorrowedBooks={mostBorrowedBooks} />,
+            content: (
+                <MostBorrowedBooks mostBorrowedBooks={mostBorrowedBooks} />
+            ),
         });
     }
 
@@ -102,9 +108,7 @@ export default function CatalogSection({
             id: 'latest-posts',
             content: (
                 <div className="flex flex-col gap-8 sm:gap-10">
-                    <SectionHeader
-                        title="Artikel Terbaru"
-                    />
+                    <SectionHeader title="Artikel Terbaru" />
 
                     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                         {latestPosts.map((post) => (
@@ -114,9 +118,7 @@ export default function CatalogSection({
 
                     <div className="flex justify-center">
                         <Button asChild size="lg" className="rounded-xl px-8">
-                            <Link href={blog.index.url()}>
-                                Semua artikel
-                            </Link>
+                            <Link href={blog.index.url()}>Semua artikel</Link>
                         </Button>
                     </div>
                 </div>

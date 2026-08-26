@@ -23,62 +23,64 @@ export default function WelcomePage({
             {
                 '@type': 'WebSite',
                 '@id': `${siteUrl}/#website`,
-                'name': siteName,
-                'url': siteUrl,
-                'potentialAction': {
+                name: siteName,
+                url: siteUrl,
+                potentialAction: {
                     '@type': 'SearchAction',
-                    'target': {
+                    target: {
                         '@type': 'EntryPoint',
-                        'urlTemplate': `${siteUrl}/search?q={search_term_string}`
+                        urlTemplate: `${siteUrl}/search?q={search_term_string}`,
                     },
-                    'query-input': 'required name=search_term_string'
-                }
+                    'query-input': 'required name=search_term_string',
+                },
             },
             {
                 '@type': 'SiteNavigationElement',
                 '@id': `${siteUrl}/#nav-books`,
-                'name': 'Katalog Buku',
-                'url': `${siteUrl}/books`
+                name: 'Katalog Buku',
+                url: `${siteUrl}/books`,
             },
             {
                 '@type': 'SiteNavigationElement',
                 '@id': `${siteUrl}/#nav-skripsi`,
-                'name': 'Arsip Skripsi',
-                'url': `${siteUrl}/skripsi`
+                name: 'Arsip Skripsi',
+                url: `${siteUrl}/skripsi`,
             },
             {
                 '@type': 'SiteNavigationElement',
                 '@id': `${siteUrl}/#nav-thesis`,
-                'name': 'Arsip Tesis',
-                'url': `${siteUrl}/thesis`
+                name: 'Arsip Tesis',
+                url: `${siteUrl}/thesis`,
             },
             {
                 '@type': 'SiteNavigationElement',
                 '@id': `${siteUrl}/#nav-kp`,
-                'name': 'Laporan Kerja Praktik',
-                'url': `${siteUrl}/internship-reports`
+                name: 'Laporan Kerja Praktik',
+                url: `${siteUrl}/internship-reports`,
             },
             {
                 '@type': 'SiteNavigationElement',
                 '@id': `${siteUrl}/#nav-blog`,
-                'name': 'Blog & Berita',
-                'url': `${siteUrl}/posts`
+                name: 'Blog & Berita',
+                url: `${siteUrl}/posts`,
             },
             {
                 '@type': 'SiteNavigationElement',
                 '@id': `${siteUrl}/#nav-about`,
-                'name': 'Tentang Kami',
-                'url': `${siteUrl}/about`
-            }
-        ]
+                name: 'Tentang Kami',
+                url: `${siteUrl}/about`,
+            },
+        ],
     };
 
-    const siteDescription = page.props.site?.description || 'Ruang Baca Teknik Informatika Universitas Malikussaleh: perpustakaan digital untuk mendukung riset, pembelajaran, dan akses koleksi akademik secara mudah.';
+    const siteDescription =
+        page.props.site?.description ||
+        'Ruang Baca Teknik Informatika Universitas Malikussaleh: perpustakaan digital untuk mendukung riset, pembelajaran, dan akses koleksi akademik secara mudah.';
 
     return (
         <>
             <SeoHead description={siteDescription} />
-            
+
             <script type="application/ld+json">
                 {JSON.stringify(websiteJsonLd)}
             </script>

@@ -249,7 +249,8 @@ export function BookActionForm({
                                                 </div>
 
                                                 <div className="max-h-[24rem] overflow-y-auto p-3">
-                                                    {selectedBooks.length > 0 ? (
+                                                    {selectedBooks.length >
+                                                    0 ? (
                                                         <div className="grid gap-2">
                                                             {selectedBooks.map(
                                                                 (
@@ -276,8 +277,12 @@ export function BookActionForm({
                                                                             alt={
                                                                                 book.title
                                                                             }
-                                                                            width={48}
-                                                                            height={64}
+                                                                            width={
+                                                                                48
+                                                                            }
+                                                                            height={
+                                                                                64
+                                                                            }
                                                                             className="h-16 w-12 shrink-0 rounded-md border border-border/70 object-cover"
                                                                             loading="lazy"
                                                                         />

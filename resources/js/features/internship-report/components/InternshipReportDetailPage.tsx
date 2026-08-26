@@ -4,7 +4,10 @@ import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
 import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
-import { KtiReportCard, KtiReportCardSkeleton } from '@/components/kti/KtiReportCard';
+import {
+    KtiReportCard,
+    KtiReportCardSkeleton,
+} from '@/components/kti/KtiReportCard';
 import { KtiTextWorkHero } from '@/components/kti/KtiTextWorkHero';
 import { KtiTextWorkSidebar } from '@/components/kti/KtiTextWorkSidebar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -61,14 +64,24 @@ export default function InternshipReportDetailPage(
                         return report.abstract.slice(0, 160);
                     }
 
-                    return `${report.abstract} Temukan abstrak lengkap, nama mahasiswa, NIM, lokasi KP, dan tahun laporan kerja praktik untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                    return `${report.abstract} Temukan abstrak lengkap, nama mahasiswa, NIM, lokasi KP, dan tahun laporan kerja praktik untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(
+                        0,
+                        160,
+                    );
                 }
 
                 if (report) {
-                    const authorStr = report.authorName ? ` disusun oleh ${report.authorName}` : '';
-                    const nimStr = report.studentId ? ` (NIM: ${report.studentId})` : '';
+                    const authorStr = report.authorName
+                        ? ` disusun oleh ${report.authorName}`
+                        : '';
+                    const nimStr = report.studentId
+                        ? ` (NIM: ${report.studentId})`
+                        : '';
 
-                    return `Akses detail laporan Kerja Praktik (KP) "${report.title}"${authorStr}${nimStr}. Temukan lokasi perusahaan, abstrak, dan tahun untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                    return `Akses detail laporan Kerja Praktik (KP) "${report.title}"${authorStr}${nimStr}. Temukan lokasi perusahaan, abstrak, dan tahun untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(
+                        0,
+                        160,
+                    );
                 }
 
                 return 'Cari detail laporan Kerja Praktik (KP), abstrak, nama penulis, lokasi instansi, dan tahun laporan secara mandiri di katalog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.';
@@ -93,12 +106,7 @@ export default function InternshipReportDetailPage(
                     onToggleBookmark={toggleBookmark}
                 />
             }
-            sidebar={
-                <KtiTextWorkSidebar
-                    record={report}
-                    label="Laporan KP"
-                />
-            }
+            sidebar={<KtiTextWorkSidebar record={report} label="Laporan KP" />}
             secondarySidebar={
                 report ? (
                     <KtiReportCard
@@ -114,9 +122,7 @@ export default function InternshipReportDetailPage(
             footer={
                 (props.relatedReports === undefined ||
                     props.relatedReports.length > 0) && (
-                    <KtiRelatedSection
-                        title="Laporan KP Terkait"
-                    >
+                    <KtiRelatedSection title="Laporan KP Terkait">
                         <Deferred
                             data="relatedReports"
                             fallback={
@@ -148,39 +154,45 @@ export default function InternshipReportDetailPage(
                 )
             }
         >
-                        {(() => {
-                const jsonLd = report ? {
-                    '@context': 'https://schema.org',
-                    '@type': 'ScholarlyArticle',
-                    'name': report.title,
-                    'headline': report.title,
-                    'author': {
-                        '@type': 'Person',
-                        'name': report.authorName,
-                        'identifier': report.studentId
-                    },
-                    'datePublished': report.year ? `${report.year}-01-01` : undefined,
-                    'inLanguage': 'id',
-                    'description': report.abstract || undefined,
-                    'keywords': report.keywords ? report.keywords.join(', ') : undefined,
-                    'learningResourceType': 'Laporan Kerja Praktik',
-                    'publisher': {
-                        '@type': 'EducationalOrganization',
-                        '@id': 'https://ruangbacainformatika.unimal.ac.id/#department',
-                        'name': 'Program Studi Teknik Informatika Universitas Malikussaleh',
-                        'url': 'https://ruangbacainformatika.unimal.ac.id',
-                        'parentOrganization': {
-                            '@type': 'EducationalOrganization',
-                            '@id': 'https://unimal.ac.id/#university',
-                            'name': 'Universitas Malikussaleh',
-                            'url': 'https://unimal.ac.id'
-                        }
-                    }
-                } : null;
+            {(() => {
+                const jsonLd = report
+                    ? {
+                          '@context': 'https://schema.org',
+                          '@type': 'ScholarlyArticle',
+                          name: report.title,
+                          headline: report.title,
+                          author: {
+                              '@type': 'Person',
+                              name: report.authorName,
+                              identifier: report.studentId,
+                          },
+                          datePublished: report.year
+                              ? `${report.year}-01-01`
+                              : undefined,
+                          inLanguage: 'id',
+                          description: report.abstract || undefined,
+                          keywords: report.keywords
+                              ? report.keywords.join(', ')
+                              : undefined,
+                          learningResourceType: 'Laporan Kerja Praktik',
+                          publisher: {
+                              '@type': 'EducationalOrganization',
+                              '@id': 'https://ruangbacainformatika.unimal.ac.id/#department',
+                              name: 'Program Studi Teknik Informatika Universitas Malikussaleh',
+                              url: 'https://ruangbacainformatika.unimal.ac.id',
+                              parentOrganization: {
+                                  '@type': 'EducationalOrganization',
+                                  '@id': 'https://unimal.ac.id/#university',
+                                  name: 'Universitas Malikussaleh',
+                                  url: 'https://unimal.ac.id',
+                              },
+                          },
+                      }
+                    : null;
 
                 if (!jsonLd) {
-return null;
-}
+                    return null;
+                }
 
                 return (
                     <script type="application/ld+json">

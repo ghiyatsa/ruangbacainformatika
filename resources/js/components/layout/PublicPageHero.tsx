@@ -34,7 +34,6 @@ export function PublicPageHero({
                     contentClassName,
                 )}
             >
-
                 {eyebrow ? (
                     <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-primary uppercase shadow-sm">
                         {eyebrow}

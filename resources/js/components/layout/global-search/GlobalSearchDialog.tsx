@@ -144,24 +144,27 @@ export function GlobalSearchDialog({
         setHistory(updated);
     }, []);
 
-    const deleteHistoryItem = React.useCallback((itemToDelete: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
+    const deleteHistoryItem = React.useCallback(
+        (itemToDelete: string, e: React.MouseEvent) => {
+            e.stopPropagation();
+            e.preventDefault();
 
-        const updated = historyRef.current.filter(
-            (item) => item !== itemToDelete,
-        );
+            const updated = historyRef.current.filter(
+                (item) => item !== itemToDelete,
+            );
 
-        historyRef.current = updated;
+            historyRef.current = updated;
 
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        } catch (err) {
-            console.error('Failed to delete search history item', err);
-        }
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            } catch (err) {
+                console.error('Failed to delete search history item', err);
+            }
 
-        setHistory(updated);
-    }, []);
+            setHistory(updated);
+        },
+        [],
+    );
 
     const items = React.useMemo(() => {
         const trimmed = query.trim();
@@ -219,7 +222,7 @@ export function GlobalSearchDialog({
                     onError: () => {
                         setSuggestions([]);
                     },
-                }
+                },
             );
         }, 200);
 
@@ -232,11 +235,15 @@ export function GlobalSearchDialog({
     const handleSelect = React.useCallback(
         (targetQuery: string) => {
             onOpenChange(false);
-            const isDirectSearch = targetQuery === query || targetQuery.startsWith('Cari semua untuk "');
+            const isDirectSearch =
+                targetQuery === query ||
+                targetQuery.startsWith('Cari semua untuk "');
             const actualQuery = isDirectSearch ? query : targetQuery;
             saveToHistory(actualQuery);
             router.visit(`/search?q=${encodeURIComponent(actualQuery)}`, {
-                headers: !isDirectSearch ? { 'X-Search-Clicked': '1' } : undefined,
+                headers: !isDirectSearch
+                    ? { 'X-Search-Clicked': '1' }
+                    : undefined,
             });
         },
         [onOpenChange, query, saveToHistory],
@@ -245,7 +252,9 @@ export function GlobalSearchDialog({
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            setSelectedIndex((prev) => (prev + 1 < items.length ? prev + 1 : prev));
+            setSelectedIndex((prev) =>
+                prev + 1 < items.length ? prev + 1 : prev,
+            );
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             setSelectedIndex((prev) => (prev - 1 >= 0 ? prev - 1 : prev));
@@ -275,24 +284,30 @@ export function GlobalSearchDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogHeader className="sr-only">
                 <DialogTitle>Pencarian Global</DialogTitle>
-                <DialogDescription>Masukkan kata kunci pencarian</DialogDescription>
+                <DialogDescription>
+                    Masukkan kata kunci pencarian
+                </DialogDescription>
             </DialogHeader>
             <DialogContent
-                className="top-[15%]! sm:top-[20%]! translate-y-0! overflow-hidden rounded-xl! p-0! gap-0! w-full sm:max-w-2xl! border bg-popover shadow-lg"
+                className="top-[15%]! w-full translate-y-0! gap-0! overflow-hidden rounded-xl! border bg-popover p-0! shadow-lg sm:top-[20%]! sm:max-w-2xl!"
                 overlayClassName="bg-black/60"
                 showCloseButton={false}
             >
-                <div className={`flex items-center px-3 ${query.length > 0 || history.length > 0 ? 'border-b' : ''}`}>
+                <div
+                    className={`flex items-center px-3 ${query.length > 0 || history.length > 0 ? 'border-b' : ''}`}
+                >
                     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                     <input
-                        className="h-12 w-full bg-transparent text-sm outline-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 px-0 placeholder:text-muted-foreground"
+                        className="h-12 w-full border-none bg-transparent px-0 text-sm outline-none placeholder:text-muted-foreground focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         placeholder="Cari buku, artikel, atau karya ilmiah..."
                         value={query}
                         onChange={handleQueryChange}
                         onKeyDown={handleKeyDown}
                         autoFocus
                     />
-                    {isLoading && <Loader2 className="h-4 w-4 animate-spin opacity-50 ml-2" />}
+                    {isLoading && (
+                        <Loader2 className="ml-2 h-4 w-4 animate-spin opacity-50" />
+                    )}
                 </div>
 
                 <AnimatePresence initial={false}>
@@ -307,69 +322,90 @@ export function GlobalSearchDialog({
                                 duration: 0.3,
                                 bounce: 0,
                             }}
-                            className="w-full overflow-hidden flex flex-col max-h-72"
+                            className="flex max-h-72 w-full flex-col overflow-hidden"
                         >
                             {query.length > 0 ? (
                                 isLoading ? (
-                                    <div className="p-1.5 space-y-0.5">
+                                    <div className="space-y-0.5 p-1.5">
                                         <div className="flex items-center gap-2 px-1.5 py-2">
-                                            <Search className="size-4 shrink-0 text-muted-foreground/30 animate-pulse" />
-                                            <div className="h-5 w-full rounded bg-muted animate-pulse" />
+                                            <Search className="size-4 shrink-0 animate-pulse text-muted-foreground/30" />
+                                            <div className="h-5 w-full animate-pulse rounded bg-muted" />
                                         </div>
                                         <div className="flex items-center gap-2 px-1.5 py-2">
-                                            <Search className="size-4 shrink-0 text-muted-foreground/30 animate-pulse" />
-                                            <div className="h-5 w-full rounded bg-muted animate-pulse" />
+                                            <Search className="size-4 shrink-0 animate-pulse text-muted-foreground/30" />
+                                            <div className="h-5 w-full animate-pulse rounded bg-muted" />
                                         </div>
                                         <div className="flex items-center gap-2 px-1.5 py-2">
-                                            <Search className="size-4 shrink-0 text-muted-foreground/30 animate-pulse" />
-                                            <div className="h-5 w-full rounded bg-muted animate-pulse" />
+                                            <Search className="size-4 shrink-0 animate-pulse text-muted-foreground/30" />
+                                            <div className="h-5 w-full animate-pulse rounded bg-muted" />
                                         </div>
                                     </div>
                                 ) : suggestions.length === 0 ? (
                                     <div className="p-1.5">
                                         <button
-                                            onClick={() => handleSelect(`Cari semua untuk "${query}"`)}
-                                            className="flex w-full items-center gap-2 px-1.5 py-2 text-sm text-primary hover:bg-accent rounded-lg text-left min-w-0 cursor-pointer font-medium"
+                                            onClick={() =>
+                                                handleSelect(
+                                                    `Cari semua untuk "${query}"`,
+                                                )
+                                            }
+                                            className="flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-1.5 py-2 text-left text-sm font-medium text-primary hover:bg-accent"
                                         >
                                             <Search className="size-4 shrink-0 text-primary" />
-                                            <span className="truncate flex-1 min-w-0">Cari semua untuk &quot;{query}&quot;</span>
+                                            <span className="min-w-0 flex-1 truncate">
+                                                Cari semua untuk &quot;{query}
+                                                &quot;
+                                            </span>
                                         </button>
                                     </div>
                                 ) : (
                                     <>
                                         {/* Scrollable Suggestions List */}
-                                        <div className="overflow-y-auto max-h-[15.5rem] no-scrollbar p-1.5">
+                                        <div className="no-scrollbar max-h-[15.5rem] overflow-y-auto p-1.5">
                                             <div className="space-y-0.5">
-                                                {suggestions.map((item, idx) => {
-                                                    const isSelected = selectedIndex === idx;
-                                                    const isInHistory = history.includes(item);
+                                                {suggestions.map(
+                                                    (item, idx) => {
+                                                        const isSelected =
+                                                            selectedIndex ===
+                                                            idx;
+                                                        const isInHistory =
+                                                            history.includes(
+                                                                item,
+                                                            );
 
-                                                    return (
-                                                        <button
-                                                            key={item}
-                                                            onClick={() => handleSelect(item)}
-                                                            className={`flex w-full items-center gap-2 px-1.5 py-2 text-sm rounded-lg text-left cursor-pointer transition-colors min-w-0 ${
-                                                                isSelected
-                                                                    ? 'bg-accent text-accent-foreground'
-                                                                    : 'hover:bg-accent/50'
-                                                            }`}
-                                                        >
-                                                            {isInHistory ? (
-                                                                <History className="size-4 shrink-0 text-muted-foreground" />
-                                                            ) : (
-                                                                <Search className="size-4 shrink-0 text-muted-foreground" />
-                                                            )}
-                                                            <span className="truncate flex-1 min-w-0">
-                                                                {getHighlightedText(item, query)}
-                                                            </span>
-                                                        </button>
-                                                    );
-                                                })}
+                                                        return (
+                                                            <button
+                                                                key={item}
+                                                                onClick={() =>
+                                                                    handleSelect(
+                                                                        item,
+                                                                    )
+                                                                }
+                                                                className={`flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-1.5 py-2 text-left text-sm transition-colors ${
+                                                                    isSelected
+                                                                        ? 'bg-accent text-accent-foreground'
+                                                                        : 'hover:bg-accent/50'
+                                                                }`}
+                                                            >
+                                                                {isInHistory ? (
+                                                                    <History className="size-4 shrink-0 text-muted-foreground" />
+                                                                ) : (
+                                                                    <Search className="size-4 shrink-0 text-muted-foreground" />
+                                                                )}
+                                                                <span className="min-w-0 flex-1 truncate">
+                                                                    {getHighlightedText(
+                                                                        item,
+                                                                        query,
+                                                                    )}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    },
+                                                )}
                                             </div>
                                         </div>
 
                                         {/* Sticky Bottom "Cari semua..." button */}
-                                        <div className="sticky bottom-0 bg-popover p-1.5 border-t border-dashed border-border mt-auto">
+                                        <div className="sticky bottom-0 mt-auto border-t border-dashed border-border bg-popover p-1.5">
                                             {(() => {
                                                 const searchAllIndex =
                                                     items.length - 1;
@@ -380,15 +416,17 @@ export function GlobalSearchDialog({
 
                                                 return (
                                                     <button
-                                                        onClick={() => handleSelect(label)}
-                                                        className={`flex w-full items-center gap-2 px-1.5 py-2 text-sm rounded-lg text-left cursor-pointer transition-colors min-w-0 ${
+                                                        onClick={() =>
+                                                            handleSelect(label)
+                                                        }
+                                                        className={`flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-1.5 py-2 text-left text-sm transition-colors ${
                                                             isSelected
                                                                 ? 'bg-accent text-accent-foreground'
                                                                 : 'hover:bg-accent/50'
                                                         }`}
                                                     >
                                                         <Search className="size-4 shrink-0 text-primary" />
-                                                        <span className="truncate flex-1 min-w-0 text-primary font-medium block">
+                                                        <span className="block min-w-0 flex-1 truncate font-medium text-primary">
                                                             {label}
                                                         </span>
                                                     </button>
@@ -399,27 +437,37 @@ export function GlobalSearchDialog({
                                 )
                             ) : (
                                 <div className="p-1.5">
-                                    <div className="space-y-0.5 max-h-56 overflow-y-auto no-scrollbar">
+                                    <div className="no-scrollbar max-h-56 space-y-0.5 overflow-y-auto">
                                         {history.map((item, idx) => {
-                                            const isSelected = selectedIndex === idx;
+                                            const isSelected =
+                                                selectedIndex === idx;
 
                                             return (
                                                 <button
                                                     key={item}
-                                                    onClick={() => handleSelect(item)}
-                                                    className={`flex w-full items-center justify-between gap-2 px-1.5 py-2 text-sm rounded-lg text-left cursor-pointer transition-colors min-w-0 ${
+                                                    onClick={() =>
+                                                        handleSelect(item)
+                                                    }
+                                                    className={`flex w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-lg px-1.5 py-2 text-left text-sm transition-colors ${
                                                         isSelected
                                                             ? 'bg-accent text-accent-foreground'
                                                             : 'hover:bg-accent/50'
                                                     }`}
                                                 >
-                                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                    <div className="flex min-w-0 flex-1 items-center gap-2">
                                                         <History className="size-4 shrink-0 text-muted-foreground" />
-                                                        <span className="truncate text-muted-foreground">{item}</span>
+                                                        <span className="truncate text-muted-foreground">
+                                                            {item}
+                                                        </span>
                                                     </div>
                                                     <span
-                                                        onClick={(e) => deleteHistoryItem(item, e)}
-                                                        className="p-1 rounded-md hover:bg-foreground/10 text-muted-foreground hover:text-foreground cursor-pointer shrink-0 transition-colors"
+                                                        onClick={(e) =>
+                                                            deleteHistoryItem(
+                                                                item,
+                                                                e,
+                                                            )
+                                                        }
+                                                        className="shrink-0 cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
                                                     >
                                                         <X className="size-3" />
                                                     </span>

@@ -52,8 +52,6 @@ export default function ErrorPage({ status }: { status: number }) {
             <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-10 text-foreground transition-colors duration-300">
                 <BackgroundPattern />
 
-
-
                 <div className="mx-auto flex w-full max-w-5xl items-center justify-center">
                     <div className="grid w-full gap-10 rounded-[2rem] border border-border/50 bg-card p-8 shadow-[0_30px_80px_-35px_rgba(0,0,0,0.25)] md:grid-cols-[1.1fr_0.9fr] md:p-12 dark:shadow-[0_30px_80px_-35px_rgba(0,0,0,0.5)]">
                         <div className="flex flex-col justify-center space-y-8">
@@ -111,8 +109,6 @@ export default function ErrorPage({ status }: { status: number }) {
                         </div>
 
                         <div className="relative flex items-center justify-center">
-
-
                             <div className="relative flex h-full min-h-72 w-full items-center justify-center rounded-[1.75rem] border border-border/50 bg-background p-8 shadow-inner">
                                 <div className="text-center">
                                     <span className="bg-linear-to-b from-primary to-primary/60 bg-clip-text text-[6rem] leading-none font-black tracking-tighter text-transparent md:text-[8rem]">

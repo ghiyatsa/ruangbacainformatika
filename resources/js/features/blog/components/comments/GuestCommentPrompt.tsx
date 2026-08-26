@@ -9,12 +9,10 @@ interface GuestCommentPromptProps {
     size?: 'sm' | 'xs';
 }
 
-export function GuestCommentPrompt({
-    size = 'sm',
-}: GuestCommentPromptProps) {
+export function GuestCommentPrompt({ size = 'sm' }: GuestCommentPromptProps) {
     if (size === 'xs') {
         return (
-            <div className="space-y-2 py-3 text-center border border-dashed border-border bg-muted/5 rounded-lg">
+            <div className="space-y-2 rounded-lg border border-dashed border-border bg-muted/5 py-3 text-center">
                 <p className="text-xs text-muted-foreground">
                     Silakan masuk untuk membalas komentar ini.
                 </p>
@@ -31,7 +29,8 @@ export function GuestCommentPrompt({
     return (
         <div className="space-y-3 py-4 text-center">
             <p className="text-sm text-muted-foreground">
-                Silakan masuk dengan akun Anda untuk menulis komentar di artikel ini.
+                Silakan masuk dengan akun Anda untuk menulis komentar di artikel
+                ini.
             </p>
             <Button asChild size="sm" className="gap-2 rounded-lg">
                 <Link href={login.url()}>

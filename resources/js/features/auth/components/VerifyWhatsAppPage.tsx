@@ -82,9 +82,7 @@ export function VerifyWhatsAppPage() {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="whatsapp">
-                                    Nomor WhatsApp
-                                </Label>
+                                <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
                                 <div className="flex gap-2">
                                     <InputGroup className="flex-1">
                                         <InputGroupInput
@@ -93,9 +91,7 @@ export function VerifyWhatsAppPage() {
                                             type="tel"
                                             value={whatsappVal}
                                             onChange={(e) =>
-                                                setWhatsappVal(
-                                                    e.target.value,
-                                                )
+                                                setWhatsappVal(e.target.value)
                                             }
                                             autoComplete="tel"
                                             inputMode="tel"
@@ -125,9 +121,7 @@ export function VerifyWhatsAppPage() {
                                             <Clock3 className="size-4" />
                                         ) : null}
                                         {resendAvailableIn > 0
-                                            ? formatCountdown(
-                                                  resendAvailableIn,
-                                              )
+                                            ? formatCountdown(resendAvailableIn)
                                             : hasWhatsapp &&
                                                 verification.hasActiveChallenge
                                               ? 'Kirim Ulang'

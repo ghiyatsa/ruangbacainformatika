@@ -10,9 +10,8 @@ import thesisRoute from '@/routes/thesis';
 import type { AcademicWorkCatalogPageProps } from '@/features/academic-works/types';
 
 const LazyAcademicWorkCatalogFilters = lazy(async () => {
-    const { AcademicWorkCatalogFilters } = await import(
-        './AcademicWorkCatalogFilters'
-    );
+    const { AcademicWorkCatalogFilters } =
+        await import('./AcademicWorkCatalogFilters');
 
     return { default: AcademicWorkCatalogFilters };
 });
@@ -27,9 +26,10 @@ export default function AcademicWorkCatalogPage({
     const route = workType === 'skripsi' ? skripsiRoute : thesisRoute;
     const label = workType === 'skripsi' ? 'Skripsi' : 'Tesis';
     const dataProp = workType === 'skripsi' ? 'skripsis' : 'theses';
-    const description = workType === 'skripsi'
-        ? 'Lihat daftar skripsi mahasiswa Teknik Informatika Universitas Malikussaleh.'
-        : 'Lihat daftar tesis mahasiswa Teknik Informatika Universitas Malikussaleh.';
+    const description =
+        workType === 'skripsi'
+            ? 'Lihat daftar skripsi mahasiswa Teknik Informatika Universitas Malikussaleh.'
+            : 'Lihat daftar tesis mahasiswa Teknik Informatika Universitas Malikussaleh.';
 
     function clearAllFilters(): void {
         router.get(
@@ -85,14 +85,20 @@ export default function AcademicWorkCatalogPage({
                 </div>
             }
         >
-            <AcademicWorkCatalogResults workType={workType} works={academicWorks} />
+            <AcademicWorkCatalogResults
+                workType={workType}
+                works={academicWorks}
+            />
             <CatalogMobilePagination
                 key={JSON.stringify(filters)}
                 data={academicWorks}
                 propKey={dataProp}
                 resourceLabel={workType}
                 loadingFallback={
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))]" aria-hidden="true">
+                    <div
+                        className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))]"
+                        aria-hidden="true"
+                    >
                         {Array.from({ length: 4 }).map((_, index) => (
                             <KtiCardSkeleton key={`load-more-${index}`} />
                         ))}

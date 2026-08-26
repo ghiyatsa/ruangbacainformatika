@@ -9,9 +9,7 @@ import booksRoute from '@/routes/books';
 import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
 
 const LazyBookCatalogFilters = lazy(async () => {
-    const { BookCatalogFilters } = await import(
-        './BookCatalogFilters'
-    );
+    const { BookCatalogFilters } = await import('./BookCatalogFilters');
 
     return { default: BookCatalogFilters };
 });
@@ -74,8 +72,14 @@ export default function BookCatalogPage({
             filters={filters}
             filterLabels={{
                 category: activeCategoryLabel,
-                author: filters.author ? (authors?.find(a => a.slug === filters.author)?.name ?? undefined) : undefined,
-                publisher: filters.publisher ? (publishers?.find(p => p.slug === filters.publisher)?.name ?? undefined) : undefined,
+                author: filters.author
+                    ? (authors?.find((a) => a.slug === filters.author)?.name ??
+                      undefined)
+                    : undefined,
+                publisher: filters.publisher
+                    ? (publishers?.find((p) => p.slug === filters.publisher)
+                          ?.name ?? undefined)
+                    : undefined,
             }}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}

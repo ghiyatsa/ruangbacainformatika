@@ -129,7 +129,7 @@ export function CatalogMobilePagination<T>({
                                 aria-hidden="true"
                             />
                             {isLoadingMore ? (
-                                <div className="w-full mt-3 sm:mt-4">
+                                <div className="mt-3 w-full sm:mt-4">
                                     {loadingSkeleton}
                                 </div>
                             ) : null}
@@ -147,9 +147,7 @@ export function CatalogMobilePagination<T>({
                     )}
 
                     {!isAutoLoadEnabled && isLoadingMore ? (
-                        <div className="w-full mt-3">
-                            {loadingSkeleton}
-                        </div>
+                        <div className="mt-3 w-full">{loadingSkeleton}</div>
                     ) : null}
                 </div>
             ) : (

@@ -38,7 +38,9 @@ export function ReturnDraftPanel({
     return (
         <div className="border border-border/60 bg-card p-6 shadow-none xl:sticky xl:top-24 xl:h-fit">
             <div className="mb-4">
-                <h3 className="text-base font-bold text-foreground">QR Pengembalian</h3>
+                <h3 className="text-base font-bold text-foreground">
+                    QR Pengembalian
+                </h3>
             </div>
             <div className="space-y-5">
                 <div className="flex items-start justify-between gap-3">
@@ -51,9 +53,7 @@ export function ReturnDraftPanel({
                         </p>
                     </div>
 
-                    <Badge variant="secondary">
-                        {activeLoanCount} aktif
-                    </Badge>
+                    <Badge variant="secondary">{activeLoanCount} aktif</Badge>
                 </div>
 
                 <InputError message={getFormError(errors, 'loan_item_ids')} />
@@ -73,8 +73,9 @@ export function ReturnDraftPanel({
                                     <p className="text-sm font-semibold text-foreground">
                                         {item.bookTitle}
                                     </p>
-                                    <p className="text-xs text-muted-foreground mt-0.5">
-                                        {item.internalCode} &middot; {item.borrowedAt}
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        {item.internalCode} &middot;{' '}
+                                        {item.borrowedAt}
                                     </p>
                                 </div>
                             ))}
@@ -129,16 +130,13 @@ export function ReturnDraftPanel({
                             </Button>
                         </div>
                     ) : (
-                        <div className="bg-muted/10 border border-dashed border-border/60 px-5 py-12 text-center text-sm text-muted-foreground">
+                        <div className="border border-dashed border-border/60 bg-muted/10 px-5 py-12 text-center text-sm text-muted-foreground">
                             QR belum dibuat.
                         </div>
                     )}
                 </div>
 
-                <form
-                    onSubmit={onSubmit}
-                    className="space-y-3"
-                >
+                <form onSubmit={onSubmit} className="space-y-3">
                     <Button
                         type="submit"
                         size="lg"

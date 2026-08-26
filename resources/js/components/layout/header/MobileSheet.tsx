@@ -192,10 +192,7 @@ export function MobileSheet({
                 {!auth.user ? (
                     <div className="flex flex-col gap-2 border-t border-border/60 p-4">
                         <SheetClose asChild>
-                            <Button
-                                asChild
-                                className="h-11 w-full rounded-xl"
-                            >
+                            <Button asChild className="h-11 w-full rounded-xl">
                                 <Link href={login.url()}>Masuk</Link>
                             </Button>
                         </SheetClose>

@@ -41,7 +41,9 @@ export function LoanHistoryMobileCard({
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0 space-y-1">
                                 <Link
-                                    href={BookController.show.url(loan.bookSlug)}
+                                    href={BookController.show.url(
+                                        loan.bookSlug,
+                                    )}
                                     instant
                                     component="books/show"
                                     pageProps={instantLoadingPageProps()}

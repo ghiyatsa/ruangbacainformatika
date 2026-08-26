@@ -8,7 +8,7 @@ export function openGoogleLoginPopup(url: string): Promise<string | undefined> {
         const popup = window.open(
             'about:blank',
             'GoogleLogin',
-            `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes,scrollbars=yes`
+            `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes,scrollbars=yes`,
         );
 
         if (!popup) {
@@ -17,22 +17,25 @@ export function openGoogleLoginPopup(url: string): Promise<string | undefined> {
             return;
         }
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const csrfToken =
+            document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content') || '';
         fetch('/auth/google/popup-session', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
+                Accept: 'application/json',
             },
         })
-        .then(() => {
-            popup.location.href = url;
-        })
-        .catch((err) => {
-            popup.close();
-            reject(err);
-        });
+            .then(() => {
+                popup.location.href = url;
+            })
+            .catch((err) => {
+                popup.close();
+                reject(err);
+            });
 
         const handleMessage = (event: MessageEvent) => {
             if (event.origin !== window.location.origin) {

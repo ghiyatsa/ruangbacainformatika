@@ -141,7 +141,9 @@ export function BookCatalogFilters({
                         emptyMessage="Penerbit tidak ditemukan."
                         triggerAriaLabel="Filter penerbit buku"
                         options={publishers}
-                        onValueChange={(val) => applyFilters({ publisher: val })}
+                        onValueChange={(val) =>
+                            applyFilters({ publisher: val })
+                        }
                     />
                 </div>
 
@@ -171,7 +173,7 @@ export function BookCatalogFilters({
                     </Select>
                 </div>
 
-                <div className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border bg-background/70 px-2 py-2 sm:w-auto sm:flex-none sm:gap-3 sm:px-3 sm:justify-start">
+                <div className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border bg-background/70 px-2 py-2 sm:w-auto sm:flex-none sm:justify-start sm:gap-3 sm:px-3">
                     <div className="flex items-center gap-2">
                         <Checkbox
                             id="featured-filter"
@@ -182,7 +184,7 @@ export function BookCatalogFilters({
                         />
                         <Label
                             htmlFor="featured-filter"
-                            className="cursor-pointer text-xs font-medium text-muted-foreground select-none whitespace-nowrap"
+                            className="cursor-pointer text-xs font-medium whitespace-nowrap text-muted-foreground select-none"
                         >
                             Unggulan
                         </Label>
@@ -200,7 +202,7 @@ export function BookCatalogFilters({
                         />
                         <Label
                             htmlFor="availability-filter"
-                            className="cursor-pointer text-xs font-medium text-muted-foreground select-none whitespace-nowrap"
+                            className="cursor-pointer text-xs font-medium whitespace-nowrap text-muted-foreground select-none"
                         >
                             Tersedia
                         </Label>

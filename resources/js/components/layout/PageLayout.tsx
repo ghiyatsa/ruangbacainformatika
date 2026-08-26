@@ -114,7 +114,6 @@ export function PageLayout({
                     header
                 ) : showHero ? (
                     <section className="relative overflow-hidden border-b bg-background py-12 sm:py-20">
-
                         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                             <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                                 {title}

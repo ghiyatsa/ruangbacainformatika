@@ -4,12 +4,14 @@ interface BlogPostCardSkeletonProps {
     variant?: 'featured' | 'card' | 'popular';
 }
 
-export function BlogPostCardSkeleton({ variant = 'card' }: BlogPostCardSkeletonProps) {
+export function BlogPostCardSkeleton({
+    variant = 'card',
+}: BlogPostCardSkeletonProps) {
     if (variant === 'featured') {
         return (
-            <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card aspect-square sm:aspect-video w-full">
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border/60 bg-card sm:aspect-video">
                 <Skeleton className="h-full w-full" />
-                <div className="absolute right-0 bottom-0 left-0 p-5 sm:p-6 space-y-3">
+                <div className="absolute right-0 bottom-0 left-0 space-y-3 p-5 sm:p-6">
                     <div className="flex gap-1.5">
                         <Skeleton className="h-5 w-20 rounded-full bg-muted/40" />
                         <Skeleton className="h-5 w-24 rounded-full bg-muted/40" />
@@ -89,13 +91,13 @@ export function BlogPopularPostsSkeleton() {
 
 export function BlogLabelsSidebarSkeleton() {
     return (
-        <section className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
             <div className="border-b border-border/60 px-5 py-3.5">
                 <Skeleton className="h-4 w-36" />
             </div>
-            <div className="p-4 space-y-4">
+            <div className="space-y-4 p-4">
                 <div>
-                    <Skeleton className="h-3 w-16 mb-2" />
+                    <Skeleton className="mb-2 h-3 w-16" />
                     <div className="grid grid-cols-2 gap-2">
                         {Array.from({ length: 4 }).map((_, idx) => (
                             <Skeleton key={idx} className="h-8 rounded-lg" />
@@ -103,10 +105,13 @@ export function BlogLabelsSidebarSkeleton() {
                     </div>
                 </div>
                 <div>
-                    <Skeleton className="h-3 w-12 mb-2" />
+                    <Skeleton className="mb-2 h-3 w-12" />
                     <div className="flex flex-wrap gap-1.5">
                         {Array.from({ length: 8 }).map((_, idx) => (
-                            <Skeleton key={idx} className="h-6 w-16 rounded-full" />
+                            <Skeleton
+                                key={idx}
+                                className="h-6 w-16 rounded-full"
+                            />
                         ))}
                     </div>
                 </div>

@@ -1,5 +1,15 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { History, KeyRound, Laptop, LayoutDashboard, LogOut, Moon, Settings, Shield, Sun } from 'lucide-react';
+import {
+    History,
+    KeyRound,
+    Laptop,
+    LayoutDashboard,
+    LogOut,
+    Moon,
+    Settings,
+    Shield,
+    Sun,
+} from 'lucide-react';
 import { UserInfo } from '@/components/common/UserInfo';
 import {
     DropdownMenuGroup,

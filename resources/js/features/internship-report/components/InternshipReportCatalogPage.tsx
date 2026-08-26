@@ -9,9 +9,8 @@ import { InternshipReportCatalogResults } from './InternshipReportCatalogResults
 import type { InternshipReportCatalogPageProps } from '@/features/internship-report/types';
 
 const LazyInternshipReportCatalogFilters = lazy(async () => {
-    const { InternshipReportCatalogFilters } = await import(
-        './InternshipReportCatalogFilters'
-    );
+    const { InternshipReportCatalogFilters } =
+        await import('./InternshipReportCatalogFilters');
 
     return { default: InternshipReportCatalogFilters };
 });
@@ -82,7 +81,10 @@ export default function InternshipReportCatalogPage({
                 propKey="reports"
                 resourceLabel="laporan"
                 loadingFallback={
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]" aria-hidden="true">
+                    <div
+                        className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]"
+                        aria-hidden="true"
+                    >
                         {Array.from({ length: 5 }).map((_, index) => (
                             <KtiCardSkeleton key={`load-more-${index}`} />
                         ))}
@@ -92,4 +94,3 @@ export default function InternshipReportCatalogPage({
         </CatalogPage>
     );
 }
-

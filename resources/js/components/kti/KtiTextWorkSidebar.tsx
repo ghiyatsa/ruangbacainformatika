@@ -1,9 +1,4 @@
-import {
-    Calendar,
-    Hash,
-    Tag,
-    User,
-} from 'lucide-react';
+import { Calendar, Hash, Tag, User } from 'lucide-react';
 import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -21,10 +16,7 @@ interface KtiTextWorkSidebarProps {
     label: string;
 }
 
-export function KtiTextWorkSidebar({
-    record,
-    label,
-}: KtiTextWorkSidebarProps) {
+export function KtiTextWorkSidebar({ record, label }: KtiTextWorkSidebarProps) {
     return (
         <div className="space-y-4">
             <div className="rounded-2xl border border-border/60 bg-card">
@@ -115,10 +107,10 @@ export function KtiTextWorkSidebar({
                     </div>
                     <Separator />
                     <div className="flex flex-wrap gap-2 p-4">
-                        <Skeleton className="h-6 w-16 rounded-full animate-pulse" />
-                        <Skeleton className="h-6 w-20 rounded-full animate-pulse" />
-                        <Skeleton className="h-6 w-14 rounded-full animate-pulse" />
-                        <Skeleton className="h-6 w-18 rounded-full animate-pulse" />
+                        <Skeleton className="h-6 w-16 animate-pulse rounded-full" />
+                        <Skeleton className="h-6 w-20 animate-pulse rounded-full" />
+                        <Skeleton className="h-6 w-14 animate-pulse rounded-full" />
+                        <Skeleton className="h-6 w-18 animate-pulse rounded-full" />
                     </div>
                 </div>
             )}

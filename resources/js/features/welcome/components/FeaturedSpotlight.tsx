@@ -85,7 +85,7 @@ function CoverImage({
 function FeaturedSpotlightSkeleton() {
     return (
         <div className="flex flex-col">
-            <div className="flex flex-col gap-5 py-5 px-4 sm:px-6 lg:px-8 sm:flex-row sm:items-center sm:gap-8 sm:py-8">
+            <div className="flex flex-col gap-5 px-4 py-5 sm:flex-row sm:items-center sm:gap-8 sm:px-6 sm:py-8 lg:px-8">
                 <div className="mx-auto w-48 shrink-0 sm:mx-0 sm:w-40 md:w-44">
                     <div className="aspect-3/4 overflow-hidden rounded-xl bg-background ring-1 ring-black/5 dark:ring-white/5">
                         <Skeleton className="h-full w-full rounded-none" />
@@ -122,7 +122,7 @@ function FeaturedSpotlightSkeleton() {
             </div>
 
             {/* Navigation Footer placeholder to prevent Cumulative Layout Shift (CLS) */}
-            <div className="flex items-center justify-between border-t border-border/60 py-3 px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between border-t border-border/60 px-4 py-3 sm:px-6 lg:px-8">
                 <Skeleton className="h-4 w-8" />
                 <div className="flex items-center gap-1">
                     <Skeleton className="size-11 rounded-full" />
@@ -203,7 +203,7 @@ export default function FeaturedSpotlight({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -12 }}
                             transition={{ duration: 0.4, ease: 'easeInOut' }}
-                            className="flex flex-col gap-5 py-5 px-4 sm:px-6 lg:px-8 sm:flex-row sm:items-center sm:gap-8 sm:py-8"
+                            className="flex flex-col gap-5 px-4 py-5 sm:flex-row sm:items-center sm:gap-8 sm:px-6 sm:py-8 lg:px-8"
                             onMouseEnter={() => setIsPaused(true)}
                             onMouseLeave={() => setIsPaused(false)}
                         >
@@ -294,7 +294,7 @@ export default function FeaturedSpotlight({
             </LazyDeferred>
 
             {count > 1 && (
-                <div className="flex items-center justify-between border-t border-border/60 py-3 px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between border-t border-border/60 px-4 py-3 sm:px-6 lg:px-8">
                     <div className="text-xs font-medium text-muted-foreground tabular-nums">
                         {currentIndex + 1}/{count}
                     </div>

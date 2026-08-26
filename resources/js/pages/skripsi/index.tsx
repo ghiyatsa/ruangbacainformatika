@@ -1,5 +1,8 @@
 import AcademicWorkCatalogPage from '@/features/academic-works/components/AcademicWorkCatalogPage';
-import type { PaginatedAcademicWorks, AcademicWorkFilters } from '@/features/academic-works/types';
+import type {
+    PaginatedAcademicWorks,
+    AcademicWorkFilters,
+} from '@/features/academic-works/types';
 
 interface SkripsiIndexProps {
     filters: AcademicWorkFilters;
@@ -8,7 +11,15 @@ interface SkripsiIndexProps {
     skripsis: PaginatedAcademicWorks;
 }
 
-export default function SkripsiIndex({ skripsis, ...props }: SkripsiIndexProps) {
-    return <AcademicWorkCatalogPage workType="skripsi" academicWorks={skripsis} {...props} />;
+export default function SkripsiIndex({
+    skripsis,
+    ...props
+}: SkripsiIndexProps) {
+    return (
+        <AcademicWorkCatalogPage
+            workType="skripsi"
+            academicWorks={skripsis}
+            {...props}
+        />
+    );
 }
-

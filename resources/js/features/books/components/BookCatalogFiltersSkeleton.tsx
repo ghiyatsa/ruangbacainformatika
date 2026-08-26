@@ -32,7 +32,7 @@ export function BookCatalogFiltersSkeleton() {
                 </div>
 
                 {/* Checkboxes container */}
-                <div className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border bg-background/70 px-2 py-2 sm:w-auto sm:flex-none sm:gap-3 sm:px-3 sm:justify-start">
+                <div className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border bg-background/70 px-2 py-2 sm:w-auto sm:flex-none sm:justify-start sm:gap-3 sm:px-3">
                     <div className="flex items-center gap-2">
                         <Skeleton className="size-4 rounded-sm" />
                         <Skeleton className="h-3 w-16 rounded-xs" />

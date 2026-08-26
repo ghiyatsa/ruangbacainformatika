@@ -23,7 +23,10 @@ import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
 import { KtiRelatedSection } from '@/components/kti/KtiRelatedSection';
-import { KtiReportCard, KtiReportCardSkeleton } from '@/components/kti/KtiReportCard';
+import {
+    KtiReportCard,
+    KtiReportCardSkeleton,
+} from '@/components/kti/KtiReportCard';
 import { KtiShareButton } from '@/components/kti/KtiShareButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -73,8 +76,6 @@ function BookDescriptionSkeleton() {
     );
 }
 
-
-
 export default function BookDetailPage(props: BookDetailPageProps) {
     const { auth, loanRequestCart } = usePage<{
         auth: Auth;
@@ -92,9 +93,14 @@ export default function BookDetailPage(props: BookDetailPageProps) {
         containsBook: false,
         hasActiveQr: false,
     };
-    const canRequestBorrow = user !== null && auth.borrowingAccess?.canBorrow === true;
+    const canRequestBorrow =
+        user !== null && auth.borrowingAccess?.canBorrow === true;
     const borrowBlockReason =
-        book && book.isBorrowable && book.isAvailable && user && !canRequestBorrow
+        book &&
+        book.isBorrowable &&
+        book.isAvailable &&
+        user &&
+        !canRequestBorrow
             ? auth.borrowingAccess?.canBorrow
                 ? requestSummary.activeLoansCount >= requestSummary.maxBooks
                     ? 'Kuota pinjam Anda penuh. Kembalikan sebagian buku untuk meminjam lagi.'
@@ -214,14 +220,24 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                         return book.description.slice(0, 160);
                     }
 
-                    return `${book.description} Temukan detail, ketersediaan eksemplar, lokasi rak, dan ajukan peminjaman buku ini di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                    return `${book.description} Temukan detail, ketersediaan eksemplar, lokasi rak, dan ajukan peminjaman buku ini di Ruang Baca Teknik Informatika Unimal.`.slice(
+                        0,
+                        160,
+                    );
                 }
 
                 if (book) {
-                    const authorStr = book.authors?.length ? ` karya ${book.authors.join(', ')}` : '';
-                    const publisherStr = book.publisher ? ` diterbitkan oleh ${book.publisher}` : '';
+                    const authorStr = book.authors?.length
+                        ? ` karya ${book.authors.join(', ')}`
+                        : '';
+                    const publisherStr = book.publisher
+                        ? ` diterbitkan oleh ${book.publisher}`
+                        : '';
 
-                    return `Akses detail buku "${book.title}"${authorStr}${publisherStr}. Cari lokasi rak, ketersediaan, dan ajukan peminjaman online di Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                    return `Akses detail buku "${book.title}"${authorStr}${publisherStr}. Cari lokasi rak, ketersediaan, dan ajukan peminjaman online di Ruang Baca Teknik Informatika Unimal.`.slice(
+                        0,
+                        160,
+                    );
                 }
 
                 return 'Cari detail buku, nomor rak, status ketersediaan eksemplar, dan ajukan peminjaman buku secara mandiri di katalog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.';
@@ -233,10 +249,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             contentClassName="pt-6 pb-10 sm:pt-8"
             hero={
                 <div className="relative -mt-20 overflow-hidden sm:-mt-28 md:-mt-24">
-
-
                     <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
-                        <div className="hidden sm:flex sm:items-center border-y border-border/60 py-3 mb-6 sm:mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-muted/5">
+                        <div className="-mx-4 mb-6 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:mb-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
                             <Breadcrumbs
                                 breadcrumbs={[
                                     { title: 'Beranda', href: '/' },
@@ -476,7 +490,9 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                 <Eye className="mt-0.5 size-4 shrink-0 sm:mt-0" />
                                                 <span className="min-w-0 text-left leading-relaxed sm:leading-normal">
                                                     <strong className="text-foreground">
-                                                        {formatViewCount(book.viewCount)}
+                                                        {formatViewCount(
+                                                            book.viewCount,
+                                                        )}
                                                     </strong>{' '}
                                                     kali dilihat
                                                 </span>
@@ -552,7 +568,9 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                                 <input
                                                                     type="hidden"
                                                                     name="book_id"
-                                                                    value={book.id}
+                                                                    value={
+                                                                        book.id
+                                                                    }
                                                                 />
                                                                 <Button
                                                                     type="submit"
@@ -715,9 +733,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             footer={
                 (props.relatedBooks === undefined ||
                     props.relatedBooks.length > 0) && (
-                    <KtiRelatedSection
-                        title="Buku Terkait"
-                    >
+                    <KtiRelatedSection title="Buku Terkait">
                         <Deferred
                             data="relatedBooks"
                             fallback={
@@ -751,30 +767,36 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                 )
             }
         >
-                        {(() => {
-                const jsonLd = book ? {
-                    '@context': 'https://schema.org',
-                    '@type': 'Book',
-                    'name': book.title,
-                    'image': book.coverImageUrl || undefined,
-                    'description': book.description || undefined,
-                    'isbn': book.isbn || undefined,
-                    'numberOfPages': book.pages || undefined,
-                    'datePublished': book.publishedYear ? `${book.publishedYear}-01-01` : undefined,
-                    'inLanguage': book.language || 'id',
-                    'author': book.authors.map((authorName) => ({
-                        '@type': 'Person',
-                        'name': authorName
-                    })),
-                    'publisher': book.publisher ? {
-                        '@type': 'Organization',
-                        'name': book.publisher
-                    } : undefined
-                } : null;
+            {(() => {
+                const jsonLd = book
+                    ? {
+                          '@context': 'https://schema.org',
+                          '@type': 'Book',
+                          name: book.title,
+                          image: book.coverImageUrl || undefined,
+                          description: book.description || undefined,
+                          isbn: book.isbn || undefined,
+                          numberOfPages: book.pages || undefined,
+                          datePublished: book.publishedYear
+                              ? `${book.publishedYear}-01-01`
+                              : undefined,
+                          inLanguage: book.language || 'id',
+                          author: book.authors.map((authorName) => ({
+                              '@type': 'Person',
+                              name: authorName,
+                          })),
+                          publisher: book.publisher
+                              ? {
+                                    '@type': 'Organization',
+                                    name: book.publisher,
+                                }
+                              : undefined,
+                      }
+                    : null;
 
                 if (!jsonLd) {
-return null;
-}
+                    return null;
+                }
 
                 return (
                     <script type="application/ld+json">

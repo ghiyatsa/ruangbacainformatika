@@ -29,7 +29,11 @@ export function AcademicWorkCatalogResults({
             {works.data && works.data.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
                     {works.data.map((w) => (
-                        <AcademicWorkCard key={w.id} work={w} workType={workType} />
+                        <AcademicWorkCard
+                            key={w.id}
+                            work={w}
+                            workType={workType}
+                        />
                     ))}
                 </div>
             ) : (

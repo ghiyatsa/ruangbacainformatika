@@ -146,12 +146,13 @@ export function BlogIndexPage({
 
                     if (isEmpty) {
                         return (
-                            <div className="rounded-2xl border border-dashed border-border/70 bg-card px-6 py-16 text-center max-w-3xl mx-auto w-full my-8">
+                            <div className="mx-auto my-8 w-full max-w-3xl rounded-2xl border border-dashed border-border/70 bg-card px-6 py-16 text-center">
                                 <p className="text-xl font-bold">
                                     Artikel tidak ditemukan
                                 </p>
                                 <p className="mt-2 text-sm text-muted-foreground">
-                                    Coba gunakan kata kunci atau filter yang berbeda.
+                                    Coba gunakan kata kunci atau filter yang
+                                    berbeda.
                                 </p>
                                 {hasFilters && (
                                     <Link
@@ -172,9 +173,7 @@ export function BlogIndexPage({
                                 {/* 1. HERO FEATURED POST (only when not filtering) */}
                                 {!hasFilters && featuredPost && (
                                     <section>
-                                        <BlogFeaturedPost
-                                            post={featuredPost}
-                                        />
+                                        <BlogFeaturedPost post={featuredPost} />
                                     </section>
                                 )}
 
@@ -244,7 +243,9 @@ export function BlogIndexPage({
                                     fallback={<BlogPopularPostsSkeleton />}
                                 >
                                     {popularPosts && (
-                                        <BlogPopularPosts posts={popularPosts} />
+                                        <BlogPopularPosts
+                                            posts={popularPosts}
+                                        />
                                     )}
                                 </Deferred>
 

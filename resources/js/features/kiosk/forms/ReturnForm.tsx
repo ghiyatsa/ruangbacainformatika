@@ -30,7 +30,6 @@ const QrCameraScanner = lazy(() =>
     })),
 );
 
-
 function getQrErrorMessage(
     errors: Record<string, string | undefined>,
 ): string | null {
@@ -103,7 +102,10 @@ export function ReturnForm() {
             window.location.origin,
         );
         searchUrl.searchParams.set('mode', 'return');
-        searchUrl.searchParams.set('member_identifier', deferredMemberIdentifier);
+        searchUrl.searchParams.set(
+            'member_identifier',
+            deferredMemberIdentifier,
+        );
 
         const loadingTimer = window.setTimeout(() => {
             setIsLoadingBooks(true);
@@ -183,10 +185,14 @@ export function ReturnForm() {
     const toggleBookSelection = (bookId: number, checked: boolean) => {
         setSelectedBookIds((current) => {
             if (checked) {
-                return current.includes(bookId) ? current : [...current, bookId];
+                return current.includes(bookId)
+                    ? current
+                    : [...current, bookId];
             }
 
-            return current.filter((selectedBookId) => selectedBookId !== bookId);
+            return current.filter(
+                (selectedBookId) => selectedBookId !== bookId,
+            );
         });
     };
 
@@ -409,7 +415,7 @@ export function ReturnForm() {
                                                 <span className="line-clamp-1 text-sm font-semibold text-foreground">
                                                     {book.title}
                                                 </span>
-                                                <span className="mt-1 block line-clamp-1 text-xs text-muted-foreground">
+                                                <span className="mt-1 line-clamp-1 block text-xs text-muted-foreground">
                                                     {book.authors?.join(', ') ||
                                                         'Penulis belum tersedia'}
                                                 </span>
@@ -436,7 +442,9 @@ export function ReturnForm() {
                 {manualErrorMessage ? (
                     <Alert variant="destructive">
                         <AlertTitle>Pengembalian belum berhasil</AlertTitle>
-                        <AlertDescription>{manualErrorMessage}</AlertDescription>
+                        <AlertDescription>
+                            {manualErrorMessage}
+                        </AlertDescription>
                     </Alert>
                 ) : null}
 

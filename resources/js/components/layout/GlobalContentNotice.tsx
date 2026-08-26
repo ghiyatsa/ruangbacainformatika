@@ -77,7 +77,7 @@ export function GlobalContentNotice({
         };
 
         checkOverflow();
-        
+
         // Wait a brief moment to ensure layouts have settled
         const timer = window.setTimeout(checkOverflow, 50);
 
@@ -138,7 +138,7 @@ export function GlobalContentNotice({
     const linkContent = notice.url ? (
         <a
             href={notice.url}
-            className={`inline-flex text-xs font-semibold leading-tight transition-colors ${noticeStyle.link}`}
+            className={`inline-flex text-xs leading-tight font-semibold transition-colors ${noticeStyle.link}`}
         >
             {notice.linkLabel ?? 'Lihat detail'}
         </a>
@@ -168,13 +168,18 @@ export function GlobalContentNotice({
                         </span>
                     </span>
 
-                    <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <div ref={containerRef} className="w-full overflow-hidden">
+                    <div className="flex min-w-0 flex-1 flex-col justify-center">
+                        <div
+                            ref={containerRef}
+                            className="w-full overflow-hidden"
+                        >
                             <div
                                 ref={textRef}
                                 className={cn(
                                     'text-sm font-medium text-foreground',
-                                    isOverflowing ? 'animate-notice-marquee gap-8 pr-8' : 'flex items-center'
+                                    isOverflowing
+                                        ? 'animate-notice-marquee gap-8 pr-8'
+                                        : 'flex items-center',
                                 )}
                             >
                                 {textContent}
@@ -220,13 +225,15 @@ export function GlobalContentNotice({
                     </span>
                 </span>
 
-                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                <div className="flex min-w-0 flex-1 flex-col justify-center">
                     <div ref={containerRef} className="w-full overflow-hidden">
                         <div
                             ref={textRef}
                             className={cn(
                                 'text-sm font-medium text-foreground',
-                                isOverflowing ? 'animate-notice-marquee gap-8 pr-8' : 'flex items-center'
+                                isOverflowing
+                                    ? 'animate-notice-marquee gap-8 pr-8'
+                                    : 'flex items-center',
                             )}
                         >
                             {textContent}

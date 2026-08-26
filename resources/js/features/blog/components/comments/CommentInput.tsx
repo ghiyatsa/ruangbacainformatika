@@ -1,10 +1,10 @@
 import { useForm } from '@inertiajs/react';
 import { Send } from 'lucide-react';
-import {  useRef } from 'react';
+import { useRef } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import commentsRoute from '@/routes/blog/comments';
-import type {FormEvent} from 'react';
+import type { FormEvent } from 'react';
 
 interface CommentInputProps {
     articleSlug: string;
@@ -25,7 +25,16 @@ export function CommentInput({
     autoFocus,
     mention,
 }: CommentInputProps) {
-    const { data, setData, post, processing, reset, errors, setError, clearErrors } = useForm({
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        reset,
+        errors,
+        setError,
+        clearErrors,
+    } = useForm({
         content: mention ? `${mention} ` : '',
         parent_id: parentId,
         reply_to_comment_id: replyToCommentId,
@@ -95,11 +104,11 @@ export function CommentInput({
 
     return (
         <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="relative w-full rounded-lg border border-border bg-background/50 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-colors overflow-hidden">
+            <div className="relative w-full overflow-hidden rounded-lg border border-border bg-background/50 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
                 {/* Backdrop for highlighting mentions */}
                 <div
                     ref={backdropRef}
-                    className="absolute inset-0 pointer-events-none select-none p-3 text-sm font-sans leading-relaxed text-transparent whitespace-pre-wrap break-words overflow-hidden"
+                    className="pointer-events-none absolute inset-0 overflow-hidden p-3 font-sans text-sm leading-relaxed break-words whitespace-pre-wrap text-transparent select-none"
                     aria-hidden="true"
                 >
                     {(() => {
@@ -120,7 +129,10 @@ export function CommentInput({
 
                             return [
                                 ...acc,
-                                <mark key={index} className="bg-primary/20 text-transparent rounded px-0.5">
+                                <mark
+                                    key={index}
+                                    className="rounded bg-primary/20 px-0.5 text-transparent"
+                                >
                                     {mention}
                                 </mark>,
                                 part,
@@ -144,7 +156,7 @@ export function CommentInput({
                     rows={parentId ? 2 : 3}
                     autoFocus={autoFocus}
                     maxLength={1000}
-                    className="relative z-10 w-full resize-none bg-transparent p-3 text-sm font-sans leading-relaxed text-foreground focus:outline-hidden placeholder:text-muted-foreground"
+                    className="relative z-10 w-full resize-none bg-transparent p-3 font-sans text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-hidden"
                 />
             </div>
             {errors.content && (

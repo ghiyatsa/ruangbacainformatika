@@ -5,10 +5,7 @@ interface SectionHeaderProps {
     action?: ReactNode;
 }
 
-export default function SectionHeader({
-    title,
-    action,
-}: SectionHeaderProps) {
+export default function SectionHeader({ title, action }: SectionHeaderProps) {
     return (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex max-w-2xl flex-col gap-2">

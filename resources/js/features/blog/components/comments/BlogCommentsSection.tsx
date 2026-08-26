@@ -91,7 +91,8 @@ export function BlogCommentsSection({
             {/* Comments List */}
             {(() => {
                 const uniqueComments = comments.filter(
-                    (comment, index, self) => self.findIndex((c) => c.id === comment.id) === index
+                    (comment, index, self) =>
+                        self.findIndex((c) => c.id === comment.id) === index,
                 );
 
                 if (uniqueComments.length === 0) {
@@ -118,20 +119,23 @@ export function BlogCommentsSection({
                             ))}
                         </div>
 
-                        {pagination && pagination.current_page < pagination.last_page && (
-                            <div className="pt-2 flex justify-center">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={loadingMore}
-                                    onClick={handleLoadMore}
-                                    className="rounded-full px-6"
-                                >
-                                    {loadingMore ? 'Memuat...' : 'Muat Komentar Lainnya'}
-                                </Button>
-                            </div>
-                        )}
+                        {pagination &&
+                            pagination.current_page < pagination.last_page && (
+                                <div className="flex justify-center pt-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={loadingMore}
+                                        onClick={handleLoadMore}
+                                        className="rounded-full px-6"
+                                    >
+                                        {loadingMore
+                                            ? 'Memuat...'
+                                            : 'Muat Komentar Lainnya'}
+                                    </Button>
+                                </div>
+                            )}
                     </div>
                 );
             })()}
