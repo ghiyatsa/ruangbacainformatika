@@ -146,6 +146,35 @@ npm run dev
 
 ---
 
+## 🔗 Integrasi Similarity API
+
+Deteksi kemiripan judul karya ilmiah (skripsi & laporan magang) dikerjakan oleh microservice terpisah: **[ruangbaca-similarity](../ruangbaca-similarity)** (FastAPI + ChromaDB, di-deploy sebagai Hugging Face Space). Aplikasi ini tetap menjadi *source of truth*; service tersebut hanya menyimpan vector embedding.
+
+- Konfigurasi koneksi ada di panel admin (section **Integration**) atau via `.env`: `SIMILARITY_API_URL`, `SIMILARITY_API_SECRET`, `SIMILARITY_API_TIMEOUT`.
+- Sinkronisasi berjalan otomatis: create/update/delete data karya ilmiah akan meng-upsert/menghapus vector melalui job antrean. Status per dokumen dapat dipantau lewat widget **Similarity Sync** di dashboard admin.
+- Reindex penuh manual dari admin atau CLI:
+  ```bash
+  php artisan skripsi:sync --chunk=50 --reset
+  ```
+
+---
+
+## 🧭 Operasional Harian
+
+Perintah yang umum dibutuhkan pengelola setelah aplikasi berjalan:
+
+| Perintah | Fungsi |
+| :--- | :--- |
+| `php artisan skripsi:sync --reset` | Reindex penuh semua karya ilmiah ke Similarity API |
+| `php artisan similarity:clear-cache` | Kosongkan cache hasil pengecekan kemiripan (dipanggil otomatis tiap sync) |
+| `php artisan queue:listen` / Horizon | Memproses antrean (sinkronisasi similarity, notifikasi, dsb.) |
+| `php artisan schedule:work` | Menjalankan task terjadwal (lokal); di produksi gunakan cron `schedule:run` |
+
+> [!NOTE]
+> Scheduler produksi dipantau lewat [spatie/laravel-schedule-monitor](https://spatie.be/docs/laravel-schedule-monitor) — halaman **Monitor Schedule** tersedia di panel admin.
+
+---
+
 ## 🧪 Pengujian & Standar Kode
 
 Harap pastikan semua pengujian lulus dan kode terformat dengan baik sebelum melakukan commit perubahan:
