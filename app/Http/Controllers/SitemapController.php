@@ -68,6 +68,12 @@ class SitemapController extends Controller
             'priority' => '0.9',
         ];
         $urls[] = [
+            'loc' => route('about'),
+            'lastmod' => now()->startOfMonth()->toAtomString(),
+            'changefreq' => 'monthly',
+            'priority' => '0.5',
+        ];
+        $urls[] = [
             'loc' => route('about-team'),
             'lastmod' => now()->startOfMonth()->toAtomString(),
             'changefreq' => 'monthly',

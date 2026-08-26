@@ -20,6 +20,8 @@ use Inertia\Response as InertiaResponse;
 
 class SearchController extends Controller
 {
+    protected const RESULTS_PER_TYPE = 15;
+
     /**
      * Handle the incoming request.
      */
@@ -60,11 +62,11 @@ class SearchController extends Controller
 
             // Hitung total sebenarnya hanya jika hasil mentok limit (dipotong).
             $totals = [
-                'books' => $results['books']->count() >= 15 ? Book::query()->published()->search($search)->count() : null,
-                'posts' => $results['posts']->count() >= 15 ? Post::query()->published()->search($search)->count() : null,
-                'skripsis' => $results['skripsis']->count() >= 15 ? Skripsi::query()->search($search)->count() : null,
-                'internshipReports' => $results['internshipReports']->count() >= 15 ? InternshipReport::query()->search($search)->count() : null,
-                'theses' => $results['theses']->count() >= 15 ? Thesis::query()->search($search)->count() : null,
+                'books' => $results['books']->count() >= self::RESULTS_PER_TYPE ? Book::query()->published()->search($search)->count() : null,
+                'posts' => $results['posts']->count() >= self::RESULTS_PER_TYPE ? Post::query()->published()->search($search)->count() : null,
+                'skripsis' => $results['skripsis']->count() >= self::RESULTS_PER_TYPE ? Skripsi::query()->search($search)->count() : null,
+                'internshipReports' => $results['internshipReports']->count() >= self::RESULTS_PER_TYPE ? InternshipReport::query()->search($search)->count() : null,
+                'theses' => $results['theses']->count() >= self::RESULTS_PER_TYPE ? Thesis::query()->search($search)->count() : null,
             ];
 
             $hasResults = $this->totalDisplayed($results) > 0;
@@ -101,6 +103,7 @@ class SearchController extends Controller
 
         return Inertia::render('search/index', [
             'query' => $search,
+            'resultsPerType' => self::RESULTS_PER_TYPE,
             'results' => app()->runningUnitTests() ? $payload : Inertia::defer(fn (): array => $payload),
         ]);
     }
@@ -120,7 +123,7 @@ class SearchController extends Controller
             ->withCount([
                 'items as available_items_count' => fn (Builder $query): Builder => $query->available(),
             ])
-            ->limit(15)
+            ->limit(self::RESULTS_PER_TYPE)
             ->get()
             ->map(fn (Book $book): array => [
                 'id' => $book->id,
@@ -145,7 +148,7 @@ class SearchController extends Controller
             ->search($search)
             ->select(['posts.id', 'posts.title', 'posts.slug', 'posts.summary', 'posts.cover_image', 'posts.user_id', 'posts.published_at'])
             ->with(['user:id,name,avatar_url', 'categories:id,name,slug'])
-            ->limit(15)
+            ->limit(self::RESULTS_PER_TYPE)
             ->get()
             ->map(fn (Post $post): array => [
                 'id' => $post->id,
@@ -170,7 +173,7 @@ class SearchController extends Controller
             ->search($search)
             ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
             ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
-            ->limit(15)
+            ->limit(self::RESULTS_PER_TYPE)
             ->get()
             ->map(fn (Skripsi $skripsi): array => [
                 'id' => $skripsi->id,
@@ -189,7 +192,7 @@ class SearchController extends Controller
             ->search($search)
             ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
             ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
-            ->limit(15)
+            ->limit(self::RESULTS_PER_TYPE)
             ->get()
             ->map(fn (InternshipReport $internshipReport): array => [
                 'id' => $internshipReport->id,
@@ -208,7 +211,7 @@ class SearchController extends Controller
             ->search($search)
             ->select(['id', 'title', 'author_name', 'student_id', 'year', 'keywords', 'abstract', 'view_count'])
             ->tap(fn (Builder $query) => $this->applyAcademicSearchRanking($query, $search))
-            ->limit(15)
+            ->limit(self::RESULTS_PER_TYPE)
             ->get()
             ->map(fn (Thesis $thesis): array => [
                 'id' => $thesis->id,
@@ -285,17 +288,6 @@ class SearchController extends Controller
         if (empty($queryWords)) {
             return response()->json([]);
         }
-
-        $suggestions = SearchHistory::query()
-            ->where(function (Builder $inner) use ($queryWords) {
-                foreach ($queryWords as $word) {
-                    $inner->where('query', 'like', "%{$word}%");
-                }
-            })
-            ->orderByDesc('hits')
-            ->limit(8)
-            ->pluck('query')
-            ->all();
 
         $suggestions = SearchHistory::query()
             ->where(function (Builder $inner) use ($queryWords) {

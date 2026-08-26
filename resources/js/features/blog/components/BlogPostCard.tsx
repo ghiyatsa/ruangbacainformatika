@@ -50,7 +50,7 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
                 <div className="aspect-square size-16 shrink-0 overflow-hidden rounded-lg bg-muted">
                     <img
                         src={post.coverImageUrl}
-                        alt=""
+                        alt={`Cover artikel: ${post.title}`}
                         width={64}
                         height={64}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -87,7 +87,7 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
             <div className="relative aspect-video overflow-hidden bg-muted">
                 <img
                     src={post.coverImageUrl}
-                    alt=""
+                    alt={`Cover artikel: ${post.title}`}
                     width={640}
                     height={400}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"

@@ -1,10 +1,16 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Mail, MapPin } from 'lucide-react';
 import { RuangBacaLogo } from '@/components/common/RuangBacaLogo';
 import { RUANG_BACA_DESCRIPTION } from '@/lib/brand';
 import { home } from '@/routes';
 
 export function FooterBrand() {
+    const {
+        site: { address, contactEmail },
+    } = usePage<{
+        site: { address: string; contactEmail: string };
+    }>().props;
+
     return (
         <div className="lg:col-span-4">
             <Link
@@ -29,15 +35,15 @@ export function FooterBrand() {
             <div className="flex flex-col gap-2.5">
                 <div className="flex items-start gap-2.5 text-xs text-muted-foreground">
                     <MapPin className="mt-0.5 size-3.5 shrink-0 text-primary/70" />
-                    <span>Jl. Cot Tengku Nie, Reuleut, Aceh Utara 24355</span>
+                    <span>{address}</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
                     <Mail className="size-3.5 shrink-0 text-primary/70" />
                     <a
-                        href="mailto:informatika@unimal.ac.id"
+                        href={`mailto:${contactEmail}`}
                         className="transition-colors hover:text-foreground"
                     >
-                        informatika@unimal.ac.id
+                        {contactEmail}
                     </a>
                 </div>
             </div>

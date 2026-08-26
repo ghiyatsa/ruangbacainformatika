@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\actingAs;
@@ -174,6 +175,12 @@ it('caches check results and serves fresh data after sync invalidates the cache'
         ->postJson(route('similarity.check'), $payload)
         ->assertOk()
         ->assertJsonFragment(['total_found' => 1]);
+});
+
+it('throttles the similarity check endpoint', function () {
+    $route = Route::getRoutes()->getByName('similarity.check');
+
+    expect($route->gatherMiddleware())->toContain('throttle:similarity-check');
 });
 
 // =========================================================================

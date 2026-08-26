@@ -71,6 +71,40 @@ it('returns the latest notifications for the authenticated user', function () {
         ->and($titles)->toContain('Peminjaman berhasil diproses');
 });
 
+it('renders the notification page for members', function () {
+    $user = createNotificationMember();
+    $loan = createLoanWithBookFor($user);
+
+    $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
+
+    actingAs($user)
+        ->get(route('notifications.page'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('notifications/index')
+            ->count('notifications.data', 1)
+            ->where('notifications.data.0.title', 'Peminjaman berhasil diproses')
+        );
+});
+
+it('paginates the notification page at fifteen per page', function () {
+    $user = createNotificationMember();
+    $loan = createLoanWithBookFor($user);
+
+    foreach (range(1, 18) as $index) {
+        $user->notifyNow(new LoanReceiptDatabaseNotification($loan));
+    }
+
+    actingAs($user)
+        ->get(route('notifications.page', ['page' => 2]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->count('notifications.data', 3)
+            ->where('notifications.current_page', 2)
+            ->where('notifications.total', 18)
+        );
+});
+
 it('excludes filament notifications from the public notification center', function () {
     $user = createNotificationMember();
     $loan = createLoanWithBookFor($user);

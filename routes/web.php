@@ -63,8 +63,11 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])
     ->name('sitemap');
 Route::middleware('auth')->group(function () {
     Route::get('/similarity', [SimilarityController::class, 'index'])->name('similarity.index');
-    Route::post('/similarity/check', [SimilarityController::class, 'check'])->name('similarity.check');
+    Route::post('/similarity/check', [SimilarityController::class, 'check'])
+        ->middleware('throttle:similarity-check')
+        ->name('similarity.check');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/page', [NotificationController::class, 'page'])->name('notifications.page');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::get('/loans/request', [LoanRequestController::class, 'show'])->name('loans.request');

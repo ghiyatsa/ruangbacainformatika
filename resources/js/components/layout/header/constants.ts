@@ -6,8 +6,9 @@ import {
     Info,
     Newspaper,
     ScanSearch,
+    Search,
 } from 'lucide-react';
-import { about, home } from '@/routes';
+import { about, home, search } from '@/routes';
 import blog from '@/routes/blog/index';
 import books from '@/routes/books';
 import internshipReports from '@/routes/internship-reports';
@@ -36,6 +37,13 @@ export const NAV_LINKS: NavItem[] = [
         label: 'Katalog',
         icon: BookOpen,
         children: [
+            {
+                label: 'Pencarian',
+                href: search.url(),
+                description:
+                    'Cari di semua koleksi buku, skripsi, tesis, dan KP.',
+                icon: Search,
+            },
             {
                 label: 'Buku',
                 href: books.index.url(),

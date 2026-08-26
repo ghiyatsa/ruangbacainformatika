@@ -38,6 +38,7 @@ interface SearchProps {
         theses: AcademicWorkData[];
         totals?: SearchTotals;
     };
+    resultsPerType: number;
 }
 
 function SearchSkeleton() {
@@ -58,7 +59,7 @@ function SearchSkeleton() {
             </section>
 
             {/* Hatched Divider */}
-            <div className="-mx-4 sm:-mx-6 lg:-mx-8 border-y border-border/60 my-8">
+            <div className="-mx-4 my-8 border-y border-border/60 sm:-mx-6 lg:-mx-8">
                 <div
                     className="h-6"
                     style={{
@@ -85,7 +86,11 @@ function SearchSkeleton() {
     );
 }
 
-export default function SearchIndex({ query, results }: SearchProps) {
+export default function SearchIndex({
+    query,
+    results,
+    resultsPerType,
+}: SearchProps) {
     const { auth, loanRequestCart } = usePage<{
         auth: Auth;
         loanRequestCart: LoanRequestCart | null;
@@ -116,7 +121,11 @@ export default function SearchIndex({ query, results }: SearchProps) {
     return (
         <CatalogPageLayout
             title={query ? `Hasil: "${query}"` : 'Pencarian'}
-            metaDescription={query ? `Hasil pencarian untuk "${query}"` : 'Halaman pencarian koleksi.'}
+            metaDescription={
+                query
+                    ? `Hasil pencarian untuk "${query}"`
+                    : 'Halaman pencarian koleksi.'
+            }
             resourceName="item"
             breadcrumbLabel="Pencarian"
             totalCount={totalCount}
@@ -125,26 +134,33 @@ export default function SearchIndex({ query, results }: SearchProps) {
             <div className="space-y-10">
                 <Deferred data="results" fallback={<SearchSkeleton />}>
                     {results && totalCount === 0 ? (
-                        <Card className="border-dashed py-12 rounded-2xl bg-card">
+                        <Card className="rounded-2xl border-dashed bg-card py-12">
                             <CardContent className="flex flex-col items-center justify-center text-center">
                                 {query ? (
                                     // Query ada tapi tidak ada hasil
                                     <>
                                         <p className="text-lg font-bold text-muted-foreground">
-                                            Tidak ada hasil yang cocok untuk &ldquo;{query}&rdquo;.
+                                            Tidak ada hasil yang cocok untuk
+                                            &ldquo;{query}&rdquo;.
                                         </p>
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            Silakan coba kata kunci lain atau periksa ejaan Anda.
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            Silakan coba kata kunci lain atau
+                                            periksa ejaan Anda.
                                         </p>
                                     </>
                                 ) : (
                                     // Tidak ada query sama sekali
                                     <>
                                         <p className="text-lg font-bold text-muted-foreground">
-                                            Ketik kata kunci untuk mulai mencari.
+                                            Ketik kata kunci untuk mulai
+                                            mencari.
                                         </p>
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            Gunakan tombol pencarian atau tekan <kbd className="rounded border px-1.5 py-0.5 text-xs font-mono">Ctrl K</kbd> untuk membuka pencarian.
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            Gunakan tombol pencarian atau tekan{' '}
+                                            <kbd className="rounded border px-1.5 py-0.5 font-mono text-xs">
+                                                Ctrl K
+                                            </kbd>{' '}
+                                            untuk membuka pencarian.
                                         </p>
                                     </>
                                 )}
@@ -173,12 +189,14 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                                     key={`book-${book.id}`}
                                                     book={book}
                                                     auth={auth}
-                                                    loanRequestCart={loanRequestCart}
+                                                    loanRequestCart={
+                                                        loanRequestCart
+                                                    }
                                                     variant="compact"
                                                 />
                                             ))}
                                         </div>
-                                    )
+                                    ),
                                 });
                             }
 
@@ -197,7 +215,7 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                                 />
                                             ))}
                                         </div>
-                                    )
+                                    ),
                                 });
                             }
 
@@ -217,7 +235,7 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                                 />
                                             ))}
                                         </div>
-                                    )
+                                    ),
                                 });
                             }
 
@@ -228,17 +246,20 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                     total:
                                         results.totals?.internshipReports ??
                                         null,
-                                    seeAllUrl: internshipReportsRoute.index.url(),
+                                    seeAllUrl:
+                                        internshipReportsRoute.index.url(),
                                     content: (
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                            {results.internshipReports.map((report) => (
-                                                <InternshipReportCard
-                                                    key={`report-${report.id}`}
-                                                    report={report}
-                                                />
-                                            ))}
+                                            {results.internshipReports.map(
+                                                (report) => (
+                                                    <InternshipReportCard
+                                                        key={`report-${report.id}`}
+                                                        report={report}
+                                                    />
+                                                ),
+                                            )}
                                         </div>
-                                    )
+                                    ),
                                 });
                             }
 
@@ -258,7 +279,7 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                                 />
                                             ))}
                                         </div>
-                                    )
+                                    ),
                                 });
                             }
 
@@ -267,7 +288,7 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                     {activeSections.map((section, idx) => (
                                         <React.Fragment key={section.id}>
                                             {idx > 0 && (
-                                                <div className="-mx-4 sm:-mx-6 lg:-mx-8 border-y border-border/60 my-8">
+                                                <div className="-mx-4 my-8 border-y border-border/60 sm:-mx-6 lg:-mx-8">
                                                     <div
                                                         className="h-6"
                                                         style={{
@@ -283,18 +304,26 @@ export default function SearchIndex({ query, results }: SearchProps) {
                                                         <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                                                             {section.title}
                                                         </h2>
-                                                        {section.total !== null ? (
+                                                        {section.total !==
+                                                        null ? (
                                                             <p className="text-sm text-muted-foreground">
-                                                                Menampilkan 15 dari {section.total} hasil
+                                                                Menampilkan{' '}
+                                                                {resultsPerType}{' '}
+                                                                dari{' '}
+                                                                {section.total}{' '}
+                                                                hasil
                                                             </p>
                                                         ) : null}
                                                     </div>
                                                     {section.seeAllUrl ? (
                                                         <Link
-                                                            href={section.seeAllUrl}
+                                                            href={
+                                                                section.seeAllUrl
+                                                            }
                                                             className="shrink-0 text-sm font-semibold text-primary hover:underline"
                                                         >
-                                                            Lihat semua {section.title.toLowerCase()}
+                                                            Lihat semua{' '}
+                                                            {section.title.toLowerCase()}
                                                         </Link>
                                                     ) : null}
                                                 </div>

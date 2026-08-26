@@ -1,9 +1,8 @@
 import { router } from '@inertiajs/react';
 import {
+    ArrowRight,
     ArrowUpRight,
     Bell,
-    BellRing,
-    BookCheck,
     CheckCheck,
     Inbox,
 } from 'lucide-react';
@@ -24,9 +23,15 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+    NotificationIcon,
+    formatNotificationTime,
+    notificationKindLabel,
+} from '@/features/notifications/components/notification-ui';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getCsrfToken } from '@/lib/csrf';
 import { cn } from '@/lib/utils';
+import notificationsRoutes from '@/routes/notifications';
 import type { SiteNotification } from '@/types';
 
 interface NotificationsDropdownProps {
@@ -37,49 +42,6 @@ type NotificationsResponse = {
     notifications: SiteNotification[];
     unreadCount: number;
 };
-
-function formatNotificationTime(value: string): string {
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return 'Baru saja';
-    }
-
-    return new Intl.DateTimeFormat('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-    }).format(date);
-}
-
-function NotificationIcon({ icon }: { icon: string | null }) {
-    if (icon === 'bell-ring') {
-        return (
-            <BellRing className="size-4 text-amber-600 dark:text-amber-400" />
-        );
-    }
-
-    return (
-        <BookCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
-    );
-}
-
-function notificationKindLabel(kind: string | null): string | null {
-    if (kind === 'loan_receipt') {
-        return 'Peminjaman';
-    }
-
-    if (kind === 'loan_reminder') {
-        return 'Pengingat';
-    }
-
-    if (kind === 'post_approved' || kind === 'post_rejected') {
-        return 'Artikel';
-    }
-
-    return null;
-}
 
 export function NotificationsDropdown({
     initialUnreadCount,
@@ -291,14 +253,14 @@ export function NotificationsDropdown({
                                 className="rounded-2xl border border-border/60 bg-background/70 p-3.5"
                             >
                                 <div className="flex items-start gap-3">
-                                    <Skeleton className="size-10 rounded-2xl shrink-0" />
+                                    <Skeleton className="size-10 shrink-0 rounded-2xl" />
                                     <div className="min-w-0 flex-1 space-y-2">
                                         <div className="flex items-center justify-between gap-3">
                                             <Skeleton className="h-4 w-24 rounded" />
                                         </div>
                                         <Skeleton className="h-3.5 w-full rounded" />
                                         <Skeleton className="h-3.5 w-3/4 rounded" />
-                                        <div className="flex justify-between items-center gap-3 pt-1">
+                                        <div className="flex items-center justify-between gap-3 pt-1">
                                             <Skeleton className="h-3 w-16 rounded" />
                                             <Skeleton className="h-3 w-12 rounded" />
                                         </div>
@@ -410,6 +372,23 @@ export function NotificationsDropdown({
                     </div>
                 )}
             </div>
+
+            {notifications.length > 0 && (
+                <div className="border-t border-border/60 p-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-center gap-1 rounded-xl text-xs font-medium text-primary hover:text-primary"
+                        onClick={() => {
+                            setOpen(false);
+                            router.visit(notificationsRoutes.page.url());
+                        }}
+                    >
+                        Lihat semua notifikasi
+                        <ArrowRight className="size-3.5" />
+                    </Button>
+                </div>
+            )}
         </>
     );
 

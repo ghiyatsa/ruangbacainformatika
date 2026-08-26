@@ -4,16 +4,16 @@ import {
     FileCheck,
     GraduationCap,
     Info,
-    LogIn,
     Mail,
+    Search,
     Users,
-    UserPlus,
 } from 'lucide-react';
 import {
     about,
     aboutTeam,
     contact,
     privacyPolicy,
+    search,
     termsOfService,
 } from '@/routes';
 import books from '@/routes/books';
@@ -22,6 +22,12 @@ import skripsi from '@/routes/skripsi';
 import thesis from '@/routes/thesis';
 
 export const KOLEKSI_LINKS = [
+    {
+        label: 'Pencarian',
+        href: () => search.url(),
+        icon: Search,
+        internal: true,
+    },
     {
         label: 'Buku',
         href: () => books.index.url(),
@@ -80,13 +86,3 @@ export const LEGAL_LINKS = [
         internal: true,
     },
 ];
-
-export const GUEST_SERVICE_LINKS = [
-    { label: 'Masuk', hrefKey: 'login', icon: LogIn, internal: true },
-    {
-        label: 'Daftar',
-        hrefKey: 'register',
-        icon: UserPlus,
-        internal: true,
-    },
-] as const;

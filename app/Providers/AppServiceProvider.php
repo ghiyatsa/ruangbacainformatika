@@ -28,6 +28,7 @@ use App\Support\SiteSettings;
 use Carbon\CarbonImmutable;
 use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
@@ -64,6 +65,8 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        Model::preventLazyLoading(! $this->app->isProduction());
+
         if (now()->isWeekday() && ! app()->runningUnitTests()) {
             config(['session.lifetime' => 1440]);
         }
@@ -83,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureContactRateLimiter();
         $this->configureBlogRateLimiters();
         $this->configureGlobalSearchRateLimiters();
+        $this->configureSimilarityRateLimiter();
         $this->configureKioskRateLimiters();
         $this->composeRootView();
 
@@ -147,6 +151,14 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('search-suggestions', function (Request $request): Limit {
             return Limit::perMinute(120)
                 ->by((string) $request->ip());
+        });
+    }
+
+    protected function configureSimilarityRateLimiter(): void
+    {
+        RateLimiter::for('similarity-check', function (Request $request): Limit {
+            return Limit::perMinute(10)
+                ->by((string) ($request->user()->id ?? $request->ip()));
         });
     }
 
@@ -280,7 +292,7 @@ class AppServiceProvider extends ServiceProvider
                 return null;
             }
 
-            if (in_array($statusCode, [403, 404, 419, 429, 500, 503], true)) {
+            if ($statusCode >= 400) {
                 return $response
                     ->render('error/index', [
                         'status' => $statusCode,

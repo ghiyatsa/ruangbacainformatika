@@ -22,7 +22,13 @@ import {
 import { Label } from '@/components/ui/label';
 
 export function ContactPage() {
-    const user = usePage().props.auth?.user;
+    const {
+        auth: { user },
+        site: { address, contactEmail, department },
+    } = usePage<{
+        auth: { user?: { name?: string; email?: string } | null };
+        site: { address: string; contactEmail: string; department: string };
+    }>().props;
 
     return (
         <PageLayout
@@ -201,13 +207,9 @@ export function ContactPage() {
                                 Alamat layanan
                             </h3>
                             <p className="text-sm leading-relaxed text-muted-foreground">
-                                Kampus Bukit Indah
+                                {department}
                                 <br />
-                                Program Studi Teknik Informatika
-                                <br />
-                                Universitas Malikussaleh
-                                <br />
-                                Lhokseumawe, Aceh
+                                {address}
                             </p>
                         </div>
 
@@ -216,9 +218,9 @@ export function ContactPage() {
                                 Email resmi
                             </h3>
                             <p className="text-sm leading-relaxed text-muted-foreground">
-                                informatika@unimal.ac.id
-                                <br />
-                                ruangbacainformatika@unimal.ac.id
+                                <a href={`mailto:${contactEmail}`}>
+                                    {contactEmail}
+                                </a>
                             </p>
                         </div>
 

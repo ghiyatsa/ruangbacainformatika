@@ -106,7 +106,10 @@ export function BlogShowPage({
                         return text.slice(0, 160);
                     }
 
-                    return `${text} Baca artikel lengkap dan berita terbaru seputar akademik, kemahasiswaan, dan teknologi di blog resmi Ruang Baca Teknik Informatika Unimal.`.slice(0, 160);
+                    return `${text} Baca artikel lengkap dan berita terbaru seputar akademik, kemahasiswaan, dan teknologi di blog resmi Ruang Baca Teknik Informatika Unimal.`.slice(
+                        0,
+                        160,
+                    );
                 }
 
                 return 'Baca artikel terbaru, berita pengumuman, tips pemrograman, panduan akademik, dan info seputar kegiatan mahasiswa di blog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.';
@@ -414,7 +417,7 @@ export function BlogShowPage({
                                 {article && (
                                     <img
                                         src={article.coverImageUrl}
-                                        alt=""
+                                        alt={`Cover artikel: ${article.title}`}
                                         width={1200}
                                         height={600}
                                         onLoad={() => setImageLoaded(true)}

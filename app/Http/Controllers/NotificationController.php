@@ -4,13 +4,37 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Filament\Notifications\DatabaseNotification as FilamentDatabaseNotification;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class NotificationController extends Controller
 {
+    public function page(Request $request): Response
+    {
+        $user = $request->user();
+
+        abort_unless($user !== null, 401);
+        abort_unless($user->canViewPublicNotifications(), 403);
+
+        return Inertia::render('notifications/index', [
+            'notifications' => fn (): LengthAwarePaginator => $this->paginatedNotifications($user),
+            'meta' => ['robots' => 'noindex, nofollow'],
+        ]);
+    }
+
+    protected function paginatedNotifications(User $user): LengthAwarePaginator
+    {
+        return $this->visibleNotifications($user)
+            ->latest()
+            ->paginate(15)
+            ->through(fn (DatabaseNotification $notification): array => $this->serializeNotification($notification));
+    }
+
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
