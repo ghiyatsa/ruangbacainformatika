@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.19.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.18.0...v1.19.0) (2026-08-26)
+
+
+### Bug Fixes
+
+* **similarity:** wire delete observer, invalidate check cache on sync, remove dead code ([dd5981e](https://github.com/ghiyatsa/ruangbacainformatika/commit/dd5981e0d1058d497ab9da0389cf8072befd252d))
+
+
+### Documentation
+
+* refresh handover notes, similarity integration, and ops commands ([524b882](https://github.com/ghiyatsa/ruangbacainformatika/commit/524b88216efd354ebfa6585e01362eecaed824b4))
+
 ## [1.18.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.17.0...v1.18.0) (2026-08-04)
 
 
