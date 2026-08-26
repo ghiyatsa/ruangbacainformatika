@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.20.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.19.0...v1.20.0) (2026-08-26)
+
+
+### Features
+
+* **admin:** add registration claims and whatsapp log viewers ([ef299e2](https://github.com/ghiyatsa/ruangbacainformatika/commit/ef299e2ee3a056cc60445ab0ad513d4141a39709))
+* **ui:** add notifications page and polish public experience ([405b779](https://github.com/ghiyatsa/ruangbacainformatika/commit/405b7798d346da63ab1caafaa4e439d7f4f0fe13))
+
+
+### Bug Fixes
+
+* **auth:** guard member key and expire whatsapp skip flag ([30dfe04](https://github.com/ghiyatsa/ruangbacainformatika/commit/30dfe04db7f26310b4c7d98046d24584dca8f30c))
+* **loan:** enforce return token uniqueness and simplify qr errors ([8829555](https://github.com/ghiyatsa/ruangbacainformatika/commit/8829555ccb6654de053f03fb5d056e9c13262a90))
+
 ## [1.19.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.18.0...v1.19.0) (2026-08-26)
 
 
