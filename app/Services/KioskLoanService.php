@@ -128,48 +128,7 @@ class KioskLoanService
      */
     public function returnBooks(string $memberIdentifier, array $isbns): int
     {
-        $member = $this->findMemberByIdentifier($memberIdentifier);
-
-        if (! $member || ! $member->canBorrowBooks()) {
-            throw ValidationException::withMessages([
-                'member_identifier' => $this->memberBlockedMessage($member),
-            ]);
-        }
-
-        $result = DB::transaction(function () use ($member, $isbns): array {
-            $returnedBookTitles = [];
-
-            foreach ($isbns as $index => $isbn) {
-                $loanItem = LoanItem::query()
-                    ->whereNull('returned_at', 'and', false)
-                    ->whereHas('bookItem.book', fn ($query) => $query->where('isbn', $isbn))
-                    ->whereHas('loan', function ($query) use ($member) {
-                        $query
-                            ->whereBelongsTo($member)
-                            ->where('status', Loan::STATUS_BORROWED);
-                    })
-                    ->with(['loan.items', 'bookItem.book'])
-                    ->lockForUpdate()
-                    ->first();
-
-                if (! $loanItem) {
-                    throw ValidationException::withMessages([
-                        "isbns.{$index}" => "Tidak ada peminjaman aktif untuk ISBN {$isbn} atas member tersebut.",
-                    ]);
-                }
-
-                $returnedBookTitles[] = $this->processReturn($loanItem);
-            }
-
-            return [
-                'returned_count' => count($returnedBookTitles),
-                'returned_book_titles' => $returnedBookTitles,
-            ];
-        });
-
-        $this->sendReturnNotification($member, $result['returned_book_titles']);
-
-        return $result['returned_count'];
+        return $this->processBatchReturn($memberIdentifier, $isbns, 'isbn');
     }
 
     /**
@@ -179,48 +138,7 @@ class KioskLoanService
      */
     public function returnBooksByBookIds(string $memberIdentifier, array $bookIds): int
     {
-        $member = $this->findMemberByIdentifier($memberIdentifier);
-
-        if (! $member || ! $member->canBorrowBooks()) {
-            throw ValidationException::withMessages([
-                'member_identifier' => $this->memberBlockedMessage($member),
-            ]);
-        }
-
-        $result = DB::transaction(function () use ($member, $bookIds): array {
-            $returnedBookTitles = [];
-
-            foreach ($bookIds as $index => $bookId) {
-                $loanItem = LoanItem::query()
-                    ->whereNull('returned_at', 'and', false)
-                    ->whereHas('bookItem.book', fn ($query) => $query->whereKey($bookId))
-                    ->whereHas('loan', function ($query) use ($member) {
-                        $query
-                            ->whereBelongsTo($member)
-                            ->where('status', Loan::STATUS_BORROWED);
-                    })
-                    ->with(['loan.items', 'bookItem', 'bookItem.book'])
-                    ->lockForUpdate()
-                    ->first();
-
-                if (! $loanItem) {
-                    throw ValidationException::withMessages([
-                        "book_ids.{$index}" => 'Buku yang dipilih tidak tercatat sebagai pinjaman aktif untuk anggota ini.',
-                    ]);
-                }
-
-                $returnedBookTitles[] = $this->processReturn($loanItem);
-            }
-
-            return [
-                'returned_count' => count($returnedBookTitles),
-                'returned_book_titles' => $returnedBookTitles,
-            ];
-        });
-
-        $this->sendReturnNotification($member, $result['returned_book_titles']);
-
-        return $result['returned_count'];
+        return $this->processBatchReturn($memberIdentifier, $bookIds, 'book_id');
     }
 
     /**
@@ -230,34 +148,57 @@ class KioskLoanService
      */
     public function returnBooksByLoanItemIds(string $memberIdentifier, array $loanItemIds): int
     {
+        return $this->processBatchReturn($memberIdentifier, $loanItemIds, 'loan_item_id');
+    }
+
+    /**
+     * @param  array<int, int|string>  $identifiers
+     */
+    protected function processBatchReturn(string $memberIdentifier, array $identifiers, string $mode): int
+    {
         $member = $this->findMemberByIdentifier($memberIdentifier);
 
-        if (! $member || ! $member->canBorrowBooks()) {
+        if (! $member) {
             throw ValidationException::withMessages([
-                'member_identifier' => $this->memberBlockedMessage($member),
+                'member_identifier' => 'Akun anggota tidak ditemukan.',
             ]);
         }
 
-        $result = DB::transaction(function () use ($member, $loanItemIds): array {
+        $result = DB::transaction(function () use ($member, $identifiers, $mode): array {
             $returnedBookTitles = [];
 
-            foreach ($loanItemIds as $index => $loanItemId) {
-                $loanItem = LoanItem::query()
-                    ->whereKey($loanItemId)
-                    ->whereNull('returned_at', 'and', false)
-                    ->whereHas('loan', function ($query) use ($member) {
-                        $query
-                            ->whereBelongsTo($member)
+            foreach ($identifiers as $index => $identifier) {
+                $query = LoanItem::query()
+                    ->whereNull('returned_at')
+                    ->whereHas('loan', function ($q) use ($member) {
+                        $q->whereBelongsTo($member)
                             ->where('status', Loan::STATUS_BORROWED);
                     })
-                    ->with(['loan.items', 'bookItem', 'bookItem.book'])
-                    ->lockForUpdate()
-                    ->first();
+                    ->with(['loan.items', 'bookItem.book'])
+                    ->lockForUpdate();
+
+                match ($mode) {
+                    'isbn' => $query->whereHas('bookItem.book', fn ($q) => $q->where('isbn', (string) $identifier)),
+                    'book_id' => $query->whereHas('bookItem.book', fn ($q) => $q->whereKey((int) $identifier)),
+                    'loan_item_id' => $query->whereKey((int) $identifier),
+                };
+
+                $loanItem = $query->first();
 
                 if (! $loanItem) {
-                    throw ValidationException::withMessages([
-                        "loan_item_ids.{$index}" => 'Buku yang dipilih tidak lagi tercatat sebagai pinjaman aktif untuk anggota ini.',
-                    ]);
+                    $message = match ($mode) {
+                        'isbn' => "Tidak ada peminjaman aktif untuk ISBN {$identifier} atas member tersebut.",
+                        'book_id' => 'Buku yang dipilih tidak tercatat sebagai pinjaman aktif untuk anggota ini.',
+                        'loan_item_id' => 'Buku yang dipilih tidak lagi tercatat sebagai pinjaman aktif untuk anggota ini.',
+                    };
+
+                    $key = match ($mode) {
+                        'isbn' => "isbns.{$index}",
+                        'book_id' => "book_ids.{$index}",
+                        'loan_item_id' => "loan_item_ids.{$index}",
+                    };
+
+                    throw ValidationException::withMessages([$key => $message]);
                 }
 
                 $returnedBookTitles[] = $this->processReturn($loanItem);
@@ -392,7 +333,9 @@ class KioskLoanService
 
     protected function calculateDueAt(CarbonInterface $borrowedAt): Carbon
     {
-        return Carbon::parse($borrowedAt)->addWeekdays($this->loanDurationDays());
+        return Carbon::parse($borrowedAt)
+            ->addWeekdays($this->loanDurationDays())
+            ->setTime(17, 0, 0);
     }
 
     /**

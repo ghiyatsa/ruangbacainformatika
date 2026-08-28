@@ -4,6 +4,7 @@ use App\Models\Loan;
 use App\Models\User;
 use App\Notifications\LoanReminderDatabaseNotification;
 use App\Notifications\LoanReminderNotification;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\artisan;
@@ -130,6 +131,7 @@ it('sends reminders again for loans reminded before today', function () {
 });
 
 it('does not send reminders for loans due later than tomorrow', function () {
+    Carbon::setTestNow('2026-06-03 09:00:00'); // Rabu
     Notification::fake();
 
     $user = User::factory()->create();
@@ -137,7 +139,7 @@ it('does not send reminders for loans due later than tomorrow', function () {
     Loan::factory()->create([
         'user_id' => $user->id,
         'status' => Loan::STATUS_BORROWED,
-        'due_at' => now()->addDays(2),
+        'due_at' => now()->addDays(5),
     ]);
 
     artisan('app:remind-return')
@@ -158,7 +160,7 @@ it('uses adaptive copy for the day before due date', function () {
     $dbNotification = new LoanReminderDatabaseNotification($loan);
 
     expect($waNotification->toWhatsApp($user)->content)
-        ->toContain('Peminjaman buku Anda berakhir besok.')
+        ->toContain('Mengingatkan peminjaman buku Anda akan jatuh tempo besok.')
         ->and($dbNotification->toArray($user)['title'])->toBe('Batas pengembalian hampir tiba');
 });
 
@@ -173,7 +175,7 @@ it('uses adaptive copy for loans due today', function () {
     $dbNotification = new LoanReminderDatabaseNotification($loan);
 
     expect($waNotification->toWhatsApp($user)->content)
-        ->toContain('Peminjaman buku Anda berakhir hari ini.')
+        ->toContain('Mengingatkan peminjaman buku Anda jatuh tempo hari ini.')
         ->and($dbNotification->toArray($user)['title'])->toBe('Batas pengembalian hari ini');
 });
 
@@ -188,6 +190,6 @@ it('uses adaptive copy for overdue loans', function () {
     $dbNotification = new LoanReminderDatabaseNotification($loan);
 
     expect($waNotification->toWhatsApp($user)->content)
-        ->toContain('sudah melewati jatuh tempo (telat 3 hari)')
+        ->toContain('Peminjaman buku Anda telah melewati batas waktu (3 hari)')
         ->and($dbNotification->toArray($user)['title'])->toBe('Pengembalian sudah telat 3 hari');
 });

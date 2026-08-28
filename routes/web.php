@@ -2,18 +2,17 @@
 
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CatalogBookmarkController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CatalogReportController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InternshipReportController;
 use App\Http\Controllers\LoanHistoryController;
-use App\Http\Controllers\LoanRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpenGraphImageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostCommentController;
-use App\Http\Controllers\ReturnDraftController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SimilarityController;
 use App\Http\Controllers\SitemapController;
@@ -67,13 +66,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:similarity-check')
         ->name('similarity.check');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/bookmarks', [CatalogBookmarkController::class, 'index'])
+        ->name('catalog-bookmarks.index');
+    Route::put('/bookmarks', [CatalogBookmarkController::class, 'replace'])
+        ->middleware('throttle:catalog-bookmarks')
+        ->name('catalog-bookmarks.replace');
     Route::get('/notifications/page', [NotificationController::class, 'page'])->name('notifications.page');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::get('/loans/request', [LoanRequestController::class, 'show'])->name('loans.request');
-    Route::post('/loans/request/books', [LoanRequestController::class, 'storeBook'])->name('loans.request.books.store');
-    Route::delete('/loans/request/books/{book}', [LoanRequestController::class, 'destroyBook'])->name('loans.request.books.destroy');
-    Route::post('/loans/request/qr', [LoanRequestController::class, 'generateQr'])->name('loans.request.qr');
 
     Route::post('/posts/{post:slug}/comments', [PostCommentController::class, 'store'])
         ->middleware('throttle:blog-comments')
@@ -83,7 +83,6 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'profile.completed'])->group(function () {
     Route::get('/loans/history', LoanHistoryController::class)->name('loans.history');
-    Route::post('/loans/history/qr', [ReturnDraftController::class, 'generateQr'])->name('loans.history.qr');
 });
 
 require __DIR__.'/kiosk.php';

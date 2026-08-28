@@ -160,6 +160,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(10)
                 ->by((string) ($request->user()->id ?? $request->ip()));
         });
+
+        RateLimiter::for('catalog-bookmarks', function (Request $request): Limit {
+            return Limit::perMinute(30)
+                ->by((string) ($request->user()->id ?? $request->ip()));
+        });
     }
 
     protected function configureBlogRateLimiters(): void
@@ -289,6 +294,10 @@ class AppServiceProvider extends ServiceProvider
             $statusCode = $response->statusCode();
 
             if (app()->environment('local') && in_array($statusCode, [500, 503], true)) {
+                return null;
+            }
+
+            if (request()->expectsJson()) {
                 return null;
             }
 

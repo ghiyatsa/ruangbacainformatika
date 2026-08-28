@@ -13,12 +13,12 @@ interface Props {
 
 export default function MemberKeyPage({ memberKey }: Props) {
     setLayoutProps({
-        title: 'Member Key',
+        title: 'Kartu Anggota (QR)',
     });
 
     return (
         <>
-            <Head title="Member Key" />
+            <Head title="Kartu Anggota (QR)" />
             <MemberKeySection memberKey={memberKey} />
         </>
     );
@@ -27,7 +27,7 @@ export default function MemberKeyPage({ memberKey }: Props) {
 MemberKeyPage.layout = {
     breadcrumbs: [
         {
-            title: 'Member Key',
+            title: 'Kartu Anggota (QR)',
             href: settings.memberKey.show(),
         },
     ],

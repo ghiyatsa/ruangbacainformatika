@@ -7,26 +7,16 @@ use App\Notifications\Channels\WhatsAppChannel;
 use App\Notifications\Concerns\RateLimitsWhatsAppNotifications;
 use App\Notifications\Messages\WhatsAppMessage;
 use App\Support\AppTimezone;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Throwable;
 
-class LoanReceiptNotification extends Notification implements ShouldQueue
+class LoanReceiptNotification extends Notification
 {
-    use Queueable;
     use RateLimitsWhatsAppNotifications;
 
-    public int $tries = 12;
-
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(
         protected Loan $loan
-    ) {
-        $this->afterCommit();
-    }
+    ) {}
 
     /**
      * @return array<int, string>
@@ -39,21 +29,20 @@ class LoanReceiptNotification extends Notification implements ShouldQueue
     public function toWhatsApp(object $notifiable): WhatsAppMessage
     {
         $lines = [
-            "Assalamualaikum {$notifiable->name},",
-            'Peminjaman buku Anda berhasil diproses.',
-            'Daftar buku:',
+            "Halo {$notifiable->name},",
+            '',
+            'Peminjaman buku Anda berhasil:',
         ];
 
         foreach ($this->loan->items as $item) {
             $title = $item->bookItem->book->title ?? 'Buku Tanpa Judul';
-            $isbn = $item->bookItem->book->isbn ?? '-';
-            $lines[] = "- {$title} (ISBN: {$isbn})";
+            $lines[] = "- {$title}";
         }
 
         $lines[] = '';
-        $lines[] = 'Batas pengembalian: '.AppTimezone::format($this->loan->due_at, 'd F Y');
-        $lines[] = 'Silakan kembalikan tepat waktu untuk menghindari pembatasan akun.';
-        $lines[] = 'Terima kasih! '.config('app.name');
+        $lines[] = 'Batas waktu pengembalian: '.AppTimezone::format($this->loan->due_at, 'd F Y');
+        $lines[] = '';
+        $lines[] = 'Harap kembalikan tepat waktu ya. Terima kasih!';
 
         return new WhatsAppMessage(
             implode("\n", $lines),
@@ -74,19 +63,6 @@ class LoanReceiptNotification extends Notification implements ShouldQueue
             'items_count' => $this->loan->items->count(),
             'due_at' => $this->loan->due_at,
         ];
-    }
-
-    /**
-     * @return list<int>
-     */
-    public function backoff(): array
-    {
-        return [300, 900, 1800, 3600];
-    }
-
-    public function retryUntil(): \DateTimeInterface
-    {
-        return now()->addDay();
     }
 
     public function failed(?Throwable $exception): void

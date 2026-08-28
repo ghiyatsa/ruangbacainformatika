@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Settings\Pages;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
+use App\Services\KioskPinManager;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -17,14 +18,15 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Hash;
 
 class LibrarySettings extends Page
 {
-    protected static ?string $navigationLabel = 'Pengaturan Peminjaman';
+    protected static ?string $navigationLabel = 'Peminjaman & Kiosk';
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $title = 'Pengaturan Peminjaman';
+    protected static ?string $title = 'Peminjaman & Kiosk';
 
     protected static ?string $slug = 'library';
 
@@ -52,8 +54,20 @@ class LibrarySettings extends Page
     {
         return $schema->components([
             Form::make([
+                Section::make('Akses Kiosk Mandiri')
+                    ->description('PIN 6-digit untuk membuka sesi kiosk di ruangan')
+                    ->schema([
+                        TextInput::make('kiosk_pin')
+                            ->label('PIN Kiosk (6 Digit Angka)')
+                            ->password()
+                            ->revealable()
+                            ->helperText('Kosongkan jika PIN tidak ingin diubah. PIN wajib 6 digit angka.')
+                            ->required(fn (): bool => ! $this->kioskPinManager()->isConfigured())
+                            ->length(6)
+                            ->rule('regex:/^[0-9]{6}$/'),
+                    ]),
                 Section::make('Aturan Peminjaman')
-                    ->description('Aturan dasar peminjaman untuk layanan anggota')
+                    ->description('Aturan dasar peminjaman buku untuk anggota')
                     ->schema([
                         TextInput::make('loan_max_books')
                             ->label('Maksimal Buku Dipinjam')
@@ -127,12 +141,16 @@ class LibrarySettings extends Page
             'late_return_cooldown_days' => $data['late_return_cooldown_days'] ?? 3,
         ];
 
+        if (! empty($data['kiosk_pin'])) {
+            $this->settingRepository()->put('kiosk', 'pin_hash', Hash::make((string) $data['kiosk_pin']));
+        }
+
         $this->settingRepository()->putMany('library', $savedValues);
-        app(ActivityLogService::class)->logSettingsUpdate('library', 'Pengaturan peminjaman', $existingValues, $savedValues);
+        app(ActivityLogService::class)->logSettingsUpdate('library', 'Pengaturan peminjaman & kios', $existingValues, $savedValues);
 
         Notification::make()
             ->success()
-            ->title('Pengaturan peminjaman disimpan')
+            ->title('Pengaturan berhasil disimpan')
             ->send();
 
         $this->form->fill($this->settingRepository()->sectionValues('library', $this->defaultValues()));
@@ -149,7 +167,13 @@ class LibrarySettings extends Page
             'late_return_suspension_enabled' => true,
             'late_return_suspend_after_days' => '1',
             'late_return_cooldown_days' => '3',
+            'kiosk_pin' => '',
         ];
+    }
+
+    protected function kioskPinManager(): KioskPinManager
+    {
+        return app(KioskPinManager::class);
     }
 
     protected function settingRepository(): SettingRepository

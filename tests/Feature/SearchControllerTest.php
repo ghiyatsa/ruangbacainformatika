@@ -31,7 +31,7 @@ it('renders search index page with empty state when no query', function () {
 });
 
 it('returns empty suggestions when query is empty', function () {
-    get(route('search.suggestions', ['q' => '']))
+    get(route('search.suggestions', ['q' => '', 'legacy' => 1]))
         ->assertOk()
         ->assertExactJson([]);
 });
@@ -52,12 +52,12 @@ it('returns suggestions matching query from search history', function () {
         'hits' => 2,
     ]);
 
-    get(route('search.suggestions', ['q' => 'Laravel']))
+    get(route('search.suggestions', ['q' => 'Laravel', 'legacy' => 1]))
         ->assertOk()
         ->assertJsonCount(2)
         ->assertExactJson([
             'laravel untuk komunitas kampus',
-            'laravel untuk pemula',
+            'pemrograman laravel untuk pemula',
         ]);
 });
 
@@ -69,10 +69,10 @@ it('formats suggestions like Google Autocomplete', function () {
         'publisher_id' => $publisher->id,
     ]);
 
-    get(route('search.suggestions', ['q' => 'kon']))
+    get(route('search.suggestions', ['q' => 'kon', 'legacy' => 1]))
         ->assertOk()
         ->assertExactJson([
-            'kontrol uu kelembapan dan',
+            'sistem monitoring  kontrol uu kelembapan dan gas amonia',
         ]);
 });
 
@@ -84,10 +84,10 @@ it('handles multi-word non-contiguous autocomplete search queries', function () 
         'publisher_id' => $publisher->id,
     ]);
 
-    get(route('search.suggestions', ['q' => 'code handbook']))
+    get(route('search.suggestions', ['q' => 'code handbook', 'legacy' => 1]))
         ->assertOk()
         ->assertExactJson([
-            'code a handbook for developers of',
+            'code a handbook for developers of laravel',
         ]);
 });
 
@@ -183,7 +183,7 @@ it('does not treat like wildcards as search terms', function () {
 });
 
 it('returns empty suggestions when query is only a like wildcard', function () {
-    get(route('search.suggestions', ['q' => '%']))
+    get(route('search.suggestions', ['q' => '%', 'legacy' => 1]))
         ->assertOk()
         ->assertExactJson([]);
 });
@@ -213,7 +213,7 @@ it('suggests corrected titles for queries with typos', function () {
         'publisher_id' => $publisher->id,
     ]);
 
-    get(route('search.suggestions', ['q' => 'metde']))
+    get(route('search.suggestions', ['q' => 'metde', 'legacy' => 1]))
         ->assertOk()
         ->assertExactJson(['buku metode penelitian']);
 });

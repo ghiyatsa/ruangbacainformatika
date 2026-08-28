@@ -11,24 +11,12 @@ export type User = {
     [key: string]: unknown;
 };
 
-export type BorrowingAccessReason = {
-    title: string;
-    message: string;
-    actionUrl: string | null;
-};
-
-export type BorrowingAccess = {
-    canBorrow: boolean;
-    reason: BorrowingAccessReason | null;
-};
-
 export type Auth = {
     user: User | null;
     canAccessAdminPanel?: boolean;
     canBorrowBooks?: boolean;
     canViewNotifications?: boolean;
     hasVerifiedWhatsApp?: boolean;
-    borrowingAccess?: BorrowingAccess;
     isMember?: boolean;
 };
 
@@ -38,12 +26,4 @@ export type GoogleAuth = {
     oneTapUrl: string;
     enabled: boolean;
     oneTapEnabled: boolean;
-};
-
-export type LoanRequestCart = {
-    count: number;
-    maxBooks: number;
-    activeLoansCount: number;
-    hasActiveQr: boolean;
-    bookIds: number[];
 };

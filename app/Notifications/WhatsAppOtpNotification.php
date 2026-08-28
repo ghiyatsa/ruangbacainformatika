@@ -4,23 +4,15 @@ namespace App\Notifications;
 
 use App\Notifications\Channels\WhatsAppChannel;
 use App\Notifications\Messages\WhatsAppMessage;
-use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
 class WhatsAppOtpNotification extends Notification
 {
-    use Queueable;
-
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(
         protected string $code,
     ) {}
 
     /**
-     * Get the notification's delivery channels.
-     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
@@ -31,12 +23,12 @@ class WhatsAppOtpNotification extends Notification
     public function toWhatsApp(object $notifiable): WhatsAppMessage
     {
         $lines = [
-            "Assalamualaikum {$notifiable->name},",
-            'Kode OTP WhatsApp Ruang Baca Anda:',
-            $this->code,
+            "Halo {$notifiable->name},",
             '',
-            'Kode berlaku selama 10 menit.',
-            'Jangan bagikan kode ini kepada siapa pun.',
+            'Kode verifikasi akun Ruang Baca Anda:',
+            "*{$this->code}*",
+            '',
+            'Kode berlaku selama 10 menit. Jangan berikan kode ini kepada siapa pun.',
         ];
 
         return new WhatsAppMessage(
@@ -46,8 +38,6 @@ class WhatsAppOtpNotification extends Notification
     }
 
     /**
-     * Get the array representation of the notification.
-     *
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array

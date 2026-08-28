@@ -153,26 +153,23 @@ export function BookSearchDialog({
                     <DialogTitle>Cari Buku</DialogTitle>
                     <DialogDescription>
                         {bookSearchMode === 'borrow'
-                            ? 'Cari dan pilih buku.'
-                            : 'Cari dari pinjaman aktif anggota ini.'}
+                            ? 'Cari berdasarkan judul, penulis, kategori, atau ISBN.'
+                            : 'Pilih buku dari daftar pinjaman aktif anggota ini.'}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid gap-4">
+                <div className="flex flex-col gap-3">
                     <InputGroup>
                         <InputGroupInput
                             id="book-search"
                             placeholder={
                                 bookSearchMode === 'borrow'
-                                    ? 'Cari judul, penulis, ISBN, atau ISSN'
-                                    : 'Filter judul, penulis, ISBN, atau ISSN'
+                                    ? 'Ketik judul, pengarang, atau topik buku...'
+                                    : 'Filter buku pinjaman aktif...'
                             }
-                            autoComplete="new-password"
+                            autoComplete="off"
                             autoCorrect="off"
                             spellCheck={false}
-                            data-lpignore="true"
-                            data-1p-ignore="true"
-                            data-bwignore="true"
                             value={searchQuery}
                             onChange={(e) => {
                                 const nextQuery = e.target.value;
@@ -205,7 +202,7 @@ export function BookSearchDialog({
                     </InputGroup>
 
                     {bookSearchMode === 'return' ? (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                             Daftar pinjaman aktif ditampilkan otomatis.
                         </p>
                     ) : null}
@@ -216,56 +213,56 @@ export function BookSearchDialog({
                         </p>
                     ) : null}
 
-                    <div className="rounded-2xl border border-border/70 bg-muted/25">
-                        <ScrollArea className="h-80 rounded-2xl bg-muted/25">
-                            <div className="grid gap-2 p-3">
-                                {bookSearchMode === 'borrow' &&
-                                searchQuery.trim() === '' ? (
-                                    <p className="px-3 py-4 text-sm text-muted-foreground">
-                                        Mulai ketik untuk mencari buku.
-                                    </p>
-                                ) : isSearching ? (
-                                    <div className="flex items-center gap-2 px-3 py-4 text-sm text-muted-foreground">
-                                        <Spinner />
-                                        Mencari buku...
-                                    </div>
-                                ) : availableSearchResults.length > 0 ? (
-                                    availableSearchResults.map((book) => (
-                                        <button
-                                            key={book.id}
-                                            type="button"
-                                            className="rounded-xl border border-transparent px-3 py-3 text-left transition hover:border-border hover:bg-accent/40"
-                                            onClick={() => onSelectBook(book)}
-                                        >
+                    <ScrollArea className="h-80">
+                        <div className="divide-y divide-border/50">
+                            {bookSearchMode === 'borrow' &&
+                            searchQuery.trim() === '' ? (
+                                <p className="py-8 text-center text-sm text-muted-foreground">
+                                    Mulai ketik untuk mencari buku.
+                                </p>
+                            ) : isSearching ? (
+                                <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+                                    <Spinner />
+                                    Mencari buku...
+                                </div>
+                            ) : availableSearchResults.length > 0 ? (
+                                availableSearchResults.map((book) => (
+                                    <button
+                                        key={book.id}
+                                        type="button"
+                                        className="flex w-full items-center justify-between gap-4 px-3 py-3 text-left transition-colors hover:bg-accent/40"
+                                        onClick={() => onSelectBook(book)}
+                                    >
+                                        <div className="min-w-0 flex-1 space-y-1">
                                             <p className="line-clamp-1 text-sm font-semibold text-foreground">
                                                 {book.title}
                                             </p>
-                                            <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                                            <p className="line-clamp-1 text-xs text-muted-foreground">
                                                 {book.authors?.join(', ') ||
                                                     'Penulis belum tersedia'}
-                                                {' | '}
+                                                {' • '}
                                                 {book.isbn
                                                     ? `ISBN ${book.isbn}`
                                                     : book.issn
                                                       ? `ISSN ${book.issn}`
                                                       : 'Tanpa ISBN/ISSN'}
-                                                {' | '}
-                                                {bookSearchMode === 'borrow'
-                                                    ? `${book.availableItemsCount} tersedia`
-                                                    : 'Pinjaman aktif'}
                                             </p>
-                                        </button>
-                                    ))
-                                ) : (
-                                    <p className="px-3 py-4 text-sm text-muted-foreground">
-                                        {bookSearchMode === 'borrow'
-                                            ? 'Tidak ada buku yang sesuai.'
-                                            : 'Tidak ada pinjaman aktif.'}
-                                    </p>
-                                )}
-                            </div>
-                        </ScrollArea>
-                    </div>
+                                        </div>
+
+                                        <span className="shrink-0 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
+                                            {bookSearchMode === 'borrow'
+                                                ? `${book.availableItemsCount} tersedia`
+                                                : 'Pinjaman aktif'}
+                                        </span>
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="py-8 text-center text-sm text-muted-foreground">
+                                    Tidak ada buku yang cocok.
+                                </p>
+                            )}
+                        </div>
+                    </ScrollArea>
                 </div>
             </DialogContent>
         </Dialog>

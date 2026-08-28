@@ -1,4 +1,4 @@
-import { Deferred, Link, usePage } from '@inertiajs/react';
+import { Deferred, Link } from '@inertiajs/react';
 import * as React from 'react';
 import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,7 +18,6 @@ import type { AcademicWorkData } from '@/features/academic-works/types';
 import type { BlogPostItem } from '@/features/blog/types';
 import type { InternshipReportData } from '@/features/internship-report/types';
 import type { CatalogBook } from '@/features/welcome/types';
-import type { Auth, LoanRequestCart } from '@/types';
 
 interface SearchTotals {
     books: number | null;
@@ -91,11 +90,6 @@ export default function SearchIndex({
     results,
     resultsPerType,
 }: SearchProps) {
-    const { auth, loanRequestCart } = usePage<{
-        auth: Auth;
-        loanRequestCart: LoanRequestCart | null;
-    }>().props;
-
     const totalCount = results
         ? results.books.length +
           results.posts.length +
@@ -188,10 +182,6 @@ export default function SearchIndex({
                                                 <BookCard
                                                     key={`book-${book.id}`}
                                                     book={book}
-                                                    auth={auth}
-                                                    loanRequestCart={
-                                                        loanRequestCart
-                                                    }
                                                     variant="compact"
                                                 />
                                             ))}

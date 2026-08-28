@@ -115,18 +115,15 @@ it('super admin users can render the library settings form', function () {
         ->assertSee('Simpan');
 });
 
-it('super admin users can render the kiosk settings actions', function () {
+it('super admin users can render the library settings actions', function () {
     $user = makeSuperAdmin();
 
     actingAs($user)
-        ->get('/admin/settings/kiosk')
+        ->get('/admin/settings/library')
         ->assertOk()
-        ->assertSee('Pengaturan Kios')
-        ->assertSee('Reset Sesi Perangkat')
-        ->assertSee('Perangkat Aktif')
-        ->assertSee('PIN Kios')
-        ->assertSee('Kosongkan jika PIN tidak diubah')
-        ->assertSee('Kosongkan untuk membuka akses ke semua jaringan. Pisahkan IP atau CIDR dengan baris baru atau koma.');
+        ->assertSee('Peminjaman & Kiosk')
+        ->assertSee('PIN Kiosk')
+        ->assertSee('Maksimal Buku Dipinjam');
 });
 
 it('super admin users can render concise integration settings copy', function () {
@@ -564,7 +561,7 @@ it('super admin users can access key admin resources', function (string $path) {
     '/admin/whats-app-message-logs',
     '/admin/logs',
     '/admin/activity-logs',
-    '/admin/settings/kiosk',
+    '/admin/settings/library',
     '/admin/settings/general-settings',
 ]);
 

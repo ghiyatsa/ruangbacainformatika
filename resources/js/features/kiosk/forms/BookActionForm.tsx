@@ -1,5 +1,5 @@
 import { Form } from '@inertiajs/react';
-import { UserIcon, BarcodeIcon, SearchIcon, QrCode } from 'lucide-react';
+import { UserIcon, BarcodeIcon, SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
@@ -23,7 +23,6 @@ export function BookActionForm({
     bookSearchUrl,
     bookSearchMode = 'borrow',
     autoFocus = true,
-    onScanQr,
     memberFieldMode = 'required',
     onActionSubmit,
 }: {
@@ -37,7 +36,6 @@ export function BookActionForm({
     bookSearchUrl?: string;
     bookSearchMode?: KioskBookSearchMode;
     autoFocus?: boolean;
-    onScanQr?: () => void;
     memberFieldMode?: 'required' | 'hidden';
     onActionSubmit?: (data: {
         memberIdentifier: string;
@@ -178,17 +176,6 @@ export function BookActionForm({
                                                         Cari Buku
                                                     </Button>
                                                 )}
-                                                {onScanQr && (
-                                                    <Button
-                                                        type="button"
-                                                        variant="secondary"
-                                                        className="shrink-0 rounded-md px-4 text-sm font-medium"
-                                                        onClick={onScanQr}
-                                                    >
-                                                        <QrCode className="size-4" />
-                                                        Scan QR
-                                                    </Button>
-                                                )}
                                             </div>
                                         </KioskField>
                                     </div>
@@ -211,17 +198,6 @@ export function BookActionForm({
                                             >
                                                 <SearchIcon />
                                                 Cari Buku
-                                            </Button>
-                                        ) : null}
-                                        {onScanQr ? (
-                                            <Button
-                                                type="button"
-                                                variant="secondary"
-                                                className="rounded-md px-4 text-sm font-medium"
-                                                onClick={onScanQr}
-                                            >
-                                                <QrCode className="size-4" />
-                                                Scan QR
                                             </Button>
                                         ) : null}
                                     </div>

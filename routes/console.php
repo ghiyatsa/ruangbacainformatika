@@ -33,10 +33,3 @@ Schedule::command(PruneAuditLogsCommand::class)
     ->withoutOverlapping();
 Schedule::command('queue:prune-failed')
     ->dailyAt('05:00');
-
-Schedule::command('schedule-monitor:sync')
-    ->everySixHours()
-    ->withoutOverlapping();
-Schedule::command('model:prune', ['--model' => config('schedule-monitor.models.monitored_scheduled_log_item')])
-    ->dailyAt('05:30')
-    ->withoutOverlapping();

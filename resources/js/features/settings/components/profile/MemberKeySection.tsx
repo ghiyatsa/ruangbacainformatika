@@ -45,9 +45,19 @@ export function MemberKeySection({ memberKey }: Props) {
     return (
         <section className="rounded-xl border border-border/70 bg-card p-6 shadow-xs">
             <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="text-center">
+                    <h2 className="text-base font-semibold">
+                        QR Kartu Anggota
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Arahkan kode QR ini ke kamera Kiosk saat meminjam atau
+                        mengembalikan buku di Ruang Baca.
+                    </p>
+                </div>
+
                 <div className="flex flex-col items-center justify-center gap-1.5 text-center">
-                    <p className="text-sm font-medium text-muted-foreground">
-                        Masa Berlaku
+                    <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                        Berlaku hingga
                     </p>
                     <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
                         {countdownLabel}

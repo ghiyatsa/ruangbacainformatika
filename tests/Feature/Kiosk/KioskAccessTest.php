@@ -16,10 +16,10 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\call;
 use function Pest\Laravel\get;
 use function Pest\Laravel\instance;
 use function Pest\Laravel\post;
+use function Pest\Laravel\withCookie;
 use function Pest\Laravel\withoutMiddleware;
 
 beforeEach(function () {
@@ -35,19 +35,6 @@ beforeEach(function () {
 
 afterEach(function () {
     Carbon::setTestNow();
-});
-
-it('kiosk denies access from networks outside the allowlist', function () {
-    Setting::query()->create([
-        'section' => 'kiosk',
-        'key' => 'allowed_networks',
-        'value' => '192.168.10.0/24',
-    ]);
-
-    call('GET', route('kiosk.index', absolute: false), [], [], [], [
-        'REMOTE_ADDR' => '10.10.10.15',
-    ])
-        ->assertForbidden();
 });
 
 it('kiosk shows pin entry when not verified', function () {
@@ -67,31 +54,23 @@ it('kiosk shows pin entry when not verified', function () {
         );
 });
 
-it('kiosk device cookies are only trusted from the same network scope', function () {
-    Setting::query()->create([
-        'section' => 'kiosk',
-        'key' => 'allowed_networks',
-        'value' => '10.10.0.0/16',
-    ]);
+it('kiosk device cookies are trusted for 24 hours', function () {
+    $deviceToken = str_repeat('a', 64);
 
     KioskDevice::query()->create([
         'session_id' => 'old-session',
-        'device_token' => 'trusted-device-token',
+        'device_token' => $deviceToken,
         'ip_address' => '10.10.10.20',
-        'network_scope' => '10.10.10.0/24',
-        'last_active_at' => now(),
+        'last_active_at' => now()->subHours(2),
     ]);
 
-    call('GET', route('kiosk.index', absolute: false), [], [
-        KioskPinManager::COOKIE_DEVICE_TOKEN_KEY => 'trusted-device-token',
-    ], [], [
-        'REMOTE_ADDR' => '10.10.20.9',
-    ])
+    withCookie(KioskPinManager::COOKIE_DEVICE_TOKEN_KEY, $deviceToken)
+        ->get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
             fn (Assert $page) => $page
                 ->component('kiosk/index')
-                ->where('step', 'pin'),
+                ->where('step', 'ready'),
         );
 });
 
@@ -118,9 +97,7 @@ it('kiosk routes apply the expected rate limiters', function () {
         ->and($routes->getByName('kiosk.members.status')?->gatherMiddleware())
         ->toContain('throttle:kiosk-member-status')
         ->and($routes->getByName('kiosk.visits.store')?->gatherMiddleware())
-        ->toContain('throttle:kiosk-submit')
-        ->and($routes->getByName('kiosk.loan-drafts.consume')?->gatherMiddleware())
-        ->toContain('throttle:kiosk-consume');
+        ->toContain('throttle:kiosk-submit');
 });
 
 it('kiosk rate limiters are registered with lobby-safe thresholds', function () {
@@ -133,23 +110,19 @@ it('kiosk rate limiters are registered with lobby-safe thresholds', function () 
     $pinLimiter = $rateLimiter->limiter('kiosk-pin');
     $bookSearchLimiter = $rateLimiter->limiter('kiosk-book-search');
     $memberStatusLimiter = $rateLimiter->limiter('kiosk-member-status');
-    $consumeLimiter = $rateLimiter->limiter('kiosk-consume');
 
     expect($pinLimiter)->not->toBeNull()
         ->and($bookSearchLimiter)->not->toBeNull()
-        ->and($memberStatusLimiter)->not->toBeNull()
-        ->and($consumeLimiter)->not->toBeNull();
+        ->and($memberStatusLimiter)->not->toBeNull();
 
     $pinLimit = $pinLimiter($request);
     $bookSearchLimit = $bookSearchLimiter($request);
     $memberStatusLimit = $memberStatusLimiter($request);
-    $consumeLimit = $consumeLimiter($request);
 
     expect($pinLimit->maxAttempts)->toBe(8)
         ->and($pinLimit->decaySeconds)->toBe(60)
         ->and($bookSearchLimit->maxAttempts)->toBe(180)
-        ->and($memberStatusLimit->maxAttempts)->toBe(180)
-        ->and($consumeLimit->maxAttempts)->toBe(20);
+        ->and($memberStatusLimit->maxAttempts)->toBe(180);
 });
 
 it('kiosk allows access after valid pin entry', function () {
@@ -161,7 +134,6 @@ it('kiosk allows access after valid pin entry', function () {
 
     assertDatabaseHas('kiosk_devices', [
         'ip_address' => '127.0.0.1',
-        'network_scope' => '127.0.0.0/24',
     ]);
 
     $mock = mock(KioskPinManager::class);
@@ -212,53 +184,18 @@ it('kiosk keeps verified sessions active during operating hours without idle exp
         ->toBeTrue();
 });
 
-it('kiosk expires verified sessions at the operating close time', function () {
-    Carbon::setTestNow('2026-06-07 09:30:00');
-
-    Setting::query()->updateOrCreate(
-        ['section' => 'kiosk', 'key' => 'operating_open_time'],
-        ['value' => '08:00'],
-    );
-    Setting::query()->updateOrCreate(
-        ['section' => 'kiosk', 'key' => 'operating_close_time'],
-        ['value' => '17:00'],
-    );
-
+it('kiosk allows verified session without auto operating lock', function () {
     post(route('kiosk.pin.store'), [
         'pin' => '123456',
     ])->assertRedirect(route('kiosk.index'));
-
-    Carbon::setTestNow('2026-06-07 10:00:01');
 
     get(route('kiosk.index'))
         ->assertSuccessful()
         ->assertInertia(
             fn (Assert $page) => $page
                 ->component('kiosk/index')
-                ->where('step', 'pin')
-                ->where('kioskSession.withinOperatingHours', false),
+                ->where('step', 'ready'),
         );
-
-    assertDatabaseCount('kiosk_devices', 0);
-});
-
-it('kiosk cannot start a session outside operating hours', function () {
-    Carbon::setTestNow('2026-06-07 13:30:00');
-
-    Setting::query()->updateOrCreate(
-        ['section' => 'kiosk', 'key' => 'operating_open_time'],
-        ['value' => '08:00'],
-    );
-    Setting::query()->updateOrCreate(
-        ['section' => 'kiosk', 'key' => 'operating_close_time'],
-        ['value' => '17:00'],
-    );
-
-    post(route('kiosk.pin.store'), [
-        'pin' => '123456',
-    ])->assertSessionHasErrors([
-        'pin' => 'Sesi kiosk hanya dapat dimulai pada jam operasional perpustakaan.',
-    ]);
 });
 
 it('kiosk respects the selected menu query when already verified', function () {

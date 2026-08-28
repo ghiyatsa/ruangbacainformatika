@@ -81,7 +81,7 @@ export function UserMenuContent({ user }: Props) {
                             onClick={cleanupMobileNavigation}
                         >
                             <KeyRound className="mr-2 h-4 w-4" />
-                            Member Key
+                            Kartu Anggota (QR)
                         </Link>
                     </DropdownMenuItem>
                 ) : null}

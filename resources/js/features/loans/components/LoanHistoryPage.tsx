@@ -1,7 +1,6 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { BookOpen, ChevronDown, Search, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import ReturnDraftController from '@/actions/App/Http/Controllers/ReturnDraftController';
+import { useMemo, useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,12 +14,9 @@ import { CatalogPagination } from '@/features/books/components/CatalogPagination
 import { LoanHistoryDesktopTable } from '@/features/loans/components/LoanHistoryDesktopTable';
 import { LoanHistoryMobileCard } from '@/features/loans/components/LoanHistoryMobileCard';
 import { LoanHistoryStatsBar } from '@/features/loans/components/LoanHistoryStatsBar';
-import { ReturnDraftPanel } from '@/features/loans/components/ReturnDraftPanel';
 import { useLoanHistoryFilters } from '@/features/loans/hooks/use-loan-history-filters';
-import { useCountdown } from '@/hooks/use-countdown';
 import { cn } from '@/lib/utils';
 import booksRoute from '@/routes/books';
-import type { FormEvent } from 'react';
 import type {
     LoanHistoryPageProps,
     LoanHistoryRow,
@@ -37,7 +33,6 @@ export default function LoanHistoryPage({
     loans,
     filters,
     stats,
-    returnDraft,
 }: LoanHistoryPageProps) {
     const [showReturnedLoans, setShowReturnedLoans] = useState(
         () =>
@@ -52,49 +47,6 @@ export default function LoanHistoryPage({
         },
     );
 
-    // Selection state ---------------------------------------------------------
-
-    const activeLoanItemIds = useMemo(
-        () =>
-            loans.data
-                .filter((loan) => !loan.isReturned)
-                .map((loan) => loan.id),
-        [loans.data],
-    );
-
-    const defaultSelectedLoanItemIds = useMemo(() => {
-        if (returnDraft.selectedLoanItemIds.length > 0) {
-            return returnDraft.selectedLoanItemIds;
-        }
-
-        return activeLoanItemIds;
-    }, [activeLoanItemIds, returnDraft.selectedLoanItemIds]);
-
-    const qrForm = useForm<{ loan_item_ids: number[] }>({
-        loan_item_ids: defaultSelectedLoanItemIds,
-    });
-
-    const { clearErrors, setData } = qrForm;
-
-    // Sync default selection when the draft changes server-side.
-    useEffect(() => {
-        setData('loan_item_ids', defaultSelectedLoanItemIds);
-        clearErrors();
-    }, [clearErrors, defaultSelectedLoanItemIds, returnDraft.id, setData]);
-
-    // QR countdown ------------------------------------------------------------
-
-    const { countdownLabel, remainingSeconds } = useCountdown(
-        returnDraft.expiresAtIso,
-    );
-
-    const hasActiveQrCountdown =
-        returnDraft.hasActiveQr &&
-        remainingSeconds !== null &&
-        remainingSeconds > 0;
-
-    // Loan grouping -----------------------------------------------------------
-
     const groupedLoans = useMemo(
         () => ({
             overdue: loans.data.filter(
@@ -108,8 +60,6 @@ export default function LoanHistoryPage({
         [loans.data],
     );
 
-    // The server counts "active" inclusively (overdue items are both active
-    // and overdue), so we subtract the overlap for the filter chip count.
     const filterCounts = useMemo(
         () => ({
             all: stats.total,
@@ -142,342 +92,236 @@ export default function LoanHistoryPage({
             : null,
     ].filter((chip): chip is NonNullable<typeof chip> => chip !== null);
 
-    const selectedLoanItemIds = qrForm.data.loan_item_ids;
-
-    const toggleLoanSelection = (loanItemId: number, checked: boolean) => {
-        const current = qrForm.data.loan_item_ids;
-
-        if (checked) {
-            if (current.includes(loanItemId)) {
-                return;
-            }
-
-            qrForm.setData('loan_item_ids', [...current, loanItemId]);
-        } else {
-            qrForm.setData(
-                'loan_item_ids',
-                current.filter((id) => id !== loanItemId),
-            );
-        }
-
-        qrForm.clearErrors('loan_item_ids');
-    };
-
-    const submitQrRequest = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        qrForm.post(ReturnDraftController.generateQr.url(), {
-            preserveScroll: true,
-        });
-    };
-
-    // Reusable rendered collection (mobile + desktop) --------------------------
-
     const renderLoanCollection = (items: LoanHistoryRow[]) => (
         <>
             <div className="space-y-3 md:hidden">
                 {items.map((loan) => (
-                    <LoanHistoryMobileCard
-                        key={loan.id}
-                        loan={loan}
-                        isSelected={selectedLoanItemIds.includes(loan.id)}
-                        onToggleSelection={(checked) =>
-                            toggleLoanSelection(loan.id, checked)
-                        }
-                    />
+                    <LoanHistoryMobileCard key={loan.id} loan={loan} />
                 ))}
             </div>
 
             <div className="hidden md:block">
-                <LoanHistoryDesktopTable
-                    loans={items}
-                    selectedLoanItemIds={selectedLoanItemIds}
-                    onToggleSelection={toggleLoanSelection}
-                />
+                <LoanHistoryDesktopTable loans={items} />
             </div>
         </>
     );
 
-    // Collapsible "returned" section ? deduplicated open expression.
-
+    const hasLoans = stats.total > 0;
     const returnedSectionOpen =
         filters.filter === 'returned' || showReturnedLoans;
 
-    // ------------------------------------------------------------------------
-
     return (
-        <PageLayout
-            title="Riwayat Peminjaman"
-            metaDescription="Riwayat pinjam ditampilkan per buku agar tetap ringkas."
-            maxWidth="7xl"
-            className="pt-0 pb-16"
-            showDesktopNoticeInContent={false}
-            header={
-                <div className="relative -mt-20 overflow-hidden bg-background sm:-mt-28 md:-mt-24">
-                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
-                        <div className="flex flex-col gap-4">
-                            <div>
-                                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                                    Riwayat Peminjaman
-                                </h1>
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                    Riwayat pinjam ditampilkan per buku agar
-                                    tetap ringkas saat data bertambah.
+        <PageLayout title="Riwayat Peminjaman">
+            <div className="space-y-6">
+                <div className="space-y-1">
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        Riwayat Peminjaman
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Pantau daftar buku yang sedang dipinjam dan riwayat
+                        peminjaman Anda sebelumnya.
+                    </p>
+                </div>
+
+                <LoanHistoryStatsBar stats={stats} />
+
+                {hasLoans ? (
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <div className="space-y-3 border border-border/60 bg-muted/5 p-4">
+                                <div className="flex flex-wrap gap-2">
+                                    {FILTER_OPTIONS.map((filter) => (
+                                        <Button
+                                            key={filter.key}
+                                            type="button"
+                                            variant={
+                                                filters.filter === filter.key
+                                                    ? 'default'
+                                                    : 'outline'
+                                            }
+                                            size="sm"
+                                            className="h-8 rounded-full px-3"
+                                            onClick={() =>
+                                                applyFilters(
+                                                    filter.key,
+                                                    searchQuery,
+                                                )
+                                            }
+                                        >
+                                            {filter.label}
+                                            <span className="text-xs opacity-80">
+                                                {filterCounts[filter.key]}
+                                            </span>
+                                        </Button>
+                                    ))}
+                                </div>
+
+                                <div className="relative">
+                                    <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        value={searchQuery}
+                                        onChange={(event) =>
+                                            setSearchQuery(event.target.value)
+                                        }
+                                        placeholder="Cari judul, kode, atau transaksi"
+                                        className="pl-9"
+                                    />
+                                </div>
+
+                                {activeFilterChips.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                        {activeFilterChips.map((chip) => (
+                                            <Button
+                                                key={chip.key}
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-8 gap-1 rounded-full px-3 text-xs"
+                                                onClick={chip.onRemove}
+                                            >
+                                                {chip.label}
+                                                <X className="size-3.5" />
+                                            </Button>
+                                        ))}
+                                    </div>
+                                ) : null}
+
+                                <p className="text-sm text-muted-foreground">
+                                    {loans.total.toLocaleString('id-ID')} hasil
                                 </p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        >
-            <div className="relative z-10">
-                {loans.data.length > 0 ? (
-                    <div className="grid gap-8 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)]">
-                        {/* Left Column: Stats & Lists */}
-                        <div className="space-y-6">
-                            <LoanHistoryStatsBar stats={stats} />
 
-                            <div className="space-y-6">
-                                <div className="border-b pb-3">
-                                    <h2 className="text-xl font-bold tracking-tight text-foreground">
-                                        Daftar Peminjaman
-                                    </h2>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        Yang aktif tampil lebih dulu.
+                            {loans.total === 0 ? (
+                                <div className="border border-dashed border-border/60 bg-muted/5 px-5 py-10 text-center">
+                                    <p className="text-sm font-medium text-foreground">
+                                        Tidak ada hasil
+                                    </p>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        Ubah filter atau kata kunci pencarian.
                                     </p>
                                 </div>
+                            ) : null}
 
-                                <div className="space-y-4">
-                                    <div className="space-y-3 border border-border/60 bg-muted/5 p-4">
-                                        <div className="flex flex-wrap gap-2">
-                                            {FILTER_OPTIONS.map((filter) => (
-                                                <Button
-                                                    key={filter.key}
-                                                    type="button"
-                                                    variant={
-                                                        filters.filter ===
-                                                        filter.key
-                                                            ? 'default'
-                                                            : 'outline'
-                                                    }
-                                                    size="sm"
-                                                    className="h-8 rounded-full px-3"
-                                                    onClick={() =>
-                                                        applyFilters(
-                                                            filter.key,
-                                                            searchQuery,
-                                                        )
-                                                    }
-                                                >
-                                                    {filter.label}
-                                                    <span className="text-xs opacity-80">
-                                                        {
-                                                            filterCounts[
-                                                                filter.key
-                                                            ]
-                                                        }
-                                                    </span>
-                                                </Button>
-                                            ))}
+                            {groupedLoans.overdue.length > 0 ? (
+                                <section className="space-y-3">
+                                    <div className="flex flex-col gap-2 border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="space-y-1">
+                                            <h3 className="text-sm font-semibold text-foreground">
+                                                Terlambat
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                Buku ini sudah melewati batas
+                                                waktu pengembalian. Silakan
+                                                kembalikan di Kiosk Ruang Baca.
+                                            </p>
                                         </div>
-
-                                        <div className="relative">
-                                            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                                            <Input
-                                                value={searchQuery}
-                                                onChange={(event) =>
-                                                    setSearchQuery(
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder="Cari judul, kode, atau transaksi"
-                                                className="pl-9"
-                                            />
-                                        </div>
-
-                                        {activeFilterChips.length > 0 ? (
-                                            <div className="flex flex-wrap gap-2">
-                                                {activeFilterChips.map(
-                                                    (chip) => (
-                                                        <Button
-                                                            key={chip.key}
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="h-8 gap-1 rounded-full px-3 text-xs"
-                                                            onClick={
-                                                                chip.onRemove
-                                                            }
-                                                        >
-                                                            {chip.label}
-                                                            <X className="size-3.5" />
-                                                        </Button>
-                                                    ),
-                                                )}
-                                            </div>
-                                        ) : null}
-
-                                        <p className="text-sm text-muted-foreground">
-                                            {loans.total.toLocaleString(
-                                                'id-ID',
-                                            )}{' '}
-                                            hasil
-                                        </p>
+                                        <Badge
+                                            variant="destructive"
+                                            className="w-fit"
+                                        >
+                                            {groupedLoans.overdue.length} buku
+                                        </Badge>
                                     </div>
 
-                                    {loans.total === 0 ? (
-                                        <div className="border border-dashed border-border/60 bg-muted/5 px-5 py-10 text-center">
-                                            <p className="text-sm font-medium text-foreground">
-                                                Tidak ada hasil
-                                            </p>
-                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                Ubah filter atau kata kunci.
+                                    {renderLoanCollection(groupedLoans.overdue)}
+                                </section>
+                            ) : null}
+
+                            {groupedLoans.active.length > 0 ? (
+                                <section className="space-y-3">
+                                    <div className="flex flex-col gap-2 border border-blue-200/60 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/20">
+                                        <div className="space-y-1">
+                                            <h3 className="text-sm font-semibold text-foreground">
+                                                Masih Dipinjam
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                Bawa buku fisik ke Kiosk Mandiri
+                                                untuk proses pengembalian.
                                             </p>
                                         </div>
-                                    ) : null}
-
-                                    {groupedLoans.overdue.length > 0 ? (
-                                        <section className="space-y-3">
-                                            <div className="flex flex-col gap-2 border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
-                                                <div className="space-y-1">
-                                                    <h3 className="text-sm font-semibold text-foreground">
-                                                        Terlambat
-                                                    </h3>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Perlu segera
-                                                        dikembalikan.
-                                                    </p>
-                                                </div>
-                                                <Badge
-                                                    variant="destructive"
-                                                    className="w-fit"
-                                                >
-                                                    {
-                                                        groupedLoans.overdue
-                                                            .length
-                                                    }{' '}
-                                                    buku
-                                                </Badge>
-                                            </div>
-
-                                            {renderLoanCollection(
-                                                groupedLoans.overdue,
-                                            )}
-                                        </section>
-                                    ) : null}
-
-                                    {groupedLoans.active.length > 0 ? (
-                                        <section className="space-y-3">
-                                            <div className="flex flex-col gap-2 border border-blue-200/60 bg-blue-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/20">
-                                                <div className="space-y-1">
-                                                    <h3 className="text-sm font-semibold text-foreground">
-                                                        Masih dipinjam
-                                                    </h3>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Pilih buku untuk QR
-                                                        pengembalian.
-                                                    </p>
-                                                </div>
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="w-fit"
-                                                >
-                                                    {groupedLoans.active.length}{' '}
-                                                    buku
-                                                </Badge>
-                                            </div>
-
-                                            {renderLoanCollection(
-                                                groupedLoans.active,
-                                            )}
-                                        </section>
-                                    ) : null}
-
-                                    {groupedLoans.returned.length > 0 ? (
-                                        <Collapsible
-                                            open={returnedSectionOpen}
-                                            onOpenChange={setShowReturnedLoans}
-                                            className="border border-border/60"
+                                        <Badge
+                                            variant="secondary"
+                                            className="w-fit"
                                         >
-                                            <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                                                <div className="space-y-1">
-                                                    <h3 className="text-sm font-semibold text-foreground">
-                                                        Selesai
-                                                    </h3>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Riwayat yang sudah
-                                                        selesai.
-                                                    </p>
-                                                </div>
+                                            {groupedLoans.active.length} buku
+                                        </Badge>
+                                    </div>
 
-                                                <div className="flex items-center gap-2">
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="w-fit"
-                                                    >
-                                                        {
-                                                            groupedLoans
-                                                                .returned.length
-                                                        }{' '}
-                                                        buku
-                                                    </Badge>
-                                                    <CollapsibleTrigger asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="gap-2"
-                                                        >
-                                                            {returnedSectionOpen
-                                                                ? 'Tutup'
-                                                                : 'Buka'}
-                                                            <ChevronDown
-                                                                className={cn(
-                                                                    'size-4 transition-transform',
-                                                                    returnedSectionOpen
-                                                                        ? 'rotate-180'
-                                                                        : '',
-                                                                )}
-                                                            />
-                                                        </Button>
-                                                    </CollapsibleTrigger>
-                                                </div>
-                                            </div>
+                                    {renderLoanCollection(groupedLoans.active)}
+                                </section>
+                            ) : null}
 
-                                            <CollapsibleContent className="border-t border-border/60 p-4 pt-4">
-                                                {renderLoanCollection(
-                                                    groupedLoans.returned,
-                                                )}
-                                            </CollapsibleContent>
-                                        </Collapsible>
-                                    ) : null}
-                                </div>
-                            </div>
+                            {groupedLoans.returned.length > 0 ? (
+                                <Collapsible
+                                    open={returnedSectionOpen}
+                                    onOpenChange={setShowReturnedLoans}
+                                    className="border border-border/60"
+                                >
+                                    <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="space-y-1">
+                                            <h3 className="text-sm font-semibold text-foreground">
+                                                Selesai Dikembalikan
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                Daftar peminjaman yang telah
+                                                selesai.
+                                            </p>
+                                        </div>
 
-                            <div className="pt-2">
-                                <CatalogPagination
-                                    data={loans}
-                                    resourceName="riwayat buku"
-                                />
-                            </div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge
+                                                variant="outline"
+                                                className="w-fit"
+                                            >
+                                                {groupedLoans.returned.length}{' '}
+                                                buku
+                                            </Badge>
+                                            <CollapsibleTrigger asChild>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="gap-2"
+                                                >
+                                                    {returnedSectionOpen
+                                                        ? 'Tutup'
+                                                        : 'Buka'}
+                                                    <ChevronDown
+                                                        className={cn(
+                                                            'size-4 transition-transform',
+                                                            returnedSectionOpen
+                                                                ? 'rotate-180'
+                                                                : '',
+                                                        )}
+                                                    />
+                                                </Button>
+                                            </CollapsibleTrigger>
+                                        </div>
+                                    </div>
+
+                                    <CollapsibleContent className="border-t border-border/60 p-4 pt-4">
+                                        {renderLoanCollection(
+                                            groupedLoans.returned,
+                                        )}
+                                    </CollapsibleContent>
+                                </Collapsible>
+                            ) : null}
                         </div>
 
-                        {/* Right Column: Return Draft Panel */}
-                        <ReturnDraftPanel
-                            returnDraft={returnDraft}
-                            activeLoanCount={stats.active}
-                            selectedItemsCount={selectedLoanItemIds.length}
-                            countdownLabel={countdownLabel}
-                            hasActiveQrCountdown={hasActiveQrCountdown}
-                            isProcessing={qrForm.processing}
-                            errors={qrForm.errors}
-                            onSubmit={submitQrRequest}
-                        />
+                        <div className="pt-2">
+                            <CatalogPagination
+                                data={loans}
+                                resourceName="riwayat buku"
+                            />
+                        </div>
                     </div>
                 ) : (
                     <div className="flex h-72 flex-col items-center justify-center border border-dashed border-border/60 bg-muted/5 p-6 text-center">
                         <h2 className="text-lg font-bold">Belum ada riwayat</h2>
                         <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-                            Anda belum pernah meminjam buku.
+                            Anda belum pernah meminjam buku. Kunjungi Ruang Baca
+                            Informatika untuk meminjam buku secara mandiri di
+                            Kiosk.
                         </p>
                         <Button
                             asChild
@@ -486,7 +330,7 @@ export default function LoanHistoryPage({
                         >
                             <Link href={booksRoute.index.url()}>
                                 <BookOpen className="size-4" />
-                                Buka Katalog
+                                Buka Katalog Buku
                             </Link>
                         </Button>
                     </div>

@@ -255,6 +255,10 @@ export function MemberRegistrationClaimDialog({
             return;
         }
 
+        if (activeRegistration.approvalPending) {
+            return;
+        }
+
         handledCompletionClaimIdRef.current = activeRegistration.id;
         clearCompletionTimeout();
 
@@ -332,14 +336,18 @@ export function MemberRegistrationClaimDialog({
                             <div className="space-y-2">
                                 <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                                     {isConnectionCompleted
-                                        ? 'Pendaftaran Berhasil!'
+                                        ? activeRegistration.approvalPending
+                                            ? 'Pendaftaran Terkirim!'
+                                            : 'Pendaftaran Berhasil!'
                                         : isExpired
                                           ? 'Sesi Telah Berakhir'
                                           : 'Tautkan Akun Google'}
                                 </h2>
                                 <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
                                     {isConnectionCompleted
-                                        ? 'Akun Google Anda telah terhubung dengan data pendaftaran di perpustakaan.'
+                                        ? activeRegistration.approvalPending
+                                            ? 'Akun Google Anda telah terhubung. Akun menunggu persetujuan admin sebelum dapat digunakan meminjam.'
+                                            : 'Akun Google Anda telah terhubung dengan data pendaftaran di perpustakaan.'
                                         : isExpired
                                           ? 'QR code pendaftaran telah kedaluwarsa demi keamanan data Anda.'
                                           : 'Pindai QR ini dengan ponsel Anda untuk masuk menggunakan Google dan menyelesaikan pendaftaran.'}
@@ -370,13 +378,39 @@ export function MemberRegistrationClaimDialog({
                                     />
                                 </div>
                             ) : isConnectionCompleted ? (
-                                <div className="w-full max-w-md animate-in rounded-[1.75rem] border border-emerald-100 bg-emerald-50/20 px-6 py-7 text-left duration-300 fade-in dark:border-emerald-900/30 dark:bg-emerald-950/10">
+                                <div
+                                    className={`w-full max-w-md animate-in rounded-[1.75rem] border px-6 py-7 text-left duration-300 fade-in ${
+                                        activeRegistration.approvalPending
+                                            ? 'border-amber-100 bg-amber-50/30 dark:border-amber-900/30 dark:bg-amber-950/10'
+                                            : 'border-emerald-100 bg-emerald-50/20 dark:border-emerald-900/30 dark:bg-emerald-950/10'
+                                    }`}
+                                >
                                     <div className="flex items-start gap-3">
-                                        <CheckCircle2 className="mt-0.5 size-5 text-emerald-600 dark:text-emerald-400" />
+                                        {activeRegistration.approvalPending ? (
+                                            <Clock3 className="mt-0.5 size-5 text-amber-600 dark:text-amber-400" />
+                                        ) : (
+                                            <CheckCircle2 className="mt-0.5 size-5 text-emerald-600 dark:text-emerald-400" />
+                                        )}
                                         <div className="space-y-1">
-                                            <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-400">
-                                                Akun Google berhasil ditautkan!
+                                            <p
+                                                className={`text-sm font-semibold ${
+                                                    activeRegistration.approvalPending
+                                                        ? 'text-amber-900 dark:text-amber-300'
+                                                        : 'text-emerald-900 dark:text-emerald-400'
+                                                }`}
+                                            >
+                                                {activeRegistration.approvalPending
+                                                    ? 'Menunggu persetujuan admin'
+                                                    : 'Akun Google berhasil ditautkan!'}
                                             </p>
+                                            {activeRegistration.approvalPending ? (
+                                                <p className="text-sm leading-relaxed text-amber-800 dark:text-amber-200">
+                                                    Petugas akan memverifikasi
+                                                    pendaftaran Anda. Simpan
+                                                    nomor WhatsApp ini untuk
+                                                    info selanjutnya.
+                                                </p>
+                                            ) : null}
                                         </div>
                                     </div>
                                 </div>
@@ -443,20 +477,49 @@ export function MemberRegistrationClaimDialog({
                             ) : null}
 
                             {isConnectionCompleted ? (
-                                <Alert className="w-full max-w-md border-emerald-200 bg-emerald-50 text-left text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100">
-                                    <CheckCircle2 className="size-4" />
-                                    <AlertTitle>
-                                        Akun sudah terhubung
-                                    </AlertTitle>
-                                    <AlertDescription>
-                                        Form sedang diatur ulang.
-                                    </AlertDescription>
-                                </Alert>
+                                activeRegistration.approvalPending ? (
+                                    <Alert className="w-full max-w-md border-amber-200 bg-amber-50 text-left text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+                                        <Clock3 className="size-4" />
+                                        <AlertTitle>
+                                            Menunggu persetujuan admin
+                                        </AlertTitle>
+                                        <AlertDescription>
+                                            Anda akan diberi tahu via WhatsApp
+                                            setelah akun disetujui.
+                                        </AlertDescription>
+                                    </Alert>
+                                ) : (
+                                    <Alert className="w-full max-w-md border-emerald-200 bg-emerald-50 text-left text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100">
+                                        <CheckCircle2 className="size-4" />
+                                        <AlertTitle>
+                                            Akun sudah terhubung
+                                        </AlertTitle>
+                                        <AlertDescription>
+                                            Form sedang diatur ulang.
+                                        </AlertDescription>
+                                    </Alert>
+                                )
                             ) : null}
                         </div>
                     </div>
 
-                    {!isConnectionCompleted ? (
+                    {isConnectionCompleted &&
+                    activeRegistration.approvalPending ? (
+                        <div className="flex flex-col gap-2 border-t border-border bg-card px-5 py-3 sm:flex-row sm:justify-end">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={() =>
+                                    void finalizeActiveRegistration({
+                                        mode: 'dismiss',
+                                    })
+                                }
+                                className="rounded-xl"
+                            >
+                                Selesai
+                            </Button>
+                        </div>
+                    ) : !isConnectionCompleted ? (
                         <div className="flex flex-col gap-2 border-t border-border bg-card px-5 py-3 sm:flex-row sm:justify-end">
                             {isExpired ? (
                                 <Button

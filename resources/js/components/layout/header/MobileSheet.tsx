@@ -1,5 +1,5 @@
-import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, Menu, ShoppingCart, X } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Collapsible,
@@ -14,10 +14,9 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { login } from '@/routes';
-import loans from '@/routes/loans';
 import { AppLogo } from './AppLogo';
 import { NAV_LINKS } from './constants';
-import type { Auth, LoanRequestCart } from '@/types';
+import type { Auth } from '@/types';
 
 interface MobileSheetProps {
     mobileOpen: boolean;
@@ -32,9 +31,6 @@ export function MobileSheet({
     isActive,
     auth,
 }: MobileSheetProps) {
-    const { loanRequestCart } = usePage<{
-        loanRequestCart: LoanRequestCart | null;
-    }>().props;
     const defaultOpenSections = NAV_LINKS.filter(
         (item) =>
             item.children &&
@@ -77,28 +73,6 @@ export function MobileSheet({
 
                 <div className="flex-1 overflow-y-auto px-1 pt-2 pb-4">
                     <nav className="space-y-2">
-                        {auth.user && auth.canBorrowBooks ? (
-                            <SheetClose asChild>
-                                <Link
-                                    href={loans.request.url()}
-                                    className={[
-                                        'flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors',
-                                        isActive(loans.request.url())
-                                            ? 'bg-primary/10 text-primary'
-                                            : 'text-foreground hover:bg-accent/70',
-                                    ].join(' ')}
-                                >
-                                    <ShoppingCart className="size-5 shrink-0 text-muted-foreground" />
-                                    <span>Keranjang Peminjaman</span>
-                                    {loanRequestCart &&
-                                        loanRequestCart.count > 0 && (
-                                            <span className="ml-auto inline-flex min-w-6 animate-in items-center justify-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground duration-200 zoom-in-50">
-                                                {loanRequestCart.count}
-                                            </span>
-                                        )}
-                                </Link>
-                            </SheetClose>
-                        ) : null}
                         {NAV_LINKS.map((item) => {
                             if (item.children) {
                                 const isSectionActive = item.children.some(

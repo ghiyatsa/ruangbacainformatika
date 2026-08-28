@@ -1,4 +1,3 @@
-import { usePage } from '@inertiajs/react';
 import { Library } from 'lucide-react';
 import {
     Empty,
@@ -10,7 +9,6 @@ import {
 import BookCard from '@/features/books/components/BookCard';
 import type { ViewMode } from '@/features/books/types';
 import type { PaginatedBooks } from '@/features/welcome/types';
-import type { Auth, LoanRequestCart } from '@/types';
 
 interface BookCatalogResultsProps {
     books: PaginatedBooks;
@@ -21,11 +19,6 @@ export function BookCatalogResults({
     books,
     viewMode,
 }: BookCatalogResultsProps) {
-    const { auth, loanRequestCart } = usePage<{
-        auth: Auth;
-        loanRequestCart: LoanRequestCart | null;
-    }>().props;
-
     if (!books) {
         return null;
     }
@@ -40,20 +33,13 @@ export function BookCatalogResults({
                                 key={book.id}
                                 book={book}
                                 variant="compact"
-                                auth={auth}
-                                loanRequestCart={loanRequestCart}
                             />
                         ))}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-4">
                         {books.data.map((book) => (
-                            <BookCard
-                                key={book.id}
-                                book={book}
-                                auth={auth}
-                                loanRequestCart={loanRequestCart}
-                            />
+                            <BookCard key={book.id} book={book} />
                         ))}
                     </div>
                 )

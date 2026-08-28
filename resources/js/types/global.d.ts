@@ -1,4 +1,4 @@
-import type { Auth, LoanRequestCart } from '@/types/auth';
+import type { Auth } from '@/types/auth';
 import type { NotificationSummary } from '@/types/notifications';
 
 declare module '@inertiajs/core' {
@@ -25,7 +25,6 @@ declare module '@inertiajs/core' {
             };
             auth: Auth;
             notifications: NotificationSummary;
-            loanRequestCart: LoanRequestCart | null;
             [key: string]: unknown;
         };
     }

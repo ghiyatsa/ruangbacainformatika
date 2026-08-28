@@ -1,7 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
-import { MoonIcon, Search, ShoppingCart, SunIcon } from 'lucide-react';
+import { MoonIcon, Search, SunIcon } from 'lucide-react';
 import { GlobalSearch } from '@/components/layout/global-search/GlobalSearch';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -9,12 +8,11 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { login } from '@/routes';
-import loans from '@/routes/loans';
 import { BookmarksDropdown } from './BookmarksDropdown';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { UserAvatar } from './UserAvatar';
 import { UserMenuContent } from './UserMenuContent';
-import type { Auth, LoanRequestCart, NotificationSummary } from '@/types';
+import type { Auth, NotificationSummary } from '@/types';
 
 interface HeaderActionsProps {
     auth: Auth;
@@ -29,8 +27,7 @@ export function HeaderActions({
     updateAppearance,
     hideSearch,
 }: HeaderActionsProps) {
-    const { loanRequestCart, notifications } = usePage<{
-        loanRequestCart: LoanRequestCart | null;
+    const { notifications } = usePage<{
         notifications: NotificationSummary;
     }>().props;
     const openSearch = () =>
@@ -85,32 +82,6 @@ export function HeaderActions({
                                 key={notifications.unreadCount}
                                 initialUnreadCount={notifications.unreadCount}
                             />
-                        ) : null}
-
-                        {auth.canBorrowBooks ? (
-                            <Button
-                                asChild
-                                variant="ghost"
-                                size="icon"
-                                className="group relative hidden h-9 w-9 rounded-xl transition-all duration-300 md:inline-flex"
-                            >
-                                <Link
-                                    href={loans.request.url()}
-                                    aria-label={`Keranjang peminjaman, ${loanRequestCart?.count ?? 0} buku`}
-                                    title="Keranjang peminjaman"
-                                >
-                                    <ShoppingCart className="h-[14px] w-[14px] text-primary transition-transform duration-300" />
-                                    <span className="sr-only">
-                                        Keranjang peminjaman
-                                    </span>
-                                    {loanRequestCart &&
-                                        loanRequestCart.count > 0 && (
-                                            <Badge className="absolute top-0.5 right-0.5 flex h-3 min-w-3 animate-in items-center justify-center rounded-full px-1 py-0 text-[8px] leading-none shadow-sm duration-200 zoom-in-50">
-                                                {loanRequestCart.count}
-                                            </Badge>
-                                        )}
-                                </Link>
-                            </Button>
                         ) : null}
                     </>
                 ) : (

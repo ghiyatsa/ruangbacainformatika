@@ -42,45 +42,29 @@ class KioskPinManager
             && hash_equals($currentPinHash, (string) $sessionPinHash);
 
         if ($isSessionVerified) {
-            $device = KioskDevice::query()
-                ->where('session_id', $request->session()->getId())
-                ->first();
-
-            if ($device && $this->kioskIdlePolicy->isSessionStillActive($device->last_active_at)) {
-                return true;
-            }
-
-            $this->invalidateSession($request, $device);
+            return true;
         }
 
-        // Try to verify via persistent cookie
+        // Try to verify via persistent cookie (24 hours)
         $deviceToken = $request->cookie(self::COOKIE_DEVICE_TOKEN_KEY);
 
         if ($deviceToken && $currentPinHash) {
             $device = KioskDevice::query()->where('device_token', $deviceToken)->first();
 
-            if (
-                $device
-                && $device->network_scope !== null
-                && $device->network_scope === $this->kioskNetworkGuard->networkScopeForRequest($request)
-                && $this->kioskIdlePolicy->isSessionStillActive($device->last_active_at)
-            ) {
-                // Re-verify session
+            if ($device && $device->last_active_at && $device->last_active_at->gt(now()->subHours(24))) {
                 $request->session()->put(self::SESSION_PIN_HASH_KEY, $currentPinHash);
                 $request->session()->put(self::SESSION_VERSION_KEY, $this->currentSessionVersion());
 
-                // Update device with new session ID
                 $device->update([
                     'session_id' => $request->session()->getId(),
                     'last_active_at' => now(),
                     'ip_address' => $request->ip(),
-                    'network_scope' => $this->kioskNetworkGuard->networkScopeForRequest($request),
                 ]);
 
                 return true;
             }
 
-            if ($device && ! $this->kioskIdlePolicy->isSessionStillActive($device->last_active_at)) {
+            if ($device) {
                 $this->invalidateSession($request, $device);
             }
         }
@@ -100,10 +84,6 @@ class KioskPinManager
             return false;
         }
 
-        if (! $this->kioskIdlePolicy->canStartSession()) {
-            return false;
-        }
-
         $request->session()->regenerate();
         $request->session()->put(self::SESSION_PIN_HASH_KEY, $currentPinHash);
         $request->session()->put(self::SESSION_VERSION_KEY, $this->currentSessionVersion());
@@ -115,13 +95,20 @@ class KioskPinManager
             [
                 'device_token' => $deviceToken,
                 'ip_address' => $request->ip(),
-                'network_scope' => $this->kioskNetworkGuard->networkScopeForRequest($request),
                 'user_agent' => $request->userAgent(),
                 'last_active_at' => now(),
-            ]
+            ],
         );
 
-        Cookie::queue(self::COOKIE_DEVICE_TOKEN_KEY, $deviceToken, 525600); // 1 year
+        Cookie::queue(
+            self::COOKIE_DEVICE_TOKEN_KEY,
+            $deviceToken,
+            60 * 24, // 24 jam
+            null,
+            null,
+            false,
+            true,
+        );
 
         return true;
     }

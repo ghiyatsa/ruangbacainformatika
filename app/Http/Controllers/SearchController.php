@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Author;
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\InternshipReport;
 use App\Models\Post;
 use App\Models\SearchHistory;
@@ -60,13 +62,13 @@ class SearchController extends Controller
                 }
             }
 
-            // Hitung total sebenarnya hanya jika hasil mentok limit (dipotong).
+            // Hitung total hanya jika hasil mencapai batas limit (RESULTS_PER_TYPE), di bawah itu cukup gunakan count koleksi
             $totals = [
-                'books' => $results['books']->count() >= self::RESULTS_PER_TYPE ? Book::query()->published()->search($search)->count() : null,
-                'posts' => $results['posts']->count() >= self::RESULTS_PER_TYPE ? Post::query()->published()->search($search)->count() : null,
-                'skripsis' => $results['skripsis']->count() >= self::RESULTS_PER_TYPE ? Skripsi::query()->search($search)->count() : null,
-                'internshipReports' => $results['internshipReports']->count() >= self::RESULTS_PER_TYPE ? InternshipReport::query()->search($search)->count() : null,
-                'theses' => $results['theses']->count() >= self::RESULTS_PER_TYPE ? Thesis::query()->search($search)->count() : null,
+                'books' => $results['books']->count() >= self::RESULTS_PER_TYPE ? Book::query()->published()->search($search)->count() : $results['books']->count(),
+                'posts' => $results['posts']->count() >= self::RESULTS_PER_TYPE ? Post::query()->published()->search($search)->count() : $results['posts']->count(),
+                'skripsis' => $results['skripsis']->count() >= self::RESULTS_PER_TYPE ? Skripsi::query()->search($search)->count() : $results['skripsis']->count(),
+                'internshipReports' => $results['internshipReports']->count() >= self::RESULTS_PER_TYPE ? InternshipReport::query()->search($search)->count() : $results['internshipReports']->count(),
+                'theses' => $results['theses']->count() >= self::RESULTS_PER_TYPE ? Thesis::query()->search($search)->count() : $results['theses']->count(),
             ];
 
             $hasResults = $this->totalDisplayed($results) > 0;
@@ -267,7 +269,7 @@ class SearchController extends Controller
     }
 
     /**
-     * Get list of search suggestions.
+     * Get list of search suggestions or quick spotlight results.
      */
     public function suggestions(Request $request): JsonResponse
     {
@@ -276,8 +278,13 @@ class SearchController extends Controller
             ->limit(100, '')
             ->toString();
 
+        $isLegacy = $request->boolean('legacy');
+
         if ($q === '') {
-            return response()->json([]);
+            return response()->json($isLegacy ? [] : [
+                'suggestions' => [],
+                'quickResults' => [],
+            ]);
         }
 
         $queryWords = collect(preg_split('/\s+/', mb_strtolower($q), -1, PREG_SPLIT_NO_EMPTY))
@@ -285,10 +292,55 @@ class SearchController extends Controller
             ->filter()
             ->values()
             ->all();
+
         if (empty($queryWords)) {
-            return response()->json([]);
+            return response()->json($isLegacy ? [] : [
+                'suggestions' => [],
+                'quickResults' => [],
+            ]);
         }
 
+        // 1. Quick Items (Buku, Skripsi, Artikel) yang cocok langsung
+        $quickBooks = Book::query()
+            ->published()
+            ->search($q)
+            ->with(['authors:id,name', 'categories:id,name,slug'])
+            ->limit(3)
+            ->get()
+            ->map(fn (Book $b): array => [
+                'type' => 'book',
+                'id' => $b->id,
+                'title' => $b->title,
+                'subtitle' => $b->authors->pluck('name')->join(', ') ?: 'Penulis tidak tersedia',
+                'url' => route('books.show', $b->slug),
+            ]);
+
+        $quickSkripsi = Skripsi::query()
+            ->search($q)
+            ->limit(2)
+            ->get()
+            ->map(fn (Skripsi $s): array => [
+                'type' => 'skripsi',
+                'id' => $s->id,
+                'title' => $s->title,
+                'subtitle' => "{$s->author_name} ({$s->student_id})",
+                'url' => route('skripsi.show', $s->student_id),
+            ]);
+
+        $quickPosts = Post::query()
+            ->published()
+            ->search($q)
+            ->limit(2)
+            ->get()
+            ->map(fn (Post $p): array => [
+                'type' => 'post',
+                'id' => $p->id,
+                'title' => $p->title,
+                'subtitle' => 'Artikel Blog',
+                'url' => route('blog.show', $p->slug),
+            ]);
+
+        // 2. Teks Saran Pintar (Query suggestions)
         $suggestions = SearchHistory::query()
             ->where(function (Builder $inner) use ($queryWords) {
                 foreach ($queryWords as $word) {
@@ -296,17 +348,17 @@ class SearchController extends Controller
                 }
             })
             ->orderByDesc('hits')
-            ->limit(8)
+            ->limit(4)
             ->pluck('query')
             ->all();
 
         $suggestions = array_merge(
             $suggestions,
-            $this->collectTitleSuggestions($queryWords, 8 - count($suggestions)),
+            $this->collectMultiFieldSuggestions($queryWords, 6 - count($suggestions)),
         );
 
-        // Koreksi typo: bila saran masih kurang, coba query terkoreksi.
-        if (count($suggestions) < 8) {
+        // Koreksi typo jika saran masih kosong
+        if (empty($suggestions)) {
             $corrected = app(SearchTermCorrector::class)->correctQuery($q);
 
             if ($corrected !== null) {
@@ -316,25 +368,12 @@ class SearchController extends Controller
                     ->values()
                     ->all();
 
-                $needed = 8 - count($suggestions);
-
-                if ($correctedWords !== []) {
-                    $suggestions = array_merge($suggestions, SearchHistory::query()
-                        ->where(function (Builder $inner) use ($correctedWords) {
-                            foreach ($correctedWords as $word) {
-                                $inner->where('query', 'like', "%{$word}%");
-                            }
-                        })
-                        ->orderByDesc('hits')
-                        ->limit($needed)
-                        ->pluck('query')
-                        ->all());
+                if (! empty($correctedWords)) {
+                    $suggestions = array_merge(
+                        $suggestions,
+                        $this->collectMultiFieldSuggestions($correctedWords, 6),
+                    );
                 }
-
-                $suggestions = array_merge(
-                    $suggestions,
-                    $this->collectTitleSuggestions($correctedWords, 8 - count($suggestions)),
-                );
             }
         }
 
@@ -352,9 +391,22 @@ class SearchController extends Controller
             $seen[$normalized] = true;
             $formattedSuggestions[] = $formatted;
         }
-        $suggestions = array_slice(array_values($formattedSuggestions), 0, 8);
 
-        return response()->json($suggestions);
+        $finalSuggestions = array_slice(array_values($formattedSuggestions), 0, 5);
+
+        // Jika request dari klien lama yang hanya menerima array string biasa:
+        if ($request->boolean('legacy')) {
+            return response()->json($finalSuggestions);
+        }
+
+        return response()->json([
+            'suggestions' => $finalSuggestions,
+            'quickResults' => [
+                'books' => $quickBooks->all(),
+                'skripsi' => $quickSkripsi->all(),
+                'posts' => $quickPosts->all(),
+            ],
+        ]);
     }
 
     /**
@@ -400,46 +452,124 @@ class SearchController extends Controller
     }
 
     /**
-     * Kumpulkan judul yang cocok dengan seluruh kata, dari 5 tipe, hingga kuota terpenuhi.
+     * Kumpulkan saran teks dari berbagai entitas dan dukung pencarian kombo lintas parameter.
      *
      * @param  list<string>  $words
      * @return list<string>
      */
-    protected function collectTitleSuggestions(array $words, int $needed): array
+    protected function collectMultiFieldSuggestions(array $words, int $needed): array
     {
         if ($needed <= 0 || $words === []) {
             return [];
         }
 
-        $titles = [];
+        $results = [];
         $remaining = $needed;
 
-        $collectFrom = function (Builder $query) use (&$titles, &$remaining, $words): void {
-            if ($remaining <= 0) {
-                return;
-            }
+        // 1. Cari buku yang cocok dengan kombinasi kata (misal: "Laravel Taylor", "Algoritma Pemrograman", "Jaringan 2024")
+        $matchedBooks = Book::query()
+            ->published()
+            ->where(function (Builder $query) use ($words) {
+                foreach ($words as $word) {
+                    $query->where(function (Builder $sub) use ($word) {
+                        $sub->where('title', 'like', "%{$word}%")
+                            ->orWhere('subtitle', 'like', "%{$word}%")
+                            ->orWhere('isbn', 'like', "%{$word}%")
+                            ->orWhere('ddc_code', 'like', "%{$word}%")
+                            ->orWhere('published_year', 'like', "%{$word}%")
+                            ->orWhereHas('authors', fn (Builder $a) => $a->where('name', 'like', "%{$word}%"))
+                            ->orWhereHas('categories', fn (Builder $c) => $c->where('name', 'like', "%{$word}%"))
+                            ->orWhereHas('publisher', fn (Builder $p) => $p->where('name', 'like', "%{$word}%"))
+                            ->orWhereHas('items', fn (Builder $i) => $i->where('internal_code', 'like', "%{$word}%")->orWhere('shelf_location', 'like', "%{$word}%"));
+                    });
+                }
+            })
+            ->with(['authors:id,name'])
+            ->limit($remaining)
+            ->get();
 
-            $matched = $query
-                ->where(function (Builder $inner) use ($words) {
+        foreach ($matchedBooks as $book) {
+            $authorName = $book->authors->first()?->name;
+            // Jika ada pengarang, berikan opsi format kombo cerdas "Judul - Pengarang"
+            if ($authorName && mb_strlen($book->title) < 50) {
+                $results[] = "{$book->title} - {$authorName}";
+            } else {
+                $results[] = $book->title;
+            }
+            $remaining--;
+        }
+
+        // 2. Pencarian Kombo Karya Ilmiah (Judul + Penulis + NIM + Keywords)
+        if ($remaining > 0) {
+            $matchedSkripsi = Skripsi::query()
+                ->where(function (Builder $query) use ($words) {
                     foreach ($words as $word) {
-                        $inner->where('title', 'like', "%{$word}%");
+                        $query->where(function (Builder $sub) use ($word) {
+                            $sub->where('title', 'like', "%{$word}%")
+                                ->orWhere('author_name', 'like', "%{$word}%")
+                                ->orWhere('student_id', 'like', "%{$word}%")
+                                ->orWhere('keywords', 'like', "%{$word}%");
+                        });
+                    }
+                })
+                ->limit($remaining)
+                ->get(['title', 'author_name']);
+
+            foreach ($matchedSkripsi as $skripsi) {
+                $results[] = $skripsi->title;
+                $remaining--;
+            }
+        }
+
+        // 3. Saran Pengarang / Dosen / Author Langsung
+        if ($remaining > 0) {
+            $matchedAuthors = Author::query()
+                ->where(function (Builder $query) use ($words) {
+                    foreach ($words as $word) {
+                        $query->where('name', 'like', "%{$word}%");
+                    }
+                })
+                ->limit($remaining)
+                ->pluck('name')
+                ->all();
+
+            $results = array_merge($results, $matchedAuthors);
+            $remaining -= count($matchedAuthors);
+        }
+
+        // 4. Saran Kategori / Subjek Langsung
+        if ($remaining > 0) {
+            $matchedCategories = Category::query()
+                ->where(function (Builder $query) use ($words) {
+                    foreach ($words as $word) {
+                        $query->where('name', 'like', "%{$word}%");
+                    }
+                })
+                ->limit($remaining)
+                ->pluck('name')
+                ->all();
+
+            $results = array_merge($results, $matchedCategories);
+            $remaining -= count($matchedCategories);
+        }
+
+        // 5. Artikel Blog
+        if ($remaining > 0) {
+            $matchedPosts = Post::query()
+                ->published()
+                ->where(function (Builder $query) use ($words) {
+                    foreach ($words as $word) {
+                        $query->where('title', 'like', "%{$word}%");
                     }
                 })
                 ->limit($remaining)
                 ->pluck('title')
                 ->all();
 
-            $titles = array_merge($titles, $matched);
-            $remaining -= count($matched);
-        };
+            $results = array_merge($results, $matchedPosts);
+        }
 
-        $collectFrom(Book::query()->published());
-        $collectFrom(Post::query()->published());
-        $collectFrom(Skripsi::query());
-        $collectFrom(Thesis::query());
-        $collectFrom(InternshipReport::query());
-
-        return $titles;
+        return array_unique(array_filter($results));
     }
 
     /**
@@ -449,39 +579,12 @@ class SearchController extends Controller
     {
         $textLower = mb_strtolower($text);
         // Remove special characters except letters, numbers, spaces, and hyphens
-        $textClean = preg_replace('/[^\p{L}\p{N}\s\-]/u', '', $textLower);
+        $textClean = preg_replace('/[^\p{L}\p{N}\s\-\–]/u', '', $textLower);
 
         $queryLower = mb_strtolower($query);
         $queryWords = preg_split('/\s+/', $queryLower, -1, PREG_SPLIT_NO_EMPTY);
         if (empty($queryWords)) {
             return $textClean;
-        }
-
-        $words = preg_split('/\s+/', $textClean, -1, PREG_SPLIT_NO_EMPTY);
-        if ($words === false) {
-            return $textClean;
-        }
-
-        $firstMatchIndex = -1;
-        $lastMatchIndex = -1;
-
-        foreach ($words as $index => $word) {
-            foreach ($queryWords as $qWord) {
-                if (mb_strpos($word, $qWord) !== false) {
-                    if ($firstMatchIndex === -1) {
-                        $firstMatchIndex = $index;
-                    }
-                    $lastMatchIndex = $index;
-                }
-            }
-        }
-
-        if ($firstMatchIndex !== -1 && $lastMatchIndex !== -1) {
-            // Take from the first match to the last match, plus 3 words after the last match
-            $length = ($lastMatchIndex - $firstMatchIndex) + 4;
-            $slice = array_slice($words, $firstMatchIndex, $length);
-
-            return implode(' ', $slice);
         }
 
         return $textClean;
