@@ -9,34 +9,23 @@ Artisan::command('inspire', function () {
 
 use App\Console\Commands\KioskSyncPullCommand;
 use App\Console\Commands\KioskSyncPushCommand;
-use App\Console\Commands\PruneAuditLogsCommand;
-use App\Console\Commands\PruneNotificationsCommand;
-use App\Console\Commands\PruneSearchHistoryCommand;
-use App\Console\Commands\PruneTemporaryRecordsCommand;
-use App\Console\Commands\PruneWhatsAppLogsCommand;
 use App\Console\Commands\RemindReturnCommand;
 use Illuminate\Support\Facades\Schedule;
 
+// 1. Pengingat Pengembalian Buku Pagi
 Schedule::command(RemindReturnCommand::class)->dailyAt('08:00');
-Schedule::command(PruneTemporaryRecordsCommand::class)
-    ->dailyAt('02:00')
-    ->withoutOverlapping();
-Schedule::command(PruneNotificationsCommand::class)
-    ->dailyAt('03:00')
-    ->withoutOverlapping();
-Schedule::command(PruneWhatsAppLogsCommand::class)
-    ->dailyAt('03:30')
-    ->withoutOverlapping();
-Schedule::command(PruneSearchHistoryCommand::class)
-    ->dailyAt('04:00')
-    ->withoutOverlapping();
-Schedule::command(PruneAuditLogsCommand::class)
-    ->dailyAt('04:30')
-    ->withoutOverlapping();
-Schedule::command('queue:prune-failed')
-    ->dailyAt('05:00');
 
-// Sinkronisasi Kiosk Hibrida: jalan otomatis hanya jika instance berperan sebagai `edge`.
+// 2. Pembersihan Rutin Harian (Dijalankan berurutan sekali jalan pukul 03:00)
+Schedule::call(function (): void {
+    Artisan::call('app:prune-temporary-records');
+    Artisan::call('app:prune-notifications');
+    Artisan::call('app:prune-whatsapp-logs');
+    Artisan::call('app:prune-search-history');
+    Artisan::call('app:prune-audit-logs');
+    Artisan::call('queue:prune-failed');
+})->dailyAt('03:00')->name('daily:cleanup');
+
+// 3. Sinkronisasi Kiosk Hibrida (Hanya jika instance berperan sebagai `edge`)
 Schedule::command(KioskSyncPushCommand::class)
     ->everyFiveMinutes()
     ->withoutOverlapping()
