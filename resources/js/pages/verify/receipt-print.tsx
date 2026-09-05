@@ -17,6 +17,16 @@ interface Props {
         publisher_name?: string | null;
         isbn?: string | null;
         copies_count?: number | null;
+        batch_token?: string | null;
+        batch_items?: Array<{
+            id: number;
+            title: string;
+            author_names?: string | null;
+            publisher_name?: string | null;
+            isbn?: string | null;
+            copies_count?: number | null;
+            receipt_number?: string | null;
+        }>;
         approved_at: string;
         verification_url: string;
         qr_svg?: string | null;
@@ -209,6 +219,36 @@ export default function ReceiptPrintPage({ receipt }: Props) {
                                         <span className="font-semibold text-neutral-900">
                                             : {receipt.copies_count} Eksemplar
                                         </span>
+                                    </div>
+                                ) : null}
+
+                                {receipt.batch_items && receipt.batch_items.length > 1 ? (
+                                    <div className="mt-4 pt-3 border-t border-neutral-200">
+                                        <p className="text-xs font-bold text-neutral-700 mb-2">
+                                            Daftar Buku Diserahkan Dalam Batch Ini ({receipt.batch_items.length} Judul Buku):
+                                        </p>
+                                        <table className="w-full text-xs text-left border border-neutral-300">
+                                            <thead className="bg-neutral-100 text-neutral-700">
+                                                <tr>
+                                                    <th className="p-1.5 border-b border-neutral-300 w-8 text-center">No</th>
+                                                    <th className="p-1.5 border-b border-neutral-300">Judul Buku</th>
+                                                    <th className="p-1.5 border-b border-neutral-300">Penulis / Penerbit</th>
+                                                    <th className="p-1.5 border-b border-neutral-300 w-16 text-center">Jml</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {receipt.batch_items.map((item, idx) => (
+                                                    <tr key={item.id} className="border-b border-neutral-200">
+                                                        <td className="p-1.5 align-top text-center">{idx + 1}</td>
+                                                        <td className="p-1.5 align-top font-semibold text-neutral-900">{item.title}</td>
+                                                        <td className="p-1.5 align-top text-neutral-700">
+                                                            {[item.author_names, item.publisher_name].filter(Boolean).join(' • ') || '-'}
+                                                        </td>
+                                                        <td className="p-1.5 align-top text-center whitespace-nowrap">{item.copies_count ?? 1} eks</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 ) : null}
                             </div>

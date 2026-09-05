@@ -18,6 +18,16 @@ interface Props {
         publisher_name?: string | null;
         isbn?: string | null;
         copies_count?: number | null;
+        batch_token?: string | null;
+        batch_items?: Array<{
+            id: number;
+            title: string;
+            author_names?: string | null;
+            publisher_name?: string | null;
+            isbn?: string | null;
+            copies_count?: number | null;
+            receipt_number?: string | null;
+        }>;
         approved_at: string;
         catalog_url: string | null;
     } | null;
@@ -132,6 +142,25 @@ export default function VerifyReceiptPage({ isValid, submission }: Props) {
                                         <p className="font-semibold text-foreground">
                                             {submission.copies_count} Eksemplar
                                         </p>
+                                    </div>
+                                ) : null}
+
+                                {submission.batch_items && submission.batch_items.length > 1 ? (
+                                    <div className="col-span-full border-t border-border pt-3">
+                                        <span className="text-[11px] font-semibold text-muted-foreground block mb-2">
+                                            Daftar Buku Terdaftar Dalam Batch ({submission.batch_items.length} Judul Buku):
+                                        </span>
+                                        <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                                            {submission.batch_items.map((item, idx) => (
+                                                <div key={item.id} className="rounded-md bg-muted/40 p-2 text-xs">
+                                                    <div className="font-medium text-foreground">{idx + 1}. {item.title}</div>
+                                                    <div className="text-[11px] text-muted-foreground mt-0.5">
+                                                        {[item.author_names, item.publisher_name].filter(Boolean).join(' • ') || '-'}
+                                                        <span className="ml-2 font-semibold text-foreground">({item.copies_count ?? 1} eks)</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 ) : null}
 

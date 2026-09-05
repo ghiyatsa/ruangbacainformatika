@@ -77,6 +77,12 @@ class DocumentDistributionController extends Controller
                 'publisher_name' => $submission->publisher_name,
                 'isbn' => $submission->isbn,
                 'copies_count' => $submission->copies_count,
+                'batch_token' => $submission->submission_batch_token,
+                'batch_items' => $submission->submission_batch_token ? DocumentSubmission::query()
+                    ->where('submission_batch_token', $submission->submission_batch_token)
+                    ->where('status', DocumentSubmission::STATUS_APPROVED)
+                    ->get(['id', 'title', 'author_names', 'publisher_name', 'isbn', 'copies_count', 'receipt_number'])
+                    ->toArray() : [],
                 'approved_at' => $submission->reviewed_at?->translatedFormat('d F Y') ?? now()->translatedFormat('d F Y'),
                 'verification_url' => $verificationUrl,
                 'qr_svg' => $qrSvg,
@@ -121,6 +127,12 @@ class DocumentDistributionController extends Controller
                 'publisher_name' => $submission->publisher_name,
                 'isbn' => $submission->isbn,
                 'copies_count' => $submission->copies_count,
+                'batch_token' => $submission->submission_batch_token,
+                'batch_items' => $submission->submission_batch_token ? DocumentSubmission::query()
+                    ->where('submission_batch_token', $submission->submission_batch_token)
+                    ->where('status', DocumentSubmission::STATUS_APPROVED)
+                    ->get(['id', 'title', 'author_names', 'publisher_name', 'isbn', 'copies_count', 'receipt_number'])
+                    ->toArray() : [],
                 'approved_at' => $submission->reviewed_at?->translatedFormat('d F Y'),
                 'catalog_url' => $catalogUrl,
             ] : null,
