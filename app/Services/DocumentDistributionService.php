@@ -8,6 +8,7 @@ use App\Models\InternshipReport;
 use App\Models\Publisher;
 use App\Models\Skripsi;
 use App\Models\User;
+use App\Notifications\DocumentSubmissionRevisionNotification;
 use App\Repositories\SettingRepository;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
@@ -303,6 +304,10 @@ class DocumentDistributionService
             'reviewed_by' => $reviewer->id,
             'reviewed_at' => now(),
         ]);
+
+        if ($submission->user) {
+            $submission->user->notify(new DocumentSubmissionRevisionNotification($submission, $notes));
+        }
 
         return $submission->fresh();
     }

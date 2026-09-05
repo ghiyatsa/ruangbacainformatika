@@ -15,6 +15,7 @@ use App\Support\Isbn;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -28,6 +29,7 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -140,6 +142,8 @@ class DocumentDistributionPage extends Page
             $booksData = [
                 'items' => $this->bookSubmissions->map(fn (DocumentSubmission $sub) => [
                     'id' => $sub->id,
+                    'book_source' => $sub->submittable_id ? 'existing' : 'new',
+                    'existing_book_id' => $sub->submittable_id,
                     'status' => $sub->status,
                     'status_label' => $sub->statusLabel(),
                     'status_color' => $sub->statusColor(),
@@ -413,18 +417,93 @@ class DocumentDistributionPage extends Page
                         ->defaultItems(1)
                         ->disabled(! $isOpen)
                         ->schema([
+                            Section::make('Perlu Revisi')
+                                ->description(fn (Get $get): string => 'Catatan Petugas: '.($get('revision_notes') ?? '-').'. Mohon sesuaikan data buku atau foto serah terima.')
+                                ->icon(Heroicon::OutlinedExclamationTriangle)
+                                ->iconColor('danger')
+                                ->visible(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_REVISION)
+                                ->schema([]),
+
+                            Radio::make('book_source')
+                                ->label('Sumber Buku')
+                                ->options([
+                                    'existing' => 'Pilih Buku yang Sudah Ada di Katalog',
+                                    'new' => 'Buku Baru (Belum Terdaftar)',
+                                ])
+                                ->default('existing')
+                                ->live()
+                                ->afterStateUpdated(function (Set $set, ?string $state): void {
+                                    if ($state === 'new') {
+                                        $set('existing_book_id', null);
+                                    }
+                                })
+                                ->inline(),
+
+                            Select::make('existing_book_id')
+                                ->label('Cari Buku di Katalog')
+                                ->placeholder('Ketik judul atau ISBN buku...')
+                                ->searchable()
+                                ->getSearchResultsUsing(function (string $search): array {
+                                    return Book::query()
+                                        ->where('title', 'like', "%{$search}%")
+                                        ->orWhere('isbn', 'like', "%{$search}%")
+                                        ->limit(30)
+                                        ->get()
+                                        ->mapWithKeys(fn (Book $book) => [
+                                            $book->id => $book->title.($book->isbn ? " (ISBN: {$book->isbn})" : ''),
+                                        ])
+                                        ->all();
+                                })
+                                ->getOptionLabelUsing(function ($value): ?string {
+                                    $b = Book::find($value);
+
+                                    return $b ? $b->title.($b->isbn ? " (ISBN: {$b->isbn})" : '') : null;
+                                })
+                                ->live()
+                                ->afterStateUpdated(function (Set $set, ?int $state): void {
+                                    if (! $state) {
+                                        return;
+                                    }
+
+                                    $book = Book::with(['authors', 'categories'])->find($state);
+                                    if (! $book) {
+                                        return;
+                                    }
+
+                                    $set('title', $book->title);
+                                    $set('subtitle', $book->subtitle);
+                                    $set('slug', $book->slug);
+                                    $set('description', $book->description);
+                                    $set('isbn', $book->isbn);
+                                    $set('issn', $book->issn);
+                                    $set('ddc_code', $book->ddc_code);
+                                    $set('language', $book->language ?: 'Indonesia');
+                                    $set('publisher_id', $book->publisher_id);
+                                    $set('published_year', $book->published_year);
+                                    $set('edition', $book->edition);
+                                    $set('pages', $book->pages);
+                                    $set('authors', $book->authors->pluck('id')->all());
+                                    $set('categories', $book->categories->pluck('id')->all());
+                                    $set('cover_image', $book->cover_image);
+                                })
+                                ->visible(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                ->required(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing'),
+
                             Grid::make([
                                 'default' => 1,
                                 'lg' => 3,
                             ])->schema([
                                 Group::make()->schema([
                                     Section::make('Identitas Buku')
+                                        ->visible(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'new' || filled($get('existing_book_id')))
                                         ->schema([
                                             TextInput::make('title')
                                                 ->label('Judul Buku')
                                                 ->required()
                                                 ->minLength(3)
                                                 ->maxLength(255)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->live(onBlur: true)
                                                 ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Book::generateSlugPreview($state)))
                                                 ->placeholder('Contoh: Machine Learning Praktis'),
@@ -439,6 +518,8 @@ class DocumentDistributionPage extends Page
                                             TextInput::make('subtitle')
                                                 ->label('Subjudul')
                                                 ->maxLength(255)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->placeholder('Subjudul tambahan bila ada')
                                                 ->columnSpanFull(),
 
@@ -446,6 +527,8 @@ class DocumentDistributionPage extends Page
                                                 ->label('Sinopsis Singkat')
                                                 ->rows(3)
                                                 ->maxLength(1500)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->columnSpanFull(),
 
                                             TextInput::make('isbn')
@@ -453,6 +536,8 @@ class DocumentDistributionPage extends Page
                                                 ->nullable()
                                                 ->minLength(8)
                                                 ->maxLength(13)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->placeholder('9786020000001')
                                                 ->live(onBlur: true)
                                                 ->afterStateUpdated(function (Set $set, ?string $state): void {
@@ -467,6 +552,8 @@ class DocumentDistributionPage extends Page
                                                 ->label('ISSN')
                                                 ->nullable()
                                                 ->maxLength(20)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->placeholder('1234-5678')
                                                 ->live(onBlur: true)
                                                 ->afterStateUpdated(function (Set $set, ?string $state): void {
@@ -480,15 +567,20 @@ class DocumentDistributionPage extends Page
                                             TextInput::make('ddc_code')
                                                 ->label('Kode DDC')
                                                 ->maxLength(20)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->placeholder('000-999'),
 
                                             TextInput::make('language')
                                                 ->label('Bahasa Dokumen')
                                                 ->default('Indonesia')
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->maxLength(30),
                                         ])->columns(2),
 
                                     Section::make('Detail Publikasi')
+                                        ->visible(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'new' || filled($get('existing_book_id')))
                                         ->schema([
                                             Select::make('publisher_id')
                                                 ->label('Penerbit')
@@ -497,12 +589,16 @@ class DocumentDistributionPage extends Page
                                                 ->required()
                                                 ->searchable()
                                                 ->preload()
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->createOptionForm(PublisherForm::optionFormSchema())
                                                 ->createOptionUsing(fn (array $data): int => static::createPublisher($data)),
 
                                             TextInput::make('edition')
                                                 ->label('Edisi / Volume')
                                                 ->maxLength(255)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->placeholder('Edisi Revisi atau Vol. 1'),
 
                                             TextInput::make('published_year')
@@ -511,11 +607,15 @@ class DocumentDistributionPage extends Page
                                                 ->integer()
                                                 ->minValue(1000)
                                                 ->maxValue(now()->year)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->placeholder((string) now()->year),
 
                                             TextInput::make('pages')
                                                 ->label('Jumlah Halaman')
                                                 ->maxLength(255)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->placeholder('Contoh: 250'),
 
                                             Select::make('authors')
@@ -525,6 +625,8 @@ class DocumentDistributionPage extends Page
                                                 ->multiple()
                                                 ->searchable()
                                                 ->preload()
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->createOptionForm(AuthorForm::optionFormSchema())
                                                 ->createOptionUsing(fn (array $data): int => static::createAuthor($data)),
 
@@ -535,6 +637,8 @@ class DocumentDistributionPage extends Page
                                                 ->multiple()
                                                 ->searchable()
                                                 ->preload()
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->createOptionForm(CategoryForm::optionFormSchema())
                                                 ->createOptionUsing(fn (array $data): int => static::createCategory($data)),
                                         ])->columns(2),
@@ -664,9 +768,15 @@ class DocumentDistributionPage extends Page
                 ? array_values($item['endorsement_file_path'])[0] ?? null
                 : $item['endorsement_file_path'] ?? null;
 
+            $existingBookId = ($item['book_source'] ?? 'existing') === 'existing' && ! empty($item['existing_book_id'])
+                ? (int) $item['existing_book_id']
+                : null;
+
             $payload = [
                 'user_id' => $user->id,
                 'type' => DocumentSubmission::TYPE_BOOK_DONATION,
+                'submittable_type' => $existingBookId ? Book::class : null,
+                'submittable_id' => $existingBookId,
                 'title' => $item['title'],
                 'subtitle' => $item['subtitle'] ?? null,
                 'slug' => $item['slug'] ?? Book::generateSlugPreview($item['title']),

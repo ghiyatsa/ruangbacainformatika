@@ -68,3 +68,29 @@ test('admin can approve document submission and publish to catalog', function ()
     $publishedFiles = Storage::disk('documents')->allFiles('internship-reports/published');
     expect($publishedFiles)->not->toBeEmpty();
 });
+
+test('admin can request revision on submission and sends notification with revision notes', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create([
+        'email' => '210170003@mhs.unimal.ac.id',
+    ]);
+
+    $submission = DocumentSubmission::factory()->create([
+        'user_id' => $user->id,
+        'type' => DocumentSubmission::TYPE_SKRIPSI,
+        'status' => DocumentSubmission::STATUS_PENDING,
+        'title' => 'Naskah Skripsi Belum Lengkap',
+    ]);
+
+    $service = app(DocumentDistributionService::class);
+    $revision = $service->requestRevision($submission, $admin, 'Lembar pengesahan belum ditandatangani');
+
+    expect($revision->status)->toBe(DocumentSubmission::STATUS_REVISION)
+        ->and($revision->revision_notes)->toBe('Lembar pengesahan belum ditandatangani')
+        ->and($revision->reviewed_by)->toBe($admin->id);
+
+    $notification = $user->notifications()->latest()->first();
+    expect($notification)->not->toBeNull()
+        ->and($notification->data['revision_notes'])->toBe('Lembar pengesahan belum ditandatangani')
+        ->and($notification->data['kind'])->toBe('document_submission_revision');
+});
