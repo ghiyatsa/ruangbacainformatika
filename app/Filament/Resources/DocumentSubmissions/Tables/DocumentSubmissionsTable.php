@@ -37,7 +37,21 @@ class DocumentSubmissionsTable
                     ->searchable()
                     ->sortable()
                     ->wrap()
-                    ->description(fn (DocumentSubmission $record): string => $record->company_name ?? $record->author_names ?? '-'),
+                    ->description(function (DocumentSubmission $record): ?string {
+                        if ($record->type === DocumentSubmission::TYPE_INTERNSHIP_REPORT && filled($record->company_name)) {
+                            return 'Tempat KP: '.$record->company_name;
+                        }
+
+                        if ($record->type === DocumentSubmission::TYPE_BOOK_DONATION && filled($record->author_names)) {
+                            return 'Penulis: '.$record->author_names;
+                        }
+
+                        if ($record->type === DocumentSubmission::TYPE_SKRIPSI && filled($record->academic_advisor)) {
+                            return 'Pembimbing: '.$record->academic_advisor;
+                        }
+
+                        return null;
+                    }),
                 TextColumn::make('user.name')
                     ->label('Mahasiswa')
                     ->searchable()

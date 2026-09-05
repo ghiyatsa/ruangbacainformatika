@@ -20,6 +20,7 @@ class DocumentSubmissionInfolist
         return $schema
             ->components([
                 Grid::make(['default' => 1, 'lg' => 3])
+                    ->columnSpanFull()
                     ->schema([
                         Group::make()
                             ->schema([
