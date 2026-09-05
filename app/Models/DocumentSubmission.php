@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -81,6 +82,30 @@ class DocumentSubmission extends Model
     public function publisher(): BelongsTo
     {
         return $this->belongsTo(Publisher::class);
+    }
+
+    /**
+     * @return Collection<int, Author>
+     */
+    public function getAuthorsListAttribute(): Collection
+    {
+        if (empty($this->author_ids)) {
+            return new Collection;
+        }
+
+        return Author::query()->whereIn('id', $this->author_ids)->get();
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getCategoriesListAttribute(): Collection
+    {
+        if (empty($this->category_ids)) {
+            return new Collection;
+        }
+
+        return Category::query()->whereIn('id', $this->category_ids)->get();
     }
 
     protected static function booted(): void
