@@ -416,9 +416,23 @@ class DocumentDistributionPage extends Page
                         ->collapsible()
                         ->defaultItems(1)
                         ->disabled(! $isOpen)
+                        ->deleteAction(fn (Action $action) => $action->visible(fn (array $arguments, Repeater $component): bool => ($component->getRawItemState($arguments['item'])['status'] ?? '') !== DocumentSubmission::STATUS_APPROVED))
                         ->schema([
+                            Section::make('Buku Disetujui')
+                                ->description(fn (Get $get): string => 'Buku sumbangan telah diverifikasi dan resmi terdaftar di perpustakaan.'.($get('receipt_number') ? ' No. Tanda Terima: '.$get('receipt_number') : ''))
+                                ->icon(Heroicon::OutlinedCheckCircle)
+                                ->iconColor('success')
+                                ->visible(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED)
+                                ->headerActions([
+                                    Action::make('printReceipt')
+                                        ->label('Cetak Tanda Terima')
+                                        ->icon(Heroicon::OutlinedPrinter)
+                                        ->url(fn (Get $get) => route('distribution.receipt', ['token' => $get('receipt_token')]), shouldOpenInNewTab: true),
+                                ])
+                                ->schema([]),
+
                             Section::make('Perlu Revisi')
-                                ->description(fn (Get $get): string => 'Catatan Petugas: '.($get('revision_notes') ?? '-').'. Mohon sesuaikan data buku atau foto serah terima.')
+                                ->description(fn (Get $get): string => 'Catatan Petugas: '.($get('revision_notes') ?? '-').'. Mohon sesuaikan data buku.')
                                 ->icon(Heroicon::OutlinedExclamationTriangle)
                                 ->iconColor('danger')
                                 ->visible(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_REVISION)
@@ -432,6 +446,7 @@ class DocumentDistributionPage extends Page
                                 ])
                                 ->default('existing')
                                 ->live()
+                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED)
                                 ->afterStateUpdated(function (Set $set, ?string $state): void {
                                     if ($state === 'new') {
                                         $set('existing_book_id', null);
@@ -443,6 +458,7 @@ class DocumentDistributionPage extends Page
                                 ->label('Cari Buku di Katalog')
                                 ->placeholder('Ketik judul, penulis, penerbit, atau ISBN...')
                                 ->searchable()
+                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED)
                                 ->getSearchResultsUsing(function (string $search): array {
                                     return Book::query()
                                         ->search($search)
@@ -532,7 +548,7 @@ class DocumentDistributionPage extends Page
                                                 ->required()
                                                 ->minLength(3)
                                                 ->maxLength(255)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->live(onBlur: true)
                                                 ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Book::generateSlugPreview($state)))
@@ -548,7 +564,7 @@ class DocumentDistributionPage extends Page
                                             TextInput::make('subtitle')
                                                 ->label('Subjudul')
                                                 ->maxLength(255)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->placeholder('Subjudul tambahan bila ada')
                                                 ->columnSpanFull(),
@@ -557,7 +573,7 @@ class DocumentDistributionPage extends Page
                                                 ->label('Sinopsis Singkat')
                                                 ->rows(3)
                                                 ->maxLength(1500)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->columnSpanFull(),
 
@@ -566,7 +582,7 @@ class DocumentDistributionPage extends Page
                                                 ->nullable()
                                                 ->minLength(8)
                                                 ->maxLength(13)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->placeholder('9786020000001')
                                                 ->live(onBlur: true)
@@ -582,7 +598,7 @@ class DocumentDistributionPage extends Page
                                                 ->label('ISSN')
                                                 ->nullable()
                                                 ->maxLength(20)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->placeholder('1234-5678')
                                                 ->live(onBlur: true)
@@ -597,14 +613,14 @@ class DocumentDistributionPage extends Page
                                             TextInput::make('ddc_code')
                                                 ->label('Kode DDC')
                                                 ->maxLength(20)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->placeholder('000-999'),
 
                                             TextInput::make('language')
                                                 ->label('Bahasa Dokumen')
                                                 ->default('Indonesia')
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->maxLength(30),
                                         ])->columns(2),
@@ -619,7 +635,7 @@ class DocumentDistributionPage extends Page
                                                 ->required()
                                                 ->searchable()
                                                 ->preload()
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->createOptionForm(PublisherForm::optionFormSchema())
                                                 ->createOptionUsing(fn (array $data): int => static::createPublisher($data)),
@@ -627,7 +643,7 @@ class DocumentDistributionPage extends Page
                                             TextInput::make('edition')
                                                 ->label('Edisi / Volume')
                                                 ->maxLength(255)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->placeholder('Edisi Revisi atau Vol. 1'),
 
@@ -637,14 +653,14 @@ class DocumentDistributionPage extends Page
                                                 ->integer()
                                                 ->minValue(1000)
                                                 ->maxValue(now()->year)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->placeholder((string) now()->year),
 
                                             TextInput::make('pages')
                                                 ->label('Jumlah Halaman')
                                                 ->maxLength(255)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->placeholder('Contoh: 250'),
 
@@ -655,7 +671,7 @@ class DocumentDistributionPage extends Page
                                                 ->multiple()
                                                 ->searchable()
                                                 ->preload()
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->createOptionForm(AuthorForm::optionFormSchema())
                                                 ->createOptionUsing(fn (array $data): int => static::createAuthor($data)),
@@ -667,7 +683,7 @@ class DocumentDistributionPage extends Page
                                                 ->multiple()
                                                 ->searchable()
                                                 ->preload()
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->createOptionForm(CategoryForm::optionFormSchema())
                                                 ->createOptionUsing(fn (array $data): int => static::createCategory($data)),
@@ -685,7 +701,7 @@ class DocumentDistributionPage extends Page
                                                 ->disk('public')
                                                 ->imagePreviewHeight('240')
                                                 ->maxSize(2048)
-                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED || ($get('book_source') ?? 'existing') === 'existing')
                                                 ->dehydrated()
                                                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                                         ]),
@@ -699,6 +715,7 @@ class DocumentDistributionPage extends Page
                                                 ->default(1)
                                                 ->minValue(1)
                                                 ->required()
+                                                ->disabled(fn (Get $get): bool => ($get('status') ?? '') === DocumentSubmission::STATUS_APPROVED)
                                                 ->helperText('Jumlah eksemplar fisik yang akan diserahkan ke perpustakaan.'),
                                         ]),
                                 ]),
