@@ -783,6 +783,8 @@ class DocumentDistributionPage extends Page
             return;
         }
 
+        $batchToken = Str::random(32);
+
         foreach ($items as $item) {
             if (empty($item['title'])) {
                 continue;
@@ -809,6 +811,7 @@ class DocumentDistributionPage extends Page
                 'type' => DocumentSubmission::TYPE_BOOK_DONATION,
                 'submittable_type' => $existingBookId ? Book::class : null,
                 'submittable_id' => $existingBookId,
+                'submission_batch_token' => $batchToken,
                 'title' => $item['title'],
                 'subtitle' => $item['subtitle'] ?? null,
                 'slug' => $item['slug'] ?? Book::generateSlugPreview($item['title']),
