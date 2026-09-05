@@ -14,6 +14,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DocumentSubmissionsTable
 {
@@ -161,6 +162,14 @@ class DocumentSubmissionsTable
                 ])
                     ->label('Aksi'),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->orderByRaw("
+                CASE 
+                    WHEN status = 'pending' THEN 1
+                    WHEN status = 'revision' THEN 2
+                    WHEN status = 'rejected' THEN 3
+                    WHEN status = 'approved' THEN 4
+                    ELSE 5
+                END ASC
+            ")->orderByDesc('created_at'));
     }
 }
