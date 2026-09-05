@@ -1,12 +1,13 @@
 import { Deferred, router } from '@inertiajs/react';
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense } from 'react';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import BookCatalogFiltersSkeleton from '@/features/books/components/BookCatalogFiltersSkeleton';
 import { BookCatalogResults } from '@/features/books/components/BookCatalogResults';
 import { CatalogMobilePagination } from '@/features/books/components/CatalogMobilePagination';
 import { CatalogPage } from '@/features/books/components/CatalogPage';
+import { useBookCollectionViewMode } from '@/hooks/use-book-collection-view-mode';
 import booksRoute from '@/routes/books';
-import type { BookCatalogPageProps, ViewMode } from '@/features/books/types';
+import type { BookCatalogPageProps } from '@/features/books/types';
 
 const LazyBookCatalogFilters = lazy(async () => {
     const { BookCatalogFilters } = await import('./BookCatalogFilters');
@@ -23,7 +24,7 @@ export default function BookCatalogPage({
     years = [],
     books,
 }: BookCatalogPageProps) {
-    const [viewMode, setViewMode] = useState<ViewMode>('grid');
+    const [viewMode, setViewMode] = useBookCollectionViewMode();
     const safeFilters = filters || ({} as BookCatalogPageProps['filters']);
     const activeCategoryLabel =
         categories?.find((category) => category.slug === safeFilters.category)
