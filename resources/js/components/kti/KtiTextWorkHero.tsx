@@ -1,5 +1,4 @@
 import { Bookmark, Calendar, Eye, Hash, User } from 'lucide-react';
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { KtiShareButton } from '@/components/kti/KtiShareButton';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,10 +16,7 @@ export interface TextWorkRecord {
 
 interface KtiTextWorkHeroProps {
     record: TextWorkRecord | null;
-    label: string;
     kindLabel: string;
-    indexUrl: string;
-    detailUrl: string | null;
     isBookmarkedByUser: boolean;
     bookmarkRecord: CatalogBookmarkRecord | null;
     onToggleBookmark: (record: CatalogBookmarkRecord) => void;
@@ -28,32 +24,14 @@ interface KtiTextWorkHeroProps {
 
 export function KtiTextWorkHero({
     record,
-    label,
     kindLabel,
-    indexUrl,
-    detailUrl,
     isBookmarkedByUser,
     bookmarkRecord,
     onToggleBookmark,
 }: KtiTextWorkHeroProps) {
     return (
-        <div className="relative -mt-20 overflow-hidden border-b bg-background sm:-mt-28 md:-mt-24">
-            <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
-                <div className="-mx-4 mb-6 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
-                    <Breadcrumbs
-                        breadcrumbs={[
-                            { title: 'Beranda', href: '/' },
-                            { title: label, href: indexUrl },
-                            {
-                                title: record?.studentId ?? (
-                                    <Skeleton className="h-4 w-24" />
-                                ),
-                                href: detailUrl ?? indexUrl,
-                            },
-                        ]}
-                    />
-                </div>
-
+        <div className="relative overflow-hidden border-b bg-background">
+            <div className="relative mx-auto max-w-7xl border-x border-border/60 px-4 py-8 sm:px-6 lg:px-8">
                 {record ? (
                     <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
                         <div className="flex w-full flex-col justify-center">
