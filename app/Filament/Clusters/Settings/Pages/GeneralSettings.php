@@ -54,7 +54,6 @@ class GeneralSettings extends Page
         return $schema->components([
             Form::make([
                 Section::make('Identitas Situs')
-                    ->description('Informasi utama yang tampil di halaman publik')
                     ->schema([
                         TextInput::make('site_name')
                             ->label('Nama Situs')
@@ -66,7 +65,7 @@ class GeneralSettings extends Page
                             ->maxLength(255)
                             ->placeholder('Layanan koleksi dan arsip akademik'),
                         TextInput::make('department')
-                            ->label('Nama Instansi / Program Studi')
+                            ->label('Program Studi / Unit Pengelola')
                             ->required()
                             ->maxLength(255)
                             ->placeholder('Program Studi Teknik Informatika Universitas Malikussaleh'),
@@ -77,58 +76,66 @@ class GeneralSettings extends Page
                             ->maxLength(255)
                             ->placeholder('informatika@unimal.ac.id'),
                         TextInput::make('support_whatsapp')
-                            ->label('WhatsApp Bantuan')
+                            ->label('WhatsApp Layanan')
                             ->tel()
                             ->maxLength(255)
-                            ->placeholder('0812xxxxxx')
-                            ->helperText('Nomor kontak layanan'),
+                            ->placeholder('0812xxxxxx'),
                         Textarea::make('address')
-                            ->label('Alamat')
+                            ->label('Alamat Kantor')
                             ->rows(3)
                             ->maxLength(500)
                             ->placeholder('Jl. Cot Tengku Nie, Reuleut, Aceh Utara 24355')
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
-                Section::make('SEO & Metadata')
-                    ->description('Nilai default untuk deskripsi halaman, preview tautan, dan metadata publik')
+                Section::make('SEO & Tampilan')
                     ->schema([
                         Textarea::make('site_description')
-                            ->label('Deskripsi Situs')
+                            ->label('Deskripsi Situs (Meta Description)')
                             ->required()
                             ->rows(4)
                             ->maxLength(500)
                             ->placeholder('Layanan katalog, koleksi, dan arsip akademik.'),
                         Textarea::make('site_keywords')
-                            ->label('Kata Kunci SEO')
+                            ->label('Kata Kunci SEO (Meta Keywords)')
                             ->rows(4)
                             ->maxLength(500)
-                            ->placeholder('perpustakaan digital, teknik informatika, unimal, katalog buku')
-                            ->helperText('Pisahkan dengan koma'),
+                            ->placeholder('perpustakaan digital, teknik informatika, unimal, katalog buku'),
                         Select::make('seo_robots')
-                            ->label('Aturan Index')
+                            ->label('Perayapan Mesin Pencari (Robots)')
                             ->options([
-                                'index,follow' => 'Index, Follow',
-                                'noindex,follow' => 'No Index, Follow',
-                                'noindex,nofollow' => 'No Index, No Follow',
+                                'index,follow' => 'Izinkan Indeks & Ikuti Tautan (Index, Follow)',
+                                'noindex,follow' => 'Jangan Indeks, Ikuti Tautan (No Index, Follow)',
+                                'noindex,nofollow' => 'Blokir Seluruh Perayapan (No Index, No Follow)',
                             ])
                             ->required()
                             ->default('index,follow')
                             ->native(false),
                         ColorPicker::make('theme_color')
-                            ->label('Warna Tema')
+                            ->label('Warna Bilah Peramban (Browser Bar)')
                             ->required()
                             ->default('#ffffff')
                             ->regex('/^#[0-9A-Fa-f]{6}$/')
-                            ->helperText('Gunakan format hex, misalnya #FFFFFF'),
+                            ->helperText('Format: #RRGGBB'),
+                        Select::make('color_palette')
+                            ->label('Palet Warna Aksen')
+                            ->options([
+                                'indigo' => 'Informatika Indigo (Bawaan)',
+                                'ocean' => 'Samudera Blue (Biru Laut)',
+                                'emerald' => 'Forest Emerald (Hijau Kampus)',
+                                'slate' => 'Monochrome Slate (Abu Netral)',
+                                'amber' => 'Academic Gold (Kuning Emas)',
+                                'crimson' => 'Ruby Crimson (Merah Marun)',
+                            ])
+                            ->required()
+                            ->default('indigo')
+                            ->native(false),
                     ])
                     ->columns(2),
-                Section::make('Notifikasi Global')
-                    ->description('Pesan singkat yang tampil di bagian atas beranda')
+                Section::make('Pengumuman Beranda')
                     ->schema([
                         Toggle::make('hero_notice_enabled')
-                            ->label('Tampilkan notifikasi')
-                            ->helperText('Tampilkan pesan di beranda')
+                            ->label('Tampilkan Pengumuman di Beranda')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
@@ -192,6 +199,9 @@ class GeneralSettings extends Page
             'theme_color' => preg_match('/^#[0-9A-Fa-f]{6}$/', (string) ($data['theme_color'] ?? '')) === 1
                 ? strtoupper((string) $data['theme_color'])
                 : '#ffffff',
+            'color_palette' => in_array($data['color_palette'] ?? null, ['indigo', 'ocean', 'emerald', 'slate', 'amber', 'crimson'], true)
+                ? $data['color_palette']
+                : 'indigo',
             'hero_notice_enabled' => ($data['hero_notice_enabled'] ?? false) ? '1' : '0',
             'hero_notice_text' => $data['hero_notice_text'] ?? null,
             'hero_notice_url' => $data['hero_notice_url'] ?? null,

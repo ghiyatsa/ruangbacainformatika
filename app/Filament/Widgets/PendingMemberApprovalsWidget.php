@@ -47,8 +47,8 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Menunggu Persetujuan', $pendingTotal)
-                ->description($pendingTotal > 0 ? 'Menunggu review admin' : 'Tidak ada antrean')
-                ->descriptionIcon($pendingTotal > 0 ? Heroicon::OutlinedClock : Heroicon::OutlinedCheckCircle)
+                ->description($pendingTotal > 0 ? 'Perlu tinjauan' : null)
+                ->descriptionIcon($pendingTotal > 0 ? Heroicon::OutlinedClock : null)
                 ->color($pendingTotal > 0 ? 'warning' : 'success')
                 ->icon(Heroicon::OutlinedUserPlus)
                 ->url($this->usersUrl([
@@ -56,9 +56,9 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
                     'manual_approval' => ['isActive' => true],
                 ])),
 
-            Stat::make('Daftar Hari Ini', $pendingRegisteredToday)
-                ->description($pendingRegisteredToday > 0 ? 'Pendaftaran baru menunggu review' : 'Belum ada pendaftaran baru')
-                ->descriptionIcon(Heroicon::OutlinedAcademicCap)
+            Stat::make('Pendaftar Hari Ini', $pendingRegisteredToday)
+                ->description($pendingRegisteredToday > 0 ? 'Pendaftar baru' : null)
+                ->descriptionIcon($pendingRegisteredToday > 0 ? Heroicon::OutlinedAcademicCap : null)
                 ->color($pendingRegisteredToday > 0 ? 'info' : 'gray')
                 ->icon(Heroicon::OutlinedAcademicCap)
                 ->url($this->usersUrl([
@@ -66,9 +66,7 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
                     'registered_today' => ['isActive' => true],
                 ])),
 
-            Stat::make('Review Awal Hari Ini', $approvedToday)
-                ->description($approvedToday > 0 ? 'Ada review awal baru' : 'Belum ada review baru')
-                ->descriptionIcon(Heroicon::OutlinedCheckBadge)
+            Stat::make('Disetujui Hari Ini', $approvedToday)
                 ->color($approvedToday > 0 ? 'success' : 'gray')
                 ->icon(Heroicon::OutlinedCheckBadge)
                 ->url($this->usersUrl([

@@ -7,6 +7,7 @@ use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
@@ -57,7 +58,7 @@ class BookExporter extends Exporter
             ExportColumn::make('cover_image')
                 ->label('Sampul (URL)')
                 ->state(fn (Book $record): string => $record->cover_image
-                    ? asset('storage/'.$record->cover_image)
+                    ? Storage::disk('public')->url($record->cover_image)
                     : asset('images/book-cover-placeholder.svg')),
             ExportColumn::make('authors')
                 ->label('Penulis')

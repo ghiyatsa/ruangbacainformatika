@@ -28,7 +28,6 @@ class ContactMessagesTableWidget extends BaseTableWidget
                 TextColumn::make('name')
                     ->label('Pengirim')
                     ->searchable()
-                    ->description(fn (ContactMessage $record): string => $record->subject)
                     ->wrap(),
                 TextColumn::make('email')
                     ->label('Email')

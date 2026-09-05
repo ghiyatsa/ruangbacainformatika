@@ -33,7 +33,7 @@ class PostForm
                 ])
                     ->schema([
                         Section::make('Artikel Perlu Perbaikan (Ditolak)')
-                            ->description(fn (?Post $record): string => 'Catatan Peninjau: '.($record?->rejection_reason ?? '').'. Silakan perbaiki artikel sesuai catatan tersebut, lalu ubah status di kanan menjadi "Ajukan Peninjauan" untuk mengirimkan kembali.')
+                            ->description(fn (?Post $record): string => 'Catatan: '.($record?->rejection_reason ?? ''))
                             ->icon(Heroicon::OutlinedExclamationTriangle)
                             ->iconColor('danger')
                             ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_REJECTED && filled($record->rejection_reason))
@@ -41,7 +41,7 @@ class PostForm
                             ->schema([]),
 
                         Section::make('Artikel Telah Diterbitkan')
-                            ->description('Artikel ini sudah aktif dan dapat dibaca oleh publik. Penting: Jika Anda menyimpan perubahan pada artikel ini, statusnya akan ditarik kembali menjadi "Dalam Peninjauan" (tidak diterbitkan) untuk ditinjau ulang oleh petugas.')
+                            ->description('Penyimpanan perubahan akan mengubah status menjadi peninjauan ulang.')
                             ->icon(Heroicon::OutlinedCheckCircle)
                             ->iconColor('success')
                             ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_APPROVED)
@@ -49,7 +49,6 @@ class PostForm
                             ->schema([]),
 
                         Section::make('Artikel Sedang Ditinjau')
-                            ->description('Artikel ini sedang dalam antrean peninjauan oleh petugas dan belum diterbitkan. Anda masih dapat mengubah isi artikel ini sebelum disetujui, namun artikel akan tetap berada dalam status peninjauan.')
                             ->icon(Heroicon::OutlinedClock)
                             ->iconColor('warning')
                             ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_PENDING)

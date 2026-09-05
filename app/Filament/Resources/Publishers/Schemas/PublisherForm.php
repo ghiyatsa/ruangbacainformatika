@@ -28,8 +28,7 @@ class PublisherForm
     {
         return $schema
             ->components([
-                Section::make('Informasi Dasar')
-                    ->description('Data utama penerbit')
+                Section::make('Identitas Penerbit')
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
@@ -47,8 +46,7 @@ class PublisherForm
                     ])
                     ->columns(2),
 
-                Section::make('Deskripsi')
-                    ->description('Keterangan tambahan penerbit')
+                Section::make('Profil Penerbit')
                     ->schema([
                         static::descriptionField(),
                     ]),
@@ -61,15 +59,15 @@ class PublisherForm
             ->label('Nama Penerbit')
             ->required()
             ->maxLength(255)
-            ->placeholder('Nama penerbit');
+            ->placeholder('Contoh: Informatika Bandung');
     }
 
     protected static function cityField(): TextInput
     {
         return TextInput::make('city')
-            ->label('Kota')
+            ->label('Kota Penerbit')
             ->maxLength(255)
-            ->placeholder('Jakarta, Surabaya, Bandung');
+            ->placeholder('Contoh: Bandung');
     }
 
     protected static function descriptionField(): Textarea

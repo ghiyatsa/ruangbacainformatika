@@ -123,7 +123,7 @@ class UsersTable
                         return $query->whereBetween('created_at', [$startOfDay, $endOfDay]);
                     }),
                 Filter::make('approved_today')
-                    ->label('Lolos review awal hari ini')
+                    ->label('Disetujui hari ini')
                     ->toggle()
                     ->query(function (Builder $query): Builder {
                         [$startOfDay, $endOfDay] = AppTimezone::dayRange();
@@ -140,8 +140,8 @@ class UsersTable
                     ->color('success')
                     ->hidden(fn (User $record): bool => $record->is_approved)
                     ->requiresConfirmation()
-                    ->modalHeading('Setujui akun')
-                    ->modalDescription('Akun ini akan dicatat lolos review awal. Akses pinjam tetap menunggu verifikasi WhatsApp dan peran anggota.')
+                    ->modalHeading('Konfirmasi Persetujuan Akun')
+                    ->modalDescription('Akun akan disetujui untuk melanjutkan keanggotaan perpustakaan.')
                     ->action(function (User $record): void {
                         $record->forceFill([
                             'is_approved' => true,
@@ -158,7 +158,7 @@ class UsersTable
 
                         Notification::make()
                             ->success()
-                            ->title('Status review awal diperbarui')
+                            ->title('Akun berhasil disetujui')
                             ->send();
                     }),
                 EditAction::make()

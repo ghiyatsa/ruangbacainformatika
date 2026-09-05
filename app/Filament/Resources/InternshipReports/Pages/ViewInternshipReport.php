@@ -16,6 +16,11 @@ class ViewInternshipReport extends ViewRecord
 {
     protected static string $resource = InternshipReportResource::class;
 
+    public function getTitle(): string
+    {
+        return $this->getRecord()->title;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

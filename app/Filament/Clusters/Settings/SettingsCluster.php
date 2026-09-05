@@ -11,6 +11,8 @@ class SettingsCluster extends Cluster
 {
     protected static ?string $navigationLabel = 'Pengaturan';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $title = 'Pengaturan';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
