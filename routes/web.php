@@ -40,8 +40,12 @@ Route::post('/catalog-reports', [CatalogReportController::class, 'store'])
     ->middleware('throttle:catalog-reports')
     ->name('catalog-reports.store');
 
-Route::get('/verify/receipt/{token}', [DocumentDistributionController::class, 'verifyReceipt'])->name('verify.receipt');
-Route::get('/distribution/receipt', [DocumentDistributionController::class, 'receipt'])->name('distribution.receipt');
+Route::get('/verify/receipt/{token}', [DocumentDistributionController::class, 'verifyReceipt'])
+    ->middleware('throttle:60,1')
+    ->name('verify.receipt');
+Route::get('/distribution/receipt', [DocumentDistributionController::class, 'receipt'])
+    ->middleware(['auth', 'throttle:30,1'])
+    ->name('distribution.receipt');
 
 Route::middleware(['auth', 'profile.completed', 'member'])->group(function () {
     Route::get('/skripsi', [SkripsiController::class, 'index'])->name('skripsi.index');
