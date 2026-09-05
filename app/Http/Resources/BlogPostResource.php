@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Support\RichContentSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /** @mixin Post */
@@ -26,7 +27,7 @@ class BlogPostResource extends JsonResource
             'content' => app(RichContentSanitizer::class)->sanitize($this->content),
             'contentText' => Str::of(strip_tags((string) $this->content))->squish()->toString(),
             'coverImageUrl' => $this->cover_image
-                ? asset('storage/'.$this->cover_image)
+                ? Storage::disk('public')->url($this->cover_image)
                 : asset('images/article-placeholder.svg'),
             'status' => $this->status,
             'publishedAt' => $this->published_at?->toIso8601String(),

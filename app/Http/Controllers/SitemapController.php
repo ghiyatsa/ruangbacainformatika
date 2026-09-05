@@ -3,11 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
-use App\Models\InternshipReport;
 use App\Models\Post;
-use App\Models\Skripsi;
 use App\Models\StaticPage;
-use App\Models\Thesis;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 
@@ -50,24 +47,6 @@ class SitemapController extends Controller
             'priority' => '0.8',
         ];
         $urls[] = [
-            'loc' => route('skripsi.index'),
-            'lastmod' => now()->startOfWeek()->toAtomString(),
-            'changefreq' => 'daily',
-            'priority' => '0.9',
-        ];
-        $urls[] = [
-            'loc' => route('internship-reports.index'),
-            'lastmod' => now()->startOfWeek()->toAtomString(),
-            'changefreq' => 'daily',
-            'priority' => '0.9',
-        ];
-        $urls[] = [
-            'loc' => route('thesis.index'),
-            'lastmod' => now()->startOfWeek()->toAtomString(),
-            'changefreq' => 'daily',
-            'priority' => '0.9',
-        ];
-        $urls[] = [
             'loc' => route('about'),
             'lastmod' => now()->startOfMonth()->toAtomString(),
             'changefreq' => 'monthly',
@@ -108,6 +87,7 @@ class SitemapController extends Controller
             ];
         }
 
+        // 4. Posts (Only Published)
         $posts = Post::published()->select('id', 'slug', 'updated_at')->get();
         foreach ($posts as $post) {
             $urls[] = [
@@ -115,39 +95,6 @@ class SitemapController extends Controller
                 'lastmod' => $post->updated_at->toAtomString(),
                 'changefreq' => 'weekly',
                 'priority' => '0.7',
-            ];
-        }
-
-        // 4. Skripsi
-        $skripsis = Skripsi::select('id', 'student_id', 'updated_at')->get();
-        foreach ($skripsis as $skripsi) {
-            $urls[] = [
-                'loc' => route('skripsi.show', $skripsi->student_id),
-                'lastmod' => $skripsi->updated_at->toAtomString(),
-                'changefreq' => 'weekly',
-                'priority' => '0.8',
-            ];
-        }
-
-        // 5. Internship Reports
-        $reports = InternshipReport::select('id', 'student_id', 'updated_at')->get();
-        foreach ($reports as $report) {
-            $urls[] = [
-                'loc' => route('internship-reports.show', $report->student_id),
-                'lastmod' => $report->updated_at->toAtomString(),
-                'changefreq' => 'weekly',
-                'priority' => '0.7',
-            ];
-        }
-
-        // 6. Thesis
-        $theses = Thesis::select('id', 'student_id', 'updated_at')->get();
-        foreach ($theses as $thesis) {
-            $urls[] = [
-                'loc' => route('thesis.show', $thesis->student_id),
-                'lastmod' => $thesis->updated_at->toAtomString(),
-                'changefreq' => 'weekly',
-                'priority' => '0.8',
             ];
         }
 

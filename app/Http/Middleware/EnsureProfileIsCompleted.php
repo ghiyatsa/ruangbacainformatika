@@ -27,7 +27,9 @@ class EnsureProfileIsCompleted
 
         $user = $request->user();
 
-        if ($user instanceof User && $this->authenticationRedirector->requiresProfileCompletion($user)) {
+        if ($user instanceof User && $this->authenticationRedirector->requiresProfileCompletion($user, allowSkipped: false)) {
+            $request->session()->put('url.intended', $request->fullUrl());
+
             return $request->expectsJson()
                 ? abort(403, 'Your profile is incomplete.')
                 : redirect()->route('register.profile');

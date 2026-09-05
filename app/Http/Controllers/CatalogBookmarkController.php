@@ -33,12 +33,27 @@ class CatalogBookmarkController extends Controller
                 Rule::in(['book', 'skripsi', 'thesis', 'internship_report', 'post']),
             ],
             'bookmarks.*.id' => ['required', 'integer', 'min:1'],
-            'bookmarks.*.href' => ['required', 'string', 'max:2048'],
+            'bookmarks.*.href' => [
+                'required',
+                'string',
+                'max:2048',
+                // Hanya izinkan href relatif atau http(s) — cegah skema berbahaya (javascript:, data:, vbscript:)
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value)) {
+                        return;
+                    }
+                    $scheme = strtolower(explode(':', $value, 2)[0]);
+                    $dangerous = ['javascript', 'data', 'vbscript'];
+                    if (in_array($scheme, $dangerous, true)) {
+                        $fail('URL bookmark tidak valid.');
+                    }
+                },
+            ],
             'bookmarks.*.title' => ['required', 'string', 'max:500'],
             'bookmarks.*.subtitle' => ['nullable', 'string', 'max:500'],
             'bookmarks.*.meta' => ['nullable', 'string', 'max:200'],
             'bookmarks.*.year' => ['nullable', 'integer'],
-            'bookmarks.*.coverImageUrl' => ['nullable', 'string', 'max:2048'],
+            'bookmarks.*.coverImageUrl' => ['nullable', 'url', 'max:2048'],
             'bookmarks.*.kindLabel' => ['required', 'string', 'max:50'],
             'bookmarks.*.statusLabel' => ['nullable', 'string', 'max:100'],
         ]);

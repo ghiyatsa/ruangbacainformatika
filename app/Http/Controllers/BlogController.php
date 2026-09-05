@@ -166,8 +166,8 @@ class BlogController extends Controller
                                         $tempDisk->get($file)
                                     );
                                     // Replace both raw encoded and decoded url
-                                    $content = str_replace($rawImgUrl, asset('storage/'.$previewPath), $content);
-                                    $content = str_replace($imgUrl, asset('storage/'.$previewPath), $content);
+                                    $content = str_replace($rawImgUrl, Storage::disk('public')->url($previewPath), $content);
+                                    $content = str_replace($imgUrl, Storage::disk('public')->url($previewPath), $content);
                                     break;
                                 }
                             }

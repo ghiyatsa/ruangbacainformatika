@@ -8,7 +8,6 @@ use App\Support\SiteSettings;
 use Filament\Notifications\DatabaseNotification as FilamentDatabaseNotification;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -52,9 +51,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             ...$siteData,
-            'globalNotice' => Inertia::defer(
-                fn (): array => $this->siteSettings->sharedNotice(),
-            )->once(),
+            'globalNotice' => $this->siteSettings->sharedNotice(),
             'auth' => [
                 'user' => $this->serializeUser($user),
                 'isMember' => $user?->hasRole('member') ?? false,
@@ -62,6 +59,10 @@ class HandleInertiaRequests extends Middleware
                 'canBorrowBooks' => $user?->canBorrowBooks() ?? false,
                 'canViewNotifications' => $user?->canViewPublicNotifications() ?? false,
                 'hasVerifiedWhatsApp' => $user?->hasVerifiedWhatsApp() ?? false,
+                'requiresOnboarding' => $user !== null && ! $user->hasCompletedProfile() && $user->usesCampusEmail() && ! $user->canAccessAdminPanel(),
+                'onboardingUrl' => $user !== null && ! $user->hasCompletedProfile()
+                    ? route('settings.profile.edit', absolute: false)
+                    : null,
             ],
             'notifications' => fn (): array => [
                 'unreadCount' => $user?->canViewPublicNotifications()

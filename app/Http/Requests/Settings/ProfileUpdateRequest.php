@@ -20,17 +20,22 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'name' => $this->nameRules(),
-            'whatsapp' => $this->whatsappRules(ignoreId: $this->user()?->id),
+            'whatsapp' => ['sometimes', ...$this->whatsappRules(required: false, ignoreId: $this->user()?->id)],
             'address' => $this->addressRules(),
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
+        $data = [
             'name' => Str::of((string) $this->input('name'))->squish()->toString(),
-            'whatsapp' => $this->normalizePhoneNumber((string) $this->input('whatsapp')),
             'address' => Str::of((string) $this->input('address'))->squish()->toString(),
-        ]);
+        ];
+
+        if ($this->has('whatsapp')) {
+            $data['whatsapp'] = $this->normalizePhoneNumber((string) $this->input('whatsapp'));
+        }
+
+        $this->merge($data);
     }
 }
