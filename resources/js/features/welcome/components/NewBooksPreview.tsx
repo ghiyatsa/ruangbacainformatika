@@ -1,20 +1,19 @@
 import { Link } from '@inertiajs/react';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useBookCollectionViewMode } from '@/hooks/use-book-collection-view-mode';
 import booksRoute from '@/routes/books';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
 import LazyDeferred from './LazyDeferred';
 import SectionHeader from './SectionHeader';
 import type { WelcomeProps } from '@/features/welcome/types';
-import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 interface NewBooksPreviewProps {
     books: WelcomeProps['books'];
 }
 
 export default function NewBooksPreview({ books }: NewBooksPreviewProps) {
-    const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
+    const [viewMode, setViewMode] = useBookCollectionViewMode();
     const previewBooks = books?.data?.slice(0, 12) || [];
 
     if (books !== undefined && previewBooks.length === 0) {
