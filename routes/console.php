@@ -7,6 +7,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+use App\Console\Commands\KioskSyncPullCommand;
+use App\Console\Commands\KioskSyncPushCommand;
 use App\Console\Commands\PruneAuditLogsCommand;
 use App\Console\Commands\PruneNotificationsCommand;
 use App\Console\Commands\PruneSearchHistoryCommand;
@@ -33,3 +35,14 @@ Schedule::command(PruneAuditLogsCommand::class)
     ->withoutOverlapping();
 Schedule::command('queue:prune-failed')
     ->dailyAt('05:00');
+
+// Sinkronisasi Kiosk Hibrida: jalan otomatis hanya jika instance berperan sebagai `edge`.
+Schedule::command(KioskSyncPushCommand::class)
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->when(fn (): bool => config('app.app.kiosk.role') === 'edge');
+
+Schedule::command(KioskSyncPullCommand::class)
+    ->hourly()
+    ->withoutOverlapping()
+    ->when(fn (): bool => config('app.app.kiosk.role') === 'edge');

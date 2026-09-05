@@ -144,6 +144,9 @@ return [
         ],
         'kiosk' => [
             'pin' => env('KIOSK_DEFAULT_PIN', ''),
+            'role' => env('KIOSK_INSTANCE_ROLE', 'standalone'), // 'standalone' | 'cloud' | 'edge'
+            'cloud_url' => env('KIOSK_CLOUD_URL', ''),
+            'sync_token' => env('KIOSK_SYNC_TOKEN', ''),
         ],
     ],
 
