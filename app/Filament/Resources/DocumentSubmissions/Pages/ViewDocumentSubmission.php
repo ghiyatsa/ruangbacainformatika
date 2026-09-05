@@ -36,7 +36,7 @@ class ViewDocumentSubmission extends ViewRecord
                 ->label('Lihat Pengesahan')
                 ->icon(Heroicon::OutlinedEye)
                 ->color('gray')
-                ->visible(fn (): bool => ! empty($this->record->endorsement_file_path))
+                ->visible(fn (): bool => $this->record->type !== DocumentSubmission::TYPE_BOOK_DONATION && ! empty($this->record->endorsement_file_path))
                 ->url(fn (): string => route('documents.file', ['submission' => $this->record->id, 'field' => 'endorsement']))
                 ->openUrlInNewTab(),
 

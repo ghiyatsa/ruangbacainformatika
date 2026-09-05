@@ -80,7 +80,7 @@ class DocumentSubmissionInfolist
                                         'fair' => 'Baik / Layak Baca',
                                         default => $record->book_condition ?? '-',
                                     })
-                                    ->visible(fn (DocumentSubmission $record): bool => $record->type === DocumentSubmission::TYPE_BOOK_DONATION),
+                                    ->visible(fn (DocumentSubmission $record): bool => $record->type === DocumentSubmission::TYPE_BOOK_DONATION && filled($record->book_condition)),
                                 TextEntry::make('year')
                                     ->label('Tahun'),
                                 TextEntry::make('keywords')

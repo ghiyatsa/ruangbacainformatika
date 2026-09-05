@@ -441,23 +441,53 @@ class DocumentDistributionPage extends Page
 
                             Select::make('existing_book_id')
                                 ->label('Cari Buku di Katalog')
-                                ->placeholder('Ketik judul atau ISBN buku...')
+                                ->placeholder('Ketik judul, penulis, penerbit, atau ISBN...')
                                 ->searchable()
                                 ->getSearchResultsUsing(function (string $search): array {
                                     return Book::query()
-                                        ->where('title', 'like', "%{$search}%")
-                                        ->orWhere('isbn', 'like', "%{$search}%")
-                                        ->limit(30)
+                                        ->search($search)
+                                        ->with(['authors', 'publisher'])
+                                        ->limit(25)
                                         ->get()
-                                        ->mapWithKeys(fn (Book $book) => [
-                                            $book->id => $book->title.($book->isbn ? " (ISBN: {$book->isbn})" : ''),
-                                        ])
+                                        ->mapWithKeys(function (Book $book): array {
+                                            $authorStr = $book->authors->pluck('name')->join(', ');
+                                            $label = $book->title;
+                                            if ($authorStr !== '') {
+                                                $label .= ' — '.$authorStr;
+                                            }
+                                            $meta = array_filter([
+                                                $book->publisher?->name,
+                                                $book->published_year,
+                                                $book->isbn ? "ISBN: {$book->isbn}" : null,
+                                            ]);
+                                            if (! empty($meta)) {
+                                                $label .= ' ('.implode(', ', $meta).')';
+                                            }
+
+                                            return [$book->id => $label];
+                                        })
                                         ->all();
                                 })
                                 ->getOptionLabelUsing(function ($value): ?string {
-                                    $b = Book::find($value);
+                                    $book = Book::with(['authors', 'publisher'])->find($value);
+                                    if (! $book) {
+                                        return null;
+                                    }
+                                    $authorStr = $book->authors->pluck('name')->join(', ');
+                                    $label = $book->title;
+                                    if ($authorStr !== '') {
+                                        $label .= ' — '.$authorStr;
+                                    }
+                                    $meta = array_filter([
+                                        $book->publisher?->name,
+                                        $book->published_year,
+                                        $book->isbn ? "ISBN: {$book->isbn}" : null,
+                                    ]);
+                                    if (! empty($meta)) {
+                                        $label .= ' ('.implode(', ', $meta).')';
+                                    }
 
-                                    return $b ? $b->title.($b->isbn ? " (ISBN: {$b->isbn})" : '') : null;
+                                    return $label;
                                 })
                                 ->live()
                                 ->afterStateUpdated(function (Set $set, ?int $state): void {
@@ -646,6 +676,7 @@ class DocumentDistributionPage extends Page
 
                                 Group::make()->schema([
                                     Section::make('Sampul Buku')
+                                        ->visible(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'new' || filled($get('existing_book_id')))
                                         ->schema([
                                             FileUpload::make('cover_image')
                                                 ->label('Cover Depan')
@@ -654,33 +685,21 @@ class DocumentDistributionPage extends Page
                                                 ->disk('public')
                                                 ->imagePreviewHeight('240')
                                                 ->maxSize(2048)
+                                                ->disabled(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'existing')
+                                                ->dehydrated()
                                                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                                         ]),
 
-                                    Section::make('Fisik & Penyerahan')
+                                    Section::make('Jumlah Eksemplar')
+                                        ->visible(fn (Get $get): bool => ($get('book_source') ?? 'existing') === 'new' || filled($get('existing_book_id')))
                                         ->schema([
                                             TextInput::make('copies_count')
-                                                ->label('Jumlah Eksemplar')
+                                                ->label('Jumlah Buku yang Disumbangkan')
                                                 ->numeric()
                                                 ->default(1)
                                                 ->minValue(1)
-                                                ->required(),
-
-                                            Select::make('book_condition')
-                                                ->label('Kondisi Fisik')
-                                                ->options([
-                                                    'good' => 'Sangat Baik / Baru',
-                                                    'fair' => 'Baik / Layak Baca',
-                                                ])
-                                                ->default('good')
-                                                ->required(),
-
-                                            FileUpload::make('endorsement_file_path')
-                                                ->label('Foto Fisik Buku / Bukti Serah Terima')
-                                                ->disk('documents')
-                                                ->directory('submissions/book_donations')
-                                                ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
-                                                ->maxSize(10240),
+                                                ->required()
+                                                ->helperText('Jumlah eksemplar fisik yang akan diserahkan ke perpustakaan.'),
                                         ]),
                                 ]),
                             ]),
@@ -764,10 +783,6 @@ class DocumentDistributionPage extends Page
                 ? array_values($item['cover_image'])[0] ?? null
                 : $item['cover_image'] ?? null;
 
-            $endorsementPath = is_array($item['endorsement_file_path'] ?? null)
-                ? array_values($item['endorsement_file_path'])[0] ?? null
-                : $item['endorsement_file_path'] ?? null;
-
             $existingBookId = ($item['book_source'] ?? 'existing') === 'existing' && ! empty($item['existing_book_id'])
                 ? (int) $item['existing_book_id']
                 : null;
@@ -791,10 +806,8 @@ class DocumentDistributionPage extends Page
                 'pages' => $item['pages'] ?? null,
                 'author_ids' => $item['authors'] ?? [],
                 'category_ids' => $item['categories'] ?? [],
-                'book_condition' => $item['book_condition'] ?? 'good',
                 'copies_count' => (int) ($item['copies_count'] ?? 1),
                 'cover_image' => $coverPath,
-                'endorsement_file_path' => $endorsementPath,
                 'status' => DocumentSubmission::STATUS_PENDING,
                 'revision_notes' => null,
             ];

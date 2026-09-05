@@ -111,7 +111,7 @@ class DocumentSubmissionsTable
                         ->label('Lihat Pengesahan')
                         ->icon(Heroicon::OutlinedEye)
                         ->color('gray')
-                        ->visible(fn (DocumentSubmission $record): bool => ! empty($record->endorsement_file_path))
+                        ->visible(fn (DocumentSubmission $record): bool => $record->type !== DocumentSubmission::TYPE_BOOK_DONATION && ! empty($record->endorsement_file_path))
                         ->url(fn (DocumentSubmission $record): string => route('documents.file', ['submission' => $record->id, 'field' => 'endorsement']))
                         ->openUrlInNewTab(),
 
