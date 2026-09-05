@@ -4,6 +4,7 @@ namespace App\Notifications\Channels;
 
 use App\Models\WhatsAppMessageLog;
 use App\Notifications\Messages\WhatsAppMessage;
+use App\Notifications\WhatsAppOtpNotification;
 use App\Services\WhatsAppGateway;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
@@ -21,9 +22,9 @@ class WhatsAppChannel
             return;
         }
 
-        $phoneNumber = method_exists($notifiable, 'routeNotificationForWhatsApp')
-            ? $notifiable->routeNotificationForWhatsApp()
-            : null;
+        $phoneNumber = ($notification instanceof WhatsAppOtpNotification && filled($notification->targetPhone))
+            ? $notification->targetPhone
+            : (method_exists($notifiable, 'routeNotificationForWhatsApp') ? $notifiable->routeNotificationForWhatsApp() : null);
 
         if (! is_string($phoneNumber) || $phoneNumber === '') {
             return;

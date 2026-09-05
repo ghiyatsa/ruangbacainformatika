@@ -41,8 +41,19 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/assets',
             'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Disk khusus untuk dokumen submission (KP, Skripsi, endorsement).
+        // Visibility private — tidak pernah diakses langsung via URL publik.
+        // Semua akses harus melalui DocumentFileController yang memverifikasi kepemilikan.
+        'documents' => [
+            'driver' => 'local',
+            'root' => storage_path('app/documents'),
+            'visibility' => 'private',
             'throw' => false,
             'report' => false,
         ],
@@ -74,6 +85,7 @@ return [
     */
 
     'links' => [
+        public_path('assets') => storage_path('app/public'),
         public_path('storage') => storage_path('app/public'),
     ],
 

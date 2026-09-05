@@ -9,7 +9,8 @@ use Illuminate\Notifications\Notification;
 class WhatsAppOtpNotification extends Notification
 {
     public function __construct(
-        protected string $code,
+        public string $code,
+        public ?string $targetPhone = null,
     ) {}
 
     /**

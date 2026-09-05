@@ -69,7 +69,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
                 $user->email = $user->getOriginal('email');
             }
 
-            if ($user->isDirty('whatsapp') && $user->usesCampusEmail()) {
+            if ($user->isDirty('whatsapp') && ! $user->isDirty('whatsapp_verified_at') && $user->usesCampusEmail()) {
                 $user->whatsapp_verified_at = null;
             }
         });
@@ -127,6 +127,25 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function canAccessAdminPanel(): bool
     {
         return $this->hasAdministrativeRole();
+    }
+
+    public function identityNumber(): ?string
+    {
+        if (filled($this->student_id)) {
+            return $this->student_id;
+        }
+
+        if ($this->email && app(CampusEmail::class)->isMahasiswaEmail($this->email)) {
+            return app(CampusEmail::class)->extractIdentityNumber($this->email);
+        }
+
+        return null;
+    }
+
+    public function isMahasiswa(): bool
+    {
+        return $this->identityNumber() !== null
+            || ($this->email !== null && app(CampusEmail::class)->isMahasiswaEmail($this->email));
     }
 
     public function canReceiveMemberRole(): bool
@@ -232,7 +251,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function hasVerifiedWhatsApp(): bool
     {
-        return $this->whatsapp_verified_at !== null;
+        return filled($this->whatsapp) && $this->whatsapp_verified_at !== null;
     }
 
     public function requiresWhatsAppVerification(): bool

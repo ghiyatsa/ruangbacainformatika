@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use AchyutN\FilamentLogViewer\FilamentLogViewer;
+use App\Support\SiteSettings;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -11,7 +12,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -33,9 +33,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->spa()
             ->colors([
-                'primary' => Color::Indigo,
+                'primary' => app(SiteSettings::class)->filamentPrimaryColor(),
             ])
-            ->favicon(asset('favicon.svg'))
+            ->favicon(fn () => route('favicon.svg'))
             ->unsavedChangesAlerts()
             ->databaseTransactions()
             ->databaseNotifications()
@@ -55,6 +55,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Konten & Blog'),
                 NavigationGroup::make('Layanan Anggota'),
                 NavigationGroup::make('Komunikasi'),
+                NavigationGroup::make('Pengaturan'),
                 NavigationGroup::make('Manajemen Pengguna'),
                 NavigationGroup::make('Sistem'),
             ])
@@ -78,6 +79,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Hak Akses')
                     ->navigationGroup('Manajemen Pengguna')
+                    ->navigationSort(2)
                     ->navigationBadge(fn (): string => (string) Role::count())
                     ->navigationBadgeTooltip('Total peran')
                     ->navigationBadgeColor('warning')

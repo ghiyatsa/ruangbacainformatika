@@ -106,7 +106,7 @@ class KioskPinManager
             60 * 24, // 24 jam
             null,
             null,
-            false,
+            app()->isProduction(), // Secure flag: HTTPS-only di production
             true,
         );
 

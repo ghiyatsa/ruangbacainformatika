@@ -35,6 +35,14 @@ class AuthenticationRedirector
             return $defaultPath;
         }
 
+        // Cegah open redirect: hanya kembalikan path relatif, bukan full URL.
+        // Jika $intended berisi host eksternal, parse_url akan mengembalikan path-nya saja.
+        $intendedHost = parse_url($intended, PHP_URL_HOST);
+
+        if ($intendedHost !== null && $intendedHost !== '') {
+            return $intendedPath;
+        }
+
         return $intended;
     }
 
@@ -56,25 +64,29 @@ class AuthenticationRedirector
 
     protected function defaultPathFor(User $user): string
     {
-        if ($this->requiresWhatsAppVerification($user)) {
-            return route('register.whatsapp', absolute: false);
-        }
-
         if ($this->requiresProfileCompletion($user)) {
             return route('register.profile', absolute: false);
+        }
+
+        if ($this->requiresWhatsAppVerification($user)) {
+            return route('register.whatsapp', absolute: false);
         }
 
         return route('home', absolute: false);
     }
 
-    public function requiresProfileCompletion(User $user): bool
+    public function requiresProfileCompletion(User $user, bool $allowSkipped = true): bool
     {
+        if ($allowSkipped && session()->get('profile_completion_skipped') === true) {
+            return false;
+        }
+
         return $this->requiresMemberOnboarding($user) && ! $user->hasRequiredProfileDetails();
     }
 
-    public function requiresWhatsAppVerification(User $user): bool
+    public function requiresWhatsAppVerification(User $user, bool $allowSkipped = true): bool
     {
-        if (session()->get('whatsapp_verification_skipped') === true) {
+        if ($allowSkipped && session()->get('whatsapp_verification_skipped') === true) {
             return false;
         }
 

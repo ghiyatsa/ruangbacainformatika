@@ -22,6 +22,12 @@ use Throwable;
 
 class KioskLoanService
 {
+    public const RETURN_MODE_ISBN = 'isbn';
+
+    public const RETURN_MODE_BOOK_ID = 'book_id';
+
+    public const RETURN_MODE_LOAN_ITEM_ID = 'loan_item_id';
+
     public function __construct(
         protected SettingRepository $settingRepository,
         protected CampusEmail $campusEmail,
@@ -128,7 +134,7 @@ class KioskLoanService
      */
     public function returnBooks(string $memberIdentifier, array $isbns): int
     {
-        return $this->processBatchReturn($memberIdentifier, $isbns, 'isbn');
+        return $this->processBatchReturn($memberIdentifier, $isbns, self::RETURN_MODE_ISBN);
     }
 
     /**
@@ -138,7 +144,7 @@ class KioskLoanService
      */
     public function returnBooksByBookIds(string $memberIdentifier, array $bookIds): int
     {
-        return $this->processBatchReturn($memberIdentifier, $bookIds, 'book_id');
+        return $this->processBatchReturn($memberIdentifier, $bookIds, self::RETURN_MODE_BOOK_ID);
     }
 
     /**
@@ -148,7 +154,7 @@ class KioskLoanService
      */
     public function returnBooksByLoanItemIds(string $memberIdentifier, array $loanItemIds): int
     {
-        return $this->processBatchReturn($memberIdentifier, $loanItemIds, 'loan_item_id');
+        return $this->processBatchReturn($memberIdentifier, $loanItemIds, self::RETURN_MODE_LOAN_ITEM_ID);
     }
 
     /**
@@ -177,25 +183,31 @@ class KioskLoanService
                     ->with(['loan.items', 'bookItem.book'])
                     ->lockForUpdate();
 
-                match ($mode) {
-                    'isbn' => $query->whereHas('bookItem.book', fn ($q) => $q->where('isbn', (string) $identifier)),
-                    'book_id' => $query->whereHas('bookItem.book', fn ($q) => $q->whereKey((int) $identifier)),
-                    'loan_item_id' => $query->whereKey((int) $identifier),
-                };
+                switch ($mode) {
+                    case self::RETURN_MODE_ISBN:
+                        $query->whereHas('bookItem.book', fn ($q) => $q->where('isbn', (string) $identifier));
+                        break;
+                    case self::RETURN_MODE_BOOK_ID:
+                        $query->whereHas('bookItem.book', fn ($q) => $q->whereKey((int) $identifier));
+                        break;
+                    default:
+                        $query->whereKey((int) $identifier);
+                        break;
+                }
 
                 $loanItem = $query->first();
 
                 if (! $loanItem) {
                     $message = match ($mode) {
-                        'isbn' => "Tidak ada peminjaman aktif untuk ISBN {$identifier} atas member tersebut.",
-                        'book_id' => 'Buku yang dipilih tidak tercatat sebagai pinjaman aktif untuk anggota ini.',
-                        'loan_item_id' => 'Buku yang dipilih tidak lagi tercatat sebagai pinjaman aktif untuk anggota ini.',
+                        self::RETURN_MODE_ISBN => "Tidak ada peminjaman aktif untuk ISBN {$identifier} atas member tersebut.",
+                        self::RETURN_MODE_BOOK_ID => 'Buku yang dipilih tidak tercatat sebagai pinjaman aktif untuk anggota ini.',
+                        default => 'Buku yang dipilih tidak lagi tercatat sebagai pinjaman aktif untuk anggota ini.',
                     };
 
                     $key = match ($mode) {
-                        'isbn' => "isbns.{$index}",
-                        'book_id' => "book_ids.{$index}",
-                        'loan_item_id' => "loan_item_ids.{$index}",
+                        self::RETURN_MODE_ISBN => "isbns.{$index}",
+                        self::RETURN_MODE_BOOK_ID => "book_ids.{$index}",
+                        default => "loan_item_ids.{$index}",
                     };
 
                     throw ValidationException::withMessages([$key => $message]);

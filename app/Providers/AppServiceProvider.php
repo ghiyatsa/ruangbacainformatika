@@ -84,6 +84,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureTurnstile();
         $this->configureWhatsAppRateLimiter();
         $this->configureContactRateLimiter();
+        $this->configureCatalogReportRateLimiter();
         $this->configureBlogRateLimiters();
         $this->configureGlobalSearchRateLimiters();
         $this->configureSimilarityRateLimiter();
@@ -141,6 +142,19 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
+    protected function configureCatalogReportRateLimiter(): void
+    {
+        RateLimiter::for('catalog-reports', function (Request $request): Limit {
+            return Limit::perMinute(5)
+                ->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()))
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'message' => 'Terlalu banyak laporan dikirim. Coba lagi sebentar.',
+                    ], 429, $headers);
+                });
+        });
+    }
+
     protected function configureGlobalSearchRateLimiters(): void
     {
         RateLimiter::for('global-search', function (Request $request): Limit {
@@ -183,7 +197,9 @@ class AppServiceProvider extends ServiceProvider
     protected function configureKioskRateLimiters(): void
     {
         RateLimiter::for('kiosk-pin', function (Request $request): Limit {
-            return Limit::perMinute(8)
+            // 5 percobaan per 5 menit per device — cukup untuk salah ketik wajar
+            // tetapi membuat brute-force PIN 6 digit tidak praktis.
+            return Limit::perMinutes(5, 5)
                 ->by($this->kioskThrottleKey($request, 'pin'))
                 ->response(fn (Request $request, array $headers) => $this->kioskThrottleResponse(
                     $request,

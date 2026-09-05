@@ -130,13 +130,13 @@ class SimilarityApiService
         // If HF token is present, use it for Bearer auth (Hugging Face Private Space requirement)
         // And send the app secret in a custom header
         if ($hfToken) {
-            $request->withToken($hfToken)
+            $request = $request->withToken($hfToken)
                 ->withHeaders([
                     'X-Similarity-Api-Secret' => $secret,
                 ]);
         } else {
             // Default behavior if not using HF Private Space
-            $request->withToken($secret);
+            $request = $request->withToken($secret);
         }
 
         return $request;

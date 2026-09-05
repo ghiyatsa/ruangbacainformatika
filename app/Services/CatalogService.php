@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Category;
+use App\Models\Loan;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -17,7 +18,8 @@ class CatalogService
      *     booksCount: int,
      *     featuredCount: int,
      *     availableItemsCount: int,
-     *     activeCategoriesCount: int
+     *     activeCategoriesCount: int,
+     *     loansCount: int
      * }
      */
     public function getStats(): array
@@ -41,6 +43,7 @@ class CatalogService
                 'activeCategoriesCount' => Category::query()
                     ->whereHas('books', fn ($query) => $query->published())
                     ->count(),
+                'loansCount' => Loan::query()->count(),
                 'mostBorrowedCount' => Book::query()
                     ->published()
                     ->where('is_borrowable', true)

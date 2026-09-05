@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Notifications\WhatsAppOtpNotification;
 use App\Support\CampusEmail;
+use App\Support\WhatsAppPhoneNumber;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -57,9 +58,10 @@ class WhatsAppOtpService
      *     approvalMessage: string
      * }
      */
-    public function dispatch(User $user): array
+    public function dispatch(User $user, ?string $targetPhone = null): array
     {
-        $this->ensureVerificationIsRequired($user);
+        $phone = filled($targetPhone) ? $this->normalizePhoneNumber($targetPhone) : $user->whatsapp;
+        $this->ensureVerificationIsRequired($user, $phone);
 
         if (RateLimiter::tooManyAttempts($this->hourlySendKey($user), self::SEND_LIMIT_PER_HOUR)) {
             $seconds = RateLimiter::availableIn($this->hourlySendKey($user));
@@ -86,14 +88,14 @@ class WhatsAppOtpService
 
         $challenge = [
             'hash' => $this->hashCode($code),
-            'phone' => $user->whatsapp,
+            'phone' => $phone,
             'expires_at' => $now->copy()->addSeconds(self::OTP_TTL_SECONDS)->timestamp,
         ];
 
         $attempts = RateLimiter::attempts($this->hourlySendKey($user));
         $cooldownSeconds = self::RESEND_COOLDOWN_SECONDS * ($attempts + 1);
 
-        $user->notify(new WhatsAppOtpNotification($code));
+        $user->notify(new WhatsAppOtpNotification($code, targetPhone: $phone));
 
         Cache::put($this->challengeKey($user), $challenge, $now->copy()->addSeconds(self::OTP_TTL_SECONDS));
         RateLimiter::hit($this->cooldownKey($user), $cooldownSeconds);
@@ -107,8 +109,6 @@ class WhatsAppOtpService
      */
     public function verify(User $user, string $code): array
     {
-        $this->ensureVerificationIsRequired($user);
-
         $challenge = Cache::get($this->challengeKey($user));
 
         if (! is_array($challenge)) {
@@ -116,6 +116,9 @@ class WhatsAppOtpService
                 'code' => 'Kode tidak ditemukan atau sudah kedaluwarsa. Kirim ulang.',
             ]);
         }
+
+        $phone = $challenge['phone'] ?? $user->whatsapp;
+        $this->ensureVerificationIsRequired($user, $phone);
 
         if (RateLimiter::tooManyAttempts($this->verifyKey($user), self::VERIFY_LIMIT)) {
             $seconds = RateLimiter::availableIn($this->verifyKey($user));
@@ -125,7 +128,7 @@ class WhatsAppOtpService
             ]);
         }
 
-        if (($challenge['phone'] ?? null) !== $user->whatsapp || ($challenge['expires_at'] ?? 0) < now()->timestamp) {
+        if (empty($challenge['phone']) || ($challenge['expires_at'] ?? 0) < now()->timestamp) {
             Cache::forget($this->challengeKey($user));
 
             throw ValidationException::withMessages([
@@ -148,6 +151,7 @@ class WhatsAppOtpService
         $autoApproved = $this->campusEmail->shouldAutoApprove($user->email);
 
         $user->forceFill([
+            'whatsapp' => (string) $challenge['phone'],
             'whatsapp_verified_at' => now(),
             'is_approved' => $user->is_approved || $autoApproved,
         ])->save();
@@ -177,6 +181,9 @@ class WhatsAppOtpService
     public function status(User $user): array
     {
         $challenge = Cache::get($this->challengeKey($user));
+        $phone = is_array($challenge) && filled($challenge['phone'] ?? null)
+            ? (string) $challenge['phone']
+            : $user->whatsapp;
         $expiresAt = is_array($challenge) ? (int) ($challenge['expires_at'] ?? 0) : 0;
         $expiresIn = max(0, $expiresAt - now()->timestamp);
         $resendAvailableIn = RateLimiter::tooManyAttempts($this->cooldownKey($user), 1)
@@ -186,7 +193,7 @@ class WhatsAppOtpService
         $approvalPendingAfterVerification = ! ($user->is_approved || $autoApproval);
 
         return [
-            'maskedWhatsapp' => $this->maskPhoneNumber($user->whatsapp),
+            'maskedWhatsapp' => $this->maskPhoneNumber($phone),
             'hasActiveChallenge' => $expiresIn > 0,
             'expiresIn' => $expiresIn,
             'resendAvailableIn' => $resendAvailableIn,
@@ -197,17 +204,23 @@ class WhatsAppOtpService
         ];
     }
 
-    protected function ensureVerificationIsRequired(User $user): void
+    protected function ensureVerificationIsRequired(User $user, ?string $targetPhone = null): void
     {
-        if (! $user->requiresWhatsAppVerification()) {
+        $phone = filled($targetPhone) ? $targetPhone : $user->whatsapp;
+
+        if (! filled($phone)) {
             throw ValidationException::withMessages([
-                'otp' => 'Verifikasi tidak diperlukan untuk akun ini.',
+                'whatsapp' => 'Masukkan nomor WhatsApp terlebih dahulu.',
             ]);
         }
 
-        if (! filled($user->whatsapp)) {
+        if (session('allow_whatsapp_change') === true) {
+            return;
+        }
+
+        if (! $user->requiresWhatsAppVerification()) {
             throw ValidationException::withMessages([
-                'whatsapp' => 'Masukkan nomor WhatsApp terlebih dahulu.',
+                'otp' => 'Verifikasi tidak diperlukan untuk akun ini.',
             ]);
         }
     }
@@ -250,5 +263,10 @@ class WhatsAppOtpService
         return Str::substr($phoneNumber, 0, 4)
             .str_repeat('*', max(0, strlen($phoneNumber) - 6))
             .Str::substr($phoneNumber, -2);
+    }
+
+    protected function normalizePhoneNumber(?string $value): string
+    {
+        return app(WhatsAppPhoneNumber::class)->normalize($value) ?? (string) $value;
     }
 }
