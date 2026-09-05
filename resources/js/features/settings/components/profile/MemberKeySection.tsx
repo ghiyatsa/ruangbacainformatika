@@ -45,16 +45,6 @@ export function MemberKeySection({ memberKey }: Props) {
     return (
         <section className="rounded-xl border border-border/70 bg-card p-6 shadow-xs">
             <div className="flex flex-col items-center justify-center space-y-4">
-                <div className="text-center">
-                    <h2 className="text-base font-semibold">
-                        QR Kartu Anggota
-                    </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Arahkan kode QR ini ke kamera Kiosk saat meminjam atau
-                        mengembalikan buku di Ruang Baca.
-                    </p>
-                </div>
-
                 <div className="flex flex-col items-center justify-center gap-1.5 text-center">
                     <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
                         Berlaku hingga
@@ -66,7 +56,7 @@ export function MemberKeySection({ memberKey }: Props) {
 
                 {memberKey.qrCodeSvg && !isProcessing ? (
                     <div className="group relative">
-                        <div className="mx-auto w-max rounded-xl border border-border/60 bg-white p-4 text-primary shadow-xs dark:bg-zinc-950 dark:text-white">
+                        <div className="mx-auto w-max rounded-xl border border-border/60 bg-card p-4 text-primary shadow-xs">
                             <div
                                 className="flex justify-center [&_svg]:mx-auto [&_svg]:size-52 md:[&_svg]:size-72"
                                 dangerouslySetInnerHTML={{
@@ -76,7 +66,7 @@ export function MemberKeySection({ memberKey }: Props) {
                         </div>
                     </div>
                 ) : (
-                    <div className="mx-auto w-max rounded-xl border border-border/60 bg-white p-4 dark:bg-zinc-950">
+                    <div className="mx-auto w-max rounded-xl border border-border/60 bg-card p-4">
                         <Skeleton className="size-52 animate-pulse rounded-lg md:size-72" />
                     </div>
                 )}

@@ -1,5 +1,7 @@
-import { Head, setLayoutProps } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { MemberKeySection } from '@/features/settings/components/profile/MemberKeySection';
+import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import settings from '@/routes/settings';
 
 interface Props {
@@ -12,23 +14,29 @@ interface Props {
 }
 
 export default function MemberKeyPage({ memberKey }: Props) {
-    setLayoutProps({
-        title: 'Kartu Anggota (QR)',
-    });
+    useEffect(() => {
+        setPageBreadcrumbs([
+            { title: 'Beranda', href: '/' },
+            {
+                title: 'Kartu Anggota (QR)',
+                href: settings.memberKey.show.url(),
+            },
+        ]);
+
+        return () => {
+            setPageBreadcrumbs(undefined);
+        };
+    }, []);
 
     return (
-        <>
-            <Head title="Kartu Anggota (QR)" />
+        <PageLayout
+            title="Kartu Anggota (QR)"
+            description="Tunjukkan kode QR ke pemindai layar untuk transaksi peminjaman mandiri."
+            maxWidth="3xl"
+            showDesktopNoticeInContent={false}
+            className="pt-8 pb-16"
+        >
             <MemberKeySection memberKey={memberKey} />
-        </>
+        </PageLayout>
     );
 }
-
-MemberKeyPage.layout = {
-    breadcrumbs: [
-        {
-            title: 'Kartu Anggota (QR)',
-            href: settings.memberKey.show(),
-        },
-    ],
-};
