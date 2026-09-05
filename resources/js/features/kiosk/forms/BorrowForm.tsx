@@ -162,10 +162,10 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
             <Dialog open={isQrDialogOpen} onOpenChange={handleQrDialogChange}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Verifikasi Kartu Anggota</DialogTitle>
+                        <DialogTitle>Verifikasi Peminjaman</DialogTitle>
                         <DialogDescription>
-                            Buka menu <strong>Member Key</strong> di HP Anda,
-                            lalu arahkan kode QR ke kamera.
+                            Arahkan kode QR <strong>Member Key</strong> dari HP
+                            Anda ke kamera untuk menyelesaikan peminjaman.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -200,7 +200,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
                         {hasDetectedQr && qrForm.processing ? (
                             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                                 <Spinner className="size-4" />
-                                Memproses peminjaman buku...
+                                Menyelesaikan peminjaman...
                             </div>
                         ) : (
                             <Button

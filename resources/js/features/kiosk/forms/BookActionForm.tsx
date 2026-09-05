@@ -120,7 +120,7 @@ export function BookActionForm({
                                 {requiresMemberField ? (
                                     <div className="grid gap-4">
                                         <KioskField
-                                            label="NIM, Email, atau No. HP"
+                                            label="Identitas Anggota"
                                             htmlFor="book-member"
                                             error={errors.member_identifier}
                                             required
@@ -138,7 +138,7 @@ export function BookActionForm({
                                                         data-lpignore="true"
                                                         data-1p-ignore="true"
                                                         data-bwignore="true"
-                                                        placeholder="NIM, email, atau no. HP"
+                                                        placeholder="Contoh: 210170001 atau nama@unimal.ac.id"
                                                         value={memberIdentifier}
                                                         onChange={(e) =>
                                                             setMemberIdentifier(

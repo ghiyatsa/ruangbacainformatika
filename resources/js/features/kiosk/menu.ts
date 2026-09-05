@@ -29,14 +29,14 @@ export const kioskMenuItems: KioskMenuItem[] = [
         key: 'borrow',
         label: 'Pinjam Buku',
         description: 'Peminjaman mandiri',
-        helper: 'Masukkan NIM, pilih buku fisik, lalu konfirmasi dengan scan Kartu Anggota.',
+        helper: 'Masukkan identitas anggota, pilih buku fisik, lalu konfirmasi dengan scan Member Key di HP.',
         icon: BookMarked,
     },
     {
         key: 'return',
         label: 'Kembalikan Buku',
         description: 'Pengembalian buku',
-        helper: 'Masukkan NIM, pilih buku yang dikembalikan, lalu konfirmasi dengan Kartu Anggota.',
+        helper: 'Masukkan identitas anggota, pilih buku yang dikembalikan, lalu konfirmasi dengan scan Member Key di HP.',
         icon: BookUp,
     },
 ];
