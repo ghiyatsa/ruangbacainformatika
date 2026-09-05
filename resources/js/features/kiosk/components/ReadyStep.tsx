@@ -43,8 +43,8 @@ export function ReadyStep(props: KioskProps) {
     };
 
     return (
-        <div className="flex h-[calc(100dvh-2rem)] min-h-0 w-full flex-col gap-4 py-10">
-            <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="flex h-[calc(100dvh-2rem)] min-h-0 w-full flex-col justify-center gap-4 py-10">
+            <div className="grid min-h-0 flex-1 w-full gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
                 <Card className="flex min-h-0 flex-col border-border/70">
                     <CardContent className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
                         <MenuGrid
@@ -54,7 +54,7 @@ export function ReadyStep(props: KioskProps) {
                     </CardContent>
                 </Card>
 
-                <Card className="flex min-h-0 flex-col border-border/70">
+                <Card className="flex min-h-0 flex-1 flex-col border-border/70">
                     <CardHeader>
                         <div className="flex items-center gap-3">
                             {ActiveIcon ? (
