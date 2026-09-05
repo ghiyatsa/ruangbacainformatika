@@ -27,6 +27,8 @@
 /auth.json
 
 # Local Development / Tooling Configurations
+.codex/
+.opencode/
 *.stackdump
 /storage/framework/lsp-*.php
 .DS_Store
