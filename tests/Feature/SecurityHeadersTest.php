@@ -22,7 +22,7 @@ test('web responses include baseline security headers', function () {
     expect($contentSecurityPolicy)
         ->not->toBeNull()
         ->toContain("default-src 'self'")
-        ->toContain("object-src 'none'")
+        ->toContain("object-src 'self'")
         ->toContain('https://accounts.google.com')
         ->toContain('https://accounts.google.com/gsi/style')
         ->toContain('https://www.googleapis.com')

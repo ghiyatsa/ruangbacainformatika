@@ -1,9 +1,23 @@
 <?php
 
 use App\Models\Thesis;
+use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+
+beforeEach(function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'is_approved' => true,
+        'profile_completed_at' => now(),
+    ]);
+    $user->assignRole('member');
+    actingAs($user);
+});
 
 it('thesis index page loads theses as deferred props', function () {
     Thesis::factory()->create([

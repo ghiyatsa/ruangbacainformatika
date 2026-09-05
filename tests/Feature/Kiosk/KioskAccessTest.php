@@ -119,8 +119,8 @@ it('kiosk rate limiters are registered with lobby-safe thresholds', function () 
     $bookSearchLimit = $bookSearchLimiter($request);
     $memberStatusLimit = $memberStatusLimiter($request);
 
-    expect($pinLimit->maxAttempts)->toBe(8)
-        ->and($pinLimit->decaySeconds)->toBe(60)
+    expect($pinLimit->maxAttempts)->toBe(5)
+        ->and($pinLimit->decaySeconds)->toBe(300)
         ->and($bookSearchLimit->maxAttempts)->toBe(180)
         ->and($memberStatusLimit->maxAttempts)->toBe(180);
 });

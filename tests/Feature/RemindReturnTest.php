@@ -180,10 +180,12 @@ it('uses adaptive copy for loans due today', function () {
 });
 
 it('uses adaptive copy for overdue loans', function () {
+    Illuminate\Support\Carbon::setTestNow('2026-08-30 12:00:00');
+
     $user = User::factory()->create();
     $loan = Loan::factory()->create([
         'status' => Loan::STATUS_BORROWED,
-        'due_at' => now()->subDays(3),
+        'due_at' => now()->startOfDay()->subWeekdays(3),
     ]);
 
     $waNotification = new LoanReminderNotification($loan);
@@ -192,4 +194,6 @@ it('uses adaptive copy for overdue loans', function () {
     expect($waNotification->toWhatsApp($user)->content)
         ->toContain('Peminjaman buku Anda telah melewati batas waktu (3 hari)')
         ->and($dbNotification->toArray($user)['title'])->toBe('Pengembalian sudah telat 3 hari');
+
+    Illuminate\Support\Carbon::setTestNow();
 });

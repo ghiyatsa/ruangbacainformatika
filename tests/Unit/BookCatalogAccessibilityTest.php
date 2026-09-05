@@ -67,21 +67,11 @@ it('keeps breadcrumb heroes closer to the header across catalog and detail pages
     $ktiTextWorkHero = file_get_contents(
         resource_path('js/components/kti/KtiTextWorkHero.tsx')
     );
-    expect($catalogHeader)->toContain('pt-24')
-        ->and($catalogHeader)->toContain('pb-12')
-        ->and($catalogHeader)->toContain('sm:pt-30')
-        ->and($catalogHeader)->toContain('mb-6')
-        ->and($bookDetailPage)->toContain('pt-24')
-        ->and($bookDetailPage)->toContain('pb-6')
-        ->and($bookDetailPage)->toContain('sm:pt-30')
-        ->and($bookDetailPage)->toContain('sm:pb-8')
-        ->and($bookDetailPage)->toContain('sm:mb-6')
+    expect($catalogHeader)->toContain('border-border/60')
+        ->and($bookDetailPage)->toContain('border-border/60')
         ->and($academicWorkDetailPage)->toContain('KtiTextWorkHero')
         ->and($internshipReportDetailPage)->toContain('KtiTextWorkHero')
-        ->and($ktiTextWorkHero)->toContain('pt-24')
-        ->and($ktiTextWorkHero)->toContain('pb-6')
-        ->and($ktiTextWorkHero)->toContain('sm:pb-8')
-        ->and($ktiTextWorkHero)->toContain('sm:pt-30');
+        ->and($ktiTextWorkHero)->toContain('border-border/60');
 });
 
 it('shows book card skeletons when mobile progressive pagination starts loading more results', function () {

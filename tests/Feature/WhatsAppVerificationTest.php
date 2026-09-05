@@ -505,3 +505,40 @@ it('verifying whatsapp clears the whatsapp skip flag', function () {
         ->post(route('register.whatsapp.verify'), ['code' => $code])
         ->assertSessionMissing('whatsapp_verification_skipped');
 });
+
+it('verifying whatsapp during change number flow redirects back to profile settings', function () {
+    Notification::fake();
+
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Kampus',
+        'profile_completed_at' => now(),
+        'whatsapp_verified_at' => now(),
+        'is_approved' => true,
+    ]);
+
+    actingAs($user)
+        ->withSession(['allow_whatsapp_change' => true])
+        ->post(route('register.whatsapp.send'), [
+            'whatsapp' => '08123456780',
+        ])
+        ->assertRedirect();
+
+    $notification = null;
+
+    Notification::assertSentTo($user, WhatsAppOtpNotification::class, function (WhatsAppOtpNotification $sentNotification) use (&$notification): bool {
+        $notification = $sentNotification;
+
+        return true;
+    });
+
+    preg_match('/\b(\d{6})\b/', $notification?->toWhatsApp($user)->content ?? '', $matches);
+    $code = $matches[1] ?? null;
+
+    actingAs($user)
+        ->withSession(['allow_whatsapp_change' => true])
+        ->post(route('register.whatsapp.verify'), ['code' => $code])
+        ->assertRedirect(route('settings.profile.edit'))
+        ->assertSessionMissing('allow_whatsapp_change');
+});

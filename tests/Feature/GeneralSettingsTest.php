@@ -4,6 +4,7 @@ use App\Filament\Clusters\Settings\Pages\GeneralSettings;
 use App\Models\ActivityLog;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\SiteSettings;
 use Inertia\Testing\AssertableInertia as Assert;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -62,6 +63,7 @@ it('general settings can persist site metadata without changing stored branding 
         ->set('data.site_keywords', 'perpustakaan digital, katalog buku, skripsi')
         ->set('data.seo_robots', 'noindex,follow')
         ->set('data.theme_color', '#123ABC')
+        ->set('data.color_palette', 'emerald')
         ->set('data.hero_notice_enabled', true)
         ->set('data.hero_notice_text', 'Layanan katalog tutup sementara pada Sabtu ini.')
         ->set('data.hero_notice_url', 'https://example.com/pengumuman')
@@ -77,6 +79,7 @@ it('general settings can persist site metadata without changing stored branding 
         ->and(Setting::query()->where('section', 'general')->where('key', 'site_keywords')->value('value'))->toBe('perpustakaan digital, katalog buku, skripsi')
         ->and(Setting::query()->where('section', 'general')->where('key', 'seo_robots')->value('value'))->toBe('noindex,follow')
         ->and(Setting::query()->where('section', 'general')->where('key', 'theme_color')->value('value'))->toBe('#123ABC')
+        ->and(Setting::query()->where('section', 'general')->where('key', 'color_palette')->value('value'))->toBe('emerald')
         ->and(Setting::query()->where('section', 'general')->where('key', 'hero_notice_enabled')->value('value'))->toBe('1')
         ->and(Setting::query()->where('section', 'general')->where('key', 'hero_notice_tone')->value('value'))->toBe('warning')
         ->and(Setting::query()->where('section', 'general')->where('key', 'site_logo_path')->value('value'))->toBe('site-assets/logo-existing.png')
@@ -111,6 +114,8 @@ it('general settings writes an activity log entry for changed values', function 
 });
 
 it('public pages use the stored site metadata and icon links', function () {
+    app(SiteSettings::class)->forget();
+
     Setting::query()->updateOrCreate(
         ['section' => 'general', 'key' => 'site_name'],
         ['value' => 'Ruang Baca Custom'],
@@ -144,6 +149,10 @@ it('public pages use the stored site metadata and icon links', function () {
         ['value' => '#0F172A'],
     );
     Setting::query()->updateOrCreate(
+        ['section' => 'general', 'key' => 'color_palette'],
+        ['value' => 'ocean'],
+    );
+    Setting::query()->updateOrCreate(
         ['section' => 'general', 'key' => 'og_image_path'],
         ['value' => 'site-assets/custom-og.png'],
     );
@@ -173,18 +182,20 @@ it('public pages use the stored site metadata and icon links', function () {
                 ->where('site.keywords', 'metadata,test,seo')
                 ->where('site.robots', 'noindex,nofollow')
                 ->where('site.themeColor', '#0F172A')
+                ->where('site.colorPalette', 'ocean')
                 ->where('site.ogImage', route('og.site'))
                 ->where('site.ogImageType', 'image/png')
                 ->where('site.ogImageWidth', 1200)
                 ->where('site.ogImageHeight', 1200)
-                ->where('site.icons.favicon', url('/storage/site-assets/custom-favicon.png'))
-                ->where('site.icons.faviconSvg', url('/storage/site-assets/custom-favicon.svg'))
-                ->where('site.icons.appleTouchIcon', url('/storage/site-assets/custom-apple-touch.png')),
+                ->where('site.icons.favicon', Storage::disk('public')->url('site-assets/custom-favicon.png'))
+                ->where('site.icons.faviconSvg', Storage::disk('public')->url('site-assets/custom-favicon.svg'))
+                ->where('site.icons.appleTouchIcon', Storage::disk('public')->url('site-assets/custom-apple-touch.png')),
         )
         ->assertSee('name="theme-color" content="#0F172A"', false)
+        ->assertSee('data-theme="ocean"', false)
         ->assertSee('name="keywords" content="metadata,test,seo"', false)
         ->assertSee('property="og:image" content="'.route('og.site').'"', false)
-        ->assertSee('href="'.url('/storage/site-assets/custom-favicon.png').'"', false)
-        ->assertSee('href="'.url('/storage/site-assets/custom-favicon.svg').'"', false)
-        ->assertSee('href="'.url('/storage/site-assets/custom-apple-touch.png').'"', false);
+        ->assertSee('href="'.Storage::disk('public')->url('site-assets/custom-favicon.png').'"', false)
+        ->assertSee('href="'.Storage::disk('public')->url('site-assets/custom-favicon.svg').'"', false)
+        ->assertSee('href="'.Storage::disk('public')->url('site-assets/custom-apple-touch.png').'"', false);
 });

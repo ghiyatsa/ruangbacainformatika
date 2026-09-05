@@ -55,9 +55,9 @@ it('generates the sitemap correctly', function () {
     expect($content)->toContain(route('home'))
         ->toContain(route('books.index'))
         ->toContain(route('blog.index'))
-        ->toContain(route('skripsi.index'))
-        ->toContain(route('internship-reports.index'))
-        ->toContain(route('thesis.index'))
+        ->not->toContain(route('skripsi.index'))
+        ->not->toContain(route('internship-reports.index'))
+        ->not->toContain(route('thesis.index'))
         ->toContain(route('about-team'))
         ->toContain(route('contact'));
 
@@ -65,7 +65,7 @@ it('generates the sitemap correctly', function () {
     expect($content)->toContain($staticPage->publicUrl())
         ->toContain(route('books.show', $book->slug))
         ->toContain(route('blog.show', $post->slug))
-        ->toContain(route('skripsi.show', $skripsi->student_id))
-        ->toContain(route('internship-reports.show', $report->student_id))
-        ->toContain(route('thesis.show', $thesis->student_id));
+        ->not->toContain(route('skripsi.show', $skripsi->student_id))
+        ->not->toContain(route('internship-reports.show', $report->student_id))
+        ->not->toContain(route('thesis.show', $thesis->student_id));
 });
