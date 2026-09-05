@@ -16,6 +16,7 @@ interface Props {
         author_names?: string | null;
         publisher_name?: string | null;
         isbn?: string | null;
+        copies_count?: number | null;
         approved_at: string;
         verification_url: string;
         qr_svg?: string | null;
@@ -196,6 +197,17 @@ export default function ReceiptPrintPage({ receipt }: Props) {
                                             {receipt.publisher_name
                                                 ? `(${receipt.publisher_name})`
                                                 : ''}
+                                        </span>
+                                    </div>
+                                ) : null}
+
+                                {receipt.copies_count ? (
+                                    <div className="grid grid-cols-[150px_1fr] gap-2">
+                                        <span className="font-semibold text-neutral-600">
+                                            Jumlah Eksemplar
+                                        </span>
+                                        <span className="font-semibold text-neutral-900">
+                                            : {receipt.copies_count} Eksemplar
                                         </span>
                                     </div>
                                 ) : null}

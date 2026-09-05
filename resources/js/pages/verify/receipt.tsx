@@ -17,6 +17,7 @@ interface Props {
         author_names?: string | null;
         publisher_name?: string | null;
         isbn?: string | null;
+        copies_count?: number | null;
         approved_at: string;
         catalog_url: string | null;
     } | null;
@@ -114,11 +115,22 @@ export default function VerifyReceiptPage({ isValid, submission }: Props) {
                                         <span className="text-[11px] font-medium text-muted-foreground">
                                             Pengarang / Penerbit
                                         </span>
-                                        <p className="font-medium text-foreground">
+                                        <p className="text-foreground">
                                             {submission.author_names}{' '}
                                             {submission.publisher_name
                                                 ? `(${submission.publisher_name})`
                                                 : ''}
+                                        </p>
+                                    </div>
+                                ) : null}
+
+                                {submission.copies_count ? (
+                                    <div>
+                                        <span className="text-[11px] font-medium text-muted-foreground">
+                                            Jumlah Eksemplar Disumbangkan
+                                        </span>
+                                        <p className="font-semibold text-foreground">
+                                            {submission.copies_count} Eksemplar
                                         </p>
                                     </div>
                                 ) : null}
