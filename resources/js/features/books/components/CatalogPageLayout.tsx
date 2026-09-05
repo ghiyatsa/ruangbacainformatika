@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CatalogHeader } from '@/features/books/components/CatalogHeader';
 import { CatalogPagination } from '@/features/books/components/CatalogPagination';
+import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import type { ReactNode } from 'react';
 import type { PaginationData } from '@/types/pagination';
 
@@ -9,7 +11,6 @@ interface CatalogPageLayoutProps<T> {
     metaDescription?: string;
     resourceName: string;
     breadcrumbLabel: string;
-    totalCount: number;
     paginationData?: PaginationData<T>;
     header?: ReactNode; // Optional override
     children: ReactNode;
@@ -25,20 +26,23 @@ export function CatalogPageLayout<T>({
     metaDescription,
     resourceName,
     breadcrumbLabel,
-    totalCount,
     paginationData,
     header,
     children,
     paginationVisibility = 'all',
 }: CatalogPageLayoutProps<T>) {
-    const defaultHeader = (
-        <CatalogHeader
-            title={title}
-            total={totalCount}
-            resourceName={resourceName}
-            breadcrumbLabel={breadcrumbLabel}
-        />
-    );
+    useEffect(() => {
+        setPageBreadcrumbs([
+            { title: 'Beranda', href: '/' },
+            { title: breadcrumbLabel, href: '#' },
+        ]);
+
+        return () => {
+            setPageBreadcrumbs(undefined);
+        };
+    }, [breadcrumbLabel]);
+
+    const defaultHeader = <CatalogHeader title={title} />;
 
     return (
         <PageLayout
@@ -46,7 +50,7 @@ export function CatalogPageLayout<T>({
             metaDescription={metaDescription}
             header={header ?? defaultHeader}
             maxWidth="7xl"
-            className="pt-0 pb-16"
+            className="pt-8 pb-16"
             showDesktopNoticeInContent={false}
         >
             <div className="relative z-10 flex flex-col gap-6 md:gap-8">

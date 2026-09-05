@@ -7,6 +7,10 @@ export interface InternshipReportData {
     studentId: string;
     year: number | null;
     abstract: string | null;
+    filePath?: string | null;
+    companyName?: string | null;
+    academicAdvisor?: string | null;
+    fieldAdvisor?: string | null;
     viewCount: number;
     keywords: string[];
 }

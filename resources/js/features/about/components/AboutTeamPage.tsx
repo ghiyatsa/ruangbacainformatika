@@ -122,7 +122,6 @@ export function AboutTeamPage() {
                         </>
                     }
                     description="Tim mahasiswa kerja praktek yang membangun dan mengembangkan sistem Ruang Baca Teknik Informatika."
-                    contentClassName="max-w-5xl px-4 sm:px-6 lg:px-8"
                     align="center"
                 />
             }

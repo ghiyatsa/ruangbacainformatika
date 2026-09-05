@@ -111,18 +111,12 @@ export default function LoanHistoryPage({
         filters.filter === 'returned' || showReturnedLoans;
 
     return (
-        <PageLayout title="Riwayat Peminjaman">
+        <PageLayout
+            title="Riwayat Peminjaman"
+            description="Pantau daftar buku yang sedang dipinjam dan riwayat peminjaman Anda sebelumnya."
+            showDesktopNoticeInContent={false}
+        >
             <div className="space-y-6">
-                <div className="space-y-1">
-                    <h1 className="text-2xl font-bold tracking-tight">
-                        Riwayat Peminjaman
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                        Pantau daftar buku yang sedang dipinjam dan riwayat
-                        peminjaman Anda sebelumnya.
-                    </p>
-                </div>
-
                 <LoanHistoryStatsBar stats={stats} />
 
                 {hasLoans ? (
@@ -185,19 +179,16 @@ export default function LoanHistoryPage({
                                         ))}
                                     </div>
                                 ) : null}
-
-                                <p className="text-sm text-muted-foreground">
-                                    {loans.total.toLocaleString('id-ID')} hasil
-                                </p>
                             </div>
 
                             {loans.total === 0 ? (
                                 <div className="border border-dashed border-border/60 bg-muted/5 px-5 py-10 text-center">
                                     <p className="text-sm font-medium text-foreground">
-                                        Tidak ada hasil
+                                        Riwayat tidak ditemukan
                                     </p>
                                     <p className="mt-1 text-sm text-muted-foreground">
-                                        Ubah filter atau kata kunci pencarian.
+                                        Coba sesuaikan filter status atau kata
+                                        kunci pencarian.
                                     </p>
                                 </div>
                             ) : null}
@@ -212,7 +203,8 @@ export default function LoanHistoryPage({
                                             <p className="text-sm text-muted-foreground">
                                                 Buku ini sudah melewati batas
                                                 waktu pengembalian. Silakan
-                                                kembalikan di Kiosk Ruang Baca.
+                                                kembalikan melalui meja layanan
+                                                mandiri di Ruang Baca.
                                             </p>
                                         </div>
                                         <Badge
@@ -235,8 +227,9 @@ export default function LoanHistoryPage({
                                                 Masih Dipinjam
                                             </h3>
                                             <p className="text-sm text-muted-foreground">
-                                                Bawa buku fisik ke Kiosk Mandiri
-                                                untuk proses pengembalian.
+                                                Bawa buku fisik ke meja layanan
+                                                mandiri di Ruang Baca untuk
+                                                proses pengembalian.
                                             </p>
                                         </div>
                                         <Badge
@@ -320,8 +313,8 @@ export default function LoanHistoryPage({
                         <h2 className="text-lg font-bold">Belum ada riwayat</h2>
                         <p className="mt-2 max-w-xs text-sm text-muted-foreground">
                             Anda belum pernah meminjam buku. Kunjungi Ruang Baca
-                            Informatika untuk meminjam buku secara mandiri di
-                            Kiosk.
+                            Informatika untuk meminjam buku secara langsung
+                            melalui layanan mandiri.
                         </p>
                         <Button
                             asChild

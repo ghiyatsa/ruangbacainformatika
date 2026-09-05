@@ -14,9 +14,8 @@ import {
     Star,
     XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
@@ -41,6 +40,7 @@ import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
+import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import { cn, formatViewCount } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 
@@ -76,6 +76,30 @@ export default function BookDetailPage(props: BookDetailPageProps) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const [imageLoaded, setImageLoaded] = useState(false);
     const book = props.book?.data ?? null;
+
+    useEffect(() => {
+        setPageBreadcrumbs([
+            { title: 'Beranda', href: '/' },
+            {
+                title: 'Buku',
+                href: booksRoute.index.url(),
+            },
+            {
+                title: book ? (
+                    book.title
+                ) : (
+                    <Skeleton className="h-4 w-32 animate-pulse rounded-md" />
+                ),
+                href: book
+                    ? booksRoute.show.url(book.slug)
+                    : booksRoute.index.url(),
+            },
+        ]);
+
+        return () => {
+            setPageBreadcrumbs(undefined);
+        };
+    }, [book]);
     const isBookmarkedByUser = book
         ? isBookmarked({
               catalogType: 'book',
@@ -217,28 +241,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             deferSecondaryContent
             contentClassName="pt-6 pb-10 sm:pt-8"
             hero={
-                <div className="relative -mt-20 overflow-hidden sm:-mt-28 md:-mt-24">
-                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
-                        <div className="-mx-4 mb-6 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:mb-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
-                            <Breadcrumbs
-                                breadcrumbs={[
-                                    { title: 'Beranda', href: '/' },
-                                    {
-                                        title: 'Buku',
-                                        href: booksRoute.index.url(),
-                                    },
-                                    {
-                                        title: book?.title ?? (
-                                            <Skeleton className="h-4 w-28" />
-                                        ),
-                                        href: book
-                                            ? booksRoute.show.url(book.slug)
-                                            : booksRoute.index.url(),
-                                    },
-                                ]}
-                            />
-                        </div>
-
+                <div className="relative overflow-hidden">
+                    <div className="relative mx-auto max-w-7xl border-x border-border/60 px-4 py-8 sm:px-6 lg:px-8">
                         <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
                                 <div className="flex w-full items-center justify-center">
@@ -540,7 +544,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border border-border/60 bg-card">
+                    <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5">
+                        <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
                         <div className="px-5 py-4">
                             <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Data Buku

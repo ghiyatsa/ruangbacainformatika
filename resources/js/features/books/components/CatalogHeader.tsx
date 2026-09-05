@@ -1,55 +1,18 @@
-import { Link } from '@inertiajs/react';
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-
 interface CatalogHeaderProps {
     title: string;
-    total: number;
-    resourceName: string;
-    breadcrumbLabel: string;
 }
 
 /**
- * Standard header for catalog-style pages with breadcrumbs and stats.
+ * Standard header for catalog-style pages.
  */
-export function CatalogHeader(props: CatalogHeaderProps) {
-    const { title, breadcrumbLabel } = props;
-
+export function CatalogHeader({ title }: CatalogHeaderProps) {
     return (
-        <div className="relative -mt-20 overflow-hidden bg-background sm:-mt-28 md:-mt-24">
-            <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
-                <div className="-mx-4 mb-6 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink asChild>
-                                    <Link href="/">Beranda</Link>
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>
-                                    {breadcrumbLabel}
-                                </BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                            {title}
-                        </h1>
-                    </div>
-                </div>
+        <section className="relative overflow-hidden border-b bg-background">
+            <div className="mx-auto max-w-7xl border-x border-border/60 px-4 py-12 text-center sm:px-6 sm:py-20 lg:px-8">
+                <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                    {title}
+                </h1>
             </div>
-        </div>
+        </section>
     );
 }

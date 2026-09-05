@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 function Card({
   className,
   size = "default",
+  children,
   ...props
 }: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
   return (
@@ -12,11 +13,14 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-6 overflow-hidden rounded-xl bg-card py-6 text-sm text-card-foreground shadow-xs ring-1 ring-foreground/10 has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
+        "group/card relative flex flex-col gap-6 overflow-hidden rounded-xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 py-6 text-sm text-card-foreground shadow-xs ring-1 ring-foreground/10 has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
         className
       )}
       {...props}
-    />
+    >
+      <div className="pointer-events-none absolute -right-12 -bottom-12 -z-0 h-36 w-36 rounded-full bg-primary/10 blur-2xl transition-opacity duration-300 group-hover/card:bg-primary/15" />
+      {children}
+    </div>
   )
 }
 

@@ -18,6 +18,8 @@ export type Auth = {
     canViewNotifications?: boolean;
     hasVerifiedWhatsApp?: boolean;
     isMember?: boolean;
+    requiresOnboarding?: boolean;
+    onboardingUrl?: string | null;
 };
 
 export type GoogleAuth = {

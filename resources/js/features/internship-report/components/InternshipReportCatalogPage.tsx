@@ -16,11 +16,14 @@ const LazyInternshipReportCatalogFilters = lazy(async () => {
 });
 
 export default function InternshipReportCatalogPage({
-    filters,
-    years,
-    total,
+    filters = {} as InternshipReportCatalogPageProps['filters'],
+    years = [],
+    total = 0,
     reports,
 }: InternshipReportCatalogPageProps) {
+    const safeFilters =
+        filters || ({} as InternshipReportCatalogPageProps['filters']);
+
     function clearAllFilters(): void {
         router.get(
             internshipReportRoute.index.url(),
@@ -30,7 +33,7 @@ export default function InternshipReportCatalogPage({
     }
 
     function removeFilter(key: string): void {
-        const next = { ...filters };
+        const next = { ...safeFilters };
 
         if (key === 'search') {
             next.search = '';
@@ -52,14 +55,14 @@ export default function InternshipReportCatalogPage({
             breadcrumbLabel="Laporan KP"
             totalCount={total}
             paginationData={reports}
-            filters={filters}
+            filters={safeFilters}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
             paginationVisibility="desktop-only"
             filtersPanel={
                 <Suspense fallback={<KtiCatalogFiltersSkeleton />}>
                     <LazyInternshipReportCatalogFilters
-                        filters={filters}
+                        filters={safeFilters}
                         years={years}
                         total={total}
                     />

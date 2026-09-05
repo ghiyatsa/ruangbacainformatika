@@ -15,17 +15,18 @@ const LazyBookCatalogFilters = lazy(async () => {
 });
 
 export default function BookCatalogPage({
-    filters,
-    stats,
-    categories,
-    authors,
-    publishers,
-    years,
+    filters = {} as BookCatalogPageProps['filters'],
+    stats = {} as BookCatalogPageProps['stats'],
+    categories = [],
+    authors = [],
+    publishers = [],
+    years = [],
     books,
 }: BookCatalogPageProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
+    const safeFilters = filters || ({} as BookCatalogPageProps['filters']);
     const activeCategoryLabel =
-        categories?.find((category) => category.slug === filters.category)
+        categories?.find((category) => category.slug === safeFilters.category)
             ?.name ?? undefined;
 
     function clearAllFilters(): void {
@@ -37,7 +38,7 @@ export default function BookCatalogPage({
     }
 
     function removeFilter(key: string): void {
-        const next = { ...filters };
+        const next = { ...safeFilters };
 
         if (key === 'search') {
             next.search = '';
@@ -67,23 +68,23 @@ export default function BookCatalogPage({
             metaDescription="Lihat daftar buku Ruang Baca Teknik Informatika Universitas Malikussaleh."
             resourceName="judul buku"
             breadcrumbLabel="Buku"
-            totalCount={stats.booksCount ?? 0}
+            totalCount={stats?.booksCount ?? 0}
             paginationData={books}
-            filters={filters}
+            paginationVisibility="none"
+            filters={safeFilters}
             filterLabels={{
                 category: activeCategoryLabel,
-                author: filters.author
-                    ? (authors?.find((a) => a.slug === filters.author)?.name ??
-                      undefined)
+                author: safeFilters.author
+                    ? (authors?.find((a) => a.slug === safeFilters.author)
+                          ?.name ?? undefined)
                     : undefined,
-                publisher: filters.publisher
-                    ? (publishers?.find((p) => p.slug === filters.publisher)
+                publisher: safeFilters.publisher
+                    ? (publishers?.find((p) => p.slug === safeFilters.publisher)
                           ?.name ?? undefined)
                     : undefined,
             }}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
-            paginationVisibility="none"
             filtersPanel={
                 <Suspense fallback={<BookCatalogFiltersSkeleton />}>
                     <Deferred
@@ -91,8 +92,7 @@ export default function BookCatalogPage({
                         fallback={<BookCatalogFiltersSkeleton />}
                     >
                         <LazyBookCatalogFilters
-                            filters={filters}
-                            stats={stats}
+                            filters={safeFilters}
                             categories={categories ?? []}
                             authors={authors ?? []}
                             publishers={publishers ?? []}

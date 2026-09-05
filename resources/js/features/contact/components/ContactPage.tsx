@@ -47,7 +47,6 @@ export function ContactPage() {
                         </>
                     }
                     description="Informasi kontak Ruang Baca Teknik Informatika Universitas Malikussaleh."
-                    contentClassName="max-w-5xl px-4 sm:px-6 lg:px-8"
                 />
             }
         >
@@ -213,7 +212,8 @@ export function ContactPage() {
                             </p>
                         </div>
 
-                        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-none">
+                        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 p-6 shadow-none">
+                            <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
                             <h3 className="mb-3 text-base font-semibold text-foreground">
                                 Email resmi
                             </h3>
@@ -224,7 +224,8 @@ export function ContactPage() {
                             </p>
                         </div>
 
-                        <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-none">
+                        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 p-6 shadow-none">
+                            <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
                             <h3 className="mb-3 text-base font-semibold text-foreground">
                                 Jam layanan
                             </h3>

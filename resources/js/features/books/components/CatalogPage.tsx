@@ -12,7 +12,7 @@ interface CatalogPageProps<T> {
     metaDescription?: string;
     resourceName: string;
     breadcrumbLabel: string;
-    totalCount: number;
+    totalCount?: number;
     paginationData?: PaginationData<T>;
     filters?: CatalogActiveFilters;
     filterLabels?: {
@@ -34,9 +34,8 @@ export function CatalogPage<T>({
     metaDescription,
     resourceName,
     breadcrumbLabel,
-    totalCount,
     paginationData,
-    filters,
+    filters = {} as CatalogActiveFilters,
     filterLabels,
     onClearFilters,
     onRemoveFilter,
@@ -46,6 +45,7 @@ export function CatalogPage<T>({
     paginationVisibility,
     children,
 }: CatalogPageProps<T>) {
+    const safeFilters = filters || ({} as CatalogActiveFilters);
     const content =
         deferredData && loadingFallback ? (
             <Deferred data={deferredData} fallback={loadingFallback}>
@@ -56,14 +56,14 @@ export function CatalogPage<T>({
         );
 
     const hasActiveFilters =
-        filters &&
-        (filters.search ||
-            filters.category ||
-            filters.author ||
-            filters.publisher ||
-            filters.year ||
-            filters.featured ||
-            filters.availability);
+        safeFilters &&
+        (safeFilters.search ||
+            safeFilters.category ||
+            safeFilters.author ||
+            safeFilters.publisher ||
+            safeFilters.year ||
+            safeFilters.featured ||
+            safeFilters.availability);
 
     return (
         <CatalogPageLayout
@@ -71,7 +71,6 @@ export function CatalogPage<T>({
             metaDescription={metaDescription}
             resourceName={resourceName}
             breadcrumbLabel={breadcrumbLabel}
-            totalCount={totalCount}
             paginationData={paginationData}
             paginationVisibility={paginationVisibility}
         >

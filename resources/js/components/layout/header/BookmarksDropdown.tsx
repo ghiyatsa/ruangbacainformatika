@@ -27,8 +27,8 @@ export function BookmarksDropdown() {
         useCatalogBookmarks();
     const isMobile = useIsMobile();
     const [open, setOpen] = React.useState(false);
-    const isAuthenticated =
-        usePage<{ auth: { user: unknown } }>().props.auth.user !== null;
+    const { auth } = usePage<{ auth?: { user?: unknown } }>().props;
+    const isAuthenticated = Boolean(auth?.user);
     const hasHydratedFromServerRef = React.useRef(false);
 
     React.useEffect(() => {

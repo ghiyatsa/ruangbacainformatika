@@ -7,7 +7,6 @@ import { LazyToaster } from '@/components/layout/LazyToaster';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import AppLayout from '@/layouts/AppLayout';
 import AuthLayout from '@/layouts/AuthLayout';
-import SettingsLayout from '@/layouts/SettingsLayout';
 import type { ReactNode } from 'react';
 
 function AppProviders({ children }: { children: ReactNode }) {
@@ -42,8 +41,6 @@ createServer((page) =>
                     return null;
                 case name.startsWith('auth/'):
                     return AuthLayout;
-                case name.startsWith('settings/'):
-                    return [AppLayout, SettingsLayout];
                 case name.startsWith('kiosk/'):
                     return null;
                 default:

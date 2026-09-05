@@ -147,11 +147,11 @@ function BookCard({ book, variant = 'grid' }: BookCardProps) {
     return (
         <div
             className={cn(
-                'group relative flex h-full overflow-hidden rounded-2xl border transition-all duration-300',
-                isCompact ? 'border-border/60 bg-card' : 'bg-card',
+                'group relative flex h-full overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 transition-all duration-300',
                 !isCompact && 'sm:flex-col',
             )}
         >
+            <div className="pointer-events-none absolute -right-12 -bottom-12 -z-0 h-36 w-36 rounded-full bg-primary/10 blur-2xl transition-opacity duration-300 group-hover:bg-primary/15" />
             <Link
                 href={booksRoute.show.url(book.slug)}
                 instant
@@ -271,12 +271,6 @@ function BookCard({ book, variant = 'grid' }: BookCardProps) {
                     <div className="flex min-w-0 items-center gap-1.5 truncate text-[11px] text-muted-foreground sm:gap-2">
                         {book.publishedYear ? (
                             <span>{book.publishedYear}</span>
-                        ) : null}
-                        {book.pages ? (
-                            <>
-                                <span className="text-border">&middot;</span>
-                                <span>{book.pages} hal</span>
-                            </>
                         ) : null}
                     </div>
                 </div>

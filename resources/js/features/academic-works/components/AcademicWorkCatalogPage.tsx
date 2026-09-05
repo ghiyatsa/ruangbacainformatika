@@ -18,11 +18,13 @@ const LazyAcademicWorkCatalogFilters = lazy(async () => {
 
 export default function AcademicWorkCatalogPage({
     workType,
-    filters,
-    years,
-    total,
+    filters = {} as AcademicWorkCatalogPageProps['filters'],
+    years = [],
+    total = 0,
     academicWorks,
 }: AcademicWorkCatalogPageProps) {
+    const safeFilters =
+        filters || ({} as AcademicWorkCatalogPageProps['filters']);
     const route = workType === 'skripsi' ? skripsiRoute : thesisRoute;
     const label = workType === 'skripsi' ? 'Skripsi' : 'Tesis';
     const dataProp = workType === 'skripsi' ? 'skripsis' : 'theses';
@@ -40,7 +42,7 @@ export default function AcademicWorkCatalogPage({
     }
 
     function removeFilter(key: string): void {
-        const next = { ...filters };
+        const next = { ...safeFilters };
 
         if (key === 'search') {
             next.search = '';
@@ -62,7 +64,7 @@ export default function AcademicWorkCatalogPage({
             breadcrumbLabel={label}
             totalCount={total}
             paginationData={academicWorks}
-            filters={filters}
+            filters={safeFilters}
             onClearFilters={clearAllFilters}
             onRemoveFilter={removeFilter}
             paginationVisibility="desktop-only"
@@ -70,7 +72,7 @@ export default function AcademicWorkCatalogPage({
                 <Suspense fallback={<KtiCatalogFiltersSkeleton />}>
                     <LazyAcademicWorkCatalogFilters
                         workType={workType}
-                        filters={filters}
+                        filters={safeFilters}
                         years={years}
                         total={total}
                     />

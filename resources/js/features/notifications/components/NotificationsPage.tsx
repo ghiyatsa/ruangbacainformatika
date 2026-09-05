@@ -107,13 +107,14 @@ export function NotificationsPage({ notifications }: NotificationsPageProps) {
             maxWidth="7xl"
             showDesktopNoticeInContent={false}
             header={
-                <div className="relative -mt-20 overflow-hidden bg-background sm:-mt-28 md:-mt-24">
-                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-30 lg:px-8">
+                <div className="relative overflow-hidden border-b bg-background">
+                    <div className="relative mx-auto max-w-7xl border-x border-border/60 px-4 py-8 sm:px-6 lg:px-8">
                         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                             Notifikasi
                         </h1>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Riwayat notifikasi akun dan peminjaman Anda.
+                            Pemberitahuan terkait akun dan aktivitas peminjaman
+                            Anda.
                         </p>
                     </div>
                 </div>
@@ -140,9 +141,6 @@ export function NotificationsPage({ notifications }: NotificationsPageProps) {
                         </div>
                         <p className="text-sm font-medium text-foreground">
                             Belum ada notifikasi
-                        </p>
-                        <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">
-                            Notifikasi akun dan peminjaman akan muncul di sini.
                         </p>
                     </div>
                 ) : (

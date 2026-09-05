@@ -1,7 +1,7 @@
-import React, { Component, Suspense, lazy } from 'react';
+import React, { Component, lazy, Suspense } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 
-const ErrorPage = lazy(() => import('@/pages/error/index'));
+const LazyErrorPage = lazy(() => import('@/pages/error/index'));
 
 interface Props {
     children?: ReactNode;
@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
         if (this.state.hasError) {
             return (
                 <Suspense fallback={null}>
-                    <ErrorPage status={500} />
+                    <LazyErrorPage status={500} />
                 </Suspense>
             );
         }

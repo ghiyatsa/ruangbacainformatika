@@ -1,4 +1,4 @@
-import { Deferred, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { Bell, X } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
@@ -48,9 +48,11 @@ export function GlobalContentNotice({
     variant = 'card',
 }: GlobalContentNoticeProps = {}) {
     const page = usePage<{
+        globalNotice?: GlobalNoticeData | null;
         site?: { notice?: GlobalNoticeData | null };
     }>();
-    const notice = providedNotice ?? page.props.site?.notice;
+    const notice =
+        providedNotice ?? page.props.globalNotice ?? page.props.site?.notice;
 
     const noticeStorageKey = React.useMemo(() => {
         return notice ? getNoticeStorageKey(notice) : '';
@@ -280,31 +282,25 @@ export function DeferredGlobalContentNotice({
     variant = 'card',
 }: Pick<GlobalContentNoticeProps, 'className' | 'variant'> = {}) {
     const page = usePage<{
+        globalNotice?: GlobalNoticeData | null;
         site?: { notice: GlobalNoticeData };
     }>();
 
     const siteNotice = page.props.site?.notice;
-    const isNoticeVisible = isNoticeActiveAndNotDismissed(siteNotice);
+    const globalNotice = page.props.globalNotice;
+    const notice = globalNotice ?? siteNotice;
+    const isNoticeVisible = isNoticeActiveAndNotDismissed(notice);
 
     if (!isNoticeVisible) {
         return null;
     }
 
     return (
-        <Deferred
-            data="globalNotice"
-            fallback={
-                <GlobalContentNoticeSkeleton
-                    className={className}
-                    variant={variant}
-                />
-            }
-        >
-            <DeferredGlobalContentNoticeContent
-                className={className}
-                variant={variant}
-            />
-        </Deferred>
+        <GlobalContentNotice
+            className={className}
+            notice={notice}
+            variant={variant}
+        />
     );
 }
 
@@ -391,41 +387,5 @@ export function GlobalContentNoticeSkeleton({
                 </div>
             </div>
         </>
-    );
-}
-
-function DeferredGlobalContentNoticeContent({
-    className,
-    variant = 'card',
-}: Pick<GlobalContentNoticeProps, 'className' | 'variant'>) {
-    const page = usePage<{
-        globalNotice?: GlobalNoticeData | null;
-    }>();
-
-    const notice = page.props.globalNotice;
-    const [prevNotice, setPrevNotice] = React.useState<
-        GlobalNoticeData | null | undefined
-    >(notice);
-    const [activeNotice, setActiveNotice] =
-        React.useState<GlobalNoticeData | null>(notice ?? null);
-
-    if (notice !== prevNotice) {
-        setPrevNotice(notice);
-
-        if (notice !== undefined && notice !== null) {
-            setActiveNotice(notice);
-        }
-    }
-
-    if (!activeNotice) {
-        return null;
-    }
-
-    return (
-        <GlobalContentNotice
-            className={className}
-            notice={activeNotice}
-            variant={variant}
-        />
     );
 }

@@ -23,13 +23,13 @@ export function PublicPageHero({
     return (
         <section
             className={cn(
-                'relative overflow-hidden border-b bg-background py-10 sm:py-16',
+                'relative overflow-hidden border-b bg-background',
                 className,
             )}
         >
             <div
                 className={cn(
-                    'mx-auto flex max-w-7xl flex-col gap-5 px-4 sm:px-6 lg:px-8',
+                    'mx-auto flex max-w-7xl flex-col gap-5 border-x border-border/60 px-4 py-10 sm:px-6 sm:py-16 lg:px-8',
                     isCentered ? 'items-center text-center' : 'items-start',
                     contentClassName,
                 )}

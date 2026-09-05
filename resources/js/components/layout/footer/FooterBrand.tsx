@@ -5,11 +5,14 @@ import { RUANG_BACA_DESCRIPTION } from '@/lib/brand';
 import { home } from '@/routes';
 
 export function FooterBrand() {
-    const {
-        site: { address, contactEmail },
-    } = usePage<{
-        site: { address: string; contactEmail: string };
+    const pageProps = usePage<{
+        site?: { address?: string; contactEmail?: string };
     }>().props;
+    const site = pageProps.site;
+    const address =
+        site?.address ??
+        'Jl. Batam, Blang Pulo, Muara Satu, Kota Lhokseumawe, Aceh 24355';
+    const contactEmail = site?.contactEmail ?? 'informatika@unimal.ac.id';
 
     return (
         <div className="lg:col-span-4">

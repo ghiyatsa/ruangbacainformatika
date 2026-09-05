@@ -1,15 +1,50 @@
+import { usePage } from '@inertiajs/react';
 import * as React from 'react';
+import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { BackgroundPattern } from '@/components/layout/BackgroundPattern';
 import Footer from '@/components/layout/footer';
 import { DeferredGlobalContentNotice } from '@/components/layout/GlobalContentNotice';
 import { AppHeader } from '@/components/layout/header';
 import GoogleOneTapPrompt from '@/features/auth/components/GoogleOneTapPrompt';
+import { syncColorPalette } from '@/hooks/use-appearance';
 import type { AppLayoutProps } from '@/types';
+
+type BreadcrumbsStoreListener = () => void;
+let currentBreadcrumbs: AppLayoutProps['breadcrumbs'] = [];
+const listeners = new Set<BreadcrumbsStoreListener>();
+
+export function setPageBreadcrumbs(breadcrumbs: AppLayoutProps['breadcrumbs']) {
+    currentBreadcrumbs = breadcrumbs;
+    listeners.forEach((listener) => listener());
+}
+
+function useBreadcrumbs(initial?: AppLayoutProps['breadcrumbs']) {
+    return React.useSyncExternalStore(
+        (listener) => {
+            listeners.add(listener);
+
+            return () => {
+                listeners.delete(listener);
+            };
+        },
+        () => currentBreadcrumbs ?? initial,
+        () => initial,
+    );
+}
 
 export default function AppLayout({
     children,
     hideSearch = false,
+    breadcrumbs: propBreadcrumbs,
 }: AppLayoutProps & { hideSearch?: boolean }) {
+    const page = usePage<{ site?: { colorPalette?: string } }>();
+    const colorPalette = page.props.site?.colorPalette;
+
+    React.useEffect(() => {
+        syncColorPalette(colorPalette);
+    }, [colorPalette]);
+
+    const breadcrumbs = useBreadcrumbs(propBreadcrumbs);
     const headerGroupRef = React.useRef<HTMLDivElement>(null);
     const [visible, setVisible] = React.useState(true);
     const lastScrollY = React.useRef(0);
@@ -40,7 +75,7 @@ export default function AppLayout({
             window.removeEventListener('resize', updateHeight);
             observer.disconnect();
         };
-    }, []);
+    }, [breadcrumbs]);
 
     React.useEffect(() => {
         lastScrollY.current = window.scrollY;
@@ -75,6 +110,13 @@ export default function AppLayout({
             >
                 <DeferredGlobalContentNotice variant="topbar" />
                 <AppHeader hideSearch={hideSearch} />
+                {breadcrumbs && breadcrumbs.length > 0 && (
+                    <div className="relative z-10 w-full border-b border-border/60 bg-background/95 backdrop-blur-xs">
+                        <div className="mx-auto flex max-w-7xl items-center border-x border-border/60 bg-muted/5 px-4 py-2.5 sm:px-6 lg:px-8">
+                            <Breadcrumbs breadcrumbs={breadcrumbs} />
+                        </div>
+                    </div>
+                )}
             </div>
             <main className="flex h-full w-full flex-1 flex-col">
                 {children}

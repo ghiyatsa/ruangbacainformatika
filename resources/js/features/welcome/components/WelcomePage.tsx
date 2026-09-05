@@ -25,38 +25,12 @@ export default function WelcomePage({
                 '@id': `${siteUrl}/#website`,
                 name: siteName,
                 url: siteUrl,
-                potentialAction: {
-                    '@type': 'SearchAction',
-                    target: {
-                        '@type': 'EntryPoint',
-                        urlTemplate: `${siteUrl}/search?q={search_term_string}`,
-                    },
-                    'query-input': 'required name=search_term_string',
-                },
             },
             {
                 '@type': 'SiteNavigationElement',
                 '@id': `${siteUrl}/#nav-books`,
                 name: 'Katalog Buku',
                 url: `${siteUrl}/books`,
-            },
-            {
-                '@type': 'SiteNavigationElement',
-                '@id': `${siteUrl}/#nav-skripsi`,
-                name: 'Arsip Skripsi',
-                url: `${siteUrl}/skripsi`,
-            },
-            {
-                '@type': 'SiteNavigationElement',
-                '@id': `${siteUrl}/#nav-thesis`,
-                name: 'Arsip Tesis',
-                url: `${siteUrl}/thesis`,
-            },
-            {
-                '@type': 'SiteNavigationElement',
-                '@id': `${siteUrl}/#nav-kp`,
-                name: 'Laporan Kerja Praktik',
-                url: `${siteUrl}/internship-reports`,
             },
             {
                 '@type': 'SiteNavigationElement',
@@ -86,10 +60,7 @@ export default function WelcomePage({
             </script>
 
             <div className="relative z-10">
-                <Hero
-                    stats={stats}
-                    categoriesCount={stats.activeCategoriesCount}
-                />
+                <Hero stats={stats} />
 
                 <CatalogSection
                     stats={stats}

@@ -1,5 +1,6 @@
 import { Deferred } from '@inertiajs/react';
 import { BookMarked } from 'lucide-react';
+import { useEffect } from 'react';
 import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
@@ -14,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import AcademicWorkCard from '@/features/academic-works/components/AcademicWorkCard';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
+import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import skripsiRoute from '@/routes/skripsi';
 import thesisRoute from '@/routes/thesis';
 import type { AcademicWorkShowProps } from '@/features/academic-works/types';
@@ -41,6 +43,25 @@ export default function AcademicWorkDetailPage(
     const label = workType === 'skripsi' ? 'Skripsi' : 'Tesis';
     const deferredDataKey =
         workType === 'skripsi' ? 'relatedSkripsis' : 'relatedTheses';
+
+    useEffect(() => {
+        setPageBreadcrumbs([
+            { title: 'Beranda', href: '/' },
+            { title: label, href: route.index.url() },
+            {
+                title: work ? (
+                    work.studentId
+                ) : (
+                    <Skeleton className="h-4 w-24 animate-pulse rounded-md" />
+                ),
+                href: work ? route.show.url(work.studentId) : route.index.url(),
+            },
+        ]);
+
+        return () => {
+            setPageBreadcrumbs(undefined);
+        };
+    }, [label, route, work]);
 
     const bookmarkRecord: CatalogBookmarkRecord | null = work
         ? {
@@ -106,10 +127,7 @@ export default function AcademicWorkDetailPage(
             hero={
                 <KtiTextWorkHero
                     record={work}
-                    label={label}
                     kindLabel={label}
-                    indexUrl={route.index.url()}
-                    detailUrl={work ? route.show.url(work.studentId) : null}
                     isBookmarkedByUser={isBookmarkedByUser}
                     bookmarkRecord={bookmarkRecord}
                     onToggleBookmark={toggleBookmark}

@@ -34,6 +34,17 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     
+    // Do not intercept Inertia partials, internal tooling, or API requests
+    const url = new URL(event.request.url);
+    if (
+        event.request.headers.get('X-Inertia') ||
+        url.pathname.startsWith('/api') ||
+        url.pathname.startsWith('/sanctum') ||
+        url.pathname.startsWith('/_boost')
+    ) {
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             if (cachedResponse) {
@@ -45,15 +56,12 @@ self.addEventListener('fetch', (event) => {
                 }
                 const responseToCache = response.clone();
                 caches.open(CACHE_NAME).then((cache) => {
-                    // Only cache internal non-api requests
-                    const url = new URL(event.request.url);
-                    if (!url.pathname.startsWith('/api') && !url.pathname.startsWith('/sanctum') && !url.pathname.startsWith('/_boost')) {
-                        cache.put(event.request, responseToCache);
-                    }
+                    cache.put(event.request, responseToCache);
                 });
                 return response;
             }).catch(() => {
-                // Fail silently or handle fallback offline page
+                // If offline and not in cache, let network error surface cleanly or return empty Response
+                return new Response('', { status: 504, statusText: 'Gateway Timeout' });
             });
         })
     );

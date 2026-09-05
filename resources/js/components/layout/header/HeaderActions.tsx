@@ -75,9 +75,9 @@ export function HeaderActions({
                     <BookmarksDropdown />
                 </div>
 
-                {auth.user ? (
+                {auth?.user ? (
                     <>
-                        {auth.canViewNotifications ? (
+                        {auth?.canViewNotifications ? (
                             <NotificationsDropdown
                                 key={notifications.unreadCount}
                                 initialUnreadCount={notifications.unreadCount}
@@ -94,7 +94,7 @@ export function HeaderActions({
                     </Button>
                 )}
 
-                {auth.user ? (
+                {auth?.user ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button

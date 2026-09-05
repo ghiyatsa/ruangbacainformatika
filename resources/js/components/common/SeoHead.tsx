@@ -53,18 +53,26 @@ export function SeoHead({
     robots,
     keywords,
 }: SeoHeadProps) {
-    const page = usePage<SiteProps>();
-    const canonicalUrl = normalizeUrl(page.props.site.url, page.url);
-    const metaDescription = description ?? page.props.site.description;
-    const metaImage = image ?? page.props.site.ogImage;
-    const metaTitle = title ? `${title} - ${page.props.name}` : page.props.name;
-    const metaRobots = robots ?? page.props.site.robots;
-    const metaImageType = page.props.site.ogImageType;
-    const metaImageWidth = String(page.props.site.ogImageWidth);
-    const metaImageHeight = String(page.props.site.ogImageHeight);
+    const page = usePage<Partial<SiteProps>>();
+    const site = page.props.site;
+    const siteUrl =
+        site?.url ||
+        (typeof window !== 'undefined' ? window.location.origin : '');
+    const canonicalUrl = normalizeUrl(siteUrl, page.url || '');
+    const metaDescription = description ?? site?.description ?? '';
+    const metaImage = image ?? site?.ogImage ?? '';
+    const metaTitle = title
+        ? page.props.name
+            ? `${title} - ${page.props.name}`
+            : title
+        : (page.props.name ?? 'Ruang Baca');
+    const metaRobots = robots ?? site?.robots ?? 'index, follow';
+    const metaImageType = site?.ogImageType ?? 'image/jpeg';
+    const metaImageWidth = String(site?.ogImageWidth ?? 1200);
+    const metaImageHeight = String(site?.ogImageHeight ?? 630);
     const metaKeywords = Array.isArray(keywords)
         ? keywords.filter(Boolean).join(', ')
-        : (keywords ?? page.props.site.keywords);
+        : (keywords ?? site?.keywords ?? '');
 
     return (
         <Head title={title}>

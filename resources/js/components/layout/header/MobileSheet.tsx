@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ChevronDown, Menu, X } from 'lucide-react';
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Collapsible,
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/sheet';
 import { login } from '@/routes';
 import { AppLogo } from './AppLogo';
-import { NAV_LINKS } from './constants';
+import { getNavLinks } from './constants';
 import type { Auth } from '@/types';
 
 interface MobileSheetProps {
@@ -31,11 +32,18 @@ export function MobileSheet({
     isActive,
     auth,
 }: MobileSheetProps) {
-    const defaultOpenSections = NAV_LINKS.filter(
-        (item) =>
-            item.children &&
-            item.children.some((child) => isActive(child.href)),
-    ).map((item) => item.label);
+    const isMember = Boolean(auth?.isMember);
+    const navLinks = React.useMemo(() => getNavLinks(isMember), [isMember]);
+
+    const defaultOpenSections = React.useMemo(() => {
+        return navLinks
+            .filter(
+                (item) =>
+                    item.children &&
+                    item.children.some((child) => isActive(child.href)),
+            )
+            .map((item) => item.label);
+    }, [navLinks, isActive]);
 
     return (
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -73,7 +81,7 @@ export function MobileSheet({
 
                 <div className="flex-1 overflow-y-auto px-1 pt-2 pb-4">
                     <nav className="space-y-2">
-                        {NAV_LINKS.map((item) => {
+                        {navLinks.map((item) => {
                             if (item.children) {
                                 const isSectionActive = item.children.some(
                                     (child) => isActive(child.href),
@@ -163,11 +171,25 @@ export function MobileSheet({
                     </nav>
                 </div>
 
-                {!auth.user ? (
+                {!auth?.user ? (
                     <div className="flex flex-col gap-2 border-t border-border/60 p-4">
                         <SheetClose asChild>
                             <Button asChild className="h-11 w-full rounded-xl">
                                 <Link href={login.url()}>Masuk</Link>
+                            </Button>
+                        </SheetClose>
+                    </div>
+                ) : auth?.requiresOnboarding && auth.onboardingUrl ? (
+                    <div className="flex flex-col gap-2 border-t border-border/60 p-4">
+                        <SheetClose asChild>
+                            <Button
+                                asChild
+                                variant="secondary"
+                                className="h-11 w-full rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+                            >
+                                <Link href={auth.onboardingUrl}>
+                                    Lengkapi Data Anggota
+                                </Link>
                             </Button>
                         </SheetClose>
                     </div>

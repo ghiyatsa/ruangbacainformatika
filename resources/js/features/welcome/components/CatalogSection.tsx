@@ -37,10 +37,7 @@ export default function CatalogSection({
 
     const items: SectionItem[] = [];
 
-    if (
-        stats.featuredCount > 0 &&
-        (featuredBooks === undefined || featuredBooks.length > 0)
-    ) {
+    if (stats.featuredCount > 0) {
         items.push({
             id: 'featured',
             isFullWidth: true,
@@ -58,43 +55,30 @@ export default function CatalogSection({
     }
 
     if (stats.booksCount > 0) {
-        if (books === undefined || (books.data && books.data.length > 0)) {
-            items.push({
-                id: 'new-books',
-                content: <NewBooksPreview books={books} />,
-            });
-        }
+        items.push({
+            id: 'new-books',
+            content: <NewBooksPreview books={books} />,
+        });
 
-        if (popularBooks === undefined || popularBooks.length > 0) {
-            items.push({
-                id: 'popular-books',
-                content: <PopularBooks popularBooks={popularBooks} />,
-            });
-        }
+        items.push({
+            id: 'popular-books',
+            content: <PopularBooks popularBooks={popularBooks} />,
+        });
     }
 
     if (stats.activeCategoriesCount > 0) {
-        const activeShelves = (popularCategoryShelves ?? []).filter(
-            (shelf) => shelf.books && shelf.books.length > 0,
-        );
-
-        if (popularCategoryShelves === undefined || activeShelves.length > 0) {
-            items.push({
-                id: 'categories',
-                isFullWidth: true,
-                content: (
-                    <PopularCategoryShelves
-                        popularCategoryShelves={popularCategoryShelves}
-                    />
-                ),
-            });
-        }
+        items.push({
+            id: 'categories',
+            isFullWidth: true,
+            content: (
+                <PopularCategoryShelves
+                    popularCategoryShelves={popularCategoryShelves}
+                />
+            ),
+        });
     }
 
-    if (
-        (stats.mostBorrowedCount ?? 0) > 0 &&
-        (mostBorrowedBooks === undefined || mostBorrowedBooks.length > 0)
-    ) {
+    if ((stats.mostBorrowedCount ?? 0) > 0) {
         items.push({
             id: 'most-borrowed',
             content: (

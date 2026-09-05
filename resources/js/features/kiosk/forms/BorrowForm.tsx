@@ -120,7 +120,7 @@ export function BorrowForm({ loanMaxBooks }: { loanMaxBooks: number }) {
             onError: (errors) => {
                 const message =
                     getQrErrorMessage(errors) ??
-                    'QR terbaca, namun peminjaman belum dapat diproses.';
+                    'Kode QR terbaca, tetapi peminjaman belum dapat diproses. Silakan coba sesaat lagi.';
 
                 toast.error(message);
             },

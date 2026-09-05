@@ -15,7 +15,6 @@ export function PrivacyPolicyPage({ pageContent }: StaticPageProps) {
                 <PublicPageHero
                     title="Kebijakan Privasi"
                     description={pageContent.summary}
-                    contentClassName="max-w-5xl px-4 sm:px-6 lg:px-8"
                 />
             }
         >
