@@ -1,4 +1,6 @@
 import { useMemo, useSyncExternalStore } from 'react';
+import * as CatalogBookmarkController from '@/actions/App/Http/Controllers/CatalogBookmarkController';
+import { getCsrfToken } from '@/lib/csrf';
 
 const BOOKMARK_STORAGE_KEY = 'ruangbaca:bookmarks';
 const BOOKMARK_EVENT_NAME = 'ruangbaca:bookmarks:changed';
@@ -256,4 +258,71 @@ export function useCatalogBookmarks(): UseCatalogBookmarksReturn {
         removeBookmark,
         clearBookmarks: () => writeBookmarks([]),
     };
+}
+
+export async function hydrateBookmarksFromServer(): Promise<void> {
+    const server = await fetchServerBookmarks();
+
+    if (server === null) {
+        return;
+    }
+
+    const local = readBookmarks();
+
+    if (local.length === 0 && server.length > 0) {
+        writeBookmarks(server);
+    }
+}
+
+export function pushServerBookmarks(
+    bookmarks: CatalogBookmarkRecord[],
+): Promise<boolean> {
+    if (typeof window === 'undefined') {
+        return Promise.resolve(false);
+    }
+
+    const csrfToken = getCsrfToken();
+
+    return window
+        .fetch(CatalogBookmarkController.replace.url(), {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+            },
+            body: JSON.stringify({ bookmarks }),
+        })
+        .then((response) => response.ok)
+        .catch(() => false);
+}
+
+async function fetchServerBookmarks(): Promise<CatalogBookmarkRecord[] | null> {
+    try {
+        const response = await window.fetch(
+            CatalogBookmarkController.index.url(),
+            {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            },
+        );
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const payload = (await response.json()) as {
+            bookmarks?: unknown;
+        };
+
+        return parseBookmarks(JSON.stringify(payload.bookmarks ?? []));
+    } catch {
+        return null;
+    }
 }

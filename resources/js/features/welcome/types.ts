@@ -9,6 +9,8 @@ export type WelcomeProps = {
         featuredCount: number;
         availableItemsCount: number;
         activeCategoriesCount: number;
+        loansCount?: number;
+        visitsCount?: number;
         searchResultsCount: number;
         mostBorrowedCount?: number;
     };

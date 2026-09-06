@@ -1,19 +1,22 @@
 <?php
 
+use App\Http\Controllers\AcademicFileController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CatalogBookmarkController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CatalogReportController;
 use App\Http\Controllers\ContactMessageController;
+use App\Http\Controllers\DocumentDistributionController;
+use App\Http\Controllers\DocumentFileController;
+use App\Http\Controllers\FaviconController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InternshipReportController;
 use App\Http\Controllers\LoanHistoryController;
-use App\Http\Controllers\LoanRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpenGraphImageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostCommentController;
-use App\Http\Controllers\ReturnDraftController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SimilarityController;
 use App\Http\Controllers\SitemapController;
@@ -22,29 +25,42 @@ use App\Http\Controllers\ThesisController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/favicon.svg', [FaviconController::class, 'svg'])->name('favicon.svg');
 Route::get('/og/site', [OpenGraphImageController::class, 'site'])->name('og.site');
 Route::get('/og/books/{book:slug}', [OpenGraphImageController::class, 'book'])->name('og.books.show');
 Route::get('/og/skripsi/{skripsi:student_id}', [OpenGraphImageController::class, 'skripsi'])->name('og.skripsi.show');
 Route::get('/og/internship-reports/{internshipReport:student_id}', [OpenGraphImageController::class, 'internshipReport'])->name('og.internship-reports.show');
 Route::get('/og/thesis/{thesis:student_id}', [OpenGraphImageController::class, 'thesis'])->name('og.thesis.show');
-Route::get('/books', CatalogController::class)
-    ->middleware('cache.headers:public;max_age=300;etag')
-    ->name('books.index');
+Route::get('/books', CatalogController::class)->name('books.index');
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
 Route::get('/posts', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/posts/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/preview/posts/{post:preview_token}', [BlogController::class, 'preview'])->name('blog.preview');
-Route::post('/catalog-reports', [CatalogReportController::class, 'store'])->name('catalog-reports.store');
-Route::get('/skripsi', [SkripsiController::class, 'index'])->name('skripsi.index');
-Route::get('/skripsi/{skripsi:student_id}', [SkripsiController::class, 'show'])->name('skripsi.show');
-Route::get('/internship-reports', [InternshipReportController::class, 'index'])->name('internship-reports.index');
-Route::get('/internship-reports/{internshipReport:student_id}', [InternshipReportController::class, 'show'])->name('internship-reports.show');
-Route::get('/thesis', [ThesisController::class, 'index'])->name('thesis.index');
-Route::get('/thesis/{thesis:student_id}', [ThesisController::class, 'show'])->name('thesis.show');
+Route::post('/catalog-reports', [CatalogReportController::class, 'store'])
+    ->middleware('throttle:catalog-reports')
+    ->name('catalog-reports.store');
 
-Route::get('/search', SearchController::class)
-    ->middleware('throttle:global-search')
-    ->name('search');
+Route::get('/verify/receipt/{token}', [DocumentDistributionController::class, 'verifyReceipt'])
+    ->middleware('throttle:60,1')
+    ->name('verify.receipt');
+Route::get('/distribution/receipt', [DocumentDistributionController::class, 'receipt'])
+    ->middleware(['auth', 'throttle:30,1'])
+    ->name('distribution.receipt');
+
+Route::middleware(['auth', 'profile.completed', 'member'])->group(function () {
+    Route::get('/skripsi', [SkripsiController::class, 'index'])->name('skripsi.index');
+    Route::get('/skripsi/{skripsi:student_id}', [SkripsiController::class, 'show'])->name('skripsi.show');
+    Route::get('/skripsi/{skripsi:student_id}/file', [AcademicFileController::class, 'skripsi'])->name('skripsi.file');
+
+    Route::get('/internship-reports', [InternshipReportController::class, 'index'])->name('internship-reports.index');
+    Route::get('/internship-reports/{internshipReport:student_id}', [InternshipReportController::class, 'show'])->name('internship-reports.show');
+    Route::get('/internship-reports/{internshipReport:student_id}/file', [AcademicFileController::class, 'internshipReport'])->name('internship-reports.file');
+
+    Route::get('/thesis', [ThesisController::class, 'index'])->name('thesis.index');
+    Route::get('/thesis/{thesis:student_id}', [ThesisController::class, 'show'])->name('thesis.show');
+    Route::get('/thesis/{thesis:student_id}/file', [AcademicFileController::class, 'thesis'])->name('thesis.file');
+});
+
 Route::get('/search/suggestions', [SearchController::class, 'suggestions'])
     ->middleware('throttle:search-suggestions')
     ->name('search.suggestions');
@@ -67,13 +83,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:similarity-check')
         ->name('similarity.check');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/bookmarks', [CatalogBookmarkController::class, 'index'])
+        ->name('catalog-bookmarks.index');
+    Route::put('/bookmarks', [CatalogBookmarkController::class, 'replace'])
+        ->middleware('throttle:catalog-bookmarks')
+        ->name('catalog-bookmarks.replace');
     Route::get('/notifications/page', [NotificationController::class, 'page'])->name('notifications.page');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::get('/loans/request', [LoanRequestController::class, 'show'])->name('loans.request');
-    Route::post('/loans/request/books', [LoanRequestController::class, 'storeBook'])->name('loans.request.books.store');
-    Route::delete('/loans/request/books/{book}', [LoanRequestController::class, 'destroyBook'])->name('loans.request.books.destroy');
-    Route::post('/loans/request/qr', [LoanRequestController::class, 'generateQr'])->name('loans.request.qr');
 
     Route::post('/posts/{post:slug}/comments', [PostCommentController::class, 'store'])
         ->middleware('throttle:blog-comments')
@@ -83,7 +100,14 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'profile.completed'])->group(function () {
     Route::get('/loans/history', LoanHistoryController::class)->name('loans.history');
-    Route::post('/loans/history/qr', [ReturnDraftController::class, 'generateQr'])->name('loans.history.qr');
+});
+
+// Serve berkas dokumen submission (PDF/gambar) — hanya untuk pemilik atau staff/admin.
+// Berkas disimpan di disk 'documents' (private) — tidak pernah diakses langsung via URL publik.
+Route::middleware('auth')->group(function () {
+    Route::get('/documents/{submission}/{field}', [DocumentFileController::class, 'show'])
+        ->where('field', 'document|endorsement')
+        ->name('documents.file');
 });
 
 require __DIR__.'/kiosk.php';

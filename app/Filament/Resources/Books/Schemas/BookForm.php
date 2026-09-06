@@ -219,15 +219,13 @@ class BookForm
                     ->integer()
                     ->minValue(1000)
                     ->maxValue(now()->year)
-                    ->placeholder((string) now()->year)
-                    ->helperText('Gunakan 4 digit tahun'),
+                    ->placeholder((string) now()->year),
 
                 TextInput::make('pages')
                     ->label('Jumlah Halaman')
                     ->visible(fn (Get $get): bool => filled($get('issn')))
                     ->maxLength(255)
-                    ->placeholder('250 atau 120-145')
-                    ->helperText('Isi jumlah atau rentang halaman utama'),
+                    ->placeholder('250 atau 120-145'),
 
                 Select::make('authors')
                     ->label('Penulis')

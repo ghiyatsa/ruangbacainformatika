@@ -10,18 +10,21 @@ import {
     navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
-import { NAV_LINKS } from './constants';
+import { getNavLinks } from './constants';
 import type { LucideIcon } from 'lucide-react';
 
 interface DesktopNavProps {
     isActive: (href: string) => boolean;
+    isMember?: boolean;
 }
 
-export function DesktopNav({ isActive }: DesktopNavProps) {
+export function DesktopNav({ isActive, isMember = false }: DesktopNavProps) {
+    const navLinks = React.useMemo(() => getNavLinks(isMember), [isMember]);
+
     return (
         <NavigationMenu className="hidden min-w-0 md:flex" viewport={false}>
             <NavigationMenuList className="gap-0.5 lg:gap-1">
-                {NAV_LINKS.map((item) => (
+                {navLinks.map((item) => (
                     <NavigationMenuItem key={item.label}>
                         {item.children ? (
                             <>
@@ -37,7 +40,7 @@ export function DesktopNav({ isActive }: DesktopNavProps) {
                                 >
                                     {item.label}
                                 </NavigationMenuTrigger>
-                                <NavigationMenuContent className="left-0">
+                                <NavigationMenuContent className="left-0 z-50">
                                     <ul className="flex w-max min-w-[200px] flex-col gap-1 p-2">
                                         {item.children.map((child) => (
                                             <ListItem

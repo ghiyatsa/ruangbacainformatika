@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Support\SiteSettings;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -9,7 +10,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
@@ -30,9 +30,9 @@ class DashboardPanelProvider extends PanelProvider
             ->path('dashboard')
             ->spa()
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => app(SiteSettings::class)->filamentPrimaryColor(),
             ])
-            ->favicon(asset('favicon.svg'))
+            ->favicon(fn () => route('favicon.svg'))
             ->unsavedChangesAlerts()
             ->databaseTransactions()
             ->databaseNotifications()

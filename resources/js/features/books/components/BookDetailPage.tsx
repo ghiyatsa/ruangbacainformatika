@@ -1,4 +1,4 @@
-import { Deferred, Form, Link, usePage } from '@inertiajs/react';
+import { Deferred, Link } from '@inertiajs/react';
 import {
     Bookmark,
     BookOpen,
@@ -11,14 +11,11 @@ import {
     Hash,
     Library,
     MapPinned,
-    ShoppingCart,
     Star,
     XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { KtiDetailItem } from '@/components/kti/KtiDetailItem';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
@@ -43,16 +40,15 @@ import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
+import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import { cn, formatViewCount } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 
 import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
-import type { BookData, LoanRequestSummary } from '@/features/books/types';
-import type { Auth, LoanRequestCart } from '@/types';
+import type { BookData } from '@/features/books/types';
 
 export interface BookDetailPageProps {
     book?: { data: BookData };
-    loanRequest?: LoanRequestSummary | null;
     relatedBooks?: BookData[];
     loading?: boolean;
 }
@@ -77,36 +73,33 @@ function BookDescriptionSkeleton() {
 }
 
 export default function BookDetailPage(props: BookDetailPageProps) {
-    const { auth, loanRequestCart } = usePage<{
-        auth: Auth;
-        loanRequestCart: LoanRequestCart | null;
-    }>().props;
-    const user = auth.user;
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const [imageLoaded, setImageLoaded] = useState(false);
     const book = props.book?.data ?? null;
-    const loanRequest = props.loanRequest ?? null;
-    const requestSummary = loanRequest ?? {
-        count: 0,
-        maxBooks: 0,
-        activeLoansCount: 0,
-        containsBook: false,
-        hasActiveQr: false,
-    };
-    const canRequestBorrow =
-        user !== null && auth.borrowingAccess?.canBorrow === true;
-    const borrowBlockReason =
-        book &&
-        book.isBorrowable &&
-        book.isAvailable &&
-        user &&
-        !canRequestBorrow
-            ? auth.borrowingAccess?.canBorrow
-                ? requestSummary.activeLoansCount >= requestSummary.maxBooks
-                    ? 'Kuota pinjam Anda penuh. Kembalikan sebagian buku untuk meminjam lagi.'
-                    : null
-                : (auth.borrowingAccess?.reason?.message ?? null)
-            : null;
+
+    useEffect(() => {
+        setPageBreadcrumbs([
+            { title: 'Beranda', href: '/' },
+            {
+                title: 'Buku',
+                href: booksRoute.index.url(),
+            },
+            {
+                title: book ? (
+                    book.title
+                ) : (
+                    <Skeleton className="h-4 w-32 animate-pulse rounded-md" />
+                ),
+                href: book
+                    ? booksRoute.show.url(book.slug)
+                    : booksRoute.index.url(),
+            },
+        ]);
+
+        return () => {
+            setPageBreadcrumbs(undefined);
+        };
+    }, [book]);
     const isBookmarkedByUser = book
         ? isBookmarked({
               catalogType: 'book',
@@ -127,8 +120,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
               statusLabel: !book.isBorrowable
                   ? 'Referensi'
                   : book.isAvailable
-                    ? 'Siap dipinjam'
-                    : 'Sedang kosong',
+                    ? 'Tersedia'
+                    : 'Sedang dipinjam',
           }
         : null;
 
@@ -248,28 +241,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             deferSecondaryContent
             contentClassName="pt-6 pb-10 sm:pt-8"
             hero={
-                <div className="relative -mt-20 overflow-hidden sm:-mt-28 md:-mt-24">
-                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
-                        <div className="-mx-4 mb-6 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:mb-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
-                            <Breadcrumbs
-                                breadcrumbs={[
-                                    { title: 'Beranda', href: '/' },
-                                    {
-                                        title: 'Buku',
-                                        href: booksRoute.index.url(),
-                                    },
-                                    {
-                                        title: book?.title ?? (
-                                            <Skeleton className="h-4 w-28" />
-                                        ),
-                                        href: book
-                                            ? booksRoute.show.url(book.slug)
-                                            : booksRoute.index.url(),
-                                    },
-                                ]}
-                            />
-                        </div>
-
+                <div className="relative overflow-hidden">
+                    <div className="relative mx-auto max-w-7xl border-x border-border/60 px-4 py-8 sm:px-6 lg:px-8">
                         <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
                             <div className="md:col-span-3">
                                 <div className="flex w-full items-center justify-center">
@@ -555,56 +528,6 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                 kindLabel="Buku"
                                                 className="bg-background"
                                             />
-
-                                            {user &&
-                                            book.isBorrowable &&
-                                            book.isAvailable ? (
-                                                canRequestBorrow ? (
-                                                    <Form
-                                                        action={LoanRequestController.storeBook()}
-                                                    >
-                                                        {({ processing }) => (
-                                                            <>
-                                                                <input
-                                                                    type="hidden"
-                                                                    name="book_id"
-                                                                    value={
-                                                                        book.id
-                                                                    }
-                                                                />
-                                                                <Button
-                                                                    type="submit"
-                                                                    variant="outline"
-                                                                    className="inline-flex h-auto items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-medium"
-                                                                    disabled={
-                                                                        processing ||
-                                                                        requestSummary.containsBook
-                                                                    }
-                                                                >
-                                                                    <ShoppingCart className="size-4" />
-                                                                    {requestSummary.containsBook
-                                                                        ? 'Di keranjang'
-                                                                        : 'Pinjam'}
-                                                                </Button>
-                                                            </>
-                                                        )}
-                                                    </Form>
-                                                ) : (
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        disabled
-                                                        title={
-                                                            borrowBlockReason ??
-                                                            undefined
-                                                        }
-                                                        className="inline-flex h-auto cursor-not-allowed items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-medium"
-                                                    >
-                                                        <ShoppingCart className="size-4" />
-                                                        Pinjam
-                                                    </Button>
-                                                )
-                                            ) : null}
                                         </>
                                     ) : (
                                         <>
@@ -621,7 +544,8 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             }
             sidebar={
                 <div className="space-y-4">
-                    <div className="rounded-2xl border border-border/60 bg-card">
+                    <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5">
+                        <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
                         <div className="px-5 py-4">
                             <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Data Buku
@@ -757,8 +681,6 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                         key={relatedBook.id}
                                         book={relatedBook}
                                         variant="compact"
-                                        auth={auth}
-                                        loanRequestCart={loanRequestCart}
                                     />
                                 ))}
                             </div>

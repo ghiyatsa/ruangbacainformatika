@@ -12,6 +12,15 @@ export interface KioskProps {
     purposeOptions: Record<string, string>;
     kioskSession: KioskSessionConfig;
     memberRegistrationClaim?: KioskMemberRegistrationClaim | null;
+    kioskInfo?: KioskInfo;
+}
+
+export interface KioskInfo {
+    deviceId: string;
+    ipAddress: string;
+    todayVisits: number;
+    todayBorrowed: number;
+    todayReturned: number;
 }
 
 export interface KioskSessionConfig {

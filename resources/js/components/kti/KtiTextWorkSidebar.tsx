@@ -19,7 +19,8 @@ interface KtiTextWorkSidebarProps {
 export function KtiTextWorkSidebar({ record, label }: KtiTextWorkSidebarProps) {
     return (
         <div className="space-y-4">
-            <div className="rounded-2xl border border-border/60 bg-card">
+            <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5">
+                <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
                 <div className="p-5">
                     <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                         Informasi {label}
@@ -77,7 +78,8 @@ export function KtiTextWorkSidebar({ record, label }: KtiTextWorkSidebarProps) {
 
             {record ? (
                 record.keywords.length > 0 ? (
-                    <div className="rounded-2xl border border-border/60 bg-card">
+                    <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5">
+                        <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
                         <div className="p-5">
                             <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                                 Kata Kunci
@@ -99,7 +101,8 @@ export function KtiTextWorkSidebar({ record, label }: KtiTextWorkSidebarProps) {
                     </div>
                 ) : null
             ) : (
-                <div className="rounded-2xl border border-border/60 bg-card">
+                <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5">
+                    <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
                     <div className="p-5">
                         <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                             Kata Kunci

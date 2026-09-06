@@ -108,20 +108,20 @@ class LoansTable
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->label('Lihat'),
+                    ->label('Lihat Detail'),
                 Action::make('remindReturn')
-                    ->label('Kirim Reminder')
+                    ->label('Kirim Pengingat')
                     ->icon(Heroicon::OutlinedBellAlert)
                     ->color('info')
                     ->visible(fn (User $record): bool => $record->active_loans_count > 0)
                     ->requiresConfirmation()
-                    ->modalHeading('Kirim Reminder Pengembalian')
-                    ->modalDescription('Reminder akan dikirim ke WhatsApp dan notifikasi akun untuk pinjaman aktif yang jatuh tempo (H-1 s.d. telat maksimal 7 hari) dan belum diingatkan hari ini.')
+                    ->modalHeading('Kirim Pengingat Pengembalian')
+                    ->modalDescription('Pengingat akan dikirimkan melalui WhatsApp dan notifikasi akun bagi peminjam yang mendekati atau melewati jatuh tempo.')
                     ->action(function (User $record): void {
                         $sent = app(LoanReminderService::class)->remindAllActive($record);
 
                         Notification::make()
-                            ->title($sent > 0 ? "Reminder dikirim untuk {$sent} pinjaman" : 'Tidak ada pinjaman yang perlu diingatkan')
+                            ->title($sent > 0 ? "Pengingat berhasil dikirim untuk {$sent} transaksi pinjaman" : 'Tidak ada transaksi yang perlu dikirimi pengingat')
                             ->{$sent > 0 ? 'success' : 'warning'}()
                             ->send();
                     }),
@@ -129,7 +129,7 @@ class LoansTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     BulkAction::make('remindReturnSelected')
-                        ->label('Kirim Reminder Terpilih')
+                        ->label('Kirim Pengingat Terpilih')
                         ->icon(Heroicon::OutlinedBellAlert)
                         ->color('info')
                         ->requiresConfirmation()
@@ -144,7 +144,7 @@ class LoansTable
                             }
 
                             Notification::make()
-                                ->title($total > 0 ? "Reminder dikirim untuk {$total} pinjaman" : 'Tidak ada pinjaman yang perlu diingatkan')
+                                ->title($total > 0 ? "Pengingat terkirim untuk {$total} transaksi pinjaman" : 'Tidak ada transaksi yang perlu dikirimi pengingat')
                                 ->{$total > 0 ? 'success' : 'warning'}()
                                 ->send();
                         }),

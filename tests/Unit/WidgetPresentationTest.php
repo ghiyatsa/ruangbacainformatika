@@ -15,6 +15,7 @@ use App\Filament\Widgets\SimilaritySyncOverviewWidget;
 use App\Filament\Widgets\TodayVisitorsWidget;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
+use App\Models\User;
 
 use function Livewire\invade;
 
@@ -56,9 +57,9 @@ it('links pending member approval stats to filtered user tables', function () {
     expect($stats[0]->getLabel())->toBe('Menunggu Persetujuan')
         ->and($stats[0]->getUrl())->toContain('filters%5Bis_approved%5D%5Bvalue%5D=0')
         ->and($stats[0]->getUrl())->toContain('filters%5Bmanual_approval%5D%5BisActive%5D=1')
-        ->and($stats[1]->getLabel())->toBe('Daftar Hari Ini')
+        ->and($stats[1]->getLabel())->toBe('Pendaftar Hari Ini')
         ->and($stats[1]->getUrl())->toContain('filters%5Bregistered_today%5D%5BisActive%5D=1')
-        ->and($stats[2]->getLabel())->toBe('Review Awal Hari Ini')
+        ->and($stats[2]->getLabel())->toBe('Disetujui Hari Ini')
         ->and($stats[2]->getUrl())->toContain('filters%5Bapproved_today%5D%5BisActive%5D=1');
 });
 
@@ -74,11 +75,19 @@ it('links restricted borrower stats to the matching user filters', function () {
 });
 
 it('separates operational member growth from approval queue copy', function () {
+    // `pendingMemberApproval()` only counts campus emails that are not
+    // auto-approved, so a plain non-campus address would not register here.
+    User::factory()->count(2)->create([
+        'email' => fn (): string => fake()->unique()->userName().'@mhs.unimal.ac.id',
+        'is_approved' => false,
+        'created_at' => now(),
+    ]);
+
     $operationsStats = invade(app(OperationsOverviewWidget::class))->getStats();
     $approvalStats = invade(app(PendingMemberApprovalsWidget::class))->getStats();
 
     expect($operationsStats[3]->getLabel())->toBe('Anggota Baru Bulan Ini')
-        ->and($operationsStats[3]->getDescription())->toContain('pendaftaran bulan ini')
+        ->and($operationsStats[3]->getDescription())->toContain('menunggu verifikasi')
         ->and($operationsStats[3]->getDescription())->not->toContain('menunggu persetujuan')
         ->and($approvalStats[0]->getDescription())->not->toContain('Google')
         ->and($approvalStats[1]->getDescription())->not->toContain('Google');
@@ -107,7 +116,10 @@ it('counts similarity overview stats from active skripsi records only', function
 
     $stats = invade(app(SimilaritySyncOverviewWidget::class))->getStats();
 
-    expect($stats[1]->getLabel())->toBe('Perlu Tindak Lanjut')
+    expect($stats[0]->getLabel())->toBe('Sinkron Berhasil')
+        ->and($stats[1]->getLabel())->toBe('Sinkron Gagal')
+        ->and($stats[2]->getLabel())->toBe('Dalam Antrean')
+        ->and($stats[3]->getLabel())->toBe('Belum Dijadwalkan')
         ->and($stats[1]->getValue())->toBe(1)
         ->and($stats[3]->getValue())->toBe(0);
 });

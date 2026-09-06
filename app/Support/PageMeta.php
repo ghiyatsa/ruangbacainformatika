@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Book;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PageMeta
@@ -95,7 +96,7 @@ class PageMeta
             'robots' => $this->siteRobots(),
             'canonicalUrl' => route('blog.show', $post),
             'type' => 'article',
-            'ogImage' => $post->cover_image ? asset('storage/'.$post->cover_image) : route('og.site'),
+            'ogImage' => $post->cover_image ? Storage::disk('public')->url($post->cover_image) : route('og.site'),
             'ogImageType' => 'image/png',
             'ogImageWidth' => 1200,
             'ogImageHeight' => 600,

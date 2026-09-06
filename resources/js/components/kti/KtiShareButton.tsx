@@ -30,7 +30,10 @@ export function KtiShareButton({
     const [, copy] = useClipboard();
     const [isSharing, setIsSharing] = useState(false);
 
-    const shareUrl = `${page.props.site.url}${page.url}`;
+    const siteUrl =
+        page.props.site?.url ||
+        (typeof window !== 'undefined' ? window.location.origin : '');
+    const shareUrl = `${siteUrl}${page.url}`;
     const shareTitle = title;
     const shareText = [kindLabel, subtitle].filter(Boolean).join(' • ');
 

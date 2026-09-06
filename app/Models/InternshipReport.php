@@ -20,6 +20,10 @@ class InternshipReport extends Model
         'year',
         'abstract',
         'keywords',
+        'file_path',
+        'company_name',
+        'academic_advisor',
+        'field_advisor',
         'view_count',
     ];
 

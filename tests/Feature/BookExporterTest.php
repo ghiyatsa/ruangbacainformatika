@@ -78,7 +78,7 @@ it('exports cover url and unique shelf locations for a book', function () {
 
     $result = collect(array_combine(array_keys($columnMap), $exporter($book)));
 
-    expect($result['cover_image'])->toBe(asset('storage/books/covers/laskar.webp'))
+    expect($result['cover_image'])->toBe(Storage::disk('public')->url('books/covers/laskar.webp'))
         ->and($result['shelf_locations'])->toBe('R-01-A | ARSIP-02')
         ->and($result['items_count'])->toBe('4');
 });

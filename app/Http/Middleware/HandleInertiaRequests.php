@@ -4,18 +4,15 @@ namespace App\Http\Middleware;
 
 use App\Models\User;
 use App\Services\Auth\GoogleLoginConfiguration;
-use App\Services\LoanDraftService;
 use App\Support\SiteSettings;
 use Filament\Notifications\DatabaseNotification as FilamentDatabaseNotification;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
     public function __construct(
-        protected LoanDraftService $loanDraftService,
         protected SiteSettings $siteSettings,
     ) {}
 
@@ -54,9 +51,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             ...$siteData,
-            'globalNotice' => Inertia::defer(
-                fn (): array => $this->siteSettings->sharedNotice(),
-            )->once(),
+            'globalNotice' => $this->siteSettings->sharedNotice(),
             'auth' => [
                 'user' => $this->serializeUser($user),
                 'isMember' => $user?->hasRole('member') ?? false,
@@ -64,7 +59,10 @@ class HandleInertiaRequests extends Middleware
                 'canBorrowBooks' => $user?->canBorrowBooks() ?? false,
                 'canViewNotifications' => $user?->canViewPublicNotifications() ?? false,
                 'hasVerifiedWhatsApp' => $user?->hasVerifiedWhatsApp() ?? false,
-                'borrowingAccess' => $this->borrowingAccessPayload($user),
+                'requiresOnboarding' => $user !== null && ! $user->hasCompletedProfile() && $user->usesCampusEmail() && ! $user->canAccessAdminPanel(),
+                'onboardingUrl' => $user !== null && ! $user->hasCompletedProfile()
+                    ? route('settings.profile.edit', absolute: false)
+                    : null,
             ],
             'notifications' => fn (): array => [
                 'unreadCount' => $user?->canViewPublicNotifications()
@@ -81,9 +79,6 @@ class HandleInertiaRequests extends Middleware
                 'oneTapEnabled' => app(GoogleLoginConfiguration::class)->isConfigured()
                     && ! $this->shouldDisableGoogleOneTap($request),
             ],
-            'loanRequestCart' => fn (): ?array => $user?->canBorrowBooks()
-                ? $this->loanDraftService->summary($user)
-                : null,
             'status' => $session?->get('status'),
         ];
     }
@@ -108,26 +103,6 @@ class HandleInertiaRequests extends Middleware
             'address' => $user->address,
             'created_at' => $user->created_at?->toIso8601String(),
             'updated_at' => $user->updated_at?->toIso8601String(),
-        ];
-    }
-
-    /**
-     * @return array{canBorrow: bool, reason: array{title: string, message: string, actionUrl: string|null}|null}
-     */
-    protected function borrowingAccessPayload(?User $user): array
-    {
-        if ($user === null || $user->canAccessAdminPanel()) {
-            return [
-                'canBorrow' => $user?->canBorrowBooks() ?? false,
-                'reason' => null,
-            ];
-        }
-
-        $canStart = $user->canStartLoanRequest();
-
-        return [
-            'canBorrow' => $canStart,
-            'reason' => $canStart ? null : $user->borrowingBlockReason(true),
         ];
     }
 

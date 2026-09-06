@@ -3,9 +3,11 @@ import { Github, Globe, Instagram, Mail } from 'lucide-react';
 
 export function FooterBottom() {
     const year = new Date().getFullYear();
-    const { contactEmail } = usePage<{
-        site: { contactEmail: string };
-    }>().props.site;
+    const pageProps = usePage<{
+        site?: { contactEmail?: string };
+    }>().props;
+    const contactEmail =
+        pageProps.site?.contactEmail ?? 'informatika@unimal.ac.id';
 
     return (
         <div className="w-full border-t border-border/60">

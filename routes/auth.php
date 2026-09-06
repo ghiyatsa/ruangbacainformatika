@@ -23,10 +23,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('register/profile', [ProfileController::class, 'complete'])->name('register.profile');
     Route::patch('register/profile', [ProfileController::class, 'storeOnboarding'])->name('register.profile.store');
+    Route::post('register/profile/skip', [ProfileController::class, 'skipOnboarding'])->name('register.profile.skip');
     Route::get('register/whatsapp', [WhatsAppVerificationController::class, 'show'])->name('register.whatsapp');
     Route::post('register/whatsapp/send', [WhatsAppVerificationController::class, 'send'])->name('register.whatsapp.send');
     Route::post('register/whatsapp/verify', [WhatsAppVerificationController::class, 'verify'])->name('register.whatsapp.verify');
     Route::post('register/whatsapp/skip', [WhatsAppVerificationController::class, 'skip'])->name('register.whatsapp.skip');
+    Route::post('register/whatsapp/cancel-change', [WhatsAppVerificationController::class, 'cancelChange'])->name('register.whatsapp.cancel');
 
-    Route::redirect('/profile', '/settings/profile')->name('settings.profile.show');
+    Route::redirect('/user/profile', '/profile')->name('settings.profile.show');
 });

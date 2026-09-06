@@ -69,7 +69,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
                 $user->email = $user->getOriginal('email');
             }
 
-            if ($user->isDirty('whatsapp') && $user->usesCampusEmail()) {
+            if ($user->isDirty('whatsapp') && ! $user->isDirty('whatsapp_verified_at') && $user->usesCampusEmail()) {
                 $user->whatsapp_verified_at = null;
             }
         });
@@ -119,9 +119,33 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         }
     }
 
+    public function catalogBookmarks(): HasMany
+    {
+        return $this->hasMany(CatalogBookmark::class);
+    }
+
     public function canAccessAdminPanel(): bool
     {
         return $this->hasAdministrativeRole();
+    }
+
+    public function identityNumber(): ?string
+    {
+        if (filled($this->student_id)) {
+            return $this->student_id;
+        }
+
+        if ($this->email && app(CampusEmail::class)->isMahasiswaEmail($this->email)) {
+            return app(CampusEmail::class)->extractIdentityNumber($this->email);
+        }
+
+        return null;
+    }
+
+    public function isMahasiswa(): bool
+    {
+        return $this->identityNumber() !== null
+            || ($this->email !== null && app(CampusEmail::class)->isMahasiswaEmail($this->email));
     }
 
     public function canReceiveMemberRole(): bool
@@ -147,8 +171,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         if (! $this->usesCampusEmail()) {
             return [
-                'title' => 'Email bukan domain kampus',
-                'message' => 'Peminjaman buku hanya untuk pengguna dengan email @mhs.unimal.ac.id atau @unimal.ac.id.',
+                'title' => 'Gunakan Email Kampus Resmi',
+                'message' => 'Untuk meminjam buku, masuk menggunakan email resmi kampus Anda (@mhs.unimal.ac.id atau @unimal.ac.id).',
                 'actionUrl' => null,
             ];
         }
@@ -227,7 +251,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function hasVerifiedWhatsApp(): bool
     {
-        return $this->whatsapp_verified_at !== null;
+        return filled($this->whatsapp) && $this->whatsapp_verified_at !== null;
     }
 
     public function requiresWhatsAppVerification(): bool
@@ -327,11 +351,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
                 $loanQuery->whereRaw('TIMESTAMPDIFF(DAY, due_at, returned_at) >= ?', [$thresholdDays]);
             }
         });
-    }
-
-    public function loanDrafts(): HasMany
-    {
-        return $this->hasMany(LoanDraft::class);
     }
 
     public function loanItems(): HasManyThrough

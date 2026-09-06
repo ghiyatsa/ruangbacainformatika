@@ -2,6 +2,8 @@
 <html
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
     data-app-name="{{ $siteMeta['title'] ?? config('app.name', 'Ruang Baca Informatika') }}"
+    data-theme="{{ $siteMeta['colorPalette'] ?? 'indigo' }}"
+    data-color-palette="{{ $siteMeta['colorPalette'] ?? 'indigo' }}"
     @class(['dark' => ($appearance ?? 'system') == 'dark'])
 >
     <head>
@@ -50,13 +52,13 @@
             }
         </style>
 
-        <link rel="icon" type="image/png" href="{{ $siteMeta['favicon'] ?? asset('favicon-32x32.png') }}">
-        <link rel="icon" href="{{ $siteMeta['faviconSvg'] ?? asset('favicon.svg') }}" type="image/svg+xml">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ $siteMeta['favicon'] ?? asset('favicon-16x16.png') }}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ $siteMeta['favicon'] ?? asset('favicon-32x32.png') }}">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ $siteMeta['appleTouchIcon'] ?? asset('apple-touch-icon.png') }}">
-        <link rel="icon" type="image/png" sizes="192x192" href="{{ $siteMeta['favicon'] ?? asset('android-chrome-192x192.png') }}">
-        <link rel="icon" type="image/png" sizes="512x512" href="{{ $siteMeta['favicon'] ?? asset('android-chrome-512x512.png') }}">
+        <link rel="icon" type="image/png" href="{{ $siteMeta['icons']['favicon'] ?? asset('favicon-32x32.png') }}">
+        <link rel="icon" href="{{ $siteMeta['icons']['faviconSvg'] ?? route('favicon.svg', ['theme' => $siteMeta['colorPalette'] ?? 'indigo']) }}" type="image/svg+xml" id="favicon-svg">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ $siteMeta['icons']['favicon'] ?? asset('favicon-16x16.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ $siteMeta['icons']['favicon'] ?? asset('favicon-32x32.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ $siteMeta['icons']['appleTouchIcon'] ?? asset('apple-touch-icon.png') }}">
+        <link rel="icon" type="image/png" sizes="192x192" href="{{ $siteMeta['icons']['favicon'] ?? asset('android-chrome-192x192.png') }}">
+        <link rel="icon" type="image/png" sizes="512x512" href="{{ $siteMeta['icons']['favicon'] ?? asset('android-chrome-512x512.png') }}">
         <link rel="manifest" href="/manifest.json">
         <meta name="theme-color" content="{{ $siteMeta['themeColor'] ?? '#ffffff' }}">
 
@@ -97,7 +99,8 @@
             <p>Ruang Baca Teknik Informatika Universitas Malikussaleh adalah layanan perpustakaan digital resmi Program Studi Teknik Informatika Unimal. Kami menyediakan katalog buku cetak, arsip tugas akhir mahasiswa (skripsi), laporan kerja praktek (KP), jurnal penelitian, serta artikel ilmiah lainnya secara terbuka dan mudah diakses oleh mahasiswa, dosen, maupun civitas akademika lainnya.</p>
         </div>
         <x-inertia::app />
-        <script>
+        @production
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('/sw.js')
@@ -106,5 +109,6 @@
                 });
             }
         </script>
+        @endproduction
     </body>
 </html>

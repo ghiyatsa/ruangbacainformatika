@@ -81,7 +81,12 @@ class Loan extends Model
         $today = now()->startOfDay();
         $dueDay = $this->due_at->copy()->startOfDay();
 
-        if ($dueDay->equalTo($today->copy()->addDay())) {
+        // Jika jatuh tempo hari Senin dan hari ini Jumat, itu adalah H-1 hari kerja
+        $isNextBusinessDay = $today->isFriday()
+            ? $dueDay->equalTo($today->copy()->addDays(3))
+            : $dueDay->equalTo($today->copy()->addDay());
+
+        if ($isNextBusinessDay) {
             return self::REMINDER_STAGE_H_MINUS_ONE;
         }
 
@@ -108,7 +113,7 @@ class Loan extends Model
             return 0;
         }
 
-        return $this->due_at->diffInDays($endDate);
+        return (int) $this->due_at->diffInWeekdays($endDate);
     }
 
     public function deletionBlockedReason(): ?string

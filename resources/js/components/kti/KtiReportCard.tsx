@@ -34,7 +34,8 @@ export function KtiReportCard({
     const user = usePage().props.auth?.user;
 
     return (
-        <div className="rounded-2xl border border-[oklch(0.90_0.03_281)] bg-[oklch(0.97_0.015_281)] dark:border-[oklch(0.22_0.04_281)] dark:bg-[oklch(0.16_0.02_281)]">
+        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-card via-card to-primary/5">
+            <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
             <div className="flex items-start gap-3 p-5">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Flag className="size-4" />
@@ -44,8 +45,9 @@ export function KtiReportCard({
                         Laporkan Data Keliru
                     </h2>
                     <p className="text-sm leading-6 text-muted-foreground">
-                        Laporkan jika ada data yang keliru pada{' '}
-                        {catalogLabel.toLowerCase()} ini.
+                        Temukan kekeliruan informasi pada{' '}
+                        {catalogLabel.toLowerCase()} ini? Bantu kami
+                        memperbaikinya.
                     </p>
                 </div>
             </div>
@@ -176,7 +178,7 @@ export function KtiReportCard({
 
 export function KtiReportCardSkeleton() {
     return (
-        <div className="rounded-2xl border border-[oklch(0.90_0.03_281)] bg-[oklch(0.97_0.015_281)] dark:border-[oklch(0.22_0.04_281)] dark:bg-[oklch(0.16_0.02_281)]">
+        <div className="rounded-2xl border border-border/70 bg-card">
             <div className="flex animate-pulse items-start gap-3 p-5">
                 <div className="size-10 shrink-0 rounded-xl bg-muted" />
                 <div className="flex-1 space-y-2 py-1">

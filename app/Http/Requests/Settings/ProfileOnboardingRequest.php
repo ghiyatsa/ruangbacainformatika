@@ -21,6 +21,7 @@ class ProfileOnboardingRequest extends FormRequest
             'name' => $this->nameRules(),
             'whatsapp' => $this->whatsappRules(required: blank($user?->whatsapp), ignoreId: $user?->id),
             'address' => $this->addressRules(required: blank($user?->address)),
+            'code' => ['nullable', 'string', 'size:6'],
         ];
     }
 

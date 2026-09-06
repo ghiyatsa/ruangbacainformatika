@@ -26,19 +26,14 @@ class UserForm
                     ->email()
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->disabled(fn ($record) => $record !== null)
-                    ->helperText(fn ($record): ?string => $record !== null
-                        ? 'Email tidak dapat diubah.'
-                        : 'Email ini digunakan untuk masuk dengan Google.'),
+                    ->disabled(fn ($record) => $record !== null),
                 Select::make('roles')
                     ->label('Peran')
                     ->multiple()
                     ->relationship('roles', 'name')
-                    ->preload()
-                    ->helperText('Pilih peran sesuai kewenangan akun'),
+                    ->preload(),
                 Toggle::make('is_approved')
                     ->label('Lolos Review Awal')
-                    ->helperText('Tandai jika akun sudah lolos review awal. Akses pinjam tetap menunggu verifikasi WhatsApp dan peran anggota.')
                     ->onIcon('heroicon-m-check')
                     ->offIcon('heroicon-m-x-mark')
                     ->onColor('success')
@@ -51,11 +46,10 @@ class UserForm
                     ->disabled(fn (Get $get, ?Model $record): bool => filled($record?->whatsapp_verified_at) && ($get('whatsapp_verified_at') ?? true))
                     ->placeholder('0812xxxxxx'),
                 Toggle::make('whatsapp_verified_at')
-                    ->label('WhatsApp Terverifikasi')
+                    ->label('Verifikasi WhatsApp Manual')
                     ->formatStateUsing(fn (?Model $record): bool => $record?->hasVerifiedWhatsApp() ?? false)
                     ->dehydrateStateUsing(fn (bool $state) => $state ? now() : null)
-                    ->live()
-                    ->helperText('Tandai jika nomor WhatsApp sudah diverifikasi oleh petugas tanpa OTP'),
+                    ->live(),
                 Textarea::make('address')
                     ->label('Alamat')
                     ->nullable()

@@ -29,8 +29,8 @@ it('reports a blocking reason for non campus emails', function () {
     ]);
 
     expect($user->borrowingBlockReason())->toBe([
-        'title' => 'Email bukan domain kampus',
-        'message' => 'Peminjaman buku hanya untuk pengguna dengan email @mhs.unimal.ac.id atau @unimal.ac.id.',
+        'title' => 'Gunakan Email Kampus Resmi',
+        'message' => 'Untuk meminjam buku, masuk menggunakan email resmi kampus Anda (@mhs.unimal.ac.id atau @unimal.ac.id).',
         'actionUrl' => null,
     ])
         ->and($user->canStartLoanRequest())->toBeFalse();
@@ -128,7 +128,7 @@ it('kiosk borrow surfaces the blocking reason', function () {
         app(KioskLoanService::class)->borrow($user->email, [999999]);
     } catch (ValidationException $exception) {
         expect($exception->errors()['member_identifier'][0])
-            ->toContain('Peminjaman buku hanya untuk pengguna dengan email @mhs.unimal.ac.id atau @unimal.ac.id');
+            ->toContain('Untuk meminjam buku, masuk menggunakan email resmi kampus Anda (@mhs.unimal.ac.id atau @unimal.ac.id)');
 
         return;
     }

@@ -35,9 +35,9 @@ class ServerInfoWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Mode Aplikasi', $environment)
-                ->description($isDebug ? 'Debug aktif' : 'Debug dimatikan')
-                ->descriptionColor($isDebug ? 'warning' : 'success')
-                ->descriptionIcon($isDebug ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle)
+                ->description($isDebug ? 'Debug aktif' : null)
+                ->descriptionColor($isDebug ? 'warning' : null)
+                ->descriptionIcon($isDebug ? Heroicon::OutlinedExclamationTriangle : null)
                 ->color('primary')
                 ->icon(Heroicon::OutlinedShieldCheck),
 
@@ -56,14 +56,14 @@ class ServerInfoWidget extends StatsOverviewWidget
                 ->icon(Heroicon::OutlinedServerStack),
 
             Stat::make('Penyimpanan', $this->formatBytes($diskFree).' bebas')
-                ->description($this->formatBytes($diskTotal)." total, {$diskUsagePercent}% terpakai")
+                ->description($this->formatBytes($diskTotal)." total ({$diskUsagePercent}%)")
                 ->descriptionColor($diskUsagePercent >= 85 ? 'danger' : ($diskUsagePercent >= 70 ? 'warning' : 'success'))
                 ->descriptionIcon(Heroicon::OutlinedArchiveBox)
                 ->color('primary')
                 ->icon(Heroicon::OutlinedArchiveBox),
 
             Stat::make('Waktu Server', $serverTime)
-                ->description("Zona waktu {$timezone}")
+                ->description($timezone)
                 ->descriptionColor('gray')
                 ->descriptionIcon(Heroicon::OutlinedClock)
                 ->color('gray')

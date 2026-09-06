@@ -77,7 +77,7 @@ class AddSecurityHeaders
         $directives = [
             "default-src 'self'",
             "base-uri 'self'",
-            "object-src 'none'",
+            "object-src 'self'",
             "frame-ancestors 'self'",
             "form-action 'self' https://accounts.google.com",
             "img-src 'self' data: blob: https:",
@@ -85,7 +85,7 @@ class AddSecurityHeaders
             'style-src '.implode(' ', $styleSources),
             'script-src '.implode(' ', $scriptSources),
             'connect-src '.implode(' ', $connectSources),
-            "frame-src 'self' https://accounts.google.com https://challenges.cloudflare.com",
+            "frame-src 'self' blob: https://accounts.google.com https://challenges.cloudflare.com",
         ];
 
         if ($request->isSecure()) {

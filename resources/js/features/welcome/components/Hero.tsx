@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, BookOpen, BookText, Search, Tags } from 'lucide-react';
+import { ArrowRight, BookOpen, BookText, Footprints, Search } from 'lucide-react';
 import { motion } from 'motion/react';
 import CountUp from '@/components/animated/CountUp';
 import { Kbd } from '@/components/ui/kbd';
@@ -10,7 +10,6 @@ import type { WelcomeProps } from '@/features/welcome/types';
 
 interface HeroProps {
     stats: WelcomeProps['stats'];
-    categoriesCount: number;
 }
 
 const STATS = [
@@ -27,9 +26,9 @@ const STATS = [
         suffix: '+',
     },
     {
-        key: 'categoriesCount' as const,
-        label: 'Kategori',
-        icon: Tags,
+        key: 'visitsCount' as const,
+        label: 'Kunjungan',
+        icon: Footprints,
         suffix: '+',
     },
 ];
@@ -56,7 +55,7 @@ const itemVariants = {
     },
 };
 
-export default function Hero({ stats, categoriesCount }: HeroProps) {
+export default function Hero({ stats }: HeroProps) {
     const isMobile = useIsMobile();
 
     const openSearch = () => {
@@ -66,7 +65,7 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
     const statsValues = {
         booksCount: stats.booksCount,
         availableItemsCount: stats.availableItemsCount,
-        categoriesCount,
+        visitsCount: stats.visitsCount ?? 0,
     };
 
     return (
@@ -95,8 +94,8 @@ export default function Hero({ stats, categoriesCount }: HeroProps) {
 
                                 <motion.div variants={itemVariants}>
                                     <h1 className="mx-auto max-w-4xl text-4xl font-medium tracking-[-0.03em] text-balance sm:text-5xl lg:mx-0 lg:max-w-3xl lg:text-6xl xl:text-[4.5rem]">
-                                        Cari buku, temukan referensi, pinjam
-                                        tanpa ribet.
+                                        Cari referensi, perkaya literasi,
+                                        temukan wawasan baru.
                                     </h1>
                                 </motion.div>
 

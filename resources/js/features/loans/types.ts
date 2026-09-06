@@ -17,24 +17,6 @@ export interface LoanHistoryRow {
     isReturned: boolean;
 }
 
-export interface ReturnDraftPayload {
-    id: number | null;
-    status: string | null;
-    itemsCount: number;
-    expiresAt: string | null;
-    expiresAtIso: string | null;
-    hasActiveQr: boolean;
-    qrCodeSvg: string | null;
-    selectedLoanItemIds: number[];
-    items: Array<{
-        loanItemId: number;
-        bookTitle: string;
-        internalCode: string;
-        borrowedAt: string;
-        dueAt: string;
-    }>;
-}
-
 export interface LoanHistoryPageProps {
     loans: PaginationData<LoanHistoryRow>;
     filters: {
@@ -47,5 +29,4 @@ export interface LoanHistoryPageProps {
         overdue: number;
         returned: number;
     };
-    returnDraft: ReturnDraftPayload;
 }

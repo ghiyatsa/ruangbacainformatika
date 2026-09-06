@@ -3,7 +3,9 @@
 use App\Models\Book;
 use App\Models\Setting;
 use App\Models\Skripsi;
+use App\Models\User;
 use Illuminate\Support\Facades\Queue;
+use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\get;
 
@@ -71,7 +73,16 @@ it('renders catalog-specific seo meta on the skripsi detail page', function () {
         'keywords' => 'sistem rekomendasi, perpustakaan, text mining',
     ]);
 
-    get(route('skripsi.show', $skripsi))
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'is_approved' => true,
+        'profile_completed_at' => now(),
+    ]);
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    $user->assignRole('member');
+
+    \Pest\Laravel\actingAs($user)
+        ->get(route('skripsi.show', $skripsi))
         ->assertOk()
         ->assertSee('name="description" content="Penelitian ini membahas sistem rekomendasi koleksi perpustakaan berbasis perilaku peminjaman pengguna dan kemiripan topik."', false)
         ->assertSee('name="keywords" content="Sistem Rekomendasi Perpustakaan, Nadia Putri, 2301700999, sistem rekomendasi, perpustakaan, text mining, skripsi informatika, ruang baca informatika"', false)

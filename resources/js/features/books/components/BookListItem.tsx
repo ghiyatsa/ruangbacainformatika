@@ -99,10 +99,12 @@ export default function BookListItem({ book }: BookListItemProps) {
             </div>
 
             <div className="hidden shrink-0 items-center gap-3 text-[11px] text-muted-foreground sm:flex">
-                <div className="flex items-center gap-1">
-                    <BookOpen className="size-3" />
-                    <span>{book.pages ? `${book.pages} hal` : '-'}</span>
-                </div>
+                {book.publishedYear ? (
+                    <div className="flex items-center gap-1">
+                        <BookOpen className="size-3" />
+                        <span>{book.publishedYear}</span>
+                    </div>
+                ) : null}
                 <div className="flex items-center gap-1">
                     <Eye className="size-3" />
                     <span>{formatViewCount(book.viewCount)}</span>

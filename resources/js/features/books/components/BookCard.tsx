@@ -1,21 +1,14 @@
-import { Form, Link } from '@inertiajs/react';
-import {
-    Bookmark,
-    BookOpen,
-    ShoppingCart as LoanRequestIcon,
-    Star,
-} from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { Bookmark, BookOpen, Star } from 'lucide-react';
 import { memo, useMemo, useState } from 'react';
-import LoanRequestController from '@/actions/App/Http/Controllers/LoanRequestController';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { cn, formatViewCount } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 import type { CatalogBook } from '@/features/welcome/types';
-import type { Auth, LoanRequestCart } from '@/types';
+import type { Auth } from '@/types';
 
 function CoverImage({
     src,
@@ -106,46 +99,19 @@ function CategoryBadges({
 interface BookCardProps {
     book: CatalogBook;
     variant?: 'grid' | 'compact';
-    auth: Auth;
-    loanRequestCart: LoanRequestCart | null;
+    auth?: Auth;
 }
 
-function BookCard({
-    book,
-    variant = 'grid',
-    auth,
-    loanRequestCart,
-}: BookCardProps) {
+function BookCard({ book, variant = 'grid' }: BookCardProps) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const isCompact = variant === 'compact';
     const categories = Array.isArray(book.categories) ? book.categories : [];
     const authors = Array.isArray(book.authors) ? book.authors : [];
     const authorsLabel = authors.join(', ') || 'Penulis tidak tersedia';
-    const isBorrowableAndAvailable = book.isBorrowable && book.isAvailable;
-    const quotaFull =
-        (loanRequestCart?.activeLoansCount ?? 0) >=
-        (loanRequestCart?.maxBooks ?? 0);
-    const canAddToCart =
-        auth.user !== null &&
-        auth.borrowingAccess?.canBorrow === true &&
-        isBorrowableAndAvailable;
-    const borrowBlockReason =
-        isBorrowableAndAvailable && auth.user && !canAddToCart
-            ? auth.borrowingAccess?.canBorrow
-                ? quotaFull
-                    ? 'Kuota pinjam Anda penuh. Kembalikan sebagian buku untuk meminjam lagi.'
-                    : null
-                : (auth.borrowingAccess?.reason?.message ?? null)
-            : null;
     const isBookmarkedByUser = isBookmarked({
         catalogType: 'book',
         id: book.id,
     });
-    const isAlreadyInLoanRequest =
-        loanRequestCart?.bookIds.includes(book.id) ?? false;
-    const addToLoanRequestLabel = isAlreadyInLoanRequest
-        ? 'Sudah di keranjang pinjam'
-        : 'Tambah ke keranjang pinjam';
     const bookmarkLabel = isBookmarkedByUser
         ? 'Hapus bookmark'
         : 'Simpan bookmark';
@@ -162,8 +128,8 @@ function BookCard({
         statusLabel: !book.isBorrowable
             ? 'Referensi'
             : book.isAvailable
-              ? 'Siap dipinjam'
-              : 'Sedang kosong',
+              ? 'Tersedia'
+              : 'Sedang dipinjam',
     };
 
     const availabilityStatus = !book.isBorrowable
@@ -176,16 +142,16 @@ function BookCard({
                 label: 'Tersedia',
                 color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
             }
-          : { label: 'Kosong', color: 'bg-muted text-muted-foreground' };
+          : { label: 'Dipinjam', color: 'bg-muted text-muted-foreground' };
 
     return (
         <div
             className={cn(
-                'group relative flex h-full overflow-hidden rounded-2xl border transition-all duration-300',
-                isCompact ? 'border-border/60 bg-card' : 'bg-card',
+                'group relative flex h-full overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 transition-all duration-300',
                 !isCompact && 'sm:flex-col',
             )}
         >
+            <div className="pointer-events-none absolute -right-12 -bottom-12 -z-0 h-36 w-36 rounded-full bg-primary/10 blur-2xl transition-opacity duration-300 group-hover:bg-primary/15" />
             <Link
                 href={booksRoute.show.url(book.slug)}
                 instant
@@ -251,91 +217,6 @@ function BookCard({
                             )}
                         />
                     </Button>
-
-                    {canAddToCart ? (
-                        <Form
-                            action={LoanRequestController.storeBook()}
-                            options={{ preserveScroll: true }}
-                            optimistic={(props, data) => {
-                                const nextBookId = Number(data.book_id);
-                                const currentLoanRequestCart =
-                                    props.loanRequestCart ?? {
-                                        count: 0,
-                                        maxBooks: 0,
-                                        activeLoansCount: 0,
-                                        hasActiveQr: false,
-                                        bookIds: [],
-                                    };
-
-                                if (
-                                    Number.isNaN(nextBookId) ||
-                                    currentLoanRequestCart.bookIds.includes(
-                                        nextBookId,
-                                    )
-                                ) {
-                                    return {};
-                                }
-
-                                return {
-                                    loanRequestCart: {
-                                        ...currentLoanRequestCart,
-                                        count: currentLoanRequestCart.count + 1,
-                                        hasActiveQr: false,
-                                        bookIds: [
-                                            ...currentLoanRequestCart.bookIds,
-                                            nextBookId,
-                                        ],
-                                    },
-                                };
-                            }}
-                        >
-                            {({ processing }) => (
-                                <>
-                                    <input
-                                        type="hidden"
-                                        name="book_id"
-                                        value={book.id}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        size="icon-sm"
-                                        variant="secondary"
-                                        title={addToLoanRequestLabel}
-                                        className={cn(
-                                            'rounded-full border border-white/20 bg-black/55 text-white shadow-sm hover:bg-black/70 hover:text-white',
-                                            processing && 'animate-pulse',
-                                        )}
-                                        disabled={
-                                            processing || isAlreadyInLoanRequest
-                                        }
-                                        aria-label={addToLoanRequestLabel}
-                                    >
-                                        {processing ? (
-                                            <>
-                                                <Spinner className="size-3.5" />
-                                                <span className="sr-only">
-                                                    Menambahkan ke keranjang
-                                                    pinjam
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <LoanRequestIcon className="size-3.5 transition-transform duration-200 group-hover:scale-105" />
-                                        )}
-                                    </Button>
-                                </>
-                            )}
-                        </Form>
-                    ) : borrowBlockReason ? (
-                        <button
-                            type="button"
-                            disabled
-                            title={borrowBlockReason}
-                            aria-label={borrowBlockReason}
-                            className="inline-flex size-7 shrink-0 cursor-not-allowed items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/60 shadow-sm"
-                        >
-                            <LoanRequestIcon className="size-3.5" />
-                        </button>
-                    ) : null}
                 </div>
 
                 <div className="absolute bottom-2 left-2 z-20">
@@ -390,12 +271,6 @@ function BookCard({
                     <div className="flex min-w-0 items-center gap-1.5 truncate text-[11px] text-muted-foreground sm:gap-2">
                         {book.publishedYear ? (
                             <span>{book.publishedYear}</span>
-                        ) : null}
-                        {book.pages ? (
-                            <>
-                                <span className="text-border">&middot;</span>
-                                <span>{book.pages} hal</span>
-                            </>
                         ) : null}
                     </div>
                 </div>

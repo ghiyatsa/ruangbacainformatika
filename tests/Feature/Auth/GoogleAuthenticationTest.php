@@ -68,7 +68,7 @@ it('eligible users can authenticate with google one tap', function () {
 
     post(route('auth.google.one-tap'), [
         'credential' => 'one-tap-token',
-    ])->assertRedirect(route('register.whatsapp', absolute: false));
+    ])->assertRedirect(route('register.profile', absolute: false));
 
     assertAuthenticated();
 
@@ -137,7 +137,7 @@ it('eligible users can authenticate with google', function () {
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('register.whatsapp', absolute: false));
+        ->assertRedirect(route('register.profile', absolute: false));
 
     assertAuthenticated();
 
@@ -169,7 +169,7 @@ it('unknown users can create a new account through direct google login', functio
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('register.whatsapp', absolute: false));
+        ->assertRedirect(route('register.profile', absolute: false));
 
     assertAuthenticated();
 
@@ -438,7 +438,7 @@ it('campus users with complete profiles are redirected to whatsapp verification 
         ->assertRedirect(route('register.whatsapp', absolute: false));
 });
 
-it('campus users without complete profiles are also redirected to whatsapp verification after google login', function () {
+it('campus users without complete profiles are redirected to profile onboarding after google login', function () {
     $socialiteUser = (new SocialiteUser)->map([
         'id' => 'google-otp-002',
         'name' => 'Mahasiswa TI Baru',
@@ -448,7 +448,7 @@ it('campus users without complete profiles are also redirected to whatsapp verif
     Socialite::fake('google', $socialiteUser);
 
     get(route('auth.google.callback'))
-        ->assertRedirect(route('register.whatsapp', absolute: false));
+        ->assertRedirect(route('register.profile', absolute: false));
 });
 
 it('legacy users with whatsapp only can complete onboarding by adding an address', function () {

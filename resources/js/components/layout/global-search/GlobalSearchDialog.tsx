@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { router, useHttp } from '@inertiajs/react';
-import { Search, Loader2, History, X } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import {
@@ -10,77 +10,27 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    clearAllSearchHistory,
+    loadSearchHistory,
+    removeSearchHistoryItem,
+    saveSearchHistoryItem,
+} from './history-storage';
+import { SearchFooter } from './SearchFooter';
+import { SearchHistoryList } from './SearchHistoryList';
+import { SearchResultsList } from './SearchResultsList';
+import { SearchResultsSkeleton } from './SearchResultsSkeleton';
+import type {
+    HistoryItem,
+    QuickResultItem,
+    SuggestionApiResponse,
+} from './types';
 
-const SEARCH_SUGGESTIONS_ENDPOINT = '/search/suggestions';
-const STORAGE_KEY = 'global_search_history';
-const MAX_HISTORY = 5;
+const SEARCH_ENDPOINT = '/search/suggestions';
 
 interface GlobalSearchDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-}
-
-/**
- * Highlights the part of the text the user actually typed (greedy left-to-right
- * alignment), leaving auto-completed / corrected characters un-highlighted.
- */
-function getHighlightedText(text: string, highlight: string) {
-    const query = highlight.trim().toLowerCase();
-
-    if (!query) {
-        return <span>{text}</span>;
-    }
-
-    const source = text.toLowerCase();
-    const parts: React.ReactNode[] = [];
-    let queryIndex = 0;
-    let run: string[] = [];
-    let runIsMatch = false;
-
-    const flush = () => {
-        if (run.length === 0) {
-            return;
-        }
-
-        const chunk = run.join('');
-        const key = parts.length;
-
-        if (runIsMatch) {
-            parts.push(
-                <strong key={key} className="font-extrabold text-foreground">
-                    {chunk}
-                </strong>,
-            );
-        } else {
-            parts.push(
-                <span key={key} className="text-muted-foreground">
-                    {chunk}
-                </span>,
-            );
-        }
-
-        run = [];
-    };
-
-    for (let i = 0; i < text.length; i++) {
-        const isMatch =
-            queryIndex < query.length && source[i] === query[queryIndex];
-
-        if (isMatch) {
-            queryIndex++;
-        }
-
-        if (isMatch !== runIsMatch) {
-            flush();
-            runIsMatch = isMatch;
-        }
-
-        run.push(text[i]);
-    }
-
-    flush();
-
-    return <span>{parts}</span>;
 }
 
 export function GlobalSearchDialog({
@@ -88,118 +38,36 @@ export function GlobalSearchDialog({
     onOpenChange,
 }: GlobalSearchDialogProps) {
     const [query, setQuery] = React.useState('');
-    const [suggestions, setSuggestions] = React.useState<string[]>([]);
-    const [history, setHistory] = React.useState<string[]>([]);
-    const [selectedIndex, setSelectedIndex] = React.useState(-1);
+    const [quickResults, setQuickResults] = React.useState<
+        SuggestionApiResponse['quickResults']
+    >({});
+    const [history, setHistory] = React.useState<HistoryItem[]>([]);
     const [isDebouncing, setIsDebouncing] = React.useState(false);
-    const historyRef = React.useRef<string[]>([]);
+    const [selectedIndex, setSelectedIndex] = React.useState<number>(0);
 
     const http = useHttp();
     const httpRef = React.useRef(http);
+
     React.useEffect(() => {
         httpRef.current = http;
     }, [http]);
 
     const isLoading = http.processing || isDebouncing;
 
+    // Muat riwayat terakhir saat dialog dibuka
     React.useEffect(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                const parsed = stored ? (JSON.parse(stored) as string[]) : [];
-
-                if (Array.isArray(parsed)) {
-                    historyRef.current = parsed;
-                    setHistory(parsed);
-                }
-            } catch (e) {
-                console.error('Failed to load search history', e);
-            }
+        if (open) {
+            setHistory(loadSearchHistory());
         }
     }, [open]);
 
-    const saveToHistory = React.useCallback((searchQuery: string) => {
-        const trimmed = searchQuery.trim();
-
-        if (!trimmed) {
-            return;
-        }
-
-        // Tulis localStorage secara sinkron di luar updater state.
-        // Menulis di dalam setHistory(prev => ...) bisa terlewat saat
-        // komponen langsung unmount (Enter -> dialog ditutup -> navigasi).
-        const updated = [
-            trimmed,
-            ...historyRef.current.filter((item) => item !== trimmed),
-        ].slice(0, MAX_HISTORY);
-
-        historyRef.current = updated;
-
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        } catch (e) {
-            console.error('Failed to save search history', e);
-        }
-
-        setHistory(updated);
-    }, []);
-
-    const deleteHistoryItem = React.useCallback(
-        (itemToDelete: string, e: React.MouseEvent) => {
-            e.stopPropagation();
-            e.preventDefault();
-
-            const updated = historyRef.current.filter(
-                (item) => item !== itemToDelete,
-            );
-
-            historyRef.current = updated;
-
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-            } catch (err) {
-                console.error('Failed to delete search history item', err);
-            }
-
-            setHistory(updated);
-        },
-        [],
-    );
-
-    const items = React.useMemo(() => {
-        const trimmed = query.trim();
-
-        if (trimmed === '') {
-            return history;
-        }
-
-        const recentMatches = history.filter((item) =>
-            item.toLowerCase().includes(trimmed.toLowerCase()),
-        );
-
-        const seen = new Set<string>();
-        const merged = [...recentMatches, ...suggestions].filter((item) => {
-            const key = item.toLowerCase();
-
-            if (seen.has(key)) {
-                return false;
-            }
-
-            seen.add(key);
-
-            return true;
-        });
-
-        return [...merged, `Cari semua untuk "${trimmed}"`];
-    }, [suggestions, query, history]);
-
+    // Handle Query input & debounce fetch
     const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setQuery(value);
-        setSelectedIndex(-1);
 
-        if (!value) {
-            setSuggestions([]);
+        if (!value.trim()) {
+            setQuickResults({});
             setIsDebouncing(false);
         } else {
             setIsDebouncing(true);
@@ -207,24 +75,25 @@ export function GlobalSearchDialog({
     };
 
     React.useEffect(() => {
-        if (!query) {
+        if (!query.trim()) {
             return;
         }
 
         const timeoutId = setTimeout(() => {
             setIsDebouncing(false);
             httpRef.current.get(
-                `${SEARCH_SUGGESTIONS_ENDPOINT}?q=${encodeURIComponent(query)}`,
+                `${SEARCH_ENDPOINT}?q=${encodeURIComponent(query.trim())}`,
                 {
                     onSuccess: (data: unknown) => {
-                        setSuggestions((data as string[]) || []);
+                        const payload = (data || {}) as SuggestionApiResponse;
+                        setQuickResults(payload.quickResults || {});
                     },
                     onError: () => {
-                        setSuggestions([]);
+                        setQuickResults({});
                     },
                 },
             );
-        }, 200);
+        }, 160);
 
         return () => {
             clearTimeout(timeoutId);
@@ -232,251 +101,192 @@ export function GlobalSearchDialog({
         };
     }, [query]);
 
-    const handleSelect = React.useCallback(
-        (targetQuery: string) => {
-            onOpenChange(false);
-            const isDirectSearch =
-                targetQuery === query ||
-                targetQuery.startsWith('Cari semua untuk "');
-            const actualQuery = isDirectSearch ? query : targetQuery;
-            saveToHistory(actualQuery);
-            router.visit(`/search?q=${encodeURIComponent(actualQuery)}`, {
-                headers: !isDirectSearch
-                    ? { 'X-Search-Clicked': '1' }
-                    : undefined,
-            });
-        },
-        [onOpenChange, query, saveToHistory],
+    const books = React.useMemo(
+        () => quickResults?.books || [],
+        [quickResults?.books],
+    );
+    const skripsi = React.useMemo(
+        () => quickResults?.skripsi || [],
+        [quickResults?.skripsi],
+    );
+    const posts = React.useMemo(
+        () => quickResults?.posts || [],
+        [quickResults?.posts],
     );
 
+    const isSearching = query.trim().length > 0;
+    const hasLiveResults =
+        books.length > 0 || skripsi.length > 0 || posts.length > 0;
+
+    // Item aktif yang dapat dinavigasi panah atas/bawah
+    const activeItems = React.useMemo<
+        Array<QuickResultItem | HistoryItem>
+    >(() => {
+        if (isSearching) {
+            return [...books, ...skripsi, ...posts];
+        }
+
+        return history;
+    }, [isSearching, books, skripsi, posts, history]);
+
+    React.useEffect(() => {
+        setSelectedIndex(0);
+    }, [query, quickResults, history]);
+
+    // Navigasi ke item yang dipilih dan catat ke riwayat
+    const handleSelectItem = React.useCallback(
+        (item: QuickResultItem | HistoryItem) => {
+            onOpenChange(false);
+            const updated = saveSearchHistoryItem({
+                id: `${item.type}-${item.id}`,
+                title: item.title,
+                subtitle: item.subtitle,
+                url: item.url,
+                type: item.type,
+            });
+
+            setHistory(updated);
+            router.visit(item.url);
+        },
+        [onOpenChange],
+    );
+
+    const handleRemoveHistory = React.useCallback(
+        (id: string, e: React.MouseEvent) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const updated = removeSearchHistoryItem(id);
+
+            setHistory(updated);
+        },
+        [],
+    );
+
+    const handleClearAllHistory = React.useCallback(() => {
+        clearAllSearchHistory();
+        setHistory([]);
+    }, []);
+
+    // Navigasi Keyboard: ↑, ↓, ↵ Enter, Esc
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            setSelectedIndex((prev) =>
-                prev + 1 < items.length ? prev + 1 : prev,
-            );
+
+            if (activeItems.length > 0) {
+                setSelectedIndex((prev) =>
+                    prev < activeItems.length - 1 ? prev + 1 : 0,
+                );
+            }
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            setSelectedIndex((prev) => (prev - 1 >= 0 ? prev - 1 : prev));
+
+            if (activeItems.length > 0) {
+                setSelectedIndex((prev) =>
+                    prev > 0 ? prev - 1 : activeItems.length - 1,
+                );
+            }
         } else if (e.key === 'Enter') {
             e.preventDefault();
 
-            if (selectedIndex >= 0 && selectedIndex < items.length) {
-                handleSelect(items[selectedIndex]);
-            } else if (query.trim() !== '') {
-                handleSelect(query);
+            if (activeItems.length > 0 && activeItems[selectedIndex]) {
+                handleSelectItem(activeItems[selectedIndex]);
             }
         } else if (e.key === 'Escape') {
             onOpenChange(false);
         }
     };
 
+    // Reset state saat dialog ditutup
     React.useEffect(() => {
         if (!open) {
             setQuery('');
-            setSuggestions([]);
-            setSelectedIndex(-1);
+            setQuickResults({});
             setIsDebouncing(false);
+            setSelectedIndex(0);
         }
     }, [open]);
+
+    const selectedItem = activeItems[selectedIndex];
+    const selectedId = selectedItem
+        ? isSearching
+            ? `${selectedItem.type}-${selectedItem.id}`
+            : (selectedItem as HistoryItem).id
+        : undefined;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogHeader className="sr-only">
-                <DialogTitle>Pencarian Global</DialogTitle>
+                <DialogTitle>Pencarian Koleksi</DialogTitle>
                 <DialogDescription>
-                    Masukkan kata kunci pencarian
+                    Pencarian instan koleksi buku, skripsi, dan artikel.
                 </DialogDescription>
             </DialogHeader>
             <DialogContent
-                className="top-[15%]! w-full translate-y-0! gap-0! overflow-hidden rounded-xl! border bg-popover p-0! shadow-lg sm:top-[20%]! sm:max-w-2xl!"
-                overlayClassName="bg-black/60"
+                className="top-[15%] w-full translate-y-0 gap-0 overflow-hidden rounded-2xl border bg-popover p-0 shadow-2xl sm:top-[18%] sm:max-w-2xl"
+                overlayClassName="bg-black/60 backdrop-blur-xs"
                 showCloseButton={false}
             >
                 <div
-                    className={`flex items-center px-3 ${query.length > 0 || history.length > 0 ? 'border-b' : ''}`}
+                    className={`flex items-center px-4 ${query.length > 0 || history.length > 0 ? 'border-b' : ''}`}
                 >
-                    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Search className="mr-3 size-4 shrink-0 text-muted-foreground" />
                     <input
-                        className="h-12 w-full border-none bg-transparent px-0 text-sm outline-none placeholder:text-muted-foreground focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                        placeholder="Cari buku, artikel, atau karya ilmiah..."
+                        className="h-13 w-full border-none bg-transparent px-0 text-sm outline-none placeholder:text-muted-foreground focus:ring-0 focus:outline-none"
+                        placeholder="Ketik judul buku, nama pengarang, topik skripsi, artikel..."
                         value={query}
                         onChange={handleQueryChange}
                         onKeyDown={handleKeyDown}
                         autoFocus
                     />
                     {isLoading && (
-                        <Loader2 className="ml-2 h-4 w-4 animate-spin opacity-50" />
+                        <Loader2 className="ml-2 size-4 animate-spin text-muted-foreground" />
                     )}
                 </div>
 
                 <AnimatePresence initial={false}>
-                    {query.length > 0 || history.length > 0 ? (
+                    {isSearching || history.length > 0 ? (
                         <motion.div
                             key="global-search-container"
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{
-                                type: 'spring',
-                                duration: 0.3,
-                                bounce: 0,
-                            }}
-                            className="flex max-h-72 w-full flex-col overflow-hidden"
+                            transition={{ duration: 0.2 }}
+                            className="flex max-h-[28rem] w-full flex-col overflow-hidden"
                         >
-                            {query.length > 0 ? (
-                                isLoading ? (
-                                    <div className="space-y-0.5 p-1.5">
-                                        <div className="flex items-center gap-2 px-1.5 py-2">
-                                            <Search className="size-4 shrink-0 animate-pulse text-muted-foreground/30" />
-                                            <div className="h-5 w-full animate-pulse rounded bg-muted" />
-                                        </div>
-                                        <div className="flex items-center gap-2 px-1.5 py-2">
-                                            <Search className="size-4 shrink-0 animate-pulse text-muted-foreground/30" />
-                                            <div className="h-5 w-full animate-pulse rounded bg-muted" />
-                                        </div>
-                                        <div className="flex items-center gap-2 px-1.5 py-2">
-                                            <Search className="size-4 shrink-0 animate-pulse text-muted-foreground/30" />
-                                            <div className="h-5 w-full animate-pulse rounded bg-muted" />
-                                        </div>
-                                    </div>
-                                ) : suggestions.length === 0 ? (
-                                    <div className="p-1.5">
-                                        <button
-                                            onClick={() =>
-                                                handleSelect(
-                                                    `Cari semua untuk "${query}"`,
-                                                )
-                                            }
-                                            className="flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-1.5 py-2 text-left text-sm font-medium text-primary hover:bg-accent"
-                                        >
-                                            <Search className="size-4 shrink-0 text-primary" />
-                                            <span className="min-w-0 flex-1 truncate">
-                                                Cari semua untuk &quot;{query}
-                                                &quot;
+                            <div className="no-scrollbar flex-1 overflow-y-auto p-2">
+                                {isSearching ? (
+                                    isLoading && !hasLiveResults ? (
+                                        <SearchResultsSkeleton />
+                                    ) : !isLoading && !hasLiveResults ? (
+                                        <div className="py-12 text-center text-sm text-muted-foreground">
+                                            <Search className="mx-auto mb-2 size-8 opacity-30" />
+                                            Tidak ditemukan hasil untuk &ldquo;
+                                            <span className="font-medium text-foreground">
+                                                {query}
                                             </span>
-                                        </button>
-                                    </div>
+                                            &rdquo;
+                                        </div>
+                                    ) : (
+                                        <SearchResultsList
+                                            books={books}
+                                            skripsi={skripsi}
+                                            posts={posts}
+                                            selectedId={selectedId}
+                                            onSelect={handleSelectItem}
+                                        />
+                                    )
                                 ) : (
-                                    <>
-                                        {/* Scrollable Suggestions List */}
-                                        <div className="no-scrollbar max-h-[15.5rem] overflow-y-auto p-1.5">
-                                            <div className="space-y-0.5">
-                                                {suggestions.map(
-                                                    (item, idx) => {
-                                                        const isSelected =
-                                                            selectedIndex ===
-                                                            idx;
-                                                        const isInHistory =
-                                                            history.includes(
-                                                                item,
-                                                            );
+                                    <SearchHistoryList
+                                        history={history}
+                                        selectedId={selectedId}
+                                        onSelect={handleSelectItem}
+                                        onRemoveHistory={handleRemoveHistory}
+                                        onClearAll={handleClearAllHistory}
+                                    />
+                                )}
+                            </div>
 
-                                                        return (
-                                                            <button
-                                                                key={item}
-                                                                onClick={() =>
-                                                                    handleSelect(
-                                                                        item,
-                                                                    )
-                                                                }
-                                                                className={`flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-1.5 py-2 text-left text-sm transition-colors ${
-                                                                    isSelected
-                                                                        ? 'bg-accent text-accent-foreground'
-                                                                        : 'hover:bg-accent/50'
-                                                                }`}
-                                                            >
-                                                                {isInHistory ? (
-                                                                    <History className="size-4 shrink-0 text-muted-foreground" />
-                                                                ) : (
-                                                                    <Search className="size-4 shrink-0 text-muted-foreground" />
-                                                                )}
-                                                                <span className="min-w-0 flex-1 truncate">
-                                                                    {getHighlightedText(
-                                                                        item,
-                                                                        query,
-                                                                    )}
-                                                                </span>
-                                                            </button>
-                                                        );
-                                                    },
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Sticky Bottom "Cari semua..." button */}
-                                        <div className="sticky bottom-0 mt-auto border-t border-dashed border-border bg-popover p-1.5">
-                                            {(() => {
-                                                const searchAllIndex =
-                                                    items.length - 1;
-                                                const isSelected =
-                                                    selectedIndex ===
-                                                    searchAllIndex;
-                                                const label = `Cari semua untuk "${query}"`;
-
-                                                return (
-                                                    <button
-                                                        onClick={() =>
-                                                            handleSelect(label)
-                                                        }
-                                                        className={`flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-1.5 py-2 text-left text-sm transition-colors ${
-                                                            isSelected
-                                                                ? 'bg-accent text-accent-foreground'
-                                                                : 'hover:bg-accent/50'
-                                                        }`}
-                                                    >
-                                                        <Search className="size-4 shrink-0 text-primary" />
-                                                        <span className="block min-w-0 flex-1 truncate font-medium text-primary">
-                                                            {label}
-                                                        </span>
-                                                    </button>
-                                                );
-                                            })()}
-                                        </div>
-                                    </>
-                                )
-                            ) : (
-                                <div className="p-1.5">
-                                    <div className="no-scrollbar max-h-56 space-y-0.5 overflow-y-auto">
-                                        {history.map((item, idx) => {
-                                            const isSelected =
-                                                selectedIndex === idx;
-
-                                            return (
-                                                <button
-                                                    key={item}
-                                                    onClick={() =>
-                                                        handleSelect(item)
-                                                    }
-                                                    className={`flex w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-lg px-1.5 py-2 text-left text-sm transition-colors ${
-                                                        isSelected
-                                                            ? 'bg-accent text-accent-foreground'
-                                                            : 'hover:bg-accent/50'
-                                                    }`}
-                                                >
-                                                    <div className="flex min-w-0 flex-1 items-center gap-2">
-                                                        <History className="size-4 shrink-0 text-muted-foreground" />
-                                                        <span className="truncate text-muted-foreground">
-                                                            {item}
-                                                        </span>
-                                                    </div>
-                                                    <span
-                                                        onClick={(e) =>
-                                                            deleteHistoryItem(
-                                                                item,
-                                                                e,
-                                                            )
-                                                        }
-                                                        className="shrink-0 cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
-                                                    >
-                                                        <X className="size-3" />
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
+                            <SearchFooter />
                         </motion.div>
                     ) : null}
                 </AnimatePresence>

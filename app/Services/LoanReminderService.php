@@ -55,10 +55,15 @@ class LoanReminderService
      */
     public function eligibleLoansQuery(int $maxOverdueDays = self::DEFAULT_MAX_OVERDUE_DAYS): Builder
     {
+        // Pada hari Jumat, batas H-1 mencakup pinjaman yang jatuh tempo hari Senin (+3 hari)
+        $maxDueDate = now()->isFriday()
+            ? now()->addDays(3)->endOfDay()
+            : now()->addDay()->endOfDay();
+
         return Loan::query()
             ->where('status', Loan::STATUS_BORROWED)
             ->whereNull('returned_at')
-            ->where('due_at', '<=', now()->addDay()->endOfDay())
+            ->where('due_at', '<=', $maxDueDate)
             ->where('due_at', '>=', now()->subDays($maxOverdueDays)->startOfDay())
             ->where(function (Builder $query): void {
                 $query
@@ -75,7 +80,11 @@ class LoanReminderService
 
         $today = now()->startOfDay();
 
-        if ($loan->due_at->gt(now()->addDay()->endOfDay())) {
+        $maxDueDate = now()->isFriday()
+            ? now()->addDays(3)->endOfDay()
+            : now()->addDay()->endOfDay();
+
+        if ($loan->due_at->gt($maxDueDate)) {
             return false;
         }
 

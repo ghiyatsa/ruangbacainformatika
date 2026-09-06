@@ -4,6 +4,7 @@ use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureKioskNetworkIsAllowed;
 use App\Http\Middleware\EnsureKioskPinIsValid;
 use App\Http\Middleware\EnsureProfileIsCompleted;
+use App\Http\Middleware\EnsureUserIsMember;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Services\Auth\AuthenticationRedirector;
@@ -49,6 +50,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'profile.completed' => EnsureProfileIsCompleted::class,
+            'member' => EnsureUserIsMember::class,
             'kiosk.pin' => EnsureKioskPinIsValid::class,
             'kiosk.network' => EnsureKioskNetworkIsAllowed::class,
         ]);

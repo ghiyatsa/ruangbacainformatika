@@ -59,68 +59,65 @@ class IntegrationSettings extends Page
     {
         return $schema->components([
             Form::make([
-                Section::make('Cloudflare Turnstile')
-                    ->description('Verifikasi tambahan untuk formulir publik')
+                Section::make('Keamanan Cloudflare Turnstile')
                     ->schema([
                         Toggle::make('turnstile_enabled')
-                            ->label('Aktifkan Turnstile')
-                            ->helperText('Gunakan untuk perlindungan tambahan pada formulir publik')
+                            ->label('Aktifkan Proteksi Turnstile')
                             ->onIcon('heroicon-m-check')
                             ->offIcon('heroicon-m-x-mark')
                             ->onColor('success')
                             ->offColor('danger'),
                     ]),
-                Section::make('API Kemiripan Skripsi')
-                    ->description('Pengaturan layanan pemeriksaan kemiripan karya ilmiah')
+                Section::make('Mesin Pemeriksa Kemiripan Karya')
                     ->schema([
                         TextInput::make('similarity_api_url')
-                            ->label('URL API')
+                            ->label('URL Endpoint API')
                             ->url()
                             ->required()
                             ->placeholder('http://localhost:8181'),
                         TextInput::make('similarity_api_secret')
-                            ->label('Token API')
+                            ->label('Token Akses API (Secret)')
                             ->autocomplete('off')
                             ->required()
                             ->suffixAction(
                                 Action::make('generateSecret')
                                     ->icon('heroicon-m-key')
                                     ->color('warning')
-                                    ->tooltip('Buat token baru')
+                                    ->tooltip('Generate token acak baru')
                                     ->requiresConfirmation()
-                                    ->modalHeading('Buat Token API Baru')
-                                    ->modalDescription('Token lama akan diganti setelah pengaturan disimpan')
-                                    ->modalSubmitActionLabel('Buat Token')
+                                    ->modalHeading('Generate Token API Baru')
+                                    ->modalDescription('Token saat ini akan langsung digantikan dengan token acak baru.')
+                                    ->modalSubmitActionLabel('Generate Token')
                                     ->action(function (Set $set) {
                                         $secret = Str::random(32);
                                         $set('similarity_api_secret', $secret);
 
                                         Notification::make()
                                             ->success()
-                                            ->title('Token baru siap digunakan')
-                                            ->body("Token baru: **{$secret}**")
+                                            ->title('Token baru berhasil dibuat')
+                                            ->body("Token baru: **{$secret}** (simpan halaman untuk menerapkan)")
                                             ->persistent()
                                             ->send();
                                     })
                             ),
                         TextInput::make('similarity_api_timeout')
-                            ->label('Timeout (Detik)')
+                            ->label('Batas Waktu Request (Timeout)')
                             ->numeric()
+                            ->suffix('detik')
                             ->required()
                             ->minValue(1)
                             ->maxValue(60)
                             ->default(10),
                         TextInput::make('similarity_api_top_k')
-                            ->label('Top K (Jumlah Hasil)')
-                            ->helperText('Jumlah hasil yang ditampilkan')
+                            ->label('Batas Dokumen Serupa (Top-K)')
                             ->numeric()
                             ->required()
                             ->minValue(1)
                             ->maxValue(50)
                             ->default(5),
                         TextInput::make('similarity_api_threshold')
-                            ->label('Threshold (Ambang Batas)')
-                            ->helperText('Nilai lebih tinggi akan memperketat hasil')
+                            ->label('Ambang Batas Kemiripan (Threshold)')
+                            ->helperText('Rentang 0.00 - 1.00.')
                             ->numeric()
                             ->required()
                             ->minValue(0)
@@ -129,7 +126,6 @@ class IntegrationSettings extends Page
                             ->default(0.5),
                         TextInput::make('similarity_weight_judul')
                             ->label('Bobot Judul')
-                            ->helperText('Total bobot disarankan 1.00')
                             ->numeric()
                             ->required()
                             ->minValue(0)
@@ -138,7 +134,6 @@ class IntegrationSettings extends Page
                             ->default(0.7),
                         TextInput::make('similarity_weight_abstrak')
                             ->label('Bobot Abstrak')
-                            ->helperText('Jika diubah, lakukan sinkron ulang data kemiripan')
                             ->numeric()
                             ->required()
                             ->minValue(0)
@@ -156,27 +151,27 @@ class IntegrationSettings extends Page
                     ])
                     ->columns(2),
 
-                Section::make('Notifikasi WhatsApp')
-                    ->description('Pengaturan WhatsApp untuk notifikasi rutin')
+                Section::make('WhatsApp Gateway')
                     ->schema([
                         TextInput::make('whatsapp_api_url')
-                            ->label('URL Endpoint WhatsApp API')
+                            ->label('URL Endpoint Gateway')
                             ->url()
                             ->placeholder('https://api.fonnte.com/send'),
                         TextInput::make('whatsapp_api_token')
-                            ->label('Token API')
+                            ->label('Token Otentikasi Gateway')
                             ->autocomplete('off'),
                         TextInput::make('whatsapp_failure_pause_threshold')
-                            ->label('Batas Gagal Sebelum Jeda')
-                            ->helperText('Isi 0 jika jeda tidak diperlukan')
+                            ->label('Batas Toleransi Kegagalan')
+                            ->helperText('0 = nonaktif.')
                             ->numeric()
                             ->required()
                             ->minValue(0)
                             ->maxValue(100)
                             ->default(5),
                         TextInput::make('whatsapp_failure_pause_window_minutes')
-                            ->label('Window Gagal (Menit)')
+                            ->label('Jendela Waktu Pemantauan')
                             ->numeric()
+                            ->suffix('menit')
                             ->required()
                             ->minValue(1)
                             ->maxValue(1440)
@@ -192,9 +187,9 @@ class IntegrationSettings extends Page
                             ->icon(Heroicon::OutlinedArrowPath)
                             ->color('warning')
                             ->requiresConfirmation()
-                            ->modalHeading('Sinkronkan Ulang Semua Dokumen')
-                            ->modalDescription('Gunakan setelah bobot kemiripan berubah agar seluruh data diperbarui ulang. Proses tetap berjalan di antrean.')
-                            ->modalSubmitActionLabel('Mulai Sinkron Ulang')
+                            ->modalHeading('Sinkronkan Seluruh Dokumen Akademik')
+                            ->modalDescription('Proses ini akan mengirim seluruh naskah skripsi dan laporan KP ke antrean komputasi indeks kemiripan.')
+                            ->modalSubmitActionLabel('Jadwalkan Sinkronisasi')
                             ->action(function (): void {
                                 $result = app(SimilarityFullSyncDispatcher::class)->dispatch(
                                     chunk: 200,

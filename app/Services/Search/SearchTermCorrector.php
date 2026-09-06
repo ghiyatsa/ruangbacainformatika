@@ -2,7 +2,9 @@
 
 namespace App\Services\Search;
 
+use App\Models\Author;
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\InternshipReport;
 use App\Models\Post;
 use App\Models\SearchHistory;
@@ -56,8 +58,17 @@ class SearchTermCorrector
             foreach (Book::query()->published()->pluck('title') as $title) {
                 $this->collectTokens((string) $title, $seen);
             }
+            foreach (Author::query()->pluck('name') as $authorName) {
+                $this->collectTokens((string) $authorName, $seen);
+            }
+            foreach (Category::query()->pluck('name') as $categoryName) {
+                $this->collectTokens((string) $categoryName, $seen);
+            }
             foreach (Skripsi::query()->whereNotNull('keywords')->pluck('keywords') as $keywords) {
                 $this->collectTokens((string) $keywords, $seen);
+            }
+            foreach (Skripsi::query()->whereNotNull('author_name')->pluck('author_name') as $authorName) {
+                $this->collectTokens((string) $authorName, $seen);
             }
             foreach (Thesis::query()->whereNotNull('keywords')->pluck('keywords') as $keywords) {
                 $this->collectTokens((string) $keywords, $seen);

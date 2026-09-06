@@ -9,6 +9,7 @@ import {
     Settings,
     Shield,
     Sun,
+    UserCheck,
 } from 'lucide-react';
 import { UserInfo } from '@/components/common/UserInfo';
 import {
@@ -31,7 +32,8 @@ type Props = {
 };
 
 export function UserMenuContent({ user }: Props) {
-    const { auth } = usePage<{ auth: Auth }>().props;
+    const pageProps = usePage<{ auth?: Auth }>().props;
+    const auth = pageProps.auth;
     const { appearance, updateAppearance } = useAppearance();
 
     const handleLogout = () => {
@@ -48,7 +50,20 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                {auth.isMember ? (
+                {auth?.requiresOnboarding && auth.onboardingUrl ? (
+                    <DropdownMenuItem asChild>
+                        <Link
+                            className="block w-full cursor-pointer bg-primary/10 px-2 py-2 font-medium text-primary hover:bg-primary/20"
+                            href={auth.onboardingUrl}
+                            prefetch
+                            onClick={cleanupMobileNavigation}
+                        >
+                            <UserCheck className="mr-2 h-4 w-4" />
+                            Lengkapi Data Anggota
+                        </Link>
+                    </DropdownMenuItem>
+                ) : null}
+                {auth?.isMember ? (
                     <DropdownMenuItem asChild>
                         <a
                             className="block w-full cursor-pointer px-2 py-2"
@@ -60,7 +75,7 @@ export function UserMenuContent({ user }: Props) {
                         </a>
                     </DropdownMenuItem>
                 ) : null}
-                {auth.canAccessAdminPanel ? (
+                {auth?.canAccessAdminPanel ? (
                     <DropdownMenuItem asChild>
                         <a
                             className="block w-full cursor-pointer px-2 py-2"
@@ -72,20 +87,20 @@ export function UserMenuContent({ user }: Props) {
                         </a>
                     </DropdownMenuItem>
                 ) : null}
-                {auth.isMember ? (
+                {auth?.isMember ? (
                     <DropdownMenuItem asChild>
                         <Link
                             className="block w-full cursor-pointer px-2 py-2"
-                            href={settings.memberKey.show()}
+                            href={settings.memberKey.show.url()}
                             prefetch
                             onClick={cleanupMobileNavigation}
                         >
                             <KeyRound className="mr-2 h-4 w-4" />
-                            Member Key
+                            Kartu Anggota (QR)
                         </Link>
                     </DropdownMenuItem>
                 ) : null}
-                {auth.isMember ? (
+                {auth?.isMember ? (
                     <DropdownMenuItem asChild>
                         <Link
                             className="block w-full cursor-pointer px-2 py-2"
@@ -101,7 +116,7 @@ export function UserMenuContent({ user }: Props) {
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer px-2 py-2"
-                        href={settings.profile.edit()}
+                        href={settings.profile.edit.url()}
                         prefetch
                         onClick={cleanupMobileNavigation}
                     >

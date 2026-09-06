@@ -1,8 +1,9 @@
 import { Deferred, Link, router } from '@inertiajs/react';
 import { X } from 'lucide-react';
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
+import { useEffect } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CatalogPagination } from '@/features/books/components/CatalogPagination';
+import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import blog from '@/routes/blog';
 import { BlogFeaturedPost } from './BlogFeaturedPost';
 import { BlogLabelsSidebar } from './BlogLabelsSidebar';
@@ -23,23 +24,31 @@ export function BlogIndexPage({
     activeFilterLabels,
     popularPosts,
 }: BlogIndexPageProps) {
-    const hasFilters =
-        filters.search !== '' || filters.category !== '' || filters.tag !== '';
+    const hasFilters = Boolean(
+        filters.search || filters.category || filters.tag,
+    );
+
+    useEffect(() => {
+        setPageBreadcrumbs([
+            { title: 'Beranda', href: '/' },
+            {
+                title: 'Artikel',
+                href: blog.index.url(),
+            },
+        ]);
+
+        return () => {
+            setPageBreadcrumbs(undefined);
+        };
+    }, []);
 
     const clearFilter = (key: string) => {
-        const newQuery: Record<string, string> = {};
-
-        if (filters.search && key !== 'search') {
-            newQuery.search = filters.search;
-        }
-
-        if (filters.category && key !== 'category') {
-            newQuery.category = filters.category;
-        }
-
-        if (filters.tag && key !== 'tag') {
-            newQuery.tag = filters.tag;
-        }
+        const newQuery: Record<string, string | undefined> = {
+            search: filters.search,
+            category: filters.category,
+            tag: filters.tag,
+        };
+        delete newQuery[key];
 
         router.get(blog.index.url(), newQuery, {
             preserveState: true,
@@ -52,26 +61,8 @@ export function BlogIndexPage({
             title="Artikel"
             metaDescription="Kumpulan artikel pilihan dari Ruang Baca Informatika Universitas Malikussaleh."
             maxWidth="7xl"
-            className="pt-0 pb-16"
+            className="pt-8 pb-16"
             showDesktopNoticeInContent={false}
-            header={
-                <div className="relative -mt-20 overflow-hidden bg-background sm:-mt-28 md:-mt-24">
-                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
-                        {/* Breadcrumbs */}
-                        <div className="-mx-4 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
-                            <Breadcrumbs
-                                breadcrumbs={[
-                                    { title: 'Beranda', href: '/' },
-                                    {
-                                        title: 'Artikel',
-                                        href: blog.index.url(),
-                                    },
-                                ]}
-                            />
-                        </div>
-                    </div>
-                </div>
-            }
         >
             {/* Active filter pills */}
             {hasFilters && activeFilterLabels.length > 0 && (

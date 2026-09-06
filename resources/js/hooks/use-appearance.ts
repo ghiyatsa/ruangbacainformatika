@@ -101,6 +101,32 @@ export function initializeTheme(): void {
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
+export function syncColorPalette(palette?: string | null): void {
+    if (typeof document === 'undefined' || !palette) {
+        return;
+    }
+
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+
+    if (currentTheme !== palette) {
+        document.documentElement.setAttribute('data-theme', palette);
+    }
+
+    // Update favicon SVG dynamically
+    const faviconLink = document.getElementById(
+        'favicon-svg',
+    ) as HTMLLinkElement | null;
+
+    if (faviconLink) {
+        const url = new URL(faviconLink.href, window.location.origin);
+
+        if (url.searchParams.get('theme') !== palette) {
+            url.searchParams.set('theme', palette);
+            faviconLink.href = url.toString();
+        }
+    }
+}
+
 export function useAppearance(): UseAppearanceReturn {
     const appearance: Appearance = useSyncExternalStore(
         subscribe,

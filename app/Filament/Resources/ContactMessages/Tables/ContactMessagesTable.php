@@ -93,7 +93,7 @@ class ContactMessagesTable
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('Belum ada pesan masuk')
-            ->emptyStateDescription('Pesan kontak akan muncul di sini.');
+            ->emptyStateHeading('Tidak Ada Pesan Masuk')
+            ->emptyStateDescription('Semua pesan kontak dari pengunjung akan terdaftar di sini.');
     }
 }

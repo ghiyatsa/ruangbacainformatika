@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Bookmark, Trash2 } from 'lucide-react';
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,11 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
+import {
+    hydrateBookmarksFromServer,
+    pushServerBookmarks,
+    useCatalogBookmarks,
+} from '@/features/books/hooks/use-catalog-bookmarks';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function BookmarksDropdown() {
@@ -23,6 +27,33 @@ export function BookmarksDropdown() {
         useCatalogBookmarks();
     const isMobile = useIsMobile();
     const [open, setOpen] = React.useState(false);
+    const { auth } = usePage<{ auth?: { user?: unknown } }>().props;
+    const isAuthenticated = Boolean(auth?.user);
+    const hasHydratedFromServerRef = React.useRef(false);
+
+    React.useEffect(() => {
+        if (!isAuthenticated || hasHydratedFromServerRef.current) {
+            return;
+        }
+
+        hasHydratedFromServerRef.current = true;
+
+        void hydrateBookmarksFromServer();
+    }, [isAuthenticated]);
+
+    React.useEffect(() => {
+        if (!isAuthenticated) {
+            return;
+        }
+
+        const timeoutId = window.setTimeout(() => {
+            void pushServerBookmarks(bookmarks);
+        }, 800);
+
+        return () => {
+            window.clearTimeout(timeoutId);
+        };
+    }, [bookmarks, isAuthenticated]);
 
     const handleOpenChange = React.useEffectEvent((nextOpen: boolean) => {
         setOpen(nextOpen);

@@ -1,10 +1,9 @@
 import { useForm } from '@inertiajs/react';
-import { QrCode, UserIcon } from 'lucide-react';
+import { UserIcon } from 'lucide-react';
 import { useDeferredValue, useEffect, useRef, useState } from 'react';
 import { lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import * as KioskController from '@/actions/App/Http/Controllers/KioskController';
-import KioskReturnDraftController from '@/actions/App/Http/Controllers/KioskReturnDraftController';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -24,6 +23,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { KioskField } from '@/features/kiosk/components/KioskField';
 import type { QrCameraScannerHandle } from '@/features/kiosk/components/QrCameraScanner';
 import type { KioskBookSearchResult } from '@/features/kiosk/types';
+
 const QrCameraScanner = lazy(() =>
     import('@/features/kiosk/components/QrCameraScanner').then((module) => ({
         default: module.QrCameraScanner,
@@ -67,22 +67,15 @@ export function ReturnForm() {
     const [isLoadingBooks, setIsLoadingBooks] = useState(false);
     const [booksError, setBooksError] = useState<string | null>(null);
     const [isMemberKeyDialogOpen, setIsMemberKeyDialogOpen] = useState(false);
-    const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
     const [hasDetectedMemberKey, setHasDetectedMemberKey] = useState(false);
-    const [hasDetectedQr, setHasDetectedQr] = useState(false);
     const memberKeyScannerRef = useRef<QrCameraScannerHandle | null>(null);
-    const qrScannerRef = useRef<QrCameraScannerHandle | null>(null);
     const deferredMemberIdentifier = useDeferredValue(memberIdentifier.trim());
     const manualForm = useForm({
         member_identifier: '',
         verification_payload: '',
         book_ids: [] as number[],
     });
-    const qrForm = useForm({
-        payload: '',
-    });
     const manualErrorMessage = getQrErrorMessage(manualForm.errors);
-    const qrErrorMessage = getQrErrorMessage(qrForm.errors);
 
     useEffect(() => {
         if (deferredMemberIdentifier === '') {
@@ -98,7 +91,7 @@ export function ReturnForm() {
 
         const abortController = new AbortController();
         const searchUrl = new URL(
-            KioskController.searchBooks.url(),
+            KioskController.searchBooks().url,
             window.location.origin,
         );
         searchUrl.searchParams.set('mode', 'return');
@@ -107,34 +100,35 @@ export function ReturnForm() {
             deferredMemberIdentifier,
         );
 
-        const loadingTimer = window.setTimeout(() => {
+        const fetchBorrowedBooks = async () => {
             setIsLoadingBooks(true);
             setBooksError(null);
-        }, 120);
 
-        void fetch(searchUrl.toString(), {
-            signal: abortController.signal,
-        })
-            .then(async (response) => {
+            try {
+                const response = await fetch(searchUrl.toString(), {
+                    signal: abortController.signal,
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
                 if (!response.ok) {
-                    throw new Error('Gagal memuat daftar pinjaman.');
+                    throw new Error('Gagal memuat daftar buku.');
                 }
 
-                const payload = (await response.json()) as {
+                const data = (await response.json()) as {
                     books?: KioskBookSearchResult[];
                 };
-                const books = payload.books ?? [];
 
+                const books = Array.isArray(data.books) ? data.books : [];
                 setBorrowedBooks(books);
-                setSelectedBookIds((current) =>
-                    current.filter((bookId) =>
-                        books.some((book) => book.id === bookId),
-                    ),
-                );
-            })
-            .catch((error: unknown) => {
+                setSelectedBookIds(books.map((book) => book.id));
+            } catch (error) {
                 if (
-                    error instanceof DOMException &&
+                    typeof error === 'object' &&
+                    error !== null &&
+                    'name' in error &&
                     error.name === 'AbortError'
                 ) {
                     return;
@@ -142,21 +136,31 @@ export function ReturnForm() {
 
                 setBorrowedBooks([]);
                 setSelectedBookIds([]);
-                setBooksError('Daftar pinjaman belum bisa dimuat saat ini.');
-            })
-            .finally(() => {
-                window.clearTimeout(loadingTimer);
+                setBooksError(
+                    'Tidak dapat memuat buku pinjaman. Pastikan identitas terdaftar.',
+                );
+            } finally {
+                setIsLoadingBooks(false);
+            }
+        };
 
-                if (!abortController.signal.aborted) {
-                    setIsLoadingBooks(false);
-                }
-            });
+        void fetchBorrowedBooks();
 
         return () => {
-            window.clearTimeout(loadingTimer);
             abortController.abort();
         };
     }, [deferredMemberIdentifier]);
+
+    const handleMemberKeyDialogChange = (open: boolean) => {
+        setIsMemberKeyDialogOpen(open);
+
+        if (!open) {
+            memberKeyScannerRef.current?.stop();
+            setHasDetectedMemberKey(false);
+            manualForm.setData('verification_payload', '');
+            manualForm.clearErrors();
+        }
+    };
 
     useEffect(() => {
         if (!isMemberKeyDialogOpen) {
@@ -170,18 +174,6 @@ export function ReturnForm() {
         return () => window.clearTimeout(timer);
     }, [isMemberKeyDialogOpen]);
 
-    useEffect(() => {
-        if (!isQrDialogOpen) {
-            return;
-        }
-
-        const timer = window.setTimeout(() => {
-            void qrScannerRef.current?.start();
-        }, 80);
-
-        return () => window.clearTimeout(timer);
-    }, [isQrDialogOpen]);
-
     const toggleBookSelection = (bookId: number, checked: boolean) => {
         setSelectedBookIds((current) => {
             if (checked) {
@@ -190,32 +182,8 @@ export function ReturnForm() {
                     : [...current, bookId];
             }
 
-            return current.filter(
-                (selectedBookId) => selectedBookId !== bookId,
-            );
+            return current.filter((id) => id !== bookId);
         });
-    };
-
-    const handleMemberKeyDialogChange = (open: boolean) => {
-        setIsMemberKeyDialogOpen(open);
-
-        if (!open) {
-            memberKeyScannerRef.current?.stop();
-            setHasDetectedMemberKey(false);
-            manualForm.reset();
-            manualForm.clearErrors();
-        }
-    };
-
-    const handleQrDialogChange = (open: boolean) => {
-        setIsQrDialogOpen(open);
-
-        if (!open) {
-            qrScannerRef.current?.stop();
-            setHasDetectedQr(false);
-            qrForm.reset();
-            qrForm.clearErrors();
-        }
     };
 
     const restartMemberKeyScanner = () => {
@@ -224,20 +192,9 @@ export function ReturnForm() {
         }
 
         setHasDetectedMemberKey(false);
-        manualForm.reset();
+        manualForm.setData('verification_payload', '');
         manualForm.clearErrors();
         void memberKeyScannerRef.current?.start();
-    };
-
-    const restartQrScanner = () => {
-        if (qrForm.processing) {
-            return;
-        }
-
-        setHasDetectedQr(false);
-        qrForm.reset();
-        qrForm.clearErrors();
-        void qrScannerRef.current?.start();
     };
 
     const submitDetectedMemberKey = (payload: string) => {
@@ -252,6 +209,7 @@ export function ReturnForm() {
             verification_payload: payload,
             book_ids: selectedBookIds,
         });
+
         manualForm.post(KioskController.storeReturn().url, {
             preserveScroll: true,
             onSuccess: () => {
@@ -263,90 +221,58 @@ export function ReturnForm() {
             onError: (errors) => {
                 const message =
                     getQrErrorMessage(errors) ??
-                    'Member key terbaca, tetapi pengembalian belum berhasil diproses.';
+                    'Member key terbaca, namun pengembalian belum berhasil.';
 
                 toast.error(message);
             },
         });
     };
 
-    const submitDetectedQr = (payload: string) => {
-        if (qrForm.processing) {
+    const openMemberKeyDialog = () => {
+        if (memberIdentifier.trim() === '') {
+            toast.error('Masukkan NIM atau email anggota terlebih dahulu.');
+
             return;
         }
 
-        setHasDetectedQr(true);
-        qrForm.clearErrors();
-        qrForm.setData('payload', payload);
-        qrForm.post(KioskReturnDraftController.store.url(), {
-            preserveScroll: true,
-            onSuccess: () => {
-                handleQrDialogChange(false);
-                setMemberIdentifier('');
-                setBorrowedBooks([]);
-                setSelectedBookIds([]);
-            },
-            onError: (errors) => {
-                const message =
-                    getQrErrorMessage(errors) ??
-                    'QR sudah terbaca, tetapi pengembalian belum berhasil diproses.';
+        if (selectedBookIds.length === 0) {
+            toast.error('Pilih minimal satu buku untuk dikembalikan.');
 
-                toast.error(message);
-            },
+            return;
+        }
+
+        manualForm.setData({
+            member_identifier: memberIdentifier.trim(),
+            verification_payload: '',
+            book_ids: selectedBookIds,
         });
+
+        setIsMemberKeyDialogOpen(true);
     };
 
-    const canSubmitManualReturn =
-        memberIdentifier.trim() !== '' &&
-        selectedBookIds.length > 0 &&
-        !manualForm.processing;
-
     return (
-        <div className="space-y-5">
-            <div className="grid gap-4">
+        <div className="space-y-6">
+            <div className="space-y-4">
                 <KioskField
-                    label="NIM, Email, atau No. HP"
-                    htmlFor="return-member"
-                    error={manualForm.errors.member_identifier}
+                    label="Identitas Anggota"
+                    htmlFor="return_member_identifier"
                     required
                 >
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                        <InputGroup className="flex-1">
-                            <InputGroupInput
-                                id="return-member"
-                                autoFocus
-                                autoComplete="new-password"
-                                autoCapitalize="none"
-                                autoCorrect="off"
-                                spellCheck={false}
-                                data-lpignore="true"
-                                data-1p-ignore="true"
-                                data-bwignore="true"
-                                placeholder="NIM, email, atau no. HP"
-                                value={memberIdentifier}
-                                onChange={(event) => {
-                                    setMemberIdentifier(event.target.value);
-                                    manualForm.clearErrors('member_identifier');
-                                }}
-                                aria-invalid={Boolean(
-                                    manualForm.errors.member_identifier,
-                                )}
-                                className="h-full text-base"
-                            />
-                            <InputGroupAddon>
-                                {isLoadingBooks ? <Spinner /> : <UserIcon />}
-                            </InputGroupAddon>
-                        </InputGroup>
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            className="shrink-0 rounded-md px-4 text-sm font-medium"
-                            onClick={() => handleQrDialogChange(true)}
-                        >
-                            <QrCode className="size-4" />
-                            Scan QR
-                        </Button>
-                    </div>
+                    <InputGroup>
+                        <InputGroupAddon>
+                            <UserIcon className="size-4" />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                            id="return_member_identifier"
+                            autoFocus
+                            value={memberIdentifier}
+                            onChange={(event) =>
+                                setMemberIdentifier(event.target.value)
+                            }
+                            placeholder="Contoh: 210170001 atau nama@unimal.ac.id"
+                            autoComplete="off"
+                        />
+                    </InputGroup>
                 </KioskField>
 
                 {booksError ? (
@@ -451,11 +377,22 @@ export function ReturnForm() {
                 <Button
                     type="button"
                     size="lg"
-                    className="h-12 w-full text-base"
-                    disabled={!canSubmitManualReturn}
-                    onClick={() => handleMemberKeyDialogChange(true)}
+                    className="w-full"
+                    disabled={
+                        memberIdentifier.trim() === '' ||
+                        selectedBookIds.length === 0 ||
+                        manualForm.processing
+                    }
+                    onClick={openMemberKeyDialog}
                 >
-                    Kembalikan Buku
+                    {manualForm.processing ? (
+                        <>
+                            <Spinner />
+                            Memproses...
+                        </>
+                    ) : (
+                        `Kembalikan ${selectedBookIds.length} Buku`
+                    )}
                 </Button>
             </div>
 
@@ -463,41 +400,31 @@ export function ReturnForm() {
                 open={isMemberKeyDialogOpen}
                 onOpenChange={handleMemberKeyDialogChange}
             >
-                <DialogContent className="max-w-2xl" showCloseButton={false}>
+                <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Scan Member Key</DialogTitle>
+                        <DialogTitle>Verifikasi Pengembalian</DialogTitle>
                         <DialogDescription>
-                            Anggota membuka member key dari akun mereka di
-                            ponsel. Identitas yang diinput harus sesuai dengan
-                            member key.
+                            Arahkan kode QR <strong>Member Key</strong> dari HP
+                            Anda ke kamera untuk menyelesaikan pengembalian.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-4">
-                        <Suspense
-                            fallback={
-                                <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
-                                    <span className="text-sm text-muted-foreground">
-                                        Memuat kamera...
-                                    </span>
-                                </div>
-                            }
-                        >
-                            <QrCameraScanner
-                                ref={memberKeyScannerRef}
-                                onDetected={submitDetectedMemberKey}
-                            />
-                        </Suspense>
-
-                        {manualForm.processing ? (
-                            <Alert>
-                                <Spinner />
-                                <AlertTitle>Member key terbaca</AlertTitle>
-                                <AlertDescription>
-                                    Sedang memproses pengembalian.
-                                </AlertDescription>
-                            </Alert>
-                        ) : null}
+                        <div className="overflow-hidden rounded-xl border bg-black">
+                            <Suspense
+                                fallback={
+                                    <div className="flex aspect-square w-full items-center justify-center text-sm text-white">
+                                        <Spinner className="mr-2 size-4" />
+                                        Menyiapkan kamera...
+                                    </div>
+                                }
+                            >
+                                <QrCameraScanner
+                                    ref={memberKeyScannerRef}
+                                    onDetected={submitDetectedMemberKey}
+                                />
+                            </Suspense>
+                        </div>
 
                         {manualErrorMessage ? (
                             <Alert variant="destructive">
@@ -510,119 +437,22 @@ export function ReturnForm() {
                             </Alert>
                         ) : null}
 
-                        {hasDetectedMemberKey &&
-                        !manualForm.processing &&
-                        !manualErrorMessage ? (
-                            <Alert>
-                                <AlertTitle>
-                                    Member key sudah terbaca
-                                </AlertTitle>
-                                <AlertDescription>
-                                    Jika dialog belum tertutup, silakan scan
-                                    ulang.
-                                </AlertDescription>
-                            </Alert>
-                        ) : null}
-
-                        <div className="flex justify-end gap-2">
+                        {hasDetectedMemberKey && manualForm.processing ? (
+                            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                <Spinner className="size-4" />
+                                Menyelesaikan pengembalian...
+                            </div>
+                        ) : (
                             <Button
                                 type="button"
-                                variant="secondary"
+                                variant="outline"
+                                className="w-full"
                                 onClick={restartMemberKeyScanner}
                                 disabled={manualForm.processing}
                             >
                                 Scan Ulang
                             </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() =>
-                                    handleMemberKeyDialogChange(false)
-                                }
-                            >
-                                Tutup
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog open={isQrDialogOpen} onOpenChange={handleQrDialogChange}>
-                <DialogContent className="max-w-2xl" showCloseButton={false}>
-                    <DialogHeader>
-                        <DialogTitle>Scan QR Pengembalian</DialogTitle>
-                        <DialogDescription>
-                            Arahkan QR pengembalian dari akun anggota ke kamera.
-                            Proses berjalan otomatis.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4">
-                        <Suspense
-                            fallback={
-                                <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
-                                    <span className="text-sm text-muted-foreground">
-                                        Memuat kamera...
-                                    </span>
-                                </div>
-                            }
-                        >
-                            <QrCameraScanner
-                                ref={qrScannerRef}
-                                onDetected={submitDetectedQr}
-                            />
-                        </Suspense>
-
-                        {qrForm.processing ? (
-                            <Alert>
-                                <Spinner />
-                                <AlertTitle>QR terbaca</AlertTitle>
-                                <AlertDescription>
-                                    Sedang memproses pengembalian.
-                                </AlertDescription>
-                            </Alert>
-                        ) : null}
-
-                        {qrErrorMessage ? (
-                            <Alert variant="destructive">
-                                <AlertTitle>
-                                    Pengembalian belum berhasil
-                                </AlertTitle>
-                                <AlertDescription>
-                                    {qrErrorMessage}
-                                </AlertDescription>
-                            </Alert>
-                        ) : null}
-
-                        {hasDetectedQr &&
-                        !qrForm.processing &&
-                        !qrErrorMessage ? (
-                            <Alert>
-                                <AlertTitle>QR sudah terbaca</AlertTitle>
-                                <AlertDescription>
-                                    Jika dialog belum tertutup, silakan scan
-                                    ulang.
-                                </AlertDescription>
-                            </Alert>
-                        ) : null}
-
-                        <div className="flex justify-end gap-2">
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={restartQrScanner}
-                                disabled={qrForm.processing}
-                            >
-                                Scan Ulang
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => handleQrDialogChange(false)}
-                            >
-                                Tutup
-                            </Button>
-                        </div>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>

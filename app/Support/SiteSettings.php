@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Repositories\SettingRepository;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -12,40 +13,46 @@ class SiteSettings
         protected SettingRepository $settingRepository,
     ) {}
 
+    protected static bool $cleared = false;
+
     /**
      * @return array<string, string>
      */
     public function values(): array
     {
-        return once(function (): array {
-            try {
-                $values = $this->settingRepository->sectionValues('general', $this->defaults());
-            } catch (Throwable) {
-                $values = $this->defaults();
-            }
+        try {
+            $values = $this->settingRepository->sectionValues('general', $this->defaults());
+        } catch (Throwable) {
+            $values = $this->defaults();
+        }
 
-            return [
-                'site_name' => $this->stringValue($values, 'site_name', config('app.name')),
-                'site_tagline' => $this->stringValue($values, 'site_tagline', 'Layanan perpustakaan yang rapi dan mudah diakses'),
-                'site_description' => $this->stringValue($values, 'site_description', 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.'),
-                'department' => $this->stringValue($values, 'department', 'Program Studi Teknik Informatika Universitas Malikussaleh'),
-                'contact_email' => $this->stringValue($values, 'contact_email', 'informatika@unimal.ac.id'),
-                'support_whatsapp' => $this->stringValue($values, 'support_whatsapp'),
-                'address' => $this->stringValue($values, 'address', 'Jl. Cot Tengku Nie, Reuleut, Aceh Utara 24355'),
-                'site_keywords' => $this->stringValue($values, 'site_keywords'),
-                'seo_robots' => $this->robotsValue($values['seo_robots'] ?? null),
-                'theme_color' => $this->themeColorValue($values['theme_color'] ?? null),
-                'site_logo_path' => $this->stringValue($values, 'site_logo_path'),
-                'favicon_path' => $this->stringValue($values, 'favicon_path'),
-                'favicon_svg_path' => $this->stringValue($values, 'favicon_svg_path'),
-                'apple_touch_icon_path' => $this->stringValue($values, 'apple_touch_icon_path'),
-                'hero_notice_enabled' => ($values['hero_notice_enabled'] ?? '0') === '1' ? '1' : '0',
-                'hero_notice_text' => $this->stringValue($values, 'hero_notice_text'),
-                'hero_notice_url' => $this->stringValue($values, 'hero_notice_url'),
-                'hero_notice_link_label' => $this->stringValue($values, 'hero_notice_link_label'),
-                'hero_notice_tone' => $this->noticeToneValue($values['hero_notice_tone'] ?? null),
-            ];
-        });
+        return [
+            'site_name' => $this->stringValue($values, 'site_name', config('app.name')),
+            'site_tagline' => $this->stringValue($values, 'site_tagline', 'Layanan perpustakaan yang rapi dan mudah diakses'),
+            'site_description' => $this->stringValue($values, 'site_description', 'Perpustakaan digital resmi Program Studi Teknik Informatika Universitas Malikussaleh untuk mendukung pembelajaran, riset, dan akses koleksi akademik.'),
+            'department' => $this->stringValue($values, 'department', 'Program Studi Teknik Informatika Universitas Malikussaleh'),
+            'contact_email' => $this->stringValue($values, 'contact_email', 'informatika@unimal.ac.id'),
+            'support_whatsapp' => $this->stringValue($values, 'support_whatsapp'),
+            'address' => $this->stringValue($values, 'address', 'Jl. Cot Tengku Nie, Reuleut, Aceh Utara 24355'),
+            'site_keywords' => $this->stringValue($values, 'site_keywords'),
+            'seo_robots' => $this->robotsValue($values['seo_robots'] ?? null),
+            'theme_color' => $this->themeColorValue($values['theme_color'] ?? null),
+            'color_palette' => $this->colorPaletteValue($values['color_palette'] ?? null),
+            'site_logo_path' => $this->stringValue($values, 'site_logo_path'),
+            'favicon_path' => $this->stringValue($values, 'favicon_path'),
+            'favicon_svg_path' => $this->stringValue($values, 'favicon_svg_path'),
+            'apple_touch_icon_path' => $this->stringValue($values, 'apple_touch_icon_path'),
+            'hero_notice_enabled' => ($values['hero_notice_enabled'] ?? '0') === '1' ? '1' : '0',
+            'hero_notice_text' => $this->stringValue($values, 'hero_notice_text'),
+            'hero_notice_url' => $this->stringValue($values, 'hero_notice_url'),
+            'hero_notice_link_label' => $this->stringValue($values, 'hero_notice_link_label'),
+            'hero_notice_tone' => $this->noticeToneValue($values['hero_notice_tone'] ?? null),
+        ];
+    }
+
+    public function forget(): void
+    {
+        // No-op for dynamic values
     }
 
     /**
@@ -69,15 +76,16 @@ class SiteSettings
                 'keywords' => $settings['site_keywords'] !== '' ? $settings['site_keywords'] : null,
                 'robots' => $settings['seo_robots'],
                 'themeColor' => $settings['theme_color'],
+                'colorPalette' => $settings['color_palette'],
                 'logo' => $this->publicDiskUrl($settings['site_logo_path']),
                 'ogImage' => route('og.site'),
                 'ogImageType' => OpenGraphImage::MIME_TYPE,
                 'ogImageWidth' => OpenGraphImage::SITE_WIDTH,
                 'ogImageHeight' => OpenGraphImage::SITE_HEIGHT,
                 'icons' => [
-                    'favicon' => $this->publicDiskUrl($settings['favicon_path']) ?? asset('favicon-32x32.png'),
-                    'faviconSvg' => $this->publicDiskUrl($settings['favicon_svg_path']) ?? asset('favicon.svg'),
-                    'appleTouchIcon' => $this->publicDiskUrl($settings['apple_touch_icon_path']) ?? asset('apple-touch-icon.png'),
+                    'favicon' => $this->publicDiskUrl($settings['favicon_path']),
+                    'faviconSvg' => $this->publicDiskUrl($settings['favicon_svg_path']),
+                    'appleTouchIcon' => $this->publicDiskUrl($settings['apple_touch_icon_path']),
                 ],
                 'notice' => $this->sharedNotice(),
             ],
@@ -103,6 +111,34 @@ class SiteSettings
         ];
     }
 
+    public function paletteHexColor(?string $palette = null): string
+    {
+        $selected = $palette ?? ($this->values()['color_palette'] ?? 'indigo');
+
+        return match ($selected) {
+            'ocean' => '#0284c7',
+            'emerald' => '#059669',
+            'slate' => '#475569',
+            'amber' => '#d97706',
+            'crimson' => '#e11d48',
+            default => '#6366f1',
+        };
+    }
+
+    public function filamentPrimaryColor(): array
+    {
+        $palette = $this->values()['color_palette'] ?? 'indigo';
+
+        return match ($palette) {
+            'ocean' => Color::Blue,
+            'emerald' => Color::Emerald,
+            'slate' => Color::Slate,
+            'amber' => Color::Amber,
+            'crimson' => Color::Rose,
+            default => Color::Indigo,
+        };
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -118,13 +154,16 @@ class SiteSettings
                 'keywords' => $site['keywords'],
                 'robots' => $site['robots'],
                 'themeColor' => $site['themeColor'],
+                'colorPalette' => $site['colorPalette'],
                 'ogImage' => $site['ogImage'],
                 'ogImageType' => $site['ogImageType'],
                 'ogImageWidth' => $site['ogImageWidth'],
                 'ogImageHeight' => $site['ogImageHeight'],
-                'favicon' => $site['icons']['favicon'],
-                'faviconSvg' => $site['icons']['faviconSvg'],
-                'appleTouchIcon' => $site['icons']['appleTouchIcon'],
+                'icons' => [
+                    'favicon' => $site['icons']['favicon'] ?? asset('favicon-32x32.png'),
+                    'faviconSvg' => $site['icons']['faviconSvg'],
+                    'appleTouchIcon' => $site['icons']['appleTouchIcon'] ?? asset('apple-touch-icon.png'),
+                ],
             ],
         ];
     }
@@ -145,6 +184,7 @@ class SiteSettings
             'site_keywords' => '',
             'seo_robots' => 'index,follow',
             'theme_color' => '#ffffff',
+            'color_palette' => 'indigo',
             'site_logo_path' => '',
             'favicon_path' => '',
             'favicon_svg_path' => '',
@@ -188,6 +228,13 @@ class SiteSettings
         return in_array($value, ['index,follow', 'noindex,follow', 'noindex,nofollow'], true)
             ? $value
             : 'index,follow';
+    }
+
+    protected function colorPaletteValue(mixed $value): string
+    {
+        return in_array($value, ['indigo', 'ocean', 'emerald', 'slate', 'amber', 'crimson'], true)
+            ? $value
+            : 'indigo';
     }
 
     protected function themeColorValue(mixed $value): string

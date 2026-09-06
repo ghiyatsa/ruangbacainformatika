@@ -8,6 +8,7 @@ use App\Models\Publisher;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\LoanConsequenceService;
+use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 
 it('returns a restricted access summary for members with overdue active loans', function () {
@@ -46,11 +47,13 @@ it('returns a restricted access summary for members with overdue active loans', 
         'status' => 'borrowed',
     ]);
 
+    Carbon::setTestNow('2026-08-30 12:00:00');
+
     $loan = Loan::query()->create([
         'user_id' => $member->id,
         'status' => Loan::STATUS_BORROWED,
-        'borrowed_at' => now()->subDays(5),
-        'due_at' => now()->subDays(2),
+        'borrowed_at' => now()->startOfDay()->subWeekdays(5),
+        'due_at' => now()->startOfDay()->subWeekdays(2),
     ]);
 
     LoanItem::query()->create([
@@ -63,6 +66,8 @@ it('returns a restricted access summary for members with overdue active loans', 
     expect($summary['label'])->toBe('Dibatasi')
         ->and($summary['color'])->toBe('danger')
         ->and($summary['detail'])->toContain('terlambat 2 hari');
+
+    Carbon::setTestNow();
 });
 
 it('returns a normal access summary for eligible members without active restrictions', function () {

@@ -83,19 +83,19 @@ class OverdueLoanTableWidget extends BaseTableWidget
                     ->url(fn (Loan $record): string => LoanResource::getUrl('view', ['record' => $record->user]))
                     ->openUrlInNewTab(),
                 Action::make('remindReturn')
-                    ->label('Kirim Reminder')
+                    ->label('Kirim Pengingat')
                     ->icon(Heroicon::OutlinedBellAlert)
                     ->color('info')
                     ->disabled(fn (Loan $record): bool => $record->reminder_sent_at !== null && $record->reminder_sent_at->isToday())
-                    ->tooltip(fn (Loan $record): ?string => $record->reminder_sent_at !== null && $record->reminder_sent_at->isToday() ? 'Sudah diingatkan hari ini' : null)
+                    ->tooltip(fn (Loan $record): ?string => $record->reminder_sent_at !== null && $record->reminder_sent_at->isToday() ? 'Sudah dikirim hari ini' : null)
                     ->requiresConfirmation()
-                    ->modalHeading('Kirim Reminder Pengembalian')
-                    ->modalDescription('Reminder akan dikirim ke WhatsApp dan notifikasi akun untuk pinjaman ini.')
+                    ->modalHeading('Kirim Pengingat Pengembalian')
+                    ->modalDescription('Pesan pengingat akan dikirim ke WhatsApp dan notifikasi akun peminjam.')
                     ->action(function (Loan $record): void {
                         $sent = app(LoanReminderService::class)->remind($record);
 
                         Notification::make()
-                            ->title($sent ? 'Reminder terkirim' : 'Tidak perlu diingatkan (sudah dikirim hari ini)')
+                            ->title($sent ? 'Pengingat berhasil dikirim' : 'Pengingat sudah dikirim hari ini')
                             ->{$sent ? 'success' : 'warning'}()
                             ->send();
                     }),

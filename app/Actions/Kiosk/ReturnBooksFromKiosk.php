@@ -2,6 +2,7 @@
 
 namespace App\Actions\Kiosk;
 
+use App\Models\User;
 use App\Services\KioskBorrowVerificationService;
 use App\Services\KioskLoanService;
 use Illuminate\Validation\ValidationException;
@@ -15,8 +16,9 @@ class ReturnBooksFromKiosk
 
     /**
      * @param  array<int, int>  $bookIds
+     * @return array{returned_count: int, member: User}
      */
-    public function execute(string $verificationPayload, string $memberIdentifier, array $bookIds): int
+    public function execute(string $verificationPayload, string $memberIdentifier, array $bookIds): array
     {
         $member = $this->kioskBorrowVerificationService->resolveUser($verificationPayload);
         $submittedMember = $this->kioskLoanService->findMemberByIdentifier($memberIdentifier);
@@ -31,6 +33,9 @@ class ReturnBooksFromKiosk
 
         $this->kioskBorrowVerificationService->consume($verificationPayload);
 
-        return $returnedCount;
+        return [
+            'returned_count' => $returnedCount,
+            'member' => $member,
+        ];
     }
 }

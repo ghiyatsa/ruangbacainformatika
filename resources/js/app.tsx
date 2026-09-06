@@ -7,7 +7,6 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import AppLayout from '@/layouts/AppLayout';
 import AuthLayout from '@/layouts/AuthLayout';
-import SettingsLayout from '@/layouts/SettingsLayout';
 import type { ReactNode } from 'react';
 import type { Root } from 'react-dom/client';
 
@@ -70,8 +69,6 @@ createInertiaApp({
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
-            case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
             case name.startsWith('kiosk/'):
                 return null;
             default:
@@ -86,13 +83,12 @@ createInertiaApp({
 
         const rootElement = el as RootElement;
         const app = createElement(App, props);
-        const wrappedApp = <AppProviders>{app}</AppProviders>;
 
         if (
             rootElement.hasAttribute('data-server-rendered') &&
             !rootElement.__inertiaHydrated
         ) {
-            hydrateRoot(rootElement, wrappedApp);
+            hydrateRoot(rootElement, <AppProviders>{app}</AppProviders>);
             rootElement.__inertiaHydrated = true;
 
             return;
@@ -102,7 +98,7 @@ createInertiaApp({
             rootElement.__inertiaRoot = createRoot(rootElement);
         }
 
-        rootElement.__inertiaRoot.render(wrappedApp);
+        rootElement.__inertiaRoot.render(<AppProviders>{app}</AppProviders>);
     },
     progress: {
         color: '#4B5563',
@@ -111,3 +107,6 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+const initialTheme = rootDataset.colorPalette || rootDataset.theme || 'indigo';
+document.documentElement.setAttribute('data-theme', initialTheme);

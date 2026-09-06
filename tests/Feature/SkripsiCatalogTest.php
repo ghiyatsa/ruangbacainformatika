@@ -1,10 +1,24 @@
 <?php
 
 use App\Models\Skripsi;
+use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+
+beforeEach(function () {
+    Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+    $user = User::factory()->create([
+        'email' => '230170001@mhs.unimal.ac.id',
+        'is_approved' => true,
+        'profile_completed_at' => now(),
+    ]);
+    $user->assignRole('member');
+    actingAs($user);
+});
 
 it('skripsi catalog page renders results', function () {
     Queue::fake();

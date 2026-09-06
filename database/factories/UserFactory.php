@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends Factory<User>
@@ -29,5 +30,29 @@ class UserFactory extends Factory
             'profile_completed_at' => now(),
             'is_approved' => true,
         ];
+    }
+
+    public function member(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $role = Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
+            $user->assignRole($role);
+        });
+    }
+
+    public function staff(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $role = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+            $user->assignRole($role);
+        });
+    }
+
+    public function admin(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $role = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+            $user->assignRole($role);
+        });
     }
 }

@@ -65,7 +65,8 @@ class LoanHistoryQuery
     protected function applyFilters(HasManyThrough $loanItemsQuery, array $filters): void
     {
         if ($filters['search'] !== '') {
-            $search = $filters['search'];
+            // Sanitasi wildcard LIKE untuk mencegah query menjadi lebih luas dari yang diinginkan.
+            $search = $this->sanitizeLikeTerm($filters['search']);
 
             $loanItemsQuery->where(function (Builder $query) use ($search): void {
                 $query
@@ -108,5 +109,13 @@ class LoanHistoryQuery
         if ($filters['filter'] === 'returned') {
             $loanItemsQuery->whereNotNull('loan_items.returned_at');
         }
+    }
+
+    /**
+     * Buang karakter wildcard LIKE untuk mencegah query lebih luas dari yang diinginkan.
+     */
+    protected function sanitizeLikeTerm(string $term): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $term);
     }
 }

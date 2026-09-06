@@ -6,9 +6,8 @@ import {
     Info,
     Newspaper,
     ScanSearch,
-    Search,
 } from 'lucide-react';
-import { about, home, search } from '@/routes';
+import { about, home } from '@/routes';
 import blog from '@/routes/blog/index';
 import books from '@/routes/books';
 import internshipReports from '@/routes/internship-reports';
@@ -31,55 +30,64 @@ export interface NavItem {
     children?: NavLink[];
 }
 
-export const NAV_LINKS: NavItem[] = [
-    { label: 'Beranda', href: home.url(), icon: Home },
-    {
-        label: 'Katalog',
-        icon: BookOpen,
-        children: [
-            {
-                label: 'Pencarian',
-                href: search.url(),
-                description:
-                    'Cari di semua koleksi buku, skripsi, tesis, dan KP.',
-                icon: Search,
-            },
-            {
-                label: 'Buku',
-                href: books.index.url(),
-                description: 'Koleksi buku teks dan referensi umum.',
-                icon: BookOpen,
-            },
-            {
-                label: 'Skripsi',
-                href: skripsi.index.url(),
-                description: 'Koleksi tugas akhir mahasiswa Informatika.',
-                icon: GraduationCap,
-            },
-            {
-                label: 'Tesis',
-                href: thesis.index.url(),
-                description: 'Koleksi tesis mahasiswa magister Informatika.',
-                icon: GraduationCap,
-            },
-            {
-                label: 'Laporan KP',
-                href: internshipReports.index.url(),
-                description:
-                    'Koleksi laporan kerja praktik mahasiswa Informatika.',
-                icon: ClipboardCheck,
-            },
-        ],
-    },
-    {
-        label: 'Blog',
-        href: blog.index.url(),
-        icon: Newspaper,
-    },
-    { label: 'Cek Kemiripan', href: similarity.index.url(), icon: ScanSearch },
-    {
-        label: 'Tentang',
-        href: about.url(),
-        icon: Info,
-    },
-];
+export function getNavLinks(isMember: boolean = false): NavItem[] {
+    return [
+        { label: 'Beranda', href: home.url(), icon: Home },
+        isMember
+            ? {
+                  label: 'Katalog',
+                  icon: BookOpen,
+                  children: [
+                      {
+                          label: 'Buku',
+                          href: books.index.url(),
+                          description: 'Koleksi buku teks dan referensi umum.',
+                          icon: BookOpen,
+                      },
+                      {
+                          label: 'Skripsi',
+                          href: skripsi.index.url(),
+                          description:
+                              'Koleksi tugas akhir mahasiswa Informatika.',
+                          icon: GraduationCap,
+                      },
+                      {
+                          label: 'Tesis',
+                          href: thesis.index.url(),
+                          description:
+                              'Koleksi tesis mahasiswa magister Informatika.',
+                          icon: GraduationCap,
+                      },
+                      {
+                          label: 'Laporan KP',
+                          href: internshipReports.index.url(),
+                          description:
+                              'Koleksi laporan kerja praktik mahasiswa Informatika.',
+                          icon: ClipboardCheck,
+                      },
+                  ],
+              }
+            : {
+                  label: 'Katalog',
+                  href: books.index.url(),
+                  icon: BookOpen,
+              },
+        {
+            label: 'Blog',
+            href: blog.index.url(),
+            icon: Newspaper,
+        },
+        {
+            label: 'Cek Kemiripan',
+            href: similarity.index.url(),
+            icon: ScanSearch,
+        },
+        {
+            label: 'Tentang',
+            href: about.url(),
+            icon: Info,
+        },
+    ];
+}
+
+export const NAV_LINKS: NavItem[] = getNavLinks(false);

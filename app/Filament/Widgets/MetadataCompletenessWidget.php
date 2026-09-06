@@ -43,20 +43,16 @@ class MetadataCompletenessWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Metadata Lengkap', $counts[MetadataCompleteness::LEVEL_LENGKAP])
-                ->description("{$percentage}% dari {$total} buku")
+                ->description("{$percentage}% dari {$total} judul")
                 ->descriptionIcon(Heroicon::OutlinedCheckBadge)
                 ->color('success')
                 ->icon(Heroicon::OutlinedDocumentCheck)
                 ->url($this->booksUrl(MetadataCompleteness::LEVEL_LENGKAP)),
-            Stat::make('Perlu Kurasi', $counts[MetadataCompleteness::LEVEL_SEBAGIAN])
-                ->description('Beberapa elemen kurang')
-                ->descriptionIcon(Heroicon::OutlinedDocumentMinus)
+            Stat::make('Perlu Dilengkapi', $counts[MetadataCompleteness::LEVEL_SEBAGIAN])
                 ->color('warning')
                 ->icon(Heroicon::OutlinedDocumentText)
                 ->url($this->booksUrl(MetadataCompleteness::LEVEL_SEBAGIAN)),
-            Stat::make('Tidak Lengkap', $counts[MetadataCompleteness::LEVEL_KURANG])
-                ->description('Butuh kurasi segera')
-                ->descriptionIcon(Heroicon::OutlinedDocumentArrowDown)
+            Stat::make('Data Minim', $counts[MetadataCompleteness::LEVEL_KURANG])
                 ->color('danger')
                 ->icon(Heroicon::OutlinedDocument)
                 ->url($this->booksUrl(MetadataCompleteness::LEVEL_KURANG)),

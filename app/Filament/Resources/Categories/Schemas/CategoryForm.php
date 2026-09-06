@@ -27,8 +27,7 @@ class CategoryForm
     {
         return $schema
             ->components([
-                Section::make('Informasi Dasar')
-                    ->description('Data utama kategori')
+                Section::make('Identitas Kategori')
                     ->schema([
                         static::nameField()
                             ->live(onBlur: true)
@@ -44,8 +43,7 @@ class CategoryForm
                     ])
                     ->columns(2),
 
-                Section::make('Deskripsi')
-                    ->description('Keterangan singkat kategori')
+                Section::make('Deskripsi Kategori')
                     ->schema([
                         static::descriptionField(),
                     ]),
@@ -58,7 +56,7 @@ class CategoryForm
             ->label('Nama Kategori')
             ->required()
             ->maxLength(255)
-            ->placeholder('Fiksi, Nonfiksi, Sains');
+            ->placeholder('Contoh: Rekayasa Perangkat Lunak');
     }
 
     protected static function descriptionField(): Textarea

@@ -1,17 +1,16 @@
-import { useState } from 'react';
+import { useBookCollectionViewMode } from '@/hooks/use-book-collection-view-mode';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
 import LazyDeferred from './LazyDeferred';
 import SectionHeader from './SectionHeader';
 import type { CatalogBook } from '@/features/welcome/types';
-import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 export default function MostBorrowedBooks({
     mostBorrowedBooks,
 }: {
     mostBorrowedBooks: CatalogBook[] | undefined;
 }) {
-    const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
+    const [viewMode, setViewMode] = useBookCollectionViewMode();
     const previewBooks = mostBorrowedBooks?.slice(0, 6) || [];
 
     if (mostBorrowedBooks !== undefined && previewBooks.length === 0) {

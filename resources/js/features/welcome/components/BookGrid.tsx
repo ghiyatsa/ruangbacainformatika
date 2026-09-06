@@ -1,11 +1,7 @@
-import { usePage } from '@inertiajs/react';
-import { AnimatePresence, motion } from 'motion/react';
 import BookCard from '@/features/books/components/BookCard';
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
-import { useIsMobile } from '@/hooks/use-mobile';
 import EmptyCatalogState from './EmptyCatalogState';
 import type { CatalogBook } from '@/features/welcome/types';
-import type { Auth, LoanRequestCart } from '@/types';
 import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 interface BookGridProps {
@@ -31,15 +27,9 @@ export default function BookGrid({
     emptyDescription,
     keyPrefix = 'book',
 }: BookGridProps) {
-    const isMobile = useIsMobile();
-    const { auth, loanRequestCart } = usePage<{
-        auth: Auth;
-        loanRequestCart: LoanRequestCart | null;
-    }>().props;
-
     if (isLoading) {
         return (
-            <div className={isMobile ? '' : 'animate-in duration-500 fade-in'}>
+            <div>
                 {viewMode === 'grid' ? (
                     <div className={GRID_CLASS}>
                         {Array.from({ length: skeletonCount }).map((_, i) => (
@@ -66,47 +56,24 @@ export default function BookGrid({
         );
     }
 
-    const content =
-        viewMode === 'grid' ? (
-            <div className={GRID_CLASS}>
-                {books.map((book, index) => (
-                    <BookCard
-                        key={book.id || `${keyPrefix}-grid-${index}`}
-                        book={book}
-                        auth={auth}
-                        loanRequestCart={loanRequestCart}
-                    />
-                ))}
-            </div>
-        ) : (
-            <div className={LIST_CLASS}>
-                {books.map((book, index) => (
-                    <BookCard
-                        key={book.id || `${keyPrefix}-list-${index}`}
-                        book={book}
-                        variant="compact"
-                        auth={auth}
-                        loanRequestCart={loanRequestCart}
-                    />
-                ))}
-            </div>
-        );
-
-    if (isMobile) {
-        return content;
-    }
-
-    return (
-        <AnimatePresence mode="wait">
-            <motion.div
-                key={viewMode}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.25 }}
-            >
-                {content}
-            </motion.div>
-        </AnimatePresence>
+    return viewMode === 'grid' ? (
+        <div className={GRID_CLASS}>
+            {books.map((book, index) => (
+                <BookCard
+                    key={book.id || `${keyPrefix}-grid-${index}`}
+                    book={book}
+                />
+            ))}
+        </div>
+    ) : (
+        <div className={LIST_CLASS}>
+            {books.map((book, index) => (
+                <BookCard
+                    key={book.id || `${keyPrefix}-list-${index}`}
+                    book={book}
+                    variant="compact"
+                />
+            ))}
+        </div>
     );
 }

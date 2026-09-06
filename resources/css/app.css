@@ -136,6 +136,95 @@
     --sidebar-ring: oklch(0.556 0.008 281);
 }
 
+/* ==========================================
+   COLOR PALETTE PRESETS
+   ========================================== */
+
+/* Ocean Blue Preset */
+html[data-theme='ocean'] {
+    --primary: oklch(0.488 0.22 250);
+    --primary-foreground: oklch(0.98 0.01 250);
+    --ring: oklch(0.65 0.15 250);
+    --sidebar-primary: oklch(0.488 0.22 250);
+    --sidebar-primary-foreground: oklch(0.98 0.01 250);
+}
+html[data-theme='ocean'].dark,
+html[data-theme='ocean'] .dark {
+    --primary: oklch(0.7 0.18 250);
+    --primary-foreground: oklch(0.18 0.03 250);
+    --ring: oklch(0.55 0.12 250);
+    --sidebar-primary: oklch(0.7 0.18 250);
+    --sidebar-primary-foreground: oklch(0.18 0.03 250);
+}
+
+/* Forest Emerald Preset */
+html[data-theme='emerald'] {
+    --primary: oklch(0.48 0.18 155);
+    --primary-foreground: oklch(0.98 0.01 155);
+    --ring: oklch(0.65 0.12 155);
+    --sidebar-primary: oklch(0.48 0.18 155);
+    --sidebar-primary-foreground: oklch(0.98 0.01 155);
+}
+html[data-theme='emerald'].dark,
+html[data-theme='emerald'] .dark {
+    --primary: oklch(0.72 0.16 155);
+    --primary-foreground: oklch(0.18 0.03 155);
+    --ring: oklch(0.55 0.1 155);
+    --sidebar-primary: oklch(0.72 0.16 155);
+    --sidebar-primary-foreground: oklch(0.18 0.03 155);
+}
+
+/* Monochrome Slate Preset */
+html[data-theme='slate'] {
+    --primary: oklch(0.3 0.02 260);
+    --primary-foreground: oklch(0.98 0.005 260);
+    --ring: oklch(0.5 0.02 260);
+    --sidebar-primary: oklch(0.3 0.02 260);
+    --sidebar-primary-foreground: oklch(0.98 0.005 260);
+}
+html[data-theme='slate'].dark,
+html[data-theme='slate'] .dark {
+    --primary: oklch(0.85 0.01 260);
+    --primary-foreground: oklch(0.15 0.01 260);
+    --ring: oklch(0.6 0.01 260);
+    --sidebar-primary: oklch(0.85 0.01 260);
+    --sidebar-primary-foreground: oklch(0.15 0.01 260);
+}
+
+/* Academic Gold / Amber Preset */
+html[data-theme='amber'] {
+    --primary: oklch(0.52 0.18 65);
+    --primary-foreground: oklch(0.98 0.01 65);
+    --ring: oklch(0.68 0.14 65);
+    --sidebar-primary: oklch(0.52 0.18 65);
+    --sidebar-primary-foreground: oklch(0.98 0.01 65);
+}
+html[data-theme='amber'].dark,
+html[data-theme='amber'] .dark {
+    --primary: oklch(0.76 0.16 65);
+    --primary-foreground: oklch(0.2 0.04 65);
+    --ring: oklch(0.6 0.1 65);
+    --sidebar-primary: oklch(0.76 0.16 65);
+    --sidebar-primary-foreground: oklch(0.2 0.04 65);
+}
+
+/* Ruby Crimson Preset */
+html[data-theme='crimson'] {
+    --primary: oklch(0.48 0.22 25);
+    --primary-foreground: oklch(0.98 0.01 25);
+    --ring: oklch(0.65 0.16 25);
+    --sidebar-primary: oklch(0.48 0.22 25);
+    --sidebar-primary-foreground: oklch(0.98 0.01 25);
+}
+html[data-theme='crimson'].dark,
+html[data-theme='crimson'] .dark {
+    --primary: oklch(0.7 0.18 25);
+    --primary-foreground: oklch(0.18 0.04 25);
+    --ring: oklch(0.55 0.12 25);
+    --sidebar-primary: oklch(0.7 0.18 25);
+    --sidebar-primary-foreground: oklch(0.18 0.04 25);
+}
+
 .disable-transitions,
 .disable-transitions * {
     transition: none !important;

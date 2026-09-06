@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\BookResource;
 use App\Models\Book;
-use App\Services\LoanDraftService;
 use App\Services\RelatedCatalogService;
 use App\Support\PageMeta;
 use Illuminate\Http\Request;
@@ -14,7 +13,6 @@ use Inertia\Response;
 class BookController extends Controller
 {
     public function __construct(
-        protected LoanDraftService $loanDraftService,
         protected RelatedCatalogService $relatedCatalogService,
         protected PageMeta $pageMeta,
     ) {}
@@ -41,9 +39,6 @@ class BookController extends Controller
 
         return Inertia::render('books/show', [
             'book' => new BookResource($book),
-            'loanRequest' => $request->user()?->canBorrowBooks()
-                ? $this->loanDraftService->summaryForBook($request->user(), $book)
-                : null,
             'relatedBooks' => Inertia::defer(
                 fn () => BookResource::collection($this->relatedCatalogService->forBook($book))->resolve(),
                 rescue: true,

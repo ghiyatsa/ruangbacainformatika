@@ -60,23 +60,23 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Sinkron Berhasil', $syncedCount)
-                ->description($totalDoc > 0 ? "{$totalDoc} dokumen" : 'Belum ada data')
+                ->description($totalDoc > 0 ? "{$syncedCount} dari {$totalDoc} karya terindeks" : 'Belum ada data karya')
                 ->descriptionIcon(Heroicon::OutlinedCheckCircle, IconPosition::Before)
                 ->color('success')
                 ->icon(Heroicon::OutlinedCheckBadge)
                 ->url($this->skripsisUrl([
                     'similarity_status' => ['value' => SimilaritySyncStatus::STATUS_SYNCED],
                 ])),
-            Stat::make('Perlu Tindak Lanjut', $failedCount)
-                ->description($failedCount > 0 ? 'Ada proses gagal' : 'Semua aman')
+            Stat::make('Sinkron Gagal', $failedCount)
+                ->description($failedCount > 0 ? 'Perlu sinkronisasi ulang' : 'Tidak ada kendala')
                 ->descriptionIcon($failedCount > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle, IconPosition::Before)
                 ->color($failedCount > 0 ? 'danger' : 'success')
                 ->icon(Heroicon::OutlinedExclamationTriangle)
                 ->url($this->skripsisUrl([
                     'similarity_status' => ['value' => SimilaritySyncStatus::STATUS_FAILED],
                 ])),
-            Stat::make('Sedang Diproses', $pendingCount)
-                ->description($pendingCount > 0 ? 'Masih ada antrean' : 'Tidak ada antrean')
+            Stat::make('Dalam Antrean', $pendingCount)
+                ->description($pendingCount > 0 ? 'Sedang dalam proses antrean' : 'Antrean kosong')
                 ->descriptionIcon($pendingCount > 0 ? Heroicon::OutlinedArrowPath : Heroicon::OutlinedPauseCircle, IconPosition::Before)
                 ->color($pendingCount > 0 ? 'warning' : 'gray')
                 ->icon(Heroicon::OutlinedArrowPath)
@@ -84,7 +84,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
                     'perlu_sync' => ['isActive' => true],
                 ])),
             Stat::make('Belum Dijadwalkan', $unscheduledCount)
-                ->description($unscheduledCount > 0 ? 'Belum dijadwalkan' : 'Semua terjadwal')
+                ->description($unscheduledCount > 0 ? 'Karya belum masuk antrean' : 'Semua karya telah terjadwal')
                 ->descriptionIcon($unscheduledCount > 0 ? Heroicon::OutlinedClock : Heroicon::OutlinedCheckCircle, IconPosition::Before)
                 ->color($unscheduledCount > 0 ? 'info' : 'gray')
                 ->icon(Heroicon::OutlinedClock)

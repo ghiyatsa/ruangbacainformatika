@@ -12,9 +12,8 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { KioskField } from '@/features/kiosk/components/KioskField';
 
-const PIN_MAX_LENGTH = 8;
-const PIN_AUTO_SUBMIT_MIN_LENGTH = 4;
-const AUTO_SUBMIT_DELAY_MS = 450;
+const PIN_LENGTH = 6;
+const AUTO_SUBMIT_DELAY_MS = 350;
 
 export function PinStep() {
     const submitTimeoutRef = useRef<number | null>(null);
@@ -38,7 +37,7 @@ export function PinStep() {
         if (
             form.processing ||
             form.errors.pin ||
-            form.data.pin.length !== PIN_MAX_LENGTH
+            form.data.pin.length !== PIN_LENGTH
         ) {
             return;
         }
@@ -76,9 +75,17 @@ export function PinStep() {
     return (
         <div className="mx-auto flex w-full max-w-sm justify-center">
             <Card className="w-full border-border/70 shadow-sm">
-                <CardHeader className="flex items-center justify-center">
+                <CardHeader className="flex flex-col items-center justify-center space-y-2 text-center">
                     <div className="flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <KeyRound />
+                        <KeyRound className="size-5" />
+                    </div>
+                    <div className="space-y-1">
+                        <h2 className="text-base font-semibold">
+                            Buka Akses Kiosk
+                        </h2>
+                        <p className="text-xs text-muted-foreground">
+                            Masukkan 6 digit PIN untuk memulai sesi hari ini.
+                        </p>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -87,25 +94,8 @@ export function PinStep() {
                         autoComplete="off"
                         className="flex flex-col gap-5"
                     >
-                        <input
-                            type="text"
-                            name="username"
-                            autoComplete="username"
-                            tabIndex={-1}
-                            className="hidden"
-                            aria-hidden="true"
-                        />
-                        <input
-                            type="password"
-                            name="password"
-                            autoComplete="current-password"
-                            tabIndex={-1}
-                            className="hidden"
-                            aria-hidden="true"
-                        />
-
                         <KioskField
-                            label="PIN"
+                            label="PIN Kiosk"
                             htmlFor="kiosk-pin"
                             error={form.errors.pin}
                             required
@@ -113,8 +103,7 @@ export function PinStep() {
                             <InputOTP
                                 id="kiosk-pin"
                                 autoFocus
-                                type="password"
-                                maxLength={PIN_MAX_LENGTH}
+                                maxLength={PIN_LENGTH}
                                 value={form.data.pin}
                                 onChange={(value) => {
                                     form.setData(
@@ -131,7 +120,7 @@ export function PinStep() {
                             >
                                 <InputOTPGroup>
                                     {Array.from(
-                                        { length: PIN_MAX_LENGTH },
+                                        { length: PIN_LENGTH },
                                         (_, index) => (
                                             <InputOTPSlot
                                                 key={index}
@@ -151,12 +140,13 @@ export function PinStep() {
                             className="w-full"
                             disabled={
                                 form.processing ||
-                                form.data.pin.length <
-                                    PIN_AUTO_SUBMIT_MIN_LENGTH
+                                form.data.pin.length !== PIN_LENGTH
                             }
                         >
                             {form.processing ? <Spinner /> : null}
-                            {form.processing ? 'Memeriksa PIN...' : 'Masuk'}
+                            {form.processing
+                                ? 'Memverifikasi...'
+                                : 'Buka Kiosk'}
                         </Button>
                     </form>
                 </CardContent>

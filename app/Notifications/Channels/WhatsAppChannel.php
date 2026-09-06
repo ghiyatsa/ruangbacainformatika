@@ -4,8 +4,8 @@ namespace App\Notifications\Channels;
 
 use App\Models\WhatsAppMessageLog;
 use App\Notifications\Messages\WhatsAppMessage;
+use App\Notifications\WhatsAppOtpNotification;
 use App\Services\WhatsAppGateway;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 use Throwable;
@@ -22,9 +22,9 @@ class WhatsAppChannel
             return;
         }
 
-        $phoneNumber = method_exists($notifiable, 'routeNotificationForWhatsApp')
-            ? $notifiable->routeNotificationForWhatsApp()
-            : null;
+        $phoneNumber = ($notification instanceof WhatsAppOtpNotification && filled($notification->targetPhone))
+            ? $notification->targetPhone
+            : (method_exists($notifiable, 'routeNotificationForWhatsApp') ? $notifiable->routeNotificationForWhatsApp() : null);
 
         if (! is_string($phoneNumber) || $phoneNumber === '') {
             return;
@@ -47,7 +47,7 @@ class WhatsAppChannel
         try {
             $this->gateway->sendMessage($phoneNumber, $message, $log);
         } catch (Throwable $exception) {
-            if ($message->category === 'otp' || $message->bypassPacing || $notification instanceof ShouldQueue) {
+            if ($message->category === 'otp' || $message->bypassPacing || in_array($message->category, ['loan_receipt', 'loan_return', 'loan_reminder'], true)) {
                 throw $exception;
             }
 

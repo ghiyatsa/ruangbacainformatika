@@ -155,7 +155,6 @@ export default function SimilarityPage({
                 <PublicPageHero
                     title="Cek Kemiripan Judul"
                     description="Pemeriksaan awal untuk membantu meninjau kemiripan judul skripsi atau laporan kerja praktek Anda."
-                    contentClassName="max-w-7xl px-4 sm:px-6 lg:px-8"
                 />
 
                 {/* Centered layout container */}

@@ -49,14 +49,12 @@ class StaticPageForm
                                     ->maxLength(255)
                                     ->unique('static_pages', 'slug', ignoreRecord: true)
                                     ->readOnly(fn (?StaticPage $record): bool => $record?->isSystemPage() ?? false)
-                                    ->helperText('Digunakan pada alamat halaman publik. Untuk halaman bawaan, slug mengikuti rute utama.')
                                     ->placeholder('panduan-layanan'),
                                 Toggle::make('is_active')
                                     ->label('Publikasi')
                                     ->default(true)
                                     ->onColor('success')
-                                    ->offColor('gray')
-                                    ->helperText('Jika dimatikan, halaman kustom tidak tampil di publik'),
+                                    ->offColor('gray'),
                                 Placeholder::make('public_url')
                                     ->label('URL Publik')
                                     ->content(fn (?StaticPage $record): string => $record?->publicUrl() ?? 'URL tersedia setelah halaman disimpan.'),

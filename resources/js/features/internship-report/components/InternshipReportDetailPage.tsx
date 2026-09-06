@@ -1,5 +1,6 @@
 import { Deferred } from '@inertiajs/react';
 import { BookMarked } from 'lucide-react';
+import { useEffect } from 'react';
 import { KtiCardSkeleton } from '@/components/kti/KtiCardSkeleton';
 import { KtiDetailPage } from '@/components/kti/KtiDetailPage';
 import { KtiEmptyState } from '@/components/kti/KtiEmptyState';
@@ -10,10 +11,12 @@ import {
 } from '@/components/kti/KtiReportCard';
 import { KtiTextWorkHero } from '@/components/kti/KtiTextWorkHero';
 import { KtiTextWorkSidebar } from '@/components/kti/KtiTextWorkSidebar';
+import { PdfDocumentViewer } from '@/components/kti/PdfDocumentViewer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import InternshipReportCard from '@/features/internship-report/components/InternshipReportCard';
 import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
+import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import internshipReportsRoute from '@/routes/internship-reports';
 import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
 import type { InternshipReportShowProps } from '@/features/internship-report/types';
@@ -30,6 +33,30 @@ export default function InternshipReportDetailPage(
               id: report.id,
           })
         : false;
+
+    useEffect(() => {
+        setPageBreadcrumbs([
+            { title: 'Beranda', href: '/' },
+            {
+                title: 'Laporan KP',
+                href: internshipReportsRoute.index.url(),
+            },
+            {
+                title: report ? (
+                    report.studentId
+                ) : (
+                    <Skeleton className="h-4 w-24 animate-pulse rounded-md" />
+                ),
+                href: report
+                    ? internshipReportsRoute.show.url(report.studentId)
+                    : internshipReportsRoute.index.url(),
+            },
+        ]);
+
+        return () => {
+            setPageBreadcrumbs(undefined);
+        };
+    }, [report]);
     const bookmarkRecord: CatalogBookmarkRecord | null = report
         ? {
               catalogType: 'internship_report',
@@ -93,14 +120,7 @@ export default function InternshipReportDetailPage(
             hero={
                 <KtiTextWorkHero
                     record={report}
-                    label="Laporan KP"
                     kindLabel="Laporan KP"
-                    indexUrl={internshipReportsRoute.index.url()}
-                    detailUrl={
-                        report
-                            ? internshipReportsRoute.show.url(report.studentId)
-                            : null
-                    }
                     isBookmarkedByUser={isBookmarkedByUser}
                     bookmarkRecord={bookmarkRecord}
                     onToggleBookmark={toggleBookmark}
@@ -126,7 +146,7 @@ export default function InternshipReportDetailPage(
                         <Deferred
                             data="relatedReports"
                             fallback={
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                     <KtiCardSkeleton />
                                     <KtiCardSkeleton />
                                     <KtiCardSkeleton />
@@ -141,7 +161,7 @@ export default function InternshipReportDetailPage(
                                 />
                             )}
                         >
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                 {props.relatedReports?.map((relatedReport) => (
                                     <InternshipReportCard
                                         key={relatedReport.id}
@@ -201,41 +221,51 @@ export default function InternshipReportDetailPage(
                 );
             })()}
 
-            <section>
-                <div className="mb-5 flex items-center gap-3">
-                    <h2 className="text-xl font-bold">Abstrak</h2>
+            <section className="space-y-10">
+                <div>
+                    <div className="mb-5 flex items-center gap-3">
+                        <h2 className="text-xl font-bold">Abstrak</h2>
+                    </div>
+
+                    {report?.abstract ? (
+                        <div className="space-y-4 text-justify text-base leading-[1.85] text-muted-foreground">
+                            {report.abstract
+                                .split('\n')
+                                .filter(Boolean)
+                                .map((paragraph, index) => (
+                                    <p key={index}>{paragraph}</p>
+                                ))}
+                        </div>
+                    ) : report ? (
+                        <KtiEmptyState
+                            icon={BookMarked}
+                            title="Abstrak belum tersedia untuk laporan KP ini."
+                        />
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="space-y-3">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-11/12" />
+                                <Skeleton className="h-4 w-10/12" />
+                                <Skeleton className="h-4 w-4/5" />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                {report?.abstract ? (
-                    <div className="space-y-4 text-justify text-base leading-[1.85] text-muted-foreground">
-                        {report.abstract
-                            .split('\n')
-                            .filter(Boolean)
-                            .map((paragraph, index) => (
-                                <p key={index}>{paragraph}</p>
-                            ))}
-                    </div>
-                ) : report ? (
-                    <KtiEmptyState
-                        icon={BookMarked}
-                        title="Abstrak belum tersedia untuk laporan KP ini."
-                    />
-                ) : (
-                    <div className="space-y-6">
-                        <div className="space-y-3">
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-11/12" />
-                            <Skeleton className="h-4 w-10/12" />
-                            <Skeleton className="h-4 w-4/5" />
+                {report?.filePath ? (
+                    <div>
+                        <div className="mb-5 flex items-center gap-3">
+                            <h2 className="text-xl font-bold">
+                                Dokumen Lengkap
+                            </h2>
                         </div>
-                        <div className="space-y-3">
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-5/6" />
-                            <Skeleton className="h-4 w-2/3" />
-                        </div>
+                        <PdfDocumentViewer
+                            fileUrl={report.filePath}
+                            title={report.title}
+                        />
                     </div>
-                )}
+                ) : null}
             </section>
         </KtiDetailPage>
     );

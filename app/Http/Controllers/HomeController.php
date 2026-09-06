@@ -24,25 +24,20 @@ class HomeController extends Controller
     public function __invoke(Request $request): Response
     {
         $books = $this->buildHomeCatalogSections->paginatedBooks();
+        $paginated = $books->toArray();
+        $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
 
         return Inertia::render('welcome/index', [
             'stats' => array_merge(
                 $this->catalogService->getStats(),
                 ['searchResultsCount' => $books->total()]
             ),
-            'featuredBooks' => Inertia::optional(fn () => $this->buildHomeCatalogSections->featuredBooks()),
-            'popularBooks' => Inertia::optional(fn () => $this->buildHomeCatalogSections->popularBooks()),
-            'mostBorrowedBooks' => Inertia::optional(fn () => $this->buildHomeCatalogSections->mostBorrowedBooks()),
-            'popularCategoryShelves' => Inertia::optional(
-                fn () => $this->buildHomeCatalogSections->popularCategoryShelves()
-            ),
-            'latestPosts' => Inertia::optional(fn () => BlogPostResource::collection($this->blogQueryService->latestForHome(4))->resolve()),
-            'books' => Inertia::optional(function () use ($books) {
-                $paginated = $books->toArray();
-                $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
-
-                return $paginated;
-            }),
+            'featuredBooks' => $this->buildHomeCatalogSections->featuredBooks(),
+            'popularBooks' => $this->buildHomeCatalogSections->popularBooks(),
+            'mostBorrowedBooks' => $this->buildHomeCatalogSections->mostBorrowedBooks(),
+            'popularCategoryShelves' => $this->buildHomeCatalogSections->popularCategoryShelves(),
+            'latestPosts' => BlogPostResource::collection($this->blogQueryService->latestForHome(4))->resolve(),
+            'books' => $paginated,
         ])->withViewData([
             'meta' => $this->pageMeta->forWelcome(),
         ]);

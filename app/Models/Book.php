@@ -209,7 +209,8 @@ class Book extends Model
                             ->orWhere('description', 'like', "%{$term}%")
                             ->orWhereHas('publisher', fn (Builder $p) => $p->where('name', 'like', "%{$term}%"))
                             ->orWhereHas('authors', fn (Builder $a) => $a->where('name', 'like', "%{$term}%"))
-                            ->orWhereHas('categories', fn (Builder $c) => $c->where('name', 'like', "%{$term}%"));
+                            ->orWhereHas('categories', fn (Builder $c) => $c->where('name', 'like', "%{$term}%"))
+                            ->orWhereHas('items', fn (Builder $i) => $i->where('internal_code', 'like', "%{$term}%")->orWhere('shelf_location', 'like', "%{$term}%"));
                     });
                 }
             });
@@ -226,7 +227,8 @@ class Book extends Model
                         ->orWhere('description', 'like', "%{$term}%")
                         ->orWhereHas('publisher', fn (Builder $p) => $p->where('name', 'like', "%{$term}%"))
                         ->orWhereHas('authors', fn (Builder $a) => $a->where('name', 'like', "%{$term}%"))
-                        ->orWhereHas('categories', fn (Builder $c) => $c->where('name', 'like', "%{$term}%"));
+                        ->orWhereHas('categories', fn (Builder $c) => $c->where('name', 'like', "%{$term}%"))
+                        ->orWhereHas('items', fn (Builder $i) => $i->where('internal_code', 'like', "%{$term}%")->orWhere('shelf_location', 'like', "%{$term}%"));
                 });
             }
         });

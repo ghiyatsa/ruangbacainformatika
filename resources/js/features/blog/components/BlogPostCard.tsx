@@ -81,8 +81,9 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
             instant
             component="blog/show"
             pageProps={instantLoadingPageProps()}
-            className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/30"
+            className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 transition-all duration-300 hover:border-primary/30"
         >
+            <div className="pointer-events-none absolute -right-12 -bottom-12 -z-0 h-36 w-36 rounded-full bg-primary/10 blur-2xl transition-opacity duration-300 group-hover:bg-primary/15" />
             {/* Cover */}
             <div className="relative aspect-video overflow-hidden bg-muted">
                 <img

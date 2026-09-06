@@ -51,10 +51,8 @@ class RestrictedBorrowersOverviewWidget extends StatsOverviewWidget
 
         return [
             Stat::make('Sedang Dibatasi', $restrictedMembers)
-                ->description($restrictedMembers > 0
-                    ? 'Ada anggota yang belum bisa meminjam'
-                    : 'Tidak ada pembatasan peminjaman aktif')
-                ->descriptionIcon($restrictedMembers > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle)
+                ->description($restrictedMembers > 0 ? 'Peminjaman ditangguhkan' : null)
+                ->descriptionIcon($restrictedMembers > 0 ? Heroicon::OutlinedExclamationTriangle : null)
                 ->color($restrictedMembers > 0 ? 'danger' : 'success')
                 ->icon(Heroicon::OutlinedNoSymbol)
                 ->url($this->usersUrl([
@@ -62,7 +60,7 @@ class RestrictedBorrowersOverviewWidget extends StatsOverviewWidget
                 ])),
 
             Stat::make('Terlambat Aktif', $activeOverdueMembers)
-                ->description("Melewati batas keterlambatan {$thresholdDays} hari")
+                ->description("> {$thresholdDays} hari terlambat")
                 ->descriptionIcon(Heroicon::OutlinedClock)
                 ->color($activeOverdueMembers > 0 ? 'warning' : 'gray')
                 ->icon(Heroicon::OutlinedClock)
@@ -71,10 +69,8 @@ class RestrictedBorrowersOverviewWidget extends StatsOverviewWidget
                 ])),
 
             Stat::make('Masa Jeda', $cooldownMembers)
-                ->description($cooldownDays > 0
-                    ? "Masih dalam jeda {$cooldownDays} hari setelah terlambat"
-                    : 'Masa jeda keterlambatan tidak aktif')
-                ->descriptionIcon(Heroicon::OutlinedArrowPathRoundedSquare)
+                ->description($cooldownDays > 0 ? "Jeda {$cooldownDays} hari" : null)
+                ->descriptionIcon($cooldownDays > 0 ? Heroicon::OutlinedArrowPathRoundedSquare : null)
                 ->color($cooldownMembers > 0 ? 'info' : 'gray')
                 ->icon(Heroicon::OutlinedArrowPathRoundedSquare)
                 ->url($this->usersUrl([

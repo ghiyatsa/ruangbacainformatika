@@ -47,12 +47,24 @@ export default function GoogleOneTapPrompt({
     linkToken?: string;
     disabled?: boolean;
 }) {
-    const { auth, googleAuth } = usePage<SharedPageProps>().props;
+    const pageProps = usePage<SharedPageProps>().props;
+    const auth = pageProps.auth;
+    const googleAuth = pageProps.googleAuth;
     const { component } = usePage();
     const initializedRef = useRef(false);
 
+    const hasAuthProps = auth != null && googleAuth != null;
+    const currentUser = auth?.user ?? null;
+    const googleClientId = googleAuth?.clientId ?? null;
+    const isGoogleEnabled = googleAuth?.enabled ?? false;
+    const isOneTapEnabled = googleAuth?.oneTapEnabled ?? false;
+
     const handleCredential = useEffectEvent(
         (response: { credential: string }) => {
+            if (!googleAuth?.oneTapUrl) {
+                return;
+            }
+
             router.post(
                 googleAuth.oneTapUrl,
                 {
@@ -68,14 +80,18 @@ export default function GoogleOneTapPrompt({
     );
 
     useEffect(() => {
-        const clientId = googleAuth.clientId;
+        if (!hasAuthProps) {
+            return;
+        }
+
+        const clientId = googleClientId;
         const promptKey = `${clientId ?? ''}:${linkToken ?? 'default'}`;
 
         if (
             disabled ||
-            auth.user !== null ||
-            !googleAuth.enabled ||
-            !googleAuth.oneTapEnabled ||
+            currentUser !== null ||
+            !isGoogleEnabled ||
+            !isOneTapEnabled ||
             !clientId ||
             shouldDisableForComponent(component)
         ) {
@@ -153,13 +169,14 @@ export default function GoogleOneTapPrompt({
             initializedRef.current = false;
         };
     }, [
-        auth.user,
+        hasAuthProps,
+        currentUser,
         linkToken,
         component,
         disabled,
-        googleAuth.clientId,
-        googleAuth.enabled,
-        googleAuth.oneTapEnabled,
+        googleClientId,
+        isGoogleEnabled,
+        isOneTapEnabled,
     ]);
 
     return null;

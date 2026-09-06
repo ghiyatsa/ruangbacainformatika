@@ -7,21 +7,13 @@ use App\Notifications\Channels\WhatsAppChannel;
 use App\Notifications\Concerns\RateLimitsWhatsAppNotifications;
 use App\Notifications\Messages\WhatsAppMessage;
 use App\Support\AppTimezone;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Throwable;
 
-class LoanReminderNotification extends Notification implements ShouldQueue
+class LoanReminderNotification extends Notification
 {
-    use Queueable;
     use RateLimitsWhatsAppNotifications;
 
-    public int $tries = 12;
-
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(
         protected Loan $loan
     ) {}
@@ -39,14 +31,18 @@ class LoanReminderNotification extends Notification implements ShouldQueue
         $stage = $this->loan->reminderStage();
         $lateDays = $this->loan->lateDays();
 
+        $greeting = "Halo {$notifiable->name},";
+        $header = match ($stage) {
+            Loan::REMINDER_STAGE_DUE_TODAY => 'Mengingatkan peminjaman buku Anda jatuh tempo hari ini.',
+            Loan::REMINDER_STAGE_OVERDUE => "Peminjaman buku Anda telah melewati batas waktu ({$lateDays} hari).",
+            default => 'Mengingatkan peminjaman buku Anda akan jatuh tempo besok.',
+        };
+
         $lines = [
-            "Assalamualaikum {$notifiable->name},",
-            match ($stage) {
-                Loan::REMINDER_STAGE_DUE_TODAY => 'Peminjaman buku Anda berakhir hari ini.',
-                Loan::REMINDER_STAGE_OVERDUE => "Peminjaman Anda sudah melewati jatuh tempo (telat {$lateDays} hari).",
-                default => 'Peminjaman buku Anda berakhir besok.',
-            },
-            'Buku yang perlu dikembalikan:',
+            $greeting,
+            '',
+            $header,
+            'Daftar buku:',
         ];
 
         foreach ($this->loan->items as $item) {
@@ -55,12 +51,9 @@ class LoanReminderNotification extends Notification implements ShouldQueue
         }
 
         $lines[] = '';
-        $lines[] = match ($stage) {
-            Loan::REMINDER_STAGE_OVERDUE => 'Batas pengembalian: '.AppTimezone::format($this->loan->due_at, 'd F Y')." (sudah terlambat {$lateDays} hari)",
-            Loan::REMINDER_STAGE_DUE_TODAY => 'Batas pengembalian hari ini: '.AppTimezone::format($this->loan->due_at, 'd F Y'),
-            default => 'Batas pengembalian: '.AppTimezone::format($this->loan->due_at, 'd F Y'),
-        };
-        $lines[] = 'Terima kasih! '.config('app.name');
+        $lines[] = 'Batas pengembalian: '.AppTimezone::format($this->loan->due_at, 'd F Y');
+        $lines[] = '';
+        $lines[] = 'Silakan lakukan pengembalian buku di Ruang Baca Informatika. Terima kasih!';
 
         return new WhatsAppMessage(
             implode("\n", $lines),
@@ -80,19 +73,6 @@ class LoanReminderNotification extends Notification implements ShouldQueue
             'loan_id' => $this->loan->id,
             'due_at' => $this->loan->due_at,
         ];
-    }
-
-    /**
-     * @return list<int>
-     */
-    public function backoff(): array
-    {
-        return [300, 900, 1800, 3600];
-    }
-
-    public function retryUntil(): \DateTimeInterface
-    {
-        return now()->addDay();
     }
 
     public function failed(?Throwable $exception): void

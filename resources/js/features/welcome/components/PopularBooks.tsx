@@ -1,20 +1,19 @@
 import { Link } from '@inertiajs/react';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useBookCollectionViewMode } from '@/hooks/use-book-collection-view-mode';
 import booksRoute from '@/routes/books';
 import BookCollectionViewToggle from './BookCollectionViewToggle';
 import BookGrid from './BookGrid';
 import LazyDeferred from './LazyDeferred';
 import SectionHeader from './SectionHeader';
 import type { CatalogBook } from '@/features/welcome/types';
-import type { BookCollectionViewMode } from './BookCollectionViewToggle';
 
 export default function PopularBooks({
     popularBooks,
 }: {
     popularBooks: CatalogBook[] | undefined;
 }) {
-    const [viewMode, setViewMode] = useState<BookCollectionViewMode>('grid');
+    const [viewMode, setViewMode] = useBookCollectionViewMode();
     const previewBooks = popularBooks?.slice(0, 6) || [];
 
     if (popularBooks !== undefined && previewBooks.length === 0) {

@@ -57,6 +57,7 @@ class WhatsAppVerificationController extends Controller
 
         return Inertia::render('auth/verify-whatsapp', [
             'verification' => $verification,
+            'isChangingNumber' => $allowWhatsAppChange,
             'meta' => ['robots' => 'noindex, nofollow'],
         ]);
     }
@@ -73,22 +74,24 @@ class WhatsAppVerificationController extends Controller
             ]);
         }
 
-        if ($request->filled('whatsapp')) {
-            $newWhatsapp = $request->validated('whatsapp');
+        $targetPhone = $request->filled('whatsapp')
+            ? (string) $request->validated('whatsapp')
+            : $user->whatsapp;
 
-            if ($user->hasVerifiedWhatsApp() && $user->whatsapp === $newWhatsapp) {
-                throw ValidationException::withMessages([
-                    'whatsapp' => 'Nomor WhatsApp baru harus berbeda dengan nomor saat ini.',
-                ]);
-            }
+        if ($user->hasVerifiedWhatsApp() && $user->whatsapp === $targetPhone) {
+            throw ValidationException::withMessages([
+                'whatsapp' => 'Nomor WhatsApp baru harus berbeda dengan nomor saat ini.',
+            ]);
+        }
 
+        if (! filled($user->whatsapp) && $request->filled('whatsapp')) {
             $user->forceFill([
-                'whatsapp' => $newWhatsapp,
+                'whatsapp' => $targetPhone,
             ])->save();
         }
 
         try {
-            $this->whatsAppOtpService->dispatch($user);
+            $this->whatsAppOtpService->dispatch($user, $targetPhone);
         } catch (RuntimeException $exception) {
             report($exception);
 
@@ -117,6 +120,8 @@ class WhatsAppVerificationController extends Controller
             ]);
         }
 
+        $isChangingNumber = $allowWhatsAppChange;
+
         $result = $this->whatsAppOtpService->verify(
             $user,
             (string) $request->validated('code'),
@@ -127,10 +132,16 @@ class WhatsAppVerificationController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => $result['approvalPending']
-                ? 'Verifikasi selesai. Akun menunggu persetujuan admin.'
-                : 'Verifikasi selesai.',
+            'message' => $isChangingNumber
+                ? 'Nomor WhatsApp berhasil diperbarui.'
+                : ($result['approvalPending']
+                    ? 'Verifikasi selesai. Akun menunggu persetujuan admin.'
+                    : 'Verifikasi selesai.'),
         ]);
+
+        if ($isChangingNumber) {
+            return to_route('settings.profile.edit');
+        }
 
         $freshUser = $user->fresh();
 
@@ -139,6 +150,13 @@ class WhatsAppVerificationController extends Controller
         }
 
         return $this->authenticationRedirector->redirectResponse($request, $freshUser);
+    }
+
+    public function cancelChange(Request $request): RedirectResponse
+    {
+        $request->session()->forget('allow_whatsapp_change');
+
+        return to_route('settings.profile.edit');
     }
 
     public function skip(Request $request): RedirectResponse

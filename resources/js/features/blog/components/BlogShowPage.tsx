@@ -1,22 +1,15 @@
 import { Deferred, Link, usePage, WhenVisible } from '@inertiajs/react';
 import { Eye, Tag, Bookmark, Share2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StaticPageContent } from '@/components/layout/StaticPageContent';
 import { Badge } from '@/components/ui/badge';
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BlogCommentsSection } from '@/features/blog/components/comments/BlogCommentsSection';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
+import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import { cn, formatViewCount } from '@/lib/utils';
 import blog from '@/routes/blog';
 import { BlogLabelsSidebar } from './BlogLabelsSidebar';
@@ -43,6 +36,28 @@ export function BlogShowPage({
     const shareUrl = `${page.props.site?.url ?? ''}${page.url}`;
     const shareTitle = article?.title ?? 'Memuat...';
     const shareText = article?.summary ?? article?.excerpt ?? 'Memuat...';
+
+    useEffect(() => {
+        setPageBreadcrumbs([
+            { title: 'Beranda', href: '/' },
+            {
+                title: 'Artikel',
+                href: blog.index.url(),
+            },
+            {
+                title: article ? (
+                    article.title
+                ) : (
+                    <Skeleton className="h-4 w-32 animate-pulse rounded-md" />
+                ),
+                href: article ? blog.show.url(article.slug) : blog.index.url(),
+            },
+        ]);
+
+        return () => {
+            setPageBreadcrumbs(undefined);
+        };
+    }, [article]);
 
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
 
@@ -120,39 +135,8 @@ export function BlogShowPage({
             className="pt-6 pb-16 sm:pt-8"
             showDesktopNoticeInContent={false}
             header={
-                <div className="relative -mt-20 overflow-hidden border-b bg-background sm:-mt-28 md:-mt-24">
-                    <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-6 sm:px-6 sm:pt-30 sm:pb-8 lg:px-8">
-                        {/* Breadcrumbs bar — identical style to CatalogHeader */}
-                        <div className="-mx-4 mb-6 hidden border-y border-border/60 bg-muted/5 px-4 py-3 sm:-mx-6 sm:flex sm:items-center sm:px-6 lg:-mx-8 lg:px-8">
-                            <Breadcrumb>
-                                <BreadcrumbList>
-                                    <BreadcrumbItem>
-                                        <BreadcrumbLink asChild>
-                                            <Link href="/">Beranda</Link>
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-                                    <BreadcrumbSeparator />
-                                    <BreadcrumbItem>
-                                        <BreadcrumbLink asChild>
-                                            <Link href={blog.index.url()}>
-                                                Artikel
-                                            </Link>
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-                                    <BreadcrumbSeparator />
-                                    <BreadcrumbItem>
-                                        <BreadcrumbPage className="max-w-xs truncate">
-                                            {article ? (
-                                                article.title
-                                            ) : (
-                                                <Skeleton className="h-4 w-32 animate-pulse" />
-                                            )}
-                                        </BreadcrumbPage>
-                                    </BreadcrumbItem>
-                                </BreadcrumbList>
-                            </Breadcrumb>
-                        </div>
-
+                <div className="relative overflow-hidden border-b bg-background">
+                    <div className="relative mx-auto max-w-7xl border-x border-border/60 px-4 py-8 sm:px-6 lg:px-8">
                         {/* Article title block */}
                         <div className="pt-4 sm:pt-0">
                             {article ? (
