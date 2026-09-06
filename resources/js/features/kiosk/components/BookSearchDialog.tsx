@@ -274,7 +274,8 @@ export function BookSearchDialog({
                                         <Search className="mx-auto mb-2 size-8 opacity-30" />
                                         {searchQuery.trim() ? (
                                             <>
-                                                Tidak ditemukan hasil untuk &ldquo;
+                                                Tidak ditemukan hasil untuk
+                                                &ldquo;
                                                 <span className="font-medium text-foreground">
                                                     {searchQuery}
                                                 </span>
@@ -296,7 +297,8 @@ export function BookSearchDialog({
                                                 {availableSearchResults.map(
                                                     (book, index) => {
                                                         const isSelected =
-                                                            selectedIndex === index;
+                                                            selectedIndex ===
+                                                            index;
                                                         const authorText =
                                                             book.authors?.join(
                                                                 ', ',
@@ -308,9 +310,10 @@ export function BookSearchDialog({
                                                                 : book.issn
                                                                   ? `ISSN ${book.issn}`
                                                                   : null;
-                                                        const subtitle = metaText
-                                                            ? `${authorText} • ${metaText}`
-                                                            : authorText;
+                                                        const subtitle =
+                                                            metaText
+                                                                ? `${authorText} • ${metaText}`
+                                                                : authorText;
 
                                                         return (
                                                             <div

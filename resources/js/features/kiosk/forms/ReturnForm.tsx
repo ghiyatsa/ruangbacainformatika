@@ -264,6 +264,7 @@ export function ReturnForm() {
                         </InputGroupAddon>
                         <InputGroupInput
                             id="return_member_identifier"
+                            autoFocus
                             value={memberIdentifier}
                             onChange={(event) =>
                                 setMemberIdentifier(event.target.value)

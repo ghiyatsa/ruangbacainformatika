@@ -20,7 +20,7 @@ export default function KioskPage(props: KioskProps) {
                 />
             </Head>
 
-            <main className="mx-auto flex min-h-dvh w-full max-w-7xl items-center px-4 py-4 sm:px-6 lg:px-8">
+            <main className="mx-auto flex min-h-dvh w-full items-center px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4">
                 {props.step === 'pin' ? <PinStep /> : <ReadyStep {...props} />}
             </main>
         </div>

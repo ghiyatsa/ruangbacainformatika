@@ -145,21 +145,43 @@ export default function VerifyReceiptPage({ isValid, submission }: Props) {
                                     </div>
                                 ) : null}
 
-                                {submission.batch_items && submission.batch_items.length > 1 ? (
+                                {submission.batch_items &&
+                                submission.batch_items.length > 1 ? (
                                     <div className="col-span-full border-t border-border pt-3">
-                                        <span className="text-[11px] font-semibold text-muted-foreground block mb-2">
-                                            Daftar Buku Terdaftar Dalam Batch ({submission.batch_items.length} Judul Buku):
+                                        <span className="mb-2 block text-[11px] font-semibold text-muted-foreground">
+                                            Daftar Buku Terdaftar Dalam Batch (
+                                            {submission.batch_items.length}{' '}
+                                            Judul Buku):
                                         </span>
-                                        <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                                            {submission.batch_items.map((item, idx) => (
-                                                <div key={item.id} className="rounded-md bg-muted/40 p-2 text-xs">
-                                                    <div className="font-medium text-foreground">{idx + 1}. {item.title}</div>
-                                                    <div className="text-[11px] text-muted-foreground mt-0.5">
-                                                        {[item.author_names, item.publisher_name].filter(Boolean).join(' • ') || '-'}
-                                                        <span className="ml-2 font-semibold text-foreground">({item.copies_count ?? 1} eks)</span>
+                                        <div className="max-h-48 space-y-1.5 overflow-y-auto">
+                                            {submission.batch_items.map(
+                                                (item, idx) => (
+                                                    <div
+                                                        key={item.id}
+                                                        className="rounded-md bg-muted/40 p-2 text-xs"
+                                                    >
+                                                        <div className="font-medium text-foreground">
+                                                            {idx + 1}.{' '}
+                                                            {item.title}
+                                                        </div>
+                                                        <div className="mt-0.5 text-[11px] text-muted-foreground">
+                                                            {[
+                                                                item.author_names,
+                                                                item.publisher_name,
+                                                            ]
+                                                                .filter(Boolean)
+                                                                .join(' • ') ||
+                                                                '-'}
+                                                            <span className="ml-2 font-semibold text-foreground">
+                                                                (
+                                                                {item.copies_count ??
+                                                                    1}{' '}
+                                                                eks)
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ),
+                                            )}
                                         </div>
                                     </div>
                                 ) : null}

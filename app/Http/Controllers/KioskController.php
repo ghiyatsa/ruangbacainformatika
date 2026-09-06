@@ -13,8 +13,10 @@ use App\Http\Requests\Kiosk\SearchBooksRequest;
 use App\Http\Requests\Kiosk\SubmitVisitRequest;
 use App\Http\Requests\Kiosk\VerifyPinRequest;
 use App\Http\Resources\BookResource;
+use App\Models\User;
 use App\Models\VisitLog;
 use App\Repositories\SettingRepository;
+use App\Services\Kiosk\KioskDashboardStatsService;
 use App\Services\Kiosk\KioskMemberLookupService;
 use App\Services\KioskPinManager;
 use App\Services\MemberRegistrationClaimService;
@@ -31,6 +33,7 @@ class KioskController extends Controller
         protected KioskPinManager $kioskPinManager,
         protected KioskMemberLookupService $kioskMemberLookupService,
         protected MemberRegistrationClaimService $memberRegistrationClaimService,
+        protected KioskDashboardStatsService $kioskDashboardStatsService,
     ) {}
 
     public function show(Request $request): Response
@@ -61,6 +64,9 @@ class KioskController extends Controller
             $activeMenu = 'visit';
         }
 
+        $currentDevice = $this->kioskPinManager->currentDevice($request);
+        $kioskInfo = $this->kioskDashboardStatsService->getStatsForRequest($request, $currentDevice);
+
         return Inertia::render('kiosk/index', [
             'step' => 'ready',
             'activeMenu' => $activeMenu,
@@ -69,6 +75,7 @@ class KioskController extends Controller
             'purposeOptions' => VisitLog::purposeOptions(),
             'kioskSession' => $kioskSession,
             'memberRegistrationClaim' => $memberRegistrationClaim,
+            'kioskInfo' => $kioskInfo,
             'meta' => ['robots' => 'noindex, nofollow'],
         ]);
     }
@@ -236,6 +243,8 @@ class KioskController extends Controller
             $request->validatedBookIds(),
         );
 
+        $this->recordKioskVisit($request, $loan->user, 'Peminjaman mandiri di kiosk');
+
         Inertia::flash('toast', [
             'type' => 'success',
             'message' => "Peminjaman untuk {$loan->user->name} berhasil disimpan. Bukti peminjaman akan dikirim ke WhatsApp anggota.",
@@ -246,15 +255,17 @@ class KioskController extends Controller
 
     public function storeReturn(ReturnBookRequest $request, ReturnBooksFromKiosk $returnBooksFromKiosk): RedirectResponse
     {
-        $returnedCount = $returnBooksFromKiosk->execute(
+        $result = $returnBooksFromKiosk->execute(
             $request->validatedVerificationPayload(),
             $request->validatedMemberIdentifier(),
             $request->validatedBookIds(),
         );
 
+        $this->recordKioskVisit($request, $result['member'], 'Pengembalian buku di kiosk');
+
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => "{$returnedCount} buku berhasil dikembalikan.",
+            'message' => "{$result['returned_count']} buku berhasil dikembalikan.",
         ]);
 
         return redirect()->route('kiosk.index', ['menu' => 'return']);
@@ -264,6 +275,32 @@ class KioskController extends Controller
     {
         return response()->json([
             'member' => $this->kioskMemberLookupService->preview($request->validatedIdentifier()),
+        ]);
+    }
+
+    protected function recordKioskVisit(Request $request, User $user, string $notes): void
+    {
+        $kioskDevice = $this->kioskPinManager->currentDevice($request);
+        $identityNumber = $user->identityNumber() ?? $user->nim();
+        $isMahasiswa = $user->isMahasiswa();
+
+        $visitorType = match (true) {
+            $isMahasiswa => VisitLog::VISITOR_TYPE_MAHASISWA,
+            $user->hasRole('staff') || $user->hasRole('super_admin') => VisitLog::VISITOR_TYPE_STAFF,
+            str_ends_with($user->email, '@unimal.ac.id') => VisitLog::VISITOR_TYPE_DOSEN,
+            default => VisitLog::VISITOR_TYPE_UMUM,
+        };
+
+        VisitLog::query()->create([
+            'kiosk_device_id' => $kioskDevice?->getKey(),
+            'name' => $user->name,
+            'visitor_type' => $visitorType,
+            'identity_number' => $identityNumber ?: null,
+            'institution' => str_ends_with($user->email, 'unimal.ac.id') ? 'Universitas Malikussaleh' : null,
+            'phone' => $user->whatsapp ?: null,
+            'purpose' => 'borrow_return',
+            'notes' => $notes,
+            'visited_at' => now(),
         ]);
     }
 }

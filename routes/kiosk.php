@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\KioskSyncController;
 use App\Http\Controllers\KioskController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,9 +39,3 @@ Route::get('/kiosk/pin', function () {
 Route::post('/kiosk/pin', [KioskController::class, 'verifyPin'])
     ->middleware('throttle:kiosk-pin')
     ->name('kiosk.pin.store');
-
-// Endpoint Sinkronisasi Kiosk Edge <-> Cloud
-Route::prefix('api/kiosk/sync')->group(function (): void {
-    Route::get('/catalog', [KioskSyncController::class, 'getCatalog'])->name('kiosk.sync.catalog');
-    Route::post('/transactions', [KioskSyncController::class, 'storeTransactions'])->name('kiosk.sync.transactions');
-});
