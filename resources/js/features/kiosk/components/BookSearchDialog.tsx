@@ -1,6 +1,8 @@
 import { BookOpen, Loader2, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { SearchFooter } from '@/components/layout/global-search/SearchFooter';
+import { SearchResultsSkeleton } from '@/components/layout/global-search/SearchResultsSkeleton';
 import {
     Dialog,
     DialogContent,
@@ -8,8 +10,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { SearchFooter } from '@/components/layout/global-search/SearchFooter';
-import { SearchResultsSkeleton } from '@/components/layout/global-search/SearchResultsSkeleton';
 import type {
     KioskBookSearchMode,
     KioskBookSearchResult,
@@ -150,9 +150,12 @@ export function BookSearchDialog({
         [searchResults, selectedBooks],
     );
 
-    useEffect(() => {
+    const [prevSearchResults, setPrevSearchResults] = useState(availableSearchResults);
+
+    if (prevSearchResults !== availableSearchResults) {
+        setPrevSearchResults(availableSearchResults);
         setSelectedIndex(0);
-    }, [availableSearchResults]);
+    }
 
     const handleSelectBook = (book: KioskBookSearchResult) => {
         onSelectBook(book);
@@ -162,6 +165,7 @@ export function BookSearchDialog({
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
+
             if (availableSearchResults.length > 0) {
                 setSelectedIndex((prev) =>
                     prev < availableSearchResults.length - 1 ? prev + 1 : 0,
@@ -169,6 +173,7 @@ export function BookSearchDialog({
             }
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
+
             if (availableSearchResults.length > 0) {
                 setSelectedIndex((prev) =>
                     prev > 0 ? prev - 1 : availableSearchResults.length - 1,
@@ -176,6 +181,7 @@ export function BookSearchDialog({
             }
         } else if (e.key === 'Enter') {
             e.preventDefault();
+
             if (
                 availableSearchResults.length > 0 &&
                 availableSearchResults[selectedIndex]

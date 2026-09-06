@@ -3,19 +3,22 @@ import { RuangBacaLogo } from '@/components/common/RuangBacaLogo';
 import { Badge } from '@/components/ui/badge';
 import {
     KioskStatsGrid,
-    KioskTimePanel,
-    type StatItem,
+    KioskTimePanel
+    
 } from '@/features/kiosk/components/KioskAttractCards';
-import type { KioskInfo, KioskSessionConfig } from '@/features/kiosk/types';
 import { PROGRAM_NAME, UNIVERSITY_NAME } from '@/lib/brand';
+import type {StatItem} from '@/features/kiosk/components/KioskAttractCards';
+import type { KioskInfo, KioskSessionConfig } from '@/features/kiosk/types';
 
 function greetingForHour(hour: number): string {
     if (hour < 11) {
         return 'Selamat Pagi';
     }
+
     if (hour < 15) {
         return 'Selamat Siang';
     }
+
     if (hour < 18) {
         return 'Selamat Sore';
     }
