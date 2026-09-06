@@ -94,12 +94,8 @@ class QrCodeWithLogo
         $innerSize = $badgeSize - ($innerPadding * 2);
         $innerPos = $badgePos + $innerPadding;
 
-        // Mask background under badge: always clean solid white/card background
-        $maskFill = match ($bgColor) {
-            'var(--background)' => 'var(--card)',
-            'transparent' => '#ffffff',
-            default => $bgColor,
-        };
+        // Mask background under badge: uses web background color so it cleanly integrates with web theme
+        $maskFill = 'var(--background)';
 
         return sprintf(
             '<g class="qr-logo-badge">'
