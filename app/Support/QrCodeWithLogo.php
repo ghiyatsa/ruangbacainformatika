@@ -60,14 +60,14 @@ class QrCodeWithLogo
         $svg = (string) preg_replace('/fill="#111827"/i', 'fill="'.$fillColor.'"', $svg);
 
         if ($withLogo) {
-            $logoBadge = self::renderLogoBadge($size, $bgColor);
+            $logoBadge = self::renderLogoBadge($size, $bgColor, $fillColor);
             $svg = str_replace('</svg>', $logoBadge.'</svg>', $svg);
         }
 
         return str_replace('<svg ', '<svg color="'.$fillColor.'" ', $svg);
     }
 
-    protected static function renderLogoBadge(int $size, string $bgColor): string
+    protected static function renderLogoBadge(int $size, string $bgColor, string $fillColor): string
     {
         $logoSvgPath = public_path('images/ruangbaca.svg');
         if (! File::exists($logoSvgPath)) {
@@ -86,6 +86,10 @@ class QrCodeWithLogo
         $innerSvg = preg_replace('/^<svg[^>]*>/s', '', trim($innerSvg));
         $innerSvg = preg_replace('/<\/svg>$/s', '', trim($innerSvg));
 
+        // Adjust inner logo fills and strokes to match QR foreground and surface themes
+        $innerSvg = (string) preg_replace('/style="fill:var\(--primary,[^)]+\);"/i', 'style="fill:'.$fillColor.';"', $innerSvg);
+        $innerSvg = (string) preg_replace('/stroke:#fff/i', 'stroke:'.$bgColor, $innerSvg);
+
         $badgeSize = (int) round($size * self::LOGO_RATIO);
         $badgePos = (int) round(($size - $badgeSize) / 2);
         $badgeRadius = (int) round($badgeSize * 0.22);
@@ -94,8 +98,12 @@ class QrCodeWithLogo
         $innerSize = $badgeSize - ($innerPadding * 2);
         $innerPos = $badgePos + $innerPadding;
 
-        // Mask background under logo so QR dark modules do not bleed into the logo
-        $maskFill = $bgColor === 'transparent' ? '#ffffff' : $bgColor;
+        // Mask background under badge
+        $maskFill = match ($bgColor) {
+            'var(--background)' => 'var(--card)',
+            'transparent' => 'var(--card, #ffffff)',
+            default => $bgColor,
+        };
 
         return sprintf(
             '<g class="qr-logo-badge">'
