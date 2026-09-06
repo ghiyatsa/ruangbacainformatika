@@ -86,10 +86,6 @@ class QrCodeWithLogo
         $innerSvg = preg_replace('/^<svg[^>]*>/s', '', trim($innerSvg));
         $innerSvg = preg_replace('/<\/svg>$/s', '', trim($innerSvg));
 
-        // Adjust inner logo fills and strokes to match QR foreground and surface themes
-        $innerSvg = (string) preg_replace('/style="fill:var\(--primary,[^)]+\);"/i', 'style="fill:'.$fillColor.';"', $innerSvg);
-        $innerSvg = (string) preg_replace('/stroke:#fff/i', 'stroke:'.$bgColor, $innerSvg);
-
         $badgeSize = (int) round($size * self::LOGO_RATIO);
         $badgePos = (int) round(($size - $badgeSize) / 2);
         $badgeRadius = (int) round($badgeSize * 0.22);
@@ -98,10 +94,10 @@ class QrCodeWithLogo
         $innerSize = $badgeSize - ($innerPadding * 2);
         $innerPos = $badgePos + $innerPadding;
 
-        // Mask background under badge
+        // Mask background under badge: always clean solid white/card background
         $maskFill = match ($bgColor) {
             'var(--background)' => 'var(--card)',
-            'transparent' => 'var(--card, #ffffff)',
+            'transparent' => '#ffffff',
             default => $bgColor,
         };
 
