@@ -94,8 +94,10 @@ class QrCodeWithLogo
         $innerSize = $badgeSize - ($innerPadding * 2);
         $innerPos = $badgePos + $innerPadding;
 
-        // Mask background under badge: uses web background color so it cleanly integrates with web theme
-        $maskFill = 'var(--background)';
+        // Mask background under badge: for white receipts use solid white, otherwise use web background color
+        $maskFill = ($bgColor === '#ffffff' || $bgColor === 'white')
+            ? '#ffffff'
+            : 'var(--background)';
 
         return sprintf(
             '<g class="qr-logo-badge">'

@@ -300,14 +300,9 @@ export default function ReceiptPrintPage({ receipt }: Props) {
                         <div className="mt-8 grid grid-cols-2 items-end pt-4">
                             {/* QR Code Validation */}
                             <div className="space-y-2">
-                                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
-                                    <CheckCircle2 className="size-4 text-emerald-700" />
-                                    <span>Terverifikasi Sistem Digital</span>
-                                </div>
-
                                 {receipt.qr_svg ? (
                                     <div
-                                        className="size-32 rounded-lg border border-neutral-300 bg-white p-1.5 text-neutral-900 shadow-xs print:border-neutral-400 [&>svg]:size-full [&>svg]:h-full [&>svg]:w-full"
+                                        className="size-32 bg-white text-neutral-900 [&>svg]:size-full [&>svg]:h-full [&>svg]:w-full"
                                         dangerouslySetInnerHTML={{
                                             __html: receipt.qr_svg,
                                         }}

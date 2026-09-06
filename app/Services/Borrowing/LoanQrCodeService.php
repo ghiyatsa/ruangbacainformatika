@@ -12,8 +12,8 @@ class LoanQrCodeService
             payload: $payload,
             size: 192,
             withLogo: true,
-            fillColor: 'currentColor',
-            bgColor: 'transparent'
+            fillColor: '#111827',
+            bgColor: '#ffffff'
         );
     }
 }
