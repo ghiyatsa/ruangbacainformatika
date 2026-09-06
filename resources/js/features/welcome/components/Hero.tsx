@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, BookOpen, BookText, History, Search } from 'lucide-react';
+import { ArrowRight, BookOpen, BookText, Footprints, Search } from 'lucide-react';
 import { motion } from 'motion/react';
 import CountUp from '@/components/animated/CountUp';
 import { Kbd } from '@/components/ui/kbd';
@@ -26,9 +26,9 @@ const STATS = [
         suffix: '+',
     },
     {
-        key: 'loansCount' as const,
-        label: 'Peminjaman',
-        icon: History,
+        key: 'visitsCount' as const,
+        label: 'Kunjungan',
+        icon: Footprints,
         suffix: '+',
     },
 ];
@@ -65,7 +65,7 @@ export default function Hero({ stats }: HeroProps) {
     const statsValues = {
         booksCount: stats.booksCount,
         availableItemsCount: stats.availableItemsCount,
-        loansCount: stats.loansCount ?? 0,
+        visitsCount: stats.visitsCount ?? 0,
     };
 
     return (

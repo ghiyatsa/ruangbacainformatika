@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Category;
 use App\Models\Loan;
+use App\Models\VisitLog;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -19,7 +20,8 @@ class CatalogService
      *     featuredCount: int,
      *     availableItemsCount: int,
      *     activeCategoriesCount: int,
-     *     loansCount: int
+     *     loansCount: int,
+     *     visitsCount: int
      * }
      */
     public function getStats(): array
@@ -44,6 +46,7 @@ class CatalogService
                     ->whereHas('books', fn ($query) => $query->published())
                     ->count(),
                 'loansCount' => Loan::query()->count(),
+                'visitsCount' => VisitLog::query()->count(),
                 'mostBorrowedCount' => Book::query()
                     ->published()
                     ->where('is_borrowable', true)
