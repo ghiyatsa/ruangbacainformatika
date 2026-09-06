@@ -53,7 +53,7 @@ export default function VerifyReceiptPage({ isValid, submission }: Props) {
                                 Dokumen Terverifikasi Resmi
                             </h1>
 
-                            <div className="my-6 w-full space-y-3 rounded-2xl border border-border/80 bg-muted/30 p-4 text-left text-xs sm:text-sm">
+                            <div className="my-6 w-full space-y-3 p-1 text-left text-xs sm:text-sm">
                                 <div>
                                     <span className="text-[11px] font-medium text-muted-foreground">
                                         Jenis Penyerahan

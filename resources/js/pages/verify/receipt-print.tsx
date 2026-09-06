@@ -148,7 +148,7 @@ export default function ReceiptPrintPage({ receipt }: Props) {
                             </p>
 
                             {/* Data Table */}
-                            <div className="my-4 space-y-2.5 rounded-xl border border-neutral-300 bg-neutral-50/70 p-4 sm:p-5">
+                            <div className="my-4 space-y-2.5 py-2">
                                 <div className="grid grid-cols-[150px_1fr] gap-2">
                                     <span className="font-semibold text-neutral-600">
                                         Nama Mahasiswa
