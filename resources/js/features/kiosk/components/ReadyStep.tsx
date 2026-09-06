@@ -9,8 +9,8 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { KioskAttractScreen } from '@/features/kiosk/components/KioskAttractScreen';
 import { KioskShortcutsHelp } from '@/features/kiosk/components/KioskAttractCards';
+import { KioskAttractScreen } from '@/features/kiosk/components/KioskAttractScreen';
 import { MenuGrid } from '@/features/kiosk/components/MenuGrid';
 import { BorrowForm } from '@/features/kiosk/forms/BorrowForm';
 import { MemberForm } from '@/features/kiosk/forms/MemberForm';

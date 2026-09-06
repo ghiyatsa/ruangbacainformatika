@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { CheckCircle2, Printer } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { RuangBacaLogo } from '@/components/common/RuangBacaLogo';
 import { Button } from '@/components/ui/button';
 

@@ -58,8 +58,8 @@ Untuk memastikan kelancaran pengembangan, harap pahami beberapa aturan alur bisn
    - Melakukan verifikasi nomor WhatsApp menggunakan OTP.
    - Mendapatkan persetujuan (approval) dari admin/petugas.
    - Memiliki role `member`.
-3. **Modus Kiosk**: Layanan Kiosk dirancang untuk perangkat fisik di perpustakaan. Kiosk dilindungi oleh pembatasan Subnet IP (Allowlist) dan PIN default untuk mencegah akses tidak sah.
-4. **Alur Transaksi (Draft QR)**: Peminjaman dan pengembalian dilakukan dengan mengajukan draft di aplikasi pengguna, menghasilkan QR Code, lalu dipindai di Kiosk atau dikonfirmasi oleh petugas.
+3. **Modus Kiosk**: Layanan Kiosk dirancang untuk perangkat fisik di perpustakaan. Kiosk dilindungi oleh pembatasan Subnet IP (Allowlist) dan PIN default untuk mencegah akses tidak sah. Layanan ini mencakup buku tamu pengunjung, klaim akun anggota baru, serta peminjaman dan pengembalian mandiri.
+4. **Alur Transaksi & QR Code**: Transaksi peminjaman di kiosk menggunakan verifikasi Member Key dinamis berbasis HMAC (kadaluarsa dalam 1 menit) atau identitas NIM/NIP/email/nomor HP anggota. Seluruh QR Code sistem (Member Key, tautan akun, dan tanda terima penyerahan berkas) dilengkapi dengan logo brand di bagian tengah dan Error Correction Level H.
 
 ---
 
