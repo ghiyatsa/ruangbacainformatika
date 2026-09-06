@@ -28,6 +28,7 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="FONNTE_API_URL" value="https://api.fonnte.com/send"/>
         <env name="FONNTE_API_TOKEN" value="test-fonnte-token"/>
     </php>
 </phpunit>
