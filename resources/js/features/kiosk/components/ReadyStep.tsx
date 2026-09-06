@@ -52,7 +52,7 @@ export function ReadyStep(props: KioskProps) {
             }
 
             router.visit(KioskController.show({ query: { menu } }), {
-                only: ['activeMenu', 'memberRegistrationClaim'],
+                only: ['activeMenu', 'memberRegistrationClaim', 'kioskInfo'],
                 preserveScroll: true,
                 preserveState: true,
             });

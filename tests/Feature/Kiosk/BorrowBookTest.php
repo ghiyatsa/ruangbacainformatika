@@ -212,6 +212,13 @@ it('borrows selected books from kiosk using book ids', function () {
     Notification::assertSentTo($member, LoanReceiptNotification::class);
 
     expect($bookItem->fresh()->status)->toBe('borrowed');
+    // Verify VisitLog entry was created for the borrow action
+    $this->assertDatabaseHas('visit_logs', [
+        'name' => $member->name,
+        'identity_number' => $member->nim(),
+        'purpose' => 'borrow_return',
+        'notes' => 'Peminjaman mandiri di kiosk',
+    ]);
 });
 
 it('rejects kiosk borrowing when the typed member identifier does not match the scanned member key', function () {
@@ -473,6 +480,13 @@ it('returns selected books from kiosk using book ids', function () {
     expect($loanItem->fresh()->returned_at)->not->toBeNull()
         ->and($bookItem->fresh()->status)->toBe('available')
         ->and($loan->fresh()->status)->toBe(Loan::STATUS_RETURNED);
+    // Verify VisitLog entry was created for the return action
+    $this->assertDatabaseHas('visit_logs', [
+        'name' => $member->name,
+        'identity_number' => $member->nim(),
+        'purpose' => 'borrow_return',
+        'notes' => 'Pengembalian buku di kiosk',
+    ]);
 });
 
 it('rejects kiosk returns when the typed member identifier does not match the scanned member key', function () {
