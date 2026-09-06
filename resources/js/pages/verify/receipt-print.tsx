@@ -148,83 +148,107 @@ export default function ReceiptPrintPage({ receipt }: Props) {
                             </p>
 
                             {/* Data Table */}
-                            <div className="my-4 space-y-2.5 py-2">
-                                <div className="grid grid-cols-[150px_1fr] gap-2">
-                                    <span className="font-semibold text-neutral-600">
-                                        Nama Mahasiswa
-                                    </span>
-                                    <span className="font-bold text-neutral-900">
-                                        : {receipt.student_name}
-                                    </span>
-                                </div>
-                                <div className="grid grid-cols-[150px_1fr] gap-2">
-                                    <span className="font-semibold text-neutral-600">
-                                        NIM
-                                    </span>
-                                    <span className="font-mono font-bold text-neutral-900">
-                                        : {receipt.student_id}
-                                    </span>
-                                </div>
+                            <table className="my-4 ml-6 border-collapse text-left text-xs sm:ml-8 sm:text-sm">
+                                <tbody className="[&_td]:py-1">
+                                    <tr>
+                                        <td className="w-44 pr-2 font-semibold text-neutral-600">
+                                            Nama Mahasiswa
+                                        </td>
+                                        <td className="w-4 text-center font-bold text-neutral-900">
+                                            :
+                                        </td>
+                                        <td className="font-bold text-neutral-900">
+                                            {receipt.student_name}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="w-44 pr-2 font-semibold text-neutral-600">
+                                            NIM
+                                        </td>
+                                        <td className="w-4 text-center font-mono font-bold text-neutral-900">
+                                            :
+                                        </td>
+                                        <td className="font-mono font-bold text-neutral-900">
+                                            {receipt.student_id}
+                                        </td>
+                                    </tr>
 
-                                {receipt.company_name ? (
-                                    <div className="grid grid-cols-[150px_1fr] gap-2">
-                                        <span className="font-semibold text-neutral-600">
-                                            Tempat / Instansi KP
-                                        </span>
-                                        <span className="text-neutral-900">
-                                            : {receipt.company_name}
-                                        </span>
-                                    </div>
-                                ) : null}
+                                    {receipt.company_name ? (
+                                        <tr>
+                                            <td className="w-44 pr-2 font-semibold text-neutral-600">
+                                                Tempat / Instansi KP
+                                            </td>
+                                            <td className="w-4 text-center text-neutral-900">
+                                                :
+                                            </td>
+                                            <td className="text-neutral-900">
+                                                {receipt.company_name}
+                                            </td>
+                                        </tr>
+                                    ) : null}
 
-                                {receipt.academic_advisor ? (
-                                    <div className="grid grid-cols-[150px_1fr] gap-2">
-                                        <span className="font-semibold text-neutral-600">
-                                            Dosen Pembimbing
-                                        </span>
-                                        <span className="text-neutral-900">
-                                            : {receipt.academic_advisor}
-                                        </span>
-                                    </div>
-                                ) : null}
+                                    {receipt.academic_advisor ? (
+                                        <tr>
+                                            <td className="w-44 pr-2 font-semibold text-neutral-600">
+                                                Dosen Pembimbing
+                                            </td>
+                                            <td className="w-4 text-center text-neutral-900">
+                                                :
+                                            </td>
+                                            <td className="text-neutral-900">
+                                                {receipt.academic_advisor}
+                                            </td>
+                                        </tr>
+                                    ) : null}
 
-                                <div className="grid grid-cols-[150px_1fr] gap-2">
-                                    <span className="font-semibold text-neutral-600">
-                                        Judul Karya / Buku
-                                    </span>
-                                    <span className="font-semibold text-neutral-900">
-                                        : {receipt.title}
-                                    </span>
-                                </div>
+                                    <tr>
+                                        <td className="w-44 pr-2 font-semibold text-neutral-600">
+                                            Judul Karya / Buku
+                                        </td>
+                                        <td className="w-4 text-center font-semibold text-neutral-900">
+                                            :
+                                        </td>
+                                        <td className="font-semibold text-neutral-900">
+                                            {receipt.title}
+                                        </td>
+                                    </tr>
 
-                                {receipt.author_names ? (
-                                    <div className="grid grid-cols-[150px_1fr] gap-2">
-                                        <span className="font-semibold text-neutral-600">
-                                            Pengarang / Penerbit
-                                        </span>
-                                        <span className="text-neutral-900">
-                                            : {receipt.author_names}{' '}
-                                            {receipt.publisher_name
-                                                ? `(${receipt.publisher_name})`
-                                                : ''}
-                                        </span>
-                                    </div>
-                                ) : null}
+                                    {receipt.author_names ? (
+                                        <tr>
+                                            <td className="w-44 pr-2 font-semibold text-neutral-600">
+                                                Pengarang / Penerbit
+                                            </td>
+                                            <td className="w-4 text-center text-neutral-900">
+                                                :
+                                            </td>
+                                            <td className="text-neutral-900">
+                                                {receipt.author_names}{' '}
+                                                {receipt.publisher_name
+                                                    ? `(${receipt.publisher_name})`
+                                                    : ''}
+                                            </td>
+                                        </tr>
+                                    ) : null}
 
-                                {receipt.copies_count ? (
-                                    <div className="grid grid-cols-[150px_1fr] gap-2">
-                                        <span className="font-semibold text-neutral-600">
-                                            Jumlah Eksemplar
-                                        </span>
-                                        <span className="font-semibold text-neutral-900">
-                                            : {receipt.copies_count} Eksemplar
-                                        </span>
-                                    </div>
-                                ) : null}
+                                    {receipt.copies_count ? (
+                                        <tr>
+                                            <td className="w-44 pr-2 font-semibold text-neutral-600">
+                                                Jumlah Eksemplar
+                                            </td>
+                                            <td className="w-4 text-center font-semibold text-neutral-900">
+                                                :
+                                            </td>
+                                            <td className="font-semibold text-neutral-900">
+                                                {receipt.copies_count} Eksemplar
+                                            </td>
+                                        </tr>
+                                    ) : null}
+                                </tbody>
+                            </table>
 
-                                {receipt.batch_items &&
-                                receipt.batch_items.length > 1 ? (
-                                    <div className="mt-4 border-t border-neutral-200 pt-3">
+                            {receipt.batch_items &&
+                            receipt.batch_items.length > 1 ? (
+                                <div className="mt-4 ml-6 border-t border-neutral-200 pt-3 sm:ml-8">
                                         <p className="mb-2 text-xs font-bold text-neutral-700">
                                             Daftar Buku Diserahkan Dalam Batch
                                             Ini ({receipt.batch_items.length}{' '}
@@ -282,9 +306,8 @@ export default function ReceiptPrintPage({ receipt }: Props) {
                                                 )}
                                             </tbody>
                                         </table>
-                                    </div>
-                                ) : null}
-                            </div>
+                                     </div>
+                                 ) : null}
 
                             <p className="text-justify text-neutral-800">
                                 Telah menyelesaikan penyerahan naskah / dokumen{' '}
