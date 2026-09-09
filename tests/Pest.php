@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Fortify\Features;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class)->in('Feature');
@@ -63,16 +62,6 @@ function asStaff(?User $user = null): TestCase
 function asAdmin(?User $user = null): TestCase
 {
     return test()->actingAs($user ?? User::factory()->admin()->create());
-}
-
-/**
- * Skip the current test if the given Fortify feature is not enabled.
- */
-function skipUnlessFortifyHas(string $feature, ?string $message = null): void
-{
-    if (! Features::enabled($feature)) {
-        test()->markTestSkipped($message ?? "Fortify feature [{$feature}] is not enabled.");
-    }
 }
 
 /*
