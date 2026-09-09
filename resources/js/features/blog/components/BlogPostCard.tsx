@@ -13,7 +13,7 @@ interface BlogPostCardProps {
 
 export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
-    const page = usePage<any>();
+    const page = usePage();
 
     const isBookmarkedByUser = isBookmarked({
         catalogType: 'post',
