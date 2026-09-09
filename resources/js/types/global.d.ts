@@ -15,6 +15,7 @@ declare module '@inertiajs/core' {
                 ogImageType: string;
                 ogImageWidth: number;
                 ogImageHeight: number;
+                colorPalette?: string;
                 notice: {
                     isActive: boolean;
                     text: string;

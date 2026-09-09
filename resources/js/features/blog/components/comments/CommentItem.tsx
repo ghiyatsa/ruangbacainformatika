@@ -223,7 +223,7 @@ export function CommentItem({
                         }
 
                         return parts.reduce(
-                            (acc: any[], part: string, index: number) => {
+                            (acc: (string | JSX.Element)[], part: string, index: number) => {
                                 if (index === 0) {
                                     return [part];
                                 }

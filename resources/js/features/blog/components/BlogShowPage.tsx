@@ -32,7 +32,7 @@ export function BlogShowPage({
 }: BlogShowPageProps) {
     const [imageLoaded, setImageLoaded] = useState(false);
     const article = post?.data ?? null;
-    const page = usePage<any>();
+    const page = usePage();
     const shareUrl = `${page.props.site?.url ?? ''}${page.url}`;
     const shareTitle = article?.title ?? 'Memuat...';
     const shareText = article?.summary ?? article?.excerpt ?? 'Memuat...';
