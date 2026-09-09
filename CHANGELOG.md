@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.21.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.20.0...v1.21.0) (2026-09-09)
+
+
+### Features
+
+* kiosk refactoring, central logo qr overlay, and receipt layout refinements ([#43](https://github.com/ghiyatsa/ruangbacainformatika/issues/43)) ([aa9bd52](https://github.com/ghiyatsa/ruangbacainformatika/commit/aa9bd5259c9a2b00f1c4d41a6495ccd6f83cc2eb))
+
+
+### Bug Fixes
+
+* resolve frontend eslint checks and update documentation ([#44](https://github.com/ghiyatsa/ruangbacainformatika/issues/44)) ([90ba945](https://github.com/ghiyatsa/ruangbacainformatika/commit/90ba94529fa36290f46584bc9504b21ae5cf13c5))
+* responsive breadcrumbs — visible on mobile, collapse middle items ([a1767b0](https://github.com/ghiyatsa/ruangbacainformatika/commit/a1767b0c90e3366bc2b5a1d6b357349aaf72e21c))
+
 ## [1.20.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.19.0...v1.20.0) (2026-08-26)
 
 
