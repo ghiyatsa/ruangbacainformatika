@@ -45,6 +45,7 @@ function CoverImage({
             width={128}
             height={171}
             loading="lazy"
+            decoding="async"
             className={className}
             onError={() => setErrored(true)}
         />

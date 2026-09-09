@@ -336,6 +336,7 @@ export function ReturnForm() {
                                                 height={64}
                                                 className="h-16 w-12 shrink-0 rounded-md border border-border/70 object-cover"
                                                 loading="lazy"
+                                                decoding="async"
                                             />
                                             <span className="min-w-0 flex-1">
                                                 <span className="line-clamp-1 text-sm font-semibold text-foreground">
