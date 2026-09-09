@@ -49,7 +49,7 @@ export function Breadcrumbs({
     const isCollapsible = breadcrumbs.length > 2;
     const isSingle = breadcrumbs.length === 1;
 
-    const renderNonLastItem = (item: BreadcrumbItemType, key: string) => (
+    const renderNonLastItem = (item: BreadcrumbItemType) => (
         <BreadcrumbLink asChild className="truncate">
             <Link href={item.href}>{item.title}</Link>
         </BreadcrumbLink>
@@ -64,7 +64,7 @@ export function Breadcrumbs({
                     {isSingle ? (
                         <BreadcrumbPage className="block truncate">{first.title}</BreadcrumbPage>
                     ) : (
-                        renderNonLastItem(first, 'bc-first')
+                        renderNonLastItem(first)
                     )}
                 </BreadcrumbItem>
 
@@ -74,7 +74,7 @@ export function Breadcrumbs({
                 {isCollapsible && middle.map((item, i) => (
                     <Fragment key={`bc-mid-${i}`}>
                         <BreadcrumbItem className="hidden shrink-0 sm:inline-flex">
-                            {renderNonLastItem(item, `bc-mid-${i}`)}
+                            {renderNonLastItem(item)}
                         </BreadcrumbItem>
                         <BreadcrumbSeparator className="hidden shrink-0 sm:inline-flex" />
                     </Fragment>
