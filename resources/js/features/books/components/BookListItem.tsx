@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { BookOpen, Eye, Star } from 'lucide-react';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import BookController from '@/actions/App/Http/Controllers/BookController';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { formatViewCount } from '@/lib/utils';
@@ -10,7 +10,7 @@ interface BookListItemProps {
     book: CatalogBook;
 }
 
-export default function BookListItem({ book }: BookListItemProps) {
+function BookListItem({ book }: BookListItemProps) {
     const [coverErrored, setCoverErrored] = useState(false);
     const categories = Array.isArray(book.categories) ? book.categories : [];
     const visibleCategory = categories[0];
@@ -51,6 +51,7 @@ export default function BookListItem({ book }: BookListItemProps) {
                         height={80}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         loading="lazy"
+                        decoding="async"
                         onError={() => setCoverErrored(true)}
                     />
                 )}
@@ -113,3 +114,5 @@ export default function BookListItem({ book }: BookListItemProps) {
         </Link>
     );
 }
+
+export default memo(BookListItem);

@@ -261,6 +261,7 @@ export function BookActionForm({
                                                                             }
                                                                             className="h-16 w-12 shrink-0 rounded-md border border-border/70 object-cover"
                                                                             loading="lazy"
+                                                                            decoding="async"
                                                                         />
                                                                         <div className="min-w-0 flex-1 space-y-1">
                                                                             <p className="line-clamp-1 text-sm font-semibold text-foreground">
