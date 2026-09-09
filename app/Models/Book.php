@@ -28,7 +28,7 @@ class Book extends Model
     protected static function booted(): void
     {
         static::deleted(function (Book $book) {
-            if ($book->cover_image && Storage::disk('public')->exists($book->cover_image)) {
+            if ($book->cover_image && ! str_starts_with($book->cover_image, 'http://') && ! str_starts_with($book->cover_image, 'https://') && Storage::disk('public')->exists($book->cover_image)) {
                 Storage::disk('public')->delete($book->cover_image);
             }
         });
@@ -36,7 +36,7 @@ class Book extends Model
         static::updating(function (Book $book) {
             if ($book->isDirty('cover_image')) {
                 $oldImage = $book->getOriginal('cover_image');
-                if ($oldImage && Storage::disk('public')->exists($oldImage)) {
+                if ($oldImage && ! str_starts_with($oldImage, 'http://') && ! str_starts_with($oldImage, 'https://') && Storage::disk('public')->exists($oldImage)) {
                     Storage::disk('public')->delete($oldImage);
                 }
             }
@@ -305,5 +305,18 @@ class Book extends Model
         }
 
         return null;
+    }
+
+    public function getCoverImageUrlAttribute(): string
+    {
+        if (blank($this->cover_image)) {
+            return asset('images/book-cover-placeholder.svg');
+        }
+
+        if (str_starts_with($this->cover_image, 'http://') || str_starts_with($this->cover_image, 'https://')) {
+            return $this->cover_image;
+        }
+
+        return Storage::disk('public')->url($this->cover_image);
     }
 }

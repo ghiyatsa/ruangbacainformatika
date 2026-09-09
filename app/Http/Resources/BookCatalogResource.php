@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /** @mixin Book */
@@ -24,9 +23,7 @@ class BookCatalogResource extends JsonResource
                 $this->description ?: 'Deskripsi buku belum tersedia.',
                 160
             ),
-            'coverImageUrl' => $this->cover_image
-                ? Storage::disk('public')->url($this->cover_image)
-                : asset('images/book-cover-placeholder.svg'),
+            'coverImageUrl' => $this->cover_image_url,
             // Selalu berupa array, bukan Collection. Hasil resource ini
             // ikut tersimpan di cache (BuildHomeCatalogSections); Collection
             // yang di-serialize berubah jadi __PHP_Incomplete_Class saat

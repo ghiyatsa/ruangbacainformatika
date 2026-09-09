@@ -116,6 +116,22 @@ class BookImporter extends Importer
                 ->label('Bahasa')
                 ->castStateUsing(fn ($state): string => static::normalizeOptionalString($state) ?? 'Indonesia'),
 
+            ImportColumn::make('cover_image')
+                ->label('Sampul (URL)')
+                ->rules(['nullable', 'max:2048'])
+                ->castStateUsing(fn ($state): ?string => static::normalizeOptionalString($state))
+                ->fillRecordUsing(fn ($record, $state) => $record->cover_image = $state),
+
+            ImportColumn::make('is_borrowable')
+                ->label('Boleh Dipinjam')
+                ->boolean()
+                ->rules(['boolean']),
+
+            ImportColumn::make('view_count')
+                ->label('Jumlah Dilihat')
+                ->numeric()
+                ->rules(['nullable', 'integer', 'min:0']),
+
             ImportColumn::make('is_featured')
                 ->boolean()
                 ->rules(['boolean']),
