@@ -7,7 +7,6 @@ use App\Models\BookItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /** @mixin Book */
@@ -29,9 +28,7 @@ class BookResource extends JsonResource
             'issn' => $this->issn,
             'description' => $this->description ?: 'Deskripsi buku belum tersedia.',
             'shortDescription' => Str::limit($this->description ?: 'Deskripsi buku belum tersedia.', 160),
-            'coverImageUrl' => $this->cover_image
-                ? Storage::disk('public')->url($this->cover_image)
-                : asset('images/book-cover-placeholder.svg'),
+            'coverImageUrl' => $this->cover_image_url,
             'authors' => $this->whenLoaded('authors', fn () => $this->authors->pluck('name')->values()),
             'authorsData' => $this->whenLoaded('authors', fn () => $this->authors->map(fn ($author) => [
                 'name' => $author->name,
