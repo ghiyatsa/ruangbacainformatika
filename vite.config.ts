@@ -6,77 +6,76 @@ import babel from '@rolldown/plugin-babel';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
-export default defineConfig(({ command }) => ({
+// Vendor chunks hanya untuk build client.
+// Saat build SSR, grouping ini membuat vite:css-post gagal membaca
+// chunk metadata ("Cannot read properties of undefined (reading 'viteMetadata')").
+const vendorGroups = [
+    {
+        name: 'react-vendor',
+        test: /node_modules[\\/](react|react-dom|scheduler|use-sync-external-store)/,
+        priority: 30,
+    },
+    {
+        name: 'inertia-vendor',
+        test: /node_modules[\\/]@inertiajs/,
+        priority: 25,
+    },
+    {
+        name: 'motion-vendor',
+        test: /node_modules[\\/]motion[\\/]/,
+        priority: 24,
+    },
+    {
+        name: 'icons-vendor',
+        test: /node_modules[\\/]lucide-react[\\/]/,
+        priority: 23,
+    },
+    {
+        name: 'radix-vendor',
+        test: /node_modules[\\/](?:@radix-ui|radix-ui)[\\/]/,
+        priority: 22,
+    },
+    {
+        name: 'search-vendor',
+        test: /node_modules[\\/]cmdk[\\/]/,
+        priority: 21,
+    },
+    {
+        name: 'toast-vendor',
+        test: /node_modules[\\/]sonner[\\/]/,
+        priority: 20,
+    },
+    {
+        name: 'qr-vendor',
+        test: /node_modules[\\/]jsqr[\\/]/,
+        priority: 19,
+    },
+    {
+        name: 'turnstile-vendor',
+        test: /node_modules[\\/]@marsidev[\\/]react-turnstile[\\/]/,
+        priority: 18,
+    },
+];
+
+export default defineConfig(({ command, isSsrBuild }) => ({
     build: {
-        rolldownOptions: {
-            output: {
-                codeSplitting: {
-                    minSize: 20_000,
-                    groups: [
-                        {
-                            name: 'react-vendor',
-                            test: /node_modules[\\/](react|react-dom|scheduler|use-sync-external-store)/,
-                            priority: 30,
-                        },
-                        {
-                            name: 'inertia-vendor',
-                            test: /node_modules[\\/]@inertiajs/,
-                            priority: 25,
-                        },
-                        {
-                            name: 'motion-vendor',
-                            test: /node_modules[\\/]motion[\\/]/,
-                            priority: 24,
-                        },
-                        {
-                            name: 'icons-vendor',
-                            test: /node_modules[\\/]lucide-react[\\/]/,
-                            priority: 23,
-                        },
-                        {
-                            name: 'radix-vendor',
-                            test: /node_modules[\\/](?:@radix-ui|radix-ui)[\\/]/,
-                            priority: 22,
-                        },
-                        {
-                            name: 'search-vendor',
-                            test: /node_modules[\\/]cmdk[\\/]/,
-                            priority: 21,
-                        },
-                        {
-                            name: 'toast-vendor',
-                            test: /node_modules[\\/]sonner[\\/]/,
-                            priority: 20,
-                        },
-                        {
-                            name: 'qr-vendor',
-                            test: /node_modules[\\/]jsqr[\\/]/,
-                            priority: 19,
-                        },
-                        {
-                            name: 'turnstile-vendor',
-                            test: /node_modules[\\/]@marsidev[\\/]react-turnstile[\\/]/,
-                            priority: 18,
-                        },
-                        {
-                            name: 'otp-vendor',
-                            test: /node_modules[\\/]input-otp[\\/]/,
-                            priority: 17,
-                        },
-                        {
-                            name: 'ui-vendor',
-                            test: /node_modules[\\/](?:class-variance-authority|clsx|tailwind-merge)/,
-                            priority: 15,
-                        },
-                        {
-                            name: 'vendor',
-                            test: /node_modules/,
-                            priority: 10,
-                        },
-                    ],
-                },
-            },
-        },
+        // Entry & output eksplisit agar `isSsrBuild` terdeteksi saat
+        // dijalankan `vite build --ssr`.
+        ssr: isSsrBuild ? 'resources/js/ssr.tsx' : false,
+        outDir: isSsrBuild ? 'bootstrap/ssr' : 'public/build',
+        // Hanya kelompokkan vendor chunk pada build browser.
+        ...(isSsrBuild
+            ? {}
+            : {
+                  rolldownOptions: {
+                      output: {
+                          codeSplitting: {
+                              minSize: 20_000,
+                              groups: vendorGroups,
+                          },
+                      },
+                  },
+              }),
     },
     server: {
         host: 'localhost',
