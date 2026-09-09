@@ -15,8 +15,8 @@ import { CommentAvatar } from '@/features/blog/components/comments/CommentAvatar
 import { CommentInput } from '@/features/blog/components/comments/CommentInput';
 import { GuestCommentPrompt } from '@/features/blog/components/comments/GuestCommentPrompt';
 import commentsRoute from '@/routes/blog/comments';
-import type { BlogPostComment } from '@/features/blog/types';
 import type { ReactElement } from 'react';
+import type { BlogPostComment } from '@/features/blog/types';
 
 interface CommentItemProps {
     comment: BlogPostComment;
