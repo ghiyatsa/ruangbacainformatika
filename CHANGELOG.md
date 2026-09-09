@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.21.0...v1.21.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* breadcrumb last item truncates to fit available width ([#46](https://github.com/ghiyatsa/ruangbacainformatika/issues/46)) ([3f28c47](https://github.com/ghiyatsa/ruangbacainformatika/commit/3f28c47385872b6082b643c635e19a99fc08352e))
+
 ## [1.21.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.20.0...v1.21.0) (2026-09-09)
 
 
