@@ -1,13 +1,13 @@
 import { createInertiaApp } from '@inertiajs/react';
 import createServer from '@inertiajs/react/server';
 import { createElement } from 'react';
-import type { ComponentType, ReactNode } from 'react';
 import { renderToString } from 'react-dom/server';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { LazyToaster } from '@/components/layout/LazyToaster';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import AppLayout from '@/layouts/AppLayout';
 import AuthLayout from '@/layouts/AuthLayout';
+import type { ComponentType, ReactNode } from 'react';
 
 function AppProviders({ children }: { children: ReactNode }) {
     useFlashToast();
