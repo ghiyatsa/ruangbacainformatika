@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { Fragment } from 'react';
 import {
     Breadcrumb,
+    BreadcrumbEllipsis,
     BreadcrumbItem,
     BreadcrumbLink,
     BreadcrumbList,
@@ -20,16 +21,16 @@ export function Breadcrumbs({
 }) {
     if (loading) {
         return (
-            <Breadcrumb className="hidden sm:block">
+            <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
                         <Skeleton className="h-4 w-14 animate-pulse rounded-md" />
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
-                    <BreadcrumbItem>
+                    <BreadcrumbItem className="hidden sm:inline-flex">
                         <Skeleton className="h-4 w-20 animate-pulse rounded-md" />
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator />
+                    <BreadcrumbSeparator className="hidden sm:inline-flex" />
                     <BreadcrumbItem>
                         <Skeleton className="h-4 w-32 animate-pulse rounded-md" />
                     </BreadcrumbItem>
@@ -42,45 +43,61 @@ export function Breadcrumbs({
         return null;
     }
 
-    const renderBreadcrumbItem = (
-        item: BreadcrumbItemType,
-        index: number,
-        items: BreadcrumbItemType[],
-        compact = false,
-    ) => {
-        const isLast = index === items.length - 1;
-        const textClassName = compact
-            ? 'inline-block max-w-[12rem] truncate align-bottom'
-            : undefined;
-
-        const content = item.title ?? (
-            <Skeleton className="h-4 w-24 animate-pulse rounded-md" />
-        );
+    const renderItem = (item: BreadcrumbItemType, index: number, isLast: boolean) => {
+        const textCls = 'inline-block max-w-[10rem] truncate align-bottom sm:max-w-[16rem]';
+        const content = item.title ?? <Skeleton className="h-4 w-24 animate-pulse rounded-md" />;
 
         return (
-            <Fragment key={`breadcrumb-${index}`}>
-                <BreadcrumbItem>
-                    {isLast ? (
-                        <BreadcrumbPage className={textClassName}>
-                            {content}
-                        </BreadcrumbPage>
-                    ) : (
-                        <BreadcrumbLink asChild className={textClassName}>
-                            <Link href={item.href}>{content}</Link>
-                        </BreadcrumbLink>
-                    )}
-                </BreadcrumbItem>
-                {!isLast && <BreadcrumbSeparator />}
-            </Fragment>
+            <BreadcrumbItem key={`bc-${index}`}>
+                {isLast ? (
+                    <BreadcrumbPage className={textCls}>{content}</BreadcrumbPage>
+                ) : (
+                    <BreadcrumbLink asChild className={textCls}>
+                        <Link href={item.href}>{content}</Link>
+                    </BreadcrumbLink>
+                )}
+            </BreadcrumbItem>
         );
     };
 
+    // Mobile: first + ellipsis + last (when >2 items)
+    // Desktop (sm+): all items
+    const first = breadcrumbs[0];
+    const last = breadcrumbs[breadcrumbs.length - 1];
+    const middle = breadcrumbs.slice(1, -1);
+    const isCollapsible = breadcrumbs.length > 2;
+
     return (
-        <Breadcrumb className="hidden sm:block">
+        <Breadcrumb>
             <BreadcrumbList>
-                {breadcrumbs.map((item, index) =>
-                    renderBreadcrumbItem(item, index, breadcrumbs),
+                {/* First item — always visible */}
+                {renderItem(first, 0, breadcrumbs.length === 1)}
+                {breadcrumbs.length > 1 && <BreadcrumbSeparator />}
+
+                {/* Middle items — desktop only */}
+                {isCollapsible && middle.map((item, i) => (
+                    <Fragment key={`bc-mid-${i}`}>
+                        <BreadcrumbItem className="hidden sm:inline-flex">
+                            <BreadcrumbLink asChild className="inline-block max-w-[16rem] truncate align-bottom">
+                                <Link href={item.href}>{item.title}</Link>
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator className="hidden sm:inline-flex" />
+                    </Fragment>
+                ))}
+
+                {/* Ellipsis — mobile only, when middle items are hidden */}
+                {isCollapsible && (
+                    <Fragment>
+                        <BreadcrumbItem className="sm:hidden">
+                            <BreadcrumbEllipsis className="size-4" />
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator className="sm:hidden" />
+                    </Fragment>
                 )}
+
+                {/* Last item — always visible */}
+                {breadcrumbs.length > 1 && renderItem(last, breadcrumbs.length - 1, true)}
             </BreadcrumbList>
         </Breadcrumb>
     );
