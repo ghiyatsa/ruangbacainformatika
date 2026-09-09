@@ -15,6 +15,7 @@ import { CommentAvatar } from '@/features/blog/components/comments/CommentAvatar
 import { CommentInput } from '@/features/blog/components/comments/CommentInput';
 import { GuestCommentPrompt } from '@/features/blog/components/comments/GuestCommentPrompt';
 import commentsRoute from '@/routes/blog/comments';
+import type { ReactElement } from 'react';
 import type { BlogPostComment } from '@/features/blog/types';
 
 interface CommentItemProps {
@@ -223,7 +224,7 @@ export function CommentItem({
                         }
 
                         return parts.reduce(
-                            (acc: any[], part: string, index: number) => {
+                            (acc: (string | ReactElement)[], part: string, index: number) => {
                                 if (index === 0) {
                                     return [part];
                                 }

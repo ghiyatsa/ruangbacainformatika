@@ -1,4 +1,4 @@
-import type { Auth } from '@/types/auth';
+import type { Auth, GoogleAuth } from '@/types/auth';
 import type { NotificationSummary } from '@/types/notifications';
 
 declare module '@inertiajs/core' {
@@ -15,6 +15,8 @@ declare module '@inertiajs/core' {
                 ogImageType: string;
                 ogImageWidth: number;
                 ogImageHeight: number;
+                colorPalette?: string;
+                logo?: string;
                 notice: {
                     isActive: boolean;
                     text: string;
@@ -24,6 +26,7 @@ declare module '@inertiajs/core' {
                 };
             };
             auth: Auth;
+            googleAuth?: GoogleAuth;
             notifications: NotificationSummary;
             [key: string]: unknown;
         };

@@ -37,7 +37,7 @@ export default function AppLayout({
     hideSearch = false,
     breadcrumbs: propBreadcrumbs,
 }: AppLayoutProps & { hideSearch?: boolean }) {
-    const page = usePage<{ site?: { colorPalette?: string } }>();
+    const page = usePage();
     const colorPalette = page.props.site?.colorPalette;
 
     React.useEffect(() => {

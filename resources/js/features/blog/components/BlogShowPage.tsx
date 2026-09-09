@@ -32,7 +32,7 @@ export function BlogShowPage({
 }: BlogShowPageProps) {
     const [imageLoaded, setImageLoaded] = useState(false);
     const article = post?.data ?? null;
-    const page = usePage<any>();
+    const page = usePage();
     const shareUrl = `${page.props.site?.url ?? ''}${page.url}`;
     const shareTitle = article?.title ?? 'Memuat...';
     const shareText = article?.summary ?? article?.excerpt ?? 'Memuat...';
@@ -472,7 +472,7 @@ export function BlogShowPage({
                                 commentsCount={article.commentsCount}
                                 articleSlug={article.slug}
                                 allowComments={article.allowComments}
-                                currentUser={page.props.auth?.user}
+                                currentUser={page.props.auth?.user ? { id: page.props.auth.user.id, name: page.props.auth.user.name, avatar: page.props.auth.user.avatar ?? null, initials: page.props.auth.user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() } : null}
                                 googleLoginUrl={
                                     page.props.googleAuth?.loginUrl ??
                                     '/auth/google'

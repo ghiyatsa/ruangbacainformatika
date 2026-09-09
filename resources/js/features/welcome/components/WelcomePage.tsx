@@ -13,7 +13,7 @@ export default function WelcomePage({
     popularCategoryShelves,
     latestPosts,
 }: WelcomeProps) {
-    const page = usePage<any>();
+    const page = usePage();
     const siteUrl = page.props.site?.url || '';
     const siteName = page.props.name || 'Ruang Baca Informatika';
 
