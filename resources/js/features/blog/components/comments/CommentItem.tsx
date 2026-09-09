@@ -1,7 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import type { ReactElement } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +16,7 @@ import { CommentInput } from '@/features/blog/components/comments/CommentInput';
 import { GuestCommentPrompt } from '@/features/blog/components/comments/GuestCommentPrompt';
 import commentsRoute from '@/routes/blog/comments';
 import type { BlogPostComment } from '@/features/blog/types';
+import type { ReactElement } from 'react';
 
 interface CommentItemProps {
     comment: BlogPostComment;
