@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.21.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.21.1...v1.21.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* add aria-labels to icon-only buttons and skip-to-content link ([#52](https://github.com/ghiyatsa/ruangbacainformatika/issues/52)) ([1b5935e](https://github.com/ghiyatsa/ruangbacainformatika/commit/1b5935e73060bc2d0f685109689b70aefaea0602))
+* eliminate remaining any types in ssr, DesktopNav, and BlogPostCard ([#50](https://github.com/ghiyatsa/ruangbacainformatika/issues/50)) ([8b22f80](https://github.com/ghiyatsa/ruangbacainformatika/commit/8b22f8066a424a09da587265b7f6ba4fbe04a007))
+* remove usePage&lt;any&gt; and add colorPalette to shared site type ([#48](https://github.com/ghiyatsa/ruangbacainformatika/issues/48)) ([f7903d5](https://github.com/ghiyatsa/ruangbacainformatika/commit/f7903d5d17a79b5dca2d869b02c449f2c36416f6))
+
+
+### Performance Improvements
+
+* add decoding=async to lazy images and memoize BookListItem ([#51](https://github.com/ghiyatsa/ruangbacainformatika/issues/51)) ([fc4987b](https://github.com/ghiyatsa/ruangbacainformatika/commit/fc4987bff5d19b4de377d95a6ccfc57f31c4327a))
+
 ## [1.21.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.21.0...v1.21.1) (2026-09-09)
 
 
