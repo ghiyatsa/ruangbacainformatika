@@ -29,11 +29,14 @@ it('allows the submission owner to download their document file', function () {
         'PDF CONTENT',
     );
 
-    $this->actingAs($owner)
-        ->get(route('documents.file', [$submission, 'document']))
-        ->assertOk()
-        ->assertHeader('X-Content-Type-Options', 'nosniff')
-        ->assertHeader('Cache-Control', 'private, no-store');
+    $response = $this->actingAs($owner)
+        ->get(route('documents.file', [$submission, 'document']));
+
+    $response->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
+
+    expect($response->headers->get('Cache-Control'))
+        ->toContain('no-store')
+        ->toContain('private');
 });
 
 it('allows administrative users to download any document file', function (string $role) {
