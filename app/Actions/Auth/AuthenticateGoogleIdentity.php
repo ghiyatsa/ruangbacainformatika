@@ -66,7 +66,7 @@ class AuthenticateGoogleIdentity
             $this->memberRegistrationClaimService->consume($linkToken, $googleId, $user);
         }
 
-        Auth::guard('web')->login($user);
+        Auth::guard('web')->login($user, remember: true);
         $request->session()->regenerate();
         $request->session()->forget(['whatsapp_verification_skipped', 'profile_completion_skipped']);
 
