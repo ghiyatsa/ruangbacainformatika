@@ -100,6 +100,11 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
                         type="button"
                         size="icon"
                         variant="secondary"
+                        aria-label={
+                            isBookmarkedByUser
+                                ? 'Hapus bookmark'
+                                : 'Simpan bookmark'
+                        }
                         title={
                             isBookmarkedByUser
                                 ? 'Hapus bookmark'

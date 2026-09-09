@@ -230,6 +230,11 @@ export function BlogShowPage({
                                             onClick={() =>
                                                 toggleBookmark(bookmarkRecord)
                                             }
+                                            aria-label={
+                                                isBookmarkedByUser
+                                                    ? 'Hapus bookmark'
+                                                    : 'Simpan bookmark'
+                                            }
                                             title={
                                                 isBookmarkedByUser
                                                     ? 'Hapus bookmark'
@@ -256,6 +261,7 @@ export function BlogShowPage({
                                             size="icon"
                                             className="h-8 w-8 rounded-xl"
                                             onClick={handleShare}
+                                            aria-label="Bagikan artikel"
                                             title="Bagikan artikel"
                                         >
                                             <Share2 className="size-4 text-primary" />

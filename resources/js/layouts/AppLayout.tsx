@@ -103,6 +103,12 @@ export default function AppLayout({
         <div className="relative flex min-h-screen w-full flex-col">
             <BackgroundPattern />
             <div className="pointer-events-none absolute top-0 bottom-0 left-1/2 z-20 w-full max-w-7xl -translate-x-1/2 border-x border-border/60" />
+            <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+            >
+                Lewati ke konten utama
+            </a>
             <GoogleOneTapPrompt />
             <div
                 ref={headerGroupRef}
@@ -118,7 +124,10 @@ export default function AppLayout({
                     </div>
                 )}
             </div>
-            <main className="flex h-full w-full flex-1 flex-col">
+            <main
+                id="main-content"
+                className="flex h-full w-full flex-1 flex-col"
+            >
                 {children}
             </main>
             <div className="w-full border-y border-border/60">
