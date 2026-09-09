@@ -1,13 +1,13 @@
 import { createInertiaApp } from '@inertiajs/react';
 import createServer from '@inertiajs/react/server';
 import { createElement } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { renderToString } from 'react-dom/server';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { LazyToaster } from '@/components/layout/LazyToaster';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import AppLayout from '@/layouts/AppLayout';
 import AuthLayout from '@/layouts/AuthLayout';
-import type { ReactNode } from 'react';
 
 function AppProviders({ children }: { children: ReactNode }) {
     useFlashToast();
@@ -33,7 +33,7 @@ createServer((page) =>
                 throw new Error(`Page not found: ./pages/${name}.tsx`);
             }
 
-            return (pageComponent as any).default;
+            return (pageComponent as { default: ComponentType }).default;
         },
         layout: (name) => {
             switch (true) {
@@ -47,7 +47,7 @@ createServer((page) =>
                     return AppLayout;
             }
         },
-        setup: ({ App, props }: any) => {
+        setup: ({ App, props }: { App: ComponentType<Record<string, unknown>>; props: Record<string, unknown> }) => {
             const app = createElement(App, props);
 
             return <AppProviders>{app}</AppProviders>;
