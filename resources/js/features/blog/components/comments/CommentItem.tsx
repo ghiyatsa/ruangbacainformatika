@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
-import { useState, type ReactElement } from 'react';
+import { useState } from 'react';
+import type { ReactElement } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
