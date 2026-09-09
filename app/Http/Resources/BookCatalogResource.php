@@ -27,18 +27,23 @@ class BookCatalogResource extends JsonResource
             'coverImageUrl' => $this->cover_image
                 ? Storage::disk('public')->url($this->cover_image)
                 : asset('images/book-cover-placeholder.svg'),
+            // Selalu berupa array, bukan Collection. Hasil resource ini
+            // ikut tersimpan di cache (BuildHomeCatalogSections); Collection
+            // yang di-serialize berubah jadi __PHP_Incomplete_Class saat
+            // di-unserialize sehingga penulis & kategori buku hilang.
             'authors' => $this->whenLoaded(
                 'authors',
-                fn () => $this->authors->pluck('name')->values()
+                fn (): array => $this->authors->pluck('name')->values()->all()
             ),
             'categories' => $this->whenLoaded(
                 'categories',
-                fn () => $this->categories
-                    ->map(fn ($category) => [
+                fn (): array => $this->categories
+                    ->map(fn ($category): array => [
                         'name' => $category->name,
                         'slug' => $category->slug,
                     ])
                     ->values()
+                    ->all()
             ),
             'publishedYear' => $this->published_year,
             'pages' => $this->pages,
