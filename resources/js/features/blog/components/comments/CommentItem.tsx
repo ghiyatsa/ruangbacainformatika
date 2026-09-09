@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -223,7 +223,7 @@ export function CommentItem({
                         }
 
                         return parts.reduce(
-                            (acc: (string | JSX.Element)[], part: string, index: number) => {
+                            (acc: (string | ReactElement)[], part: string, index: number) => {
                                 if (index === 0) {
                                     return [part];
                                 }

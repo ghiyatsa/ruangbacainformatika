@@ -472,7 +472,7 @@ export function BlogShowPage({
                                 commentsCount={article.commentsCount}
                                 articleSlug={article.slug}
                                 allowComments={article.allowComments}
-                                currentUser={page.props.auth?.user}
+                                currentUser={page.props.auth?.user ? { id: page.props.auth.user.id, name: page.props.auth.user.name, avatar: page.props.auth.user.avatar ?? null, initials: page.props.auth.user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() } : null}
                                 googleLoginUrl={
                                     page.props.googleAuth?.loginUrl ??
                                     '/auth/google'
