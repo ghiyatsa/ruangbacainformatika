@@ -47,7 +47,7 @@ createServer((page) =>
                     return AppLayout;
             }
         },
-        setup: ({ App, props }: { App: ComponentType<Record<string, unknown>>; props: Record<string, unknown> }) => {
+        setup: ({ App, props }) => {
             const app = createElement(App, props);
 
             return <AppProviders>{app}</AppProviders>;
