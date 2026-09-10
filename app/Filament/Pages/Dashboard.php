@@ -6,6 +6,7 @@ use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\MetadataCompletenessWidget;
+use App\Filament\Widgets\WhatsAppGatewayStatusWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
 use App\Filament\Widgets\PendingMemberApprovalsWidget;
@@ -120,6 +121,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                 OverdueLoanTableWidget::class,
             ],
             'messages' => [
+                WhatsAppGatewayStatusWidget::class,
                 ContactMessagesTableWidget::class,
                 CatalogReportsTableWidget::class,
             ],
