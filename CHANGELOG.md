@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.22.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.21.2...v1.22.0) (2026-09-10)
+
+
+### Features
+
+* **catalog:** support external book cover image URLs and importer mapping ([#56](https://github.com/ghiyatsa/ruangbacainformatika/issues/56)) ([00e0ac5](https://github.com/ghiyatsa/ruangbacainformatika/commit/00e0ac5a66dd8f48f7d33a8175d55022c294cf72))
+* enable Inertia SSR (server-side rendering) ([4bea71e](https://github.com/ghiyatsa/ruangbacainformatika/commit/4bea71e4acac7517e3d92a28c5e253dc78643f96))
+* enable persistent session with remember me on Google auth ([d24f159](https://github.com/ghiyatsa/ruangbacainformatika/commit/d24f159f0e802f4399d50f80bab40d891b21af7b))
+* **whatsapp:** add dashboard widget to monitor fonnte gateway device status ([#57](https://github.com/ghiyatsa/ruangbacainformatika/issues/57)) ([e2bc3b9](https://github.com/ghiyatsa/ruangbacainformatika/commit/e2bc3b93b098af102f4f95eef20921d1f25c1647))
+* **whatsapp:** add Fonnte gateway status widget to admin dashboard ([#58](https://github.com/ghiyatsa/ruangbacainformatika/issues/58)) ([4ccb232](https://github.com/ghiyatsa/ruangbacainformatika/commit/4ccb232d56c0fc0a3507c98724cdebe88f374026))
+
+
+### Bug Fixes
+
+* return authors & categories as array in BookCatalogResource ([c527810](https://github.com/ghiyatsa/ruangbacainformatika/commit/c52781059f88d0bd5e3607b5b25bfc7be71c22eb))
+
 ## [1.21.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.21.1...v1.21.2) (2026-09-09)
 
 
