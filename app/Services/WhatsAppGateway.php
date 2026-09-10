@@ -9,6 +9,7 @@ use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class WhatsAppGateway
@@ -21,6 +22,92 @@ class WhatsAppGateway
     public function configured(): bool
     {
         return filled($this->apiUrl()) && filled($this->apiToken());
+    }
+
+    /**
+     * Memeriksa status perangkat WhatsApp gateway (Fonnte).
+     *
+     * Hasil disimpan singkat di cache agar dashboard tidak
+     * memanggil API Fonnte berulang kali pada setiap render.
+     *
+     * @return array<string, mixed>
+     */
+    public function deviceStatus(bool $refresh = false): array
+    {
+        if (! $this->configured()) {
+            return [
+                'configured' => false,
+                'connected' => false,
+                'reason' => 'Gateway WhatsApp belum dikonfigurasi.',
+                'checked_at' => now()->toIso8601String(),
+            ];
+        }
+
+        $cacheKey = 'whatsapp-gateway:device-status';
+
+        if (! $refresh && ! app()->runningUnitTests()) {
+            $cached = Cache::get($cacheKey);
+
+            if (is_array($cached)) {
+                return $cached;
+            }
+        }
+
+        try {
+            $response = $this->http
+                ->acceptJson()
+                ->timeout(10)
+                ->withHeaders([
+                    'Authorization' => (string) $this->apiToken(),
+                ])
+                ->post($this->deviceUrl());
+
+            $payload = $this->responsePayload($response);
+            $status = $payload['status'] ?? null;
+            $deviceStatus = $payload['device_status'] ?? null;
+
+            $result = [
+                'configured' => true,
+                'connected' => $status === true && $deviceStatus === 'connect',
+                'device_status' => $deviceStatus,
+                'device' => $payload['device'] ?? null,
+                'name' => $payload['name'] ?? null,
+                'reason' => $status === false
+                    ? (string) ($payload['reason'] ?? 'Permintaan ditolak oleh gateway.')
+                    : null,
+                'checked_at' => now()->toIso8601String(),
+            ];
+        } catch (\Throwable $exception) {
+            $result = [
+                'configured' => true,
+                'connected' => false,
+                'device_status' => null,
+                'device' => null,
+                'name' => null,
+                'reason' => $exception->getMessage(),
+                'checked_at' => now()->toIso8601String(),
+            ];
+        }
+
+        Cache::put($cacheKey, $result, now()->addSeconds(60));
+
+        return $result;
+    }
+
+    /**
+     * URL endpoint pemeriksaan perangkat, diturunkan dari endpoint kirim.
+     */
+    public function deviceUrl(): string
+    {
+        $configured = config('services.fonnte.device_url');
+
+        if (is_string($configured) && $configured !== '') {
+            return $configured;
+        }
+
+        $base = rtrim(Str::beforeLast((string) $this->apiUrl(), '/'), '/');
+
+        return $base.'/device';
     }
 
     public function send(string $phoneNumber, string $message): Response
