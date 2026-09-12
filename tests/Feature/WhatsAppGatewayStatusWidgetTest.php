@@ -5,10 +5,7 @@ use App\Models\WhatsAppMessageLog;
 use App\Repositories\SettingRepository;
 use App\Services\WhatsAppGateway;
 use Illuminate\Http\Client\Factory as HttpFactory;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-
-use function Livewire\invade;
 
 it('derives the fonnte device endpoint from the send endpoint', function () {
     config()->set('services.fonnte.url', 'https://api.fonnte.com/send');
@@ -79,10 +76,10 @@ it('renders a disconnected whatsapp gateway stat in the dashboard widget', funct
 
     app()->instance(WhatsAppGateway::class, new WhatsAppGateway($repository, app(HttpFactory::class)));
 
-    $stats = invade(app(WhatsAppGatewayStatusWidget::class))->getStats();
+    $data = app(WhatsAppGatewayStatusWidget::class)->getViewData();
 
-    expect($stats[0]->getLabel())->toBe('WhatsApp Gateway')
-        ->and($stats[0]->getValue())->toBe('Belum Dikonfigurasi');
+    expect($data['connectionLabel'])->toBe('Belum Dikonfigurasi')
+        ->and($data['connectionColor'])->toBe('gray');
 });
 
 it('counts today sent and failed whatsapp messages in the dashboard widget', function () {
@@ -111,9 +108,10 @@ it('counts today sent and failed whatsapp messages in the dashboard widget', fun
         'attempts' => 1,
     ]);
 
-    DB::table('whats_app_message_logs')
-        ->where('id', $staleLog->id)
-        ->update(['created_at' => now()->subDays(3)]);
+    // backdate stale log directly via the model (no DB facade needed)
+    $staleLog->timestamps = false;
+    $staleLog->created_at = now()->subDays(3);
+    $staleLog->save();
 
     $repository = mock(SettingRepository::class);
     $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url', null)->andReturn(null);
@@ -121,10 +119,8 @@ it('counts today sent and failed whatsapp messages in the dashboard widget', fun
 
     app()->instance(WhatsAppGateway::class, new WhatsAppGateway($repository, app(HttpFactory::class)));
 
-    $stats = invade(app(WhatsAppGatewayStatusWidget::class))->getStats();
+    $data = app(WhatsAppGatewayStatusWidget::class)->getViewData();
 
-    expect($stats[1]->getLabel())->toBe('Pesan Terkirim Hari Ini')
-        ->and($stats[1]->getValue())->toBe('1')
-        ->and($stats[2]->getLabel())->toBe('Pesan Gagal Hari Ini')
-        ->and($stats[2]->getValue())->toBe('1');
+    expect($data['sentCount'])->toBe(1)
+        ->and($data['failedCount'])->toBe(1);
 });
