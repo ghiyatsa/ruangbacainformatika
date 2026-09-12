@@ -19,10 +19,7 @@ class WhatsAppGatewayStatusWidget extends Widget
 
     protected ?string $pollingInterval = '60s';
 
-    public function getView(): string
-    {
-        return 'filament.widgets.whats-app-gateway-status-widget';
-    }
+    protected string $view = 'filament.widgets.whats-app-gateway-status-widget';
 
     public function getViewData(): array
     {
