@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\WhatsAppMessageLogs\WhatsAppMessageLogsResource;
 use App\Models\WhatsAppMessageLog;
 use App\Services\WhatsAppGateway;
-use App\Support\AppTimezone;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
@@ -18,7 +17,7 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
 
     protected static ?int $sort = 6;
 
-    protected int|string|array $columnSpan = ['xl' => 2];
+    protected int|string|array $columnSpan = 'full';
 
     protected ?string $pollingInterval = '60s';
 
@@ -68,16 +67,14 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
             ->descriptionIcon(Heroicon::OutlinedExclamationTriangle, IconPosition::Before)
             ->color('danger')
             ->icon(Heroicon::OutlinedSignalSlash)
-            ->extraAttributes([
-                'title' => $reason,
-            ]);
+            ->extraAttributes(['title' => $reason]);
     }
 
     protected function todaySentStat(): Stat
     {
         $count = $this->todayLogCount(WhatsAppMessageLog::StatusSent);
 
-        return Stat::make('Pesan Terkirim Hari Ini', (string) $count)
+        return Stat::make('Terkirim Hari Ini', (string) $count)
             ->description($count > 0 ? 'Berhasil dikirim melalui gateway' : 'Belum ada pengiriman')
             ->descriptionIcon(Heroicon::OutlinedCheckCircle, IconPosition::Before)
             ->color($count > 0 ? 'success' : 'gray')
@@ -89,7 +86,7 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
     {
         $count = $this->todayLogCount(WhatsAppMessageLog::StatusFailed);
 
-        return Stat::make('Pesan Gagal Hari Ini', (string) $count)
+        return Stat::make('Gagal Hari Ini', (string) $count)
             ->description($count > 0 ? 'Perlu pengecekan gateway' : 'Tidak ada kegagalan')
             ->descriptionIcon($count > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle, IconPosition::Before)
             ->color($count > 0 ? 'danger' : 'success')
@@ -101,7 +98,7 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
     {
         return WhatsAppMessageLog::query()
             ->where('status', $status)
-            ->where('created_at', '>=', AppTimezone::now()->startOfDay())
+            ->where('created_at', '>=', now()->utc()->startOfDay())
             ->count();
     }
 }

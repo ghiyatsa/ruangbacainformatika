@@ -4,8 +4,8 @@ use App\Filament\Widgets\WhatsAppGatewayStatusWidget;
 use App\Models\WhatsAppMessageLog;
 use App\Repositories\SettingRepository;
 use App\Services\WhatsAppGateway;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Http\Client\Factory as HttpFactory;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 use function Livewire\invade;
@@ -79,6 +79,7 @@ it('renders a disconnected whatsapp gateway stat in the dashboard widget', funct
 
     app()->instance(WhatsAppGateway::class, new WhatsAppGateway($repository, app(HttpFactory::class)));
 
+    /** @var array<Stat> $stats */
     $stats = invade(app(WhatsAppGatewayStatusWidget::class))->getStats();
 
     expect($stats[0]->getLabel())->toBe('WhatsApp Gateway')
@@ -111,9 +112,10 @@ it('counts today sent and failed whatsapp messages in the dashboard widget', fun
         'attempts' => 1,
     ]);
 
-    DB::table('whats_app_message_logs')
-        ->where('id', $staleLog->id)
-        ->update(['created_at' => now()->subDays(3)]);
+    // backdate stale log directly via the model (no DB facade needed)
+    $staleLog->timestamps = false;
+    $staleLog->created_at = now()->subDays(3);
+    $staleLog->save();
 
     $repository = mock(SettingRepository::class);
     $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url', null)->andReturn(null);
@@ -121,10 +123,11 @@ it('counts today sent and failed whatsapp messages in the dashboard widget', fun
 
     app()->instance(WhatsAppGateway::class, new WhatsAppGateway($repository, app(HttpFactory::class)));
 
+    /** @var array<Stat> $stats */
     $stats = invade(app(WhatsAppGatewayStatusWidget::class))->getStats();
 
-    expect($stats[1]->getLabel())->toBe('Pesan Terkirim Hari Ini')
+    expect($stats[1]->getLabel())->toBe('Terkirim Hari Ini')
         ->and($stats[1]->getValue())->toBe('1')
-        ->and($stats[2]->getLabel())->toBe('Pesan Gagal Hari Ini')
+        ->and($stats[2]->getLabel())->toBe('Gagal Hari Ini')
         ->and($stats[2]->getValue())->toBe('1');
 });

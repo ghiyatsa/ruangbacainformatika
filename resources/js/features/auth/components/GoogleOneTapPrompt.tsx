@@ -33,11 +33,7 @@ let initializedPromptKey: string | null = null;
 let attemptedPromptKey: string | null = null;
 
 function shouldDisableForComponent(component: string) {
-    return (
-        component === 'error/index' ||
-        component.startsWith('kiosk/') ||
-        (component !== 'welcome/index' && !component.startsWith('auth/'))
-    );
+    return component === 'error/index' || component.startsWith('kiosk/');
 }
 
 export default function GoogleOneTapPrompt({
