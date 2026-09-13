@@ -572,7 +572,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                 Lokasi rak
                                             </p>
                                             <p className="mt-0.5 text-sm font-semibold text-foreground">
-                                                {shelfLocations || '—'}
+                                                {shelfLocations || '-'}
                                             </p>
                                             {usesBackupShelfLocations ? (
                                                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
