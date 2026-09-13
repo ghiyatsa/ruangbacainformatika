@@ -22,6 +22,11 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
 
     protected ?string $pollingInterval = '60s';
 
+    protected function getColumns(): int
+    {
+        return 3;
+    }
+
     protected function getStats(): array
     {
         /** @var WhatsAppGateway $gateway */
@@ -68,16 +73,14 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
             ->descriptionIcon(Heroicon::OutlinedExclamationTriangle, IconPosition::Before)
             ->color('danger')
             ->icon(Heroicon::OutlinedSignalSlash)
-            ->extraAttributes([
-                'title' => $reason,
-            ]);
+            ->extraAttributes(['title' => $reason]);
     }
 
     protected function todaySentStat(): Stat
     {
         $count = $this->todayLogCount(WhatsAppMessageLog::StatusSent);
 
-        return Stat::make('Pesan Terkirim Hari Ini', (string) $count)
+        return Stat::make('Terkirim Hari Ini', (string) $count)
             ->description($count > 0 ? 'Berhasil dikirim melalui gateway' : 'Belum ada pengiriman')
             ->descriptionIcon(Heroicon::OutlinedCheckCircle, IconPosition::Before)
             ->color($count > 0 ? 'success' : 'gray')
@@ -89,7 +92,7 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
     {
         $count = $this->todayLogCount(WhatsAppMessageLog::StatusFailed);
 
-        return Stat::make('Pesan Gagal Hari Ini', (string) $count)
+        return Stat::make('Gagal Hari Ini', (string) $count)
             ->description($count > 0 ? 'Perlu pengecekan gateway' : 'Tidak ada kegagalan')
             ->descriptionIcon($count > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle, IconPosition::Before)
             ->color($count > 0 ? 'danger' : 'success')
