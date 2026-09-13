@@ -222,7 +222,7 @@ export function GlobalSearchDialog({
                 </DialogDescription>
             </DialogHeader>
             <DialogContent
-                className="top-[15%] w-full translate-y-0 gap-0 overflow-hidden rounded-2xl border bg-popover p-0 shadow-2xl sm:top-[18%] sm:max-w-2xl"
+                className="top-[4%] w-full translate-y-0 gap-0 overflow-hidden rounded-2xl border bg-popover p-0 shadow-2xl sm:top-[18%] sm:max-w-2xl"
                 overlayClassName="bg-black/60 backdrop-blur-xs"
                 showCloseButton={false}
             >
