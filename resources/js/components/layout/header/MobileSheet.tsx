@@ -65,7 +65,7 @@ export function MobileSheet({
                 overlayClassName="bg-black/20"
                 className="h-svh w-[min(92vw,24rem)] max-w-[24rem] transform-gpu gap-0 rounded-r-[1.15rem] border-r border-border/60 bg-background p-0 shadow-none will-change-transform contain-[layout_paint] data-open:duration-200 data-closed:duration-0"
             >
-                <SheetHeader className="flex h-16 flex-row items-center gap-0.5 rounded-tr-[1.15rem] border-b border-border/60 bg-background px-3 text-left">
+                <SheetHeader className="flex h-18 flex-row items-center gap-0.5 rounded-tr-[1.15rem] border-b border-border/60 bg-background px-3 text-left">
                     <SheetClose asChild>
                         <Button
                             variant="ghost"
