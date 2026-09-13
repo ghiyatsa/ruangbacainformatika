@@ -173,35 +173,35 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                           {publisherData.name}
                       </Link>
                   ) : (
-                      (book.publisher ?? '-')
+                      (book.publisher ?? null)
                   ),
               },
               {
                   icon: <Calendar className="size-4" />,
                   label: 'Tahun',
-                  value: book.publishedYear ? String(book.publishedYear) : '-',
+                  value: book.publishedYear ? String(book.publishedYear) : null,
               },
               {
                   icon: <Hash className="size-4" />,
                   label: 'ISBN / ISSN',
-                  value: book.isbn ?? book.issn ?? '-',
+                  value: book.isbn ?? book.issn ?? null,
               },
               {
                   icon: <Bookmark className="size-4" />,
                   label: 'Edisi / Volume',
-                  value: book.edition ?? '-',
+                  value: book.edition ?? null,
               },
               {
                   icon: <FileText className="size-4" />,
                   label: 'Halaman',
-                  value: book.pages ?? '-',
+                  value: book.pages ?? null,
               },
               {
                   icon: <Globe className="size-4" />,
                   label: 'Bahasa',
-                  value: book.language ?? '-',
+                  value: book.language ?? null,
               },
-          ]
+          ].filter((item) => item.value !== null)
         : null;
 
     return (
@@ -572,7 +572,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                                 Lokasi rak
                                             </p>
                                             <p className="mt-0.5 text-sm font-semibold text-foreground">
-                                                {shelfLocations || '-'}
+                                                {shelfLocations || '—'}
                                             </p>
                                             {usesBackupShelfLocations ? (
                                                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">

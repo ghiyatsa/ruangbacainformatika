@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\WhatsAppMessageLogs\WhatsAppMessageLogsResource;
 use App\Models\WhatsAppMessageLog;
 use App\Services\WhatsAppGateway;
-use App\Support\AppTimezone;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
@@ -99,7 +98,7 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
     {
         return WhatsAppMessageLog::query()
             ->where('status', $status)
-            ->where('created_at', '>=', AppTimezone::now()->startOfDay())
+            ->where('created_at', '>=', now()->utc()->startOfDay())
             ->count();
     }
 }
