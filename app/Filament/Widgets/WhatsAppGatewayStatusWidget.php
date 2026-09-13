@@ -18,14 +18,9 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
 
     protected static ?int $sort = 6;
 
-    protected int|string|array $columnSpan = ['xl' => 2];
+    protected int|string|array $columnSpan = 'full';
 
     protected ?string $pollingInterval = '60s';
-
-    protected function getColumns(): int
-    {
-        return 3;
-    }
 
     protected function getStats(): array
     {
