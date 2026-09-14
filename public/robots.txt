@@ -3,6 +3,5 @@ Disallow: /admin/
 Disallow: /kiosk/
 Disallow: /login
 Disallow: /register
-Disallow: /search
 
-Sitemap: https://ruangbacainformatika.unimal.ac.id/sitemap.xml
+Sitemap: https://ruangbacainformatika.ghiyatsa.web.id/sitemap.xml
