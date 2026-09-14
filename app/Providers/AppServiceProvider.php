@@ -107,6 +107,7 @@ class AppServiceProvider extends ServiceProvider
             Cache::forget('catalog:home:popular');
             Cache::forget('catalog:home:most_borrowed');
             Cache::forget('catalog:home:category_shelves');
+            Cache::forget('catalog:home:books:page:1');
             app(CatalogPageCache::class)->invalidate();
         };
         Book::saved($clearCatalogCache);
