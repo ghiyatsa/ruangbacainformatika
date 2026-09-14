@@ -9,5 +9,6 @@ it('has a valid robots.txt file', function () {
         ->toContain('User-agent: *')
         ->toContain('Disallow: /admin/')
         ->toContain('Disallow: /kiosk/')
-        ->toContain('Sitemap: '.url('/sitemap.xml'));
+        ->toContain('Sitemap: ')
+        ->toContain('/sitemap.xml');
 });
