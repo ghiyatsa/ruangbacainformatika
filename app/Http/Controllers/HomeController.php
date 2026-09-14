@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Actions\Catalog\BuildHomeCatalogSections;
 use App\Http\Resources\BlogPostResource;
-use App\Http\Resources\BookCatalogResource;
 use App\Services\Blog\BlogQueryService;
 use App\Services\CatalogService;
 use App\Support\PageMeta;
@@ -23,14 +22,12 @@ class HomeController extends Controller
 
     public function __invoke(Request $request): Response
     {
-        $books = $this->buildHomeCatalogSections->paginatedBooks();
-        $paginated = $books->toArray();
-        $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
+        $paginated = $this->buildHomeCatalogSections->cachedFirstPageBooks();
 
         return Inertia::render('welcome/index', [
             'stats' => array_merge(
                 $this->catalogService->getStats(),
-                ['searchResultsCount' => $books->total()]
+                ['searchResultsCount' => $paginated['total'] ?? 0]
             ),
             'featuredBooks' => $this->buildHomeCatalogSections->featuredBooks(),
             'popularBooks' => $this->buildHomeCatalogSections->popularBooks(),

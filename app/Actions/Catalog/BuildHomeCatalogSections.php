@@ -41,6 +41,23 @@ class BuildHomeCatalogSections
     }
 
     /**
+     * Cached page-1 book list for the homepage — avoids the expensive
+     * correlated-subquery pagination on every visit.
+     *
+     * @return array<string, mixed>
+     */
+    public function cachedFirstPageBooks(): array
+    {
+        return Cache::remember('catalog:home:books:page:1', 3600, function (): array {
+            $books = $this->paginatedBooks();
+            $paginated = $books->toArray();
+            $paginated['data'] = BookCatalogResource::collection($books->getCollection())->resolve();
+
+            return $paginated;
+        });
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     public function featuredBooks(): array
@@ -148,7 +165,6 @@ class BuildHomeCatalogSections
             ->select(self::BOOK_LIST_COLUMNS)
             ->with(['authors:id,name', 'categories:id,name,slug'])
             ->withCount([
-                'items',
                 'items as available_items_count' => fn (Builder $query): Builder => $query->available(),
             ]);
     }
