@@ -58,7 +58,7 @@ export function HeaderActions({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="group hidden h-9 w-9 rounded-xl transition-all duration-300 md:inline-flex"
+                    className="group inline-flex h-9 w-9 rounded-xl transition-all duration-300"
                     onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
                     aria-label={isDark ? 'Mode terang' : 'Mode gelap'}
                     title={isDark ? 'Mode terang' : 'Mode gelap'}

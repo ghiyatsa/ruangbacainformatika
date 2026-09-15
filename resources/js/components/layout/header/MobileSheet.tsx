@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ChevronDown, Menu, MoonIcon, SunIcon, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,8 +24,6 @@ interface MobileSheetProps {
     setMobileOpen: (open: boolean) => void;
     isActive: (href: string) => boolean;
     auth: Auth;
-    resolvedAppearance: 'light' | 'dark';
-    updateAppearance: (appearance: 'light' | 'dark' | 'system') => void;
 }
 
 export function MobileSheet({
@@ -33,8 +31,6 @@ export function MobileSheet({
     setMobileOpen,
     isActive,
     auth,
-    resolvedAppearance,
-    updateAppearance,
 }: MobileSheetProps) {
     const isMember = Boolean(auth?.isMember);
     const navLinks = React.useMemo(() => getNavLinks(isMember), [isMember]);
@@ -55,7 +51,7 @@ export function MobileSheet({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="-ml-2 h-10 w-10 rounded-lg transition-colors active:scale-95 md:hidden"
+                    className="h-10 w-10 shrink-0 rounded-lg transition-colors active:scale-95 md:hidden"
                     aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
                     aria-expanded={mobileOpen}
                 >
@@ -74,7 +70,7 @@ export function MobileSheet({
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="-ml-2 h-10 w-10 rounded-lg transition-colors active:scale-95"
+                            className="h-10 w-10 shrink-0 rounded-lg transition-colors active:scale-95"
                             aria-label="Tutup menu"
                         >
                             <X className="size-5 transition-transform duration-200" />
@@ -198,22 +194,6 @@ export function MobileSheet({
                         </SheetClose>
                     </div>
                 ) : null}
-                <div className="flex items-center justify-between border-t border-border/60 px-4 py-3">
-                    <span className="text-xs text-muted-foreground">Tampilan</span>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-xl"
-                        onClick={() => updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark')}
-                        aria-label={resolvedAppearance === 'dark' ? 'Mode terang' : 'Mode gelap'}
-                    >
-                        {resolvedAppearance === 'dark' ? (
-                            <SunIcon className="h-[14px] w-[14px] text-primary" />
-                        ) : (
-                            <MoonIcon className="h-[14px] w-[14px] text-primary" />
-                        )}
-                    </Button>
-                </div>
             </SheetContent>
         </Sheet>
     );

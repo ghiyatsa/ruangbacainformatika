@@ -47,8 +47,6 @@ export function AppHeader({ hideSearch = false }: { hideSearch?: boolean }) {
                             setMobileOpen={setMobileOpen}
                             isActive={isActive}
                             auth={auth}
-                            resolvedAppearance={resolvedAppearance}
-                            updateAppearance={updateAppearance}
                         />
                         <AppLogo compact />
                         <DesktopNav
