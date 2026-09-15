@@ -94,11 +94,11 @@ export function MobileSheet({
 
             {/* Sidebar panel — slides from left, starts below header */}
             <div
-                className={`fixed left-0 z-50 h-[calc(100svh-var(--header-height,4.5rem))] w-[min(92vw,24rem)] overflow-y-auto rounded-br-[1.15rem] border-r border-border/60 bg-background shadow-lg transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`fixed left-0 z-50 h-[calc(100svh-var(--header-height,4.5rem))] w-[min(85vw,20rem)] overflow-y-auto rounded-br-[1.15rem] border-r border-border/60 bg-background px-4 shadow-lg transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 style={{ top: 'var(--header-height, 4.5rem)' }}
                 aria-hidden={!mobileOpen}
             >
-                <div className="px-1 pt-3 pb-4">
+                <div className="pt-3 pb-4">
                     <nav className="space-y-1">
                         {navLinks.map((item) => {
                             if (item.children) {
