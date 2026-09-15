@@ -84,12 +84,13 @@ export function MobileSheet({
                 </span>
             </Button>
 
-            {/* Overlay — covers page below header */}
+            {/* Backdrop — covers the page below the header; click to close */}
             <div
                 aria-hidden="true"
-                className={`fixed inset-0 z-40 bg-black/20 transition-opacity duration-300 md:hidden ${mobileOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
+                className={`fixed inset-x-0 bottom-0 z-40 h-[calc(100svh-var(--header-height,4.5rem))] bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 md:hidden ${mobileOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
                 style={{ top: 'var(--header-height, 4.5rem)' }}
                 onClick={() => setMobileOpen(false)}
+                data-testid="mobile-nav-backdrop"
             />
 
             {/* Sidebar panel — slides from left, starts below header */}
