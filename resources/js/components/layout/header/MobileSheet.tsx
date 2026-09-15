@@ -92,13 +92,13 @@ export function MobileSheet({
                 onClick={() => setMobileOpen(false)}
             />
 
-            {/* Drawer panel — sits below header, not full-height */}
+            {/* Sidebar panel — slides from left, starts below header */}
             <div
-                className={`fixed left-0 right-0 z-50 max-h-[calc(100svh-var(--header-height,4.5rem))] overflow-y-auto border-b border-border/60 bg-background shadow-lg transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${mobileOpen ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0 pointer-events-none'}`}
+                className={`fixed bottom-0 left-0 z-50 w-[min(92vw,24rem)] overflow-y-auto rounded-br-[1.15rem] border-r border-border/60 bg-background shadow-lg transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 style={{ top: 'var(--header-height, 4.5rem)' }}
                 aria-hidden={!mobileOpen}
             >
-                <div className="mx-auto max-w-7xl px-4 pt-3 pb-4 sm:px-6">
+                <div className="px-1 pt-3 pb-4">
                     <nav className="space-y-1">
                         {navLinks.map((item) => {
                             if (item.children) {
