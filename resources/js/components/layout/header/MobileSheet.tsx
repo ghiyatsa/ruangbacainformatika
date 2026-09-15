@@ -7,15 +7,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetHeader,
-    SheetTrigger,
-} from '@/components/ui/sheet';
 import { login } from '@/routes';
-import { AppLogo } from './AppLogo';
 import { getNavLinks } from './constants';
 import type { Auth } from '@/types';
 
@@ -45,42 +37,69 @@ export function MobileSheet({
             .map((item) => item.label);
     }, [navLinks, isActive]);
 
+    // Close on Escape
+    React.useEffect(() => {
+        if (!mobileOpen) {
+            return;
+        }
+
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setMobileOpen(false);
+            }
+        };
+
+        document.addEventListener('keydown', handler);
+
+        return () => document.removeEventListener('keydown', handler);
+    }, [mobileOpen, setMobileOpen]);
+
+    // Lock body scroll when open
+    React.useEffect(() => {
+        document.body.style.overflow = mobileOpen ? 'hidden' : '';
+
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [mobileOpen]);
+
     return (
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="-ml-2 h-10 w-10 shrink-0 rounded-lg transition-colors active:scale-95 md:hidden"
-                    aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
-                    aria-expanded={mobileOpen}
-                >
-                    <Menu className="size-5 transition-transform duration-300 active:scale-90" />
-                </Button>
-            </SheetTrigger>
-
-            <SheetContent
-                side="left"
-                showCloseButton={false}
-                overlayClassName="bg-black/20"
-                className="h-svh w-[min(92vw,24rem)] max-w-[24rem] transform-gpu gap-0 rounded-r-[1.15rem] border-r border-border/60 bg-background p-0 shadow-none will-change-transform contain-[layout_paint]"
+        <>
+            {/* Hamburger / Close toggle */}
+            <Button
+                variant="ghost"
+                size="icon"
+                className="-ml-2 h-10 w-10 shrink-0 rounded-lg transition-colors active:scale-95 md:hidden"
+                aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
+                aria-expanded={mobileOpen}
+                onClick={() => setMobileOpen(!mobileOpen)}
             >
-                <SheetHeader className="flex h-18 flex-row items-center gap-0.5 rounded-tr-[1.15rem] border-b border-border/60 bg-background px-3 text-left">
-                    <SheetClose asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-10 w-10 shrink-0 rounded-lg transition-colors active:scale-95"
-                            aria-label="Tutup menu"
-                        >
-                            <X className="size-5 transition-transform duration-200" />
-                        </Button>
-                    </SheetClose>
-                    <AppLogo compact />
-                </SheetHeader>
+                <span className="relative flex size-5 items-center justify-center">
+                    <Menu
+                        className={`absolute size-5 transition-all duration-200 ${mobileOpen ? 'rotate-90 opacity-0 scale-75' : 'rotate-0 opacity-100 scale-100'}`}
+                    />
+                    <X
+                        className={`absolute size-5 transition-all duration-200 ${mobileOpen ? 'rotate-0 opacity-100 scale-100' : '-rotate-90 opacity-0 scale-75'}`}
+                    />
+                </span>
+            </Button>
 
-                <div className="flex-1 overflow-y-auto px-1 pt-2 pb-4">
-                    <nav className="space-y-2">
+            {/* Overlay — covers page below header */}
+            <div
+                aria-hidden="true"
+                className={`fixed inset-0 z-40 bg-black/20 transition-opacity duration-300 md:hidden ${mobileOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
+                style={{ top: 'var(--header-height, 4.5rem)' }}
+                onClick={() => setMobileOpen(false)}
+            />
+
+            {/* Drawer panel — sits below header, not full-height */}
+            <div
+                className={`fixed left-0 right-0 z-50 max-h-[calc(100svh-var(--header-height,4.5rem))] overflow-y-auto border-b border-border/60 bg-background shadow-lg transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${mobileOpen ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0 pointer-events-none'}`}
+                style={{ top: 'var(--header-height, 4.5rem)' }}
+                aria-hidden={!mobileOpen}
+            >
+                <div className="mx-auto max-w-7xl px-4 pt-3 pb-4 sm:px-6">
+                    <nav className="space-y-1">
                         {navLinks.map((item) => {
                             if (item.children) {
                                 const isSectionActive = item.children.some(
@@ -90,9 +109,7 @@ export function MobileSheet({
                                 return (
                                     <Collapsible
                                         key={item.label}
-                                        defaultOpen={defaultOpenSections.includes(
-                                            item.label,
-                                        )}
+                                        defaultOpen={defaultOpenSections.includes(item.label)}
                                         className="rounded-2xl border border-border/80 bg-muted/60 dark:border-border/50 dark:bg-muted/20"
                                     >
                                         <CollapsibleTrigger asChild>
@@ -119,31 +136,24 @@ export function MobileSheet({
                                                 const ChildIcon = child.icon;
 
                                                 return (
-                                                    <SheetClose
-                                                        asChild
+                                                    <Link
                                                         key={child.href}
+                                                        href={child.href}
+                                                        onClick={() => setMobileOpen(false)}
+                                                        className={[
+                                                            'flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors',
+                                                            isActive(child.href)
+                                                                ? 'bg-primary/10 text-primary'
+                                                                : 'text-muted-foreground hover:bg-accent/70 hover:text-foreground',
+                                                        ].join(' ')}
                                                     >
-                                                        <Link
-                                                            href={child.href}
-                                                            className={[
-                                                                'flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors',
-                                                                isActive(
-                                                                    child.href,
-                                                                )
-                                                                    ? 'bg-primary/10 text-primary'
-                                                                    : 'text-muted-foreground hover:bg-accent/70 hover:text-foreground',
-                                                            ].join(' ')}
-                                                        >
-                                                            <ChildIcon className="mt-0.5 size-5 shrink-0" />
-                                                            <div className="space-y-1">
-                                                                <div className="text-sm font-medium">
-                                                                    {
-                                                                        child.label
-                                                                    }
-                                                                </div>
+                                                        <ChildIcon className="mt-0.5 size-5 shrink-0" />
+                                                        <div className="space-y-1">
+                                                            <div className="text-sm font-medium">
+                                                                {child.label}
                                                             </div>
-                                                        </Link>
-                                                    </SheetClose>
+                                                        </div>
+                                                    </Link>
                                                 );
                                             })}
                                         </CollapsibleContent>
@@ -152,49 +162,46 @@ export function MobileSheet({
                             }
 
                             return (
-                                <SheetClose asChild key={item.label}>
-                                    <Link
-                                        href={item.href || '#'}
-                                        className={[
-                                            'flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors',
-                                            item.href && isActive(item.href)
-                                                ? 'bg-primary/10 text-primary'
-                                                : 'text-foreground hover:bg-accent/70',
-                                        ].join(' ')}
-                                    >
-                                        <item.icon className="size-5 shrink-0 text-muted-foreground" />
-                                        {item.label}
-                                    </Link>
-                                </SheetClose>
+                                <Link
+                                    key={item.label}
+                                    href={item.href || '#'}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={[
+                                        'flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-colors',
+                                        item.href && isActive(item.href)
+                                            ? 'bg-primary/10 text-primary'
+                                            : 'text-foreground hover:bg-accent/70',
+                                    ].join(' ')}
+                                >
+                                    <item.icon className="size-5 shrink-0 text-muted-foreground" />
+                                    {item.label}
+                                </Link>
                             );
                         })}
                     </nav>
-                </div>
 
-                {!auth?.user ? (
-                    <div className="flex flex-col gap-2 border-t border-border/60 p-4">
-                        <SheetClose asChild>
-                            <Button asChild className="h-11 w-full rounded-xl">
+                    {!auth?.user ? (
+                        <div className="mt-3 border-t border-border/60 pt-3">
+                            <Button asChild className="h-11 w-full rounded-xl" onClick={() => setMobileOpen(false)}>
                                 <Link href={login.url()}>Masuk</Link>
                             </Button>
-                        </SheetClose>
-                    </div>
-                ) : auth?.requiresOnboarding && auth.onboardingUrl ? (
-                    <div className="flex flex-col gap-2 border-t border-border/60 p-4">
-                        <SheetClose asChild>
+                        </div>
+                    ) : auth?.requiresOnboarding && auth.onboardingUrl ? (
+                        <div className="mt-3 border-t border-border/60 pt-3">
                             <Button
                                 asChild
                                 variant="secondary"
                                 className="h-11 w-full rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+                                onClick={() => setMobileOpen(false)}
                             >
                                 <Link href={auth.onboardingUrl}>
                                     Lengkapi Data Anggota
                                 </Link>
                             </Button>
-                        </SheetClose>
-                    </div>
-                ) : null}
-            </SheetContent>
-        </Sheet>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+        </>
     );
 }
