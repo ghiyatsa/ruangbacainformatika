@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ruangbaca-cache-v1';
+const CACHE_NAME = 'ruangbaca-cache-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/manifest.json',
@@ -45,24 +45,26 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Network-first: the app is server-rendered, so stale HTML/JS would
+    // hide new deployments. Always try the network, fall back to cache
+    // only when offline.
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            return fetch(event.request).then((response) => {
-                if (!response || response.status !== 200 || response.type !== 'basic') {
-                    return response;
+        fetch(event.request)
+            .then((response) => {
+                if (response && response.status === 200 && response.type === 'basic') {
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
                 }
-                const responseToCache = response.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseToCache);
-                });
                 return response;
-            }).catch(() => {
-                // If offline and not in cache, let network error surface cleanly or return empty Response
-                return new Response('', { status: 504, statusText: 'Gateway Timeout' });
-            });
-        })
+            })
+            .catch(() =>
+                caches.match(event.request).then(
+                    (cachedResponse) =>
+                        cachedResponse ??
+                        new Response('', { status: 504, statusText: 'Gateway Timeout' }),
+                ),
+            )
     );
 });
