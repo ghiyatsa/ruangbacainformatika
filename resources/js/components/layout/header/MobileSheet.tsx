@@ -94,7 +94,7 @@ export function MobileSheet({
 
             {/* Sidebar panel — slides from left, starts below header */}
             <div
-                className={`fixed bottom-0 left-0 z-50 w-[min(92vw,24rem)] overflow-y-auto rounded-br-[1.15rem] border-r border-border/60 bg-background shadow-lg transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`fixed left-0 z-50 h-[calc(100svh-var(--header-height,4.5rem))] w-[min(92vw,24rem)] overflow-y-auto rounded-br-[1.15rem] border-r border-border/60 bg-background shadow-lg transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 style={{ top: 'var(--header-height, 4.5rem)' }}
                 aria-hidden={!mobileOpen}
             >
