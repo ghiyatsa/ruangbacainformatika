@@ -51,7 +51,7 @@ export function MobileSheet({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 shrink-0 rounded-lg transition-colors active:scale-95 md:hidden"
+                    className="-ml-2 h-10 w-10 shrink-0 rounded-lg transition-colors active:scale-95 md:hidden"
                     aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
                     aria-expanded={mobileOpen}
                 >
