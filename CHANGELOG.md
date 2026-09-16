@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.25.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.25.1...v1.25.2) (2026-09-16)
+
+
+### Bug Fixes
+
+* **admin:** izinkan pengingat untuk pinjaman telat berapa pun lamanya ([#95](https://github.com/ghiyatsa/ruangbacainformatika/issues/95)) ([4fee8ce](https://github.com/ghiyatsa/ruangbacainformatika/commit/4fee8ce3fd3a81e00051e75b6b6246c9a135a0be))
+
 ## [1.25.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.25.0...v1.25.1) (2026-09-16)
 
 
