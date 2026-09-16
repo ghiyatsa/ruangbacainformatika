@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.23.3](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.2...v1.23.3) (2026-09-16)
+
+
+### Bug Fixes
+
+* **scheduler:** bersihkan jadwal rusak, perbaiki seeder & cache produksi ([8d18cb9](https://github.com/ghiyatsa/ruangbacainformatika/commit/8d18cb9d29b2bc8d94f73ccba87229a0be36d3a1))
+* **scheduler:** hapus jadwal kiosk sync yang rusak & pisahkan seeder penting ([3f10ddf](https://github.com/ghiyatsa/ruangbacainformatika/commit/3f10ddf7d84a5b55a9ac9a8eca80d22525f9448e))
+
 ## [1.23.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.1...v1.23.2) (2026-09-16)
 
 
