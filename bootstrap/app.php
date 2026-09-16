@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AddSecurityHeaders;
+use App\Http\Middleware\EnsureKioskDeviceTokenIsValid;
 use App\Http\Middleware\EnsureKioskNetworkIsAllowed;
 use App\Http\Middleware\EnsureKioskPinIsValid;
 use App\Http\Middleware\EnsureProfileIsCompleted;
@@ -17,6 +18,7 @@ use Illuminate\Http\Request;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -53,6 +55,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'member' => EnsureUserIsMember::class,
             'kiosk.pin' => EnsureKioskPinIsValid::class,
             'kiosk.network' => EnsureKioskNetworkIsAllowed::class,
+            'kiosk.device' => EnsureKioskDeviceTokenIsValid::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
