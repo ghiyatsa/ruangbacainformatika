@@ -3,83 +3,97 @@
 > Dokumen ini melacak implementasi **Fase A** dari `docs/kiosk-api-spec.md`.
 > Terakhir diperbarui: 2026-09-16
 
-## Status: SELESAI (11 endpoint) ✅
+## Status: SELESAI (11 endpoint + API key) ✅
 
-Seluruh endpoint pada spesifikasi sudah diimplementasikan, teruji otomatis (16 test), dan diverifikasi
+Seluruh endpoint pada spesifikasi sudah diimplementasikan, teruji otomatis, dan diverifikasi
 end-to-end terhadap server produksi.
 
 ---
 
-## Yang diimplementasikan
+## Model keamanan (keputusan akhir)
+
+Komunikasi Flutter ↔ server dilindungi **dua lapis**:
+
+| Lapis | Mekanisme | Keterangan |
+|---|---|---|
+| 1 | **Network guard** (`kiosk.network`) | Hanya CIDR jaringan perpustakaan yang diizinkan |
+| 2 | **API key** (`X-Kiosk-Api-Key`) | Key bersama, disimpan sebagai **hash** di settings |
+
+### PIN hanya untuk aktivasi, bukan untuk klien
+
+Keputusan produk: **aplikasi Flutter tidak menampilkan layar PIN.**
+
+- Teknisi mengaktifkan perangkat **sekali** dengan PIN (lewat `devices/activate` atau `kiosk:api-key`).
+- Setelah itu Flutter memakai **API key** dari konfigurasi — tidak ada PIN lagi di aplikasi.
+- API key **berlaku permanen** sampai dirotasi/dicabut dari server, dan dapat dicabut
+  **tanpa membangun ulang** aplikasi.
+
+Device token 24 jam **tetap didukung** (untuk kiosk web yang belum dimigrasi).
+
+### Mengelola API key
+
+```bash
+php artisan kiosk:api-key show       # cek status
+php artisan kiosk:api-key generate   # buat / rotasi (plaintext tampil sekali)
+php artisan kiosk:api-key revoke     # cabut — semua akses langsung ditolak
+```
+
+Masukkan key ke konfigurasi Flutter: header `X-Kiosk-Api-Key: <key>`.
+
+---
+
+## Berkas
 
 | Berkas | Keterangan |
 |---|---|
-| `routes/api.php` | 11 route di bawah prefix `api/kiosk`, dua grup middleware |
-| `app/Http/Middleware/EnsureKioskDeviceTokenIsValid.php` | Auth device token (alias `kiosk.device`) |
-| `app/Http/Controllers/Api/Kiosk/KioskApiController.php` | Controller JSON — memanggil Action yang sudah ada |
-| `database/migrations/2026_09_16_131056_add_kiosk_device_id_to_member_registration_claims_table.php` | Kolom `kiosk_device_id` untuk registrasi tanpa session |
-| `bootstrap/app.php` | Registrasi `api` route + alias `kiosk.device` |
-| `tests/Feature/Kiosk/KioskApiTest.php` | 16 test (61 assertion) |
+| `routes/api.php` | 11 route di bawah prefix `api/kiosk` |
+| `app/Http/Middleware/EnsureKioskDeviceTokenIsValid.php` | Auth API key **atau** device token (alias `kiosk.device`) |
+| `app/Http/Controllers/Api/Kiosk/KioskApiController.php` | Controller JSON |
+| `app/Console/Commands/KioskApiKeyCommand.php` | Kelola API key |
+| `..._add_kiosk_device_id_to_member_registration_claims_table.php` | Kolom `kiosk_device_id` |
+| `tests/Feature/Kiosk/KioskApiTest.php` | 16 test (device token) |
+| `tests/Feature/Kiosk/KioskApiKeyTest.php` | 8 test (API key) |
 
 **Tidak ada logika bisnis yang diduplikasi** — controller hanya menjembatani HTTP ↔ Action
 (`BorrowBooksFromKiosk`, `ReturnBooksFromKiosk`, `SearchKioskBooks`) dan Service yang sama.
 
 ---
 
-## Verifikasi end-to-end (produksi, 2026-09-16)
+## Verifikasi end-to-end (produksi)
 
 | Uji | Hasil |
 |---|---|
-| Activate PIN salah | 422 ✅ |
-| Activate PIN benar | 200 + `device_token` (64 char) ✅ |
-| Bootstrap tanpa token | 401 ✅ |
-| Bootstrap dengan token | 200 (opsi form + stats) ✅ |
-| Cari buku | 200 (data nyata) ✅ |
+| Semua endpoint **dengan API key** | 200/201 ✅ |
+| Tanpa key / key salah | 401 ✅ |
+| Key dicabut → akses ditolak seketika | 401 ✅ |
+| Activate PIN salah / benar | 422 / 200 ✅ |
 | `members/find` | `hasEmail` + `emailDomain`, **tanpa email penuh** ✅ |
-| Lock | 200 ✅ |
-| Bootstrap setelah lock | 401 (token mati) ✅ |
-
-Diverifikasi juga: `activate` di luar jam operasional → **403** (sesuai perilaku kiosk web).
+| Activate di luar jam operasional | 403 ✅ |
 
 ---
 
-## Keputusan & catatan operasional
+## ⚠️ Catatan operasional penting
 
-### Jaringan
-Kiosk Flutter berjalan di **jaringan kampus yang sama**, sehingga middleware `kiosk.network`
-(CIDR `kiosk.allowed_networks`) **tetap dipertahankan** — inilah lapis pertahanan terkuat.
+### Wajib isi `kiosk.allowed_networks`
 
-> ⚠️ **Penting:** saat ini `kiosk.allowed_networks` **kosong** = izinkan semua. Sebelum
-> kiosk web dihapus, isi dengan CIDR jaringan perpustakaan agar guard benar-benar aktif.
+Saat ini **kosong** = izinkan semua. Karena PIN tidak lagi dipakai pada klien, **network guard
+menjadi lapis pertahanan utama**. Isi dengan CIDR jaringan perpustakaan sebelum dipakai produksi.
 
-### Jam operasional
-`activate` menolak di luar `kiosk.operating_open_time`–`operating_close_time`
-(default **08:00–17:00**, zona `Asia/Jakarta`). Aplikasi Flutter akan menampilkan 403
-sebagai pesan "di luar jam operasional", bukan crash.
+### Deploy wajib reload php-fpm
 
-### Rate limit
-Seluruh endpoint memakai limiter yang sudah ada (`kiosk-pin`, `kiosk-submit`,
-`kiosk-book-search`, `kiosk-member-status`, `kiosk-member-lookup`) — tanpa konfigurasi baru.
+Server memakai OPcache `validate_timestamps=Off`. Setiap deploy kode **harus** diikuti:
 
-### Registrasi anggota
-State claim tidak lagi bergantung pada session web. Claim ditautkan ke `kiosk_device_id`,
-sehingga perangkat mana pun (Flutter atau web) dapat memantau status claim-nya sendiri.
+```bash
+sudo systemctl reload php8.4-fpm
+```
 
----
-
-## ⚠️ Catatan deploy (PENTING)
-
-Server produksi memakai OPcache dengan **`validate_timestamps=Off`**. Artinya:
-
-> **Setiap deploy kode baru WAJIB diikuti `sudo systemctl reload php8.4-fpm`.**
-> Tanpa reload, PHP-FPM akan terus menjalankan kode lama dari cache meskipun berkas di disk
-> sudah berubah. Juga hapus `bootstrap/cache/routes-v7.php` bila daftar route berubah.
+Juga hapus `bootstrap/cache/routes-v7.php` bila daftar route berubah. Tanpa ini, PHP-FPM
+terus menjalankan kode lama.
 
 ---
 
 ## Belum dikerjakan (menunggu keputusan)
 
-1. **Idempotency-Key** untuk borrow/return (§5 spesifikasi) — belum, menunggu kebutuhan nyata
-   dari sisi Flutter.
-2. **Penghapusan kiosk web** — hanya setelah aplikasi Flutter terbukti stabil.
-3. **Pengisian `kiosk.allowed_networks`** — sebelum kiosk web dihapus.
+1. **Halaman admin** untuk kelola perangkat/API key — tidak diperlukan sekarang (cukup artisan).
+2. **Idempotency-Key** untuk borrow/return — menunggu kebutuhan nyata dari Flutter.
+3. **Penghapusan kiosk web** — hanya setelah aplikasi Flutter terbukti stabil.
