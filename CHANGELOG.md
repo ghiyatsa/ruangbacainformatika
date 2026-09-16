@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.23.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.22.0...v1.23.0) (2026-09-16)
+
+
+### Features
+
+* **ui:** mobile nav drawer below header, single logo ([#70](https://github.com/ghiyatsa/ruangbacainformatika/issues/70)) ([eafd376](https://github.com/ghiyatsa/ruangbacainformatika/commit/eafd376d302b32acc6c3833a03b5e0eb1608cc24))
+* **ui:** narrower mobile sidebar with consistent x padding ([#73](https://github.com/ghiyatsa/ruangbacainformatika/issues/73)) ([584d6ba](https://github.com/ghiyatsa/ruangbacainformatika/commit/584d6bae4281af1261d3f94e95ed5d2af9d92f94))
+
+
+### Bug Fixes
+
+* **books:** reset language placeholder instead of nulling it ([#76](https://github.com/ghiyatsa/ruangbacainformatika/issues/76)) ([8143e54](https://github.com/ghiyatsa/ruangbacainformatika/commit/8143e548a2475bfbef9f90094419154e2f61caf5))
+* **books:** stop placeholder "-" leaking into book metadata ([c3c256e](https://github.com/ghiyatsa/ruangbacainformatika/commit/c3c256e7a780d06f02ab7831fdf0543df2e65a1c))
+* **seo:** generate robots.txt from APP_URL via artisan command ([#63](https://github.com/ghiyatsa/ruangbacainformatika/issues/63)) ([d08cd6c](https://github.com/ghiyatsa/ruangbacainformatika/commit/d08cd6c049bdc545b0910cb8f9a21b4e24083b1e))
+* **ui:** align hamburger button flush with page content edge ([#69](https://github.com/ghiyatsa/ruangbacainformatika/issues/69)) ([c0d6f64](https://github.com/ghiyatsa/ruangbacainformatika/commit/c0d6f6496fbf067f69167b67cf014deda05e8ff3))
+* **ui:** make mobile sidebar open and close animation seamless ([#66](https://github.com/ghiyatsa/ruangbacainformatika/issues/66)) ([660191a](https://github.com/ghiyatsa/ruangbacainformatika/commit/660191a8a70bab3e729081fa1b23c456a48296af))
+* **ui:** mobile nav backdrop had zero height ([#74](https://github.com/ghiyatsa/ruangbacainformatika/issues/74)) ([90e8b72](https://github.com/ghiyatsa/ruangbacainformatika/commit/90e8b7280bfbde4900d769646dfb145731a408f5))
+* **ui:** real sidebar animation fix + service worker stale cache ([#68](https://github.com/ghiyatsa/ruangbacainformatika/issues/68)) ([485871f](https://github.com/ghiyatsa/ruangbacainformatika/commit/485871f8a899b44cb4d93e0920c3a2178224a1e7))
+* **ui:** remove hamburger left offset, move dark mode toggle to header ([#67](https://github.com/ghiyatsa/ruangbacainformatika/issues/67)) ([a542bf2](https://github.com/ghiyatsa/ruangbacainformatika/commit/a542bf2e15a8c9ecac84c26ffb8cca3006131049))
+* **ui:** sidebar collapsed to 0 height ([#72](https://github.com/ghiyatsa/ruangbacainformatika/issues/72)) ([906fb31](https://github.com/ghiyatsa/ruangbacainformatika/commit/906fb3187649ea9a38a9c45adda7edf90fffb444))
+* **ui:** sidebar slides from left below header ([#71](https://github.com/ghiyatsa/ruangbacainformatika/issues/71)) ([264df00](https://github.com/ghiyatsa/ruangbacainformatika/commit/264df00004ea6c50160e2b4d5e7dfcd29ed48266))
+
+
+### Performance Improvements
+
+* **catalog:** cache homepage book page-1 and drop unused items count ([#65](https://github.com/ghiyatsa/ruangbacainformatika/issues/65)) ([439f55c](https://github.com/ghiyatsa/ruangbacainformatika/commit/439f55c961a5cf6a7dd269463a59491bb80080b4))
+
 ## [1.22.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.21.2...v1.22.0) (2026-09-14)
 
 
