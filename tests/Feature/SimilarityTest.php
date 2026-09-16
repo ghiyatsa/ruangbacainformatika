@@ -354,3 +354,52 @@ it('sync and delete jobs invalidate the similarity check cache version', functio
     (new RemoveSkripsiFromSimilarity($skripsi->id, Skripsi::class))->handle($apiDelete, app(SimilaritySyncStatusService::class));
     expect(Cache::get($versionKey))->toBe(2);
 });
+
+// =========================================================================
+// SECTION 7: Auto Dispatch Tanpa Worker (hosting kampus)
+// =========================================================================
+
+it('auto dispatch runs inline when queue driver is sync (no worker)', function () {
+    Queue::fake();
+    config()->set('services.similarity_api.dispatch', 'auto');
+    config()->set('queue.default', 'sync');
+
+    $skripsi = Skripsi::withoutEvents(fn () => Skripsi::factory()->create());
+    app(SimilaritySyncDispatcher::class)->dispatchUpsert($skripsi->id);
+
+    // Tanpa worker, job harus dijalankan inline; tidak boleh masuk queue.
+    Queue::assertNotPushed(SyncSkripsiToSimilarity::class);
+});
+
+it('auto dispatch runs inline when queue connection is empty', function () {
+    Queue::fake();
+    config()->set('services.similarity_api.dispatch', 'auto');
+    config()->set('queue.default', '');
+
+    $skripsi = Skripsi::withoutEvents(fn () => Skripsi::factory()->create());
+    app(SimilaritySyncDispatcher::class)->dispatchUpsert($skripsi->id);
+
+    Queue::assertNotPushed(SyncSkripsiToSimilarity::class);
+});
+
+it('explicit sync dispatch wins over a database queue connection', function () {
+    Queue::fake();
+    config()->set('services.similarity_api.dispatch', 'sync');
+    config()->set('queue.default', 'database');
+
+    $skripsi = Skripsi::withoutEvents(fn () => Skripsi::factory()->create());
+    app(SimilaritySyncDispatcher::class)->dispatchUpsert($skripsi->id);
+
+    Queue::assertNotPushed(SyncSkripsiToSimilarity::class);
+});
+
+it('explicit queued dispatch still pushes to the queue', function () {
+    Queue::fake();
+    config()->set('services.similarity_api.dispatch', 'queued');
+    config()->set('queue.default', 'sync');
+
+    $skripsi = Skripsi::withoutEvents(fn () => Skripsi::factory()->create());
+    app(SimilaritySyncDispatcher::class)->dispatchUpsert($skripsi->id);
+
+    Queue::assertPushed(SyncSkripsiToSimilarity::class);
+});

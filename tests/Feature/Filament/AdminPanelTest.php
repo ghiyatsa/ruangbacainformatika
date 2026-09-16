@@ -132,7 +132,7 @@ it('super admin users can render concise integration settings copy', function ()
         ->assertSee('Pengaturan Integrasi')
         ->assertSee('WhatsApp Gateway')
         ->assertSee('Batas Toleransi Kegagalan')
-        ->assertSee('Sinkronkan Ulang Semua Dokumen');
+        ->assertDontSee('Sinkronkan Ulang Semua Dokumen');
 });
 
 it('super admin users can render the create user form for google accounts', function () {

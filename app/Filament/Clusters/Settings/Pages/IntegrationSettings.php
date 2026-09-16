@@ -5,7 +5,6 @@ namespace App\Filament\Clusters\Settings\Pages;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
-use App\Services\SimilarityFullSyncDispatcher;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -19,7 +18,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
-use Throwable;
 
 class IntegrationSettings extends Page
 {
@@ -182,44 +180,6 @@ class IntegrationSettings extends Page
                 ->livewireSubmitHandler('save')
                 ->footer([
                     Actions::make([
-                        Action::make('resyncAllSkripsi')
-                            ->label('Sinkronkan Ulang Semua Dokumen')
-                            ->icon(Heroicon::OutlinedArrowPath)
-                            ->color('warning')
-                            ->requiresConfirmation()
-                            ->modalHeading('Sinkronkan Seluruh Dokumen Akademik')
-                            ->modalDescription('Proses ini akan mengirim seluruh naskah skripsi dan laporan KP ke antrean komputasi indeks kemiripan.')
-                            ->modalSubmitActionLabel('Jadwalkan Sinkronisasi')
-                            ->action(function (): void {
-                                $result = app(SimilarityFullSyncDispatcher::class)->dispatch(
-                                    chunk: 200,
-                                    forceSync: false,
-                                    initiatedByUserId: auth()->id(),
-                                );
-
-                                try {
-                                    app(ActivityLogService::class)->log(
-                                        'integration.skripsi_resync.triggered',
-                                        'Sinkron ulang semua skripsi dipicu',
-                                        'Integrasi',
-                                        $result,
-                                    );
-                                } catch (Throwable) {
-                                }
-
-                                Notification::make()
-                                    ->{$result['success'] ? 'success' : 'danger'}()
-                                    ->title($result['success']
-                                        ? ($result['mode'] === 'sync' ? 'Sinkron ulang selesai' : 'Sinkron ulang dimulai')
-                                        : 'Sinkron ulang belum berhasil')
-                                    ->body($result['success']
-                                        ? ($result['mode'] === 'sync'
-                                            ? 'Seluruh data kemiripan telah diperbarui.'
-                                            : 'Proses sedang berjalan di antrean. Pastikan worker queue tetap aktif.')
-                                        : ($result['error_message'] ?? 'Periksa koneksi Similarity API lalu coba lagi.'))
-                                    ->persistent($result['mode'] === 'queued')
-                                    ->send();
-                            }),
                         Action::make('save')
                             ->label('Simpan')
                             ->submit('save')
