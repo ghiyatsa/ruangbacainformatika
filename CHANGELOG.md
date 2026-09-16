@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.23.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.1...v1.23.2) (2026-09-16)
+
+
+### Bug Fixes
+
+* **seo:** og:image spesifik halaman & meta description sesuai data ([0253dab](https://github.com/ghiyatsa/ruangbacainformatika/commit/0253dabc9d0328e9eed864cf9f7a6347aa15fb24))
+* **seo:** pakai og:image spesifik halaman & samakan meta description dengan data ([133ebbe](https://github.com/ghiyatsa/ruangbacainformatika/commit/133ebbeadb397bd6aa3b8f7edd397339a6d590b5))
+
 ## [1.23.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.0...v1.23.1) (2026-09-16)
 
 
