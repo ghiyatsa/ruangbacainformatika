@@ -177,7 +177,7 @@ class KioskApiController extends Controller
             'loan' => [
                 'id' => $loan->getKey(),
                 'member' => ['name' => $loan->user->name],
-                'books_count' => $loan->loanItems()->count(),
+                'books_count' => $loan->items()->count(),
                 'borrowed_at' => $loan->borrowed_at?->toIso8601String(),
                 'due_at' => $loan->due_at?->toIso8601String(),
             ],
