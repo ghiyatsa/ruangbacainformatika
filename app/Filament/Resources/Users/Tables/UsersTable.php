@@ -13,6 +13,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -49,6 +50,18 @@ class UsersTable
                     ->limit(40)
                     ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('is_approved')
+                    ->label('Persetujuan Akun')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-badge')
+                    ->falseIcon('heroicon-o-clock')
+                    ->trueColor('success')
+                    ->falseColor('warning')
+                    ->tooltip(fn (User $record): string => $record->is_approved
+                        ? 'Sudah disetujui — boleh menjadi anggota & meminjam buku'
+                        : ($record->usesCampusEmail()
+                            ? 'Menunggu persetujuan admin'
+                            : 'Bukan email kampus — tidak dapat disetujui')),
                 TextColumn::make('roles.name')
                     ->badge()
                     ->label('Peran')
@@ -67,10 +80,10 @@ class UsersTable
             ])
             ->filters([
                 TernaryFilter::make('is_approved')
-                    ->label('Review Awal')
+                    ->label('Persetujuan Akun')
                     ->placeholder('Semua')
-                    ->trueLabel('Sudah lolos review awal')
-                    ->falseLabel('Belum lolos review awal'),
+                    ->trueLabel('Sudah disetujui')
+                    ->falseLabel('Belum disetujui'),
                 Filter::make('registered_between')
                     ->label('Rentang Tanggal')
                     ->form([
@@ -111,7 +124,7 @@ class UsersTable
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->lateReturnCooldown()),
                 Filter::make('manual_approval')
-                    ->label('Perlu persetujuan admin')
+                    ->label('Perlu disetujui admin')
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->pendingMemberApproval()),
                 Filter::make('registered_today')
@@ -141,7 +154,7 @@ class UsersTable
                     ->hidden(fn (User $record): bool => $record->is_approved)
                     ->requiresConfirmation()
                     ->modalHeading('Konfirmasi Persetujuan Akun')
-                    ->modalDescription('Akun akan disetujui untuk melanjutkan keanggotaan perpustakaan.')
+                    ->modalDescription('Akun ini akan disetujui sehingga dapat menjadi anggota perpustakaan dan meminjam buku.')
                     ->action(function (User $record): void {
                         $record->forceFill([
                             'is_approved' => true,

@@ -99,7 +99,7 @@ it('reports members that have not met all borrowing requirements as ineligible',
 
     expect($summary['label'])->toBe('Belum Memenuhi Syarat')
         ->and($summary['color'])->toBe('warning')
-        ->and($summary['detail'])->toContain('belum lolos review awal');
+        ->and($summary['detail'])->toContain('belum disetujui admin');
 });
 
 it('reports members without verified whatsapp as ineligible', function () {

@@ -46,8 +46,8 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
             ->count();
 
         return [
-            Stat::make('Menunggu Persetujuan', $pendingTotal)
-                ->description($pendingTotal > 0 ? 'Perlu tinjauan' : null)
+            Stat::make('Menunggu Persetujuan Akun', $pendingTotal)
+                ->description($pendingTotal > 0 ? 'Perlu ditinjau admin' : null)
                 ->descriptionIcon($pendingTotal > 0 ? Heroicon::OutlinedClock : null)
                 ->color($pendingTotal > 0 ? 'warning' : 'success')
                 ->icon(Heroicon::OutlinedUserPlus)
