@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.25.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.24.0...v1.25.0) (2026-09-16)
+
+
+### Features
+
+* **kiosk:** API key bersama untuk klien Flutter ([00c0c60](https://github.com/ghiyatsa/ruangbacainformatika/commit/00c0c6010f459ff9a1eb428d4772ad7a53352734))
+* **kiosk:** kunci API bersama untuk klien Flutter ([304898a](https://github.com/ghiyatsa/ruangbacainformatika/commit/304898ad024fdc9598139427ff7c7b524ce9dba2))
+
 ## [1.24.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.4...v1.24.0) (2026-09-16)
 
 
