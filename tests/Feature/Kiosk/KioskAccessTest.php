@@ -705,7 +705,8 @@ it('kiosk find member returns member details when found', function () {
         ->assertJson([
             'member' => [
                 'name' => 'John Doe',
-                'emailMasked' => 'john.doe@mhs.unimal.ac.id',
+                'hasEmail' => true,
+                'emailDomain' => 'mhs.unimal.ac.id',
                 'whatsappMasked' => '0812******90',
             ],
         ]);

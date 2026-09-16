@@ -12,7 +12,13 @@ class KioskMemberLookupService
     ) {}
 
     /**
-     * @return array{name: string, emailMasked: string|null, whatsappMasked: string|null}|null
+     * Ringkasan publik seorang anggota untuk petugas kiosk.
+     *
+     * Email sengaja TIDAK dikembalikan utuh (hanya penanda boolean) agar endpoint
+     * pencarian tidak bisa dipakai memanen alamat email anggota. Nomor WhatsApp
+     * tetap disamarkan.
+     *
+     * @return array{name: string, hasEmail: bool, emailDomain: string|null, whatsappMasked: string|null}|null
      */
     public function preview(string $identifier): ?array
     {
@@ -28,9 +34,25 @@ class KioskMemberLookupService
 
         return [
             'name' => $member->name,
-            'emailMasked' => $member->email,
+            'hasEmail' => filled($member->email),
+            'emailDomain' => $this->emailDomain($member->email),
             'whatsappMasked' => $this->maskPhoneNumber($member->whatsapp),
         ];
+    }
+
+    /**
+     * Hanya domain email (mis. "mhs.unimal.ac.id") — cukup untuk memastikan
+     * anggota memakai email kampus tanpa membocorkan identitasnya.
+     */
+    protected function emailDomain(?string $email): ?string
+    {
+        if (! is_string($email) || ! str_contains($email, '@')) {
+            return null;
+        }
+
+        $domain = substr(strrchr($email, '@'), 1);
+
+        return $domain !== '' ? $domain : null;
     }
 
     protected function maskPhoneNumber(?string $phoneNumber): ?string
