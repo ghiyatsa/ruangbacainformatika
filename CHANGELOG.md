@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.25.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.25.0...v1.25.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **admin:** jadwalkan pengingat pada zona Asia/Jakarta dan bersihkan aksi integrasi ([#91](https://github.com/ghiyatsa/ruangbacainformatika/issues/91)) ([c94f503](https://github.com/ghiyatsa/ruangbacainformatika/commit/c94f50327000fcaa015c69e692ba1e0a6b384fd9))
+* **profile:** batasi verifikasi whatsapp pada akun email kampus ([#93](https://github.com/ghiyatsa/ruangbacainformatika/issues/93)) ([5a76bd3](https://github.com/ghiyatsa/ruangbacainformatika/commit/5a76bd36ed284f78133edcb33fced94276455142))
+
 ## [1.25.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.24.0...v1.25.0) (2026-09-16)
 
 
