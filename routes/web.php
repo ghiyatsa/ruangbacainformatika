@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AcademicFileController;
-use App\Http\Controllers\BlogController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogBookmarkController;
 use App\Http\Controllers\CatalogController;
@@ -33,9 +33,9 @@ Route::get('/og/internship-reports/{internshipReport:student_id}', [OpenGraphIma
 Route::get('/og/thesis/{thesis:student_id}', [OpenGraphImageController::class, 'thesis'])->name('og.thesis.show');
 Route::get('/books', CatalogController::class)->name('books.index');
 Route::get('/books/{book:slug}', [BookController::class, 'show'])->name('books.show');
-Route::get('/posts', [BlogController::class, 'index'])->name('blog.index');
-Route::get('/posts/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
-Route::get('/preview/posts/{post:preview_token}', [BlogController::class, 'preview'])->name('blog.preview');
+Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+Route::get('/posts/{post:slug}', [PostController::class, 'show'])->name('posts.show');
+Route::get('/preview/posts/{post:preview_token}', [PostController::class, 'preview'])->name('posts.preview');
 Route::post('/catalog-reports', [CatalogReportController::class, 'store'])
     ->middleware('throttle:catalog-reports')
     ->name('catalog-reports.store');
@@ -94,8 +94,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/posts/{post:slug}/comments', [PostCommentController::class, 'store'])
         ->middleware('throttle:blog-comments')
-        ->name('blog.comments.store');
-    Route::delete('/posts/comments/{comment}', [PostCommentController::class, 'destroy'])->name('blog.comments.destroy');
+        ->name('posts.comments.store');
+    Route::delete('/posts/comments/{comment}', [PostCommentController::class, 'destroy'])->name('posts.comments.destroy');
 });
 
 Route::middleware(['auth', 'profile.completed'])->group(function () {

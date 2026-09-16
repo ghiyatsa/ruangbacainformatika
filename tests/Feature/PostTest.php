@@ -3,7 +3,7 @@
 use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\PostTag;
-use App\Services\Blog\BlogQueryService;
+use App\Services\Blog\PostQueryService;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -19,7 +19,7 @@ it('blog index only shows approved posts', function () {
         'status' => Post::STATUS_DRAFT,
     ]);
 
-    get(route('blog.index'))
+    get(route('posts.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('blog/index')
@@ -34,7 +34,7 @@ it('blog detail returns 404 for unpublished posts', function () {
         'status' => Post::STATUS_PENDING,
     ]);
 
-    get(route('blog.show', $post->slug))
+    get(route('posts.show', $post->slug))
         ->assertNotFound();
 });
 
@@ -43,7 +43,7 @@ it('blog detail increments view count for approved posts', function () {
         'view_count' => 5,
     ]);
 
-    get(route('blog.show', $post->slug))
+    get(route('posts.show', $post->slug))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('blog/show')
@@ -78,7 +78,7 @@ it('blog index can filter by category and tag', function () {
     $nonMatchingPost->categories()->attach($otherCategory);
     $nonMatchingPost->tags()->attach($otherTag);
 
-    get(route('blog.index', [
+    get(route('posts.index', [
         'category' => $category->slug,
         'tag' => $tag->slug,
     ]))
@@ -128,7 +128,7 @@ it('popular posts are ordered by view_count descending', function () {
         'published_at' => now()->subDay(),
     ]);
 
-    $service = app(BlogQueryService::class);
+    $service = app(PostQueryService::class);
     $popular = $service->popularPosts(2);
 
     expect($popular)->toHaveCount(2)
@@ -141,7 +141,7 @@ it('allows anyone with the preview token to preview draft posts', function () {
         'status' => Post::STATUS_DRAFT,
     ]);
 
-    get(route('blog.preview', $post->preview_token))
+    get(route('posts.preview', $post->preview_token))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('blog/show')
@@ -164,7 +164,7 @@ it('renders preview with cached data if available', function () {
         now()->addHours(2)
     );
 
-    get(route('blog.preview', $post->preview_token))
+    get(route('posts.preview', $post->preview_token))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('blog/show')
@@ -200,7 +200,7 @@ it('converts Tiptap JSON content to HTML on preview', function () {
         now()->addHours(2)
     );
 
-    get(route('blog.preview', $post->preview_token))
+    get(route('posts.preview', $post->preview_token))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('blog/show')

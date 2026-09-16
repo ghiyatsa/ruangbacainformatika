@@ -2,19 +2,19 @@ import { Link } from '@inertiajs/react';
 import { ArrowRight, Clock3, Eye } from 'lucide-react';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
 import { formatViewCount } from '@/lib/utils';
-import blog from '@/routes/blog';
-import type { BlogPostItem } from '@/features/blog/types';
+import postRoutes from '@/routes/posts';
+import type { PostItem } from '@/features/posts/types';
 
-interface BlogFeaturedPostProps {
-    post: BlogPostItem;
+interface FeaturedPostProps {
+    post: PostItem;
 }
 
-export function BlogFeaturedPost({ post }: BlogFeaturedPostProps) {
+export function FeaturedPost({ post }: FeaturedPostProps) {
     return (
         <Link
-            href={blog.show.url(post.slug)}
+            href={postRoutes.show.url(post.slug)}
             instant
-            component="blog/show"
+            component="posts/show"
             pageProps={instantLoadingPageProps()}
             className="group relative block overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/40"
         >

@@ -38,7 +38,7 @@ function createStaffUser(): User
 it('redirects guests attempting to comment to login', function () {
     $post = Post::factory()->published()->create();
 
-    post(route('blog.comments.store', $post->slug), [
+    post(route('posts.comments.store', $post->slug), [
         'content' => 'Ini adalah komentar tes.',
     ])->assertRedirect(route('login'));
 });
@@ -48,7 +48,7 @@ it('allows authenticated users to write comments', function () {
     $post = Post::factory()->published()->create();
 
     actingAs($user)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => 'Ini adalah komentar tes dari user.',
         ])
         ->assertRedirect();
@@ -73,7 +73,7 @@ it('allows authenticated users to reply to comments', function () {
     ]);
 
     actingAs($user2)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => 'Balasan dari user 2',
             'parent_id' => $comment->id,
         ])
@@ -109,7 +109,7 @@ it('stores reply-to-reply inside the same root thread', function () {
     ]);
 
     actingAs($user3)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => 'Balas balasan pertama',
             'parent_id' => $rootComment->id,
             'reply_to_comment_id' => $reply->id,
@@ -137,7 +137,7 @@ it('prevents users from deleting comments written by others', function () {
     ]);
 
     actingAs($user2)
-        ->delete(route('blog.comments.destroy', $comment->id))
+        ->delete(route('posts.comments.destroy', $comment->id))
         ->assertForbidden();
 
     assertDatabaseHas('post_comments', [
@@ -156,7 +156,7 @@ it('allows users to delete their own comments', function () {
     ]);
 
     actingAs($user)
-        ->delete(route('blog.comments.destroy', $comment->id))
+        ->delete(route('posts.comments.destroy', $comment->id))
         ->assertRedirect();
 
     assertDatabaseMissing('post_comments', [
@@ -176,7 +176,7 @@ it('allows administrative users to delete any comment', function () {
     ]);
 
     actingAs($admin)
-        ->delete(route('blog.comments.destroy', $comment->id))
+        ->delete(route('posts.comments.destroy', $comment->id))
         ->assertRedirect();
 
     assertDatabaseMissing('post_comments', [
@@ -196,7 +196,7 @@ it('allows staff users to delete any comment', function () {
     ]);
 
     actingAs($staff)
-        ->delete(route('blog.comments.destroy', $comment->id))
+        ->delete(route('posts.comments.destroy', $comment->id))
         ->assertRedirect();
 
     assertDatabaseMissing('post_comments', [
@@ -205,13 +205,13 @@ it('allows staff users to delete any comment', function () {
 });
 
 it('applies throttle middleware to the comment store route', function () {
-    $route = route('blog.comments.store', 'sebuah-artikel');
+    $route = route('posts.comments.store', 'sebuah-artikel');
 
     expect($route)->not->toBeNull();
 
     // Pastikan named limiter terdaftar dan terpasang di route.
     $middleware = app('router')->getRoutes()
-        ->getByName('blog.comments.store')
+        ->getByName('posts.comments.store')
         ->gatherMiddleware();
 
     expect($middleware)->toContain('throttle:blog-comments');
@@ -222,7 +222,7 @@ it('prevents commenting on draft posts', function () {
     $post = Post::factory()->create(['status' => Post::STATUS_DRAFT]);
 
     actingAs($user)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => 'Komentar pada draft.',
         ])
         ->assertNotFound();
@@ -237,7 +237,7 @@ it('prevents commenting on pending posts', function () {
     $post = Post::factory()->pending()->create();
 
     actingAs($user)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => 'Komentar pada post pending.',
         ])
         ->assertNotFound();
@@ -248,7 +248,7 @@ it('prevents commenting on rejected posts', function () {
     $post = Post::factory()->create(['status' => Post::STATUS_REJECTED]);
 
     actingAs($user)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => 'Komentar pada post ditolak.',
         ])
         ->assertNotFound();
@@ -259,7 +259,7 @@ it('rejects empty comment content', function () {
     $post = Post::factory()->published()->create();
 
     actingAs($user)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => '   ',
         ])
         ->assertSessionHasErrors(['content']);
@@ -270,7 +270,7 @@ it('rejects comment content exceeding maximum length', function () {
     $post = Post::factory()->published()->create();
 
     actingAs($user)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => str_repeat('a', 1001),
         ])
         ->assertSessionHasErrors(['content']);
@@ -289,7 +289,7 @@ it('shows the blog post with deferred comments', function () {
         'content' => 'Balasan',
     ]);
 
-    $response = get(route('blog.show', $post->slug));
+    $response = get(route('posts.show', $post->slug));
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
@@ -308,7 +308,7 @@ it('prevents commenting when allow_comments is disabled', function () {
     $post = Post::factory()->published()->create(['allow_comments' => false]);
 
     actingAs($user)
-        ->post(route('blog.comments.store', $post->slug), [
+        ->post(route('posts.comments.store', $post->slug), [
             'content' => 'Komentar pada artikel dengan komentar dinonaktifkan.',
         ])
         ->assertStatus(403);

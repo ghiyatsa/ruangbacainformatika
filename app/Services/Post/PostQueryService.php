@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Blog;
+namespace App\Services\Post;
 
 use App\Models\Post;
 use App\Models\PostCategory;
@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class BlogQueryService
+class PostQueryService
 {
     /**
      * @return array{search: string, category: string, tag: string}

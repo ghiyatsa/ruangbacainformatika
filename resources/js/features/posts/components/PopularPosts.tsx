@@ -1,13 +1,13 @@
 import { Link } from '@inertiajs/react';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
-import blog from '@/routes/blog';
-import type { BlogPostItem } from '@/features/blog/types';
+import postRoutes from '@/routes/posts';
+import type { PostItem } from '@/features/posts/types';
 
-interface BlogPopularPostsProps {
-    posts: BlogPostItem[];
+interface PopularPostsProps {
+    posts: PostItem[];
 }
 
-export function BlogPopularPosts({ posts }: BlogPopularPostsProps) {
+export function PopularPosts({ posts }: PopularPostsProps) {
     if (posts.length === 0) {
         return null;
     }
@@ -24,9 +24,9 @@ export function BlogPopularPosts({ posts }: BlogPopularPostsProps) {
             {/* Top post thumbnail */}
             <div className="relative">
                 <Link
-                    href={blog.show.url(posts[0].slug)}
+                    href={postRoutes.show.url(posts[0].slug)}
                     instant
-                    component="blog/show"
+                    component="posts/show"
                     pageProps={instantLoadingPageProps()}
                     className="group block"
                 >
@@ -62,9 +62,9 @@ export function BlogPopularPosts({ posts }: BlogPopularPostsProps) {
                 {posts.map((post, idx) => (
                     <Link
                         key={post.id}
-                        href={blog.show.url(post.slug)}
+                        href={postRoutes.show.url(post.slug)}
                         instant
-                        component="blog/show"
+                        component="posts/show"
                         pageProps={instantLoadingPageProps()}
                         className="group flex gap-3 p-4 transition-colors hover:bg-muted/50"
                     >

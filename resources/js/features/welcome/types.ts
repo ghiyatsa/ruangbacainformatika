@@ -1,5 +1,5 @@
-import type { BlogPostItem } from '@/features/blog/types';
 import type { CatalogBook, PaginatedBooks } from '@/features/books/types';
+import type { PostItem } from '@/features/posts/types';
 
 export type { CatalogBook, PaginatedBooks };
 
@@ -26,5 +26,5 @@ export type WelcomeProps = {
     popularBooks: CatalogBook[];
     mostBorrowedBooks: CatalogBook[];
     books: PaginatedBooks;
-    latestPosts?: BlogPostItem[];
+    latestPosts?: PostItem[];
 };

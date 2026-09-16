@@ -3,7 +3,7 @@ import { Send } from 'lucide-react';
 import { useRef } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import commentsRoute from '@/routes/blog/comments';
+import commentsRoute from '@/routes/posts/comments';
 import type { FormEvent } from 'react';
 
 interface CommentInputProps {

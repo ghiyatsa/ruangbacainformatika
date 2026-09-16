@@ -1,13 +1,13 @@
 import type { PaginationData } from '@/types/pagination';
 
-export interface BlogTaxonomyItem {
+export interface PostTaxonomyItem {
     id: number;
     name: string;
     slug: string;
     postsCount: number;
 }
 
-export interface BlogPostItem {
+export interface PostItem {
     id: number;
     title: string;
     slug: string;
@@ -42,10 +42,10 @@ export interface BlogPostItem {
         slug: string;
     }>;
     commentsCount?: number;
-    comments?: PaginationData<BlogPostComment>;
+    comments?: PaginationData<PostCommentItem>;
 }
 
-export interface BlogPostComment {
+export interface PostCommentItem {
     id: number;
     content: string;
     parentId: number | null;
@@ -62,35 +62,35 @@ export interface BlogPostComment {
         avatar: string | null;
         initials: string;
     } | null;
-    replies?: BlogPostComment[];
+    replies?: PostCommentItem[];
     canDelete: boolean;
 }
 
-export interface BlogFilters {
+export interface PostFilters {
     search: string;
     category: string;
     tag: string;
 }
 
-export interface BlogIndexPageProps {
-    filters: BlogFilters;
+export interface PostIndexPageProps {
+    filters: PostFilters;
     activeFilterLabels: Array<{
         key: string;
         label: string;
     }>;
-    categories?: BlogTaxonomyItem[];
-    tags?: BlogTaxonomyItem[];
-    posts?: PaginationData<BlogPostItem>;
-    popularPosts?: BlogPostItem[];
+    categories?: PostTaxonomyItem[];
+    tags?: PostTaxonomyItem[];
+    posts?: PaginationData<PostItem>;
+    popularPosts?: PostItem[];
 }
 
-export interface BlogShowPageProps {
+export interface PostShowPageProps {
     post?: {
-        data: BlogPostItem;
+        data: PostItem;
     } | null;
-    relatedPosts?: BlogPostItem[];
-    popularPosts?: BlogPostItem[];
-    categories?: BlogTaxonomyItem[];
-    tags?: BlogTaxonomyItem[];
+    relatedPosts?: PostItem[];
+    popularPosts?: PostItem[];
+    categories?: PostTaxonomyItem[];
+    tags?: PostTaxonomyItem[];
     isPreview?: boolean;
 }

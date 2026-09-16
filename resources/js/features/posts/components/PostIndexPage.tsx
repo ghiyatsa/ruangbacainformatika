@@ -4,26 +4,26 @@ import { useEffect } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CatalogPagination } from '@/features/books/components/CatalogPagination';
 import { setPageBreadcrumbs } from '@/layouts/AppLayout';
-import blog from '@/routes/blog';
-import { BlogFeaturedPost } from './BlogFeaturedPost';
-import { BlogLabelsSidebar } from './BlogLabelsSidebar';
-import { BlogPopularPosts } from './BlogPopularPosts';
-import { BlogPostCard } from './BlogPostCard';
+import postRoutes from '@/routes/posts';
+import { FeaturedPost } from './FeaturedPost';
+import { PopularPosts } from './PopularPosts';
+import { PostCard } from './PostCard';
 import {
-    BlogPostCardSkeleton,
-    BlogPopularPostsSkeleton,
-    BlogLabelsSidebarSkeleton,
-} from './BlogPostCardSkeleton';
-import type { BlogIndexPageProps } from '@/features/blog/types';
+    PostCardSkeleton,
+    PopularPostsSkeleton,
+    PostLabelsSidebarSkeleton,
+} from './PostCardSkeleton';
+import { PostLabelsSidebar } from './PostLabelsSidebar';
+import type { PostIndexPageProps } from '@/features/posts/types';
 
-export function BlogIndexPage({
+export function PostIndexPage({
     posts,
     categories,
     tags,
     filters,
     activeFilterLabels,
     popularPosts,
-}: BlogIndexPageProps) {
+}: PostIndexPageProps) {
     const hasFilters = Boolean(
         filters.search || filters.category || filters.tag,
     );
@@ -33,7 +33,7 @@ export function BlogIndexPage({
             { title: 'Beranda', href: '/' },
             {
                 title: 'Artikel',
-                href: blog.index.url(),
+                href: postRoutes.index.url(),
             },
         ]);
 
@@ -50,7 +50,7 @@ export function BlogIndexPage({
         };
         delete newQuery[key];
 
-        router.get(blog.index.url(), newQuery, {
+        router.get(postRoutes.index.url(), newQuery, {
             preserveState: true,
             replace: true,
         });
@@ -89,7 +89,11 @@ export function BlogIndexPage({
                     <button
                         type="button"
                         onClick={() =>
-                            router.get(blog.index.url(), {}, { replace: true })
+                            router.get(
+                                postRoutes.index.url(),
+                                {},
+                                { replace: true },
+                            )
                         }
                         className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                     >
@@ -107,17 +111,17 @@ export function BlogIndexPage({
                     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
                         <div className="min-w-0 space-y-6">
                             {!hasFilters && (
-                                <BlogPostCardSkeleton variant="featured" />
+                                <PostCardSkeleton variant="featured" />
                             )}
                             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                                 {Array.from({ length: 6 }).map((_, idx) => (
-                                    <BlogPostCardSkeleton key={idx} />
+                                    <PostCardSkeleton key={idx} />
                                 ))}
                             </div>
                         </div>
                         <aside className="space-y-6">
-                            <BlogPopularPostsSkeleton />
-                            <BlogLabelsSidebarSkeleton />
+                            <PopularPostsSkeleton />
+                            <PostLabelsSidebarSkeleton />
                         </aside>
                     </div>
                 }
@@ -147,7 +151,7 @@ export function BlogIndexPage({
                                 </p>
                                 {hasFilters && (
                                     <Link
-                                        href={blog.index.url()}
+                                        href={postRoutes.index.url()}
                                         className="mt-6 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/95"
                                     >
                                         Lihat semua artikel
@@ -164,7 +168,7 @@ export function BlogIndexPage({
                                 {/* 1. HERO FEATURED POST (only when not filtering) */}
                                 {!hasFilters && featuredPost && (
                                     <section>
-                                        <BlogFeaturedPost post={featuredPost} />
+                                        <FeaturedPost post={featuredPost} />
                                     </section>
                                 )}
 
@@ -188,7 +192,7 @@ export function BlogIndexPage({
 
                                         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                                             {remainingPosts.map((post) => (
-                                                <BlogPostCard
+                                                <PostCard
                                                     key={post.id}
                                                     post={post}
                                                 />
@@ -207,7 +211,7 @@ export function BlogIndexPage({
                                             </p>
                                             {hasFilters && (
                                                 <Link
-                                                    href={blog.index.url()}
+                                                    href={postRoutes.index.url()}
                                                     className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                                                 >
                                                     Lihat semua artikel
@@ -231,22 +235,20 @@ export function BlogIndexPage({
                                 {/* Popular Posts */}
                                 <Deferred
                                     data="popularPosts"
-                                    fallback={<BlogPopularPostsSkeleton />}
+                                    fallback={<PopularPostsSkeleton />}
                                 >
                                     {popularPosts && (
-                                        <BlogPopularPosts
-                                            posts={popularPosts}
-                                        />
+                                        <PopularPosts posts={popularPosts} />
                                     )}
                                 </Deferred>
 
                                 {/* Labels & Categories */}
                                 <Deferred
                                     data={['categories', 'tags']}
-                                    fallback={<BlogLabelsSidebarSkeleton />}
+                                    fallback={<PostLabelsSidebarSkeleton />}
                                 >
                                     {categories && tags && (
-                                        <BlogLabelsSidebar
+                                        <PostLabelsSidebar
                                             categories={categories}
                                             tags={tags}
                                             activeCategory={filters.category}

@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { BlogPostCard } from '@/features/blog/components/BlogPostCard';
-import blog from '@/routes/blog';
+import { PostCard } from '@/features/posts/components/PostCard';
+import postRoutes from '@/routes/posts';
 import FeaturedSpotlight from './FeaturedSpotlight';
 import MostBorrowedBooks from './MostBorrowedBooks';
 import NewBooksPreview from './NewBooksPreview';
@@ -96,13 +96,15 @@ export default function CatalogSection({
 
                     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                         {latestPosts.map((post) => (
-                            <BlogPostCard key={post.id} post={post} />
+                            <PostCard key={post.id} post={post} />
                         ))}
                     </div>
 
                     <div className="flex justify-center">
                         <Button asChild size="lg" className="rounded-xl px-8">
-                            <Link href={blog.index.url()}>Semua artikel</Link>
+                            <Link href={postRoutes.index.url()}>
+                                Semua artikel
+                            </Link>
                         </Button>
                     </div>
                 </div>

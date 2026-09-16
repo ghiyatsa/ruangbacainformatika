@@ -32,7 +32,7 @@ class PostApprovedNotification extends Notification
             'title' => 'Artikel diterbitkan',
             'message' => sprintf('"%s" telah diterbitkan.', $this->post->title),
             'action_label' => 'Buka artikel',
-            'action_url' => route('blog.show', $this->post, absolute: false),
+            'action_url' => route('posts.show', $this->post, absolute: false),
             'icon' => 'book-check',
             'post_id' => $this->post->id,
             'post_slug' => $this->post->slug,
