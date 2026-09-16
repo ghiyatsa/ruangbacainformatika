@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.24.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.4...v1.24.0) (2026-09-16)
+
+
+### Features
+
+* **kiosk:** API JSON untuk klien Flutter ([47364c1](https://github.com/ghiyatsa/ruangbacainformatika/commit/47364c11b21d683893011d69b5685c5fc259b826))
+* **kiosk:** tambah API JSON untuk klien Flutter ([40859eb](https://github.com/ghiyatsa/ruangbacainformatika/commit/40859eb6fa0b38a99a0d36fb6ee3820272eb5b6a))
+
+
+### Bug Fixes
+
+* **admin:** perjelas label persetujuan akun pada resource pengguna ([cddfe3a](https://github.com/ghiyatsa/ruangbacainformatika/commit/cddfe3aff9d425dcf73092abf9cd4952ece00c0d))
+* **admin:** perjelas label persetujuan akun pada resource pengguna ([819b09c](https://github.com/ghiyatsa/ruangbacainformatika/commit/819b09c3a02ffd131a653a1429ab1734ccf4f64e))
+* **kiosk:** gunakan relasi items() yang benar pada Loan ([305adb9](https://github.com/ghiyatsa/ruangbacainformatika/commit/305adb938dcd496c27bc4a70063083969604cd5c))
+
 ## [1.23.4](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.3...v1.23.4) (2026-09-16)
 
 
