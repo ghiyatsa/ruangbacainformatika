@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 beforeEach(function () {
@@ -29,18 +30,48 @@ beforeEach(function () {
 });
 
 it('renders configured seo meta on the welcome page', function () {
-    get('/')
-        ->assertOk()
-        ->assertSee('name="description" content="Deskripsi SEO kustom untuk pengujian halaman publik."', false)
-        ->assertSee('name="robots" content="noindex,nofollow"', false)
-        ->assertSee('name="keywords" content="seo, katalog, ruang baca"', false)
-        ->assertSee('property="og:title" content="Ruang Baca Custom"', false)
-        ->assertSee('property="og:image" content="'.route('og.site').'"', false)
-        ->assertSee('property="og:image:type" content="image/png"', false)
-        ->assertSee('property="og:image:width" content="1200"', false)
-        ->assertSee('property="og:image:height" content="1200"', false)
-        ->assertSee('property="og:url" content="'.url('/').'"', false)
-        ->assertSee('rel="canonical" href="'.url('/').'"', false);
+    $response = get('/')->assertOk();
+
+    assertResponseHasTag($response, [
+        'name' => 'description',
+        'content' => 'Deskripsi SEO kustom untuk pengujian halaman publik.',
+    ]);
+    assertResponseHasTag($response, [
+        'name' => 'robots',
+        'content' => 'noindex,nofollow',
+    ]);
+    assertResponseHasTag($response, [
+        'name' => 'keywords',
+        'content' => 'seo, katalog, ruang baca',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:title',
+        'content' => 'Ruang Baca Custom',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image',
+        'content' => route('og.site'),
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image:type',
+        'content' => 'image/png',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image:width',
+        'content' => '1200',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image:height',
+        'content' => '1200',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:url',
+        'content' => fn (string $value): bool => urlMatches($value, url('/')),
+    ]);
+    assertResponseHasTag($response, [
+        'rel' => 'canonical',
+        'href' => fn (string $value): bool => urlMatches($value, url('/')),
+    ], 'link');
 });
 
 it('renders catalog-specific seo meta on the book detail page', function () {
@@ -50,16 +81,40 @@ it('renders catalog-specific seo meta on the book detail page', function () {
         'description' => 'Panduan lengkap membangun aplikasi web modern dengan fokus pada performa, keamanan, dan pengalaman pengguna yang baik.',
     ]);
 
-    get(route('books.show', $book))
-        ->assertOk()
-        ->assertSee('name="description" content="Panduan lengkap membangun aplikasi web modern dengan fokus pada performa, keamanan, dan pengalaman pengguna yang baik."', false)
-        ->assertSee('name="keywords" content="Pemrograman Web Lanjut, katalog buku, ruang baca informatika"', false)
-        ->assertSee('property="og:title" content="Pemrograman Web Lanjut - Ruang Baca Custom"', false)
-        ->assertSee('property="og:image" content="'.route('og.books.show', $book).'"', false)
-        ->assertSee('property="og:image:type" content="image/png"', false)
-        ->assertSee('property="og:image:width" content="1200"', false)
-        ->assertSee('property="og:image:height" content="600"', false)
-        ->assertSee('rel="canonical" href="'.route('books.show', $book).'"', false);
+    $response = get(route('books.show', $book))->assertOk();
+
+    assertResponseHasTag($response, [
+        'name' => 'description',
+        'content' => 'Panduan lengkap membangun aplikasi web modern dengan fokus pada performa, keamanan, dan pengalaman pengguna yang baik.',
+    ]);
+    assertResponseHasTag($response, [
+        'name' => 'keywords',
+        'content' => 'Pemrograman Web Lanjut, katalog buku, ruang baca informatika',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:title',
+        'content' => 'Pemrograman Web Lanjut - Ruang Baca Custom',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image',
+        'content' => route('og.books.show', $book),
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image:type',
+        'content' => 'image/png',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image:width',
+        'content' => '1200',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image:height',
+        'content' => '600',
+    ]);
+    assertResponseHasTag($response, [
+        'rel' => 'canonical',
+        'href' => route('books.show', $book),
+    ], 'link');
 });
 
 it('renders catalog-specific seo meta on the skripsi detail page', function () {
@@ -81,14 +136,36 @@ it('renders catalog-specific seo meta on the skripsi detail page', function () {
     Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
     $user->assignRole('member');
 
-    \Pest\Laravel\actingAs($user)
+    $response = actingAs($user)
         ->get(route('skripsi.show', $skripsi))
-        ->assertOk()
-        ->assertSee('name="description" content="Penelitian ini membahas sistem rekomendasi koleksi perpustakaan berbasis perilaku peminjaman pengguna dan kemiripan topik."', false)
-        ->assertSee('name="keywords" content="Sistem Rekomendasi Perpustakaan, Nadia Putri, 2301700999, sistem rekomendasi, perpustakaan, text mining, skripsi informatika, ruang baca informatika"', false)
-        ->assertSee('property="og:title" content="Sistem Rekomendasi Perpustakaan - Ruang Baca Custom"', false)
-        ->assertSee('property="og:image" content="'.route('og.skripsi.show', $skripsi).'"', false)
-        ->assertSee('property="og:image:type" content="image/png"', false)
-        ->assertSee('rel="canonical" href="'.route('skripsi.show', $skripsi).'"', false)
-        ->assertSee('name="robots" content="noindex,nofollow"', false);
+        ->assertOk();
+
+    assertResponseHasTag($response, [
+        'name' => 'description',
+        'content' => 'Penelitian ini membahas sistem rekomendasi koleksi perpustakaan berbasis perilaku peminjaman pengguna dan kemiripan topik.',
+    ]);
+    assertResponseHasTag($response, [
+        'name' => 'keywords',
+        'content' => 'Sistem Rekomendasi Perpustakaan, Nadia Putri, 2301700999, sistem rekomendasi, perpustakaan, text mining, skripsi informatika, ruang baca informatika',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:title',
+        'content' => 'Sistem Rekomendasi Perpustakaan - Ruang Baca Custom',
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image',
+        'content' => route('og.skripsi.show', $skripsi),
+    ]);
+    assertResponseHasTag($response, [
+        'property' => 'og:image:type',
+        'content' => 'image/png',
+    ]);
+    assertResponseHasTag($response, [
+        'rel' => 'canonical',
+        'href' => route('skripsi.show', $skripsi),
+    ], 'link');
+    assertResponseHasTag($response, [
+        'name' => 'robots',
+        'content' => 'noindex,nofollow',
+    ]);
 });

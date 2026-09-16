@@ -213,14 +213,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             title={book?.title ?? 'Detail Buku'}
             description={(() => {
                 if (book?.description) {
-                    if (book.description.length >= 120) {
-                        return book.description.slice(0, 160);
-                    }
-
-                    return `${book.description} Temukan detail, ketersediaan eksemplar, lokasi rak, dan ajukan peminjaman buku ini di Ruang Baca Teknik Informatika Unimal.`.slice(
-                        0,
-                        160,
-                    );
+                    return book.description.slice(0, 160);
                 }
 
                 if (book) {
@@ -231,7 +224,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                         ? ` diterbitkan oleh ${book.publisher}`
                         : '';
 
-                    return `Akses detail buku "${book.title}"${authorStr}${publisherStr}. Cari lokasi rak, ketersediaan, dan ajukan peminjaman online di Ruang Baca Teknik Informatika Unimal.`.slice(
+                    return `Detail buku "${book.title}"${authorStr}${publisherStr}.`.slice(
                         0,
                         160,
                     );

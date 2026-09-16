@@ -13,6 +13,7 @@ class PageMeta
     public function __construct(
         protected SiteSettings $siteSettings,
         protected OpenGraphImage $openGraphImage,
+        protected SeoMetaState $seoMetaState,
     ) {}
 
     /**
@@ -20,7 +21,7 @@ class PageMeta
      */
     public function forWelcome(): array
     {
-        return [
+        return $this->publish([
             'title' => $this->siteTitle(),
             'description' => $this->siteDescription(),
             'keywords' => $this->siteKeywords(),
@@ -28,7 +29,7 @@ class PageMeta
             'canonicalUrl' => url('/'),
             'type' => 'website',
             ...$this->openGraphImage->defaultMeta(),
-        ];
+        ]);
     }
 
     /**
@@ -46,7 +47,7 @@ class PageMeta
             ->filter()
             ->implode(', ');
 
-        return [
+        return $this->publish([
             'title' => $this->fullTitle($book->title),
             'description' => $this->excerpt(
                 $book->description ?: "{$book->title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.",
@@ -56,7 +57,7 @@ class PageMeta
             'canonicalUrl' => route('books.show', $book),
             'type' => 'article',
             ...$this->openGraphImage->bookMeta($book),
-        ];
+        ]);
     }
 
     /**
@@ -64,7 +65,7 @@ class PageMeta
      */
     public function forPostIndex(): array
     {
-        return [
+        return $this->publish([
             'title' => $this->fullTitle('Artikel'),
             'description' => 'Kumpulan artikel pilihan dari Ruang Baca Informatika.',
             'keywords' => 'artikel ruang baca, blog ruang baca, artikel informatika, ruang baca informatika',
@@ -72,7 +73,7 @@ class PageMeta
             'canonicalUrl' => route('posts.index'),
             'type' => 'website',
             ...$this->openGraphImage->defaultMeta(),
-        ];
+        ]);
     }
 
     /**
@@ -89,7 +90,7 @@ class PageMeta
             'ruang baca informatika',
         ])->filter()->implode(', ');
 
-        return [
+        return $this->publish([
             'title' => $this->fullTitle($post->title),
             'description' => $this->excerpt($post->summary ?: strip_tags((string) $post->content)),
             'keywords' => $keywords,
@@ -100,7 +101,7 @@ class PageMeta
             'ogImageType' => 'image/png',
             'ogImageWidth' => 1200,
             'ogImageHeight' => 600,
-        ];
+        ]);
     }
 
     /**
@@ -129,7 +130,7 @@ class PageMeta
             ->filter()
             ->implode(', ');
 
-        return [
+        return $this->publish([
             'title' => $this->fullTitle($title),
             'description' => $this->excerpt(
                 $abstract ?: "{$title} tersedia di Ruang Baca Teknik Informatika Universitas Malikussaleh.",
@@ -139,7 +140,20 @@ class PageMeta
             'canonicalUrl' => $canonicalUrl,
             'type' => 'article',
             ...$this->openGraphImage->academicDocumentMeta($ogRouteName, $document),
-        ];
+        ]);
+    }
+
+    /**
+     * Simpan meta sebagai state request berjalan lalu kembalikan nilainya.
+     *
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    protected function publish(array $meta): array
+    {
+        $this->seoMetaState->put($meta);
+
+        return $meta;
     }
 
     protected function fullTitle(string $pageTitle): string

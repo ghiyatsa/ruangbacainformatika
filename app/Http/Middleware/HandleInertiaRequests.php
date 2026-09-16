@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\User;
 use App\Services\Auth\GoogleLoginConfiguration;
+use App\Support\SeoMetaState;
 use App\Support\SiteSettings;
 use Filament\Notifications\DatabaseNotification as FilamentDatabaseNotification;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -14,6 +15,7 @@ class HandleInertiaRequests extends Middleware
 {
     public function __construct(
         protected SiteSettings $siteSettings,
+        protected SeoMetaState $seoMetaState,
     ) {}
 
     /**
@@ -51,6 +53,10 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             ...$siteData,
+            // Lazy: closure dievaluasi setelah controller selesai, sehingga meta
+            // spesifik halaman (og:image buku/skripsi/tesis/laporan KP) tersedia
+            // untuk komponen React agar tidak jatuh ke gambar OG generik situs.
+            'meta' => fn (): array => $this->seoMetaState->get(),
             'globalNotice' => $this->siteSettings->sharedNotice(),
             'auth' => [
                 'user' => $this->serializeUser($user),

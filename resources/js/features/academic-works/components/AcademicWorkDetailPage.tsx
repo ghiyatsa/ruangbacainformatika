@@ -94,14 +94,7 @@ export default function AcademicWorkDetailPage(
             title={work?.title ?? `Detail ${label}`}
             description={(() => {
                 if (work?.abstract) {
-                    if (work.abstract.length >= 120) {
-                        return work.abstract.slice(0, 160);
-                    }
-
-                    return `${work.abstract} Temukan abstrak lengkap, penulis, NIM, tahun terbit, dan dosen pembimbing untuk referensi akademik di Ruang Baca Teknik Informatika Unimal.`.slice(
-                        0,
-                        160,
-                    );
+                    return work.abstract.slice(0, 160);
                 }
 
                 if (work) {
@@ -112,7 +105,7 @@ export default function AcademicWorkDetailPage(
                         ? ` (NIM: ${work.studentId})`
                         : '';
 
-                    return `Akses detail ${label.toLowerCase()} "${work.title}"${authorStr}${nimStr}. Cari metadata lengkap, abstrak, dan tahun terbit untuk referensi ilmiah di Ruang Baca Teknik Informatika Unimal.`.slice(
+                    return `Detail ${label.toLowerCase()} "${work.title}"${authorStr}${nimStr}.`.slice(
                         0,
                         160,
                     );
