@@ -46,7 +46,10 @@ class KioskApiController extends Controller
     ) {}
 
     /**
-     * Aktifkan perangkat: tukar PIN kiosk menjadi device token.
+     * Aktifkan perangkat: tukar PIN kiosk menjadi API key + device token.
+     *
+     * PIN hanya diperlukan sekali saat menyiapkan perangkat. Setelah itu aplikasi
+     * Flutter memakai API key dari konfigurasi dan tidak lagi menampilkan layar PIN.
      */
     public function activateDevice(VerifyPinRequest $request): JsonResponse
     {
@@ -73,10 +76,12 @@ class KioskApiController extends Controller
         }
 
         $device = $this->registerDevice($request);
+        $apiKey = $this->settingRepository->get('kiosk', 'api_key_hash');
 
         return response()->json([
             'device_token' => $device->device_token,
             'expires_at' => now()->addHours(24)->toIso8601String(),
+            'has_api_key' => is_string($apiKey) && $apiKey !== '',
             'session' => $this->kioskPinManager->sessionConfiguration(),
         ]);
     }
