@@ -54,7 +54,7 @@ it('uses concise descriptions on overview widgets', function () {
 it('links pending member approval stats to filtered user tables', function () {
     $stats = invade(app(PendingMemberApprovalsWidget::class))->getStats();
 
-    expect($stats[0]->getLabel())->toBe('Menunggu Persetujuan')
+    expect($stats[0]->getLabel())->toBe('Menunggu Persetujuan Akun')
         ->and($stats[0]->getUrl())->toContain('filters%5Bis_approved%5D%5Bvalue%5D=0')
         ->and($stats[0]->getUrl())->toContain('filters%5Bmanual_approval%5D%5BisActive%5D=1')
         ->and($stats[1]->getLabel())->toBe('Pendaftar Hari Ini')

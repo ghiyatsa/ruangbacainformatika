@@ -144,7 +144,7 @@ it('super admin users can render the create user form for google accounts', func
         ->assertSee('WhatsApp')
         ->assertSee('Alamat')
         ->assertSee('Peran')
-        ->assertSee('Lolos Review Awal');
+        ->assertSee('Persetujuan Akun');
 });
 
 it('super admin users see verified whatsapp as locked on the edit user form', function () {

@@ -104,7 +104,7 @@ class LoanConsequenceService
         if (! $user->canReceiveMemberRole()) {
             $reasons[] = $user->is_approved
                 ? 'email tidak memenuhi syarat'
-                : 'akun belum lolos review awal';
+                : 'akun belum disetujui admin';
         }
 
         if (! $user->hasRole('member')) {

@@ -33,7 +33,8 @@ class UserForm
                     ->relationship('roles', 'name')
                     ->preload(),
                 Toggle::make('is_approved')
-                    ->label('Lolos Review Awal')
+                    ->label('Persetujuan Akun')
+                    ->helperText('Aktifkan agar akun kampus ini boleh menjadi anggota perpustakaan (wajib untuk meminjam buku). Mahasiswa Teknik Informatika disetujui otomatis.')
                     ->onIcon('heroicon-m-check')
                     ->offIcon('heroicon-m-x-mark')
                     ->onColor('success')
