@@ -37,7 +37,7 @@ class EditPost extends EditRecord
                         $this->sanitizePreviewData($this->data),
                         now()->addMinutes(10)
                     );
-                    $this->js("window.open('".route('blog.preview', $this->record->preview_token)."', '_blank')");
+                    $this->js("window.open('".route('posts.preview', $this->record->preview_token)."', '_blank')");
                 }),
             DeleteAction::make()
                 ->label('Hapus'),

@@ -41,7 +41,7 @@ class SitemapController extends Controller
             'priority' => '0.9',
         ];
         $urls[] = [
-            'loc' => route('blog.index'),
+            'loc' => route('posts.index'),
             'lastmod' => now()->startOfWeek()->toAtomString(),
             'changefreq' => 'daily',
             'priority' => '0.8',
@@ -91,7 +91,7 @@ class SitemapController extends Controller
         $posts = Post::published()->select('id', 'slug', 'updated_at')->get();
         foreach ($posts as $post) {
             $urls[] = [
-                'loc' => route('blog.show', $post->slug),
+                'loc' => route('posts.show', $post->slug),
                 'lastmod' => $post->updated_at->toAtomString(),
                 'changefreq' => 'weekly',
                 'priority' => '0.7',

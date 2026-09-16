@@ -7,29 +7,29 @@ import { StaticPageContent } from '@/components/layout/StaticPageContent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BlogCommentsSection } from '@/features/blog/components/comments/BlogCommentsSection';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
+import { PostCommentsSection } from '@/features/posts/components/comments/PostCommentsSection';
 import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import { cn, formatViewCount } from '@/lib/utils';
-import blog from '@/routes/blog';
-import { BlogLabelsSidebar } from './BlogLabelsSidebar';
-import { BlogPopularPosts } from './BlogPopularPosts';
-import { BlogPostCard } from './BlogPostCard';
+import postRoutes from '@/routes/posts';
+import { PopularPosts } from './PopularPosts';
+import { PostCard } from './PostCard';
 import {
-    BlogPostCardSkeleton,
-    BlogPopularPostsSkeleton,
-    BlogLabelsSidebarSkeleton,
-} from './BlogPostCardSkeleton';
-import type { BlogShowPageProps } from '@/features/blog/types';
+    PostCardSkeleton,
+    PopularPostsSkeleton,
+    PostLabelsSidebarSkeleton,
+} from './PostCardSkeleton';
+import { PostLabelsSidebar } from './PostLabelsSidebar';
+import type { PostShowPageProps } from '@/features/posts/types';
 
-export function BlogShowPage({
+export function PostShowPage({
     post,
     relatedPosts,
     popularPosts,
     categories,
     tags,
     isPreview = false,
-}: BlogShowPageProps) {
+}: PostShowPageProps) {
     const [imageLoaded, setImageLoaded] = useState(false);
     const article = post?.data ?? null;
     const page = usePage();
@@ -42,7 +42,7 @@ export function BlogShowPage({
             { title: 'Beranda', href: '/' },
             {
                 title: 'Artikel',
-                href: blog.index.url(),
+                href: postRoutes.index.url(),
             },
             {
                 title: article ? (
@@ -50,7 +50,9 @@ export function BlogShowPage({
                 ) : (
                     <Skeleton className="h-4 w-32 animate-pulse rounded-md" />
                 ),
-                href: article ? blog.show.url(article.slug) : blog.index.url(),
+                href: article
+                    ? postRoutes.show.url(article.slug)
+                    : postRoutes.index.url(),
             },
         ]);
 
@@ -145,7 +147,7 @@ export function BlogShowPage({
                                         {article.categories.map((cat) => (
                                             <Link
                                                 key={cat.slug}
-                                                href={blog.index.url({
+                                                href={postRoutes.index.url({
                                                     query: {
                                                         category: cat.slug,
                                                     },
@@ -473,12 +475,29 @@ export function BlogShowPage({
                                 </section>
                             }
                         >
-                            <BlogCommentsSection
+                            <PostCommentsSection
                                 comments={article.comments?.data ?? []}
                                 commentsCount={article.commentsCount}
                                 articleSlug={article.slug}
                                 allowComments={article.allowComments}
-                                currentUser={page.props.auth?.user ? { id: page.props.auth.user.id, name: page.props.auth.user.name, avatar: page.props.auth.user.avatar ?? null, initials: page.props.auth.user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() } : null}
+                                currentUser={
+                                    page.props.auth?.user
+                                        ? {
+                                              id: page.props.auth.user.id,
+                                              name: page.props.auth.user.name,
+                                              avatar:
+                                                  page.props.auth.user.avatar ??
+                                                  null,
+                                              initials:
+                                                  page.props.auth.user.name
+                                                      .split(' ')
+                                                      .map((n: string) => n[0])
+                                                      .join('')
+                                                      .slice(0, 2)
+                                                      .toUpperCase(),
+                                          }
+                                        : null
+                                }
                                 googleLoginUrl={
                                     page.props.googleAuth?.loginUrl ??
                                     '/auth/google'
@@ -498,7 +517,7 @@ export function BlogShowPage({
                                 </h2>
                                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                                     {Array.from({ length: 3 }).map((_, idx) => (
-                                        <BlogPostCardSkeleton key={idx} />
+                                        <PostCardSkeleton key={idx} />
                                     ))}
                                 </div>
                             </section>
@@ -511,7 +530,7 @@ export function BlogShowPage({
                                 </h2>
                                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                                     {relatedPosts.map((relatedPost) => (
-                                        <BlogPostCard
+                                        <PostCard
                                             key={relatedPost.id}
                                             post={relatedPost}
                                         />
@@ -538,7 +557,7 @@ export function BlogShowPage({
                                         {article.tags.map((tagItem) => (
                                             <Link
                                                 key={tagItem.slug}
-                                                href={blog.index.url({
+                                                href={postRoutes.index.url({
                                                     query: {
                                                         tag: tagItem.slug,
                                                     },
@@ -572,20 +591,18 @@ export function BlogShowPage({
                     {/* Popular Posts */}
                     <Deferred
                         data="popularPosts"
-                        fallback={<BlogPopularPostsSkeleton />}
+                        fallback={<PopularPostsSkeleton />}
                     >
-                        {popularPosts && (
-                            <BlogPopularPosts posts={popularPosts} />
-                        )}
+                        {popularPosts && <PopularPosts posts={popularPosts} />}
                     </Deferred>
 
                     {/* Labels & Categories */}
                     <Deferred
                         data={['categories', 'tags']}
-                        fallback={<BlogLabelsSidebarSkeleton />}
+                        fallback={<PostLabelsSidebarSkeleton />}
                     >
                         {categories && tags && (
-                            <BlogLabelsSidebar
+                            <PostLabelsSidebar
                                 categories={categories}
                                 tags={tags}
                             />

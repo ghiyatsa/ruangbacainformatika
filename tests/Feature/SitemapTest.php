@@ -54,7 +54,7 @@ it('generates the sitemap correctly', function () {
     // Verify main landing pages exist
     expect($content)->toContain(route('home'))
         ->toContain(route('books.index'))
-        ->toContain(route('blog.index'))
+        ->toContain(route('posts.index'))
         ->not->toContain(route('skripsi.index'))
         ->not->toContain(route('internship-reports.index'))
         ->not->toContain(route('thesis.index'))
@@ -64,7 +64,7 @@ it('generates the sitemap correctly', function () {
     // Verify dynamic model pages exist
     expect($content)->toContain($staticPage->publicUrl())
         ->toContain(route('books.show', $book->slug))
-        ->toContain(route('blog.show', $post->slug))
+        ->toContain(route('posts.show', $post->slug))
         ->not->toContain(route('skripsi.show', $skripsi->student_id))
         ->not->toContain(route('internship-reports.show', $report->student_id))
         ->not->toContain(route('thesis.show', $thesis->student_id));

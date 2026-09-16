@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /** @mixin Post */
-class BlogPostResource extends JsonResource
+class PostResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

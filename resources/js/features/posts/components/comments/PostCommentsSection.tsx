@@ -1,25 +1,25 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CommentAvatar } from '@/features/blog/components/comments/CommentAvatar';
-import { CommentInput } from '@/features/blog/components/comments/CommentInput';
-import { CommentItem } from '@/features/blog/components/comments/CommentItem';
-import { GuestCommentPrompt } from '@/features/blog/components/comments/GuestCommentPrompt';
-import type { CommentUser } from '@/features/blog/components/comments/CommentItem';
-import type { BlogPostComment } from '@/features/blog/types';
+import { CommentAvatar } from '@/features/posts/components/comments/CommentAvatar';
+import { CommentInput } from '@/features/posts/components/comments/CommentInput';
+import { CommentItem } from '@/features/posts/components/comments/CommentItem';
+import { GuestCommentPrompt } from '@/features/posts/components/comments/GuestCommentPrompt';
+import type { CommentUser } from '@/features/posts/components/comments/CommentItem';
+import type { PostCommentItem } from '@/features/posts/types';
 import type { PaginationData } from '@/types/pagination';
 
-interface BlogCommentsSectionProps {
-    comments: BlogPostComment[];
+interface PostCommentsSectionProps {
+    comments: PostCommentItem[];
     commentsCount?: number;
     articleSlug: string;
     currentUser: CommentUser | null;
     googleLoginUrl: string;
-    pagination?: PaginationData<BlogPostComment>;
+    pagination?: PaginationData<PostCommentItem>;
     allowComments?: boolean;
 }
 
-export function BlogCommentsSection({
+export function PostCommentsSection({
     comments,
     commentsCount,
     articleSlug,
@@ -27,7 +27,7 @@ export function BlogCommentsSection({
     googleLoginUrl,
     pagination,
     allowComments = true,
-}: BlogCommentsSectionProps) {
+}: PostCommentsSectionProps) {
     const [loadingMore, setLoadingMore] = useState(false);
 
     const handleLoadMore = () => {

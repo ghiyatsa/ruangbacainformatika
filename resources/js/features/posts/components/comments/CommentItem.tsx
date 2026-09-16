@@ -11,15 +11,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { CommentAvatar } from '@/features/blog/components/comments/CommentAvatar';
-import { CommentInput } from '@/features/blog/components/comments/CommentInput';
-import { GuestCommentPrompt } from '@/features/blog/components/comments/GuestCommentPrompt';
-import commentsRoute from '@/routes/blog/comments';
+import { CommentAvatar } from '@/features/posts/components/comments/CommentAvatar';
+import { CommentInput } from '@/features/posts/components/comments/CommentInput';
+import { GuestCommentPrompt } from '@/features/posts/components/comments/GuestCommentPrompt';
+import commentsRoute from '@/routes/posts/comments';
 import type { ReactElement } from 'react';
-import type { BlogPostComment } from '@/features/blog/types';
+import type { PostCommentItem } from '@/features/posts/types';
 
 interface CommentItemProps {
-    comment: BlogPostComment;
+    comment: PostCommentItem;
     articleSlug: string;
     currentUser: CommentUser | null;
     googleLoginUrl: string;
@@ -164,7 +164,7 @@ export function CommentItem({
         });
     };
 
-    const openReplyForm = (target: BlogPostComment) => {
+    const openReplyForm = (target: PostCommentItem) => {
         const isTogglingSameTarget = isReplying && replyTargetId === target.id;
         setReplyTargetId(target.id);
         setIsReplying(!isTogglingSameTarget);
@@ -175,7 +175,7 @@ export function CommentItem({
         [comment, ...replies].find((item) => item.id === replyTargetId) ??
         comment;
 
-    const renderReply = (reply: BlogPostComment) => (
+    const renderReply = (reply: PostCommentItem) => (
         <div key={reply.id} className="relative flex gap-3">
             <CommentAvatar
                 avatarUrl={reply.user?.avatar}
@@ -224,7 +224,11 @@ export function CommentItem({
                         }
 
                         return parts.reduce(
-                            (acc: (string | ReactElement)[], part: string, index: number) => {
+                            (
+                                acc: (string | ReactElement)[],
+                                part: string,
+                                index: number,
+                            ) => {
                                 if (index === 0) {
                                     return [part];
                                 }

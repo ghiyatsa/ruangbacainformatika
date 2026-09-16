@@ -62,14 +62,14 @@ class PageMeta
     /**
      * @return array<string, mixed>
      */
-    public function forBlogIndex(): array
+    public function forPostIndex(): array
     {
         return [
             'title' => $this->fullTitle('Artikel'),
             'description' => 'Kumpulan artikel pilihan dari Ruang Baca Informatika.',
             'keywords' => 'artikel ruang baca, blog ruang baca, artikel informatika, ruang baca informatika',
             'robots' => $this->siteRobots(),
-            'canonicalUrl' => route('blog.index'),
+            'canonicalUrl' => route('posts.index'),
             'type' => 'website',
             ...$this->openGraphImage->defaultMeta(),
         ];
@@ -94,7 +94,7 @@ class PageMeta
             'description' => $this->excerpt($post->summary ?: strip_tags((string) $post->content)),
             'keywords' => $keywords,
             'robots' => $this->siteRobots(),
-            'canonicalUrl' => route('blog.show', $post),
+            'canonicalUrl' => route('posts.show', $post),
             'type' => 'article',
             'ogImage' => $post->cover_image ? Storage::disk('public')->url($post->cover_image) : route('og.site'),
             'ogImageType' => 'image/png',

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\BlogPostResource;
 use App\Http\Resources\PostCommentResource;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\PostTag;
-use App\Services\Blog\BlogQueryService;
+use App\Services\Post\PostQueryService;
 use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -19,32 +19,32 @@ use Tiptap\Editor;
 use Tiptap\Extensions\StarterKit;
 use Tiptap\Nodes\Image;
 
-class BlogController extends Controller
+class PostController extends Controller
 {
     public function __construct(
-        protected BlogQueryService $blogQueryService,
+        protected PostQueryService $postQueryService,
         protected PageMeta $pageMeta,
     ) {}
 
     public function index(Request $request): Response
     {
-        $filters = $this->blogQueryService->filtersFromRequest($request);
+        $filters = $this->postQueryService->filtersFromRequest($request);
 
-        return Inertia::render('blog/index', [
+        return Inertia::render('posts/index', [
             'filters' => $filters,
-            'activeFilterLabels' => $this->blogQueryService->activeFilterLabels($filters),
-            'categories' => Inertia::defer(fn () => $this->blogQueryService->categories()),
-            'tags' => Inertia::defer(fn () => $this->blogQueryService->tags()),
+            'activeFilterLabels' => $this->postQueryService->activeFilterLabels($filters),
+            'categories' => Inertia::defer(fn () => $this->postQueryService->categories()),
+            'tags' => Inertia::defer(fn () => $this->postQueryService->tags()),
             'posts' => Inertia::defer(function () use ($filters) {
-                $posts = $this->blogQueryService->paginatePosts($filters);
+                $posts = $this->postQueryService->paginatePosts($filters);
                 $paginated = $posts->toArray();
-                $paginated['data'] = BlogPostResource::collection($posts->getCollection())->resolve();
+                $paginated['data'] = PostResource::collection($posts->getCollection())->resolve();
 
                 return $paginated;
             }),
-            'popularPosts' => Inertia::defer(fn () => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve()),
+            'popularPosts' => Inertia::defer(fn () => PostResource::collection($this->postQueryService->popularPosts())->resolve()),
         ])->withViewData([
-            'meta' => $this->pageMeta->forBlogIndex(),
+            'meta' => $this->pageMeta->forPostIndex(),
         ]);
     }
 
@@ -63,11 +63,11 @@ class BlogController extends Controller
             'tags:id,name,slug',
         ])->loadCount('comments');
 
-        $postResource = new BlogPostResource($post);
+        $postResource = new PostResource($post);
 
         $commentsPage = request()->integer('comments_page', 1);
 
-        return Inertia::render('blog/show', [
+        return Inertia::render('posts/show', [
             'isPreview' => false,
             'post' => [
                 'data' => array_merge(
@@ -91,10 +91,10 @@ class BlogController extends Controller
                     ]
                 ),
             ],
-            'relatedPosts' => Inertia::defer(fn () => BlogPostResource::collection($this->blogQueryService->relatedPosts($post))->resolve()),
-            'popularPosts' => Inertia::defer(fn () => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve()),
-            'categories' => Inertia::defer(fn () => $this->blogQueryService->categories()),
-            'tags' => Inertia::defer(fn () => $this->blogQueryService->tags()),
+            'relatedPosts' => Inertia::defer(fn () => PostResource::collection($this->postQueryService->relatedPosts($post))->resolve()),
+            'popularPosts' => Inertia::defer(fn () => PostResource::collection($this->postQueryService->popularPosts())->resolve()),
+            'categories' => Inertia::defer(fn () => $this->postQueryService->categories()),
+            'tags' => Inertia::defer(fn () => $this->postQueryService->tags()),
         ])->withViewData([
             'meta' => $this->pageMeta->forPost($post),
         ]);
@@ -210,11 +210,11 @@ class BlogController extends Controller
             'tags:id,name,slug',
         ])->loadCount('comments');
 
-        $postResource = new BlogPostResource($post);
+        $postResource = new PostResource($post);
 
         $commentsPage = request()->integer('comments_page', 1);
 
-        return Inertia::render('blog/show', [
+        return Inertia::render('posts/show', [
             'isPreview' => true,
             'post' => [
                 'data' => array_merge(
@@ -236,10 +236,10 @@ class BlogController extends Controller
                     ]
                 ),
             ],
-            'relatedPosts' => BlogPostResource::collection($this->blogQueryService->relatedPosts($post))->resolve(),
-            'popularPosts' => BlogPostResource::collection($this->blogQueryService->popularPosts())->resolve(),
-            'categories' => $this->blogQueryService->categories(),
-            'tags' => $this->blogQueryService->tags(),
+            'relatedPosts' => PostResource::collection($this->postQueryService->relatedPosts($post))->resolve(),
+            'popularPosts' => PostResource::collection($this->postQueryService->popularPosts())->resolve(),
+            'categories' => $this->postQueryService->categories(),
+            'tags' => $this->postQueryService->tags(),
         ])->withViewData([
             'meta' => $this->pageMeta->forPost($post),
         ]);

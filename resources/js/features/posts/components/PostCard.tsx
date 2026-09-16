@@ -3,15 +3,15 @@ import { ArrowUpRight, CalendarDays, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import { instantLoadingPageProps } from '@/lib/inertia-loading';
-import blog from '@/routes/blog';
-import type { BlogPostItem } from '@/features/blog/types';
+import postRoutes from '@/routes/posts';
+import type { PostItem } from '@/features/posts/types';
 
-interface BlogPostCardProps {
-    post: BlogPostItem;
+interface PostCardProps {
+    post: PostItem;
     compact?: boolean;
 }
 
-export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
+export function PostCard({ post, compact = false }: PostCardProps) {
     const { isBookmarked, toggleBookmark } = useCatalogBookmarks();
     const page = usePage();
 
@@ -20,7 +20,7 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
         id: post.id,
     });
 
-    const postUrl = `${page.props.site?.url ?? ''}${blog.show.url(post.slug)}`;
+    const postUrl = `${page.props.site?.url ?? ''}${postRoutes.show.url(post.slug)}`;
 
     const bookmarkRecord = {
         catalogType: 'post' as const,
@@ -41,9 +41,9 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
         // Compact horizontal card — used in related posts sidebar
         return (
             <Link
-                href={blog.show.url(post.slug)}
+                href={postRoutes.show.url(post.slug)}
                 instant
-                component="blog/show"
+                component="posts/show"
                 pageProps={instantLoadingPageProps()}
                 className="group flex gap-3 overflow-hidden rounded-xl border border-border/60 bg-card p-3 transition-all duration-200 hover:border-primary/30"
             >
@@ -77,9 +77,9 @@ export function BlogPostCard({ post, compact = false }: BlogPostCardProps) {
     // Standard vertical card — used in grid
     return (
         <Link
-            href={blog.show.url(post.slug)}
+            href={postRoutes.show.url(post.slug)}
             instant
-            component="blog/show"
+            component="posts/show"
             pageProps={instantLoadingPageProps()}
             className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 transition-all duration-300 hover:border-primary/30"
         >

@@ -1,12 +1,10 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface BlogPostCardSkeletonProps {
+interface PostCardSkeletonProps {
     variant?: 'featured' | 'card' | 'popular';
 }
 
-export function BlogPostCardSkeleton({
-    variant = 'card',
-}: BlogPostCardSkeletonProps) {
+export function PostCardSkeleton({ variant = 'card' }: PostCardSkeletonProps) {
     if (variant === 'featured') {
         return (
             <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border/60 bg-card sm:aspect-video">
@@ -71,7 +69,7 @@ export function BlogPostCardSkeleton({
     );
 }
 
-export function BlogPopularPostsSkeleton() {
+export function PopularPostsSkeleton() {
     return (
         <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
             <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
@@ -82,14 +80,14 @@ export function BlogPopularPostsSkeleton() {
             </div>
             <div className="divide-y divide-border/50">
                 {Array.from({ length: 4 }).map((_, idx) => (
-                    <BlogPostCardSkeleton key={idx} variant="popular" />
+                    <PostCardSkeleton key={idx} variant="popular" />
                 ))}
             </div>
         </section>
     );
 }
 
-export function BlogLabelsSidebarSkeleton() {
+export function PostLabelsSidebarSkeleton() {
     return (
         <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
             <div className="border-b border-border/60 px-5 py-3.5">

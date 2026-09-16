@@ -1,21 +1,21 @@
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
-import blog from '@/routes/blog';
-import type { BlogTaxonomyItem } from '@/features/blog/types';
+import postRoutes from '@/routes/posts';
+import type { PostTaxonomyItem } from '@/features/posts/types';
 
-interface BlogLabelsSidebarProps {
-    categories: BlogTaxonomyItem[];
-    tags: BlogTaxonomyItem[];
+interface PostLabelsSidebarProps {
+    categories: PostTaxonomyItem[];
+    tags: PostTaxonomyItem[];
     activeCategory?: string;
     activeTag?: string;
 }
 
-export function BlogLabelsSidebar({
+export function PostLabelsSidebar({
     categories,
     tags,
     activeCategory,
     activeTag,
-}: BlogLabelsSidebarProps) {
+}: PostLabelsSidebarProps) {
     const [showAllCategories, setShowAllCategories] = useState(false);
     const [showAllTags, setShowAllTags] = useState(false);
 
@@ -52,7 +52,7 @@ export function BlogLabelsSidebar({
                                 return (
                                     <Link
                                         key={cat.slug}
-                                        href={blog.index.url({
+                                        href={postRoutes.index.url({
                                             query: isActive
                                                 ? undefined
                                                 : { category: cat.slug },
@@ -109,7 +109,7 @@ export function BlogLabelsSidebar({
                                 return (
                                     <Link
                                         key={tag.slug}
-                                        href={blog.index.url({
+                                        href={postRoutes.index.url({
                                             query: isActive
                                                 ? undefined
                                                 : { tag: tag.slug },

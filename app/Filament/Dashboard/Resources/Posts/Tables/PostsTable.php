@@ -79,7 +79,7 @@ class PostsTable
                         ->label('Pratinjau')
                         ->icon('heroicon-o-eye')
                         ->color('info')
-                        ->url(fn (Post $record): string => route('blog.preview', $record->preview_token))
+                        ->url(fn (Post $record): string => route('posts.preview', $record->preview_token))
                         ->openUrlInNewTab(),
                     EditAction::make()
                         ->label('Ubah'),

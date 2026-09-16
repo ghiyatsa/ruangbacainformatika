@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 return [
-    'placeholder' => 'Tidak tersedia',
+    'placeholder' => 'T/A',
     'navigation' => [
-        'title' => 'Penampil Log',
+        'title' => 'Log Sistem',
         'heading' => 'Tabel Log',
         'subheading' => '',
         'group' => 'Sistem',
@@ -15,9 +15,9 @@ return [
         'model_label' => 'log',
         'plural_model_label' => 'log',
         'columns' => [
-            'log_level' => 'Level Log',
+            'log_level' => 'Tingkat Log',
             'env' => 'Lingkungan',
-            'file' => 'Nama File',
+            'file' => 'Nama Berkas',
             'message' => 'Ringkasan',
             'date' => 'Waktu Kejadian',
         ],
@@ -27,8 +27,8 @@ return [
                 'indicator' => 'Difilter berdasarkan lingkungan',
             ],
             'file' => [
-                'label' => 'File',
-                'indicator' => 'Difilter berdasarkan file',
+                'label' => 'Berkas',
+                'indicator' => 'Difilter berdasarkan berkas',
             ],
             'date' => [
                 'label' => 'Tanggal',
@@ -49,38 +49,38 @@ return [
         'actions' => [
             'view' => [
                 'label' => 'Lihat',
-                'heading' => 'Detail Error Log',
+                'heading' => 'Log Galat',
             ],
             'read' => [
-                'label' => 'Baca Email',
+                'label' => 'Baca Surel',
                 'subject' => 'Subjek',
-                'mail_log' => 'Log Email',
+                'mail_log' => 'Log Surel',
                 'sent_date' => 'Tanggal Kirim',
             ],
             'refresh' => [
                 'label' => 'Muat Ulang',
             ],
             'clear' => [
-                'label' => 'Kosongkan Log',
-                'success' => 'Semua log berhasil dikosongkan.',
+                'label' => 'Bersihkan Log',
+                'success' => 'Semua log berhasil dibersihkan!',
             ],
             'copy_markdown' => [
                 'label' => 'Salin sebagai Markdown',
-                'success' => 'Markdown berhasil disalin',
+                'success' => 'Markdown disalin ke papan klip',
                 'headers' => [
-                    'file' => 'File',
+                    'file' => 'Berkas',
                     'message' => 'Pesan',
                     'description' => 'Deskripsi',
                     'context' => 'Konteks',
-                    'stack_trace' => 'Stack Trace',
-                    'mail' => 'Detail Email',
+                    'stack_trace' => 'Jejak Tumpukan',
+                    'mail' => 'Detail Surel',
                 ],
             ],
         ],
     ],
     'schema' => [
         'error-log' => [
-            'stack' => 'Stack Trace',
+            'stack' => 'Jejak Tumpukan',
         ],
         'json-log' => [
             'context' => 'Konteks',
@@ -90,12 +90,12 @@ return [
         'sender' => [
             'label' => 'Pengirim',
             'name' => 'Nama',
-            'email' => 'Email',
+            'email' => 'Surel',
         ],
         'receiver' => [
             'label' => 'Penerima',
             'name' => 'Nama',
-            'email' => 'Email',
+            'email' => 'Surel',
         ],
         'content' => 'Konten',
         'plain' => 'Teks Biasa',
@@ -103,14 +103,14 @@ return [
     ],
     'levels' => [
         'all' => 'Semua Log',
-        'alert' => 'Alert',
-        'critical' => 'Critical',
+        'alert' => 'Peringatan Keras',
+        'critical' => 'Kritis',
         'debug' => 'Debug',
-        'emergency' => 'Emergency',
-        'error' => 'Error',
+        'emergency' => 'Darurat',
+        'error' => 'Galat',
         'info' => 'Info',
-        'notice' => 'Notice',
-        'warning' => 'Warning',
-        'mail' => 'Email',
+        'notice' => 'Pemberitahuan',
+        'warning' => 'Peringatan',
+        'mail' => 'Surel',
     ],
 ];

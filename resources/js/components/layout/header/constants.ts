@@ -8,9 +8,9 @@ import {
     ScanSearch,
 } from 'lucide-react';
 import { about, home } from '@/routes';
-import blog from '@/routes/blog/index';
 import books from '@/routes/books';
 import internshipReports from '@/routes/internship-reports';
+import postRoutes from '@/routes/posts';
 import similarity from '@/routes/similarity';
 import skripsi from '@/routes/skripsi';
 import thesis from '@/routes/thesis';
@@ -73,8 +73,8 @@ export function getNavLinks(isMember: boolean = false): NavItem[] {
                   icon: BookOpen,
               },
         {
-            label: 'Blog',
-            href: blog.index.url(),
+            label: 'Artikel',
+            href: postRoutes.index.url(),
             icon: Newspaper,
         },
         {

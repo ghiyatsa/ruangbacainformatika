@@ -93,8 +93,8 @@ class SearchController extends Controller
                 'type' => 'post',
                 'id' => $p->id,
                 'title' => $p->title,
-                'subtitle' => 'Artikel Blog',
-                'url' => route('blog.show', $p->slug),
+                'subtitle' => 'Artikel',
+                'url' => route('posts.show', $p->slug),
             ]);
 
         // 2. Teks Saran Pintar (Query suggestions)
