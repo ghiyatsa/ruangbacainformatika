@@ -6,11 +6,22 @@ use App\Models\Loan;
 use App\Models\User;
 use App\Notifications\LoanReminderDatabaseNotification;
 use App\Notifications\LoanReminderNotification;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 
 class LoanReminderService
 {
-    protected const DEFAULT_MAX_OVERDUE_DAYS = 7;
+    /**
+     * Ambang jatuh tempo yang membuka izin pengingat: H-1, atau H+3 pada Jumat.
+     * Dipakai bersama oleh daftar peminjam dan pengirim pengingat agar
+     * pinjaman yang tampil selalu bisa diingatkan.
+     */
+    public static function reminderDueThreshold(): CarbonImmutable
+    {
+        return now()->isFriday()
+            ? now()->addDays(3)->endOfDay()->toImmutable()
+            : now()->addDay()->endOfDay()->toImmutable();
+    }
 
     /**
      * Kirim reminder pengembalian untuk satu pinjaman (jika memenuhi syarat).
@@ -51,20 +62,16 @@ class LoanReminderService
     }
 
     /**
-     * Query pinjaman yang layak diingatkan: H-1 s.d. telat (cap), belum diingatkan hari ini.
+     * Query pinjaman yang layak diingatkan: sudah jatuh tempo H-1 atau sudah
+     * telat berapa pun lamanya, dan belum diingatkan hari ini.
      */
-    public function eligibleLoansQuery(int $maxOverdueDays = self::DEFAULT_MAX_OVERDUE_DAYS): Builder
+    public function eligibleLoansQuery(): Builder
     {
-        // Pada hari Jumat, batas H-1 mencakup pinjaman yang jatuh tempo hari Senin (+3 hari)
-        $maxDueDate = now()->isFriday()
-            ? now()->addDays(3)->endOfDay()
-            : now()->addDay()->endOfDay();
-
         return Loan::query()
             ->where('status', Loan::STATUS_BORROWED)
             ->whereNull('returned_at')
-            ->where('due_at', '<=', $maxDueDate)
-            ->where('due_at', '>=', now()->subDays($maxOverdueDays)->startOfDay())
+            ->whereNotNull('due_at')
+            ->where('due_at', '<=', self::reminderDueThreshold())
             ->where(function (Builder $query): void {
                 $query
                     ->whereNull('reminder_sent_at')
@@ -80,15 +87,7 @@ class LoanReminderService
 
         $today = now()->startOfDay();
 
-        $maxDueDate = now()->isFriday()
-            ? now()->addDays(3)->endOfDay()
-            : now()->addDay()->endOfDay();
-
-        if ($loan->due_at->gt($maxDueDate)) {
-            return false;
-        }
-
-        if ($loan->due_at->lt(now()->subDays(self::DEFAULT_MAX_OVERDUE_DAYS)->startOfDay())) {
+        if ($loan->due_at->gt(self::reminderDueThreshold())) {
             return false;
         }
 

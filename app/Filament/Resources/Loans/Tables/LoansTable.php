@@ -100,7 +100,8 @@ class LoansTable
                     ->query(fn (Builder $query): Builder => $query->whereHas('loans', fn ($q) => $q
                         ->where('status', Loan::STATUS_BORROWED)
                         ->whereNotNull('due_at')
-                        ->where('due_at', '<', now()))),
+                        ->where('due_at', '<', now())
+                        ->where('due_at', '<=', LoanReminderService::reminderDueThreshold()))),
                 Filter::make('restricted_borrowers')
                     ->label('Hanya akun dibatasi')
                     ->toggle()

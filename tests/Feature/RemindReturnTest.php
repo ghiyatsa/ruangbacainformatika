@@ -58,7 +58,7 @@ it('sends reminders for loans due today', function () {
     Notification::assertSentTo($user, LoanReminderDatabaseNotification::class);
 });
 
-it('sends reminders for overdue loans within the overdue cap', function () {
+it('sends reminders for loans that are a few days overdue', function () {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -76,7 +76,7 @@ it('sends reminders for overdue loans within the overdue cap', function () {
     Notification::assertSentTo($user, LoanReminderNotification::class);
 });
 
-it('does not send reminders for loans beyond the overdue cap', function () {
+it('still sends reminders for loans that are long overdue', function () {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -88,10 +88,10 @@ it('does not send reminders for loans beyond the overdue cap', function () {
     ]);
 
     artisan('app:remind-return')
-        ->expectsOutput('Tidak ada pinjaman yang perlu diingatkan hari ini.')
+        ->expectsOutput('Mengirim reminder untuk 1 pinjaman...')
         ->assertExitCode(0);
 
-    Notification::assertNothingSent();
+    Notification::assertSentTo($user, LoanReminderNotification::class);
 });
 
 it('does not send reminders for loans already reminded today', function () {
