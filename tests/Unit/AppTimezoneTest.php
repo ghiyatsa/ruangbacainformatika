@@ -7,7 +7,7 @@ it('formats datetimes in the application display timezone', function () {
     $dateTime = Carbon::parse('2026-05-28 17:30:00', 'UTC');
 
     expect(AppTimezone::format($dateTime, 'd F Y H:i'))
-        ->toBe('29 May 2026 00:30');
+        ->toBe('29 Mei 2026 00:30');
 });
 
 it('builds day ranges using the application display timezone', function () {

@@ -3,13 +3,13 @@
 use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\PostTag;
-use App\Services\Blog\PostQueryService;
+use App\Services\Post\PostQueryService;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
 
-it('blog index only shows approved posts', function () {
+it('post index only shows approved posts', function () {
     $approvedPost = Post::factory()->published()->create([
         'title' => 'Artikel Approved',
     ]);
@@ -22,14 +22,14 @@ it('blog index only shows approved posts', function () {
     get(route('posts.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('blog/index')
+            ->component('posts/index')
             ->loadDeferredProps(fn (Assert $reload) => $reload
                 ->has('posts.data', 1)
                 ->where('posts.data.0.title', $approvedPost->title)
             ));
 });
 
-it('blog detail returns 404 for unpublished posts', function () {
+it('post detail returns 404 for unpublished posts', function () {
     $post = Post::factory()->create([
         'status' => Post::STATUS_PENDING,
     ]);
@@ -38,7 +38,7 @@ it('blog detail returns 404 for unpublished posts', function () {
         ->assertNotFound();
 });
 
-it('blog detail increments view count for approved posts', function () {
+it('post detail increments view count for approved posts', function () {
     $post = Post::factory()->published()->create([
         'view_count' => 5,
     ]);
@@ -46,13 +46,13 @@ it('blog detail increments view count for approved posts', function () {
     get(route('posts.show', $post->slug))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('blog/show')
+            ->component('posts/show')
             ->where('post.data.title', $post->title));
 
     expect($post->fresh()->view_count)->toBe(6);
 });
 
-it('blog index can filter by category and tag', function () {
+it('post index can filter by category and tag', function () {
     $category = PostCategory::factory()->create([
         'name' => 'Teknologi',
     ]);
@@ -84,7 +84,7 @@ it('blog index can filter by category and tag', function () {
     ]))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('blog/index')
+            ->component('posts/index')
             ->loadDeferredProps(fn (Assert $reload) => $reload
                 ->has('posts.data', 1)
                 ->where('posts.data.0.title', $matchingPost->title)
@@ -144,7 +144,7 @@ it('allows anyone with the preview token to preview draft posts', function () {
     get(route('posts.preview', $post->preview_token))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('blog/show')
+            ->component('posts/show')
             ->where('post.data.title', $post->title));
 });
 
@@ -167,7 +167,7 @@ it('renders preview with cached data if available', function () {
     get(route('posts.preview', $post->preview_token))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('blog/show')
+            ->component('posts/show')
             ->where('post.data.title', 'Cached Title')
             ->where('post.data.contentText', 'Cached content body...'));
 });
@@ -203,7 +203,7 @@ it('converts Tiptap JSON content to HTML on preview', function () {
     get(route('posts.preview', $post->preview_token))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('blog/show')
+            ->component('posts/show')
             ->where('post.data.title', 'Tiptap Title')
             ->where('post.data.contentText', 'Hello from Tiptap!'));
 });

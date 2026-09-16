@@ -129,7 +129,7 @@ class Post extends Model
     }
 
     /**
-     * Get the comments for this blog post.
+     * Get the comments for this post.
      */
     public function comments(): HasMany
     {

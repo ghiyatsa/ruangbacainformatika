@@ -276,7 +276,7 @@ it('rejects comment content exceeding maximum length', function () {
         ->assertSessionHasErrors(['content']);
 });
 
-it('shows the blog post with deferred comments', function () {
+it('shows the post with deferred comments', function () {
     $post = Post::factory()->published()->create();
     $comment = PostComment::factory()->create([
         'post_id' => $post->id,

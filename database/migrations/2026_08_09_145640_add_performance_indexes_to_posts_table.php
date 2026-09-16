@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            // Used by BlogQueryService::paginatePosts() — filters status, orders published_at DESC
+            // Used by PostQueryService::paginatePosts() — filters status, orders published_at DESC
             $table->index(['status', 'published_at'], 'posts_status_published_at_index');
 
-            // Used by BlogQueryService::popularPosts() — filters status, orders view_count DESC
+            // Used by PostQueryService::popularPosts() — filters status, orders view_count DESC
             $table->index(['status', 'view_count'], 'posts_status_view_count_index');
         });
     }

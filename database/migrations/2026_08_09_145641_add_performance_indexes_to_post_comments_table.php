@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('post_comments', function (Blueprint $table) {
-            // Used by BlogController::show() — WHERE post_id = ? AND parent_id IS NULL
+            // Used by PostController::show() — WHERE post_id = ? AND parent_id IS NULL
             $table->index(['post_id', 'parent_id'], 'post_comments_post_parent_index');
         });
     }

@@ -301,7 +301,7 @@ it('shows loan history times in the application display timezone', function () {
         ->get(route('loans.history'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('loans.data.0.borrowedAt', '29 May 2026 00:30')
-            ->where('loans.data.0.dueAt', '31 May 2026 00:30')
+            ->where('loans.data.0.borrowedAt', '29 Mei 2026 00:30')
+            ->where('loans.data.0.dueAt', '31 Mei 2026 00:30')
         );
 });

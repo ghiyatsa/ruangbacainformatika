@@ -91,7 +91,7 @@ it('sends database notification when a post is rejected', function () {
     Notification::assertSentTo($member, PostRejectedNotification::class);
 });
 
-it('public notification center exposes blog review notifications', function () {
+it('public notification center exposes post review notifications', function () {
     $member = makeReviewMember();
 
     $approvedPost = Post::factory()->published()->create([
