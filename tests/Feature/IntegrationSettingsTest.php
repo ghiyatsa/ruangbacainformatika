@@ -78,13 +78,14 @@ it('integration settings encrypts the whatsapp token before persisting it', func
         ->toBe('encrypted-whatsapp-token');
 });
 
-it('integration settings page shows the full skripsi resync action', function () {
+it('integration settings page no longer exposes the full skripsi resync action', function () {
     $user = makeIntegrationSuperAdmin();
 
     actingAs($user);
 
     Livewire::test(IntegrationSettings::class)
-        ->assertSee('Sinkronkan Ulang Semua Dokumen');
+        ->assertDontSee('Sinkronkan Ulang Semua Dokumen')
+        ->assertSee('Simpan');
 });
 
 it('integration settings clears cached turnstile status after saving', function () {

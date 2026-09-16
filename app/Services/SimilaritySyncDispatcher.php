@@ -73,10 +73,36 @@ class SimilaritySyncDispatcher
 
     private function shouldRunSynchronously(): bool
     {
-        return match (config('services.similarity_api.dispatch', 'auto')) {
-            'sync' => true,
-            'queued' => false,
-            default => app()->isLocal() && (! app()->runningUnitTests()) && (config('queue.default') !== 'sync'),
-        };
+        $configured = config('services.similarity_api.dispatch', 'auto');
+
+        // Hormati pilihan eksplisit operator.
+        if ($configured === 'sync') {
+            return true;
+        }
+
+        if ($configured === 'queued') {
+            return false;
+        }
+
+        // Mode 'auto': jalankan sinkron kecuali queue benar-benar dilayani worker.
+        return ! $this->queueHasWorker();
+    }
+
+    /**
+     * Apakah queue yang aktif benar-benar dilayani worker?
+     *
+     * Di hosting tanpa worker (mis. server kampus) queue "database"/"redis"
+     * menumpuk job tanpa pernah dieksekusi, sehingga sinkronisasi skripsi
+     * berhenti diam-diam. Driver "sync" selalu aman karena job dijalankan inline.
+     */
+    private function queueHasWorker(): bool
+    {
+        $connection = config('queue.default');
+
+        if (! is_string($connection) || $connection === '' || $connection === 'sync') {
+            return false;
+        }
+
+        return true;
     }
 }
