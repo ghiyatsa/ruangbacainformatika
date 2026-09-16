@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.0...v1.23.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **ui:** perbaiki referensi rename yang terlewat dan lengkapi terjemahan id ([1654d11](https://github.com/ghiyatsa/ruangbacainformatika/commit/1654d11f8f091bc1c897e6427de8cd71d38a52b4))
+
 ## [1.23.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.22.0...v1.23.0) (2026-09-16)
 
 
