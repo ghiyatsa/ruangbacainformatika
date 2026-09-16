@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AcademicFileController;
-use App\Http\Controllers\PostController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CatalogBookmarkController;
 use App\Http\Controllers\CatalogController;
@@ -17,6 +16,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpenGraphImageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostCommentController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SimilarityController;
 use App\Http\Controllers\SitemapController;

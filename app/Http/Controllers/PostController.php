@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PostResource;
 use App\Http\Resources\PostCommentResource;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\PostTag;
