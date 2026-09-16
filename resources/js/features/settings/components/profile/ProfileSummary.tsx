@@ -6,6 +6,7 @@ interface ProfileSummaryProps {
     email: string;
     avatar?: string | null;
     whatsapp?: string | null;
+    showWhatsapp?: boolean;
 }
 
 export function ProfileSummary({
@@ -13,6 +14,7 @@ export function ProfileSummary({
     email,
     avatar,
     whatsapp,
+    showWhatsapp = true,
 }: ProfileSummaryProps) {
     const initials = (name ?? '')
         .split(' ')
@@ -39,10 +41,12 @@ export function ProfileSummary({
                         <Mail className="h-4 w-4 shrink-0" />
                         <span className="truncate">{email}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 shrink-0" />
-                        <span>{whatsapp || 'Nomor WhatsApp belum diisi'}</span>
-                    </div>
+                    {showWhatsapp ? (
+                        <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 shrink-0" />
+                            <span>{whatsapp || 'Nomor WhatsApp belum diisi'}</span>
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </div>
