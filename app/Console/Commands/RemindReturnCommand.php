@@ -7,8 +7,8 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('app:remind-return {--max-overdue-days=7 : Berhenti kirim reminder setelah sekian hari telat}')]
-#[Description('Send WhatsApp reminders from H-1 until books are returned or overdue cap is reached')]
+#[Signature('app:remind-return')]
+#[Description('Send WhatsApp reminders from H-1 onwards until the books are returned')]
 class RemindReturnCommand extends Command
 {
     /**
@@ -16,9 +16,7 @@ class RemindReturnCommand extends Command
      */
     public function handle(LoanReminderService $reminderService): int
     {
-        $maxOverdueDays = max((int) $this->option('max-overdue-days'), 0);
-
-        $loans = $reminderService->eligibleLoansQuery($maxOverdueDays)
+        $loans = $reminderService->eligibleLoansQuery()
             ->with('user', 'items.bookItem.book')
             ->get();
 
