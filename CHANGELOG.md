@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.23.4](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.3...v1.23.4) (2026-09-16)
+
+
+### Bug Fixes
+
+* **kiosk:** jangan bocorkan email penuh pada pencarian anggota ([bdc017f](https://github.com/ghiyatsa/ruangbacainformatika/commit/bdc017f41de9e41cebfd91655af5446821e118ed))
+* **kiosk:** jangan bocorkan email penuh pada pencarian anggota ([d03672e](https://github.com/ghiyatsa/ruangbacainformatika/commit/d03672e7643c17c86108328e236a16355f1b9afb))
+
 ## [1.23.3](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.23.2...v1.23.3) (2026-09-16)
 
 
