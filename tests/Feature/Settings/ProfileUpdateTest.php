@@ -65,7 +65,9 @@ it('google users with incomplete profile are redirected to onboarding page', fun
 
 it('profile information can be updated', function () {
     $user = User::factory()->create([
-        'email' => 'outside@example.com',
+        'email' => '230170999@mhs.unimal.ac.id',
+        'whatsapp' => '08123456789',
+        'address' => 'Jl. Merdeka No. 1',
     ]);
 
     /** @var User $user */
@@ -74,7 +76,7 @@ it('profile information can be updated', function () {
             'name' => 'Test User',
             'email' => 'changed@example.com',
             'whatsapp' => '08123456789',
-            'address' => 'Jl. Merdeka No. 1',
+            'address' => 'Jl. Sudirman No. 2',
         ])
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('settings.profile.edit'));
@@ -82,9 +84,95 @@ it('profile information can be updated', function () {
     $user->refresh();
 
     expect($user->name)->toBe('Test User');
-    expect($user->whatsapp)->toBe('08123456789');
-    expect($user->address)->toBe('Jl. Merdeka No. 1');
+    expect($user->address)->toBe('Jl. Sudirman No. 2');
     expect($user->email)->not->toBe('changed@example.com');
+});
+
+it('ignores whatsapp and address updates from non-campus accounts', function () {
+    $user = User::factory()->create([
+        'email' => 'outside@example.com',
+        'whatsapp' => null,
+        'address' => null,
+    ]);
+
+    /** @var User $user */
+    actingAs($user)
+        ->patch(route('settings.profile.update'), [
+            'name' => 'Nama Luar Kampus',
+            'whatsapp' => '08123456789',
+            'address' => 'Jl. Merdeka No. 1',
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('settings.profile.edit'));
+
+    $user->refresh();
+
+    // Nama tetap bisa diubah, tetapi WhatsApp & alamat diabaikan.
+    expect($user->name)->toBe('Nama Luar Kampus');
+    expect($user->whatsapp)->toBeNull();
+    expect($user->address)->toBeNull();
+});
+
+it('non-campus accounts cannot request a whatsapp verification code', function () {
+    Notification::fake();
+
+    $user = User::factory()->create([
+        'email' => 'outside@example.com',
+        'whatsapp' => null,
+    ]);
+
+    /** @var User $user */
+    actingAs($user)
+        ->post(route('settings.profile.whatsapp.send'), [
+            'whatsapp' => '08123456789',
+        ])
+        ->assertSessionHasErrors('whatsapp');
+
+    Notification::assertNothingSent();
+});
+
+it('non-campus accounts cannot start a whatsapp change flow', function () {
+    $user = User::factory()->create([
+        'email' => 'outside@example.com',
+    ]);
+
+    /** @var User $user */
+    actingAs($user)
+        ->post(route('settings.profile.change-whatsapp'))
+        ->assertSessionHasErrors('whatsapp');
+});
+
+it('profile page marks non-campus accounts as unable to manage campus contact', function () {
+    $user = User::factory()->create([
+        'email' => 'outside@example.com',
+    ]);
+
+    /** @var User $user */
+    actingAs($user)
+        ->get(route('settings.profile.edit'))
+        ->assertOk()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('settings/profile')
+                ->where('canManageCampusContact', false)
+                ->where('verification', null),
+        );
+});
+
+it('profile page allows campus accounts to manage campus contact', function () {
+    $user = User::factory()->create([
+        'email' => '230170998@mhs.unimal.ac.id',
+    ]);
+
+    /** @var User $user */
+    actingAs($user)
+        ->get(route('settings.profile.edit'))
+        ->assertOk()
+        ->assertInertia(
+            fn (Assert $page) => $page
+                ->component('settings/profile')
+                ->where('canManageCampusContact', true),
+        );
 });
 
 it('profile update keeps non-editable account data intact', function () {

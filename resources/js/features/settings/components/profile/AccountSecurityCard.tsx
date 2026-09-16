@@ -8,11 +8,13 @@ import type { VerificationProps } from './ManageWhatsAppDialog';
 interface AccountSecurityCardProps {
     user: AuthUser;
     verification?: VerificationProps | null;
+    canManageCampusContact?: boolean;
 }
 
 export function AccountSecurityCard({
     user,
     verification,
+    canManageCampusContact = true,
 }: AccountSecurityCardProps) {
     const isVerified = Boolean(user.whatsapp && user.whatsapp_verified_at);
 
@@ -48,45 +50,47 @@ export function AccountSecurityCard({
                 </div>
 
                 {/* WhatsApp Section */}
-                <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                            <Phone className="size-4.5" />
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-foreground">
-                                    Nomor WhatsApp
-                                </span>
-                                {isVerified ? (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                                        <CheckCircle2 className="size-3" />
-                                        Terverifikasi
-                                    </span>
-                                ) : user.whatsapp ? (
-                                    <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
-                                        Belum Terverifikasi
-                                    </span>
-                                ) : (
-                                    <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                                        Belum Diisi
-                                    </span>
-                                )}
+                {canManageCampusContact ? (
+                    <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Phone className="size-4.5" />
                             </div>
-                            <p className="font-mono text-sm text-muted-foreground">
-                                {user.whatsapp || '-'}
-                            </p>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-medium text-foreground">
+                                        Nomor WhatsApp
+                                    </span>
+                                    {isVerified ? (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                                            <CheckCircle2 className="size-3" />
+                                            Terverifikasi
+                                        </span>
+                                    ) : user.whatsapp ? (
+                                        <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                                            Belum Terverifikasi
+                                        </span>
+                                    ) : (
+                                        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                                            Belum Diisi
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="font-mono text-sm text-muted-foreground">
+                                    {user.whatsapp || '-'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <ManageWhatsAppDialog
+                                currentWhatsapp={user.whatsapp}
+                                isVerified={isVerified}
+                                verification={verification}
+                            />
                         </div>
                     </div>
-
-                    <div>
-                        <ManageWhatsAppDialog
-                            currentWhatsapp={user.whatsapp}
-                            isVerified={isVerified}
-                            verification={verification}
-                        />
-                    </div>
-                </div>
+                ) : null}
             </div>
         </section>
     );

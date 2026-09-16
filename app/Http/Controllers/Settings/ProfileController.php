@@ -24,6 +24,20 @@ class ProfileController extends Controller
     ) {}
 
     /**
+     * Verifikasi WhatsApp dan data profil hanya relevan untuk akun kampus.
+     * Akun non-kampus tidak dapat meminjam buku sehingga tidak perlu
+     * mengirim OTP maupun menyimpan nomor/alamat.
+     */
+    protected function ensureCampusAccount(User $user): void
+    {
+        if (! $user->usesCampusEmail()) {
+            throw ValidationException::withMessages([
+                'whatsapp' => 'Verifikasi WhatsApp hanya tersedia untuk akun dengan email kampus.',
+            ]);
+        }
+    }
+
+    /**
      * Show the user's profile settings page.
      */
     public function edit(Request $request): Response
@@ -32,13 +46,21 @@ class ProfileController extends Controller
         $user = $request->user();
 
         return Inertia::render('settings/profile', [
-            'verification' => $this->whatsAppOtpService->status($user),
+            'verification' => $user->usesCampusEmail()
+                ? $this->whatsAppOtpService->status($user)
+                : null,
+            'canManageCampusContact' => $user->usesCampusEmail(),
             'meta' => ['robots' => 'noindex, nofollow'],
         ]);
     }
 
     public function initiateWhatsAppChange(Request $request): RedirectResponse
     {
+        /** @var User $user */
+        $user = $request->user();
+
+        $this->ensureCampusAccount($user);
+
         $request->session()->put('allow_whatsapp_change', true);
 
         return to_route('register.whatsapp');
@@ -48,6 +70,9 @@ class ProfileController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+
+        $this->ensureCampusAccount($user);
+
         $targetPhone = $request->filled('whatsapp')
             ? (string) $request->validated('whatsapp')
             : $user->whatsapp;
@@ -82,6 +107,8 @@ class ProfileController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+
+        $this->ensureCampusAccount($user);
 
         $this->whatsAppOtpService->verify(
             $user,
@@ -126,8 +153,15 @@ class ProfileController extends Controller
         /** @var User $user */
         $user = $request->user();
         $originalWhatsapp = $user->whatsapp;
+        $payload = $request->validated();
 
-        $user->fill($request->validated());
+        // Akun non-kampus tidak memakai WhatsApp maupun alamat domisili,
+        // jadi kedua field itu diabaikan walau dikirim dari klien.
+        if (! $user->usesCampusEmail()) {
+            unset($payload['whatsapp'], $payload['address']);
+        }
+
+        $user->fill($payload);
         $user->save();
 
         if ($user->hasRequiredProfileDetails() && ! $user->hasCompletedProfile()) {

@@ -13,10 +13,12 @@ import type { Auth } from '@/types';
 interface ProfilePageProps extends Record<string, unknown> {
     auth: Auth;
     verification?: VerificationProps | null;
+    canManageCampusContact?: boolean;
 }
 
 export default function ProfilePage() {
-    const { auth, verification } = usePage<ProfilePageProps>().props;
+    const { auth, verification, canManageCampusContact = true } =
+        usePage<ProfilePageProps>().props;
     const user = auth.user!;
 
     useEffect(() => {
@@ -49,12 +51,16 @@ export default function ProfilePage() {
                         email={user.email}
                         avatar={user.avatar}
                         whatsapp={user.whatsapp}
+                        showWhatsapp={canManageCampusContact}
                     />
                 </div>
 
                 <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 p-6 shadow-xs">
                     <div className="pointer-events-none absolute -right-10 -bottom-10 -z-0 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
-                    <ProfileInformationForm user={user} />
+                    <ProfileInformationForm
+                        user={user}
+                        canManageCampusContact={canManageCampusContact}
+                    />
                 </div>
 
                 <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-card via-card to-primary/5 p-6 shadow-xs">
@@ -62,6 +68,7 @@ export default function ProfilePage() {
                     <AccountSecurityCard
                         user={user}
                         verification={verification}
+                        canManageCampusContact={canManageCampusContact}
                     />
                 </div>
             </div>

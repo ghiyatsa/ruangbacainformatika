@@ -16,9 +16,13 @@ import type { User as AuthUser } from '@/types/auth';
 
 export interface ProfileInformationFormProps {
     user: AuthUser;
+    canManageCampusContact?: boolean;
 }
 
-export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
+export function ProfileInformationForm({
+    user,
+    canManageCampusContact = true,
+}: ProfileInformationFormProps) {
     return (
         <section className="space-y-6">
             <SettingsSectionHeader title="Data Pribadi" />
@@ -50,24 +54,31 @@ export function ProfileInformationForm({ user }: ProfileInformationFormProps) {
                             <InputError message={errors.name} />
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="address">Alamat Domisili</Label>
-                            <InputGroup>
-                                <InputGroupTextarea
-                                    id="address"
-                                    className="min-h-24 w-full resize-y"
-                                    defaultValue={user.address ?? ''}
-                                    name="address"
-                                    required
-                                    autoComplete="street-address"
-                                    placeholder="Alamat lengkap tempat tinggal saat ini"
-                                />
-                                <InputGroupAddon className="self-start pt-2.5">
-                                    <MapPin className="size-4" />
-                                </InputGroupAddon>
-                            </InputGroup>
-                            <InputError message={errors.address} />
-                        </div>
+                        {canManageCampusContact ? (
+                            <div className="grid gap-2">
+                                <Label htmlFor="address">Alamat Domisili</Label>
+                                <InputGroup>
+                                    <InputGroupTextarea
+                                        id="address"
+                                        className="min-h-24 w-full resize-y"
+                                        defaultValue={user.address ?? ''}
+                                        name="address"
+                                        required
+                                        autoComplete="street-address"
+                                        placeholder="Alamat lengkap tempat tinggal saat ini"
+                                    />
+                                    <InputGroupAddon className="self-start pt-2.5">
+                                        <MapPin className="size-4" />
+                                    </InputGroupAddon>
+                                </InputGroup>
+                                <InputError message={errors.address} />
+                            </div>
+                        ) : (
+                            <p className="rounded-lg border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
+                                Alamat domisili hanya diperlukan untuk akun dengan email kampus
+                                yang dapat meminjam buku.
+                            </p>
+                        )}
 
                         <div className="flex items-center gap-3 pt-1">
                             <Button
