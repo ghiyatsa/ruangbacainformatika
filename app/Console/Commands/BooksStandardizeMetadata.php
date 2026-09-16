@@ -58,6 +58,10 @@ class BooksStandardizeMetadata extends Command
                     }
                 }
 
+                if (self::isPlaceholder($book->getRawOriginal('language'))) {
+                    $book->language = self::DEFAULT_LANGUAGE;
+                }
+
                 if ($book->isDirty()) {
                     $book->save();
                     $changed++;
@@ -87,8 +91,11 @@ class BooksStandardizeMetadata extends Command
     }
 
     /**
-     * Columns that spreadsheets commonly export with a "-" or "N/A" stand-in
-     * for an empty cell. Such placeholders must be stored as NULL.
+     * Nullable columns that spreadsheets commonly export with a "-" or "N/A"
+     * stand-in for an empty cell. Such placeholders must be stored as NULL.
+     *
+     * `language` is deliberately absent: its column is NOT NULL with a default
+     * of "Indonesia", so a placeholder resets it to the default instead.
      *
      * @var array<int, string>
      */
@@ -98,10 +105,15 @@ class BooksStandardizeMetadata extends Command
         'edition',
         'pages',
         'ddc_code',
-        'language',
         'issn',
         'isbn',
     ];
+
+    /**
+     * Default applied when `language` held a placeholder. Mirrors the column
+     * default in the books migration.
+     */
+    protected const DEFAULT_LANGUAGE = 'Indonesia';
 
     /**
      * @var array<int, string>
@@ -130,6 +142,11 @@ class BooksStandardizeMetadata extends Command
                         $book->{$field} = null;
                         $dirty = true;
                     }
+                }
+
+                if (self::isPlaceholder($book->getRawOriginal('language'))) {
+                    $book->language = self::DEFAULT_LANGUAGE;
+                    $dirty = true;
                 }
 
                 if ($dirty) {
