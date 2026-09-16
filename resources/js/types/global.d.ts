@@ -25,6 +25,23 @@ declare module '@inertiajs/core' {
                     tone: 'info' | 'warning' | 'success';
                 };
             };
+            /**
+             * Metadata SEO spesifik halaman dari server (og:image buku/skripsi/
+             * tesis/laporan KP). Dikirim sebagai prop agar komponen React memakai
+             * gambar OG dokumen alih-alih gambar OG generik situs.
+             */
+            meta?: {
+                title?: string;
+                description?: string;
+                keywords?: string | null;
+                robots?: string;
+                canonicalUrl?: string;
+                type?: 'website' | 'article';
+                ogImage?: string;
+                ogImageType?: string;
+                ogImageWidth?: number;
+                ogImageHeight?: number;
+            };
             auth: Auth;
             googleAuth?: GoogleAuth;
             notifications: NotificationSummary;

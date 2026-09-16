@@ -24,6 +24,7 @@ use App\Services\KioskPinManager;
 use App\Services\SimilarityApiService;
 use App\Support\AppTimezone;
 use App\Support\RichContentSanitizer;
+use App\Support\SeoMetaState;
 use App\Support\SiteSettings;
 use Carbon\CarbonImmutable;
 use Filament\Support\Facades\FilamentTimezone;
@@ -54,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(SimilarityApiService::class);
         $this->app->scoped(SiteSettings::class);
         $this->app->scoped(RichContentSanitizer::class);
+        $this->app->scoped(SeoMetaState::class);
     }
 
     /**

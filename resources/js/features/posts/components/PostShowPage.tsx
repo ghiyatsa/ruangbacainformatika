@@ -119,17 +119,10 @@ export function PostShowPage({
                 const text = article?.summary ?? article?.excerpt;
 
                 if (text) {
-                    if (text.length >= 120) {
-                        return text.slice(0, 160);
-                    }
-
-                    return `${text} Baca artikel lengkap dan berita terbaru seputar akademik, kemahasiswaan, dan teknologi di blog resmi Ruang Baca Teknik Informatika Unimal.`.slice(
-                        0,
-                        160,
-                    );
+                    return text.slice(0, 160);
                 }
 
-                return 'Baca artikel terbaru, berita pengumuman, tips pemrograman, panduan akademik, dan info seputar kegiatan mahasiswa di blog resmi Ruang Baca Teknik Informatika Universitas Malikussaleh.';
+                return 'Baca artikel terbaru, berita pengumuman, tips pemrograman, panduan akademik, dan info seputar kegiatan mahasiswa di Ruang Baca Teknik Informatika Universitas Malikussaleh.';
             })()}
             image={article?.coverImageUrl || undefined}
             type="article"

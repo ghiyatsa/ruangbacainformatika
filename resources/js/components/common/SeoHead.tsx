@@ -24,6 +24,18 @@ type SiteProps = {
             appleTouchIcon: string;
         };
     };
+    meta?: {
+        title?: string;
+        description?: string;
+        keywords?: string | null;
+        robots?: string;
+        canonicalUrl?: string;
+        type?: 'website' | 'article';
+        ogImage?: string;
+        ogImageType?: string;
+        ogImageWidth?: number;
+        ogImageHeight?: number;
+    };
 };
 
 interface SeoHeadProps {
@@ -55,24 +67,34 @@ export function SeoHead({
 }: SeoHeadProps) {
     const page = usePage<Partial<SiteProps>>();
     const site = page.props.site;
+    const serverMeta = page.props.meta;
     const siteUrl =
         site?.url ||
         (typeof window !== 'undefined' ? window.location.origin : '');
     const canonicalUrl = normalizeUrl(siteUrl, page.url || '');
-    const metaDescription = description ?? site?.description ?? '';
-    const metaImage = image ?? site?.ogImage ?? '';
+    const metaDescription =
+        description ?? serverMeta?.description ?? site?.description ?? '';
+    // Utamakan gambar dari komponen, lalu og:image spesifik halaman dari server
+    // (buku/skripsi/tesis/laporan KP), baru fallback ke gambar OG generik situs.
+    const metaImage = image ?? serverMeta?.ogImage ?? site?.ogImage ?? '';
     const metaTitle = title
         ? page.props.name
             ? `${title} - ${page.props.name}`
             : title
-        : (page.props.name ?? 'Ruang Baca');
-    const metaRobots = robots ?? site?.robots ?? 'index, follow';
-    const metaImageType = site?.ogImageType ?? 'image/jpeg';
-    const metaImageWidth = String(site?.ogImageWidth ?? 1200);
-    const metaImageHeight = String(site?.ogImageHeight ?? 630);
+        : (serverMeta?.title ?? page.props.name ?? 'Ruang Baca');
+    const metaRobots =
+        robots ?? serverMeta?.robots ?? site?.robots ?? 'index, follow';
+    const metaImageType =
+        serverMeta?.ogImageType ?? site?.ogImageType ?? 'image/jpeg';
+    const metaImageWidth = String(
+        serverMeta?.ogImageWidth ?? site?.ogImageWidth ?? 1200,
+    );
+    const metaImageHeight = String(
+        serverMeta?.ogImageHeight ?? site?.ogImageHeight ?? 630,
+    );
     const metaKeywords = Array.isArray(keywords)
         ? keywords.filter(Boolean).join(', ')
-        : (keywords ?? site?.keywords ?? '');
+        : (keywords ?? serverMeta?.keywords ?? site?.keywords ?? '');
 
     return (
         <Head title={title}>

@@ -87,14 +87,7 @@ export default function InternshipReportDetailPage(
             title={report?.title ?? 'Detail Laporan KP'}
             description={(() => {
                 if (report?.abstract) {
-                    if (report.abstract.length >= 120) {
-                        return report.abstract.slice(0, 160);
-                    }
-
-                    return `${report.abstract} Temukan abstrak lengkap, nama mahasiswa, NIM, lokasi KP, dan tahun laporan kerja praktik untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(
-                        0,
-                        160,
-                    );
+                    return report.abstract.slice(0, 160);
                 }
 
                 if (report) {
@@ -105,7 +98,7 @@ export default function InternshipReportDetailPage(
                         ? ` (NIM: ${report.studentId})`
                         : '';
 
-                    return `Akses detail laporan Kerja Praktik (KP) "${report.title}"${authorStr}${nimStr}. Temukan lokasi perusahaan, abstrak, dan tahun untuk referensi di Ruang Baca Teknik Informatika Unimal.`.slice(
+                    return `Detail laporan Kerja Praktik (KP) "${report.title}"${authorStr}${nimStr}.`.slice(
                         0,
                         160,
                     );
