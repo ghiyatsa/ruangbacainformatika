@@ -20,13 +20,15 @@ class BooksStandardizeMetadata extends Command
 
         DB::transaction(function () use (&$counts): void {
             $counts['book'] = $this->standardizeBooks();
+            $counts['placeholder'] = $this->clearPlaceholders();
             $counts['author'] = $this->standardizeAuthors();
             $counts['publisher'] = $this->standardizePublishers();
         });
 
         $this->info(sprintf(
-            'Buku: %d dinormalisasi, Penulis: %d, Penerbit: %d.',
+            'Buku: %d dinormalisasi (termasuk %d placeholder "-" dikosongkan), Penulis: %d, Penerbit: %d.',
             $counts['book'],
+            $counts['placeholder'],
             $counts['author'],
             $counts['publisher'],
         ));
@@ -49,6 +51,12 @@ class BooksStandardizeMetadata extends Command
                 $book->ddc_code = $book->getRawOriginal('ddc_code');
                 $book->language = $book->getRawOriginal('language');
                 $book->issn = $book->getRawOriginal('issn');
+
+                foreach (self::PLACEHOLDER_FIELDS as $field) {
+                    if (self::isPlaceholder($book->{$field})) {
+                        $book->{$field} = null;
+                    }
+                }
 
                 if ($book->isDirty()) {
                     $book->save();
@@ -76,6 +84,71 @@ class BooksStandardizeMetadata extends Command
         });
 
         return $changed;
+    }
+
+    /**
+     * Columns that spreadsheets commonly export with a "-" or "N/A" stand-in
+     * for an empty cell. Such placeholders must be stored as NULL.
+     *
+     * @var array<int, string>
+     */
+    protected const PLACEHOLDER_FIELDS = [
+        'subtitle',
+        'description',
+        'edition',
+        'pages',
+        'ddc_code',
+        'language',
+        'issn',
+        'isbn',
+    ];
+
+    /**
+     * @var array<int, string>
+     */
+    protected const BLANK_PLACEHOLDERS = [
+        '-', '--', '---',
+        '–', '—', '−',
+        'n/a', 'n.a.', 'na', 'null', 'nil', 'none',
+        'tidak ada', 'tidak tersedia',
+    ];
+
+    /**
+     * Blank out any placeholder glyph stored by an earlier import so the UI
+     * stops rendering a stray "-" where a value was never provided.
+     */
+    protected function clearPlaceholders(): int
+    {
+        $cleared = 0;
+
+        Book::query()->chunkById(100, function ($books) use (&$cleared): void {
+            foreach ($books as $book) {
+                $dirty = false;
+
+                foreach (self::PLACEHOLDER_FIELDS as $field) {
+                    if (self::isPlaceholder($book->getRawOriginal($field))) {
+                        $book->{$field} = null;
+                        $dirty = true;
+                    }
+                }
+
+                if ($dirty) {
+                    $book->save();
+                    $cleared++;
+                }
+            }
+        });
+
+        return $cleared;
+    }
+
+    protected static function isPlaceholder(mixed $value): bool
+    {
+        if (! is_string($value)) {
+            return false;
+        }
+
+        return in_array(mb_strtolower(trim($value)), self::BLANK_PLACEHOLDERS, true);
     }
 
     protected function standardizePublishers(): int

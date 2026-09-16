@@ -288,11 +288,32 @@ class BookImporter extends Importer
             ->all();
     }
 
+    /**
+     * Placeholder glyphs that spreadsheet exports use for "empty cell".
+     * These must never be persisted as real metadata values.
+     *
+     * @var array<int, string>
+     */
+    protected const BLANK_PLACEHOLDERS = [
+        '-', '--', '---',
+        '–', '—', '−',
+        'n/a', 'n.a.', 'na', 'null', 'nil', 'none',
+        'tidak ada', 'tidak tersedia',
+    ];
+
     protected static function normalizeOptionalString(mixed $value): ?string
     {
         $normalized = trim((string) $value);
 
-        return $normalized !== '' ? $normalized : null;
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (in_array(mb_strtolower($normalized), static::BLANK_PLACEHOLDERS, true)) {
+            return null;
+        }
+
+        return $normalized;
     }
 
     protected static function normalizeRequiredString(mixed $value): string

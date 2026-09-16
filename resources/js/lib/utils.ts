@@ -108,3 +108,39 @@ export function formatViewCount(count: number): string {
 
     return rounded + 'k';
 }
+
+/**
+ * Placeholder glyphs spreadsheet imports use for "empty cell". Sourced from
+ * exports where `-` or `N/A` stands in for a genuinely blank value.
+ */
+const BLANK_PLACEHOLDERS = new Set([
+    '-',
+    '--',
+    '---',
+    '\u2013', // en dash
+    '\u2014', // em dash
+    '\u2212', // minus sign
+    'n/a',
+    'n.a.',
+    'na',
+    'null',
+    'nil',
+    'none',
+    'tidak ada',
+    'tidak tersedia',
+]);
+
+/**
+ * True when a value carries real content. Guards against rendered output that
+ * looks broken because the database stored a placeholder (`-`, `N/A`, ...)
+ * instead of NULL.
+ */
+export function hasText(value: unknown): value is string {
+    if (typeof value !== 'string') {
+        return false;
+    }
+
+    const trimmed = value.trim();
+
+    return trimmed !== '' && !BLANK_PLACEHOLDERS.has(trimmed.toLowerCase());
+}

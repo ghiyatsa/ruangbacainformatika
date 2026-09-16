@@ -41,7 +41,7 @@ import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 import { useCatalogBookmarks } from '@/features/books/hooks/use-catalog-bookmarks';
 import DeferredCatalogRescue from '@/features/welcome/components/DeferredCatalogRescue';
 import { setPageBreadcrumbs } from '@/layouts/AppLayout';
-import { cn, formatViewCount } from '@/lib/utils';
+import { cn, formatViewCount, hasText } from '@/lib/utils';
 import booksRoute from '@/routes/books';
 
 import type { CatalogBookmarkRecord } from '@/features/books/hooks/use-catalog-bookmarks';
@@ -201,7 +201,11 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                   label: 'Bahasa',
                   value: book.language ?? null,
               },
-          ].filter((item) => item.value !== null)
+          ].filter(
+              (item) =>
+                  item.value !== null &&
+                  (typeof item.value !== 'string' || hasText(item.value)),
+          )
         : null;
 
     return (
@@ -372,7 +376,7 @@ export default function BookDetailPage(props: BookDetailPageProps) {
                                 </h1>
 
                                 {book ? (
-                                    book.subtitle ? (
+                                    hasText(book.subtitle) ? (
                                         <p className="mb-3 max-w-3xl text-base leading-relaxed text-muted-foreground italic sm:text-lg">
                                             {book.subtitle}
                                         </p>
