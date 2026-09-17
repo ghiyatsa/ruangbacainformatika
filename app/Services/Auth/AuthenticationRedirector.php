@@ -74,8 +74,13 @@ class AuthenticationRedirector
         }
 
         // Anggota diarahkan ke dasbor agar langsung melihat status
-        // pengajuannya. Pengelola tetap ke panel admin.
-        if (Route::has('dashboard') && $user->hasRole('member')) {
+        // pengajuannya. Pengelola tetap ke beranda/panel admin, termasuk
+        // bila ia juga memegang role member.
+        if (
+            Route::has('dashboard')
+            && $user->hasRole('member')
+            && ! $user->hasAdministrativeRole()
+        ) {
             return route('dashboard', absolute: false);
         }
 
