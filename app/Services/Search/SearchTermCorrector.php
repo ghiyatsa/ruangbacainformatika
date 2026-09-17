@@ -36,15 +36,25 @@ class SearchTermCorrector
         }
 
         $dictionary = $this->buildDictionary();
+        $dikenal = array_flip($dictionary);
         $changed = false;
         $corrected = [];
 
         foreach ($terms as $term) {
-            $fixed = $this->correctTerm($term, $dictionary);
-            $corrected[] = $fixed;
+            // Kata gabungan dipecah lebih dulu, mis. "basisdata".
+            $bagian = $this->splitCompoundTerm($term, $dikenal);
 
-            if ($fixed !== $term) {
+            if ($bagian !== [$term]) {
                 $changed = true;
+            }
+
+            foreach ($bagian as $kata) {
+                $fixed = $this->correctTerm($kata, $dictionary);
+                $corrected[] = $fixed;
+
+                if ($fixed !== $kata) {
+                    $changed = true;
+                }
             }
         }
 
@@ -150,5 +160,36 @@ class SearchTermCorrector
         }
 
         return $bestDistance <= $maxDistance ? $best : $term;
+    }
+
+    /**
+     * Pecah istilah gabungan menjadi kata-kata yang dikenali kamus.
+     *
+     * "basisdata" menjadi ["basis", "data"] bila kedua bagian ada di kamus.
+     * Istilah yang sudah dikenali atau tidak dapat dipecah dikembalikan apa
+     * adanya, sehingga pencarian yang sudah baik tidak terpengaruh.
+     *
+     * @param  array<string, true>  $dikenal
+     * @return list<string>
+     */
+    public function splitCompoundTerm(string $term, array $dikenal): array
+    {
+        $panjang = mb_strlen($term);
+
+        if ($panjang < 6 || isset($dikenal[$term])) {
+            return [$term];
+        }
+
+        // Coba setiap titik potong; kedua bagian harus kata yang dikenali.
+        for ($i = 3; $i <= $panjang - 3; $i++) {
+            $kiri = mb_substr($term, 0, $i);
+            $kanan = mb_substr($term, $i);
+
+            if (isset($dikenal[$kiri], $dikenal[$kanan])) {
+                return [$kiri, $kanan];
+            }
+        }
+
+        return [$term];
     }
 }

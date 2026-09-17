@@ -62,3 +62,29 @@ it('mengoreksi ejaan kata yang berawalan akhir alfabet', function () {
     expect(app(SearchTermCorrector::class)->correctQuery('pemrogaman'))
         ->toBe('pemrograman');
 });
+
+it('memecah istilah gabungan yang tidak dikenali kamus', function () {
+    $penerbit = Publisher::factory()->create();
+
+    Book::withoutEvents(fn () => Book::factory()->create([
+        'title' => 'Basis Data Dan Jaringan Komputer',
+        'is_published' => true,
+        'publisher_id' => $penerbit->id,
+    ]));
+
+    expect(app(SearchTermCorrector::class)->correctQuery('basisdata'))
+        ->toBe('basis data');
+});
+
+it('tidak memecah istilah yang sudah dikenali kamus', function () {
+    $penerbit = Publisher::factory()->create();
+
+    Book::withoutEvents(fn () => Book::factory()->create([
+        'title' => 'Basis Data Dan Jaringan Komputer',
+        'is_published' => true,
+        'publisher_id' => $penerbit->id,
+    ]));
+
+    // "jaringan" sudah kata yang dikenali sehingga tidak boleh diubah.
+    expect(app(SearchTermCorrector::class)->correctQuery('jaringan'))->toBeNull();
+});
