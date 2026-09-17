@@ -19,7 +19,6 @@ class TodayVisitorsWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         [$todayStart, $todayEnd] = VisitLog::adminDayRange();
-        [$weekStart, $weekEnd] = VisitLog::adminWeekRange();
 
         $total = VisitLog::query()->whereBetween('visited_at', [$todayStart, $todayEnd])->count();
 
@@ -76,22 +75,6 @@ class TodayVisitorsWidget extends StatsOverviewWidget
                 ->icon(Heroicon::OutlinedBriefcase)
                 ->url(VisitLogResource::getUrl('index', ['filters' => ['today' => ['isActive' => true]]])),
 
-            Stat::make('Minggu Ini', VisitLog::query()
-                ->whereBetween('visited_at', [$weekStart, $weekEnd])
-                ->count())
-                ->description('Total kunjungan minggu ini')
-                ->descriptionColor('gray')
-                ->descriptionIcon(Heroicon::OutlinedCalendarDays)
-                ->color('primary')
-                ->icon(Heroicon::OutlinedCalendarDays)
-                ->url(VisitLogResource::getUrl('index', [
-                    'filters' => [
-                        'visited_between' => [
-                            'visited_from' => now()->startOfWeek()->toDateString(),
-                            'visited_until' => now()->endOfWeek()->toDateString(),
-                        ],
-                    ],
-                ])),
         ];
     }
 }
