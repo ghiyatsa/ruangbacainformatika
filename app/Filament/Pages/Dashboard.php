@@ -109,12 +109,12 @@ class Dashboard extends \Filament\Pages\Dashboard
         return [
             'overview' => [
                 OperationsOverviewWidget::class,
+                TodayVisitorsWidget::class,
                 MetadataCompletenessWidget::class,
                 PendingMemberApprovalsWidget::class,
                 SimilaritySyncOverviewWidget::class,
             ],
             'activity' => [
-                TodayVisitorsWidget::class,
                 OverdueLoanTableWidget::class,
             ],
             'messages' => [

@@ -10,7 +10,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class TodayVisitorsWidget extends StatsOverviewWidget
 {
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 2;
+
+    protected int|array|null $columns = 3;
 
     protected int|string|array $columnSpan = 'full';
 

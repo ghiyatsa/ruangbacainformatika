@@ -3,9 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Skripsis\SkripsiResource;
-use App\Models\InternshipReport;
 use App\Models\SimilaritySyncStatus;
-use App\Models\Skripsi;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
@@ -18,7 +16,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
 
     protected int|array|null $columns = 2;
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 5;
 
     /**
      * Antrean sinkronisasi berubah karena proses latar, bukan karena
@@ -48,7 +46,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
         $counts = $this->summaryCounts();
 
         $pendingCount = $counts['pending'];
-        $unscheduledCount = $counts['unscheduled'];
+        $failedCount = $counts['failed'];
 
         return [
             Stat::make('Dalam Antrean', $pendingCount)
@@ -59,13 +57,13 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
                 ->url($this->skripsisUrl([
                     'perlu_sync' => ['isActive' => true],
                 ])),
-            Stat::make('Belum Dijadwalkan', $unscheduledCount)
-                ->description($unscheduledCount > 0 ? 'Karya belum masuk antrean' : 'Semua karya telah terjadwal')
-                ->descriptionIcon($unscheduledCount > 0 ? Heroicon::OutlinedClock : Heroicon::OutlinedCheckCircle, IconPosition::Before)
-                ->color($unscheduledCount > 0 ? 'info' : 'gray')
-                ->icon(Heroicon::OutlinedClock)
+            Stat::make('Sinkron Gagal', $failedCount)
+                ->description($failedCount > 0 ? 'Perlu ditinjau ulang' : 'Tidak ada kegagalan')
+                ->descriptionIcon($failedCount > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle, IconPosition::Before)
+                ->color($failedCount > 0 ? 'danger' : 'gray')
+                ->icon(Heroicon::OutlinedExclamationTriangle)
                 ->url($this->skripsisUrl([
-                    'belum_dijadwalkan' => ['isActive' => true],
+                    'sinkron_gagal' => ['isActive' => true],
                 ])),
         ];
     }
@@ -76,7 +74,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
      * Hasilnya disimpan sebentar karena satu pemuatan dashboard dapat
      * memanggil ini lebih dari sekali (mis. saat polling berjalan).
      *
-     * @return array{pending: int, unscheduled: int}
+     * @return array{pending: int, failed: int}
      */
     protected function summaryCounts(): array
     {
@@ -88,7 +86,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
     }
 
     /**
-     * @return array{pending: int, unscheduled: int}
+     * @return array{pending: int, failed: int}
      */
     protected function computeSummaryCounts(): array
     {
@@ -98,16 +96,10 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
             ->groupBy('status')
             ->pluck('jumlah', 'status');
 
-        $unscheduledCount = Skripsi::query()
-            ->whereDoesntHave('similaritySyncStatus')
-            ->count() + InternshipReport::query()
-            ->whereDoesntHave('similaritySyncStatus')
-            ->count();
-
         return [
             'pending' => (int) ($statusCounts[SimilaritySyncStatus::STATUS_PENDING] ?? 0)
                 + (int) ($statusCounts[SimilaritySyncStatus::STATUS_SYNCING] ?? 0),
-            'unscheduled' => $unscheduledCount,
+            'failed' => (int) ($statusCounts[SimilaritySyncStatus::STATUS_FAILED] ?? 0),
         ];
     }
 }

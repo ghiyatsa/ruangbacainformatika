@@ -4,6 +4,7 @@ use App\Filament\Resources\Users\Widgets\RestrictedBorrowersOverviewWidget;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+use App\Filament\Resources\Skripsis\Pages\ListSkripsis;
 use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
@@ -15,6 +16,9 @@ use App\Filament\Widgets\TodayVisitorsWidget;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Models\User;
+use Filament\Facades\Filament;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 use function Livewire\invade;
 
@@ -114,11 +118,50 @@ it('counts similarity queue stats from active skripsi records only', function ()
 
     $stats = invade(app(SimilaritySyncOverviewWidget::class))->getStats();
 
-    // Hanya antrean dan jadwal yang ditampilkan; keduanya dihitung dari
-    // karya aktif sehingga catatan yatim tidak ikut terhitung.
+    // Hanya antrean dan kegagalan yang ditampilkan; keduanya dihitung
+    // dari karya aktif sehingga catatan yatim tidak ikut terhitung.
     expect($stats)->toHaveCount(2)
         ->and($stats[0]->getLabel())->toBe('Dalam Antrean')
-        ->and($stats[1]->getLabel())->toBe('Belum Dijadwalkan')
+        ->and($stats[1]->getLabel())->toBe('Sinkron Gagal')
         ->and($stats[0]->getValue())->toBe(1)
         ->and($stats[1]->getValue())->toBe(0);
+});
+
+it('filters skripsi that failed to sync from the list page', function () {
+    $gagal = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+
+    SimilaritySyncStatus::query()->create([
+        'syncable_id' => $gagal->id,
+        'syncable_type' => Skripsi::class,
+        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+        'attempts' => 1,
+        'last_error' => 'Gagal',
+    ]);
+
+    $lolos = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+
+    SimilaritySyncStatus::query()->create([
+        'syncable_id' => $lolos->id,
+        'syncable_type' => Skripsi::class,
+        'status' => SimilaritySyncStatus::STATUS_SYNCED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+        'attempts' => 1,
+    ]);
+
+    $admin = User::factory()->create();
+    $role = Role::firstOrCreate([
+        'name' => 'super_admin',
+        'guard_name' => 'web',
+    ]);
+    $admin->assignRole($role);
+
+    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    $this->actingAs($admin);
+
+    // Filter harus menyaring hanya karya yang gagal disinkronkan.
+    Livewire::test(ListSkripsis::class)
+        ->filterTable('sinkron_gagal')
+        ->assertCanSeeTableRecords([$gagal])
+        ->assertCanNotSeeTableRecords([$lolos]);
 });
