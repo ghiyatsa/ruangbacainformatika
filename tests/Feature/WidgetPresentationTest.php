@@ -6,7 +6,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
-use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
 use App\Filament\Widgets\PendingMemberApprovalsWidget;
@@ -33,7 +32,6 @@ function widgetProperty(string $className, string $property): mixed
 it('uses concise headings across filament widgets', function () {
     expect(widgetProperty(OperationsOverviewWidget::class, 'heading'))->toBeNull()
         ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'heading'))->toBeNull()
-        ->and(widgetProperty(LoanActivityChartWidget::class, 'heading'))->toBe('Aktivitas Mingguan')
         ->and(widgetProperty(TodayVisitorsWidget::class, 'heading'))->toBeNull()
         ->and(widgetProperty(ContactMessagesTableWidget::class, 'heading'))->toBe('Pesan Kontak Terbaru')
         ->and(widgetProperty(CatalogReportsTableWidget::class, 'heading'))->toBe('Laporan Umpan Balik Katalog')
@@ -45,7 +43,6 @@ it('uses concise headings across filament widgets', function () {
 it('uses concise descriptions on overview widgets', function () {
     expect(widgetProperty(OperationsOverviewWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'description'))->toBeNull()
-        ->and(widgetProperty(LoanActivityChartWidget::class, 'description'))->toBe('Tren peminjaman dan kunjungan 7 hari terakhir.')
         ->and(widgetProperty(TodayVisitorsWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(ServerInfoWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(RestrictedBorrowersOverviewWidget::class, 'description'))->toBeNull();

@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
-use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\MetadataCompletenessWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
@@ -116,7 +115,6 @@ class Dashboard extends \Filament\Pages\Dashboard
                 SimilaritySyncOverviewWidget::class,
             ],
             'activity' => [
-                LoanActivityChartWidget::class,
                 TodayVisitorsWidget::class,
                 OverdueLoanTableWidget::class,
             ],
