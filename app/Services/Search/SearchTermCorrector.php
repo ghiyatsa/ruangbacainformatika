@@ -18,7 +18,11 @@ class SearchTermCorrector
 
     protected const DICTIONARY_TTL_SECONDS = 21600;
 
-    protected const DICTIONARY_MAX_TOKENS = 1500;
+    /**
+     * Batas kata kamus. Judul katalog saja menghasilkan lebih dari dua
+     * ribu kata unik, sehingga batas lama memotong separuh alfabet.
+     */
+    protected const DICTIONARY_MAX_TOKENS = 6000;
 
     /**
      * Kembalikan query terkoreksi (typo), atau null bila tidak ada perbaikan.
@@ -83,15 +87,24 @@ class SearchTermCorrector
                 $this->collectTokens((string) $query, $seen);
             }
 
-            $dictionary = array_keys($seen);
+            // Bila perlu dipotong, utamakan kata yang paling sering muncul
+            // agar kata umum tidak terbuang oleh urutan alfabetis.
+            arsort($seen);
+
+            $dictionary = array_slice(
+                array_keys($seen),
+                0,
+                self::DICTIONARY_MAX_TOKENS,
+            );
+
             sort($dictionary);
 
-            return array_slice($dictionary, 0, self::DICTIONARY_MAX_TOKENS);
+            return $dictionary;
         });
     }
 
     /**
-     * @param  array<string, true>  $seen
+     * @param  array<string, int>  $seen
      */
     protected function collectTokens(string $text, array &$seen): void
     {
@@ -103,7 +116,7 @@ class SearchTermCorrector
 
         foreach ($words as $word) {
             if (mb_strlen($word) >= 3) {
-                $seen[$word] = true;
+                $seen[$word] = ($seen[$word] ?? 0) + 1;
             }
         }
     }
