@@ -177,6 +177,27 @@ class SearchController extends Controller
         $prefix = "{$search}%";
         $wildcard = "%{$search}%";
 
+        // Setiap kata yang muncul pada judul menambah skor, sehingga karya
+        // yang judulnya memuat lebih banyak kata kunci terangkat ke atas.
+        $kata = preg_split('/[^\p{L}\p{N}]+/u', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $kata = array_values(array_unique(array_map(
+            fn (string $k): string => mb_strtolower($k),
+            $kata,
+        )));
+
+        $skorJudul = '';
+        $binding = [];
+        foreach ($kata as $k) {
+            // Bonus lebih besar bila kata ada pada judul atau subjudul.
+            $skorJudul .= ' + (CASE WHEN LOWER(books.title) LIKE ? THEN 25 ELSE 0 END)';
+            $skorJudul .= ' + (CASE WHEN LOWER(books.subtitle) LIKE ? THEN 8 ELSE 0 END)';
+            $binding[] = '%'.$k.'%';
+            $binding[] = '%'.$k.'%';
+        }
+
+        // Bonus kedekatan: frasa utuh di judul menandakan kecocokan terkuat.
+        $bonus = $kata !== [] && count($kata) > 1 ? 60 : 0;
+
         $query
             ->selectRaw(
                 'CASE
@@ -187,7 +208,9 @@ class SearchController extends Controller
                     WHEN books.isbn LIKE ? OR books.issn LIKE ? OR books.ddc_code LIKE ? THEN 30
                     WHEN books.description LIKE ? THEN 10
                     ELSE 5
-                END as search_priority',
+                END
+                + '.($bonus > 0 ? '60' : '0').$skorJudul.'
+                as search_priority',
                 [
                     $exact,
                     $prefix,
@@ -197,6 +220,7 @@ class SearchController extends Controller
                     $wildcard,
                     $wildcard,
                     $wildcard,
+                    ...$binding,
                 ]
             )
             ->orderByDesc('search_priority')

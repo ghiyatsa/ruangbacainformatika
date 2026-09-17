@@ -6,6 +6,7 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Publisher;
+use App\Services\Search\SearchTermCorrector;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -58,11 +59,66 @@ class CatalogQueryService
      * @param  array{search: string, category: string, author: string, publisher: string, year: int|null, featured: bool, availability: bool}  $filters
      * @return Builder<Book>
      */
+
+    /** Ambang jumlah hasil yang dianggap terlalu sedikit. */
+    protected const MIN_ACCEPTABLE_RESULTS = 3;
+
+    /**
+     * Tentukan kata kunci yang benar-benar dipakai untuk pencarian.
+     *
+     * Bila kueri asli menghasilkan terlalu sedikit hasil, kueri dicoba
+     * dikoreksi ejaannya. Koreksi hanya dipakai bila benar-benar menambah
+     * hasil, sehingga pencarian yang sudah baik tidak pernah memburuk.
+     *
+     * @param  array{search: string, category: string, author: string, publisher: string, year: int|null, featured: bool, availability: bool}  $filters
+     */
+    protected function resolveSearchTerm(array $filters): string
+    {
+        $search = $filters['search'];
+
+        if ($search === '' || mb_strlen($search) < 4) {
+            return $search;
+        }
+
+        $asli = $this->countForSearch($filters, $search);
+
+        if ($asli >= self::MIN_ACCEPTABLE_RESULTS) {
+            return $search;
+        }
+
+        $koreksi = app(SearchTermCorrector::class)->correctQuery($search);
+
+        if ($koreksi === null || $koreksi === $search) {
+            return $search;
+        }
+
+        return $this->countForSearch($filters, $koreksi) > $asli ? $koreksi : $search;
+    }
+
+    /**
+     * Hitung hasil untuk sebuah kata kunci tanpa mengubah filter lain.
+     *
+     * @param  array{search: string, category: string, author: string, publisher: string, year: int|null, featured: bool, availability: bool}  $filters
+     */
+    protected function countForSearch(array $filters, string $search): int
+    {
+        return Book::query()
+            ->published()
+            ->search($search)
+            ->forCategory($filters['category'])
+            ->forAuthor($filters['author'])
+            ->forPublisher($filters['publisher'])
+            ->forYear($filters['year'])
+            ->when($filters['featured'], fn ($query) => $query->featured())
+            ->onlyAvailable($filters['availability'])
+            ->count();
+    }
+
     public function booksQuery(array $filters): Builder
     {
         return Book::query()
             ->published()
-            ->search($filters['search'])
+            ->search($this->resolveSearchTerm($filters))
             ->forCategory($filters['category'])
             ->forAuthor($filters['author'])
             ->forPublisher($filters['publisher'])
@@ -75,6 +131,10 @@ class CatalogQueryService
                 'items',
                 'items as available_items_count' => fn ($query) => $query->available(),
             ])
+            ->when(
+                $this->resolveSearchTerm($filters) !== '',
+                fn ($query) => $this->orderByTitleRelevance($query, $this->resolveSearchTerm($filters)),
+            )
             ->orderByRaw('CASE WHEN cover_image IS NOT NULL THEN 0 ELSE 1 END')
             ->orderByDesc('is_featured')
             ->orderByDesc('published_year')
@@ -182,5 +242,40 @@ class CatalogQueryService
         return Publisher::query()
             ->where('slug', $publisherSlug)
             ->value('name');
+    }
+
+    /**
+     * Beri bobot pada judul agar karya yang judulnya memuat kata kunci naik.
+     *
+     * Setiap kata kunci yang muncul di judul menambah skor. Frasa utuh di
+     * judul diberi tambahan, dan judul yang diawali kata kunci diberi
+     * tambahan lagi. Buku yang judulnya tidak memuat kata kunci tetap
+     * ditampilkan, hanya berada di bawah.
+     *
+     * @param  Builder<Book>  $query
+     * @return Builder<Book>
+     */
+    protected function orderByTitleRelevance(Builder $query, string $search): Builder
+    {
+        $judul = 'LOWER(COALESCE(title, \'\'))';
+        $skor = '0';
+        $frasa = mb_strtolower(trim($search));
+
+        // Setiap kata menambah skor bila muncul di judul.
+        foreach (preg_split('/\s+/u', $frasa, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $kata) {
+            if (mb_strlen($kata) < 2) {
+                continue;
+            }
+
+            $aman = addslashes($kata);
+            $skor .= " + (CASE WHEN {$judul} LIKE '%{$aman}%' THEN 10 ELSE 0 END)";
+        }
+
+        // Frasa utuh dan judul yang diawali kata kunci bernilai lebih tinggi.
+        $aman2 = addslashes($frasa);
+        $skor .= " + (CASE WHEN {$judul} LIKE '%{$aman2}%' THEN 25 ELSE 0 END)";
+        $skor .= " + (CASE WHEN {$judul} LIKE '{$aman2}%' THEN 40 ELSE 0 END)";
+
+        return $query->orderByRaw("({$skor}) DESC");
     }
 }

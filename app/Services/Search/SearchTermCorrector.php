@@ -18,7 +18,11 @@ class SearchTermCorrector
 
     protected const DICTIONARY_TTL_SECONDS = 21600;
 
-    protected const DICTIONARY_MAX_TOKENS = 1500;
+    /**
+     * Batas kata kamus. Judul katalog saja menghasilkan lebih dari dua
+     * ribu kata unik, sehingga batas lama memotong separuh alfabet.
+     */
+    protected const DICTIONARY_MAX_TOKENS = 6000;
 
     /**
      * Kembalikan query terkoreksi (typo), atau null bila tidak ada perbaikan.
@@ -32,15 +36,25 @@ class SearchTermCorrector
         }
 
         $dictionary = $this->buildDictionary();
+        $dikenal = array_flip($dictionary);
         $changed = false;
         $corrected = [];
 
         foreach ($terms as $term) {
-            $fixed = $this->correctTerm($term, $dictionary);
-            $corrected[] = $fixed;
+            // Kata gabungan dipecah lebih dulu, mis. "basisdata".
+            $bagian = $this->splitCompoundTerm($term, $dikenal);
 
-            if ($fixed !== $term) {
+            if ($bagian !== [$term]) {
                 $changed = true;
+            }
+
+            foreach ($bagian as $kata) {
+                $fixed = $this->correctTerm($kata, $dictionary);
+                $corrected[] = $fixed;
+
+                if ($fixed !== $kata) {
+                    $changed = true;
+                }
             }
         }
 
@@ -83,15 +97,24 @@ class SearchTermCorrector
                 $this->collectTokens((string) $query, $seen);
             }
 
-            $dictionary = array_keys($seen);
+            // Bila perlu dipotong, utamakan kata yang paling sering muncul
+            // agar kata umum tidak terbuang oleh urutan alfabetis.
+            arsort($seen);
+
+            $dictionary = array_slice(
+                array_keys($seen),
+                0,
+                self::DICTIONARY_MAX_TOKENS,
+            );
+
             sort($dictionary);
 
-            return array_slice($dictionary, 0, self::DICTIONARY_MAX_TOKENS);
+            return $dictionary;
         });
     }
 
     /**
-     * @param  array<string, true>  $seen
+     * @param  array<string, int>  $seen
      */
     protected function collectTokens(string $text, array &$seen): void
     {
@@ -103,7 +126,7 @@ class SearchTermCorrector
 
         foreach ($words as $word) {
             if (mb_strlen($word) >= 3) {
-                $seen[$word] = true;
+                $seen[$word] = ($seen[$word] ?? 0) + 1;
             }
         }
     }
@@ -137,5 +160,36 @@ class SearchTermCorrector
         }
 
         return $bestDistance <= $maxDistance ? $best : $term;
+    }
+
+    /**
+     * Pecah istilah gabungan menjadi kata-kata yang dikenali kamus.
+     *
+     * "basisdata" menjadi ["basis", "data"] bila kedua bagian ada di kamus.
+     * Istilah yang sudah dikenali atau tidak dapat dipecah dikembalikan apa
+     * adanya, sehingga pencarian yang sudah baik tidak terpengaruh.
+     *
+     * @param  array<string, true>  $dikenal
+     * @return list<string>
+     */
+    public function splitCompoundTerm(string $term, array $dikenal): array
+    {
+        $panjang = mb_strlen($term);
+
+        if ($panjang < 6 || isset($dikenal[$term])) {
+            return [$term];
+        }
+
+        // Coba setiap titik potong; kedua bagian harus kata yang dikenali.
+        for ($i = 3; $i <= $panjang - 3; $i++) {
+            $kiri = mb_substr($term, 0, $i);
+            $kanan = mb_substr($term, $i);
+
+            if (isset($dikenal[$kiri], $dikenal[$kanan])) {
+                return [$kiri, $kanan];
+            }
+        }
+
+        return [$term];
     }
 }

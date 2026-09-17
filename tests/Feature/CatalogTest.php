@@ -4,6 +4,7 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Category;
+use App\Models\Publisher;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
@@ -149,4 +150,48 @@ it('catalog page returns the requested pagination page', function () {
                     ->where('books.data.0.title', 'Book 13')
                 ),
         );
+});
+
+it('merapikan kata kunci pencarian katalog', function () {
+    $buku = new Book;
+
+    $istilah = new ReflectionMethod($buku, 'searchTerms');
+    $istilah->setAccessible(true);
+
+    // Kata umum dipertahankan karena sering menjadi bagian judul karya.
+    expect($istilah->invoke($buku, 'digital untuk'))
+        ->toBe(['digital', 'untuk'])
+        ->and($istilah->invoke($buku, 'sistem informasi dan jaringan'))
+        ->toBe(['sistem', 'informasi', 'dan', 'jaringan']);
+
+    // Tanda hubung, spasi, dan bentuk tersambung menghasilkan istilah sama.
+    expect($istilah->invoke($buku, 'dasar-dasar'))
+        ->toBe(['dasar', 'dasar'])
+        ->and($istilah->invoke($buku, 'dasar dasar'))
+        ->toBe(['dasar', 'dasar'])
+        ->and($istilah->invoke($buku, 'dasardasar'))
+        ->toBe(['dasar', 'dasar']);
+
+    // Bila seluruh kata kunci hanyalah kata umum, istilah tetap dipakai.
+    expect($istilah->invoke($buku, 'dan atau'))->toBe(['dan', 'atau']);
+});
+
+it('mewajibkan semua kata kunci cocok pada pencarian buku', function () {
+    $penerbit = Publisher::factory()->create();
+
+    $duaKata = Book::factory()->create([
+        'title' => 'Manajemen Keuangan Lanjutan '.fake()->unique()->word(),
+        'publisher_id' => $penerbit->id,
+    ]);
+
+    Book::factory()->create([
+        'title' => 'Keuangan Dasar '.fake()->unique()->word(),
+        'publisher_id' => $penerbit->id,
+    ]);
+
+    $hasil = Book::query()->search('manajemen keuangan')->pluck('title');
+
+    // Kata "manajemen" dan "keuangan" harus ada keduanya.
+    expect($hasil)->toContain($duaKata->title)
+        ->and($hasil->filter(fn (string $t): bool => str_contains($t, 'Keuangan Dasar')))->toBeEmpty();
 });
