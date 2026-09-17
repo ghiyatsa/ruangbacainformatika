@@ -1,6 +1,6 @@
 <?php
 
-use App\Filament\Widgets\WhatsAppGatewayStatusWidget;
+use App\Filament\Widgets\ServerInfoWidget;
 use App\Repositories\SettingRepository;
 use App\Services\WhatsAppGateway;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -68,7 +68,7 @@ it('reports the gateway as disconnected when fonnte rejects the token', function
         ->and($status['reason'])->toBe('token invalid');
 });
 
-it('renders a disconnected whatsapp gateway stat in the dashboard widget', function () {
+it('renders a disconnected whatsapp gateway stat inside the server info widget', function () {
     config()->set('services.fonnte.url', null);
     config()->set('services.fonnte.token', null);
 
@@ -79,8 +79,10 @@ it('renders a disconnected whatsapp gateway stat in the dashboard widget', funct
     app()->instance(WhatsAppGateway::class, new WhatsAppGateway($repository, app(HttpFactory::class)));
 
     /** @var array<Stat> $stats */
-    $stats = invade(app(WhatsAppGatewayStatusWidget::class))->getStats();
+    $stats = invade(app(ServerInfoWidget::class))->getStats();
 
-    expect($stats[0]->getLabel())->toBe('Gateway Pesan')
-        ->and($stats[0]->getValue())->toBe('Belum Dikonfigurasi');
+    // Lima kartu informasi server lebih dulu, kartu gateway melengkapinya.
+    expect($stats)->toHaveCount(6)
+        ->and($stats[5]->getLabel())->toBe('Gateway Pesan')
+        ->and($stats[5]->getValue())->toBe('Belum Dikonfigurasi');
 });

@@ -11,7 +11,6 @@ use App\Filament\Widgets\PendingMemberApprovalsWidget;
 use App\Filament\Widgets\ServerInfoWidget;
 use App\Filament\Widgets\SimilaritySyncOverviewWidget;
 use App\Filament\Widgets\TodayVisitorsWidget;
-use App\Filament\Widgets\WhatsAppGatewayStatusWidget;
 use App\Models\ContactMessage;
 use App\Models\Loan;
 use App\Models\User;
@@ -123,7 +122,6 @@ class Dashboard extends \Filament\Pages\Dashboard
                 CatalogReportsTableWidget::class,
             ],
             'system' => [
-                WhatsAppGatewayStatusWidget::class,
                 ServerInfoWidget::class,
             ],
         ];
