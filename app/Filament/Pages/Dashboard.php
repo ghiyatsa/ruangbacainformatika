@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
-use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\MetadataCompletenessWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
@@ -12,7 +11,6 @@ use App\Filament\Widgets\PendingMemberApprovalsWidget;
 use App\Filament\Widgets\ServerInfoWidget;
 use App\Filament\Widgets\SimilaritySyncOverviewWidget;
 use App\Filament\Widgets\TodayVisitorsWidget;
-use App\Filament\Widgets\WhatsAppGatewayStatusWidget;
 use App\Models\ContactMessage;
 use App\Models\Loan;
 use App\Models\User;
@@ -111,17 +109,15 @@ class Dashboard extends \Filament\Pages\Dashboard
         return [
             'overview' => [
                 OperationsOverviewWidget::class,
+                TodayVisitorsWidget::class,
                 MetadataCompletenessWidget::class,
                 PendingMemberApprovalsWidget::class,
                 SimilaritySyncOverviewWidget::class,
             ],
             'activity' => [
-                LoanActivityChartWidget::class,
-                TodayVisitorsWidget::class,
                 OverdueLoanTableWidget::class,
             ],
             'messages' => [
-                WhatsAppGatewayStatusWidget::class,
                 ContactMessagesTableWidget::class,
                 CatalogReportsTableWidget::class,
             ],

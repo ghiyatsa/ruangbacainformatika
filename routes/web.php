@@ -12,6 +12,7 @@ use App\Http\Controllers\FaviconController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InternshipReportController;
 use App\Http\Controllers\LoanHistoryController;
+use App\Http\Controllers\MemberDashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpenGraphImageController;
 use App\Http\Controllers\PageController;
@@ -48,6 +49,8 @@ Route::get('/distribution/receipt', [DocumentDistributionController::class, 'rec
     ->name('distribution.receipt');
 
 Route::middleware(['auth', 'profile.completed', 'member'])->group(function () {
+    Route::get('/dasbor', MemberDashboardController::class)->name('dashboard');
+
     Route::get('/skripsi', [SkripsiController::class, 'index'])->name('skripsi.index');
     Route::get('/skripsi/{skripsi:student_id}', [SkripsiController::class, 'show'])->name('skripsi.show');
     Route::get('/skripsi/{skripsi:student_id}/file', [AcademicFileController::class, 'skripsi'])->name('skripsi.file');

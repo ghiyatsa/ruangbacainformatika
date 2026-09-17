@@ -125,6 +125,12 @@ class SkripsisTable
                 Filter::make('belum_dijadwalkan')
                     ->label('Belum dijadwalkan')
                     ->query(fn ($query) => $query->whereDoesntHave('similaritySyncStatus')),
+                Filter::make('sinkron_gagal')
+                    ->label('Sinkron gagal')
+                    ->query(fn ($query) => $query->whereHas(
+                        'similaritySyncStatus',
+                        fn ($query) => $query->where('status', SimilaritySyncStatus::STATUS_FAILED),
+                    )),
                 Filter::make('created_at')
                     ->label('Tanggal Masuk')
                     ->form([
