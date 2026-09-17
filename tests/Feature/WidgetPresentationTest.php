@@ -4,9 +4,9 @@ use App\Filament\Resources\Users\Widgets\RestrictedBorrowersOverviewWidget;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+use App\Filament\Resources\Skripsis\Pages\ListSkripsis;
 use App\Filament\Widgets\CatalogReportsTableWidget;
 use App\Filament\Widgets\ContactMessagesTableWidget;
-use App\Filament\Widgets\LoanActivityChartWidget;
 use App\Filament\Widgets\OperationsOverviewWidget;
 use App\Filament\Widgets\OverdueLoanTableWidget;
 use App\Filament\Widgets\PendingMemberApprovalsWidget;
@@ -16,6 +16,9 @@ use App\Filament\Widgets\TodayVisitorsWidget;
 use App\Models\SimilaritySyncStatus;
 use App\Models\Skripsi;
 use App\Models\User;
+use Filament\Facades\Filament;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 use function Livewire\invade;
 
@@ -33,7 +36,6 @@ function widgetProperty(string $className, string $property): mixed
 it('uses concise headings across filament widgets', function () {
     expect(widgetProperty(OperationsOverviewWidget::class, 'heading'))->toBeNull()
         ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'heading'))->toBeNull()
-        ->and(widgetProperty(LoanActivityChartWidget::class, 'heading'))->toBe('Aktivitas Mingguan')
         ->and(widgetProperty(TodayVisitorsWidget::class, 'heading'))->toBeNull()
         ->and(widgetProperty(ContactMessagesTableWidget::class, 'heading'))->toBe('Pesan Kontak Terbaru')
         ->and(widgetProperty(CatalogReportsTableWidget::class, 'heading'))->toBe('Laporan Umpan Balik Katalog')
@@ -45,7 +47,6 @@ it('uses concise headings across filament widgets', function () {
 it('uses concise descriptions on overview widgets', function () {
     expect(widgetProperty(OperationsOverviewWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'description'))->toBeNull()
-        ->and(widgetProperty(LoanActivityChartWidget::class, 'description'))->toBe('Tren peminjaman dan kunjungan 7 hari terakhir.')
         ->and(widgetProperty(TodayVisitorsWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(ServerInfoWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(RestrictedBorrowersOverviewWidget::class, 'description'))->toBeNull();
@@ -74,7 +75,7 @@ it('links restricted borrower stats to the matching user filters', function () {
         ->and($stats[2]->getUrl())->toContain('filters%5Blate_return_cooldown%5D%5BisActive%5D=1');
 });
 
-it('separates operational member growth from approval queue copy', function () {
+it('keeps approval queue copy separate from operational stats', function () {
     // `pendingMemberApproval()` only counts campus emails that are not
     // auto-approved, so a plain non-campus address would not register here.
     User::factory()->count(2)->create([
@@ -86,20 +87,21 @@ it('separates operational member growth from approval queue copy', function () {
     $operationsStats = invade(app(OperationsOverviewWidget::class))->getStats();
     $approvalStats = invade(app(PendingMemberApprovalsWidget::class))->getStats();
 
-    expect($operationsStats[3]->getLabel())->toBe('Anggota Baru Bulan Ini')
-        ->and($operationsStats[3]->getDescription())->toContain('menunggu verifikasi')
-        ->and($operationsStats[3]->getDescription())->not->toContain('menunggu persetujuan')
+    // Widget operasional tidak lagi memuat kartu pertumbuhan anggota; dua
+    // widget tetap harus memakai istilah berbeda agar tidak saling kabur.
+    expect($operationsStats)->toHaveCount(3)
+        ->and($approvalStats[0]->getLabel())->toBe('Menunggu Persetujuan Akun')
         ->and($approvalStats[0]->getDescription())->not->toContain('Google')
         ->and($approvalStats[1]->getDescription())->not->toContain('Google');
 });
 
-it('counts similarity overview stats from active skripsi records only', function () {
+it('counts similarity queue stats from active skripsi records only', function () {
     $activeSkripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
 
     SimilaritySyncStatus::query()->create([
         'syncable_id' => $activeSkripsi->id,
         'syncable_type' => Skripsi::class,
-        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'status' => SimilaritySyncStatus::STATUS_PENDING,
         'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
         'attempts' => 1,
         'last_error' => 'Masih aktif',
@@ -108,7 +110,7 @@ it('counts similarity overview stats from active skripsi records only', function
     SimilaritySyncStatus::query()->create([
         'syncable_id' => 999999,
         'syncable_type' => Skripsi::class,
-        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'status' => SimilaritySyncStatus::STATUS_PENDING,
         'last_operation' => SimilaritySyncStatus::OPERATION_DELETE,
         'attempts' => 1,
         'last_error' => 'Orphan',
@@ -116,10 +118,50 @@ it('counts similarity overview stats from active skripsi records only', function
 
     $stats = invade(app(SimilaritySyncOverviewWidget::class))->getStats();
 
-    expect($stats[0]->getLabel())->toBe('Sinkron Berhasil')
+    // Hanya antrean dan kegagalan yang ditampilkan; keduanya dihitung
+    // dari karya aktif sehingga catatan yatim tidak ikut terhitung.
+    expect($stats)->toHaveCount(2)
+        ->and($stats[0]->getLabel())->toBe('Dalam Antrean')
         ->and($stats[1]->getLabel())->toBe('Sinkron Gagal')
-        ->and($stats[2]->getLabel())->toBe('Dalam Antrean')
-        ->and($stats[3]->getLabel())->toBe('Belum Dijadwalkan')
-        ->and($stats[1]->getValue())->toBe(1)
-        ->and($stats[3]->getValue())->toBe(0);
+        ->and($stats[0]->getValue())->toBe(1)
+        ->and($stats[1]->getValue())->toBe(0);
+});
+
+it('filters skripsi that failed to sync from the list page', function () {
+    $gagal = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+
+    SimilaritySyncStatus::query()->create([
+        'syncable_id' => $gagal->id,
+        'syncable_type' => Skripsi::class,
+        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+        'attempts' => 1,
+        'last_error' => 'Gagal',
+    ]);
+
+    $lolos = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+
+    SimilaritySyncStatus::query()->create([
+        'syncable_id' => $lolos->id,
+        'syncable_type' => Skripsi::class,
+        'status' => SimilaritySyncStatus::STATUS_SYNCED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+        'attempts' => 1,
+    ]);
+
+    $admin = User::factory()->create();
+    $role = Role::firstOrCreate([
+        'name' => 'super_admin',
+        'guard_name' => 'web',
+    ]);
+    $admin->assignRole($role);
+
+    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    $this->actingAs($admin);
+
+    // Filter harus menyaring hanya karya yang gagal disinkronkan.
+    Livewire::test(ListSkripsis::class)
+        ->filterTable('sinkron_gagal')
+        ->assertCanSeeTableRecords([$gagal])
+        ->assertCanNotSeeTableRecords([$lolos]);
 });

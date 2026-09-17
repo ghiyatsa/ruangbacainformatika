@@ -2,10 +2,13 @@
 
 namespace App\Filament\Widgets;
 
+use App\Services\WhatsAppGateway;
 use App\Support\AppTimezone;
+use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Str;
 
 class ServerInfoWidget extends StatsOverviewWidget
 {
@@ -68,7 +71,50 @@ class ServerInfoWidget extends StatsOverviewWidget
                 ->descriptionIcon(Heroicon::OutlinedClock)
                 ->color('gray')
                 ->icon(Heroicon::OutlinedClock),
+
+            $this->gatewayStat(),
         ];
+    }
+
+    /**
+     * Status gateway pesan, dahulu widget terpisah pada tab ini.
+     * Digabung agar enam kartu mengisi tepat dua baris tiga kolom.
+     */
+    protected function gatewayStat(): Stat
+    {
+        /** @var WhatsAppGateway $gateway */
+        $gateway = app(WhatsAppGateway::class);
+        $status = $gateway->deviceStatus();
+
+        $configured = (bool) ($status['configured'] ?? false);
+        $connected = (bool) ($status['connected'] ?? false);
+
+        if (! $configured) {
+            return Stat::make('Gateway Pesan', 'Belum Dikonfigurasi')
+                ->description('Isi URL & token di Pengaturan Integrasi')
+                ->descriptionIcon(Heroicon::OutlinedExclamationTriangle, IconPosition::Before)
+                ->color('gray')
+                ->icon(Heroicon::OutlinedChatBubbleLeftRight);
+        }
+
+        if ($connected) {
+            $device = $status['device'] ?? null;
+
+            return Stat::make('Gateway Pesan', 'Terhubung')
+                ->description($device ? "Perangkat {$device}" : 'Perangkat siap mengirim pesan')
+                ->descriptionIcon(Heroicon::OutlinedCheckCircle, IconPosition::Before)
+                ->color('success')
+                ->icon(Heroicon::OutlinedSignal);
+        }
+
+        $reason = (string) ($status['reason'] ?? 'Tidak dapat memverifikasi perangkat.');
+
+        return Stat::make('Gateway Pesan', 'Terputus')
+            ->description(Str::limit($reason, 60))
+            ->descriptionIcon(Heroicon::OutlinedExclamationTriangle, IconPosition::Before)
+            ->color('danger')
+            ->icon(Heroicon::OutlinedSignalSlash)
+            ->extraAttributes(['title' => $reason]);
     }
 
     protected function resolveDiskFree(): int

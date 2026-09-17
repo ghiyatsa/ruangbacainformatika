@@ -1,7 +1,6 @@
 <?php
 
-use App\Filament\Widgets\WhatsAppGatewayStatusWidget;
-use App\Models\WhatsAppMessageLog;
+use App\Filament\Widgets\ServerInfoWidget;
 use App\Repositories\SettingRepository;
 use App\Services\WhatsAppGateway;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -69,7 +68,7 @@ it('reports the gateway as disconnected when fonnte rejects the token', function
         ->and($status['reason'])->toBe('token invalid');
 });
 
-it('renders a disconnected whatsapp gateway stat in the dashboard widget', function () {
+it('renders a disconnected whatsapp gateway stat inside the server info widget', function () {
     config()->set('services.fonnte.url', null);
     config()->set('services.fonnte.token', null);
 
@@ -80,54 +79,10 @@ it('renders a disconnected whatsapp gateway stat in the dashboard widget', funct
     app()->instance(WhatsAppGateway::class, new WhatsAppGateway($repository, app(HttpFactory::class)));
 
     /** @var array<Stat> $stats */
-    $stats = invade(app(WhatsAppGatewayStatusWidget::class))->getStats();
+    $stats = invade(app(ServerInfoWidget::class))->getStats();
 
-    expect($stats[0]->getLabel())->toBe('WhatsApp Gateway')
-        ->and($stats[0]->getValue())->toBe('Belum Dikonfigurasi');
-});
-
-it('counts today sent and failed whatsapp messages in the dashboard widget', function () {
-    config()->set('services.fonnte.url', null);
-    config()->set('services.fonnte.token', null);
-
-    WhatsAppMessageLog::query()->create([
-        'category' => 'otp',
-        'notification_type' => 'test',
-        'status' => WhatsAppMessageLog::StatusSent,
-        'attempts' => 1,
-    ]);
-
-    WhatsAppMessageLog::query()->create([
-        'category' => 'otp',
-        'notification_type' => 'test',
-        'status' => WhatsAppMessageLog::StatusFailed,
-        'attempts' => 1,
-        'error_message' => 'token invalid',
-    ]);
-
-    $staleLog = WhatsAppMessageLog::query()->create([
-        'category' => 'otp',
-        'notification_type' => 'old',
-        'status' => WhatsAppMessageLog::StatusSent,
-        'attempts' => 1,
-    ]);
-
-    // backdate stale log directly via the model (no DB facade needed)
-    $staleLog->timestamps = false;
-    $staleLog->created_at = now()->subDays(3);
-    $staleLog->save();
-
-    $repository = mock(SettingRepository::class);
-    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_url', null)->andReturn(null);
-    $repository->shouldReceive('get')->with('integration', 'whatsapp_api_token', null)->andReturn(null);
-
-    app()->instance(WhatsAppGateway::class, new WhatsAppGateway($repository, app(HttpFactory::class)));
-
-    /** @var array<Stat> $stats */
-    $stats = invade(app(WhatsAppGatewayStatusWidget::class))->getStats();
-
-    expect($stats[1]->getLabel())->toBe('Terkirim Hari Ini')
-        ->and($stats[1]->getValue())->toBe('1')
-        ->and($stats[2]->getLabel())->toBe('Gagal Hari Ini')
-        ->and($stats[2]->getValue())->toBe('1');
+    // Lima kartu informasi server lebih dulu, kartu gateway melengkapinya.
+    expect($stats)->toHaveCount(6)
+        ->and($stats[5]->getLabel())->toBe('Gateway Pesan')
+        ->and($stats[5]->getValue())->toBe('Belum Dikonfigurasi');
 });

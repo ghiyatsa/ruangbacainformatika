@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 class AuthenticationRedirector
@@ -70,6 +71,17 @@ class AuthenticationRedirector
 
         if ($this->requiresWhatsAppVerification($user)) {
             return route('register.whatsapp', absolute: false);
+        }
+
+        // Anggota diarahkan ke dasbor agar langsung melihat status
+        // pengajuannya. Pengelola tetap ke beranda/panel admin, termasuk
+        // bila ia juga memegang role member.
+        if (
+            Route::has('dashboard')
+            && $user->hasRole('member')
+            && ! $user->hasAdministrativeRole()
+        ) {
+            return route('dashboard', absolute: false);
         }
 
         return route('home', absolute: false);

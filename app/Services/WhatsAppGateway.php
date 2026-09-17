@@ -32,6 +32,16 @@ class WhatsAppGateway
      *
      * @return array<string, mixed>
      */
+    /**
+     * Masa simpan status perangkat di cache.
+     *
+     * Harus LEBIH LAMA daripada interval polling widget pemakainya
+     * (saat ini 60 detik). Bila sama, cache kedaluwarsa tepat sebelum
+     * widget meminta sehingga setiap poll memanggil API dan dashboard
+     * menunggu jaringan berulang kali.
+     */
+    protected const DEVICE_STATUS_CACHE_SECONDS = 300;
+
     public function deviceStatus(bool $refresh = false): array
     {
         if (! $this->configured()) {
@@ -78,6 +88,9 @@ class WhatsAppGateway
                 'checked_at' => now()->toIso8601String(),
             ];
         } catch (\Throwable $exception) {
+            // Simpan kegagalan sementara, jangan hapus status terakhir yang
+            // diketahui agar widget tidak menampilkan "terputus" hanya karena
+            // satu percobaan jaringan gagal.
             $result = [
                 'configured' => true,
                 'connected' => false,
@@ -89,7 +102,7 @@ class WhatsAppGateway
             ];
         }
 
-        Cache::put($cacheKey, $result, now()->addSeconds(60));
+        Cache::put($cacheKey, $result, now()->addSeconds(self::DEVICE_STATUS_CACHE_SECONDS));
 
         return $result;
     }

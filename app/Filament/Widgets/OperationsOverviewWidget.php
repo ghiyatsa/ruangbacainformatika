@@ -4,14 +4,12 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Books\BookResource;
 use App\Filament\Resources\Loans\LoanResource;
-use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\VisitLogs\VisitLogResource;
 use App\Models\Book;
 use App\Models\BookItem;
 use App\Models\Loan;
 use App\Models\User;
 use App\Models\VisitLog;
-use App\Support\AppTimezone;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -56,11 +54,6 @@ class OperationsOverviewWidget extends StatsOverviewWidget
         $totalBooks = Book::query()->count();
         $availableItems = BookItem::query()->where('status', 'available')->count();
         $totalItems = BookItem::query()->count();
-        [$monthStart, $monthEnd] = AppTimezone::monthRange();
-
-        $newMembersThisMonth = User::query()
-            ->whereBetween('created_at', [$monthStart, $monthEnd])
-            ->count();
 
         $pendingApproval = User::query()
             ->pendingMemberApproval()
@@ -103,20 +96,6 @@ class OperationsOverviewWidget extends StatsOverviewWidget
                 ->icon(Heroicon::OutlinedBookOpen)
                 ->url(BookResource::getUrl('index')),
 
-            Stat::make('Anggota Baru Bulan Ini', $newMembersThisMonth)
-                ->description($pendingApproval > 0 ? "{$pendingApproval} menunggu verifikasi" : null)
-                ->descriptionColor($pendingApproval > 0 ? 'warning' : null)
-                ->descriptionIcon($pendingApproval > 0 ? Heroicon::OutlinedClock : null)
-                ->color('info')
-                ->icon(Heroicon::OutlinedUserPlus)
-                ->url(UserResource::getUrl('index', [
-                    'filters' => [
-                        'registered_between' => [
-                            'registered_from' => now()->startOfMonth()->toDateString(),
-                            'registered_until' => now()->endOfMonth()->toDateString(),
-                        ],
-                    ],
-                ])),
         ];
     }
 }

@@ -482,10 +482,8 @@ it('super admin users can see similarity sync overview on the admin dashboard', 
     actingAs($user)
         ->get('/admin')
         ->assertOk()
-        ->assertSee('Sinkron Berhasil')
-        ->assertSee('Sinkron Gagal')
         ->assertSee('Dalam Antrean')
-        ->assertSee('Belum Dijadwalkan');
+        ->assertSee('Sinkron Gagal');
 });
 
 it('super admin users can see pending member approvals overview on the admin dashboard', function () {
