@@ -252,6 +252,7 @@ class ProfileController extends Controller
 
         return redirect()->to($this->authenticationRedirector->destinationFor($user));
     }
+
     /**
      * Hapus akun atas permintaan pemiliknya.
      *
