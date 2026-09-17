@@ -118,12 +118,12 @@ it('counts similarity queue stats from active skripsi records only', function ()
 
     $stats = invade(app(SimilaritySyncOverviewWidget::class))->getStats();
 
-    // Hanya antrean dan kegagalan yang ditampilkan; keduanya dihitung
+    // Hanya keberhasilan dan kegagalan yang ditampilkan; keduanya dihitung
     // dari karya aktif sehingga catatan yatim tidak ikut terhitung.
     expect($stats)->toHaveCount(2)
-        ->and($stats[0]->getLabel())->toBe('Dalam Antrean')
+        ->and($stats[0]->getLabel())->toBe('Sinkron Berhasil')
         ->and($stats[1]->getLabel())->toBe('Sinkron Gagal')
-        ->and($stats[0]->getValue())->toBe(1)
+        ->and($stats[0]->getValue())->toBe(0)
         ->and($stats[1]->getValue())->toBe(0);
 });
 
@@ -164,4 +164,43 @@ it('filters skripsi that failed to sync from the list page', function () {
         ->filterTable('sinkron_gagal')
         ->assertCanSeeTableRecords([$gagal])
         ->assertCanNotSeeTableRecords([$lolos]);
+});
+
+it('filters skripsi that synced successfully from the list page', function () {
+    $berhasil = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+
+    SimilaritySyncStatus::query()->create([
+        'syncable_id' => $berhasil->id,
+        'syncable_type' => Skripsi::class,
+        'status' => SimilaritySyncStatus::STATUS_SYNCED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+        'attempts' => 1,
+    ]);
+
+    $gagal = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
+
+    SimilaritySyncStatus::query()->create([
+        'syncable_id' => $gagal->id,
+        'syncable_type' => Skripsi::class,
+        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
+        'attempts' => 1,
+        'last_error' => 'Gagal',
+    ]);
+
+    $admin = User::factory()->create();
+    $role = Role::firstOrCreate([
+        'name' => 'super_admin',
+        'guard_name' => 'web',
+    ]);
+    $admin->assignRole($role);
+
+    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    $this->actingAs($admin);
+
+    // Kartu "Sinkron Berhasil" harus menyaring hanya karya yang tersinkron.
+    Livewire::test(ListSkripsis::class)
+        ->filterTable('sinkron_berhasil')
+        ->assertCanSeeTableRecords([$berhasil])
+        ->assertCanNotSeeTableRecords([$gagal]);
 });

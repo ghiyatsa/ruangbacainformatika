@@ -45,17 +45,17 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
     {
         $counts = $this->summaryCounts();
 
-        $pendingCount = $counts['pending'];
+        $syncedCount = $counts['synced'];
         $failedCount = $counts['failed'];
 
         return [
-            Stat::make('Dalam Antrean', $pendingCount)
-                ->description($pendingCount > 0 ? 'Sedang dalam proses antrean' : 'Antrean kosong')
-                ->descriptionIcon($pendingCount > 0 ? Heroicon::OutlinedArrowPath : Heroicon::OutlinedPauseCircle, IconPosition::Before)
-                ->color($pendingCount > 0 ? 'warning' : 'gray')
-                ->icon(Heroicon::OutlinedArrowPath)
+            Stat::make('Sinkron Berhasil', $syncedCount)
+                ->description($syncedCount > 0 ? 'Karya sudah tersinkron' : 'Belum ada yang tersinkron')
+                ->descriptionIcon($syncedCount > 0 ? Heroicon::OutlinedCheckCircle : Heroicon::OutlinedPauseCircle, IconPosition::Before)
+                ->color($syncedCount > 0 ? 'success' : 'gray')
+                ->icon(Heroicon::OutlinedCheckCircle)
                 ->url($this->skripsisUrl([
-                    'perlu_sync' => ['isActive' => true],
+                    'sinkron_berhasil' => ['isActive' => true],
                 ])),
             Stat::make('Sinkron Gagal', $failedCount)
                 ->description($failedCount > 0 ? 'Perlu ditinjau ulang' : 'Tidak ada kegagalan')
@@ -74,7 +74,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
      * Hasilnya disimpan sebentar karena satu pemuatan dashboard dapat
      * memanggil ini lebih dari sekali (mis. saat polling berjalan).
      *
-     * @return array{pending: int, failed: int}
+     * @return array{synced: int, failed: int}
      */
     protected function summaryCounts(): array
     {
@@ -86,7 +86,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
     }
 
     /**
-     * @return array{pending: int, failed: int}
+     * @return array{synced: int, failed: int}
      */
     protected function computeSummaryCounts(): array
     {
@@ -97,8 +97,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
             ->pluck('jumlah', 'status');
 
         return [
-            'pending' => (int) ($statusCounts[SimilaritySyncStatus::STATUS_PENDING] ?? 0)
-                + (int) ($statusCounts[SimilaritySyncStatus::STATUS_SYNCING] ?? 0),
+            'synced' => (int) ($statusCounts[SimilaritySyncStatus::STATUS_SYNCED] ?? 0),
             'failed' => (int) ($statusCounts[SimilaritySyncStatus::STATUS_FAILED] ?? 0),
         ];
     }
