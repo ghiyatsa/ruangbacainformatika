@@ -16,7 +16,7 @@ class MetadataCompletenessWidget extends StatsOverviewWidget
 
     protected static ?int $sort = 3;
 
-    protected int|string|array $columnSpan = ['xl' => 2];
+    protected int|string|array $columnSpan = 'full';
 
     /** Lama simpan ringkasan kelengkapan metadata. */
     protected const CACHE_SECONDS = 300;

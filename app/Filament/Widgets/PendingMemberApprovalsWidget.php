@@ -13,7 +13,7 @@ class PendingMemberApprovalsWidget extends StatsOverviewWidget
 {
     protected static ?int $sort = 2;
 
-    protected int|string|array $columnSpan = ['xl' => 2];
+    protected int|string|array $columnSpan = 'full';
 
     protected static bool $isLazy = false;
 

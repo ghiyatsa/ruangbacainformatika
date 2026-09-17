@@ -71,7 +71,7 @@ it('links restricted borrower stats to the matching user filters', function () {
         ->and($stats[2]->getUrl())->toContain('filters%5Blate_return_cooldown%5D%5BisActive%5D=1');
 });
 
-it('separates operational member growth from approval queue copy', function () {
+it('keeps approval queue copy separate from operational stats', function () {
     // `pendingMemberApproval()` only counts campus emails that are not
     // auto-approved, so a plain non-campus address would not register here.
     User::factory()->count(2)->create([
@@ -83,9 +83,10 @@ it('separates operational member growth from approval queue copy', function () {
     $operationsStats = invade(app(OperationsOverviewWidget::class))->getStats();
     $approvalStats = invade(app(PendingMemberApprovalsWidget::class))->getStats();
 
-    expect($operationsStats[3]->getLabel())->toBe('Anggota Baru Bulan Ini')
-        ->and($operationsStats[3]->getDescription())->toContain('menunggu verifikasi')
-        ->and($operationsStats[3]->getDescription())->not->toContain('menunggu persetujuan')
+    // Widget operasional tidak lagi memuat kartu pertumbuhan anggota; dua
+    // widget tetap harus memakai istilah berbeda agar tidak saling kabur.
+    expect($operationsStats)->toHaveCount(3)
+        ->and($approvalStats[0]->getLabel())->toBe('Menunggu Persetujuan Akun')
         ->and($approvalStats[0]->getDescription())->not->toContain('Google')
         ->and($approvalStats[1]->getDescription())->not->toContain('Google');
 });

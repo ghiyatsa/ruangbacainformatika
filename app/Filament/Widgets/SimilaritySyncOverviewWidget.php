@@ -16,6 +16,8 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
 {
     protected static bool $isLazy = false;
 
+    protected int|array|null $columns = 2;
+
     protected static ?int $sort = 2;
 
     /**
