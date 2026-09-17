@@ -12,14 +12,21 @@ class LoanActivityChartWidget extends ChartWidget
 {
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Aktivitas Mingguan';
+    protected ?string $heading = 'Aktivitas 7 Hari Terakhir';
 
-    protected ?string $description = 'Tren peminjaman dan kunjungan 7 hari terakhir.';
+    protected ?string $description = 'Tren peminjaman dan kunjungan tamu kiosk.';
 
     protected int|string|array $columnSpan = 'full';
 
-    protected ?string $maxHeight = '280px';
-
+    /**
+     * Tinggi wadah ditentukan lewat rasio aspek, bukan max-height.
+     * Memakai max-height membuat Filament mematikan rasio aspek namun
+     * canvas tidak diberi tinggi pasti, sehingga grafik tampak terpotong.
+     *
+     * Penghitungan per hari memakai rentang waktu, bukan CONVERT_TZ,
+     * karena tabel zona waktu MySQL tidak selalu terisi di server
+     * produksi dan CONVERT_TZ akan mengembalikan NULL.
+     */
     protected function getData(): array
     {
         $days = collect(range(6, 0))->map(
@@ -53,14 +60,16 @@ class LoanActivityChartWidget extends ChartWidget
                     'borderColor' => 'rgb(99, 102, 241)',
                     'borderWidth' => 2,
                     'borderRadius' => 4,
+                    'maxBarThickness' => 48,
                 ],
                 [
-                    'label' => 'Kunjungan',
+                    'label' => 'Kunjungan Tamu',
                     'data' => $visitorData->values()->toArray(),
                     'backgroundColor' => 'rgba(34, 197, 94, 0.7)',
                     'borderColor' => 'rgb(34, 197, 94)',
                     'borderWidth' => 2,
                     'borderRadius' => 4,
+                    'maxBarThickness' => 48,
                 ],
             ],
             'labels' => $labels->toArray(),
@@ -75,6 +84,7 @@ class LoanActivityChartWidget extends ChartWidget
     protected function getOptions(): array
     {
         return [
+            'maintainAspectRatio' => true,
             'plugins' => [
                 'legend' => [
                     'display' => true,
@@ -82,10 +92,15 @@ class LoanActivityChartWidget extends ChartWidget
                 ],
             ],
             'scales' => [
+                'x' => [
+                    'grid' => [
+                        'display' => false,
+                    ],
+                ],
                 'y' => [
                     'beginAtZero' => true,
                     'ticks' => [
-                        'stepSize' => 1,
+                        'precision' => 0,
                     ],
                 ],
             ],
