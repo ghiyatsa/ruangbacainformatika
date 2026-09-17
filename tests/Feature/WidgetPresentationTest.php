@@ -90,13 +90,13 @@ it('separates operational member growth from approval queue copy', function () {
         ->and($approvalStats[1]->getDescription())->not->toContain('Google');
 });
 
-it('counts similarity overview stats from active skripsi records only', function () {
+it('counts similarity queue stats from active skripsi records only', function () {
     $activeSkripsi = Skripsi::withoutEvents(fn (): Skripsi => Skripsi::factory()->create());
 
     SimilaritySyncStatus::query()->create([
         'syncable_id' => $activeSkripsi->id,
         'syncable_type' => Skripsi::class,
-        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'status' => SimilaritySyncStatus::STATUS_PENDING,
         'last_operation' => SimilaritySyncStatus::OPERATION_UPSERT,
         'attempts' => 1,
         'last_error' => 'Masih aktif',
@@ -105,7 +105,7 @@ it('counts similarity overview stats from active skripsi records only', function
     SimilaritySyncStatus::query()->create([
         'syncable_id' => 999999,
         'syncable_type' => Skripsi::class,
-        'status' => SimilaritySyncStatus::STATUS_FAILED,
+        'status' => SimilaritySyncStatus::STATUS_PENDING,
         'last_operation' => SimilaritySyncStatus::OPERATION_DELETE,
         'attempts' => 1,
         'last_error' => 'Orphan',
@@ -113,10 +113,11 @@ it('counts similarity overview stats from active skripsi records only', function
 
     $stats = invade(app(SimilaritySyncOverviewWidget::class))->getStats();
 
-    expect($stats[0]->getLabel())->toBe('Sinkron Berhasil')
-        ->and($stats[1]->getLabel())->toBe('Sinkron Gagal')
-        ->and($stats[2]->getLabel())->toBe('Dalam Antrean')
-        ->and($stats[3]->getLabel())->toBe('Belum Dijadwalkan')
-        ->and($stats[1]->getValue())->toBe(1)
-        ->and($stats[3]->getValue())->toBe(0);
+    // Hanya antrean dan jadwal yang ditampilkan; keduanya dihitung dari
+    // karya aktif sehingga catatan yatim tidak ikut terhitung.
+    expect($stats)->toHaveCount(2)
+        ->and($stats[0]->getLabel())->toBe('Dalam Antrean')
+        ->and($stats[1]->getLabel())->toBe('Belum Dijadwalkan')
+        ->and($stats[0]->getValue())->toBe(1)
+        ->and($stats[1]->getValue())->toBe(0);
 });

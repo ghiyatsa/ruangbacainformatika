@@ -45,29 +45,10 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
     {
         $counts = $this->summaryCounts();
 
-        $totalDoc = $counts['total_doc'];
-        $syncedCount = $counts['synced'];
-        $failedCount = $counts['failed'];
         $pendingCount = $counts['pending'];
         $unscheduledCount = $counts['unscheduled'];
 
         return [
-            Stat::make('Sinkron Berhasil', $syncedCount)
-                ->description($totalDoc > 0 ? "{$syncedCount} dari {$totalDoc} karya terindeks" : 'Belum ada data karya')
-                ->descriptionIcon(Heroicon::OutlinedCheckCircle, IconPosition::Before)
-                ->color('success')
-                ->icon(Heroicon::OutlinedCheckBadge)
-                ->url($this->skripsisUrl([
-                    'similarity_status' => ['value' => SimilaritySyncStatus::STATUS_SYNCED],
-                ])),
-            Stat::make('Sinkron Gagal', $failedCount)
-                ->description($failedCount > 0 ? 'Perlu sinkronisasi ulang' : 'Tidak ada kendala')
-                ->descriptionIcon($failedCount > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle, IconPosition::Before)
-                ->color($failedCount > 0 ? 'danger' : 'success')
-                ->icon(Heroicon::OutlinedExclamationTriangle)
-                ->url($this->skripsisUrl([
-                    'similarity_status' => ['value' => SimilaritySyncStatus::STATUS_FAILED],
-                ])),
             Stat::make('Dalam Antrean', $pendingCount)
                 ->description($pendingCount > 0 ? 'Sedang dalam proses antrean' : 'Antrean kosong')
                 ->descriptionIcon($pendingCount > 0 ? Heroicon::OutlinedArrowPath : Heroicon::OutlinedPauseCircle, IconPosition::Before)
@@ -93,7 +74,7 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
      * Hasilnya disimpan sebentar karena satu pemuatan dashboard dapat
      * memanggil ini lebih dari sekali (mis. saat polling berjalan).
      *
-     * @return array{total_doc: int, synced: int, failed: int, pending: int, unscheduled: int}
+     * @return array{pending: int, unscheduled: int}
      */
     protected function summaryCounts(): array
     {
@@ -105,13 +86,10 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
     }
 
     /**
-     * @return array{total_doc: int, synced: int, failed: int, pending: int, unscheduled: int}
+     * @return array{pending: int, unscheduled: int}
      */
     protected function computeSummaryCounts(): array
     {
-        $totalSkripsi = Skripsi::query()->count();
-        $totalInternship = InternshipReport::query()->count();
-
         $statusCounts = SimilaritySyncStatus::query()
             ->forExistingRecords()
             ->selectRaw('status, COUNT(*) AS jumlah')
@@ -125,9 +103,6 @@ class SimilaritySyncOverviewWidget extends StatsOverviewWidget
             ->count();
 
         return [
-            'total_doc' => $totalSkripsi + $totalInternship,
-            'synced' => (int) ($statusCounts[SimilaritySyncStatus::STATUS_SYNCED] ?? 0),
-            'failed' => (int) ($statusCounts[SimilaritySyncStatus::STATUS_FAILED] ?? 0),
             'pending' => (int) ($statusCounts[SimilaritySyncStatus::STATUS_PENDING] ?? 0)
                 + (int) ($statusCounts[SimilaritySyncStatus::STATUS_SYNCING] ?? 0),
             'unscheduled' => $unscheduledCount,
