@@ -482,7 +482,7 @@ it('super admin users can see similarity sync overview on the admin dashboard', 
     actingAs($user)
         ->get('/admin')
         ->assertOk()
-        ->assertSee('Dalam Antrean')
+        ->assertSee('Sinkron Berhasil')
         ->assertSee('Sinkron Gagal');
 });
 
