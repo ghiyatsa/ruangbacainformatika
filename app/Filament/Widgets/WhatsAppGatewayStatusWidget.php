@@ -27,10 +27,13 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
         $gateway = app(WhatsAppGateway::class);
         $status = $gateway->deviceStatus();
 
+        // Satu kueri agregat untuk kedua kartu, bukan dua COUNT terpisah.
+        $todayCounts = $this->todayStatusCounts();
+
         return [
             $this->connectionStat($status),
-            $this->todaySentStat(),
-            $this->todayFailedStat(),
+            $this->todaySentStat($todayCounts[WhatsAppMessageLog::StatusSent] ?? 0),
+            $this->todayFailedStat($todayCounts[WhatsAppMessageLog::StatusFailed] ?? 0),
         ];
     }
 
@@ -70,10 +73,8 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
             ->extraAttributes(['title' => $reason]);
     }
 
-    protected function todaySentStat(): Stat
+    protected function todaySentStat(int $count): Stat
     {
-        $count = $this->todayLogCount(WhatsAppMessageLog::StatusSent);
-
         return Stat::make('Terkirim Hari Ini', (string) $count)
             ->description($count > 0 ? 'Berhasil dikirim melalui gateway' : 'Belum ada pengiriman')
             ->descriptionIcon(Heroicon::OutlinedCheckCircle, IconPosition::Before)
@@ -82,10 +83,8 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
             ->url(WhatsAppMessageLogsResource::getUrl('index'));
     }
 
-    protected function todayFailedStat(): Stat
+    protected function todayFailedStat(int $count): Stat
     {
-        $count = $this->todayLogCount(WhatsAppMessageLog::StatusFailed);
-
         return Stat::make('Gagal Hari Ini', (string) $count)
             ->description($count > 0 ? 'Perlu pengecekan gateway' : 'Tidak ada kegagalan')
             ->descriptionIcon($count > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle, IconPosition::Before)
@@ -94,11 +93,19 @@ class WhatsAppGatewayStatusWidget extends StatsOverviewWidget
             ->url(WhatsAppMessageLogsResource::getUrl('index'));
     }
 
-    protected function todayLogCount(string $status): int
+    /**
+     * Jumlah log hari ini per status dalam satu kueri.
+     *
+     * @return array<string, int>
+     */
+    protected function todayStatusCounts(): array
     {
         return WhatsAppMessageLog::query()
-            ->where('status', $status)
             ->where('created_at', '>=', now()->utc()->startOfDay())
-            ->count();
+            ->selectRaw('status, COUNT(*) AS jumlah')
+            ->groupBy('status')
+            ->pluck('jumlah', 'status')
+            ->map(fn ($jumlah): int => (int) $jumlah)
+            ->all();
     }
 }
