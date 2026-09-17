@@ -14,6 +14,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('profile/whatsapp/verify', [ProfileController::class, 'verifyWhatsAppOtp'])->name('settings.profile.whatsapp.verify');
     Route::patch('profile', [ProfileController::class, 'update'])->name('settings.profile.update');
 
+    // Penghapusan akun: dibatasi laju percobaan dan memerlukan konfirmasi
+    // kata kunci serta password pada level request.
+    Route::delete('profile', [ProfileController::class, 'destroyAccount'])
+        ->middleware('throttle:3,1')
+        ->name('settings.profile.destroy');
+
     Route::middleware(['profile.completed'])->group(function () {
         Route::redirect('settings/member-key', '/member-qr');
         Route::redirect('settings/member-qr', '/member-qr');
