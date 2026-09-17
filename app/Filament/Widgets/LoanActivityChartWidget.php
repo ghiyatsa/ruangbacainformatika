@@ -12,9 +12,9 @@ class LoanActivityChartWidget extends ChartWidget
 {
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Aktivitas 7 Hari Terakhir';
+    protected ?string $heading = 'Aktivitas Mingguan';
 
-    protected ?string $description = 'Tren peminjaman dan kunjungan tamu kiosk.';
+    protected ?string $description = 'Tren peminjaman dan kunjungan tamu kiosk 7 hari terakhir.';
 
     protected int|string|array $columnSpan = 'full';
 

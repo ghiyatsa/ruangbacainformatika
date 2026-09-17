@@ -45,7 +45,7 @@ it('uses concise headings across filament widgets', function () {
 it('uses concise descriptions on overview widgets', function () {
     expect(widgetProperty(OperationsOverviewWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(SimilaritySyncOverviewWidget::class, 'description'))->toBeNull()
-        ->and(widgetProperty(LoanActivityChartWidget::class, 'description'))->toBe('Tren peminjaman dan kunjungan 7 hari terakhir.')
+        ->and(widgetProperty(LoanActivityChartWidget::class, 'description'))->toBe('Tren peminjaman dan kunjungan tamu kiosk 7 hari terakhir.')
         ->and(widgetProperty(TodayVisitorsWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(ServerInfoWidget::class, 'description'))->toBeNull()
         ->and(widgetProperty(RestrictedBorrowersOverviewWidget::class, 'description'))->toBeNull();
