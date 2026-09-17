@@ -182,8 +182,7 @@ class Book extends Model
             return $query;
         }
 
-        $terms = collect(explode(' ', $search))
-            ->filter()
+        $terms = collect($this->searchTerms($search))
             ->map(fn (string $term): string => $this->sanitizeLikeTerm($term))
             ->filter()
             ->values();
@@ -193,14 +192,14 @@ class Book extends Model
         }
 
         if ($this->supportsFullText($query->getConnection())) {
-            return $query->where(function (Builder $q) use ($search, $terms) {
+            return $query->where(function (Builder $q) use ($terms) {
                 $q->whereRaw(
                     'MATCH(title, subtitle, description, isbn, issn, ddc_code) AGAINST (? IN BOOLEAN MODE)',
-                    [$this->toBooleanFullTextQuery($search)]
+                    [$this->requiredBooleanFullTextQuery($terms->all())]
                 );
 
                 foreach ($terms as $term) {
-                    $q->orWhere(function (Builder $inner) use ($term) {
+                    $q->where(function (Builder $inner) use ($term) {
                         $inner->where('title', 'like', "%{$term}%")
                             ->orWhere('subtitle', 'like', "%{$term}%")
                             ->orWhere('isbn', 'like', "%{$term}%")
