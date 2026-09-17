@@ -119,11 +119,11 @@ class Dashboard extends \Filament\Pages\Dashboard
                 OverdueLoanTableWidget::class,
             ],
             'messages' => [
-                WhatsAppGatewayStatusWidget::class,
                 ContactMessagesTableWidget::class,
                 CatalogReportsTableWidget::class,
             ],
             'system' => [
+                WhatsAppGatewayStatusWidget::class,
                 ServerInfoWidget::class,
             ],
         ];
