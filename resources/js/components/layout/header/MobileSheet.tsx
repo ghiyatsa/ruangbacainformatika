@@ -98,6 +98,10 @@ export function MobileSheet({
                 className={`fixed left-0 z-50 h-[calc(100svh-var(--header-height,4.5rem))] w-[min(85vw,20rem)] overflow-y-auto rounded-br-[1.15rem] border-r border-border/60 bg-background px-4 shadow-lg transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 style={{ top: 'var(--header-height, 4.5rem)' }}
                 aria-hidden={!mobileOpen}
+                // Panel yang tertutup hanya digeser keluar layar, sehingga
+                // isinya masih dapat difokus keyboard. inert menonaktifkan
+                // fokus dan klik sampai menu benar-benar dibuka.
+                inert={!mobileOpen ? true : undefined}
             >
                 <div className="pt-3 pb-4">
                     <nav className="space-y-1">
