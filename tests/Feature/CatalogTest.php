@@ -158,9 +158,11 @@ it('merapikan kata kunci pencarian katalog', function () {
     $istilah = new ReflectionMethod($buku, 'searchTerms');
     $istilah->setAccessible(true);
 
-    // Kata umum dibuang dari kata kunci.
-    expect($istilah->invoke($buku, 'sistem informasi dan jaringan'))
-        ->toBe(['sistem', 'informasi', 'jaringan']);
+    // Kata umum dipertahankan karena sering menjadi bagian judul karya.
+    expect($istilah->invoke($buku, 'digital untuk'))
+        ->toBe(['digital', 'untuk'])
+        ->and($istilah->invoke($buku, 'sistem informasi dan jaringan'))
+        ->toBe(['sistem', 'informasi', 'dan', 'jaringan']);
 
     // Tanda hubung, spasi, dan bentuk tersambung menghasilkan istilah sama.
     expect($istilah->invoke($buku, 'dasar-dasar'))

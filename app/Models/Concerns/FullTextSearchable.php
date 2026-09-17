@@ -66,9 +66,18 @@ trait FullTextSearchable
             ->filter()
             ->values();
 
-        $filtered = $terms
+        // Seluruh istilah asli dipakai agar kueri makin spesifik; kata umum
+        // tidak dibuang karena sering menjadi bagian judul karya, misalnya
+        // "Digital Marketing Untuk Kreator Konten". Kata umum hanya dibuang
+        // bila kueri tidak berisi istilah bermakna selain kata umum, sehingga
+        // pencarian seperti "dan" tetap berjalan apa adanya.
+        $adaIstilahBermakna = $terms
             ->reject(fn (string $term): bool => in_array($term, self::SEARCH_STOPWORDS, true))
-            ->values();
+            ->isNotEmpty();
+
+        $filtered = $adaIstilahBermakna
+            ? $terms
+            : $terms->reject(fn (string $term): bool => in_array($term, self::SEARCH_STOPWORDS, true))->values();
 
         $hasil = $filtered->isEmpty() ? $terms : $filtered;
 
