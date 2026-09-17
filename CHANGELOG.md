@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.26.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.25.2...v1.26.0) (2026-09-17)
+
+
+### Features
+
+* **catalog:** pertajam pencarian buku dengan stopwords dan istilah wajib ([#101](https://github.com/ghiyatsa/ruangbacainformatika/issues/101)) ([7154074](https://github.com/ghiyatsa/ruangbacainformatika/commit/71540740d1f80b5cc747281b4234a1e51634df21))
+* **dashboard:** tambah dasbor anggota dan kurangi beban widget admin ([#99](https://github.com/ghiyatsa/ruangbacainformatika/issues/99)) ([72e8d54](https://github.com/ghiyatsa/ruangbacainformatika/commit/72e8d546aa633f5741ae3155fc6a17715d3f86c9))
+* **profile:** hapus akun dengan anonimisasi dan jaga riwayat sirkulasi ([#98](https://github.com/ghiyatsa/ruangbacainformatika/issues/98)) ([d31256b](https://github.com/ghiyatsa/ruangbacainformatika/commit/d31256b4334b2918f023bcea448ca5c82b6305a4))
+
+
+### Bug Fixes
+
+* **ui:** sembunyikan tombol mode gelap di header pada layar mobile ([#97](https://github.com/ghiyatsa/ruangbacainformatika/issues/97)) ([76462ec](https://github.com/ghiyatsa/ruangbacainformatika/commit/76462ec17f64df999e76cf6174ef9cc5c7272918))
+
 ## [1.25.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.25.1...v1.25.2) (2026-09-16)
 
 
