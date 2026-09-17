@@ -3,10 +3,12 @@ import { useEffect } from 'react';
 
 import { PageLayout } from '@/components/layout/PageLayout';
 import { AccountSecurityCard } from '@/features/settings/components/profile/AccountSecurityCard';
+import { DangerZoneCard } from '@/features/settings/components/profile/DangerZoneCard';
 import { ProfileInformationForm } from '@/features/settings/components/profile/ProfileInformationForm';
 import { ProfileSummary } from '@/features/settings/components/profile/ProfileSummary';
 import { setPageBreadcrumbs } from '@/layouts/AppLayout';
 import settings from '@/routes/settings';
+import type { AccountDeletionProps } from '@/features/settings/components/profile/DangerZoneCard';
 import type { VerificationProps } from '@/features/settings/components/profile/ManageWhatsAppDialog';
 import type { Auth } from '@/types';
 
@@ -14,11 +16,16 @@ interface ProfilePageProps extends Record<string, unknown> {
     auth: Auth;
     verification?: VerificationProps | null;
     canManageCampusContact?: boolean;
+    accountDeletion?: AccountDeletionProps;
 }
 
 export default function ProfilePage() {
-    const { auth, verification, canManageCampusContact = true } =
-        usePage<ProfilePageProps>().props;
+    const {
+        auth,
+        verification,
+        canManageCampusContact = true,
+        accountDeletion,
+    } = usePage<ProfilePageProps>().props;
     const user = auth.user!;
 
     useEffect(() => {
@@ -71,6 +78,10 @@ export default function ProfilePage() {
                         canManageCampusContact={canManageCampusContact}
                     />
                 </div>
+
+                {accountDeletion ? (
+                    <DangerZoneCard accountDeletion={accountDeletion} />
+                ) : null}
             </div>
         </PageLayout>
     );

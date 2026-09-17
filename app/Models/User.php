@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -39,7 +40,28 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasRoles, Notifiable, SoftDeletes;
+
+    /**
+     * Saat true, interceptor model tidak dijalankan. Dipakai ketika akun
+     * sedang dianonimkan karena permintaan penghapusan, agar email tidak
+     * dikembalikan ke nilai lama dan peran tidak diberikan ulang.
+     */
+    protected bool $anonymizing = false;
+
+    /**
+     * Jalankan callback dengan interceptor model dinonaktifkan.
+     */
+    public function withoutModelInterceptors(callable $callback): mixed
+    {
+        $this->anonymizing = true;
+
+        try {
+            return $callback();
+        } finally {
+            $this->anonymizing = false;
+        }
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -51,6 +73,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return [
             'whatsapp_verified_at' => 'datetime',
             'profile_completed_at' => 'datetime',
+            'deletion_requested_at' => 'datetime',
             'is_approved' => 'boolean',
         ];
     }
@@ -61,10 +84,18 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected static function booted(): void
     {
         static::saving(function (User $user): void {
+            if ($user->anonymizing) {
+                return;
+            }
+
             $user->whatsapp = app(WhatsAppPhoneNumber::class)->normalize($user->whatsapp);
         });
 
         static::updating(function (User $user) {
+            if ($user->anonymizing) {
+                return;
+            }
+
             if ($user->isDirty('email') && $user->getOriginal('email') !== null) {
                 $user->email = $user->getOriginal('email');
             }
@@ -75,6 +106,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         });
 
         static::saved(function (User $user): void {
+            if ($user->anonymizing) {
+                return;
+            }
+
             $user->syncMemberRoleState();
         });
     }

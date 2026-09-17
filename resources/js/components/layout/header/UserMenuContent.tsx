@@ -44,9 +44,15 @@ export function UserMenuContent({ user }: Props) {
     return (
         <>
             <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-2 py-2 text-left text-sm">
+                <Link
+                    className="flex items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
+                    href={settings.profile.edit.url()}
+                    prefetch
+                    onClick={cleanupMobileNavigation}
+                    aria-label="Buka pengaturan profil"
+                >
                     <UserInfo user={user} showEmail={true} />
-                </div>
+                </Link>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>

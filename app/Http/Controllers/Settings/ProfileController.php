@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\SendWhatsAppOtpRequest;
 use App\Http\Requests\Auth\VerifyWhatsAppOtpRequest;
+use App\Http\Requests\Settings\AccountDeletionRequest;
 use App\Http\Requests\Settings\ProfileOnboardingRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use App\Models\User;
+use App\Services\AccountDeletionService;
 use App\Services\Auth\AuthenticationRedirector;
 use App\Services\WhatsAppOtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -45,11 +48,18 @@ class ProfileController extends Controller
         /** @var User $user */
         $user = $request->user();
 
+        $deletion = app(AccountDeletionService::class);
+
         return Inertia::render('settings/profile', [
             'verification' => $user->usesCampusEmail()
                 ? $this->whatsAppOtpService->status($user)
                 : null,
             'canManageCampusContact' => $user->usesCampusEmail(),
+            'accountDeletion' => [
+                'blockingReason' => $deletion->blockingReason($user),
+                'confirmationPhrase' => AccountDeletionService::CONFIRMATION_PHRASE,
+                'gracePeriodDays' => AccountDeletionService::GRACE_PERIOD_DAYS,
+            ],
             'meta' => ['robots' => 'noindex, nofollow'],
         ]);
     }
@@ -241,5 +251,28 @@ class ProfileController extends Controller
         $user = $request->user();
 
         return redirect()->to($this->authenticationRedirector->destinationFor($user));
+    }
+    /**
+     * Hapus akun atas permintaan pemiliknya.
+     *
+     * Data pribadi dianonimkan dan akun ditandai terhapus. Riwayat peminjaman
+     * tidak disentuh sehingga statistik sirkulasi tetap utuh. Sesi diakhiri
+     * agar pengguna langsung keluar.
+     */
+    public function destroyAccount(AccountDeletionRequest $request, AccountDeletionService $deletion): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $deletion->request($user, $request->validated('reason'));
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->to('/')->with(
+            'status',
+            'Akun Anda telah dihapus. Data pribadi sudah dihapus dan akun tidak dapat diakses lagi.'
+        );
     }
 }
