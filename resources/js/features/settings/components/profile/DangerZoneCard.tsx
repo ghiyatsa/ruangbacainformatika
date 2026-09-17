@@ -72,12 +72,8 @@ export function DangerZoneCard({ accountDeletion }: DangerZoneCardProps) {
                     <div className="space-y-1">
                         <h2 className="text-base font-semibold">Hapus Akun</h2>
                         <p className="text-sm text-muted-foreground">
-                            Menghapus akun berarti data pribadi Anda (nama,
-                            email, nomor WhatsApp, dan alamat) dihapus permanen,
-                            dan akun tidak dapat diakses lagi. Riwayat
-                            peminjaman tetap tersimpan sebagai data
-                            perpustakaan tanpa keterkaitan dengan identitas
-                            Anda.
+                            Hapus akun beserta data pribadi Anda secara
+                            permanen.
                         </p>
                     </div>
                 </div>
@@ -158,6 +154,14 @@ export function DangerZoneCard({ accountDeletion }: DangerZoneCardProps) {
                                 placeholder="Misalnya: tidak lagi meminjam buku"
                             />
                         </div>
+
+                        <p className="text-sm text-muted-foreground">
+                            Data pribadi Anda (nama, email, nomor WhatsApp,
+                            dan alamat) dihapus permanen, dan akun tidak dapat
+                            diakses lagi. Riwayat peminjaman tetap tersimpan
+                            sebagai data perpustakaan tanpa keterkaitan dengan
+                            identitas Anda.
+                        </p>
 
                         <p className="rounded-xl border border-border/60 bg-muted/40 p-3 text-sm text-muted-foreground">
                             Setelah diajukan, akun langsung tidak dapat
