@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Dashboard\Resources\Posts\Schemas;
 
 use App\Models\Post;
