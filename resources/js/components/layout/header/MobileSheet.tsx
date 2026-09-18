@@ -76,10 +76,10 @@ export function MobileSheet({
             >
                 <span className="relative flex size-5 items-center justify-center">
                     <Menu
-                        className={`absolute size-5 transition-all duration-200 ${mobileOpen ? 'rotate-90 opacity-0 scale-75' : 'rotate-0 opacity-100 scale-100'}`}
+                        className={`absolute size-5 transition-all duration-200 ${mobileOpen ? 'scale-75 rotate-90 opacity-0' : 'scale-100 rotate-0 opacity-100'}`}
                     />
                     <X
-                        className={`absolute size-5 transition-all duration-200 ${mobileOpen ? 'rotate-0 opacity-100 scale-100' : '-rotate-90 opacity-0 scale-75'}`}
+                        className={`absolute size-5 transition-all duration-200 ${mobileOpen ? 'scale-100 rotate-0 opacity-100' : 'scale-75 -rotate-90 opacity-0'}`}
                     />
                 </span>
             </Button>
@@ -114,7 +114,9 @@ export function MobileSheet({
                                 return (
                                     <Collapsible
                                         key={item.label}
-                                        defaultOpen={defaultOpenSections.includes(item.label)}
+                                        defaultOpen={defaultOpenSections.includes(
+                                            item.label,
+                                        )}
                                         className="rounded-2xl border border-border/80 bg-muted/60 dark:border-border/50 dark:bg-muted/20"
                                     >
                                         <CollapsibleTrigger asChild>
@@ -144,7 +146,9 @@ export function MobileSheet({
                                                     <Link
                                                         key={child.href}
                                                         href={child.href}
-                                                        onClick={() => setMobileOpen(false)}
+                                                        onClick={() =>
+                                                            setMobileOpen(false)
+                                                        }
                                                         className={[
                                                             'flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors',
                                                             isActive(child.href)
@@ -187,7 +191,11 @@ export function MobileSheet({
 
                     {!auth?.user ? (
                         <div className="mt-3 border-t border-border/60 pt-3">
-                            <Button asChild className="h-11 w-full rounded-xl" onClick={() => setMobileOpen(false)}>
+                            <Button
+                                asChild
+                                className="h-11 w-full rounded-xl"
+                                onClick={() => setMobileOpen(false)}
+                            >
                                 <Link href={login.url()}>Masuk</Link>
                             </Button>
                         </div>

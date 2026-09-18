@@ -1,5 +1,11 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, BookOpen, BookText, Footprints, Search } from 'lucide-react';
+import {
+    ArrowRight,
+    BookOpen,
+    BookText,
+    Footprints,
+    Search,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import CountUp from '@/components/animated/CountUp';
 import { Kbd } from '@/components/ui/kbd';

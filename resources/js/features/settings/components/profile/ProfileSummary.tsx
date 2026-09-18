@@ -44,7 +44,9 @@ export function ProfileSummary({
                     {showWhatsapp ? (
                         <div className="flex items-center gap-2">
                             <Phone className="h-4 w-4 shrink-0" />
-                            <span>{whatsapp || 'Nomor WhatsApp belum diisi'}</span>
+                            <span>
+                                {whatsapp || 'Nomor WhatsApp belum diisi'}
+                            </span>
                         </div>
                     ) : null}
                 </div>

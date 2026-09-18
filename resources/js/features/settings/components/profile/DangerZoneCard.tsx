@@ -156,17 +156,17 @@ export function DangerZoneCard({ accountDeletion }: DangerZoneCardProps) {
                         </div>
 
                         <p className="text-sm text-muted-foreground">
-                            Data pribadi Anda (nama, email, nomor WhatsApp,
-                            dan alamat) dihapus permanen, dan akun tidak dapat
+                            Data pribadi Anda (nama, email, nomor WhatsApp, dan
+                            alamat) dihapus permanen, dan akun tidak dapat
                             diakses lagi. Riwayat peminjaman tetap tersimpan
                             sebagai data perpustakaan tanpa keterkaitan dengan
                             identitas Anda.
                         </p>
 
                         <p className="rounded-xl border border-border/60 bg-muted/40 p-3 text-sm text-muted-foreground">
-                            Setelah diajukan, akun langsung tidak dapat
-                            diakses. Hubungi pengelola dalam {gracePeriodDays}{' '}
-                            hari bila Anda berubah pikiran.
+                            Setelah diajukan, akun langsung tidak dapat diakses.
+                            Hubungi pengelola dalam {gracePeriodDays} hari bila
+                            Anda berubah pikiran.
                         </p>
 
                         {error ? (

@@ -249,65 +249,62 @@ export default function ReceiptPrintPage({ receipt }: Props) {
                             {receipt.batch_items &&
                             receipt.batch_items.length > 1 ? (
                                 <div className="mt-4 ml-6 border-t border-neutral-200 pt-3 sm:ml-8">
-                                        <p className="mb-2 text-xs font-bold text-neutral-700">
-                                            Daftar Buku Diserahkan Dalam Batch
-                                            Ini ({receipt.batch_items.length}{' '}
-                                            Judul Buku):
-                                        </p>
-                                        <table className="w-full border border-neutral-300 text-left text-xs">
-                                            <thead className="bg-neutral-100 text-neutral-700">
-                                                <tr>
-                                                    <th className="w-8 border-b border-neutral-300 p-1.5 text-center">
-                                                        No
-                                                    </th>
-                                                    <th className="border-b border-neutral-300 p-1.5">
-                                                        Judul Buku
-                                                    </th>
-                                                    <th className="border-b border-neutral-300 p-1.5">
-                                                        Penulis / Penerbit
-                                                    </th>
-                                                    <th className="w-16 border-b border-neutral-300 p-1.5 text-center">
-                                                        Jml
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {receipt.batch_items.map(
-                                                    (item, idx) => (
-                                                        <tr
-                                                            key={item.id}
-                                                            className="border-b border-neutral-200"
-                                                        >
-                                                            <td className="p-1.5 text-center align-top">
-                                                                {idx + 1}
-                                                            </td>
-                                                            <td className="p-1.5 align-top font-semibold text-neutral-900">
-                                                                {item.title}
-                                                            </td>
-                                                            <td className="p-1.5 align-top text-neutral-700">
-                                                                {[
-                                                                    item.author_names,
-                                                                    item.publisher_name,
-                                                                ]
-                                                                    .filter(
-                                                                        Boolean,
-                                                                    )
-                                                                    .join(
-                                                                        ' • ',
-                                                                    ) || '-'}
-                                                            </td>
-                                                            <td className="p-1.5 text-center align-top whitespace-nowrap">
-                                                                {item.copies_count ??
-                                                                    1}{' '}
-                                                                eks
-                                                            </td>
-                                                        </tr>
-                                                    ),
-                                                )}
-                                            </tbody>
-                                        </table>
-                                     </div>
-                                 ) : null}
+                                    <p className="mb-2 text-xs font-bold text-neutral-700">
+                                        Daftar Buku Diserahkan Dalam Batch Ini (
+                                        {receipt.batch_items.length} Judul
+                                        Buku):
+                                    </p>
+                                    <table className="w-full border border-neutral-300 text-left text-xs">
+                                        <thead className="bg-neutral-100 text-neutral-700">
+                                            <tr>
+                                                <th className="w-8 border-b border-neutral-300 p-1.5 text-center">
+                                                    No
+                                                </th>
+                                                <th className="border-b border-neutral-300 p-1.5">
+                                                    Judul Buku
+                                                </th>
+                                                <th className="border-b border-neutral-300 p-1.5">
+                                                    Penulis / Penerbit
+                                                </th>
+                                                <th className="w-16 border-b border-neutral-300 p-1.5 text-center">
+                                                    Jml
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {receipt.batch_items.map(
+                                                (item, idx) => (
+                                                    <tr
+                                                        key={item.id}
+                                                        className="border-b border-neutral-200"
+                                                    >
+                                                        <td className="p-1.5 text-center align-top">
+                                                            {idx + 1}
+                                                        </td>
+                                                        <td className="p-1.5 align-top font-semibold text-neutral-900">
+                                                            {item.title}
+                                                        </td>
+                                                        <td className="p-1.5 align-top text-neutral-700">
+                                                            {[
+                                                                item.author_names,
+                                                                item.publisher_name,
+                                                            ]
+                                                                .filter(Boolean)
+                                                                .join(' • ') ||
+                                                                '-'}
+                                                        </td>
+                                                        <td className="p-1.5 text-center align-top whitespace-nowrap">
+                                                            {item.copies_count ??
+                                                                1}{' '}
+                                                            eks
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : null}
 
                             <p className="text-justify text-neutral-800">
                                 Telah menyelesaikan penyerahan naskah / dokumen{' '}
