@@ -1,7 +1,6 @@
 User-agent: *
 Disallow: /admin/
-Disallow: /kiosk/
 Disallow: /login
 Disallow: /register
 
-Sitemap: https://ruangbacainformatika.ghiyatsa.web.id/sitemap.xml
+Sitemap: https://ruangbacainformatika.unimal.ac.id/sitemap.xml

@@ -113,6 +113,5 @@ Route::middleware('auth')->group(function () {
         ->name('documents.file');
 });
 
-require __DIR__.'/kiosk.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/settings.php';

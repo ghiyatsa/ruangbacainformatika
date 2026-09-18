@@ -39,13 +39,13 @@
 
 ### High-Impact Files
 
-- route publik dan layanan: `routes/web.php`, `routes/auth.php`, `routes/settings.php`, `routes/kiosk.php`
+- route publik dan layanan: `routes/web.php`, `routes/auth.php`, `routes/settings.php`
 - shared auth props: `app/Http/Middleware/HandleInertiaRequests.php`
 - redirect auth: `app/Services/Auth/AuthenticationRedirector.php`
 - login Google: `app/Http/Controllers/Auth/GoogleController.php`
 - verifikasi WhatsApp: `app/Http/Controllers/Auth/WhatsAppVerificationController.php`, `app/Services/WhatsAppOtpService.php`
 - loan flow: `app/Services/LoanDraftService.php`, `app/Http/Controllers/LoanRequestController.php`, `app/Http/Controllers/LoanHistoryController.php`
-- kiosk flow: `app/Http/Controllers/KioskController.php`, `app/Services/MemberRegistrationClaimService.php`
+- kiosk API (klien Flutter desktop, bukan UI web): `routes/api.php`, `app/Http/Controllers/Api/Kiosk/KioskApiController.php`, `app/Services/MemberRegistrationClaimService.php`
 - admin panel: `app/Providers/Filament/AdminPanelProvider.php`, `app/Filament/Pages`, `app/Filament/Resources`
 
 ### Documentation In Repo

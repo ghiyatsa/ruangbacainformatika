@@ -17,7 +17,7 @@ Aplikasi ini dirancang dengan arsitektur modern untuk mendukung kebutuhan akadem
 
 - **🔍 Katalog Publik & Pencarian Pintar**: Modul pencarian cepat dan komprehensif untuk buku cetak dan karya ilmiah (Skripsi, Tesis, Laporan Magang).
 - **🔑 Google Authentication & Single Sign-On**: Registrasi dan login aman menggunakan Google Account terverifikasi.
-- **📱 Layanan Mandiri (Self-Service Kiosk)**:
+- **📱 Layanan Mandiri (Self-Service Kiosk)**: aplikasi desktop (Flutter) untuk perangkat fisik di perpustakaan, terhubung ke API `/api/kiosk/*`.
   - Pencatatan buku kunjungan harian pengunjung.
   - Klaim dan cetak kartu anggota.
   - Peminjaman dan pengembalian mandiri berbasis pemindaian QR Code.
@@ -105,7 +105,7 @@ GOOGLE_REDIRECT_URL=http://localhost:8000/auth/google/callback
 FONNTE_API_URL=https://api.fonnte.com
 FONNTE_API_TOKEN=your_fonnte_token
 
-# Cloudflare Turnstile CAPTCHA (Untuk keamanan form Kiosk)
+# Cloudflare Turnstile CAPTCHA (untuk keamanan form publik)
 TURNSTILE_SITE_KEY=your_turnstile_site_key
 TURNSTILE_SECRET=your_turnstile_secret
 

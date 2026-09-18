@@ -250,16 +250,6 @@ class AppServiceProvider extends ServiceProvider
                     'Permintaan layanan mandiri sedang dibatasi sebentar. Coba lagi sesaat.',
                 ));
         });
-
-        RateLimiter::for('kiosk-consume', function (Request $request): Limit {
-            return Limit::perMinute(20)
-                ->by($this->kioskThrottleKey($request, 'consume'))
-                ->response(fn (Request $request, array $headers) => $this->kioskThrottleResponse(
-                    $request,
-                    $headers,
-                    'Pemrosesan QR sedang dibatasi sebentar. Coba lagi sesaat.',
-                ));
-        });
     }
 
     protected function kioskThrottleKey(Request $request, string $bucket): string

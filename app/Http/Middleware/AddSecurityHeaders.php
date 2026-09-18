@@ -26,7 +26,7 @@ class AddSecurityHeaders
         $response->headers->set('Content-Security-Policy', $this->buildContentSecurityPolicy($request));
         $response->headers->set(
             'Permissions-Policy',
-            $this->buildPermissionsPolicy($request),
+            $this->buildPermissionsPolicy(),
         );
 
         if ($request->isSecure()) {
@@ -95,12 +95,8 @@ class AddSecurityHeaders
         return implode('; ', $directives);
     }
 
-    protected function buildPermissionsPolicy(Request $request): string
+    protected function buildPermissionsPolicy(): string
     {
-        $cameraPolicy = $request->is('kiosk') || $request->is('kiosk/*')
-            ? 'camera=(self)'
-            : 'camera=()';
-
-        return "{$cameraPolicy}, geolocation=(), microphone=(), identity-credentials-get=(self \"https://accounts.google.com\")";
+        return 'camera=(), geolocation=(), microphone=(), identity-credentials-get=(self "https://accounts.google.com")';
     }
 }

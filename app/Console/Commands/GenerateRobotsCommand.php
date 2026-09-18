@@ -15,7 +15,6 @@ class GenerateRobotsCommand extends Command
         $content = implode("\n", [
             'User-agent: *',
             'Disallow: /admin/',
-            'Disallow: /kiosk/',
             'Disallow: /login',
             'Disallow: /register',
             '',

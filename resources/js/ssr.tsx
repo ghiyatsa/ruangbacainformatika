@@ -41,8 +41,6 @@ createServer((page) =>
                     return null;
                 case name.startsWith('auth/'):
                     return AuthLayout;
-                case name.startsWith('kiosk/'):
-                    return null;
                 default:
                     return AppLayout;
             }

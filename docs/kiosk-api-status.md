@@ -28,7 +28,8 @@ Keputusan produk: **aplikasi Flutter tidak menampilkan layar PIN.**
 - API key **berlaku permanen** sampai dirotasi/dicabut dari server, dan dapat dicabut
   **tanpa membangun ulang** aplikasi.
 
-Device token 24 jam **tetap didukung** (untuk kiosk web yang belum dimigrasi).
+Device token 24 jam **tetap didukung** untuk aktivasi perangkat lewat `devices/activate`
+(teknisinya memakai PIN sekali), lalu klien Flutter memakai API key untuk permintaan berikutnya.
 
 ### Mengelola API key
 
@@ -53,6 +54,9 @@ Masukkan key ke konfigurasi Flutter: header `X-Kiosk-Api-Key: <key>`.
 | `..._add_kiosk_device_id_to_member_registration_claims_table.php` | Kolom `kiosk_device_id` |
 | `tests/Feature/Kiosk/KioskApiTest.php` | 16 test (device token) |
 | `tests/Feature/Kiosk/KioskApiKeyTest.php` | 8 test (API key) |
+| `tests/Feature/Kiosk/KioskLoanApiTest.php` | 14 test (pinjam/kembali) — dipindah dari tes UI web |
+| `tests/Feature/Kiosk/KioskValidationApiTest.php` | 10 test (registrasi anggota + buku tamu) — dipindah dari tes UI web |
+| `tests/Feature/Kiosk/KioskInfrastructureTest.php` | 3 test (rate limiter + kebijakan jam operasional) — dipindah dari tes UI web |
 
 **Tidak ada logika bisnis yang diduplikasi** — controller hanya menjembatani HTTP ↔ Action
 (`BorrowBooksFromKiosk`, `ReturnBooksFromKiosk`, `SearchKioskBooks`) dan Service yang sama.
@@ -92,8 +96,12 @@ terus menjalankan kode lama.
 
 ---
 
-## Belum dikerjakan (menunggu keputusan)
+## Riwayat migrasi
 
 1. **Halaman admin** untuk kelola perangkat/API key — tidak diperlukan sekarang (cukup artisan).
 2. **Idempotency-Key** untuk borrow/return — menunggu kebutuhan nyata dari Flutter.
-3. **Penghapusan kiosk web** — hanya setelah aplikasi Flutter terbukti stabil.
+3. **Penghapusan kiosk web** — ✅ **selesai**. `routes/kiosk.php`, `KioskController`,
+   `EnsureKioskPinIsValid`, komponen React `features/kiosk` + `pages/kiosk`, dan rate limiter
+   `kiosk-consume` sudah dihapus. Cakupan tes yang menguji logika bisnis yang masih hidup
+   dipindahkan ke tes API (`KioskLoanApiTest`, `KioskValidationApiTest`,
+   `KioskInfrastructureTest`) — bukan dibuang.

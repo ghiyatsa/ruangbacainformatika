@@ -29,16 +29,6 @@ test('web responses include baseline security headers', function () {
         ->toContain("'nonce-");
 });
 
-test('kiosk responses allow camera access for the same origin only', function () {
-    $response = get(route('kiosk.index'));
-
-    $response->assertOk()
-        ->assertHeader(
-            'Permissions-Policy',
-            'camera=(self), geolocation=(), microphone=(), identity-credentials-get=(self "https://accounts.google.com")',
-        );
-});
-
 test('lighthouse requests disable google one tap while keeping google login configured', function () {
     config()->set('services.google.client_id', 'google-client-id');
     config()->set('services.google.client_secret', 'google-client-secret');
