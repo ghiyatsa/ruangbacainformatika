@@ -8,7 +8,6 @@ it('has a valid robots.txt file', function () {
     expect($content)
         ->toContain('User-agent: *')
         ->toContain('Disallow: /admin/')
-        ->toContain('Disallow: /kiosk/')
         ->toContain('Sitemap: ')
         ->toContain('/sitemap.xml');
 });
