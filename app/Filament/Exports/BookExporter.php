@@ -2,16 +2,18 @@
 
 namespace App\Filament\Exports;
 
+use App\Filament\Exports\Concerns\SanitizesSpreadsheetValues;
 use App\Models\Book;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
-use Illuminate\Support\Str;
 
 class BookExporter extends Exporter
 {
+    use SanitizesSpreadsheetValues;
+
     protected static ?string $model = Book::class;
 
     public static function getColumns(): array
@@ -101,18 +103,5 @@ class BookExporter extends Exporter
     public static function modifyQuery(Builder $query): Builder
     {
         return $query->with(['authors', 'categories', 'items']);
-    }
-
-    protected static function sanitizeForSpreadsheet(?string $value): string
-    {
-        $normalizedValue = trim((string) $value);
-
-        if ($normalizedValue === '') {
-            return '-';
-        }
-
-        return Str::startsWith($normalizedValue, ['=', '+', '-', '@'])
-            ? "'{$normalizedValue}"
-            : $normalizedValue;
     }
 }
