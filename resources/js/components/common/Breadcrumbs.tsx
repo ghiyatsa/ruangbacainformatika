@@ -62,7 +62,9 @@ export function Breadcrumbs({
                 {/* First item — shrink-0 agar tidak ikut menyusut */}
                 <BreadcrumbItem className={isSingle ? 'min-w-0' : 'shrink-0'}>
                     {isSingle ? (
-                        <BreadcrumbPage className="block truncate">{first.title}</BreadcrumbPage>
+                        <BreadcrumbPage className="block truncate">
+                            {first.title}
+                        </BreadcrumbPage>
                     ) : (
                         renderNonLastItem(first)
                     )}
@@ -71,14 +73,15 @@ export function Breadcrumbs({
                 {!isSingle && <BreadcrumbSeparator className="shrink-0" />}
 
                 {/* Middle items — desktop only, shrink-0 */}
-                {isCollapsible && middle.map((item, i) => (
-                    <Fragment key={`bc-mid-${i}`}>
-                        <BreadcrumbItem className="hidden shrink-0 sm:inline-flex">
-                            {renderNonLastItem(item)}
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator className="hidden shrink-0 sm:inline-flex" />
-                    </Fragment>
-                ))}
+                {isCollapsible &&
+                    middle.map((item, i) => (
+                        <Fragment key={`bc-mid-${i}`}>
+                            <BreadcrumbItem className="hidden shrink-0 sm:inline-flex">
+                                {renderNonLastItem(item)}
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator className="hidden shrink-0 sm:inline-flex" />
+                        </Fragment>
+                    ))}
 
                 {/* Ellipsis — mobile only */}
                 {isCollapsible && (
@@ -94,7 +97,9 @@ export function Breadcrumbs({
                 {!isSingle && (
                     <BreadcrumbItem className="min-w-0">
                         <BreadcrumbPage className="block truncate">
-                            {last.title ?? <Skeleton className="h-4 w-24 animate-pulse rounded-md" />}
+                            {last.title ?? (
+                                <Skeleton className="h-4 w-24 animate-pulse rounded-md" />
+                            )}
                         </BreadcrumbPage>
                     </BreadcrumbItem>
                 )}

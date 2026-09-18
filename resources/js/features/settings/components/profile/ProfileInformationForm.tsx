@@ -75,8 +75,8 @@ export function ProfileInformationForm({
                             </div>
                         ) : (
                             <p className="rounded-lg border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
-                                Alamat domisili hanya diperlukan untuk akun dengan email kampus
-                                yang dapat meminjam buku.
+                                Alamat domisili hanya diperlukan untuk akun
+                                dengan email kampus yang dapat meminjam buku.
                             </p>
                         )}
 

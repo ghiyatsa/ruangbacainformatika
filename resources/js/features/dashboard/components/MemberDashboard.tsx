@@ -61,10 +61,7 @@ function formatDate(value: string | null): string {
     });
 }
 
-export function MemberDashboard({
-    counts,
-    submissions,
-}: MemberDashboardProps) {
+export function MemberDashboard({ counts, submissions }: MemberDashboardProps) {
     const cards = [
         {
             key: 'pending',

@@ -55,7 +55,8 @@ export function useBookCollectionViewMode(): readonly [
     useEffect(() => {
         const handleStorage = (event: StorageEvent) => {
             if (event.key === STORAGE_KEY && event.newValue) {
-                const nextMode: BookCollectionViewMode = event.newValue === 'list' ? 'list' : 'grid';
+                const nextMode: BookCollectionViewMode =
+                    event.newValue === 'list' ? 'list' : 'grid';
 
                 if (currentViewMode !== nextMode) {
                     currentViewMode = nextMode;
