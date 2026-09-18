@@ -4,20 +4,26 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Author;
 use App\Models\Book;
-use App\Models\Category;
 use App\Models\Post;
 use App\Models\SearchHistory;
 use App\Models\Skripsi;
 use App\Models\User;
-use App\Services\Search\SearchTermCorrector;
+use App\Services\Search\BookSearchRanker;
+use App\Services\Search\SearchSuggestionBuilder;
+use App\Services\Search\SearchTermResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
+    public function __construct(
+        protected BookSearchRanker $bookRanker,
+        protected SearchTermResolver $terms,
+        protected SearchSuggestionBuilder $suggestionBuilder,
+    ) {}
+
     /**
      * Get list of search suggestions or quick spotlight results.
      */
@@ -37,11 +43,7 @@ class SearchController extends Controller
             ]);
         }
 
-        $queryWords = collect(preg_split('/\s+/', mb_strtolower($q), -1, PREG_SPLIT_NO_EMPTY))
-            ->map(fn (string $word): string => $this->sanitizeLikeTerm($word))
-            ->filter()
-            ->values()
-            ->all();
+        $queryWords = $this->terms->words($q);
 
         if (empty($queryWords)) {
             return response()->json($isLegacy ? [] : [
@@ -58,7 +60,7 @@ class SearchController extends Controller
             ->published()
             ->search($q)
             ->select(['books.id', 'books.title', 'books.slug', 'books.view_count'])
-            ->tap(fn (Builder $query) => $this->applyBookSearchRanking($query, $q))
+            ->tap(fn (Builder $query) => $this->bookRanker->apply($query, $q))
             ->with(['authors:id,name', 'categories:id,name,slug'])
             ->limit(5)
             ->get()
@@ -113,24 +115,20 @@ class SearchController extends Controller
 
         $suggestions = array_merge(
             $suggestions,
-            $this->collectMultiFieldSuggestions($queryWords, 6 - count($suggestions), $isMember),
+            $this->suggestionBuilder->collectMultiField($queryWords, 6 - count($suggestions), $isMember),
         );
 
         // Koreksi typo jika saran masih kosong
         if (empty($suggestions)) {
-            $corrected = app(SearchTermCorrector::class)->correctQuery($q);
+            $corrected = $this->terms->correct($q);
 
             if ($corrected !== null) {
-                $correctedWords = collect(preg_split('/\s+/', $corrected, -1, PREG_SPLIT_NO_EMPTY))
-                    ->map(fn (string $word): string => $this->sanitizeLikeTerm($word))
-                    ->filter()
-                    ->values()
-                    ->all();
+                $correctedWords = $this->terms->words($corrected);
 
                 if (! empty($correctedWords)) {
                     $suggestions = array_merge(
                         $suggestions,
-                        $this->collectMultiFieldSuggestions($correctedWords, 6, $isMember),
+                        $this->suggestionBuilder->collectMultiField($correctedWords, 6, $isMember),
                     );
                 }
             }
@@ -140,7 +138,7 @@ class SearchController extends Controller
         $seen = [];
 
         foreach ($suggestions as $suggestion) {
-            $formatted = $this->formatSuggestion($suggestion, $q);
+            $formatted = $this->suggestionBuilder->format($suggestion);
             $normalized = mb_strtolower($formatted);
 
             if (isset($seen[$normalized])) {
@@ -166,68 +164,6 @@ class SearchController extends Controller
                 'posts' => $quickPosts->all(),
             ],
         ]);
-    }
-
-    /**
-     * Apply field-priority ordering for book search results.
-     *
-     * Exact title / prefix title > author > publisher / category > description.
-     */
-    protected function applyBookSearchRanking(Builder $query, string $search): void
-    {
-        $exact = $search;
-        $prefix = "{$search}%";
-        $wildcard = "%{$search}%";
-
-        // Setiap kata yang muncul pada judul menambah skor, sehingga karya
-        // yang judulnya memuat lebih banyak kata kunci terangkat ke atas.
-        $kata = preg_split('/[^\p{L}\p{N}]+/u', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
-        $kata = array_values(array_unique(array_map(
-            fn (string $k): string => mb_strtolower($k),
-            $kata,
-        )));
-
-        $skorJudul = '';
-        $binding = [];
-        foreach ($kata as $k) {
-            // Bonus lebih besar bila kata ada pada judul atau subjudul.
-            $skorJudul .= ' + (CASE WHEN LOWER(books.title) LIKE ? THEN 25 ELSE 0 END)';
-            $skorJudul .= ' + (CASE WHEN LOWER(books.subtitle) LIKE ? THEN 8 ELSE 0 END)';
-            $binding[] = '%'.$k.'%';
-            $binding[] = '%'.$k.'%';
-        }
-
-        // Bonus kedekatan: frasa utuh di judul menandakan kecocokan terkuat.
-        $bonus = $kata !== [] && count($kata) > 1 ? 60 : 0;
-
-        $query
-            ->selectRaw(
-                'CASE
-                    WHEN books.title = ? THEN 100
-                    WHEN books.title LIKE ? THEN 80
-                    WHEN books.title LIKE ? THEN 60
-                    WHEN books.subtitle LIKE ? THEN 40
-                    WHEN books.isbn LIKE ? OR books.issn LIKE ? OR books.ddc_code LIKE ? THEN 30
-                    WHEN books.description LIKE ? THEN 10
-                    ELSE 5
-                END
-                + '.($bonus > 0 ? '60' : '0').$skorJudul.'
-                as search_priority',
-                [
-                    $exact,
-                    $prefix,
-                    $wildcard,
-                    $wildcard,
-                    $wildcard,
-                    $wildcard,
-                    $wildcard,
-                    $wildcard,
-                    ...$binding,
-                ]
-            )
-            ->orderByDesc('search_priority')
-            ->orderByDesc('books.view_count')
-            ->orderBy('books.title');
     }
 
     /**
@@ -268,187 +204,5 @@ class SearchController extends Controller
             )
             ->orderByDesc('search_priority')
             ->orderBy('title');
-    }
-
-    /**
-     * Buang wildcard LIKE yang bisa mengubah semantik pencarian.
-     */
-    protected function sanitizeLikeTerm(string $term): string
-    {
-        return str_replace(['\\', '%', '_'], '', $term);
-    }
-
-    /**
-     * Kumpulkan saran teks berbasis frasa pencarian organik (Google/Gramedia style).
-     *
-     * @param  list<string>  $words
-     * @return list<string>
-     */
-    protected function collectMultiFieldSuggestions(array $words, int $needed, bool $includeAcademic = true): array
-    {
-        if ($needed <= 0 || $words === []) {
-            return [];
-        }
-
-        $results = [];
-        $remaining = $needed;
-        $prefix = implode(' ', $words);
-
-        // 1. Kategori / Topik yang cocok (misal: "Kecerdasan Buatan", "Pemrograman Web")
-        $categories = Category::query()
-            ->where(function (Builder $query) use ($words) {
-                foreach ($words as $word) {
-                    $query->where('name', 'like', "%{$word}%");
-                }
-            })
-            ->limit($remaining)
-            ->pluck('name')
-            ->all();
-
-        foreach ($categories as $cat) {
-            $results[] = mb_strtolower($cat);
-            $remaining--;
-        }
-
-        // 2. Pengarang / Dosen / Author Langsung
-        if ($remaining > 0) {
-            $authors = Author::query()
-                ->where(function (Builder $query) use ($words) {
-                    foreach ($words as $word) {
-                        $query->where('name', 'like', "%{$word}%");
-                    }
-                })
-                ->limit($remaining)
-                ->pluck('name')
-                ->all();
-
-            foreach ($authors as $author) {
-                $results[] = mb_strtolower($author);
-                $remaining--;
-            }
-        }
-
-        // 3. Ekstrak frasa 2-4 kata dari judul buku yang relevan (bukan seluruh judul panjang)
-        if ($remaining > 0) {
-            $titles = Book::query()
-                ->published()
-                ->where(function (Builder $query) use ($words) {
-                    foreach ($words as $word) {
-                        $query->where('title', 'like', "%{$word}%");
-                    }
-                })
-                ->limit(10)
-                ->pluck('title')
-                ->all();
-
-            foreach ($titles as $title) {
-                if ($remaining <= 0) {
-                    break;
-                }
-
-                $phrase = $this->extractMeaningfulPhrase($title, $words);
-                if ($phrase !== null && ! in_array($phrase, $results, true)) {
-                    $results[] = $phrase;
-                    $remaining--;
-                }
-            }
-        }
-
-        // 4. Kata Kunci Skripsi / Karya Ilmiah
-        if ($includeAcademic && $remaining > 0) {
-            $keywordsList = Skripsi::query()
-                ->whereNotNull('keywords')
-                ->where(function (Builder $query) use ($words) {
-                    foreach ($words as $word) {
-                        $query->where('keywords', 'like', "%{$word}%");
-                    }
-                })
-                ->limit(10)
-                ->pluck('keywords')
-                ->all();
-
-            foreach ($keywordsList as $kwString) {
-                if ($remaining <= 0) {
-                    break;
-                }
-
-                $items = array_map('trim', explode(',', $kwString));
-                foreach ($items as $item) {
-                    $itemLower = mb_strtolower($item);
-                    $matchesAll = true;
-                    foreach ($words as $w) {
-                        if (! str_contains($itemLower, $w)) {
-                            $matchesAll = false;
-                            break;
-                        }
-                    }
-
-                    if ($matchesAll && mb_strlen($itemLower) >= 3 && ! in_array($itemLower, $results, true)) {
-                        $results[] = $itemLower;
-                        $remaining--;
-                        if ($remaining <= 0) {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        return array_values(array_unique(array_filter($results)));
-    }
-
-    /**
-     * Potong judul panjang menjadi frasa query organik atau judul yang bersih.
-     *
-     * @param  list<string>  $words
-     */
-    protected function extractMeaningfulPhrase(string $title, array $words): ?string
-    {
-        $clean = preg_replace('/[^\p{L}\p{N}\s\-\–]/u', '', mb_strtolower($title));
-
-        if ($clean === null || trim($clean) === '') {
-            return null;
-        }
-
-        $tokens = preg_split('/\s+/', trim($clean), -1, PREG_SPLIT_NO_EMPTY) ?: [];
-
-        // Bila judul <= 8 kata, gunakan seluruh judul bersih agar tetap bermakna penuh
-        if (count($tokens) <= 8) {
-            return $clean;
-        }
-
-        // Untuk judul sangat panjang, potong 4-5 kata di sekitar kata kunci
-        $targetIndex = 0;
-        foreach ($tokens as $idx => $token) {
-            foreach ($words as $w) {
-                if (str_contains($token, $w)) {
-                    $targetIndex = $idx;
-                    break 2;
-                }
-            }
-        }
-
-        $start = max(0, $targetIndex - 1);
-        $slice = array_slice($tokens, $start, 5);
-
-        return implode(' ', $slice);
-    }
-
-    /**
-     * Format a search suggestion like Google Autocomplete.
-     */
-    protected function formatSuggestion(string $text, string $query): string
-    {
-        $textLower = mb_strtolower($text);
-        // Remove special characters except letters, numbers, spaces, and hyphens
-        $textClean = preg_replace('/[^\p{L}\p{N}\s\-\–]/u', '', $textLower);
-
-        $queryLower = mb_strtolower($query);
-        $queryWords = preg_split('/\s+/', $queryLower, -1, PREG_SPLIT_NO_EMPTY);
-        if (empty($queryWords)) {
-            return $textClean;
-        }
-
-        return $textClean;
     }
 }

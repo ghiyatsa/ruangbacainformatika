@@ -193,10 +193,12 @@ class KioskApiController extends Controller
             return response()->json(['books' => []]);
         }
 
-        $books = $searchKioskBooks->execute($search, $mode, $memberIdentifier);
+        $result = $searchKioskBooks->execute($search, $mode, $memberIdentifier);
 
         return response()->json([
-            'books' => BookResource::collection($books)->resolve(),
+            'books' => BookResource::collection($result->books)->resolve(),
+            'suggestions' => $result->suggestions,
+            'corrected_query' => $result->correctedQuery,
         ]);
     }
 
