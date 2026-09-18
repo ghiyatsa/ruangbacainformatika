@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.27.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.26.0...v1.27.0) (2026-09-18)
+
+
+### Features
+
+* **admin:** tampilkan keberhasilan sinkronisasi pada widget similaritas ([#102](https://github.com/ghiyatsa/ruangbacainformatika/issues/102)) ([0e9609c](https://github.com/ghiyatsa/ruangbacainformatika/commit/0e9609c61d0c61aab00796f45aca11084bc35f6a))
+
+
+### Bug Fixes
+
+* **a11y:** cegah fokus masuk ke panel menu mobile yang tertutup ([#104](https://github.com/ghiyatsa/ruangbacainformatika/issues/104)) ([0ac33b0](https://github.com/ghiyatsa/ruangbacainformatika/commit/0ac33b0ade99bfedd06b0f21cf796b37cdc7a1a1))
+
 ## [1.26.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.25.2...v1.26.0) (2026-09-17)
 
 
