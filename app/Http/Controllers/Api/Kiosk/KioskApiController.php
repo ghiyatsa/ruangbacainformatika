@@ -11,6 +11,7 @@ use App\Http\Requests\Kiosk\FindMemberRequest;
 use App\Http\Requests\Kiosk\RegisterMemberRequest;
 use App\Http\Requests\Kiosk\ReturnBookRequest;
 use App\Http\Requests\Kiosk\SearchBooksRequest;
+use App\Http\Requests\Kiosk\SubmitMemberVisitRequest;
 use App\Http\Requests\Kiosk\SubmitVisitRequest;
 use App\Http\Requests\Kiosk\VerifyPinRequest;
 use App\Http\Resources\BookResource;
@@ -21,6 +22,7 @@ use App\Models\VisitLog;
 use App\Repositories\SettingRepository;
 use App\Services\Kiosk\KioskDashboardStatsService;
 use App\Services\Kiosk\KioskMemberLookupService;
+use App\Services\KioskBorrowVerificationService;
 use App\Services\KioskPinManager;
 use App\Services\MemberRegistrationClaimService;
 use Illuminate\Http\JsonResponse;
@@ -43,6 +45,7 @@ class KioskApiController extends Controller
         protected KioskMemberLookupService $kioskMemberLookupService,
         protected MemberRegistrationClaimService $memberRegistrationClaimService,
         protected KioskDashboardStatsService $kioskDashboardStatsService,
+        protected KioskBorrowVerificationService $kioskBorrowVerificationService,
     ) {}
 
     /**
@@ -140,6 +143,36 @@ class KioskApiController extends Controller
             'visit' => [
                 'id' => $visit->getKey(),
                 'name' => $visit->name,
+                'visited_at' => $visit->visited_at?->toIso8601String(),
+            ],
+        ], 201);
+    }
+
+    /**
+     * Buku tamu cepat: catat kunjungan langsung dari scan Member Key anggota.
+     *
+     * Anggota hanya memindai QR-nya; nama, jenis pengunjung, identitas,
+     * instansi, dan nomor telepon diambil dari profil sehingga tidak ada
+     * satu kolom pun yang perlu diisi ulang di kiosk.
+     */
+    public function storeMemberVisit(SubmitMemberVisitRequest $request): JsonResponse
+    {
+        // consume() sekaligus memvalidasi dan menghanguskan token (sekali pakai).
+        $user = $this->kioskBorrowVerificationService->consume(
+            $request->validatedVerificationPayload(),
+        );
+
+        $visit = $this->recordKioskVisit(
+            $request,
+            $user,
+            'Buku tamu cepat via Member Key di kiosk',
+            $request->validatedPurpose(),
+        );
+
+        return response()->json([
+            'visit' => [
+                'id' => $visit->getKey(),
+                'name' => $user->name,
                 'visited_at' => $visit->visited_at?->toIso8601String(),
             ],
         ], 201);
@@ -330,7 +363,7 @@ class KioskApiController extends Controller
     /**
      * Catat kunjungan otomatis saat pinjam/kembali (selaras dengan kiosk web).
      */
-    protected function recordKioskVisit(Request $request, User $user, string $notes): void
+    protected function recordKioskVisit(Request $request, User $user, string $notes, string $purpose = 'borrow_return'): VisitLog
     {
         /** @var KioskDevice|null $device */
         $device = $request->attributes->get('kiosk_device');
@@ -345,14 +378,14 @@ class KioskApiController extends Controller
             default => VisitLog::VISITOR_TYPE_UMUM,
         };
 
-        VisitLog::query()->create([
+        return VisitLog::query()->create([
             'kiosk_device_id' => $device?->getKey(),
             'name' => $user->name,
             'visitor_type' => $visitorType,
             'identity_number' => $identityNumber ?: null,
             'institution' => str_ends_with($user->email, 'unimal.ac.id') ? 'Universitas Malikussaleh' : null,
             'phone' => $user->whatsapp ?: null,
-            'purpose' => 'borrow_return',
+            'purpose' => $purpose,
             'notes' => $notes,
             'visited_at' => now(),
         ]);

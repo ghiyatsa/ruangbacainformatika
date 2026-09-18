@@ -38,6 +38,10 @@ Route::prefix('kiosk')->group(function (): void {
             ->middleware('throttle:kiosk-submit')
             ->name('api.kiosk.visits.store');
 
+        Route::post('visits/member', [KioskApiController::class, 'storeMemberVisit'])
+            ->middleware('throttle:kiosk-submit')
+            ->name('api.kiosk.visits.member');
+
         Route::get('books/search', [KioskApiController::class, 'searchBooks'])
             ->middleware('throttle:kiosk-book-search')
             ->name('api.kiosk.books.search');
