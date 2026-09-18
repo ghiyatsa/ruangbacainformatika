@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.29.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.28.0...v1.29.0) (2026-09-18)
+
+
+### Features
+
+* **kiosk:** buku tamu cepat lewat scan Member Key anggota ([#108](https://github.com/ghiyatsa/ruangbacainformatika/issues/108)) ([b5de209](https://github.com/ghiyatsa/ruangbacainformatika/commit/b5de2099ceea102bc6fc848a01d8b9ea0ba95fac))
+
 ## [1.28.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.27.0...v1.28.0) (2026-09-18)
 
 
