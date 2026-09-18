@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.30.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.29.0...v1.30.0) (2026-09-18)
+
+
+### Features
+
+* **kiosk:** pakai mesin pencarian global pada pencarian buku kiosk ([68fae0d](https://github.com/ghiyatsa/ruangbacainformatika/commit/68fae0d06b955d95fcdde904e2a2b1ed81330599))
+
+
+### Bug Fixes
+
+* **config:** hapus link public/storage yang tidak terpakai ([26f2f8c](https://github.com/ghiyatsa/ruangbacainformatika/commit/26f2f8c9479d6e11a3eda5c3246b23d08c048a75))
+* **search:** perbaiki panggilan driver koneksi yang tidak ada di interface ([88ddf7d](https://github.com/ghiyatsa/ruangbacainformatika/commit/88ddf7d1f7eebd2668c96821d21891fc5df7ec69))
+
+
+### Performance Improvements
+
+* **kiosk:** hilangkan query Book per-iterasi saat meminjam ([210ddcc](https://github.com/ghiyatsa/ruangbacainformatika/commit/210ddcc1b42c6782be5f5986a0a4480827c517ce))
+* **search:** bangun kamus koreksi secara bertahap ([6ef94f6](https://github.com/ghiyatsa/ruangbacainformatika/commit/6ef94f6e03969da438c1518ab62de66f31fbedb9))
+
 ## [1.29.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.28.0...v1.29.0) (2026-09-18)
 
 
