@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Authors;
 
 use App\Filament\Resources\Authors\Pages\CreateAuthor;

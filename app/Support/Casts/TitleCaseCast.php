@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support\Casts;
 
 use App\Support\TextStandardizer;
@@ -15,6 +17,10 @@ class TitleCaseCast implements CastsAttributes
 
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string
     {
-        return TextStandardizer::titleCase($value);
+        if (! is_scalar($value)) {
+            return null;
+        }
+
+        return TextStandardizer::titleCase((string) $value);
     }
 }

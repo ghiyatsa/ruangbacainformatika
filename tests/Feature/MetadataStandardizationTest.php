@@ -95,3 +95,23 @@ it('keeps title case cast harmless on already clean values', function () {
     expect($book->title)->toBe('Clean Code')
         ->and($book->subtitle)->toBe('A Handbook Of Agile Software Craftsmanship');
 });
+
+it('accepts non-string scalars on integer metadata columns', function () {
+    $book = Book::factory()->create([
+        'pages' => 320,
+        'ddc_code' => 5,
+    ]);
+
+    expect($book->refresh()->pages)->toBe('320')
+        ->and($book->ddc_code)->toBe('5');
+});
+
+it('ignores non-scalar values on squish and title case casts', function () {
+    $book = new Book;
+    $book->pages = ['tidak', 'valid'];
+    $book->title = ['tidak', 'valid'];
+
+    expect($book->getAttributes())->toHaveKey('pages')
+        ->and($book->getAttributes()['pages'])->toBeNull()
+        ->and($book->getAttributes()['title'])->toBeNull();
+});

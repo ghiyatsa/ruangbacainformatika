@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Book;
@@ -74,6 +76,12 @@ class KioskLoanService
         $loan = DB::transaction(function () use ($member, $bookIds): Loan {
             $borrowedAt = now();
 
+            // Ambil semua buku sekaligus agar tidak ada query per-iterasi.
+            $booksById = Book::query()
+                ->whereKey($bookIds)
+                ->get(['id', 'title', 'is_borrowable'])
+                ->keyBy('id');
+
             $loan = Loan::query()->create([
                 'user_id' => $member->id,
                 'status' => Loan::STATUS_BORROWED,
@@ -90,7 +98,7 @@ class KioskLoanService
                     ->lockForUpdate()
                     ->first();
 
-                $book = Book::query()->find($bookId);
+                $book = $booksById->get($bookId);
 
                 if (! $bookItem) {
                     if ($book && ! $book->is_borrowable) {

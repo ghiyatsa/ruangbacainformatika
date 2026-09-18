@@ -84,9 +84,9 @@ return [
     |
     */
 
+    // Prefix URL file publik aplikasi ini adalah `assets`, bukan `storage`.
     'links' => [
         public_path('assets') => storage_path('app/public'),
-        public_path('storage') => storage_path('app/public'),
     ],
 
 ];

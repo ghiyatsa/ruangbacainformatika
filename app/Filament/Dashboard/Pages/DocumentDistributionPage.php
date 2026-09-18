@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Dashboard\Pages;
 
 use App\Filament\Resources\Authors\Schemas\AuthorForm;
@@ -212,166 +214,155 @@ class DocumentDistributionPage extends Page
 
     protected function buildInternshipTab(bool $isOpen = true): Tab
     {
-        $submission = $this->kpSubmission;
-        $isApproved = (bool) $submission?->isApproved();
-        $isRevision = (bool) $submission?->isRevision();
-        $isPending = (bool) $submission?->isPending();
-        $isFormDisabled = $isApproved || (! $isOpen && ! $isRevision);
-
-        return Tab::make('Laporan Kerja Praktik (KP)')
-            ->icon(Heroicon::OutlinedClipboardDocumentCheck)
-            ->badge($submission ? $submission->statusLabel() : 'Belum')
-            ->badgeColor($submission ? $submission->statusColor() : 'gray')
-            ->schema([
-                Form::make([
-                    Section::make('Laporan Kerja Praktik Disetujui')
-                        ->description(fn (): string => 'Laporan KP telah diverifikasi dan diterbitkan di katalog resmi.'.($submission?->receipt_number ? ' Nomor Tanda Terima: '.$submission->receipt_number : ''))
-                        ->icon(Heroicon::OutlinedCheckCircle)
-                        ->iconColor('success')
-                        ->visible(fn (): bool => $isApproved)
-                        ->headerActions([
-                            Action::make('printKpReceipt')
-                                ->label('Cetak Tanda Terima KP')
-                                ->icon(Heroicon::OutlinedPrinter)
-                                ->url(fn () => route('distribution.receipt', ['token' => $submission?->receipt_token]), shouldOpenInNewTab: true),
-                        ])
-                        ->schema([]),
-
-                    Section::make('Pengajuan Memerlukan Revisi')
-                        ->description(fn (): string => 'Catatan Petugas: '.($submission?->revision_notes ?? '-').'. Mohon perbaiki data atau berkas sesuai arahan di atas, kemudian ajukan kembali.')
-                        ->icon(Heroicon::OutlinedExclamationTriangle)
-                        ->iconColor('danger')
-                        ->visible(fn (): bool => $isRevision)
-                        ->schema([]),
-
-                    Section::make('Menunggu Verifikasi Petugas')
-                        ->description('Berkas laporan KP sedang dalam antrean pemeriksaan petugas perpustakaan.')
-                        ->icon(Heroicon::OutlinedClock)
-                        ->iconColor('warning')
-                        ->visible(fn (): bool => $isPending)
-                        ->schema([]),
-
-                    Section::make('Data Laporan KP')
-                        ->schema([
-                            Grid::make(2)->schema([
-                                TextInput::make('kp.student_name')->label('Nama Mahasiswa')->required()->disabled($isFormDisabled),
-                                TextInput::make('kp.student_id')->label('NIM')->disabled()->dehydrated(false),
-                            ]),
-                            TextInput::make('kp.title')->label('Judul Laporan KP')->required()->disabled($isFormDisabled)->columnSpanFull(),
-                            Grid::make(2)->schema([
-                                TextInput::make('kp.company_name')->label('Instansi / Perusahaan')->required()->disabled($isFormDisabled),
-                                TextInput::make('kp.company_address')->label('Alamat Instansi')->disabled($isFormDisabled),
-                            ]),
-                            Grid::make(3)->schema([
-                                TextInput::make('kp.academic_advisor')->label('Dosen Pembimbing KP')->required()->disabled($isFormDisabled),
-                                TextInput::make('kp.field_advisor')->label('Pembimbing Lapangan')->disabled($isFormDisabled),
-                                TextInput::make('kp.year')->label('Tahun Pelaksanaan')->numeric()->required()->disabled($isFormDisabled),
-                            ]),
-                            Textarea::make('kp.abstract')->label('Abstrak / Ringkasan')->rows(4)->required()->disabled($isFormDisabled)->columnSpanFull(),
-                            TextInput::make('kp.keywords')->label('Kata Kunci')->disabled($isFormDisabled)->columnSpanFull(),
-                        ]),
-
-                    Section::make('Berkas Laporan KP')
-                        ->schema([
-                            FileUpload::make('kp.document_file_path')
-                                ->label('Berkas Laporan KP (PDF)')
-                                ->disk('documents')
-                                ->directory('submissions/internship_report')
-                                ->acceptedFileTypes(['application/pdf'])
-                                ->maxSize(20480)
-                                ->required(fn () => $this->kpSubmission === null)
-                                ->disabled($isFormDisabled),
-                            FileUpload::make('kp.endorsement_file_path')
-                                ->label('Lembar Pengesahan (Bertanda Tangan)')
-                                ->disk('documents')
-                                ->directory('submissions/endorsements')
-                                ->acceptedFileTypes(['application/pdf'])
-                                ->maxSize(10240)
-                                ->disabled($isFormDisabled),
-                        ]),
-                ])
-                    ->livewireSubmitHandler('submitKp')
-                    ->footer(
-                        (! $isApproved && ($isOpen || $isRevision)) ? [
-                            Actions::make([
-                                Action::make('submitKpBtn')
-                                    ->label($this->kpSubmission ? 'Simpan Perubahan Laporan KP' : 'Ajukan Laporan KP')
-                                    ->submit('submitKp')
-                                    ->size('lg'),
-                            ]),
-                        ] : []
-                    ),
-            ]);
+        return $this->buildAcademicSubmissionTab($isOpen, [
+            'submission' => $this->kpSubmission,
+            'tab_title' => 'Laporan Kerja Praktik (KP)',
+            'tab_icon' => Heroicon::OutlinedClipboardDocumentCheck,
+            'prefix' => 'kp',
+            'approved_title' => 'Laporan Kerja Praktik Disetujui',
+            'approved_summary' => 'Laporan KP telah diverifikasi dan diterbitkan di katalog resmi.',
+            'print_action' => 'printKpReceipt',
+            'print_label' => 'Cetak Tanda Terima KP',
+            'revision_suffix' => 'Mohon perbaiki data atau berkas sesuai arahan di atas, kemudian ajukan kembali.',
+            'pending_description' => 'Berkas laporan KP sedang dalam antrean pemeriksaan petugas perpustakaan.',
+            'data_section' => 'Data Laporan KP',
+            'title_label' => 'Judul Laporan KP',
+            'extra_fields' => static function (string $prefix, bool $disabled): array {
+                return [
+                    Grid::make(2)->schema([
+                        TextInput::make("{$prefix}.company_name")->label('Instansi / Perusahaan')->required()->disabled($disabled),
+                        TextInput::make("{$prefix}.company_address")->label('Alamat Instansi')->disabled($disabled),
+                    ]),
+                    Grid::make(3)->schema([
+                        TextInput::make("{$prefix}.academic_advisor")->label('Dosen Pembimbing KP')->required()->disabled($disabled),
+                        TextInput::make("{$prefix}.field_advisor")->label('Pembimbing Lapangan')->disabled($disabled),
+                        TextInput::make("{$prefix}.year")->label('Tahun Pelaksanaan')->numeric()->required()->disabled($disabled),
+                    ]),
+                ];
+            },
+            'abstract_label' => 'Abstrak / Ringkasan',
+            'abstract_rows' => 4,
+            'file_section' => 'Berkas Laporan KP',
+            'file_label' => 'Berkas Laporan KP (PDF)',
+            'file_directory' => 'submissions/internship_report',
+            'file_max_size' => 20480,
+            'endorsement_label' => 'Lembar Pengesahan (Bertanda Tangan)',
+            'submit_handler' => 'submitKp',
+            'submit_action' => 'submitKpBtn',
+            'submit_label_new' => 'Ajukan Laporan KP',
+            'submit_label_update' => 'Simpan Perubahan Laporan KP',
+        ]);
     }
 
     protected function buildSkripsiTab(bool $isOpen = true): Tab
     {
-        $submission = $this->skripsiSubmission;
+        return $this->buildAcademicSubmissionTab($isOpen, [
+            'submission' => $this->skripsiSubmission,
+            'tab_title' => 'Skripsi / Tugas Akhir',
+            'tab_icon' => Heroicon::OutlinedAcademicCap,
+            'prefix' => 'skripsi',
+            'approved_title' => 'Naskah Skripsi Disetujui',
+            'approved_summary' => 'Naskah Skripsi telah diverifikasi dan diterbitkan di katalog resmi.',
+            'print_action' => 'printSkripsiReceipt',
+            'print_label' => 'Cetak Tanda Terima Skripsi',
+            'revision_suffix' => 'Mohon perbaiki naskah sesuai arahan di atas, kemudian ajukan kembali.',
+            'pending_description' => 'Naskah Skripsi sedang dalam antrean pemeriksaan petugas perpustakaan.',
+            'data_section' => 'Data Naskah Skripsi',
+            'title_label' => 'Judul Skripsi',
+            'extra_fields' => static function (string $prefix, bool $disabled): array {
+                return [
+                    Grid::make(2)->schema([
+                        TextInput::make("{$prefix}.academic_advisor")->label('Dosen Pembimbing')->required()->disabled($disabled),
+                        TextInput::make("{$prefix}.year")->label('Tahun Lulus / Sidang')->numeric()->required()->disabled($disabled),
+                    ]),
+                ];
+            },
+            'abstract_label' => 'Abstrak Skripsi',
+            'abstract_rows' => 5,
+            'file_section' => 'Berkas Naskah Skripsi',
+            'file_label' => 'Berkas Naskah Lengkap Skripsi (PDF)',
+            'file_directory' => 'submissions/skripsi',
+            'file_max_size' => 30720,
+            'endorsement_label' => 'Lembar Pengesahan Sidang (Bertanda Tangan)',
+            'submit_handler' => 'submitSkripsi',
+            'submit_action' => 'submitSkripsiBtn',
+            'submit_label_new' => 'Ajukan Naskah Skripsi',
+            'submit_label_update' => 'Simpan Perubahan Skripsi',
+        ]);
+    }
+
+    /**
+     * Bangun tab pengajuan dokumen akademik (KP / Skripsi) dari konfigurasi.
+     *
+     * @param  array<string, mixed>  $config
+     */
+    protected function buildAcademicSubmissionTab(bool $isOpen, array $config): Tab
+    {
+        $submission = $config['submission'];
         $isApproved = (bool) $submission?->isApproved();
         $isRevision = (bool) $submission?->isRevision();
         $isPending = (bool) $submission?->isPending();
         $isFormDisabled = $isApproved || (! $isOpen && ! $isRevision);
+        $prefix = $config['prefix'];
+        $extraFields = ($config['extra_fields'])($prefix, $isFormDisabled);
 
-        return Tab::make('Skripsi / Tugas Akhir')
-            ->icon(Heroicon::OutlinedAcademicCap)
+        return Tab::make($config['tab_title'])
+            ->icon($config['tab_icon'])
             ->badge($submission ? $submission->statusLabel() : 'Belum')
             ->badgeColor($submission ? $submission->statusColor() : 'gray')
             ->schema([
                 Form::make([
-                    Section::make('Naskah Skripsi Disetujui')
-                        ->description(fn (): string => 'Naskah Skripsi telah diverifikasi dan diterbitkan di katalog resmi.'.($submission?->receipt_number ? ' Nomor Tanda Terima: '.$submission->receipt_number : ''))
+                    Section::make($config['approved_title'])
+                        ->description(fn (): string => $config['approved_summary'].($submission?->receipt_number ? ' Nomor Tanda Terima: '.$submission->receipt_number : ''))
                         ->icon(Heroicon::OutlinedCheckCircle)
                         ->iconColor('success')
                         ->visible(fn (): bool => $isApproved)
                         ->headerActions([
-                            Action::make('printSkripsiReceipt')
-                                ->label('Cetak Tanda Terima Skripsi')
+                            Action::make($config['print_action'])
+                                ->label($config['print_label'])
                                 ->icon(Heroicon::OutlinedPrinter)
                                 ->url(fn () => route('distribution.receipt', ['token' => $submission?->receipt_token]), shouldOpenInNewTab: true),
                         ])
                         ->schema([]),
 
                     Section::make('Pengajuan Memerlukan Revisi')
-                        ->description(fn (): string => 'Catatan Petugas: '.($submission?->revision_notes ?? '-').'. Mohon perbaiki naskah sesuai arahan di atas, kemudian ajukan kembali.')
+                        ->description(fn (): string => 'Catatan Petugas: '.($submission?->revision_notes ?? '-').'. '.$config['revision_suffix'])
                         ->icon(Heroicon::OutlinedExclamationTriangle)
                         ->iconColor('danger')
                         ->visible(fn (): bool => $isRevision)
                         ->schema([]),
 
                     Section::make('Menunggu Verifikasi Petugas')
-                        ->description('Naskah Skripsi sedang dalam antrean pemeriksaan petugas perpustakaan.')
+                        ->description($config['pending_description'])
                         ->icon(Heroicon::OutlinedClock)
                         ->iconColor('warning')
                         ->visible(fn (): bool => $isPending)
                         ->schema([]),
 
-                    Section::make('Data Naskah Skripsi')
+                    Section::make($config['data_section'])
                         ->schema([
                             Grid::make(2)->schema([
-                                TextInput::make('skripsi.student_name')->label('Nama Mahasiswa')->required()->disabled($isFormDisabled),
-                                TextInput::make('skripsi.student_id')->label('NIM')->disabled()->dehydrated(false),
+                                TextInput::make("{$prefix}.student_name")->label('Nama Mahasiswa')->required()->disabled($isFormDisabled),
+                                TextInput::make("{$prefix}.student_id")->label('NIM')->disabled()->dehydrated(false),
                             ]),
-                            TextInput::make('skripsi.title')->label('Judul Skripsi')->required()->disabled($isFormDisabled)->columnSpanFull(),
-                            Grid::make(2)->schema([
-                                TextInput::make('skripsi.academic_advisor')->label('Dosen Pembimbing')->required()->disabled($isFormDisabled),
-                                TextInput::make('skripsi.year')->label('Tahun Lulus / Sidang')->numeric()->required()->disabled($isFormDisabled),
-                            ]),
-                            Textarea::make('skripsi.abstract')->label('Abstrak Skripsi')->rows(5)->required()->disabled($isFormDisabled)->columnSpanFull(),
-                            TextInput::make('skripsi.keywords')->label('Kata Kunci')->disabled($isFormDisabled)->columnSpanFull(),
+                            TextInput::make("{$prefix}.title")->label($config['title_label'])->required()->disabled($isFormDisabled)->columnSpanFull(),
+                            ...$extraFields,
+                            Textarea::make("{$prefix}.abstract")->label($config['abstract_label'])->rows($config['abstract_rows'])->required()->disabled($isFormDisabled)->columnSpanFull(),
+                            TextInput::make("{$prefix}.keywords")->label('Kata Kunci')->disabled($isFormDisabled)->columnSpanFull(),
                         ]),
 
-                    Section::make('Berkas Naskah Skripsi')
+                    Section::make($config['file_section'])
                         ->schema([
-                            FileUpload::make('skripsi.document_file_path')
-                                ->label('Berkas Naskah Lengkap Skripsi (PDF)')
+                            FileUpload::make("{$prefix}.document_file_path")
+                                ->label($config['file_label'])
                                 ->disk('documents')
-                                ->directory('submissions/skripsi')
+                                ->directory($config['file_directory'])
                                 ->acceptedFileTypes(['application/pdf'])
-                                ->maxSize(30720)
-                                ->required(fn () => $this->skripsiSubmission === null)
+                                ->maxSize($config['file_max_size'])
+                                ->required(fn () => $submission === null)
                                 ->disabled($isFormDisabled),
-                            FileUpload::make('skripsi.endorsement_file_path')
-                                ->label('Lembar Pengesahan Sidang (Bertanda Tangan)')
+                            FileUpload::make("{$prefix}.endorsement_file_path")
+                                ->label($config['endorsement_label'])
                                 ->disk('documents')
                                 ->directory('submissions/endorsements')
                                 ->acceptedFileTypes(['application/pdf'])
@@ -379,13 +370,13 @@ class DocumentDistributionPage extends Page
                                 ->disabled($isFormDisabled),
                         ]),
                 ])
-                    ->livewireSubmitHandler('submitSkripsi')
+                    ->livewireSubmitHandler($config['submit_handler'])
                     ->footer(
                         (! $isApproved && ($isOpen || $isRevision)) ? [
                             Actions::make([
-                                Action::make('submitSkripsiBtn')
-                                    ->label($this->skripsiSubmission ? 'Simpan Perubahan Skripsi' : 'Ajukan Naskah Skripsi')
-                                    ->submit('submitSkripsi')
+                                Action::make($config['submit_action'])
+                                    ->label($submission ? $config['submit_label_update'] : $config['submit_label_new'])
+                                    ->submit($config['submit_handler'])
                                     ->size('lg'),
                             ]),
                         ] : []

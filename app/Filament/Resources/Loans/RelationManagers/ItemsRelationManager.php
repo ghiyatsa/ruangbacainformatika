@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Loans\RelationManagers;
 
 use App\Filament\Resources\Loans\Pages\ViewLoan;

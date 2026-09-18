@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\FullTextSearchable;
@@ -118,11 +120,13 @@ class Post extends Model
         return $this->belongsTo(User::class, 'reviewed_by_user_id');
     }
 
+    /** @return BelongsToMany<PostCategory, $this> */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(PostCategory::class, 'post_category_post');
     }
 
+    /** @return BelongsToMany<PostTag, $this> */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(PostTag::class);

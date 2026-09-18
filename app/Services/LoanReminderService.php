@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Loan;
@@ -64,6 +66,8 @@ class LoanReminderService
     /**
      * Query pinjaman yang layak diingatkan: sudah jatuh tempo H-1 atau sudah
      * telat berapa pun lamanya, dan belum diingatkan hari ini.
+     *
+     * @return Builder<Loan>
      */
     public function eligibleLoansQuery(): Builder
     {

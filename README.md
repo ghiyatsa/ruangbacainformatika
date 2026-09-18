@@ -58,7 +58,7 @@ Untuk memastikan kelancaran pengembangan, harap pahami beberapa aturan alur bisn
    - Melakukan verifikasi nomor WhatsApp menggunakan OTP.
    - Mendapatkan persetujuan (approval) dari admin/petugas.
    - Memiliki role `member`.
-3. **Modus Kiosk**: Layanan Kiosk dirancang untuk perangkat fisik di perpustakaan. Kiosk dilindungi oleh pembatasan Subnet IP (Allowlist) dan PIN default untuk mencegah akses tidak sah. Layanan ini mencakup buku tamu pengunjung, klaim akun anggota baru, serta peminjaman dan pengembalian mandiri.
+3. **Modus Kiosk**: Layanan Kiosk dirancang untuk perangkat fisik di perpustakaan. Kiosk dilindungi oleh pembatasan Subnet IP (Allowlist) dan API key bersama (`X-Kiosk-Api-Key`) untuk mencegah akses tidak sah. Aplikasi Flutter **tidak** menampilkan layar PIN — API key bersifat permanen sampai dirotasi/dicabut dari server. Layanan ini mencakup buku tamu pengunjung, klaim akun anggota baru, serta peminjaman dan pengembalian mandiri.
 4. **Alur Transaksi & QR Code**: Transaksi peminjaman di kiosk menggunakan verifikasi Member Key dinamis berbasis HMAC (kadaluarsa dalam 1 menit) atau identitas NIM/NIP/email/nomor HP anggota. Seluruh QR Code sistem (Member Key, tautan akun, dan tanda terima penyerahan berkas) dilengkapi dengan logo brand di bagian tengah dan Error Correction Level H.
 
 ---

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\ActivityLog;
+use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -52,7 +55,7 @@ class ActivityLogService
             'user_agent' => Str::limit((string) $request?->userAgent(), 65535, ''),
         ]);
 
-        if ($actor !== null) {
+        if ($actor instanceof User) {
             $activityLog->user()->associate($actor);
         }
 

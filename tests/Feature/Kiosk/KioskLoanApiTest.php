@@ -7,12 +7,14 @@ use App\Models\Loan;
 use App\Models\LoanItem;
 use App\Models\Publisher;
 use App\Models\Setting;
+use App\Models\Skripsi;
 use App\Models\User;
 use App\Services\KioskBorrowVerificationService;
 use App\Services\KioskLoanService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Notifications\Dispatcher;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -32,6 +34,10 @@ use function Pest\Laravel\withoutMiddleware;
 beforeEach(function () {
     withoutMiddleware(PreventRequestForgery::class);
     Carbon::setTestNow('2026-06-07 03:00:00'); // 10:00 WIB — dalam jam operasional
+
+    // Kamus koreksi ejaan di-cache; bersihkan agar tiap test membangun kamus
+    // dari datanya sendiri, bukan sisa test sebelumnya.
+    Cache::flush();
 
     Setting::query()->create([
         'section' => 'kiosk',
@@ -261,6 +267,58 @@ it('searches only borrowable and available books for borrowing', function () {
     ])->json('books'))->pluck('id')->all();
 
     expect($ids)->toBe([$availableBook->id]);
+});
+
+it('ranks a closer title match above a weaker one', function () {
+    $token = borrowApiDeviceToken();
+
+    // Judul lemah dibuat lebih dulu agar urutan natural (id) menempatkannya
+    // di depan; hanya ranking relevansi yang bisa mengangkat judul persis.
+    [$loose] = borrowApiBook('available', ['title' => 'Catatan Belajar Laravel untuk Pemula']);
+    [$exact] = borrowApiBook('available', ['title' => 'Laravel']);
+
+    $ids = collect(getJson(route('api.kiosk.books.search', ['q' => 'Laravel', 'mode' => 'borrow']), [
+        'X-Kiosk-Device-Token' => $token,
+    ])->json('books'))->pluck('id')->all();
+
+    expect($ids)->toContain($exact->id)
+        ->and($ids)->toContain($loose->id)
+        ->and($ids[0])->toBe($exact->id);
+});
+
+it('corrects a typo when the original query yields too few results', function () {
+    $token = borrowApiDeviceToken();
+
+    [$book] = borrowApiBook('available', ['title' => 'Buku Metode Penelitian']);
+
+    $response = getJson(route('api.kiosk.books.search', ['q' => 'metde', 'mode' => 'borrow']), [
+        'X-Kiosk-Device-Token' => $token,
+    ])->assertSuccessful();
+
+    expect(collect($response->json('books'))->pluck('id')->all())->toBe([$book->id])
+        ->and($response->json('corrected_query'))->toBe('metode');
+});
+
+it('returns book suggestions and never academic ones on the public kiosk', function () {
+    $token = borrowApiDeviceToken();
+
+    borrowApiBook('available', ['title' => 'Algoritma dan Struktur Data']);
+
+    Skripsi::factory()->create([
+        'title' => 'Analisis Algoritma Pencarian',
+        'student_id' => '1234567890',
+        'keywords' => 'algoritma, pencarian, data',
+    ]);
+
+    $response = getJson(route('api.kiosk.books.search', ['q' => 'algoritma', 'mode' => 'borrow']), [
+        'X-Kiosk-Device-Token' => $token,
+    ])->assertSuccessful();
+
+    $suggestions = $response->json('suggestions');
+
+    expect($suggestions)->toBeArray()->not->toBeEmpty()
+        ->and(json_encode($suggestions))->toContain('algoritma dan struktur data')
+        ->and(json_encode($suggestions))->not->toContain('pencarian');
 });
 
 // ---------------------------------------------------------------------------

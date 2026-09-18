@@ -1,108 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Publishers\RelationManagers;
 
-use App\Filament\Resources\Books\BookResource;
-use App\Models\Book;
-use App\Services\BookCoverImageService;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\ImageColumn;
+use App\Filament\Resources\Concerns\BookRelationManager;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
-class BooksRelationManager extends RelationManager
+class BooksRelationManager extends BookRelationManager
 {
-    protected static string $relationship = 'books';
-
     protected static ?string $title = 'Daftar Buku yang Diterbitkan';
 
-    protected static bool $isLazy = false;
-
-    public function form(Schema $schema): Schema
+    protected function emptyStateHeading(): string
     {
-        return $schema
-            ->components([
-                TextInput::make('title')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return 'Belum ada buku yang diterbitkan';
     }
 
-    public function getEloquentQuery(): Builder
+    protected function emptyStateDescription(): string
     {
-        return parent::getEloquentQuery()
-            ->withCount([
-                'items as available_stock' => fn (Builder $query) => $query->where('status', 'available'),
-            ]);
+        return 'Penerbit ini belum terhubung dengan buku apa pun.';
     }
 
-    public function table(Table $table): Table
+    protected function contextColumn(): TextColumn
     {
-        return $table
-            ->recordTitleAttribute('title')
-            ->emptyStateHeading('Belum ada buku yang diterbitkan')
-            ->emptyStateDescription('Penerbit ini belum terhubung dengan buku apa pun.')
-            ->emptyStateIcon(Heroicon::OutlinedBookOpen)
-            ->columns([
-                ImageColumn::make('cover_image')
-                    ->label('Sampul')
-                    ->alignCenter()
-                    ->defaultImageUrl(app(BookCoverImageService::class)->getDefaultCoverUrl())
-                    ->extraImgAttributes([
-                        'class' => 'object-contain bg-white p-1',
-                    ])
-                    ->disk('public'),
+        return TextColumn::make('authors.name')
+            ->label('Penulis')
+            ->badge()
+            ->color('warning')
+            ->placeholder('Tidak ada penulis');
+    }
 
-                TextColumn::make('title')
-                    ->label('Judul')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold')
-                    ->wrap(),
-
-                TextColumn::make('authors.name')
-                    ->label('Penulis')
-                    ->badge()
-                    ->color('warning')
-                    ->placeholder('Tidak ada penulis'),
-
-                TextColumn::make('published_year')
-                    ->label('Tahun')
-                    ->sortable(),
-
-                TextColumn::make('available_stock')
-                    ->label('Stok')
-                    ->badge()
-                    ->sortable()
-                    ->color(fn (string $state): string => match (true) {
-                        $state == 0 => 'danger',
-                        $state <= 2 => 'warning',
-                        default => 'success',
-                    }),
-            ])
-            ->filters([
-                //
-            ])
-            ->headerActions([
-                //
-            ])
-            ->recordActions([
-                ViewAction::make()
-                    ->label('Lihat')
-                    ->url(fn (Book $record): string => BookResource::getUrl('view', ['record' => $record])),
-                EditAction::make()
-                    ->label('Ubah')
-                    ->url(fn (Book $record): string => BookResource::getUrl('edit', ['record' => $record]))
-                    ->hidden(fn ($livewire) => $livewire->isReadOnly()),
-            ])
-            ->bulkActions([
-                //
-            ]);
+    protected function allowsAttachingBooks(): bool
+    {
+        return false;
     }
 }

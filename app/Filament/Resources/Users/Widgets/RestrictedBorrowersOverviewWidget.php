@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Users\Widgets;
 
 use App\Filament\Resources\Users\UserResource;

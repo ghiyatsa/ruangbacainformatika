@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\Kiosk;
 
 use App\Actions\Kiosk\BorrowBooksFromKiosk;
@@ -191,10 +193,12 @@ class KioskApiController extends Controller
             return response()->json(['books' => []]);
         }
 
-        $books = $searchKioskBooks->execute($search, $mode, $memberIdentifier);
+        $result = $searchKioskBooks->execute($search, $mode, $memberIdentifier);
 
         return response()->json([
-            'books' => BookResource::collection($books)->resolve(),
+            'books' => BookResource::collection($result->books)->resolve(),
+            'suggestions' => $result->suggestions,
+            'corrected_query' => $result->correctedQuery,
         ]);
     }
 

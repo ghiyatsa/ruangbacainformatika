@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
 use App\Models\Book;
@@ -58,7 +60,7 @@ class MetadataCompleteness
             'score' => $score,
             'filled' => $filled,
             'total' => $total,
-            'missing' => array_values($missing),
+            'missing' => $missing,
             'level' => self::levelForScore($score),
         ];
     }

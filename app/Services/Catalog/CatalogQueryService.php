@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Catalog;
 
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Publisher;
-use App\Services\Search\SearchTermCorrector;
+use App\Services\Search\SearchTermResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -74,25 +76,10 @@ class CatalogQueryService
      */
     protected function resolveSearchTerm(array $filters): string
     {
-        $search = $filters['search'];
-
-        if ($search === '' || mb_strlen($search) < 4) {
-            return $search;
-        }
-
-        $asli = $this->countForSearch($filters, $search);
-
-        if ($asli >= self::MIN_ACCEPTABLE_RESULTS) {
-            return $search;
-        }
-
-        $koreksi = app(SearchTermCorrector::class)->correctQuery($search);
-
-        if ($koreksi === null || $koreksi === $search) {
-            return $search;
-        }
-
-        return $this->countForSearch($filters, $koreksi) > $asli ? $koreksi : $search;
+        return app(SearchTermResolver::class)->resolve(
+            $filters['search'],
+            fn (string $search): int => $this->countForSearch($filters, $search),
+        );
     }
 
     /**

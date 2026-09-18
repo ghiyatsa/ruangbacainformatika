@@ -1,47 +1,80 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Kiosk;
 
 use App\Models\Book;
 use App\Models\Loan;
 use App\Services\KioskLoanService;
+use App\Services\Search\BookSearchRanker;
+use App\Services\Search\SearchSuggestionBuilder;
+use App\Services\Search\SearchTermResolver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
+/**
+ * Pencarian buku di kiosk, memakai mesin yang sama dengan pencarian global web:
+ * ranking relevansi, koreksi ejaan, dan saran kata kunci.
+ *
+ * Saran dibatasi pada koleksi buku (tanpa karya ilmiah) karena kiosk adalah
+ * perangkat publik tanpa sesi anggota.
+ */
 class SearchKioskBooks
 {
     public function __construct(
         protected KioskLoanService $kioskLoanService,
+        protected BookSearchRanker $ranker,
+        protected SearchTermResolver $terms,
+        protected SearchSuggestionBuilder $suggestions,
     ) {}
 
-    /**
-     * @return EloquentCollection<int, Book>
-     */
-    public function execute(string $search, string $mode, string $memberIdentifier): EloquentCollection
+    public function execute(string $search, string $mode, string $memberIdentifier): KioskBookSearchResult
     {
         if ($mode === 'return') {
-            return $this->searchReturnableBooks($search, $memberIdentifier);
+            return new KioskBookSearchResult(
+                $this->searchReturnableBooks($search, $memberIdentifier),
+            );
         }
 
         return $this->searchBorrowableBooks($search);
     }
 
-    /**
-     * @return EloquentCollection<int, Book>
-     */
-    protected function searchBorrowableBooks(string $search): EloquentCollection
+    protected function searchBorrowableBooks(string $search): KioskBookSearchResult
     {
-        return Book::query()
-            ->search($search)
-            ->where('is_borrowable', true)
-            ->whereHas('items', fn ($query) => $query->available())
+        // Koreksi ejaan hanya bila hasil asli terlalu sedikit, sehingga
+        // pencarian yang sudah baik tidak pernah memburuk.
+        $resolved = $this->terms->resolve(
+            $search,
+            fn (string $term): int => $this->borrowableQuery($term)->count(),
+        );
+
+        $books = $this->borrowableQuery($resolved)
+            ->tap(fn (Builder $query) => $this->ranker->apply($query, $resolved))
             ->with(['authors:id,name'])
             ->withCount('items')
             ->withCount([
-                'items as available_items_count' => fn ($query) => $query->available(),
+                'items as available_items_count' => fn (Builder $query) => $query->available(),
             ])
-            ->orderBy('title')
             ->limit(8)
             ->get();
+
+        $words = $this->terms->words($search);
+        $suggestions = $this->suggestions->collectMultiField($words, 6, false);
+
+        if ($suggestions === [] && $resolved !== $search) {
+            $suggestions = $this->suggestions->collectMultiField(
+                $this->terms->words($resolved),
+                6,
+                false,
+            );
+        }
+
+        return new KioskBookSearchResult(
+            books: $books,
+            suggestions: $suggestions,
+            correctedQuery: $resolved !== $search ? $resolved : null,
+        );
     }
 
     /**
@@ -58,11 +91,11 @@ class SearchKioskBooks
         }
 
         return Book::query()
-            ->when($search !== '', fn ($query) => $query->search($search))
-            ->whereHas('items.loanItems', function ($query) use ($member): void {
+            ->when($search !== '', fn (Builder $query) => $query->search($search))
+            ->whereHas('items.loanItems', function (Builder $query) use ($member): void {
                 $query
                     ->whereNull('returned_at', 'and', false)
-                    ->whereHas('loan', fn ($loanQuery) => $loanQuery
+                    ->whereHas('loan', fn (Builder $loanQuery) => $loanQuery
                         ->whereBelongsTo($member)
                         ->where('status', Loan::STATUS_BORROWED));
             })
@@ -71,5 +104,17 @@ class SearchKioskBooks
             ->orderBy('title')
             ->limit(8)
             ->get();
+    }
+
+    /**
+     * @return Builder<Book>
+     */
+    protected function borrowableQuery(string $search): Builder
+    {
+        return Book::query()
+            ->select('books.*')
+            ->search($search)
+            ->where('is_borrowable', true)
+            ->whereHas('items', fn (Builder $query) => $query->available());
     }
 }

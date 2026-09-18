@@ -3,6 +3,8 @@
 use App\Models\Book;
 use App\Models\Publisher;
 use App\Services\Search\SearchTermCorrector;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 it('corrects simple typos from the dictionary', function () {
     $publisher = Publisher::factory()->create();
@@ -87,4 +89,27 @@ it('tidak memecah istilah yang sudah dikenali kamus', function () {
 
     // "jaringan" sudah kata yang dikenali sehingga tidak boleh diubah.
     expect(app(SearchTermCorrector::class)->correctQuery('jaringan'))->toBeNull();
+});
+
+it('membangun kamus secara bertahap, bukan satu query besar', function () {
+    $penerbit = Publisher::factory()->create();
+
+    Book::withoutEvents(fn () => Book::factory()->count(3)->create([
+        'is_published' => true,
+        'publisher_id' => $penerbit->id,
+    ]));
+
+    Cache::flush();
+
+    DB::enableQueryLog();
+    app(SearchTermCorrector::class)->buildDictionary();
+    $bookQuery = collect(DB::getQueryLog())
+        ->pluck('query')
+        ->first(fn (string $q): bool => str_contains($q, 'from "books"'));
+    DB::disableQueryLog();
+
+    // lazy() mengambil data per-batch (limit + offset), sedangkan pluck()
+    // menarik seluruh kolom sekaligus tanpa limit.
+    expect($bookQuery)->not->toBeNull()
+        ->and($bookQuery)->toContain('limit');
 });

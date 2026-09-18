@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Search;
 
 use App\Models\Author;
@@ -69,33 +71,15 @@ class SearchTermCorrector
         return Cache::remember(self::DICTIONARY_CACHE_KEY, self::DICTIONARY_TTL_SECONDS, function (): array {
             $seen = [];
 
-            foreach (Book::query()->published()->pluck('title') as $title) {
-                $this->collectTokens((string) $title, $seen);
-            }
-            foreach (Author::query()->pluck('name') as $authorName) {
-                $this->collectTokens((string) $authorName, $seen);
-            }
-            foreach (Category::query()->pluck('name') as $categoryName) {
-                $this->collectTokens((string) $categoryName, $seen);
-            }
-            foreach (Skripsi::query()->whereNotNull('keywords')->pluck('keywords') as $keywords) {
-                $this->collectTokens((string) $keywords, $seen);
-            }
-            foreach (Skripsi::query()->whereNotNull('author_name')->pluck('author_name') as $authorName) {
-                $this->collectTokens((string) $authorName, $seen);
-            }
-            foreach (Thesis::query()->whereNotNull('keywords')->pluck('keywords') as $keywords) {
-                $this->collectTokens((string) $keywords, $seen);
-            }
-            foreach (InternshipReport::query()->whereNotNull('keywords')->pluck('keywords') as $keywords) {
-                $this->collectTokens((string) $keywords, $seen);
-            }
-            foreach (Post::query()->published()->pluck('title') as $title) {
-                $this->collectTokens((string) $title, $seen);
-            }
-            foreach (SearchHistory::query()->pluck('query') as $query) {
-                $this->collectTokens((string) $query, $seen);
-            }
+            $this->collectColumn(Book::query()->published(), 'title', $seen);
+            $this->collectColumn(Author::query(), 'name', $seen);
+            $this->collectColumn(Category::query(), 'name', $seen);
+            $this->collectColumn(Skripsi::query()->whereNotNull('keywords'), 'keywords', $seen);
+            $this->collectColumn(Skripsi::query()->whereNotNull('author_name'), 'author_name', $seen);
+            $this->collectColumn(Thesis::query()->whereNotNull('keywords'), 'keywords', $seen);
+            $this->collectColumn(InternshipReport::query()->whereNotNull('keywords'), 'keywords', $seen);
+            $this->collectColumn(Post::query()->published(), 'title', $seen);
+            $this->collectColumn(SearchHistory::query(), 'query', $seen);
 
             // Bila perlu dipotong, utamakan kata yang paling sering muncul
             // agar kata umum tidak terbuang oleh urutan alfabetis.
@@ -111,6 +95,20 @@ class SearchTermCorrector
 
             return $dictionary;
         });
+    }
+
+    /**
+     * Alirkan satu kolom baris demi baris agar tidak memuat seluruh tabel
+     * ke memori sekaligus.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<*>  $query
+     * @param  array<string, int>  $seen
+     */
+    protected function collectColumn($query, string $column, array &$seen): void
+    {
+        foreach ($query->select($column)->lazy() as $row) {
+            $this->collectTokens((string) $row->{$column}, $seen);
+        }
     }
 
     /**
@@ -169,7 +167,7 @@ class SearchTermCorrector
      * Istilah yang sudah dikenali atau tidak dapat dipecah dikembalikan apa
      * adanya, sehingga pencarian yang sudah baik tidak terpengaruh.
      *
-     * @param  array<string, true>  $dikenal
+     * @param  array<string, int>  $dikenal
      * @return list<string>
      */
     public function splitCompoundTerm(string $term, array $dikenal): array

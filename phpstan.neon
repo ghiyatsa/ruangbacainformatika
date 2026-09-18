@@ -5,8 +5,11 @@ parameters:
     paths:
         - app/
 
-    # Level 4: Menengah, cocok untuk framework dengan dynamic magic methods seperti Laravel
-    level: 4
+    # Level 5: menambahkan pemeriksaan tipe argumen pada pemanggilan method.
+    level: 5
+
+    # Laravel 11+: cast dideklarasikan lewat method casts(), bukan properti $casts.
+    parseModelCastsMethod: true
 
     # Matikan strict PHPDoc check untuk Carbon/String casts di Laravel
     treatPhpDocTypesAsCertain: false

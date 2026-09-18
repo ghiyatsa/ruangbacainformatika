@@ -1,17 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Exports;
 
+use App\Filament\Exports\Concerns\SanitizesSpreadsheetValues;
 use App\Models\VisitLog;
 use Carbon\CarbonInterface;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 use Illuminate\Support\Number;
-use Illuminate\Support\Str;
 
 class VisitLogExporter extends Exporter
 {
+    use SanitizesSpreadsheetValues;
+
     protected static ?string $model = VisitLog::class;
 
     public static function getColumns(): array
@@ -57,18 +61,5 @@ class VisitLogExporter extends Exporter
         }
 
         return $body;
-    }
-
-    protected static function sanitizeForSpreadsheet(?string $value): string
-    {
-        $normalizedValue = trim((string) $value);
-
-        if ($normalizedValue === '') {
-            return '-';
-        }
-
-        return Str::startsWith($normalizedValue, ['=', '+', '-', '@'])
-            ? "'{$normalizedValue}"
-            : $normalizedValue;
     }
 }

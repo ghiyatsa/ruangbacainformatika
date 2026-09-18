@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\VisitLogs\Schemas;
 
 use App\Models\VisitLog;
