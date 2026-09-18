@@ -151,7 +151,7 @@ class SearchController extends Controller
             $formattedSuggestions[] = $formatted;
         }
 
-        $finalSuggestions = array_slice(array_values($formattedSuggestions), 0, 5);
+        $finalSuggestions = array_slice($formattedSuggestions, 0, 5);
 
         // Jika request dari klien lama yang hanya menerima array string biasa:
         if ($request->boolean('legacy')) {

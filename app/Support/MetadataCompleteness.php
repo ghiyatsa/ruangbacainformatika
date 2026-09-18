@@ -60,7 +60,7 @@ class MetadataCompleteness
             'score' => $score,
             'filled' => $filled,
             'total' => $total,
-            'missing' => array_values($missing),
+            'missing' => $missing,
             'level' => self::levelForScore($score),
         ];
     }

@@ -107,11 +107,13 @@ class Book extends Model
         return $this->belongsTo(Publisher::class);
     }
 
+    /** @return BelongsToMany<Author, $this> */
     public function authors(): BelongsToMany
     {
         return $this->belongsToMany(Author::class);
     }
 
+    /** @return BelongsToMany<Category, $this> */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class);

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use Illuminate\Database\Connection;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Str;
 
 trait FullTextSearchable
 {
-    protected function supportsFullText(Connection $connection): bool
+    protected function supportsFullText(ConnectionInterface $connection): bool
     {
         return in_array($connection->getDriverName(), ['mysql', 'mariadb'], true);
     }

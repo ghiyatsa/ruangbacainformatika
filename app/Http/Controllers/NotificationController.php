@@ -101,6 +101,7 @@ class NotificationController extends Controller
         return $this->visibleNotifications($user)->whereNull('read_at');
     }
 
+    /** @return MorphMany<DatabaseNotification, User> */
     protected function visibleNotifications(User $user): MorphMany
     {
         return $user->notifications()

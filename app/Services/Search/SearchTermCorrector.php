@@ -167,7 +167,7 @@ class SearchTermCorrector
      * Istilah yang sudah dikenali atau tidak dapat dipecah dikembalikan apa
      * adanya, sehingga pencarian yang sudah baik tidak terpengaruh.
      *
-     * @param  array<string, true>  $dikenal
+     * @param  array<string, int>  $dikenal
      * @return list<string>
      */
     public function splitCompoundTerm(string $term, array $dikenal): array

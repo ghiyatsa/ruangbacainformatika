@@ -156,6 +156,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         }
     }
 
+    /** @return HasMany<CatalogBookmark, $this> */
     public function catalogBookmarks(): HasMany
     {
         return $this->hasMany(CatalogBookmark::class);
@@ -307,7 +308,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function scopePendingMemberApproval(Builder $query): Builder
     {
-        $pendingIds = $query->getModel()->newQuery()
+        $pendingIds = User::query()
             ->where('is_approved', false)
             ->get(['id', 'email', 'is_approved'])
             ->filter(fn (User $user): bool => $user->requiresManualApproval())
