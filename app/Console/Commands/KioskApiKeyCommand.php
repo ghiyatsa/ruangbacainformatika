@@ -2,16 +2,18 @@
 
 namespace App\Console\Commands;
 
-use App\Repositories\SettingRepository;
+use App\Services\KioskApiKeyManager;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * Kelola API key bersama untuk aplikasi kiosk (Flutter).
  *
+ * Logika generate/revoke didelegasikan ke KioskApiKeyManager agar identik
+ * dengan halaman pengaturan pada panel admin (Filament) — tidak ada dua
+ * implementasi yang bisa saling menyimpang.
+ *
  * Key disimpan sebagai hash di settings (kiosk.api_key_hash); plaintext hanya
- * ditampilkan sekali saat dibuat/dirotasi. Menghapus key akan langsung mematikan
+ * ditampilkan sekali saat dibuat/dirotasi. Mencabut key akan langsung mematikan
  * seluruh akses API kiosk tanpa perlu membangun ulang aplikasi.
  */
 class KioskApiKeyCommand extends Command
@@ -22,21 +24,19 @@ class KioskApiKeyCommand extends Command
 
     protected $description = 'Kelola API key untuk aplikasi kiosk (Flutter)';
 
-    public function handle(SettingRepository $settingRepository): int
+    public function handle(KioskApiKeyManager $manager): int
     {
         return match ($this->argument('action')) {
-            'show' => $this->showStatus($settingRepository),
-            'generate' => $this->generate($settingRepository),
-            'revoke' => $this->revoke($settingRepository),
+            'show' => $this->showStatus($manager),
+            'generate' => $this->generate($manager),
+            'revoke' => $this->revoke($manager),
             default => $this->invalidAction(),
         };
     }
 
-    protected function showStatus(SettingRepository $settingRepository): int
+    protected function showStatus(KioskApiKeyManager $manager): int
     {
-        $hash = $settingRepository->get('kiosk', 'api_key_hash');
-
-        if (! is_string($hash) || $hash === '') {
+        if (! $manager->isConfigured()) {
             $this->warn('API key kiosk belum dibuat.');
             $this->line('Buat dengan: php artisan kiosk:api-key generate');
 
@@ -44,16 +44,14 @@ class KioskApiKeyCommand extends Command
         }
 
         $this->info('API key kiosk sudah aktif.');
-        $this->line('  Dibuat : '.($settingRepository->get('kiosk', 'api_key_created_at') ?? '-'));
+        $this->line('  Dibuat : '.($manager->createdAt() ?? '-'));
 
         return self::SUCCESS;
     }
 
-    protected function generate(SettingRepository $settingRepository): int
+    protected function generate(KioskApiKeyManager $manager): int
     {
-        $existing = $settingRepository->get('kiosk', 'api_key_hash');
-
-        if (is_string($existing) && $existing !== '' && ! $this->option('force')) {
+        if ($manager->isConfigured() && ! $this->option('force')) {
             if (! $this->confirm('API key lama akan langsung berhenti berlaku. Lanjutkan?', false)) {
                 $this->line('Dibatalkan.');
 
@@ -61,10 +59,7 @@ class KioskApiKeyCommand extends Command
             }
         }
 
-        $plainKey = 'rbk_'.Str::random(56);
-
-        $settingRepository->put('kiosk', 'api_key_hash', Hash::make($plainKey));
-        $settingRepository->put('kiosk', 'api_key_created_at', now()->toIso8601String());
+        $plainKey = $manager->generate();
 
         $this->info('API key kiosk berhasil dibuat.');
         $this->newLine();
@@ -72,12 +67,12 @@ class KioskApiKeyCommand extends Command
         $this->newLine();
         $this->warn('Simpan key ini sekarang — tidak akan ditampilkan lagi.');
         $this->line('Masukkan ke konfigurasi aplikasi Flutter sebagai header:');
-        $this->line('  X-Kiosk-Api-Key: <key>');
+        $this->line('  X-Kiosk-Api-Key: <key di atas>');
 
         return self::SUCCESS;
     }
 
-    protected function revoke(SettingRepository $settingRepository): int
+    protected function revoke(KioskApiKeyManager $manager): int
     {
         if (! $this->option('force')) {
             if (! $this->confirm('Seluruh akses API kiosk akan langsung ditolak. Lanjutkan?', false)) {
@@ -87,8 +82,7 @@ class KioskApiKeyCommand extends Command
             }
         }
 
-        $settingRepository->forget('kiosk', 'api_key_hash');
-        $settingRepository->forget('kiosk', 'api_key_created_at');
+        $manager->revoke();
 
         $this->info('API key kiosk dicabut. Seluruh akses API kiosk kini ditolak.');
 
