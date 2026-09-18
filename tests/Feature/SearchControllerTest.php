@@ -103,3 +103,17 @@ it('filters out skripsi quick results for guest or non-member', function () {
         ->assertOk()
         ->assertJsonPath('quickResults.skripsi', []);
 });
+
+it('keeps legacy suggestions a sequential JSON array, not an object', function () {
+    SearchHistory::create(['query' => 'Laravel Dasar', 'hits' => 3]);
+    SearchHistory::create(['query' => 'Laravel Lanjutan', 'hits' => 2]);
+
+    $response = get(route('search.suggestions', ['q' => 'Laravel', 'legacy' => 1]))
+        ->assertOk();
+
+    $decoded = $response->json();
+
+    expect($decoded)->toBeArray()
+        ->and(array_is_list($decoded))->toBeTrue()
+        ->and($response->getContent())->toStartWith('[');
+});

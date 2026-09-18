@@ -101,3 +101,14 @@ it('groups books by metadata level with aggregate counts', function () {
 
     expect($rows->sum('total'))->toBe(Book::query()->count());
 });
+
+it('always returns missing metadata as a sequential list', function () {
+    $sparse = makeSparselyFilledBook();
+
+    $missing = MetadataCompleteness::evaluate($sparse)['missing'];
+
+    expect($missing)->toBeArray()
+        ->and(array_is_list($missing))->toBeTrue()
+        ->and(json_encode($missing))->toStartWith('[')
+        ->and($sparse->metadata_missing)->toBe($missing);
+});
