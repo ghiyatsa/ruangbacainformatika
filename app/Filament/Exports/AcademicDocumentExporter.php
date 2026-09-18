@@ -10,9 +10,6 @@ use Illuminate\Support\Number;
 
 /**
  * Kolom ekspor bersama untuk dokumen akademik (skripsi, tesis, laporan KP).
- *
- * Ketiga model memiliki skema kolom yang identik; hanya label notifikasi yang
- * berbeda, sehingga subclass cukup mendefinisikan $model dan documentLabel().
  */
 abstract class AcademicDocumentExporter extends Exporter
 {

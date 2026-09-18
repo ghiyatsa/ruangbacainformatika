@@ -20,10 +20,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Tabel relasi `books` bersama untuk Author / Category / Publisher.
- *
- * Ketiga RelationManager sebelumnya identik kecuali judul, teks empty-state,
- * kolom konteks, dan ada/tidaknya aksi hubungkan/lepaskan. Perbedaan itu
- * diekspresikan lewat method abstrak di kelas ini.
  */
 abstract class BookRelationManager extends RelationManager
 {
@@ -31,18 +27,14 @@ abstract class BookRelationManager extends RelationManager
 
     protected static bool $isLazy = false;
 
-    /** Judul empty state. */
     abstract protected function emptyStateHeading(): string;
 
-    /** Deskripsi empty state. */
     abstract protected function emptyStateDescription(): string;
 
-    /** Kolom konteks: penerbit (Author/Category) atau penulis (Publisher). */
     abstract protected function contextColumn(): TextColumn;
 
     /**
-     * Apakah pengguna boleh menghubungkan/melepaskan buku dari relasi ini.
-     * Publisher tidak menyediakan attach/detach.
+     * Publisher tidak menyediakan aksi hubungkan/lepaskan buku.
      */
     protected function allowsAttachingBooks(): bool
     {

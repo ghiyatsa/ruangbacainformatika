@@ -292,10 +292,7 @@ class DocumentDistributionPage extends Page
     /**
      * Bangun tab pengajuan dokumen akademik (KP / Skripsi) dari konfigurasi.
      *
-     * Struktur tab (status + data + berkas) identik antar jenis dokumen;
-     * hanya label, field, dan berkas yang berbeda sehingga diparameterkan.
-     *
-     * @param  array<string, mixed>  $config  Lihat `buildInternshipTab()` untuk daftar kunci.
+     * @param  array<string, mixed>  $config
      */
     protected function buildAcademicSubmissionTab(bool $isOpen, array $config): Tab
     {

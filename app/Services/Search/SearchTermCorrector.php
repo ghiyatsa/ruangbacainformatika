@@ -96,8 +96,8 @@ class SearchTermCorrector
     }
 
     /**
-     * Alirkan satu kolom baris demi baris (chunked) agar tidak memuat seluruh
-     * tabel ke memori sekaligus saat membangun kamus.
+     * Alirkan satu kolom baris demi baris agar tidak memuat seluruh tabel
+     * ke memori sekaligus.
      *
      * @param  \Illuminate\Database\Eloquent\Builder<*>  $query
      * @param  array<string, int>  $seen

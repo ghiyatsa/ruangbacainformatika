@@ -74,8 +74,7 @@ class KioskLoanService
         $loan = DB::transaction(function () use ($member, $bookIds): Loan {
             $borrowedAt = now();
 
-            // Ambil semua buku sekaligus agar tidak ada query per-iterasi di
-            // dalam loop (data ini hanya dipakai untuk pesan validasi).
+            // Ambil semua buku sekaligus agar tidak ada query per-iterasi.
             $booksById = Book::query()
                 ->whereKey($bookIds)
                 ->get(['id', 'title', 'is_borrowable'])
