@@ -6,6 +6,14 @@
       "sourceType": "github",
       "skillPath": "skills/shadcn/SKILL.md",
       "computedHash": "f0fdd03f4755cbb3b57e20fe6fd4a97c00d34e6780187b6559316986e8d848db"
+    },
+    "disciplined-changes": {
+      "source": "multica-ai/andrej-karpathy-skills",
+      "sourceType": "github",
+      "skillPath": "skills/karpathy-guidelines/SKILL.md",
+      "adapted": true,
+      "localPath": ".agents/workflows/disciplined-changes/SKILL.md",
+      "computedHash": "9f42300f386afc2d60b0c006902a64af01652a51788e25aa704e3a64e6db3acb"
     }
   }
 }
