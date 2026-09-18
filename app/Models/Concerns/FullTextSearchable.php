@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Str;
 
@@ -11,6 +12,12 @@ trait FullTextSearchable
 {
     protected function supportsFullText(ConnectionInterface $connection): bool
     {
+        // Hanya koneksi konkret yang menyediakan nama driver; koneksi lain
+        // (mis. tiruan) diperlakukan sebagai tanpa dukungan full-text.
+        if (! $connection instanceof Connection) {
+            return false;
+        }
+
         return in_array($connection->getDriverName(), ['mysql', 'mariadb'], true);
     }
 
