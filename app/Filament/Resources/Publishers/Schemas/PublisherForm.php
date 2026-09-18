@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Publishers\Schemas;
 
 use App\Models\Publisher;
