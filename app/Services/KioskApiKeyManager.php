@@ -16,8 +16,8 @@ use Illuminate\Support\Str;
  * plaintext tidak pernah bisa dibaca ulang — hanya ditampilkan sekali saat
  * dibuat/dirotasi.
  *
- * Logika ini dipakai bersama oleh perintah artisan `kiosk:api-key` dan
- * halaman pengaturan Filament, agar keduanya tidak pernah menyimpang.
+ * Logika ini dipakai oleh perintah artisan `kiosk:api-key` — satu-satunya
+ * permukaan pengelolaan API key sejak UI kiosk dihapus dari panel admin.
  */
 class KioskApiKeyManager
 {

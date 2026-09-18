@@ -119,7 +119,6 @@ it('super admin users can render the library settings actions', function () {
         ->get('/admin/settings/library')
         ->assertOk()
         ->assertSee('Peminjaman & Layanan')
-        ->assertSee('PIN Kiosk')
         ->assertSee('Batas Kuota Pinjam');
 });
 

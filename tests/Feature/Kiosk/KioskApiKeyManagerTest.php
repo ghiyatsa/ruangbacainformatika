@@ -1,34 +1,11 @@
 <?php
 
-use App\Filament\Clusters\Settings\Pages\KioskApiKeySettings;
 use App\Models\Setting;
-use App\Models\User;
 use App\Services\KioskApiKeyManager;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
 
-use function Pest\Laravel\actingAs;
+use function Pest\Laravel\artisan;
 use function Pest\Laravel\getJson;
-
-function makeKioskSettingsAdmin(): User
-{
-    $user = User::factory()->create();
-
-    $role = Role::firstOrCreate([
-        'name' => 'super_admin',
-        'guard_name' => 'web',
-    ]);
-
-    $user->assignRole($role);
-
-    return $user;
-}
-
-function makeKioskSettingsMember(): User
-{
-    return User::factory()->create();
-}
 
 beforeEach(function () {
     Setting::query()->where('section', KioskApiKeyManager::SECTION)->delete();
@@ -102,41 +79,31 @@ it('revokes the key and clears its metadata', function () {
         ->and($manager->maskedPreview())->toBeNull();
 });
 
-it('allows administrators to open the kiosk api key settings page', function () {
-    actingAs(makeKioskSettingsAdmin());
-
-    expect(KioskApiKeySettings::canAccess())->toBeTrue();
-
-    Livewire::test(KioskApiKeySettings::class)
+it('reports the unconfigured state through the artisan command', function () {
+    artisan('kiosk:api-key show')
+        ->expectsOutputToContain('belum dibuat')
         ->assertSuccessful();
 });
 
-it('denies regular members access to the kiosk api key settings page', function () {
-    actingAs(makeKioskSettingsMember());
-
-    expect(KioskApiKeySettings::canAccess())->toBeFalse();
-});
-
-it('generates a usable key through the admin panel action', function () {
-    actingAs(makeKioskSettingsAdmin());
-
-    Livewire::test(KioskApiKeySettings::class)
-        ->callAction('generate')
-        ->assertNotified('API key kiosk berhasil dibuat');
+it('generates a key through the artisan command', function () {
+    artisan('kiosk:api-key generate --force')
+        ->assertSuccessful();
 
     expect(app(KioskApiKeyManager::class)->isConfigured())->toBeTrue();
 });
 
-it('revokes the key through the admin panel action', function () {
+it('revokes the key through the artisan command', function () {
     app(KioskApiKeyManager::class)->generate();
 
-    actingAs(makeKioskSettingsAdmin());
-
-    Livewire::test(KioskApiKeySettings::class)
-        ->callAction('revoke')
-        ->assertNotified('API key kiosk dicabut');
+    artisan('kiosk:api-key revoke --force')
+        ->assertSuccessful();
 
     expect(app(KioskApiKeyManager::class)->isConfigured())->toBeFalse();
+});
+
+it('rejects an unknown artisan action', function () {
+    artisan('kiosk:api-key nonsense')
+        ->assertFailed();
 });
 
 it('produces a key that authenticates a real kiosk api request', function () {

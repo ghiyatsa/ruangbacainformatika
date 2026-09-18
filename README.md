@@ -196,6 +196,7 @@ Perintah yang umum dibutuhkan pengelola setelah aplikasi berjalan:
 | :--- | :--- |
 | `php artisan skripsi:sync --reset` | Reindex penuh semua karya ilmiah ke Similarity API |
 | `php artisan similarity:clear-cache` | Kosongkan cache hasil pengecekan kemiripan (dipanggil otomatis tiap sync) |
+| `php artisan kiosk:api-key show\|generate\|revoke` | Kelola API key kiosk (`X-Kiosk-Api-Key`) untuk aplikasi Flutter |
 | `php artisan queue:listen` / Horizon | Memproses antrean (sinkronisasi similarity, notifikasi, dsb.) |
 | `php artisan schedule:work` | Menjalankan task terjadwal (lokal); di produksi gunakan cron `schedule:run` |
 
