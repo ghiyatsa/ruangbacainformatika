@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.28.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.27.0...v1.28.0) (2026-09-18)
+
+
+### Features
+
+* **admin:** kelola api key kiosk dari panel pengaturan ([#106](https://github.com/ghiyatsa/ruangbacainformatika/issues/106)) ([b1289d4](https://github.com/ghiyatsa/ruangbacainformatika/commit/b1289d42196cb40f0a22e7490aec138b6c110c3b))
+
 ## [1.27.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.26.0...v1.27.0) (2026-09-18)
 
 
