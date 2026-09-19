@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.31.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.30.0...v1.31.0) (2026-09-19)
+
+
+### Features
+
+* **books:** section rekomendasi buku dari penulis/penerbit sama ([0bfa0f8](https://github.com/ghiyatsa/ruangbacainformatika/commit/0bfa0f82607ac43b6f4e529285f6b17e1f1f307c))
+
 ## [1.30.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.29.0...v1.30.0) (2026-09-18)
 
 
