@@ -3,6 +3,7 @@
 use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureKioskDeviceTokenIsValid;
 use App\Http\Middleware\EnsureKioskNetworkIsAllowed;
+use App\Http\Middleware\EnsureKioskRequestIsIdempotent;
 use App\Http\Middleware\EnsureProfileIsCompleted;
 use App\Http\Middleware\EnsureUserIsMember;
 use App\Http\Middleware\HandleAppearance;
@@ -54,6 +55,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'member' => EnsureUserIsMember::class,
             'kiosk.network' => EnsureKioskNetworkIsAllowed::class,
             'kiosk.device' => EnsureKioskDeviceTokenIsValid::class,
+            'kiosk.idempotent' => EnsureKioskRequestIsIdempotent::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
