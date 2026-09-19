@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.32.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.31.0...v1.32.0) (2026-09-19)
+
+
+### Features
+
+* **kiosk:** idempotensi transaksi pinjam/kembali ([af69e45](https://github.com/ghiyatsa/ruangbacainformatika/commit/af69e459b4aad321dfbc6732f40f9cca1e46d5de))
+* **kiosk:** idempotensi transaksi pinjam/kembali ([1aae0ab](https://github.com/ghiyatsa/ruangbacainformatika/commit/1aae0abb7b4ed236cb04c157000b553bdddf32e8))
+
 ## [1.31.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.30.0...v1.31.0) (2026-09-19)
 
 
