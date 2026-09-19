@@ -197,8 +197,6 @@ class KioskApiController extends Controller
 
         return response()->json([
             'books' => BookResource::collection($result->books)->resolve(),
-            'suggestions' => $result->suggestions,
-            'corrected_query' => $result->correctedQuery,
         ]);
     }
 

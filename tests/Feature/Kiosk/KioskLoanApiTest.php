@@ -286,7 +286,7 @@ it('ranks a closer title match above a weaker one', function () {
         ->and($ids[0])->toBe($exact->id);
 });
 
-it('corrects a typo when the original query yields too few results', function () {
+it('corrects a typo silently when the original query yields too few results', function () {
     $token = borrowApiDeviceToken();
 
     [$book] = borrowApiBook('available', ['title' => 'Buku Metode Penelitian']);
@@ -295,14 +295,16 @@ it('corrects a typo when the original query yields too few results', function ()
         'X-Kiosk-Device-Token' => $token,
     ])->assertSuccessful();
 
+    // Koreksi ejaan tetap bekerja (hasil benar), tetapi kiosk tidak
+    // mengungkapkannya lewat field apa pun.
     expect(collect($response->json('books'))->pluck('id')->all())->toBe([$book->id])
-        ->and($response->json('corrected_query'))->toBe('metode');
+        ->and($response->json())->not->toHaveKey('corrected_query');
 });
 
-it('returns book suggestions and never academic ones on the public kiosk', function () {
+it('returns only books on the public kiosk, without suggestions or academic works', function () {
     $token = borrowApiDeviceToken();
 
-    borrowApiBook('available', ['title' => 'Algoritma dan Struktur Data']);
+    [$book] = borrowApiBook('available', ['title' => 'Algoritma dan Struktur Data']);
 
     Skripsi::factory()->create([
         'title' => 'Analisis Algoritma Pencarian',
@@ -314,11 +316,13 @@ it('returns book suggestions and never academic ones on the public kiosk', funct
         'X-Kiosk-Device-Token' => $token,
     ])->assertSuccessful();
 
-    $suggestions = $response->json('suggestions');
+    // Kiosk tidak lagi mengirim saran kata kunci maupun query terkoreksi.
+    expect($response->json())->not->toHaveKey('suggestions')
+        ->and($response->json())->not->toHaveKey('corrected_query');
 
-    expect($suggestions)->toBeArray()->not->toBeEmpty()
-        ->and(json_encode($suggestions))->toContain('algoritma dan struktur data')
-        ->and(json_encode($suggestions))->not->toContain('pencarian');
+    // Karya ilmiah tidak pernah bocor ke hasil kiosk.
+    $ids = collect($response->json('books'))->pluck('id')->all();
+    expect($ids)->toBe([$book->id]);
 });
 
 // ---------------------------------------------------------------------------
