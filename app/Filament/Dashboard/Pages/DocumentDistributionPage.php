@@ -37,6 +37,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class DocumentDistributionPage extends Page
 {
@@ -776,63 +778,80 @@ class DocumentDistributionPage extends Page
 
         $batchToken = Str::random(32);
 
-        foreach ($items as $item) {
-            if (empty($item['title'])) {
-                continue;
-            }
+        // Muat status item yang sudah ada dalam satu query, bukan satu SELECT
+        // per buku. Item yang sudah disetujui tidak boleh ditimpa.
+        $existingItems = DocumentSubmission::query()
+            ->where('user_id', $user->id)
+            ->where('type', DocumentSubmission::TYPE_BOOK_DONATION)
+            ->whereIn('id', collect($items)->pluck('id')->filter()->all())
+            ->get()
+            ->keyBy('id');
 
-            // Backend Security: Abaikan jika item buku sudah disetujui sebelumnya
-            if (! empty($item['id'])) {
-                $existingItem = DocumentSubmission::query()->where('id', $item['id'])->where('user_id', $user->id)->first();
-                if ($existingItem && $existingItem->isApproved()) {
+        $created = 0;
+
+        // Seluruh batch ditulis dalam satu transaksi: bila satu item gagal,
+        // tidak ada sebagian sumbangan yang tersimpan setengah jalan.
+        DB::transaction(function () use ($items, $user, $batchToken, $existingItems, &$created): void {
+            foreach ($items as $item) {
+                if (empty($item['title'])) {
                     continue;
                 }
+
+                // Item yang sudah disetujui tidak boleh ditimpa.
+                if (! empty($item['id'])) {
+                    $existingItem = $existingItems->get($item['id']);
+                    if ($existingItem && $existingItem->isApproved()) {
+                        continue;
+                    }
+                }
+
+                $coverPath = is_array($item['cover_image'] ?? null)
+                    ? array_values($item['cover_image'])[0] ?? null
+                    : $item['cover_image'] ?? null;
+
+                $existingBookId = ($item['book_source'] ?? 'existing') === 'existing' && ! empty($item['existing_book_id'])
+                    ? (int) $item['existing_book_id']
+                    : null;
+
+                $payload = [
+                    'user_id' => $user->id,
+                    'type' => DocumentSubmission::TYPE_BOOK_DONATION,
+                    'submittable_type' => $existingBookId ? Book::class : null,
+                    'submittable_id' => $existingBookId,
+                    'submission_batch_token' => $batchToken,
+                    'title' => $item['title'],
+                    'subtitle' => $item['subtitle'] ?? null,
+                    'slug' => $item['slug'] ?? Book::generateSlugPreview($item['title']),
+                    'description' => $item['description'] ?? null,
+                    'isbn' => $item['isbn'] ?? null,
+                    'issn' => $item['issn'] ?? null,
+                    'ddc_code' => $item['ddc_code'] ?? null,
+                    'language' => $item['language'] ?? 'Indonesia',
+                    'publisher_id' => $item['publisher_id'] ?? null,
+                    'year' => (int) ($item['published_year'] ?? date('Y')),
+                    'edition' => $item['edition'] ?? null,
+                    'pages' => $item['pages'] ?? null,
+                    'author_ids' => $item['authors'] ?? [],
+                    'category_ids' => $item['categories'] ?? [],
+                    'copies_count' => (int) ($item['copies_count'] ?? 1),
+                    'cover_image' => $coverPath,
+                    'status' => DocumentSubmission::STATUS_PENDING,
+                    'revision_notes' => null,
+                ];
+
+                if (! empty($item['id'])) {
+                    DocumentSubmission::query()->where('id', $item['id'])->where('user_id', $user->id)->update($payload);
+                } else {
+                    DocumentSubmission::query()->create($payload);
+                }
+
+                $created++;
             }
-
-            $coverPath = is_array($item['cover_image'] ?? null)
-                ? array_values($item['cover_image'])[0] ?? null
-                : $item['cover_image'] ?? null;
-
-            $existingBookId = ($item['book_source'] ?? 'existing') === 'existing' && ! empty($item['existing_book_id'])
-                ? (int) $item['existing_book_id']
-                : null;
-
-            $payload = [
-                'user_id' => $user->id,
-                'type' => DocumentSubmission::TYPE_BOOK_DONATION,
-                'submittable_type' => $existingBookId ? Book::class : null,
-                'submittable_id' => $existingBookId,
-                'submission_batch_token' => $batchToken,
-                'title' => $item['title'],
-                'subtitle' => $item['subtitle'] ?? null,
-                'slug' => $item['slug'] ?? Book::generateSlugPreview($item['title']),
-                'description' => $item['description'] ?? null,
-                'isbn' => $item['isbn'] ?? null,
-                'issn' => $item['issn'] ?? null,
-                'ddc_code' => $item['ddc_code'] ?? null,
-                'language' => $item['language'] ?? 'Indonesia',
-                'publisher_id' => $item['publisher_id'] ?? null,
-                'year' => (int) ($item['published_year'] ?? date('Y')),
-                'edition' => $item['edition'] ?? null,
-                'pages' => $item['pages'] ?? null,
-                'author_ids' => $item['authors'] ?? [],
-                'category_ids' => $item['categories'] ?? [],
-                'copies_count' => (int) ($item['copies_count'] ?? 1),
-                'cover_image' => $coverPath,
-                'status' => DocumentSubmission::STATUS_PENDING,
-                'revision_notes' => null,
-            ];
-
-            if (! empty($item['id'])) {
-                DocumentSubmission::query()->where('id', $item['id'])->where('user_id', $user->id)->update($payload);
-            } else {
-                DocumentSubmission::query()->create($payload);
-            }
-        }
+        });
 
         Notification::make()
             ->title('Daftar sumbangan buku berhasil disimpan')
-            ->body('Data telah diajukan dan sedang menunggu verifikasi oleh petugas.')
+            ->body("{$created} buku telah diajukan dan sedang menunggu verifikasi oleh petugas.")
             ->success()
             ->send();
 
