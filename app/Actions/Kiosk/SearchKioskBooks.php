@@ -8,17 +8,17 @@ use App\Models\Book;
 use App\Models\Loan;
 use App\Services\KioskLoanService;
 use App\Services\Search\BookSearchRanker;
-use App\Services\Search\SearchSuggestionBuilder;
 use App\Services\Search\SearchTermResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 /**
  * Pencarian buku di kiosk, memakai mesin yang sama dengan pencarian global web:
- * ranking relevansi, koreksi ejaan, dan saran kata kunci.
+ * ranking relevansi dan koreksi ejaan.
  *
- * Saran dibatasi pada koleksi buku (tanpa karya ilmiah) karena kiosk adalah
- * perangkat publik tanpa sesi anggota.
+ * Koreksi ejaan berjalan senyap — hasil tetap benar saat pengguna salah ketik,
+ * tetapi kiosk tidak menampilkan saran kata kunci maupun pemberitahuan koreksi
+ * karena perangkat publik harus tetap sesederhana mungkin.
  */
 class SearchKioskBooks
 {
@@ -26,7 +26,6 @@ class SearchKioskBooks
         protected KioskLoanService $kioskLoanService,
         protected BookSearchRanker $ranker,
         protected SearchTermResolver $terms,
-        protected SearchSuggestionBuilder $suggestions,
     ) {}
 
     public function execute(string $search, string $mode, string $memberIdentifier): KioskBookSearchResult
@@ -59,22 +58,7 @@ class SearchKioskBooks
             ->limit(8)
             ->get();
 
-        $words = $this->terms->words($search);
-        $suggestions = $this->suggestions->collectMultiField($words, 6, false);
-
-        if ($suggestions === [] && $resolved !== $search) {
-            $suggestions = $this->suggestions->collectMultiField(
-                $this->terms->words($resolved),
-                6,
-                false,
-            );
-        }
-
-        return new KioskBookSearchResult(
-            books: $books,
-            suggestions: $suggestions,
-            correctedQuery: $resolved !== $search ? $resolved : null,
-        );
+        return new KioskBookSearchResult(books: $books);
     }
 
     /**
