@@ -169,6 +169,36 @@ it('menyimpan sumbangan buku secara batch tanpa satu query per buku', function (
         ->count())->toBe(15);
 });
 
+it('tidak menimpa pengajuan yang sudah disetujui lewat submitBooks dengan id lintas tipe', function () {
+    $member = User::factory()->create([
+        'email' => '210170022@mhs.unimal.ac.id',
+        'is_approved' => true,
+    ]);
+
+    actingAs($member);
+
+    // Pengajuan KP yang sudah disetujui. Bila id-nya dikirim lewat form
+    // sumbangan buku, jalur tulis buku tidak boleh menimpanya.
+    $approvedKp = DocumentSubmission::factory()->create([
+        'user_id' => $member->id,
+        'type' => DocumentSubmission::TYPE_INTERNSHIP_REPORT,
+        'status' => DocumentSubmission::STATUS_APPROVED,
+        'title' => 'Laporan KP Resmi Disetujui',
+    ]);
+
+    Livewire::test(DocumentDistributionPage::class)
+        ->set('data.books.items', [
+            'item-x' => ['id' => $approvedKp->id, 'title' => 'Percobaan Timpa', 'copies_count' => 1],
+        ])
+        ->call('submitBooks');
+
+    $after = DocumentSubmission::query()->find($approvedKp->id);
+
+    expect($after->title)->toBe('Laporan KP Resmi Disetujui')
+        ->and($after->type)->toBe(DocumentSubmission::TYPE_INTERNSHIP_REPORT)
+        ->and($after->status)->toBe(DocumentSubmission::STATUS_APPROVED);
+});
+
 it('membatalkan seluruh batch bila satu item gagal disimpan', function () {
     $member = User::factory()->create([
         'email' => '210170021@mhs.unimal.ac.id',

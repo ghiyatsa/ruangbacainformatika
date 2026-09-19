@@ -779,10 +779,11 @@ class DocumentDistributionPage extends Page
         $batchToken = Str::random(32);
 
         // Muat status item yang sudah ada dalam satu query, bukan satu SELECT
-        // per buku. Item yang sudah disetujui tidak boleh ditimpa.
+        // per buku. Sengaja TIDAK memfilter `type`: pengaman di bawah harus
+        // mengenali id milik pengguna ini apa pun tipenya, supaya pengajuan
+        // (mis. laporan KP) yang sudah disetujui tidak pernah tertimpa.
         $existingItems = DocumentSubmission::query()
             ->where('user_id', $user->id)
-            ->where('type', DocumentSubmission::TYPE_BOOK_DONATION)
             ->whereIn('id', collect($items)->pluck('id')->filter()->all())
             ->get()
             ->keyBy('id');
