@@ -7,7 +7,6 @@ namespace App\Filament\Clusters\Settings\Pages;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Repositories\SettingRepository;
 use App\Services\ActivityLogService;
-use App\Services\KioskPinManager;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -22,7 +21,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Hash;
 
 class LibrarySettings extends Page
 {
@@ -124,17 +122,6 @@ class LibrarySettings extends Page
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Otentikasi Kiosk Mandiri')
-                    ->schema([
-                        TextInput::make('kiosk_pin')
-                            ->label('PIN Kiosk')
-                            ->password()
-                            ->revealable()
-                            ->helperText('Wajib 6 digit angka. Kosongkan jika tidak diubah.')
-                            ->required(fn (): bool => ! $this->kioskPinManager()->isConfigured())
-                            ->length(6)
-                            ->rule('regex:/^[0-9]{6}$/'),
-                    ]),
                 Section::make('Kebijakan Peminjaman')
                     ->schema([
                         TextInput::make('loan_max_books')
@@ -218,10 +205,6 @@ class LibrarySettings extends Page
             'late_return_cooldown_days' => $data['late_return_cooldown_days'] ?? 3,
         ];
 
-        if (! empty($data['kiosk_pin'])) {
-            $this->settingRepository()->put('kiosk', 'pin_hash', Hash::make((string) $data['kiosk_pin']));
-        }
-
         $this->settingRepository()->putMany('library', $savedValues);
         app(ActivityLogService::class)->logSettingsUpdate('library', 'Pengaturan peminjaman & distribusi', $existingValues, $savedValues);
 
@@ -254,13 +237,7 @@ class LibrarySettings extends Page
             'late_return_suspension_enabled' => true,
             'late_return_suspend_after_days' => '1',
             'late_return_cooldown_days' => '3',
-            'kiosk_pin' => '',
         ];
-    }
-
-    protected function kioskPinManager(): KioskPinManager
-    {
-        return app(KioskPinManager::class);
     }
 
     protected function settingRepository(): SettingRepository

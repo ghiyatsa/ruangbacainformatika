@@ -116,4 +116,5 @@ export interface BookShowProps {
     };
     loanRequest?: LoanRequestSummary | null;
     relatedBooks?: BookData[];
+    recommendedBooks?: BookData[];
 }

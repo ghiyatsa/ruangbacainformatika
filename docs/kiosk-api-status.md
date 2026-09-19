@@ -98,7 +98,11 @@ terus menjalankan kode lama.
 
 ## Riwayat migrasi
 
-1. **Halaman admin** untuk kelola perangkat/API key — tidak diperlukan sekarang (cukup artisan).
+1. **Halaman admin** untuk kelola perangkat/API key — ✅ **dihapus**. Panel admin kini
+   bersih dari UI kiosk (`KioskApiKeySettings`, field PIN, blade view). Pengelolaan API key
+   hanya lewat artisan `kiosk:api-key`; komunikasi Flutter ↔ server murni lewat
+   `routes/api.php`. PIN tetap dibaca dari settings (`kiosk.pin_hash`, diisi seeder/env
+   `KIOSK_DEFAULT_PIN`) untuk `devices/activate`, tanpa UI web.
 2. **Idempotency-Key** untuk borrow/return — menunggu kebutuhan nyata dari Flutter.
 3. **Penghapusan kiosk web** — ✅ **selesai**. `routes/kiosk.php`, `KioskController`,
    `EnsureKioskPinIsValid`, komponen React `features/kiosk` + `pages/kiosk`, dan rate limiter

@@ -17,11 +17,18 @@ class RelatedCatalogService
 {
     private const RESULT_LIMIT = 4;
 
+    /** @var array<int, Collection<int, Book>> */
+    private array $recommendedCache = [];
+
     /**
+     * @param  array<int, int|string>  $excludeBookIds  Buku yang tidak boleh muncul (mis. sudah tampil di rekomendasi).
      * @return Collection<int, Book>
      */
-    public function forBook(Book $book, int $limit = self::RESULT_LIMIT): Collection
-    {
+    public function forBook(
+        Book $book,
+        int $limit = self::RESULT_LIMIT,
+        array $excludeBookIds = [],
+    ): Collection {
         $book->loadMissing(['authors:id', 'categories:id']);
 
         $categoryIds = $book->categories->modelKeys();
@@ -32,13 +39,74 @@ class RelatedCatalogService
             ->published()
             ->whereKeyNot($book->getKey());
 
+        $this->excludeBooks($query, $excludeBookIds);
         $this->applyBookMatches($query, $book, $categoryIds, $authorIds, $titleTerms);
 
         $related = $this->bookResults($query, $limit);
 
-        return $related->isNotEmpty()
-            ? $related
-            : $this->bookResults(Book::query()->published()->whereKeyNot($book->getKey()), $limit);
+        if ($related->isNotEmpty()) {
+            return $related;
+        }
+
+        $fallback = Book::query()
+            ->published()
+            ->whereKeyNot($book->getKey());
+
+        $this->excludeBooks($fallback, $excludeBookIds);
+
+        return $this->bookResults($fallback, $limit);
+    }
+
+    /**
+     * Buku rekomendasi: hanya dari penulis atau penerbit yang sama.
+     *
+     * Sengaja dipisah dari {@see self::forBook()} yang mencocokkan lebih luas
+     * (kategori, tahun, kata kunci judul) agar section "Rekomendasi Buku"
+     * benar-benar menampilkan karya penulis/penerbit yang sama. Hasilnya
+     * di-cache per buku selama satu request agar controller dapat memakainya
+     * lagi untuk mengecualikan duplikat dari daftar buku terkait.
+     *
+     * @return Collection<int, Book>
+     */
+    public function recommendedForBook(Book $book, int $limit = self::RESULT_LIMIT): Collection
+    {
+        $cacheKey = (int) $book->getKey();
+
+        if (isset($this->recommendedCache[$cacheKey])) {
+            return $this->recommendedCache[$cacheKey];
+        }
+
+        $book->loadMissing(['authors:id']);
+        $authorIds = $book->authors->modelKeys();
+        $publisherId = $book->publisher_id;
+
+        if ($authorIds === [] && $publisherId === null) {
+            return $this->recommendedCache[$cacheKey] = new Collection;
+        }
+
+        $query = Book::query()
+            ->published()
+            ->whereKeyNot($book->getKey())
+            ->where(function (Builder $matches) use ($authorIds, $publisherId): void {
+                $matches
+                    ->when($authorIds !== [], fn (Builder $query) => $query
+                        ->orWhereHas('authors', fn (Builder $authors) => $authors->whereKey($authorIds)))
+                    ->when($publisherId !== null, fn (Builder $query) => $query
+                        ->orWhere('publisher_id', $publisherId));
+            });
+
+        return $this->recommendedCache[$cacheKey] = $this->bookResults($query, $limit);
+    }
+
+    /**
+     * @param  Builder<Book>  $query
+     * @param  array<int, int|string>  $ids
+     */
+    private function excludeBooks(Builder $query, array $ids): void
+    {
+        if ($ids !== []) {
+            $query->whereKeyNot($ids);
+        }
     }
 
     /**

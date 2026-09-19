@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
  * Kelola API key bersama untuk aplikasi kiosk (Flutter).
  *
  * Logika generate/revoke didelegasikan ke KioskApiKeyManager agar identik
- * dengan halaman pengaturan pada panel admin (Filament) — tidak ada dua
+ * dengan satu-satunya sumber kebenaran pengelolaan key — tidak ada dua
  * implementasi yang bisa saling menyimpang.
  *
  * Key disimpan sebagai hash di settings (kiosk.api_key_hash); plaintext hanya
