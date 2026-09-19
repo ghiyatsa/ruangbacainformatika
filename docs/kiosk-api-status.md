@@ -103,7 +103,14 @@ terus menjalankan kode lama.
    hanya lewat artisan `kiosk:api-key`; komunikasi Flutter ↔ server murni lewat
    `routes/api.php`. PIN tetap dibaca dari settings (`kiosk.pin_hash`, diisi seeder/env
    `KIOSK_DEFAULT_PIN`) untuk `devices/activate`, tanpa UI web.
-2. **Idempotency-Key** untuk borrow/return — menunggu kebutuhan nyata dari Flutter.
+2. **Idempotency-Key** untuk borrow/return — ✅ **selesai**. Middleware
+   `kiosk.idempotent` menyimpan respons sukses pertama per key (tabel
+   `kiosk_idempotency_records`, TTL 24 jam) dan memutar ulang respons itu untuk
+   percobaan ulang, sehingga koneksi putus di tengah transaksi tidak menghasilkan
+   pinjaman/pengembalian ganda. Sidik jari sengaja mengecualikan
+   `verification_payload` (QR sekali pakai) dan menolak key sama dengan muatan
+   berbeda (409). Klien Flutter memakai `IdempotencyKey` (key stabil antar
+   percobaan). Records kedaluwarsa dipangkas oleh `records:prune`.
 3. **Penghapusan kiosk web** — ✅ **selesai**. `routes/kiosk.php`, `KioskController`,
    `EnsureKioskPinIsValid`, komponen React `features/kiosk` + `pages/kiosk`, dan rate limiter
    `kiosk-consume` sudah dihapus. Cakupan tes yang menguji logika bisnis yang masih hidup

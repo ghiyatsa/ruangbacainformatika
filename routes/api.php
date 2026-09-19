@@ -47,11 +47,11 @@ Route::prefix('kiosk')->group(function (): void {
             ->name('api.kiosk.books.search');
 
         Route::post('loans/borrow', [KioskApiController::class, 'borrow'])
-            ->middleware('throttle:kiosk-submit')
+            ->middleware(['throttle:kiosk-submit', 'kiosk.idempotent'])
             ->name('api.kiosk.loans.borrow');
 
         Route::post('loans/return', [KioskApiController::class, 'storeReturn'])
-            ->middleware('throttle:kiosk-submit')
+            ->middleware(['throttle:kiosk-submit', 'kiosk.idempotent'])
             ->name('api.kiosk.loans.return');
 
         Route::post('members', [KioskApiController::class, 'storeMember'])
