@@ -50,6 +50,7 @@ import type { BookData } from '@/features/books/types';
 export interface BookDetailPageProps {
     book?: { data: BookData };
     relatedBooks?: BookData[];
+    recommendedBooks?: BookData[];
     loading?: boolean;
 }
 
@@ -653,36 +654,83 @@ export default function BookDetailPage(props: BookDetailPageProps) {
             }
             footer={
                 (props.relatedBooks === undefined ||
-                    props.relatedBooks.length > 0) && (
-                    <KtiRelatedSection title="Buku Terkait">
-                        <Deferred
-                            data="relatedBooks"
-                            fallback={
-                                <div className="grid gap-4 lg:grid-cols-2">
-                                    <BookCardSkeleton variant="compact" />
-                                    <BookCardSkeleton variant="compact" />
-                                </div>
-                            }
-                            rescue={({ reloading }) => (
-                                <DeferredCatalogRescue
-                                    dataKey="relatedBooks"
-                                    title="Daftar buku lain belum sempat dimuat"
-                                    description="Coba muat lagi sebentar. Kalau berhasil, beberapa judul yang masih dekat dengan buku ini akan muncul di sini."
-                                    reloading={reloading}
-                                />
-                            )}
-                        >
-                            <div className="grid gap-4 lg:grid-cols-2">
-                                {props.relatedBooks?.map((relatedBook) => (
-                                    <BookCard
-                                        key={relatedBook.id}
-                                        book={relatedBook}
-                                        variant="compact"
-                                    />
-                                ))}
-                            </div>
-                        </Deferred>
-                    </KtiRelatedSection>
+                    props.relatedBooks.length > 0 ||
+                    props.recommendedBooks === undefined ||
+                    props.recommendedBooks.length > 0) && (
+                    <div className="space-y-12">
+                        {(props.relatedBooks === undefined ||
+                            props.relatedBooks.length > 0) && (
+                            <KtiRelatedSection title="Buku Terkait">
+                                <Deferred
+                                    data="relatedBooks"
+                                    fallback={
+                                        <div className="grid gap-4 lg:grid-cols-2">
+                                            <BookCardSkeleton variant="compact" />
+                                            <BookCardSkeleton variant="compact" />
+                                        </div>
+                                    }
+                                    rescue={({ reloading }) => (
+                                        <DeferredCatalogRescue
+                                            dataKey="relatedBooks"
+                                            title="Daftar buku lain belum sempat dimuat"
+                                            description="Coba muat lagi sebentar. Kalau berhasil, beberapa judul yang masih dekat dengan buku ini akan muncul di sini."
+                                            reloading={reloading}
+                                        />
+                                    )}
+                                >
+                                    <div className="grid gap-4 lg:grid-cols-2">
+                                        {props.relatedBooks?.map(
+                                            (relatedBook) => (
+                                                <BookCard
+                                                    key={relatedBook.id}
+                                                    book={relatedBook}
+                                                    variant="compact"
+                                                />
+                                            ),
+                                        )}
+                                    </div>
+                                </Deferred>
+                            </KtiRelatedSection>
+                        )}
+
+                        {(props.recommendedBooks === undefined ||
+                            props.recommendedBooks.length > 0) && (
+                            <KtiRelatedSection
+                                title="Rekomendasi Buku"
+                                description="Karya lain dari penulis atau penerbit yang sama."
+                            >
+                                <Deferred
+                                    data="recommendedBooks"
+                                    fallback={
+                                        <div className="grid gap-4 lg:grid-cols-2">
+                                            <BookCardSkeleton variant="compact" />
+                                            <BookCardSkeleton variant="compact" />
+                                        </div>
+                                    }
+                                    rescue={({ reloading }) => (
+                                        <DeferredCatalogRescue
+                                            dataKey="recommendedBooks"
+                                            title="Rekomendasi belum sempat dimuat"
+                                            description="Coba muat lagi sebentar. Kalau berhasil, buku dari penulis atau penerbit yang sama akan muncul di sini."
+                                            reloading={reloading}
+                                        />
+                                    )}
+                                >
+                                    <div className="grid gap-4 lg:grid-cols-2">
+                                        {props.recommendedBooks?.map(
+                                            (recommendedBook) => (
+                                                <BookCard
+                                                    key={recommendedBook.id}
+                                                    book={recommendedBook}
+                                                    variant="compact"
+                                                />
+                                            ),
+                                        )}
+                                    </div>
+                                </Deferred>
+                            </KtiRelatedSection>
+                        )}
+                    </div>
                 )
             }
         >

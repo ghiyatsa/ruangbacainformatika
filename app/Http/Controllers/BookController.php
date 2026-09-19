@@ -41,8 +41,21 @@ class BookController extends Controller
 
         return Inertia::render('books/show', [
             'book' => new BookResource($book),
+            // Buku terkait mengecualikan buku rekomendasi agar tidak ada judul
+            // yang tampil dua kali di halaman yang sama.
             'relatedBooks' => Inertia::defer(
-                fn () => BookResource::collection($this->relatedCatalogService->forBook($book))->resolve(),
+                fn () => BookResource::collection(
+                    $this->relatedCatalogService->forBook(
+                        $book,
+                        excludeBookIds: $this->relatedCatalogService->recommendedForBook($book)->modelKeys(),
+                    ),
+                )->resolve(),
+                rescue: true,
+            ),
+            'recommendedBooks' => Inertia::defer(
+                fn () => BookResource::collection(
+                    $this->relatedCatalogService->recommendedForBook($book),
+                )->resolve(),
                 rescue: true,
             ),
         ])->withViewData([
