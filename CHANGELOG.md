@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.32.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.32.0...v1.32.1) (2026-09-19)
+
+
+### Bug Fixes
+
+* **distribution:** jangan timpa pengajuan disetujui lintas tipe + indeks statistik kiosk ([#121](https://github.com/ghiyatsa/ruangbacainformatika/issues/121)) ([07a2775](https://github.com/ghiyatsa/ruangbacainformatika/commit/07a277558470693f70645844f157af62cb9d6ee7))
+* **distribution:** write book donations in one transaction without N+1 ([#119](https://github.com/ghiyatsa/ruangbacainformatika/issues/119)) ([56aa2d7](https://github.com/ghiyatsa/ruangbacainformatika/commit/56aa2d715e792803e7151d85d4a57e86885cc3fa))
+
 ## [1.32.0](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.31.0...v1.32.0) (2026-09-19)
 
 
