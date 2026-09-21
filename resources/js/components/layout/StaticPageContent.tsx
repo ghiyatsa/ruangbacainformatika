@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { enhanceCodeBlocks } from '@/lib/code-highlight';
 import { cn } from '@/lib/utils';
 
 interface StaticPageContentProps {
@@ -6,9 +8,24 @@ interface StaticPageContentProps {
 }
 
 export function StaticPageContent({ html, className }: StaticPageContentProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const container = containerRef.current;
+
+        if (!container) {
+            return;
+        }
+
+        // Beri warna sintaks + tombol salin pada tiap blok kode. Efek ini
+        // idempoten, jadi aman dijalankan ulang saat konten berubah.
+        void enhanceCodeBlocks(container);
+    }, [html]);
+
     return (
         <div className={cn('mx-auto max-w-4xl', className)}>
             <div
+                ref={containerRef}
                 className={cn(
                     'text-sm leading-8 text-muted-foreground sm:text-base',
                     '[&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary/80',
