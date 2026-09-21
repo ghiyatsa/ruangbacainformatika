@@ -32,9 +32,9 @@ const errorContent: Record<number, { title: string; description: string }> = {
             'Terjadi kendala pada sistem kami. Tim teknis sedang menanganinya.',
     },
     503: {
-        title: 'Layanan sementara tidak tersedia',
+        title: 'Sedang maintenance',
         description:
-            'Layanan sedang dalam pemeliharaan. Silakan coba kembali beberapa saat lagi.',
+            'Layanan sedang dalam pemeliharaan terjadwal untuk meningkatkan kualitas akses. Silakan kunjungi kembali beberapa saat lagi.',
     },
 };
 
