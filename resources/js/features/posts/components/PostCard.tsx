@@ -165,7 +165,7 @@ export function PostCard({ post, compact = false }: PostCardProps) {
 
                 {/* Title + excerpt */}
                 <div className="space-y-1.5">
-                    <h3 className="text-wrap-balance line-clamp-2 leading-snug font-bold text-foreground transition-colors group-hover:text-primary">
+                    <h3 className="line-clamp-2 leading-snug font-bold text-balance text-foreground transition-colors group-hover:text-primary">
                         {post.title}
                     </h3>
                     <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">

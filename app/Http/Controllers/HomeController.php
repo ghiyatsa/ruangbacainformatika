@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Catalog\BuildHomeCatalogSections;
-use App\Http\Resources\PostResource;
+use App\Http\Resources\PostListResource;
 use App\Services\CatalogService;
 use App\Services\Post\PostQueryService;
 use App\Support\PageMeta;
@@ -35,7 +35,7 @@ class HomeController extends Controller
             'popularBooks' => $this->buildHomeCatalogSections->popularBooks(),
             'mostBorrowedBooks' => $this->buildHomeCatalogSections->mostBorrowedBooks(),
             'popularCategoryShelves' => $this->buildHomeCatalogSections->popularCategoryShelves(),
-            'latestPosts' => PostResource::collection($this->postQueryService->latestForHome(4))->resolve(),
+            'latestPosts' => PostListResource::collection($this->postQueryService->latestForHome(4))->resolve(),
             'books' => $paginated,
         ])->withViewData([
             'meta' => $this->pageMeta->forWelcome(),

@@ -57,6 +57,7 @@ it('member can render the create post page with correct titles and labels', func
         ->assertSee('Isi & Redaksi')
         ->assertSee('Judul Artikel')
         ->assertSee('Slug URL')
+        ->assertSee('Ringkasan')
         ->assertSee('Badan Artikel')
         ->assertSee('Klasifikasi')
         ->assertSee('Penulis')
@@ -109,7 +110,7 @@ it('member edit page shows review notes for rejected posts', function () {
         ->assertSee('Rapikan pembuka dan tambah sumber rujukan.');
 });
 
-it('member can only attach existing categories and tags', function () {
+it('member can attach existing categories and create tags by typing names', function () {
     $user = createTestMember();
     $category = PostCategory::factory()->create();
     $tag = PostTag::factory()->create();
@@ -123,7 +124,7 @@ it('member can only attach existing categories and tags', function () {
             'summary' => 'Ringkasan singkat.',
             'content' => '<p>Isi artikel valid.</p>',
             'categories' => [$category->getKey()],
-            'tags' => [$tag->getKey()],
+            'tags' => [$tag->name, 'Tag Baru'],
             'status' => Post::STATUS_PENDING,
         ])
         ->call('create')
@@ -132,10 +133,40 @@ it('member can only attach existing categories and tags', function () {
     $post = Post::query()->where('slug', 'artikel-member-valid')->firstOrFail();
 
     expect($post->categories()->pluck('post_categories.id')->all())->toBe([$category->getKey()])
-        ->and($post->tags()->pluck('post_tags.id')->all())->toBe([$tag->getKey()]);
+        ->and($post->tags()->pluck('post_tags.name')->sort()->values()->all())->toBe(collect([$tag->name, 'Tag Baru'])->sort()->values()->all());
+
+    expect(PostTag::query()->where('name', 'Tag Baru')->exists())->toBeTrue();
 });
 
-it('member cannot submit unknown categories and tags', function () {
+it('member-entered summary is saved and sent to the frontend', function () {
+    $user = createTestMember();
+
+    actingAs($user);
+
+    Livewire::test(MemberCreatePost::class)
+        ->fillForm([
+            'title' => 'Artikel dengan Ringkasan',
+            'slug' => 'artikel-dengan-ringkasan',
+            'summary' => 'Ringkasan manual dari penulis.',
+            'content' => '<p>Isi artikel.</p>',
+            'status' => Post::STATUS_DRAFT,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $post = Post::query()->where('slug', 'artikel-dengan-ringkasan')->firstOrFail();
+
+    expect($post->summary)->toBe('Ringkasan manual dari penulis.');
+
+    // Ringkasan harus ikut terkirim ke frontend (dipakai kartu & meta berbagi).
+    get(route('posts.preview', $post->preview_token))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('posts/show')
+            ->where('post.data.summary', 'Ringkasan manual dari penulis.'));
+});
+
+it('member cannot submit unknown categories but tags are created on the fly', function () {
     $user = createTestMember();
 
     actingAs($user);
@@ -147,11 +178,21 @@ it('member cannot submit unknown categories and tags', function () {
             'summary' => 'Ringkasan singkat.',
             'content' => '<p>Isi artikel valid.</p>',
             'categories' => [999999],
-            'tags' => [999999],
+            'tags' => ['Tag Tanpa Kategori Valid'],
             'status' => Post::STATUS_PENDING,
         ])
         ->call('create')
-        ->assertHasFormErrors(['categories.0', 'tags.0']);
+        ->assertHasFormErrors(['categories.0'])
+        ->assertHasNoFormErrors(['tags.0']);
+});
+
+it('member create page limits the article body height so the toolbar stays reachable', function () {
+    $user = createTestMember();
+
+    actingAs($user)
+        ->get('/dashboard/posts/create')
+        ->assertOk()
+        ->assertSee('--max-height: 60vh', false);
 });
 
 it('admin create post page has correct title and labels', function () {

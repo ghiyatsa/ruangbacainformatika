@@ -13,8 +13,11 @@ export interface PostItem {
     slug: string;
     summary: string | null;
     excerpt: string;
-    content: string;
-    contentText: string;
+    /**
+     * Badan artikel (HTML tersanitasi). Hanya dikirim pada halaman detail;
+     * daftar/kartu artikel memakai excerpt saja, jadi field ini bisa kosong.
+     */
+    content?: string;
     coverImageUrl: string;
     status: string;
     publishedAt: string | null;
