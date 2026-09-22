@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Posts\Tables;
 
 use App\Models\Post;
+use App\Services\Post\PostRevisionService;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -110,8 +111,18 @@ class PostsTable
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
-                        ->hidden(fn (Post $record): bool => $record->status === Post::STATUS_APPROVED)
+                        ->hidden(fn (Post $record): bool => $record->status === Post::STATUS_APPROVED
+                            && app(PostRevisionService::class)->pendingRevision($record) === null)
                         ->action(function (Post $record): void {
+                            $service = app(PostRevisionService::class);
+                            $revision = $service->pendingRevision($record);
+
+                            if ($revision !== null) {
+                                $service->approve($revision, Auth::user());
+
+                                return;
+                            }
+
                             $record->update([
                                 'status' => Post::STATUS_APPROVED,
                                 'reviewed_by_user_id' => Auth::id(),
@@ -123,7 +134,8 @@ class PostsTable
                         ->label('Kembalikan')
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
-                        ->hidden(fn (Post $record): bool => $record->status === Post::STATUS_REJECTED)
+                        ->hidden(fn (Post $record): bool => $record->status === Post::STATUS_REJECTED
+                            && app(PostRevisionService::class)->pendingRevision($record) === null)
                         ->schema([
                             Textarea::make('rejection_reason')
                                 ->label('Catatan untuk Penulis')
@@ -132,6 +144,15 @@ class PostsTable
                                 ->maxLength(500),
                         ])
                         ->action(function (Post $record, array $data): void {
+                            $service = app(PostRevisionService::class);
+                            $revision = $service->pendingRevision($record);
+
+                            if ($revision !== null) {
+                                $service->reject($revision, Auth::user(), (string) $data['rejection_reason']);
+
+                                return;
+                            }
+
                             $record->update([
                                 'status' => Post::STATUS_REJECTED,
                                 'reviewed_by_user_id' => Auth::id(),

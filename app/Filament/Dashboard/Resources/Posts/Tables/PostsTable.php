@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Dashboard\Resources\Posts\Tables;
 
 use App\Models\Post;
+use App\Services\Post\PostRevisionService;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -42,8 +43,8 @@ class PostsTable
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => static::statusLabel($state))
-                    ->color(fn (string $state): string => static::statusColor($state))
+                    ->formatStateUsing(fn (Post $record): string => static::statusLabelFor($record))
+                    ->color(fn (Post $record): string => static::statusColorFor($record))
                     ->sortable()
                     ->description(fn (Post $record): ?string => $record->status === Post::STATUS_REJECTED && filled($record->rejection_reason) ? "Alasan: {$record->rejection_reason}" : null),
 
@@ -117,5 +118,29 @@ class PostsTable
             Post::STATUS_REJECTED => 'danger',
             default => 'gray',
         };
+    }
+
+    /**
+     * Artikel yang sudah terbit dengan perubahan menunggu tinjauan tetap
+     * berstatus "Diterbitkan", tetapi diberi keterangan tambahan.
+     */
+    protected static function statusLabelFor(Post $record): string
+    {
+        if ($record->status === Post::STATUS_APPROVED
+            && app(PostRevisionService::class)->hasPendingRevision($record)) {
+            return 'Diterbitkan · Perubahan Ditinjau';
+        }
+
+        return static::statusLabel($record->status);
+    }
+
+    protected static function statusColorFor(Post $record): string
+    {
+        if ($record->status === Post::STATUS_APPROVED
+            && app(PostRevisionService::class)->hasPendingRevision($record)) {
+            return 'warning';
+        }
+
+        return static::statusColor($record->status);
     }
 }

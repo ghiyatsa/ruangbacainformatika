@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Dashboard\Resources\Posts\Schemas;
 
+use App\Filament\Concerns\ManagesPostRevisionForm;
 use App\Models\Post;
 use App\Models\PostTag;
+use App\Services\Post\PostRevisionService;
 use App\Services\PostThumbnailImageService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -28,6 +30,29 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PostForm
 {
+    use ManagesPostRevisionForm;
+
+    /**
+     * Artikel yang sudah terbit tidak ditimpa langsung; perubahan penulis
+     * disimpan sebagai revisi sampai disetujui peninjau.
+     */
+    protected static function shouldStageRevision(?Post $record): bool
+    {
+        return $record !== null && $record->status === Post::STATUS_APPROVED;
+    }
+
+    /**
+     * Catatan penolakan terbaru, baik dari artikel maupun dari revisi.
+     */
+    protected static function revisionRejectionReason(?Post $record): ?string
+    {
+        if ($record === null) {
+            return null;
+        }
+
+        return app(PostRevisionService::class)->workingRevision($record)?->rejection_reason;
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -38,15 +63,15 @@ class PostForm
                 ])
                     ->schema([
                         Section::make('Artikel Perlu Perbaikan (Ditolak)')
-                            ->description(fn (?Post $record): string => 'Catatan: '.($record?->rejection_reason ?? ''))
+                            ->description(fn (?Post $record): string => 'Catatan: '.(static::revisionRejectionReason($record) ?? $record?->rejection_reason ?? ''))
                             ->icon(Heroicon::OutlinedExclamationTriangle)
                             ->iconColor('danger')
-                            ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_REJECTED && filled($record->rejection_reason))
+                            ->visible(fn (?Post $record): bool => filled(static::revisionRejectionReason($record)) || ($record !== null && $record->status === Post::STATUS_REJECTED && filled($record->rejection_reason)))
                             ->columnSpanFull()
                             ->schema([]),
 
                         Section::make('Artikel Telah Diterbitkan')
-                            ->description('Penyimpanan perubahan akan mengubah status menjadi peninjauan ulang.')
+                            ->description('Perubahan Anda akan ditinjau dulu. Artikel versi sekarang tetap tampil sampai perubahan disetujui.')
                             ->icon(Heroicon::OutlinedCheckCircle)
                             ->iconColor('success')
                             ->visible(fn (?Post $record): bool => $record !== null && $record->status === Post::STATUS_APPROVED)
@@ -153,7 +178,21 @@ class PostForm
                                             ->preload()
                                             ->rules(['array'])
                                             ->nestedRecursiveRules(['exists:post_categories,id'])
-                                            ->searchable(),
+                                            ->searchable()
+                                            ->afterStateHydrated(function (Select $component, ?Post $record): void {
+                                                if ($record === null || ! $record->exists) {
+                                                    return;
+                                                }
+
+                                                $revision = static::shouldStageRevision($record)
+                                                    ? app(PostRevisionService::class)->workingRevision($record)
+                                                    : null;
+
+                                                $component->state($revision?->categories ?? $record->categories()->pluck('post_categories.id')->all());
+                                            })
+                                            ->saveRelationshipsUsing(function (?Post $record, array $state): void {
+                                                static::stageOrSyncRelation($record, 'categories', $state);
+                                            }),
 
                                         TagsInput::make('tags')
                                             ->label('Tag')
@@ -165,18 +204,14 @@ class PostForm
                                                 if ($record === null || ! $record->exists) {
                                                     return;
                                                 }
-                                                $component->state($record->tags()->pluck('name')->toArray());
+                                                $revision = static::shouldStageRevision($record)
+                                                    ? app(PostRevisionService::class)->workingRevision($record)
+                                                    : null;
+
+                                                $component->state($revision?->tags ?? $record->tags()->pluck('name')->toArray());
                                             })
                                             ->saveRelationshipsUsing(function (?Post $record, array $state): void {
-                                                if ($record === null) {
-                                                    return;
-                                                }
-                                                $tagIds = [];
-                                                foreach ($state as $tagName) {
-                                                    $tag = PostTag::findOrCreateByName((string) $tagName);
-                                                    $tagIds[] = $tag->getKey();
-                                                }
-                                                $record->tags()->sync($tagIds);
+                                                static::stageOrSyncRelation($record, 'tags', $state);
                                             }),
                                     ]),
 
@@ -188,8 +223,8 @@ class PostForm
 
                                         Placeholder::make('review_note')
                                             ->label('Catatan Review Sebelumnya')
-                                            ->content(fn (?Post $record): string => $record?->rejection_reason ?? '-')
-                                            ->visible(fn (?Post $record): bool => filled($record?->rejection_reason)),
+                                            ->content(fn (?Post $record): string => static::revisionRejectionReason($record) ?? $record?->rejection_reason ?? '-')
+                                            ->visible(fn (?Post $record): bool => filled(static::revisionRejectionReason($record)) || filled($record?->rejection_reason)),
 
                                         Select::make('status')
                                             ->label('Status')

@@ -36,7 +36,12 @@ export function notificationKindLabel(kind: string | null): string | null {
         return 'Pengingat';
     }
 
-    if (kind === 'post_approved' || kind === 'post_rejected') {
+    if (
+        kind === 'post_approved' ||
+        kind === 'post_rejected' ||
+        kind === 'post_revision_approved' ||
+        kind === 'post_revision_rejected'
+    ) {
         return 'Artikel';
     }
 

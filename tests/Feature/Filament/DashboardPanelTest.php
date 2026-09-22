@@ -4,6 +4,7 @@ use App\Filament\Dashboard\Resources\Posts\Pages\CreatePost;
 use App\Filament\Dashboard\Resources\Posts\Pages\EditPost;
 use App\Filament\Dashboard\Resources\Posts\Pages\ListPosts;
 use App\Models\Post;
+use App\Models\PostRevision;
 use App\Models\User;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -206,7 +207,7 @@ it('member users cannot edit other members posts because they are filtered out',
         ->assertNotFound();
 });
 
-it('editing an approved post by member resubmits it for review', function () {
+it('editing an approved post by member keeps it published and stages a revision', function () {
     $user = makeMemberUser();
     $reviewer = makeStaffUser();
 
@@ -231,12 +232,16 @@ it('editing an approved post by member resubmits it for review', function () {
 
     $freshPost = $post->fresh();
 
-    expect($freshPost->title)->toBe('Already Published Revised')
-        ->and($freshPost->status)->toBe(Post::STATUS_PENDING)
-        ->and($freshPost->is_published)->toBeFalse()
-        ->and($freshPost->published_at)->toBeNull()
-        ->and($freshPost->reviewed_by_user_id)->toBeNull()
-        ->and($freshPost->reviewed_at)->toBeNull();
+    // Artikel lama tetap terbit; perubahan menunggu tinjauan.
+    expect($freshPost->title)->toBe('Already Published')
+        ->and($freshPost->status)->toBe(Post::STATUS_APPROVED)
+        ->and($freshPost->is_published)->toBeTrue()
+        ->and($freshPost->published_at)->not->toBeNull();
+
+    $revision = PostRevision::query()->where('post_id', $post->id)->firstOrFail();
+
+    expect($revision->title)->toBe('Already Published Revised')
+        ->and($revision->status)->toBe(PostRevision::STATUS_PENDING);
 });
 
 it('staff users can approve a post', function () {

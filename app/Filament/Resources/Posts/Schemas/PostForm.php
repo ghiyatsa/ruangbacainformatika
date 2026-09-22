@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Posts\Schemas;
 
+use App\Filament\Concerns\ManagesPostRevisionForm;
 use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\PostTag;
+use App\Services\Post\PostRevisionService;
 use App\Services\PostThumbnailImageService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -29,6 +31,19 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PostForm
 {
+    use ManagesPostRevisionForm;
+
+    /**
+     * Saat meninjau perubahan artikel yang sudah terbit, perubahan peninjau
+     * juga masuk ke revisi yang sama agar tidak langsung mengubah versi tayang.
+     */
+    protected static function shouldStageRevision(?Post $record): bool
+    {
+        return $record !== null
+            && $record->status === Post::STATUS_APPROVED
+            && app(PostRevisionService::class)->hasPendingRevision($record);
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -141,7 +156,20 @@ class PostForm
                                                 TextInput::make('name')->required(),
                                                 Textarea::make('description'),
                                             ])
-                                            ->createOptionUsing(fn (array $data): int => static::createCategory($data)),
+                                            ->createOptionUsing(fn (array $data): int => static::createCategory($data))
+                                            ->afterStateHydrated(function (Select $component, ?Post $record): void {
+                                                if ($record === null || ! $record->exists) {
+                                                    return;
+                                                }
+                                                $revision = static::shouldStageRevision($record)
+                                                    ? app(PostRevisionService::class)->pendingRevision($record)
+                                                    : null;
+
+                                                $component->state($revision?->categories ?? $record->categories()->pluck('post_categories.id')->all());
+                                            })
+                                            ->saveRelationshipsUsing(function (?Post $record, array $state): void {
+                                                static::stageOrSyncRelation($record, 'categories', $state);
+                                            }),
 
                                         TagsInput::make('tags')
                                             ->label('Tag')
@@ -152,18 +180,14 @@ class PostForm
                                                 if ($record === null || ! $record->exists) {
                                                     return;
                                                 }
-                                                $component->state($record->tags()->pluck('name')->toArray());
+                                                $revision = static::shouldStageRevision($record)
+                                                    ? app(PostRevisionService::class)->pendingRevision($record)
+                                                    : null;
+
+                                                $component->state($revision?->tags ?? $record->tags()->pluck('name')->toArray());
                                             })
                                             ->saveRelationshipsUsing(function (?Post $record, array $state) {
-                                                if ($record === null) {
-                                                    return;
-                                                }
-                                                $tagIds = [];
-                                                foreach ($state as $tagName) {
-                                                    $tag = PostTag::findOrCreateByName($tagName);
-                                                    $tagIds[] = $tag->getKey();
-                                                }
-                                                $record->tags()->sync($tagIds);
+                                                static::stageOrSyncRelation($record, 'tags', $state);
                                             }),
                                     ]),
 

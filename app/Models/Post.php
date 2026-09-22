@@ -140,6 +140,16 @@ class Post extends Model
         return $this->hasMany(PostComment::class);
     }
 
+    /**
+     * Perubahan yang menunggu tinjauan untuk artikel ini.
+     *
+     * @return HasMany<PostRevision, $this>
+     */
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(PostRevision::class);
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_APPROVED);

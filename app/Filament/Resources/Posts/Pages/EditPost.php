@@ -6,9 +6,11 @@ namespace App\Filament\Resources\Posts\Pages;
 
 use App\Filament\Resources\Posts\PostResource;
 use App\Models\Post;
+use App\Services\Post\PostRevisionService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -19,11 +21,42 @@ class EditPost extends EditRecord
 
     public function getTitle(): string
     {
+        if ($this->revisionService()->pendingRevision($this->record) !== null) {
+            return 'Tinjau Perubahan Artikel';
+        }
+
         if ($this->record->user_id !== auth()->id()) {
             return 'Tinjau Artikel Member';
         }
 
         return 'Ubah Artikel';
+    }
+
+    protected function revisionService(): PostRevisionService
+    {
+        return app(PostRevisionService::class);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $revision = $this->revisionService()->pendingRevision($this->record);
+
+        if ($revision !== null) {
+            $data['title'] = $revision->title;
+            $data['slug'] = $revision->slug;
+            $data['summary'] = $revision->summary;
+            $data['content'] = $revision->content;
+            $data['cover_image'] = $revision->cover_image;
+            $data['allow_comments'] = $revision->allow_comments;
+            $data['categories'] = $revision->categories ?? [];
+            $data['status'] = Post::STATUS_PENDING;
+        }
+
+        return $data;
     }
 
     protected function getHeaderActions(): array
@@ -46,6 +79,10 @@ class EditPost extends EditRecord
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function sanitizePreviewData(array $data): array
     {
         return array_map(function ($value) {
@@ -75,6 +112,10 @@ class EditPost extends EditRecord
         }, $data);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         if (in_array($data['status'], [Post::STATUS_APPROVED, Post::STATUS_REJECTED])) {
@@ -94,11 +135,52 @@ class EditPost extends EditRecord
         return $data;
     }
 
+    /**
+     * Bila ada perubahan menunggu tinjauan, keputusan peninjau diterapkan ke
+     * revisi sehingga versi artikel yang sedang tayang tidak ikut berubah
+     * sebelum disetujui.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        /** @var Post $record */
+        $revision = $this->revisionService()->pendingRevision($record);
+
+        if ($revision === null) {
+            $record->update($data);
+
+            return $record;
+        }
+
+        $status = $data['status'] ?? null;
+
+        if ($status === Post::STATUS_APPROVED) {
+            return $this->revisionService()->approve($revision, auth()->user());
+        }
+
+        if ($status === Post::STATUS_REJECTED) {
+            $this->revisionService()->reject(
+                $revision,
+                auth()->user(),
+                (string) ($data['rejection_reason'] ?? ''),
+            );
+
+            return $record;
+        }
+
+        return $record;
+    }
+
     protected function getSaveFormAction(): Action
     {
-        $label = $this->record->user_id !== auth()->id()
-            ? 'Simpan Keputusan'
-            : 'Terbitkan Artikel';
+        $hasPendingRevision = $this->revisionService()->pendingRevision($this->record) !== null;
+
+        $label = match (true) {
+            $hasPendingRevision => 'Simpan Keputusan',
+            $this->record->user_id !== auth()->id() => 'Simpan Keputusan',
+            default => 'Terbitkan Artikel',
+        };
 
         return parent::getSaveFormAction()
             ->label($label);

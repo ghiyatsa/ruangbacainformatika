@@ -6,9 +6,12 @@ namespace App\Filament\Dashboard\Resources\Posts\Pages;
 
 use App\Filament\Dashboard\Resources\Posts\PostResource;
 use App\Models\Post;
+use App\Models\PostRevision;
+use App\Services\Post\PostRevisionService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -22,8 +25,42 @@ class EditPost extends EditRecord
         return 'Ubah Artikel';
     }
 
+    protected function revisionService(): PostRevisionService
+    {
+        return app(PostRevisionService::class);
+    }
+
+    protected function workingRevision(): ?PostRevision
+    {
+        return $this->revisionService()->workingRevision($this->record);
+    }
+
+    /**
+     * Artikel yang sudah terbit tidak ditampilkan sebagai draf baru: yang
+     * ditampilkan adalah perubahan yang sedang menunggu tinjauan.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        $revision = $this->workingRevision();
+
+        if ($revision !== null) {
+            $data['title'] = $revision->title;
+            $data['slug'] = $revision->slug;
+            $data['summary'] = $revision->summary;
+            $data['content'] = $revision->content;
+            $data['cover_image'] = $revision->cover_image;
+            $data['allow_comments'] = $revision->allow_comments;
+            $data['categories'] = $revision->categories ?? [];
+            $data['status'] = $revision->status === PostRevision::STATUS_PENDING
+                ? Post::STATUS_PENDING
+                : Post::STATUS_DRAFT;
+
+            return $data;
+        }
+
         if (($data['status'] ?? null) === Post::STATUS_APPROVED) {
             $data['status'] = Post::STATUS_PENDING;
         }
@@ -55,6 +92,10 @@ class EditPost extends EditRecord
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function sanitizePreviewData(array $data): array
     {
         return array_map(function ($value) {
@@ -82,12 +123,14 @@ class EditPost extends EditRecord
         }, $data);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $wasApproved = $this->record->status === Post::STATUS_APPROVED;
-
         $data['user_id'] = $this->record->user_id;
-        $data['status'] = $data['status'] === Post::STATUS_PENDING || $wasApproved
+        $data['status'] = $data['status'] === Post::STATUS_PENDING
             ? Post::STATUS_PENDING
             : Post::STATUS_DRAFT;
         $data['reviewed_by_user_id'] = null;
@@ -97,11 +140,37 @@ class EditPost extends EditRecord
         return $data;
     }
 
+    /**
+     * Artikel yang sudah terbit hanya menerima perubahan lewat revisi,
+     * sehingga versi yang sedang tayang tidak ikut berubah.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        /** @var Post $record */
+        if ($record->status === Post::STATUS_APPROVED) {
+            $this->revisionService()->stageContent($record, $data);
+
+            return $record;
+        }
+
+        $record->update($data);
+
+        return $record;
+    }
+
     protected function getSaveFormAction(): Action
     {
-        $label = ($this->data['status'] ?? null) === Post::STATUS_PENDING
-            ? 'Ajukan Artikel'
-            : 'Simpan Draf';
+        $isApproved = $this->record->status === Post::STATUS_APPROVED;
+        $submitting = ($this->data['status'] ?? null) === Post::STATUS_PENDING;
+
+        $label = match (true) {
+            $submitting && $isApproved => 'Ajukan Perubahan',
+            $submitting => 'Ajukan Artikel',
+            $isApproved => 'Simpan Draf Perubahan',
+            default => 'Simpan Draf',
+        };
 
         return parent::getSaveFormAction()
             ->label($label);
