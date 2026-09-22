@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.32.2](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.32.1...v1.32.2) (2026-09-22)
+
+
+### Bug Fixes
+
+* **ui:** perbaiki render artikel, sanitasi, dan halaman maintenance ([#122](https://github.com/ghiyatsa/ruangbacainformatika/issues/122)) ([76c8142](https://github.com/ghiyatsa/ruangbacainformatika/commit/76c8142b9c2b798fe6b6d04e1aa9fc488360063c))
+
 ## [1.32.1](https://github.com/ghiyatsa/ruangbacainformatika/compare/v1.32.0...v1.32.1) (2026-09-19)
 
 
