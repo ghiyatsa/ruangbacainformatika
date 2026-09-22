@@ -81,10 +81,20 @@ class PostForm
                                             ->unique(table: 'posts', column: 'slug', ignoreRecord: true)
                                             ->disabled(fn ($record): bool => $record !== null && $record->user_id !== auth()->id()),
 
+                                        Textarea::make('summary')
+                                            ->label('Ringkasan')
+                                            ->placeholder('Ringkasan singkat yang tampil di kartu artikel, hasil pencarian, dan pratinjau berbagi.')
+                                            ->rows(3)
+                                            ->maxLength(255)
+                                            ->columnSpanFull()
+                                            ->helperText('Opsional. Bila kosong, ringkasan otomatis diambil dari awal badan artikel.')
+                                            ->disabled(fn ($record): bool => $record !== null && $record->user_id !== auth()->id()),
+
                                         RichEditor::make('content')
                                             ->label('Badan Artikel')
                                             ->required()
                                             ->columnSpanFull()
+                                            ->maxHeight('60vh')
                                             ->fileAttachmentsDisk('public')
                                             ->fileAttachmentsDirectory('posts/attachments')
                                             ->fileAttachmentsVisibility('public')

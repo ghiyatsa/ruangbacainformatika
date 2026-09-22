@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PostCommentResource;
+use App\Http\Resources\PostListResource;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\PostTag;
 use App\Services\Post\PostQueryService;
 use App\Support\PageMeta;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -40,11 +42,11 @@ class PostController extends Controller
             'posts' => Inertia::defer(function () use ($filters) {
                 $posts = $this->postQueryService->paginatePosts($filters);
                 $paginated = $posts->toArray();
-                $paginated['data'] = PostResource::collection($posts->getCollection())->resolve();
+                $paginated['data'] = PostListResource::collection($posts->getCollection())->resolve();
 
                 return $paginated;
             }),
-            'popularPosts' => Inertia::defer(fn () => PostResource::collection($this->postQueryService->popularPosts())->resolve()),
+            'popularPosts' => Inertia::defer(fn () => PostListResource::collection($this->postQueryService->popularPosts())->resolve()),
         ])->withViewData([
             'meta' => $this->pageMeta->forPostIndex(),
         ]);
@@ -93,8 +95,8 @@ class PostController extends Controller
                     ]
                 ),
             ],
-            'relatedPosts' => Inertia::defer(fn () => PostResource::collection($this->postQueryService->relatedPosts($post))->resolve()),
-            'popularPosts' => Inertia::defer(fn () => PostResource::collection($this->postQueryService->popularPosts())->resolve()),
+            'relatedPosts' => Inertia::defer(fn () => PostListResource::collection($this->postQueryService->relatedPosts($post))->resolve()),
+            'popularPosts' => Inertia::defer(fn () => PostListResource::collection($this->postQueryService->popularPosts())->resolve()),
             'categories' => Inertia::defer(fn () => $this->postQueryService->categories()),
             'tags' => Inertia::defer(fn () => $this->postQueryService->tags()),
         ])->withViewData([
@@ -113,6 +115,11 @@ class PostController extends Controller
 
             if (isset($previewData['slug'])) {
                 $post->slug = is_array($previewData['slug']) ? json_encode($previewData['slug']) : $previewData['slug'];
+            }
+
+            if (isset($previewData['summary'])) {
+                $summary = $previewData['summary'];
+                $post->summary = is_array($summary) ? json_encode($summary) : $summary;
             }
 
             if (isset($previewData['content'])) {
@@ -200,7 +207,20 @@ class PostController extends Controller
             }
 
             if (isset($previewData['tags'])) {
-                $tags = PostTag::whereIn('id', (array) $previewData['tags'])->get();
+                $tagValues = array_filter((array) $previewData['tags'], fn ($value): bool => filled($value));
+
+                $tags = PostTag::query()
+                    ->where(function (Builder $query) use ($tagValues): void {
+                        $query->whereIn('id', array_filter($tagValues, fn ($value): bool => is_numeric($value)));
+
+                        $names = array_filter($tagValues, fn ($value): bool => ! is_numeric($value));
+
+                        if ($names !== []) {
+                            $query->orWhereIn('name', $names);
+                        }
+                    })
+                    ->get();
+
                 $post->setRelation('tags', $tags);
             }
         }
@@ -238,8 +258,8 @@ class PostController extends Controller
                     ]
                 ),
             ],
-            'relatedPosts' => PostResource::collection($this->postQueryService->relatedPosts($post))->resolve(),
-            'popularPosts' => PostResource::collection($this->postQueryService->popularPosts())->resolve(),
+            'relatedPosts' => PostListResource::collection($this->postQueryService->relatedPosts($post))->resolve(),
+            'popularPosts' => PostListResource::collection($this->postQueryService->popularPosts())->resolve(),
             'categories' => $this->postQueryService->categories(),
             'tags' => $this->postQueryService->tags(),
         ])->withViewData([

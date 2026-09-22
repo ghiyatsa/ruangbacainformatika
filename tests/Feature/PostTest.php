@@ -169,7 +169,7 @@ it('renders preview with cached data if available', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('posts/show')
             ->where('post.data.title', 'Cached Title')
-            ->where('post.data.contentText', 'Cached content body...'));
+            ->where('post.data.content', 'Cached content body...'));
 });
 
 it('converts Tiptap JSON content to HTML on preview', function () {
@@ -205,5 +205,66 @@ it('converts Tiptap JSON content to HTML on preview', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('posts/show')
             ->where('post.data.title', 'Tiptap Title')
-            ->where('post.data.contentText', 'Hello from Tiptap!'));
+            ->where('post.data.content', '<p>Hello from Tiptap!</p>'));
+});
+
+it('preview resolves tags cached as names', function () {
+    $post = Post::factory()->create([
+        'status' => Post::STATUS_DRAFT,
+    ]);
+
+    PostTag::factory()->create(['name' => 'Tag Preview']);
+
+    // The post form stores tag names (not ids) in the preview cache.
+    Cache::put(
+        'post_preview_'.$post->preview_token,
+        [
+            'tags' => ['Tag Preview', 'Belum Dibuat'],
+        ],
+        now()->addHours(2)
+    );
+
+    get(route('posts.preview', $post->preview_token))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('posts/show')
+            ->where('post.data.tags.0.name', 'Tag Preview'));
+});
+
+it('post index omits the full article body so card payloads stay light', function () {
+    Post::factory()->published()->create([
+        'content' => '<p>Isi artikel yang cukup panjang untuk kartu.</p>',
+    ]);
+
+    get(route('posts.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('posts/index')
+            ->loadDeferredProps(fn (Assert $reload) => $reload
+                ->has('posts.data', 1)
+                ->where('posts.data.0.excerpt', fn (string $excerpt): bool => $excerpt !== '')
+                ->missing('posts.data.0.content')
+            ));
+});
+
+it('post detail still ships the sanitized article body', function () {
+    $post = Post::factory()->published()->create([
+        'content' => '<p style="text-align: center">Isi rata tengah</p>',
+    ]);
+
+    get(route('posts.show', $post->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('posts/show')
+            ->where('post.data.content', fn (string $content): bool => str_contains($content, 'text-align: center')));
+});
+
+it('post payload no longer exposes the redundant contentText field', function () {
+    $post = Post::factory()->published()->create();
+
+    get(route('posts.show', $post->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('posts/show')
+            ->missing('post.data.contentText'));
 });

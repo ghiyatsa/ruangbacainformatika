@@ -47,7 +47,7 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
                     </div>
                 )}
 
-                <h2 className="text-wrap-balance line-clamp-2 text-xl leading-snug font-bold text-white sm:text-2xl">
+                <h2 className="line-clamp-2 text-xl leading-snug font-bold text-balance text-white sm:text-2xl">
                     {post.title}
                 </h2>
 

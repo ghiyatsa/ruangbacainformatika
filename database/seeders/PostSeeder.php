@@ -74,7 +74,7 @@ class PostSeeder extends Seeder
                 'summary' => 'Bagaimana cara menulis paper ilmiah berkualitas yang layak dipublikasikan di jurnal internasional? Simak panduan lengkap langkah-demi-langkah bagi mahasiswa.',
                 'content' => '<p>Menulis artikel ilmiah yang berhasil menembus jurnal terindeks Scopus merupakan pencapaian luar biasa bagi mahasiswa Teknik Informatika. Selain meningkatkan reputasi akademis, publikasi ilmiah juga menjadi poin plus untuk kelulusan dan karir masa depan.</p>
 <p>Langkah pertama dalam menulis paper berkualitas adalah memilih topik riset yang orisinal dan memiliki kontribusi nyata (novelty). Cari celah penelitian dari paper-paper terbaru yang bisa Anda temukan di repositori atau koleksi fisik Ruang Baca Informatika.</p>
-<p>Langkah kedua adalah menyusun struktur paper dengan baik, yang umumnya terdiri dari:
+<p>Langkah kedua adalah menyusun struktur paper dengan baik, yang umumnya terdiri dari:</p>
 <ul>
   <li><strong>Abstract:</strong> Ringkasan singkat mengenai masalah, metode, hasil, dan kesimpulan.</li>
   <li><strong>Introduction:</strong> Latar belakang masalah, penelitian terdahulu, dan novelty penelitian Anda.</li>
@@ -82,7 +82,6 @@ class PostSeeder extends Seeder
   <li><strong>Results and Discussion:</strong> Penyajian data hasil pengujian beserta analisis mendalam.</li>
   <li><strong>Conclusion:</strong> Kesimpulan akhir dan saran untuk penelitian selanjutnya.</li>
 </ul>
-</p>
 <p>Pastikan Anda menggunakan referensi dari jurnal terpercaya dan menghindari jurnal predator. Untuk referensi buku cetak penunjang metode penelitian, Anda bisa langsung meminjamnya di Ruang Baca Informatika menggunakan sistem layanan mandiri QR Code.</p>',
                 'status' => Post::STATUS_APPROVED,
                 'categories' => ['Tips Akademik', 'Teknologi & Coding'],
@@ -94,7 +93,7 @@ class PostSeeder extends Seeder
                 'summary' => 'Ingin berkolaborasi dalam proyek software dengan rapi? Git adalah jawabannya. Pelajari perintah dasar Git dan tips mengelola repositori GitHub.',
                 'content' => '<p>Dalam dunia software development, kolaborasi adalah kunci. Ketika bekerja dalam tim, mengedit file kode yang sama secara bersamaan sering kali memicu konflik file. Di sinilah Version Control System seperti Git menjadi penyelamat.</p>
 <p>Git memungkinkan Anda mencatat setiap perubahan kode, kembali ke versi sebelumnya jika terjadi error, serta membuat cabang (branch) untuk eksperimen fitur baru tanpa merusak kode utama (main/master).</p>
-<p>Berikut adalah beberapa perintah dasar Git yang wajib dihafal:
+<p>Berikut adalah beberapa perintah dasar Git yang wajib dihafal:</p>
 <pre><code># Inisialisasi repositori lokal
 git init
 
@@ -109,7 +108,6 @@ git remote add origin &lt;url-repositori&gt;
 
 # Mengirimkan perubahan ke GitHub
 git push origin main</code></pre>
-</p>
 <p>Dengan menguasai Git dan GitHub, Anda tidak hanya mempermudah pengerjaan tugas kelompok atau skripsi, tetapi juga membangun portofolio yang sangat dihargai oleh industri teknologi.</p>',
                 'status' => Post::STATUS_APPROVED,
                 'categories' => ['Teknologi & Coding'],
@@ -120,13 +118,12 @@ git push origin main</code></pre>
                 'title' => 'Panduan Memilih Topik Skripsi Informatika yang Menarik dan Cepat Selesai',
                 'summary' => 'Masih bingung mencari ide tugas akhir? Jangan khawatir. Kami rangkum beberapa topik tren seperti AI, IoT, dan Web Development yang bisa kamu angkat.',
                 'content' => '<p>Menentukan topik skripsi sering kali menjadi fase paling berat bagi mahasiswa tingkat akhir. Rasa takut salah memilih topik atau kesulitan mencari data sering kali membuat mahasiswa menunda-nunda memulai tugas akhir.</p>
-<p>Untuk membantu Anda, berikut adalah beberapa area penelitian populer dan relevan di bidang Teknik Informatika saat ini:
+<p>Untuk membantu Anda, berikut adalah beberapa area penelitian populer dan relevan di bidang Teknik Informatika saat ini:</p>
 <ol>
   <li><strong>Artificial Intelligence & Machine Learning:</strong> Deteksi objek menggunakan Computer Vision, analisis sentimen media sosial, atau sistem rekomendasi.</li>
   <li><strong>Internet of Things (IoT):</strong> Sistem monitoring pertanian pintar (smart farming), otomasi rumah pintar, atau monitoring kesehatan berbasis sensor.</li>
   <li><strong>Web & Mobile Application:</strong> Membangun aplikasi dengan teknologi mutakhir (seperti Laravel, React, Next.js) dengan penyelesaian masalah spesifik di masyarakat.</li>
 </ol>
-</p>
 <p>Tips penting agar skripsi cepat selesai: pilihlah topik yang Anda kuasai, konsultasikan secara intensif dengan dosen pembimbing sejak awal, dan manfaatkan repositori skripsi di Ruang Baca Informatika untuk melihat struktur penelitian terdahulu yang sukses.</p>',
                 'status' => Post::STATUS_APPROVED,
                 'categories' => ['Tips Akademik'],
@@ -138,13 +135,12 @@ git push origin main</code></pre>
                 'summary' => 'Magang bukan sekadar prasyarat kelulusan, tapi gerbang karir sesungguhnya. Baca kisah sukses alumni dalam menjalani magang industri.',
                 'content' => '<p>Dunia perkuliahan sering kali menyajikan materi yang bersifat teoritis. Namun, dunia industri menuntut keterampilan praktis dan kesiapan kerja. Kesenjangan ini bisa dijembatani secara efektif melalui program magang (internship).</p>
 <p>Melalui magang, Anda akan belajar bagaimana bekerja dalam tim profesional, berkomunikasi dengan klien, menggunakan tools kolaborasi industri, dan merasakan langsung tekanan serta budaya kerja nyata.</p>
-<p>Beberapa keuntungan magang bagi mahasiswa Informatika:
+<p>Beberapa keuntungan magang bagi mahasiswa Informatika:</p>
 <ul>
   <li>Mendapatkan portofolio proyek riil yang bisa dicantumkan di CV.</li>
   <li>Membangun jaringan (networking) dengan para profesional industri.</li>
   <li>Berkesempatan ditawari kerja langsung sebagai karyawan tetap setelah lulus.</li>
 </ul>
-</p>
 <p>Jangan lupa untuk mempersiapkan laporan magang Anda dengan baik setelah selesai. Contoh-contoh laporan magang terdahulu bisa Anda akses di perpustakaan Ruang Baca Informatika sebagai acuan penulisan.</p>',
                 'status' => Post::STATUS_APPROVED,
                 'categories' => ['Tips Akademik', 'Event & Kegiatan'],
@@ -156,14 +152,13 @@ git push origin main</code></pre>
                 'summary' => 'Kabar gembira! Ruang Baca kini dilengkapi dengan sistem peminjaman mandiri berbasis QR code untuk memudahkan sirkulasi buku.',
                 'content' => '<p>Untuk meningkatkan kenyamanan dan efisiensi sirkulasi buku, Ruang Baca Teknik Informatika kini resmi meluncurkan platform sistem informasi perpustakaan baru.</p>
 <p>Sistem ini mengusung konsep layanan mandiri (kiosk), di mana mahasiswa dapat mencari buku di katalog digital, memasukkan buku ke draf peminjaman, lalu melakukan scan QR code draf di layar kiosk yang tersedia di ruang baca. Petugas atau admin cukup melakukan verifikasi draf tersebut untuk meresmikan peminjaman.</p>
-<p>Langkah-langkah menggunakan layanan baru ini:
+<p>Langkah-langkah menggunakan layanan baru ini:</p>
 <ol>
   <li>Login ke web menggunakan akun email Universitas Malikussaleh (Google Auth).</li>
   <li>Lengkapi profil dan verifikasi nomor WhatsApp Anda untuk mengaktifkan hak peminjaman.</li>
   <li>Cari buku yang ingin dipinjam, masukkan ke draf peminjaman.</li>
   <li>Kunjungi Ruang Baca, scan draf QR di Kiosk atau tunjukkan ke petugas.</li>
 </ol>
-</p>
 <p>Selamat mencoba sistem baru ini! Semoga minat baca mahasiswa Informatika terus meningkat.</p>',
                 'status' => Post::STATUS_APPROVED,
                 'categories' => ['Pengumuman', 'Event & Kegiatan'],
@@ -175,10 +170,9 @@ git push origin main</code></pre>
                 'summary' => 'Laravel tetap menjadi salah satu framework PHP terpopuler di dunia. Pelajari cara membangun REST API yang aman dalam hitungan menit.',
                 'content' => '<p>REST API merupakan standar industri dalam menghubungkan aplikasi backend dengan frontend (seperti React, Vue, atau Mobile Apps). Laravel menyederhanakan pembuatan API ini dengan fitur-fitur bawaan yang sangat kuat.</p>
 <p>Dalam tutorial singkat ini, kita akan membuat API sederhana menggunakan Laravel 11 dan Laravel Sanctum untuk sistem autentikasi token.</p>
-<p>Langkah instalasi Laravel Sanctum:
+<p>Langkah instalasi Laravel Sanctum:</p>
 <pre><code>composer require laravel/sanctum
 php artisan sanctum:install</code></pre>
-</p>
 <p>Selanjutnya, Anda dapat membuat controller menggunakan API resource untuk menangani operasi CRUD secara terstruktur dan efisien. Jangan lupa untuk membatasi akses endpoint sensitif menggunakan middleware auth:sanctum.</p>',
                 'status' => Post::STATUS_APPROVED,
                 'categories' => ['Teknologi & Coding'],
@@ -189,7 +183,7 @@ php artisan sanctum:install</code></pre>
                 'title' => '5 Rekomendasi Buku Rekayasa Perangkat Lunak Terbaik di Ruang Baca',
                 'summary' => 'Ingin memperdalam arsitektur software dan design patterns? Berikut adalah 5 buku best-seller di Ruang Baca yang wajib kamu pinjam.',
                 'content' => '<p>Buku cetak tetap memiliki nilai mendalam bagi mahasiswa yang ingin memahami konsep software engineering secara komprehensif. Koleksi buku di Ruang Baca Informatika dirancang untuk menunjang kurikulum utama perkuliahan.</p>
-<p>Berikut adalah 5 rekomendasi buku rekayasa perangkat lunak (RPL) terbaik di Ruang Baca yang wajib Anda baca:
+<p>Berikut adalah 5 rekomendasi buku rekayasa perangkat lunak (RPL) terbaik di Ruang Baca yang wajib Anda baca:</p>
 <ol>
   <li><strong>Clean Code</strong> oleh Robert C. Martin - Memandu Anda menulis kode yang elegan dan mudah dipelihara.</li>
   <li><strong>Refactoring</strong> oleh Martin Fowler - Teknik meningkatkan struktur kode tanpa mengubah perilakunya.</li>
@@ -197,7 +191,6 @@ php artisan sanctum:install</code></pre>
   <li><strong>Laravel Up & Running</strong> oleh Matt Stauffer - Buku wajib bagi yang ingin menguasai ekosistem Laravel secara mendalam.</li>
   <li><strong>Database System Concepts</strong> - Membedah teori basis data relasional hingga optimasi query.</li>
 </ol>
-</p>
 <p>Seluruh buku di atas sudah terdaftar di katalog online kami dan siap dipinjam kapan saja.</p>',
                 'status' => Post::STATUS_APPROVED,
                 'categories' => ['Resensi Buku'],

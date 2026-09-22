@@ -8,6 +8,10 @@ use App\Models\StaticPage;
 
 class StaticPageContent
 {
+    public function __construct(
+        protected RichContentSanitizer $sanitizer,
+    ) {}
+
     /**
      * @return array{summary: string, content: string}
      */
@@ -51,9 +55,20 @@ class StaticPageContent
             ->where('page_key', $pageKey)
             ->firstOrFail();
 
+        return $this->present($page);
+    }
+
+    /**
+     * Samakan perlakuan dengan artikel: konten halaman statis juga dirender
+     * lewat dangerouslySetInnerHTML, jadi harus melewati sanitizer yang sama.
+     *
+     * @return array{summary: string, content: string}
+     */
+    public function present(StaticPage $page): array
+    {
         return [
-            'summary' => trim($page->summary),
-            'content' => trim($page->content),
+            'summary' => trim((string) $page->summary),
+            'content' => (string) $this->sanitizer->sanitize(trim((string) $page->content)),
         ];
     }
 }

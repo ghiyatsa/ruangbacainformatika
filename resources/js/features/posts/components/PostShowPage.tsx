@@ -161,7 +161,7 @@ export function PostShowPage({
                             )}
                             {article ? (
                                 <>
-                                    <h1 className="text-wrap-balance text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                                    <h1 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl">
                                         {article.title}
                                     </h1>
                                 </>
@@ -376,7 +376,7 @@ export function PostShowPage({
                 {/* ─── LEFT: Article content ─── */}
                 <div className="space-y-8">
                     {article && article.status !== 'approved' && (
-                        <div className="text-yellow-850 flex items-center gap-2 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm dark:text-yellow-400">
+                        <div className="flex items-center gap-2 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-700 dark:text-yellow-400">
                             <span className="relative flex h-2 w-2 shrink-0">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75"></span>
                                 <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-500"></span>
@@ -423,7 +423,7 @@ export function PostShowPage({
                         {/* Article body */}
                         {article ? (
                             <StaticPageContent
-                                html={article.content}
+                                html={article.content ?? ''}
                                 className="max-w-none"
                             />
                         ) : (

@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Filament\Dashboard\Resources\Posts\Schemas;
 
 use App\Models\Post;
+use App\Models\PostTag;
 use App\Services\PostThumbnailImageService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
@@ -97,10 +100,19 @@ class PostForm
                                             ->live(onBlur: true)
                                             ->unique(table: 'posts', column: 'slug', ignoreRecord: true),
 
+                                        Textarea::make('summary')
+                                            ->label('Ringkasan')
+                                            ->placeholder('Ringkasan singkat yang tampil di kartu artikel, hasil pencarian, dan pratinjau berbagi.')
+                                            ->rows(3)
+                                            ->maxLength(255)
+                                            ->columnSpanFull()
+                                            ->helperText('Opsional. Bila kosong, ringkasan otomatis diambil dari awal badan artikel.'),
+
                                         RichEditor::make('content')
                                             ->label('Badan Artikel')
                                             ->required()
                                             ->columnSpanFull()
+                                            ->maxHeight('60vh')
                                             ->fileAttachmentsDisk('public')
                                             ->fileAttachmentsDirectory('posts/attachments')
                                             ->fileAttachmentsVisibility('public')
@@ -143,15 +155,29 @@ class PostForm
                                             ->nestedRecursiveRules(['exists:post_categories,id'])
                                             ->searchable(),
 
-                                        Select::make('tags')
+                                        TagsInput::make('tags')
                                             ->label('Tag')
-                                            ->relationship('tags', 'name')
-                                            ->placeholder('Pilih Tag')
-                                            ->multiple()
-                                            ->preload()
-                                            ->rules(['array'])
-                                            ->nestedRecursiveRules(['exists:post_tags,id'])
-                                            ->searchable(),
+                                            ->placeholder('Ketik tag lalu tekan Enter, pisahkan dengan koma')
+                                            ->suggestions(fn () => PostTag::pluck('name')->toArray())
+                                            ->splitKeys([','])
+                                            ->dehydrated(false)
+                                            ->afterStateHydrated(function (TagsInput $component, ?Post $record): void {
+                                                if ($record === null || ! $record->exists) {
+                                                    return;
+                                                }
+                                                $component->state($record->tags()->pluck('name')->toArray());
+                                            })
+                                            ->saveRelationshipsUsing(function (?Post $record, array $state): void {
+                                                if ($record === null) {
+                                                    return;
+                                                }
+                                                $tagIds = [];
+                                                foreach ($state as $tagName) {
+                                                    $tag = PostTag::findOrCreateByName((string) $tagName);
+                                                    $tagIds[] = $tag->getKey();
+                                                }
+                                                $record->tags()->sync($tagIds);
+                                            }),
                                     ]),
 
                                 Section::make('Penerbitan')

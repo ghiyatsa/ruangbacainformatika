@@ -54,10 +54,7 @@ class PageController extends Controller
 
         return Inertia::render('static/index', [
             'title' => $page->title,
-            'pageContent' => [
-                'summary' => $page->summary,
-                'content' => $page->content,
-            ],
+            'pageContent' => $this->staticPageContent->present($page),
         ]);
     }
 }

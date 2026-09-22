@@ -9,11 +9,19 @@ use App\Support\RichContentSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /** @mixin Post */
 class PostResource extends JsonResource
 {
+    /**
+     * Apakah badan artikel lengkap (HTML tersanitasi) disertakan.
+     *
+     * Kartu artikel (index, terkait, populer, terbaru di beranda) hanya
+     * menampilkan excerpt, jadi PostListResource mematikan ini agar payload
+     * tidak membawa HTML penuh untuk tiap kartu.
+     */
+    protected bool $includeContent = true;
+
     /**
      * Transform the resource into an array.
      *
@@ -25,9 +33,11 @@ class PostResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
+            'summary' => $this->summary,
             'excerpt' => $this->excerpt(),
-            'content' => app(RichContentSanitizer::class)->sanitize($this->content),
-            'contentText' => Str::of(strip_tags((string) $this->content))->squish()->toString(),
+            ...($this->includeContent
+                ? ['content' => app(RichContentSanitizer::class)->sanitize($this->content)]
+                : []),
             'coverImageUrl' => $this->cover_image
                 ? Storage::disk('public')->url($this->cover_image)
                 : asset('images/article-placeholder.svg'),

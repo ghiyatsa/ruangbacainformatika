@@ -26,6 +26,15 @@ class RichContentSanitizer
             ->allowElement('img', ['src', 'alt', 'title', 'width', 'height', 'class', 'style'])
             ->allowElement('figure', ['class', 'data-trix-attachment', 'data-trix-attributes', 'style'])
             ->allowElement('figcaption', ['class', 'style'])
+            // Perataan dari toolbar RichEditor disimpan sebagai inline style.
+            // AttributeSanitizer di bawah memangkasnya menjadi `text-align` saja.
+            ->allowAttribute('style', [
+                'img', 'figure', 'figcaption',
+                'p', 'div', 'span', 'li', 'td', 'th', 'blockquote',
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            ])
+            ->withAttributeSanitizer(new TextAlignStyleSanitizer)
+            ->withAttributeSanitizer(new ImageStyleSanitizer)
             ->allowRelativeLinks()
             ->allowRelativeMedias();
 
