@@ -9,6 +9,10 @@
 /public/build
 /public/hot
 /public/storage
+# public/assets is the storage:link symlink target (see config/filesystems.php).
+# Never track it: a tracked file inside this path makes git replace the symlink
+# with a real directory on every pull/reset, breaking access to uploaded files.
+/public/assets
 /storage/*.key
 /storage/pail
 
